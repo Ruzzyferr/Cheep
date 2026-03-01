@@ -1,0 +1,29 @@
+{
+  "country": "Poland",
+  "country_code": "PL",
+  "markets": [
+    {
+      "name": "CarrefourPL",
+      "store_id": 10,
+      "scraper_path": "scrapers/carrefour_pl/scraper.py",
+      "scraper_class": "CarrefourPLScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "carrefour_pl_products_{timestamp}.json",
+      "enabled": false,
+      "note": "Scraper henüz implement edilmedi"
+    },
+    {
+      "name": "AuchanPL",
+      "store_id": 11,
+      "scraper_path": "scrapers/auchan_pl/scraper.py",
+      "scraper_class": "AuchanPLScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "auchan_pl_products_{timestamp}.json",
+      "enabled": false,
+      "note": "Scraper henüz implement edilmedi"
+    }
+  ],
+  "output_dir": "output",
+  "log_dir": "logs"
+}
+

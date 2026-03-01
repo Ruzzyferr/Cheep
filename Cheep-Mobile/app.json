@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Cheep",
+    "slug": "cheep-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F5F3E8"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cheep.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundColor": "#F5F3E8"
+      },
+      "package": "com.cheep.mobile"
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png"
+    }
+  }
+}

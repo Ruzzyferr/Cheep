@@ -1,0 +1,222 @@
+// Cheep - Akıllı Alışveriş Asistanı
+// Prisma Schema Dosyası
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// KULLANICI YÖNETİMİ
+// ============================================
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password_hash String
+  name          String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // İlişkiler
+  lists           List[]
+  favorite_stores UserFavoriteStore[]
+  price_feedbacks PriceFeedback[]
+
+  @@map("users")
+}
+
+// ============================================
+// MARKET VE KONUM
+// ============================================
+
+model Store {
+  id       Int     @id @default(autoincrement())
+  name     String
+  logo_url String?
+  address  String?
+  lat      Float? // Enlem (Latitude)
+  lon      Float? // Boylam (Longitude)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // İlişkiler
+  store_prices      StorePrice[]
+  favorite_by_users UserFavoriteStore[]
+
+  @@map("stores")
+}
+
+model UserFavoriteStore {
+  user_id  Int
+  store_id Int
+
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  store Store @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+
+  @@id([user_id, store_id])
+  @@map("user_favorite_stores")
+}
+
+// ============================================
+// ÜRÜN KATEGORİLERİ (HİYERARŞİK)
+// ============================================
+
+model Category {
+  id            Int     @id @default(autoincrement())
+  name          String
+  slug          String  @unique
+  parent_id     Int? // NULL ise ana kategori, değilse alt kategori
+  display_order Int     @default(0) // Sıralama için
+  icon_url      String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Self-referencing ilişki
+  parent   Category?  @relation("CategoryHierarchy", fields: [parent_id], references: [id], onDelete: Cascade)
+  children Category[] @relation("CategoryHierarchy")
+
+  // İlişkiler
+  products Product[]
+
+  @@index([parent_id])
+  @@index([slug])
+  @@map("categories")
+}
+
+// ============================================
+// ÜRÜNLER VE FİYATLAR
+// ============================================
+
+model Product {
+  id             Int     @id @default(autoincrement())
+  name           String
+  brand          String?
+  ean_barcode    String? @unique // EAN/UPC barkod numarası
+  image_url      String?
+  category_id    Int?
+  muadil_grup_id String? // Muadil ürünleri gruplamak için
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // İlişkiler
+  category     Category?    @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  store_prices StorePrice[]
+  list_items   ListItem[]
+
+  @@index([ean_barcode])
+  @@index([muadil_grup_id])
+  @@index([category_id])
+  @@map("products")
+}
+
+model StorePrice {
+  id               Int      @id @default(autoincrement())
+  store_id         Int
+  product_id       Int
+  //Markete özgü SKU (örn: Migros'un kendi ürün kodu)
+  store_sku        String?
+  price            Decimal  @db.Decimal(10, 2) // 10 basamak, 2 ondalık
+  unit             String   @default("adet") // kg, adet, lt, g, ml vb.
+  last_updated_at  DateTime @default(now())
+  source           String   @default("scrape") // scrape, api, user
+  confidence_score Float    @default(1.0) // 0-1 arası güven skoru
+
+  // İlişkiler
+  store           Store           @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  product         Product         @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  price_feedbacks PriceFeedback[]
+
+  @@unique([store_id, product_id]) // Her market-ürün çifti için tek kayıt
+  @@unique([store_id, store_sku])
+  @@index([product_id])
+  @@index([store_id])
+  @@index([last_updated_at])
+  @@map("store_prices")
+}
+
+// ============================================
+// ALIŞVERİŞ LİSTELERİ
+// ============================================
+
+model List {
+  id          Int      @id @default(autoincrement())
+  user_id     Int
+  name        String
+  is_template Boolean  @default(false) // Şablon liste mi?
+  budget      Decimal? @db.Decimal(10, 2) // Opsiyonel bütçe
+  
+  // Geçmiş liste yönetimi
+  status        String    @default("active") // active, completed
+  completed_at  DateTime? // Liste tamamlanma zamanı
+  last_compared_at DateTime? // Son compare zamanı
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // İlişkiler
+  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  list_items ListItem[]
+
+  @@index([user_id])
+  @@index([is_template])
+  @@index([status])
+  @@map("lists")
+}
+
+model ListItem {
+  id         Int    @id @default(autoincrement())
+  list_id    Int
+  product_id Int
+  quantity   Float  @default(1) // Miktar (1.5 kg, 2 adet vb.)
+  unit       String @default("adet") // kg, adet, lt, g, ml vb.
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // İlişkiler
+  list    List    @relation(fields: [list_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([list_id, product_id]) // Aynı listede aynı ürün sadece bir kez
+  @@index([list_id])
+  @@index([product_id])
+  @@map("list_items")
+}
+
+// ============================================
+// KULLANICI GERİ BİLDİRİMLERİ
+// ============================================
+
+enum FeedbackType {
+  fiyat_yanlis // Fiyat yanlış bildirildi
+  stok_yok // Ürün stokta yok
+}
+
+model PriceFeedback {
+  id             Int          @id @default(autoincrement())
+  user_id        Int
+  store_price_id Int
+  feedback_type  FeedbackType
+  reported_price Decimal?     @db.Decimal(10, 2) // Kullanıcının bildirdiği fiyat (opsiyonel)
+
+  created_at DateTime @default(now())
+
+  // İlişkiler
+  user        User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  store_price StorePrice @relation(fields: [store_price_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([store_price_id])
+  @@index([created_at])
+  @@map("price_feedbacks")
+}

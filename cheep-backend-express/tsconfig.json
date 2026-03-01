@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    /* ---------------------- Temel Ayarlar ---------------------- */
+    "target": "ES2022", // Kodun derleneceği JavaScript sürümü. Node.js'in modern sürümleriyle uyumludur.
+    "lib": ["ES2022"], // Derleme sırasında kullanılacak kütüphane dosyaları. Backend için ES2022 yeterlidir.
+    "strict": true, // Tüm katı tip denetimi seçeneklerini etkinleştirir. Proje kalitesi için en önemli ayardır.
+
+    /* ------------------- Modül Yapılandırması ------------------- */
+    // package.json'daki "type": "module" ile birlikte modern ESM projesi için en iyi ayarlardır.
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "verbatimModuleSyntax": false, // `import type` kullanımını zorunlu kılarak gereksiz kodları önler.
+    "resolveJsonModule": true, // JSON dosyalarını import etmeye izin verir.
+
+    /* ----------------- Proje Yapısı ve Çıktılar ----------------- */
+    "rootDir": "./src", // TypeScript kaynak dosyalarının bulunduğu ana dizin.
+    "outDir": "./dist", // Derlenmiş JavaScript dosyalarının kaydedileceği dizin.
+    "sourceMap": true, // Hata ayıklama (debugging) için .js dosyalarını .ts dosyalarıyla eşleştirir.
+
+    /* -------------------- Birlikte Çalışabilirlik -------------------- */
+    // CommonJS ve ES Modülleri arasında sorunsuz geçişi sağlar. Express gibi kütüphaneler için kritiktir.
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true, // `import express from 'express'` gibi kullanımlara izin verir.
+    "forceConsistentCasingInFileNames": true, // Dosya adlarında büyük/küçük harf tutarlılığını zorunlu kılar, hataları önler.
+
+    /* ------------------------ Diğer Ayarlar ------------------------ */
+    "skipLibCheck": true, // Bağımlılıkların (node_modules) tip dosyalarını kontrol etmeyi atlar, derlemeyi hızlandırır.
+    "isolatedModules": true // Her dosyanın bağımsız olarak derlenebilmesini sağlar.
+  },
+  "include": ["src/**/*"], // Derlemeye dahil edilecek dosyalar.
+  "exclude": ["node_modules"], // Derleme dışında tutulacak dosyalar.
+  "typeRoots": ["./node_modules/@types", "./src/types"] // Custom type definitions
+}

@@ -1,0 +1,50 @@
+{
+  "country": "Turkey",
+  "country_code": "TR",
+  "markets": [
+    {
+      "name": "Migros",
+      "store_id": 1,
+      "scraper_path": "../../migros/migros_api_scraper.py",
+      "scraper_class": "MigrosAPISafeScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "migros_products_{timestamp}.json",
+      "enabled": true
+    },
+    {
+      "name": "CarrefourSA",
+      "store_id": 2,
+      "scraper_path": "../../carrefour/carrefoursa_api_scraper.py",
+      "scraper_class": "CarrefourSAPlaywrightScraper",
+      "scraper_method": "scrape_all_categories",
+      "output_pattern": "carrefoursa_products_{timestamp}.json",
+      "enabled": true,
+      "headless": false,
+      "user_data_dir": "./browser_data/carrefoursa",
+      "note": "user_data_dir ile persistent browser context kullanılır (Cloudflare bypass için en iyi yöntem)"
+    },
+    {
+      "name": "A101",
+      "store_id": 3,
+      "scraper_path": "scrapers/a101/a101_scraper.py",
+      "scraper_class": "A101Scraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "a101_products_{timestamp}.json",
+      "enabled": false,
+      "note": "Scraper henüz implement edilmedi"
+    },
+    {
+      "name": "BİM",
+      "store_id": 4,
+      "scraper_path": "scrapers/bim/bim_scraper.py",
+      "scraper_class": "BIMScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "bim_products_{timestamp}.json",
+      "enabled": false,
+      "note": "Scraper henüz implement edilmedi"
+    }
+  ],
+  "output_dir": "output",
+  "log_dir": "logs"
+}
+

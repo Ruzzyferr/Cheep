@@ -1,0 +1,41 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.env
+data/*.json
+*.log
+.idea/
+
+# Playwright browser data (persistent context)
+browser_data/
+**/browser_data/
+!**/browser_data/README.md
+
+# Scraper output files (large JSON files)
+countries/**/output/*.json
+!countries/**/output/.gitkeep
+
+# Debug and temporary files
+*.html
+debug_*.html
+cloudflare_blocked_*.html
+*_blocked_*.html
+
+# Old output files
+*_products_*.json
+*_output.json
+*_final.json
+*_new_output.json
+
+# Test scripts
+test-*.ps1
+update-*.ps1
+
+# Temporary data
+products_data/
+Database/
+multi-import/

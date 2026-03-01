@@ -1,0 +1,19 @@
+# Cheep Scraper - Gerekli Paketler
+
+# HTTP İstekleri (Migros API için)
+requests>=2.31.0
+
+# Web Scraping (CarrefourSA için)
+playwright>=1.40.0
+beautifulsoup4>=4.12.0
+
+# Veri İşleme
+lxml>=4.9.0  # BeautifulSoup için parser
+
+# Scalable LLM Matcher için
+numpy>=1.24.0  # Cosine similarity hesaplamaları için
+python-dotenv>=1.0.0  # .env dosyası desteği için
+
+
+
+

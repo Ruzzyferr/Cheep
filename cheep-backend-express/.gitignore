@@ -1,0 +1,42 @@
+# Node ve pnpm modülleri
+node_modules/
+**/node_modules/
+.pnpm/
+**/.pnpm/
+
+# pnpm store ve lock dosyaları
+.pnpm-store/
+pnpm-lock.yaml
+
+# Derlenmiş dosyalar
+dist/
+build/
+out/
+
+# Log dosyaları
+*.log
+*.log.*
+
+# Geçici veya cache dosyaları
+.DS_Store
+.env
+.env.local
+.env.*.local
+
+# IDE ve editor dosyaları
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS dosyaları
+Thumbs.db
+.DS_Store
