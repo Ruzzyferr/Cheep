@@ -23,6 +23,7 @@ import { EmptyListCard } from '../../components/home/EmptyListCard';
 import { SmartDealCard, StatsCard } from '../../components/home';
 import { CategoryItem } from '../../components/home/CategoryItem';
 import { NearbyStoreCard } from '../../components/home/NearbyStoreCard';
+import { getUserLocation, haversineKm, formatDistance, type Coords } from '../../utils/geo';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { Product, Store, ShoppingList } from '../../types';
@@ -73,6 +74,12 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
   const [potentialSavings, setPotentialSavings] = useState<number>(0);
   const [listStoreLogos, setListStoreLogos] = useState<string[]>([]);
   const [listStoreNames, setListStoreNames] = useState<string[]>([]);
+  const [userCoords, setUserCoords] = useState<Coords | null>(null);
+
+  // Cihaz konumunu bir kez al (gerçek mesafe hesabı için)
+  useEffect(() => {
+    getUserLocation().then(setUserCoords).catch(() => setUserCoords(null));
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -566,15 +573,27 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         <View style={[styles.section, styles.lastSection]}>
           <Text style={styles.sectionLabel}>Yakındaki Mağazalar</Text>
           {nearbyStores.length > 0 ? (
-            nearbyStores.map((store) => (
-              <NearbyStoreCard
-                key={store.id}
-                storeName={store.name}
-                distance={`${(Math.random() * 2 + 0.5).toFixed(1)} km`}
-                logoUrl={store.logo_url || undefined}
-                onPress={() => navigation.navigate('StoreDetail', { storeId: store.id })}
-              />
-            ))
+            nearbyStores
+              .map((store) => {
+                const hasCoords =
+                  userCoords && store.lat != null && store.lon != null;
+                const km = hasCoords
+                  ? haversineKm(userCoords, { lat: store.lat as number, lon: store.lon as number })
+                  : null;
+                return { store, km };
+              })
+              // Mesafesi bilinenleri yakından uzağa sırala (bilinmeyenler sona)
+              .sort((a, b) => (a.km ?? Infinity) - (b.km ?? Infinity))
+              .map(({ store, km }) => (
+                <NearbyStoreCard
+                  key={store.id}
+                  storeName={store.name}
+                  distance={km != null ? formatDistance(km) : undefined}
+                  subtitle={km == null ? store.address || undefined : undefined}
+                  logoUrl={store.logo_url || undefined}
+                  onPress={() => navigation.navigate('StoreDetail', { storeId: store.id })}
+                />
+              ))
           ) : (
             <Text style={styles.emptyText}>Yakında market bulunamadı</Text>
           )}
