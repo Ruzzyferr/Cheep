@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as ProductController from './products.controller.js';
 import { validate } from '../../schema/validation.middleware.js';
+import { requireIngestKey } from '../../middleware/ingest-auth.middleware.js';
 import {
     createProductSchema,
     updateProductSchema,
@@ -287,6 +288,7 @@ router.get('/barcode/:barcode', ProductController.getProductByBarcode);
  */
 router.post(
     '/',
+    requireIngestKey,
     validate(createProductSchema),
     ProductController.createProduct
 );
@@ -327,6 +329,7 @@ router.post(
  */
 router.post(
     '/upsert',
+    requireIngestKey,
     validate(createProductSchema),
     ProductController.upsertProduct
 );
@@ -370,6 +373,7 @@ router.post(
  */
 router.put(
     '/:id',
+    requireIngestKey,
     validate(updateProductSchema),
     ProductController.updateProduct
 );
@@ -392,7 +396,7 @@ router.put(
  *       404:
  *         description: Ürün bulunamadı
  */
-router.delete('/:id', ProductController.deleteProduct);
+router.delete('/:id', requireIngestKey, ProductController.deleteProduct);
 
 /**
  * @swagger
@@ -553,6 +557,7 @@ router.get('/:id/compare', ProductController.compareProductPrices);
  */
 router.post(
     '/find-or-create',
+    requireIngestKey,
     validate(createProductSchema),
     ProductController.findOrCreateProduct
 );
@@ -629,7 +634,7 @@ router.get('/debug/similar', ProductController.debugSimilarProducts);
  *       200:
  *         description: Ürünler başarıyla birleştirildi
  */
-router.post('/merge', ProductController.mergeProducts);
+router.post('/merge', requireIngestKey, ProductController.mergeProducts);
 
 /**
  * @swagger
@@ -652,6 +657,6 @@ router.post('/merge', ProductController.mergeProducts);
  *                   type: integer
  *                   example: 1247
  */
-router.post('/admin/generate-fingerprints', ProductController.generateFingerprints);
+router.post('/admin/generate-fingerprints', requireIngestKey, ProductController.generateFingerprints);
 
 export default router;

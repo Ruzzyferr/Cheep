@@ -32,8 +32,9 @@ export const compareList = async (req: Request, res: Response, next: NextFunctio
         );
 
         // Sadece last_compared_at güncelle (status'i değiştirme)
-        await prisma.list.update({
-            where: { id: parseInt(id) },
+        // user_id ile sınırla: başkasının listesi güncellenemesin (IDOR koruması)
+        await prisma.list.updateMany({
+            where: { id: parseInt(id), user_id: req.user.id },
             data: {
                 last_compared_at: new Date(),
             },
@@ -61,14 +62,19 @@ export const useRoute = async (req: Request, res: Response, next: NextFunction) 
 
         const { id } = req.params;
 
-        // Listeyi completed yap
-        await prisma.list.update({
-            where: { id: parseInt(id) },
+        // Listeyi completed yap (sadece sahibinin listesi - IDOR koruması)
+        const result = await prisma.list.updateMany({
+            where: { id: parseInt(id), user_id: req.user.id },
             data: {
                 status: 'completed',
                 completed_at: new Date(),
             },
         });
+
+        if (result.count === 0) {
+            res.status(404).json({ success: false, message: 'Liste bulunamadı' });
+            return;
+        }
 
         res.status(200).json({
             success: true,

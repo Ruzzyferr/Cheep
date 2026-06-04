@@ -10,16 +10,14 @@ export const errorHandler = (
     res: Response,
     next: NextFunction
 ) => {
-    console.error('❌ Error:', error);
-
-    logger.error(error);
+    // Tam hata sadece loglara yazılır; HTTP yanıtında detay/stack sızdırılmaz.
+    logger.error(error.stack || error.message || String(error));
 
     // Prisma hataları
     if (error.name === 'PrismaClientKnownRequestError') {
         return res.status(400).json({
             success: false,
             message: 'Database hatası',
-            error: error.message,
         });
     }
 
@@ -47,11 +45,10 @@ export const errorHandler = (
         });
     }
 
-    // Diğer hatalar
+    // Diğer hatalar — istemciye genel mesaj, detay loglarda.
     res.status(500).json({
         success: false,
-        message: error.message || 'Sunucu hatası',
-        ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
+        message: 'Sunucu hatası',
     });
 };
 

@@ -14,10 +14,7 @@ export const generalLimiter = rateLimit({
     },
     standardHeaders: true, // `RateLimit-*` header'larını döndür
     legacyHeaders: false, // `X-RateLimit-*` header'larını devre dışı bırak
-    skip: (req) => {
-        // Development modunda scraper endpoint'lerini atla
-        return process.env.NODE_ENV !== 'production';
-    },
+    // Not: Limit dev'de yüksek (10000), prod'da 100. Her ortamda aktiftir.
 });
 
 /**
