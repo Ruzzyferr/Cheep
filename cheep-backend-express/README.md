@@ -1,285 +1,142 @@
-# 🛒 Cheep Backend - Akıllı Alışveriş Asistanı API
+# 🛒 Cheep Backend — Akıllı Alışveriş Asistanı API
 
-Express.js + TypeScript + Prisma + PostgreSQL ile geliştirilmiş RESTful API.
+Express 5 + TypeScript (ESM) + Prisma + PostgreSQL ile geliştirilmiş RESTful API. Event-driven ingestion için Kafka (KafkaJS) consumer'ları ve çok-ülke desteği içerir.
 
-## 📋 Özellikler
+## 📋 Modüller
 
-### ✅ Tamamlanan Modüller (85%)
-
-- **Authentication & Authorization** - JWT tabanlı kimlik doğrulama
-- **Products API** - Ürün CRUD, arama, fiyat karşılaştırma, fuzzy matching
-- **Stores API** - Market yönetimi
-- **Store Prices API** - Dinamik fiyat yönetimi, bulk import
-- **Categories API** - Kategori yönetimi, hiyerarşik yapı
-- **Lists API** - Alışveriş listesi CRUD, şablonlar, istatistikler
-- **Compare Engine** - 7-factor scoring, rota optimizasyonu, TSP algoritması
-- **Feedback System** - Kullanıcı fiyat geri bildirimleri
-- **LLM Product Matcher** - OpenAI/OpenRouter ile ürün eşleştirme
+- **Auth** — JWT **access (1s) + refresh (30g)** token; `/auth/refresh` ile sessiz yenileme
+- **Products** — CRUD, arama, fiyat karşılaştırma, fuzzy matching, **fiyat geçmişi** (`/:id/history`)
+- **Stores / Categories / Lists** — yönetim, hiyerarşik kategoriler, şablonlar, istatistikler
+- **Store Prices** — fiyat upsert, toplu import, **LLM import** (API-key korumalı ingestion)
+- **Compare Engine** — 7-faktör skorlama, TSP rota optimizasyonu (sınırlı kombinatorik)
+- **Feedback** — kullanıcı fiyat doğruluk geri bildirimleri (is_accurate / suggested_price)
+- **Country multi-tenancy** — ülke-bazlı ürün/mağaza scoping (`x-country` header)
+- **Kafka consumers** — normalizer / matcher / persister / ingest (bkz. kök `docker-compose.kafka.yml`)
 
 ## 🚀 Kurulum
 
-### Gereksinimler
-- Node.js (v18+)
-- PostgreSQL (v14+)
-- npm veya pnpm
+```bash
+# 1. Bağımlılıklar
+pnpm install
 
-### Adımlar
+# 2. Ortam değişkenleri
+cp .env.example .env   # DATABASE_URL, JWT_SECRET (≥32), ALLOWED_ORIGINS, INGEST_API_KEY, LLM anahtarları
+
+# 3. Migration'lar (feedback boolean modeli + price_history + country dahil) ve client
+pnpm db:migrate:deploy
+pnpm db:generate
+
+# 4. Seed (TR/PL ülkeleri + demo veri)
+pnpm db:seed
+
+# 5. Sunucu
+pnpm dev               # http://localhost:3000
+```
+
+> ⚠️ Bu sürüm 3 yeni migration getirir: `feedback_boolean_model`, `add_price_history`, `add_country`. Mevcut bir DB'de mutlaka `pnpm db:migrate:deploy` çalıştırın (country_id mevcut veriye `TR` olarak backfill edilir).
+
+## 🔑 Öne Çıkan Endpoint'ler
+
+```
+POST /api/v1/auth/register | login | refresh
+GET  /api/v1/products            (x-country ile ülkeye göre filtrelenir)
+GET  /api/v1/products/:id/history?days=90     # fiyat geçmişi (zaman serisi)
+GET  /api/v1/products/:id/compare
+GET  /api/v1/stores              (x-country ile filtrelenir)
+POST /api/v1/store-prices/upsert | bulk-upsert | import-with-llm   # x-api-key (INGEST_API_KEY) gerekir
+POST /api/v1/lists/:id/compare   # rota optimizasyonu (sahibe özel)
+POST /api/v1/feedback
+```
+
+Tam dokümantasyon: **Swagger UI** → `http://localhost:3000/api-docs`
+
+## 🔐 Güvenlik
+
+- **Auth:** access + refresh token; tüm korumalı route'larda `authenticate`; sahiplik (IDOR) kontrolleri
+- **Ingestion:** ürün/fiyat yazma endpoint'leri `x-api-key` (`INGEST_API_KEY`) ile korunur — scraper bunu gönderir
+- **CORS:** `ALLOWED_ORIGINS` allowlist; **rate limiting** her ortamda aktif
+- Hata yanıtlarında stack/detay sızdırılmaz; graceful shutdown (SIGTERM/SIGINT)
+
+## 🗄️ Veritabanı (Prisma)
+
+Ana tablolar: `countries`, `users`, `stores` (lat/lon/city/country_id), `categories` (hiyerarşik), `products` (country_id, muadil_grup_id), `store_prices`, `price_history`, `lists`, `list_items`, `price_feedbacks`, `user_favorite_stores`.
+
+```
+Country → Store / Product (1:N)     Store/Product → PriceHistory (1:N)
+User → List (1:N)                   Product ↔ StorePrice (1:N)
+List → ListItem (1:N)               Product → Category (N:1)
+```
+
+## 📡 Event-Driven Ingestion (Kafka)
+
+```
+raw.products → [normalizer] → normalized.products → [matcher] → matched.products → [persister] → Postgres
+                                                                                         └→ price.events
+```
 
 ```bash
-# 1. Bağımlılıkları yükle
-npm install
-
-# 2. Environment variables
-cp .env.example .env
-# .env dosyasını düzenle:
-# - DATABASE_URL
-# - JWT_SECRET (min 32 karakter)
-# - OPENAI_API_KEY (opsiyonel, LLM matching için)
-
-# 3. Veritabanını oluştur
-npx prisma migrate dev
-
-# 4. Prisma Client oluştur
-npx prisma generate
-
-# 5. Seed verileri (opsiyonel)
-npx tsx prisma/seed.ts
-
-# 6. Sunucuyu başlat
-npm run dev
+# Kök dizinde Redpanda'yı başlat
+docker compose -f docker-compose.kafka.yml up -d        # Console: http://localhost:8080
+# Backend env: KAFKA_BROKERS=localhost:9092  SCHEMA_REGISTRY_URL=http://localhost:8081
+pnpm consume:normalizer   # consume:matcher | consume:persister | consume:ingest
 ```
 
-Sunucu `http://localhost:3000` adresinde çalışacak.
+Avro şemaları `src/kafka/avro/`, paylaşılan client/producer/consumer `src/kafka/`. Consumer'lar process-then-commit + bounded retry + dead-letter topic kullanır; ülke koduyla partition'lanır.
 
-## 📚 API Dokümantasyonu
+## 🧪 Test & CI
 
-### Swagger UI
+```bash
+pnpm test            # vitest (fuzzy-matching çekirdeği: utils/similarity.ts)
+pnpm typecheck       # tsc --noEmit
 ```
-http://localhost:3000/api-docs
-```
+GitHub Actions (`.github/workflows/ci.yml`): backend (generate+typecheck+test), mobil (typecheck), scraper (py compile).
 
-### Base URL
-```
-http://localhost:3000/api/v1
-```
-
-## 🔑 API Endpoints
-
-### Authentication
-- `POST /api/v1/auth/register` - Yeni kullanıcı kaydı
-- `POST /api/v1/auth/login` - Kullanıcı girişi
-
-### Products
-- `GET /api/v1/products` - Ürün listeleme (filter, search, pagination)
-- `GET /api/v1/products/:id` - Ürün detayı
-- `GET /api/v1/products/barcode/:barcode` - Barkod ile ürün bulma
-- `POST /api/v1/products` - Yeni ürün oluşturma
-- `PUT /api/v1/products/:id` - Ürün güncelleme
-- `DELETE /api/v1/products/:id` - Ürün silme
-- `GET /api/v1/products/:id/prices` - Ürün fiyatları
-- `GET /api/v1/products/:id/compare` - Fiyat karşılaştırma
-
-### Stores
-- `GET /api/v1/stores` - Market listesi
-- `GET /api/v1/stores/:id` - Market detayı
-- `POST /api/v1/stores` - Yeni market ekleme
-- `PUT /api/v1/stores/:id` - Market güncelleme
-- `DELETE /api/v1/stores/:id` - Market silme
-
-### Store Prices
-- `POST /api/v1/store-prices` - Fiyat kaydetme/güncelleme
-- `POST /api/v1/store-prices/bulk` - Toplu fiyat import (max 1000)
-- `POST /api/v1/store-prices/import-with-llm` - LLM ile ürün eşleştirme ve import
-
-### Categories
-- `GET /api/v1/categories` - Kategori listesi
-- `POST /api/v1/categories` - Yeni kategori oluşturma (smart matching)
-
-### Lists
-- `GET /api/v1/lists` - Kullanıcı listeleri (active/completed/templates)
-- `GET /api/v1/lists/:id` - Liste detayı
-- `POST /api/v1/lists` - Yeni liste oluşturma
-- `PUT /api/v1/lists/:id` - Liste güncelleme
-- `DELETE /api/v1/lists/:id` - Liste silme
-- `GET /api/v1/lists/:id/stats` - Liste istatistikleri
-- `POST /api/v1/lists/:id/compare` - Liste karşılaştırma ve rota optimizasyonu
-- `POST /api/v1/lists/templates` - Şablon oluşturma
-
-### Users
-- `GET /api/v1/users/me` - Kullanıcı profili
-- `PUT /api/v1/users/me` - Profil güncelleme
-- `GET /api/v1/users/me/favorite-stores` - Favori marketler
-- `POST /api/v1/users/me/favorite-stores/:storeId` - Favori market ekle
-- `DELETE /api/v1/users/me/favorite-stores/:storeId` - Favori market sil
-
-### Feedback
-- `POST /api/v1/feedback` - Fiyat geri bildirimi
-
-## 📊 Veritabanı Yapısı
-
-### Ana Tablolar
-- `users` - Kullanıcılar
-- `stores` - Marketler (konum bilgisi ile)
-- `categories` - Ürün kategorileri (hiyerarşik)
-- `products` - Ürünler (muadil_grup_id ile gruplandırılmış)
-- `store_prices` - Dinamik fiyatlar
-- `lists` - Alışveriş listeleri
-- `list_items` - Liste öğeleri
-- `price_feedback` - Kullanıcı geri bildirimleri
-- `user_favorite_stores` - Favori marketler
-
-### İlişkiler
-```
-User → Lists (1:N)
-User → PriceFeedback (1:N)
-Store → StorePrice (1:N)
-Product → StorePrice (1:N)
-Product → Category (N:1)
-List → ListItem (1:N)
-```
-
-## 🔍 Önemli Özellikler
-
-### Product Matching
-Fuzzy matching algoritması ile benzer ürünleri otomatik eşleştirir:
-- Text normalization (Türkçe karakter desteği)
-- Levenshtein distance
-- Jaccard similarity
-- Fingerprint generation
-- %95+ doğruluk oranı
-
-### Compare Engine
-7-factor scoring algoritması:
-1. Total Price (ağırlık: 30%)
-2. Store Count (ağırlık: 15%)
-3. Distance (ağırlık: 20%)
-4. Route Efficiency (ağırlık: 15%)
-5. Favorite Store Bonus (ağırlık: 10%)
-6. Missing Products Penalty (ağırlık: -10%)
-7. Budget Compliance (ağırlık: 10%)
-
-TSP (Traveling Salesman Problem) algoritması ile optimal rota hesaplar.
-
-### LLM Product Matcher
-3-stage pipeline:
-- **Stage 1**: Market-level normalization (LLM batch processing)
-- **Stage 2**: Cross-market matching (Embedding + Cosine similarity)
-- **Stage 3**: Category consolidation
-
-### Category Matching
-Otomatik kategori eşleştirme:
-- Exact match
-- Fuzzy match
-- Keyword matching (parent bulma)
-- Yeni kategori önerileri
-
-## 🔐 Test Credentials
-
-**Test Kullanıcı:**
-- Email: `test@cheep.com`
-- Şifre: `test123456`
-
-## 🛠️ Teknoloji Yığını
-
-- **Runtime:** Node.js + TypeScript
-- **Framework:** Express.js
-- **ORM:** Prisma
-- **Database:** PostgreSQL
-- **Auth:** JWT + bcrypt
-- **Validation:** Joi
-- **Documentation:** Swagger UI
-- **Logging:** Winston
-- **LLM:** OpenAI/OpenRouter
-
-## 📝 Environment Variables
+## 📝 Ortam Değişkenleri
 
 ```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/cheep_db"
-
-# Auth
-JWT_SECRET="your-secret-key-min-32-chars"
-
-# Server
 PORT=3000
 NODE_ENV=development
-
+DATABASE_URL="postgresql://user:pass@localhost:5432/cheep?schema=public"
+JWT_SECRET="en-az-32-karakterlik-gizli-deger"
+ALLOWED_ORIGINS="http://localhost:8081,https://app.cheep.com"
+INGEST_API_KEY="scraper-icin-paylasilan-anahtar"
+DEFAULT_COUNTRY_CODE=TR
 # LLM (opsiyonel)
-OPENAI_API_KEY="your-openai-key"
-OPENROUTER_API_KEY="your-openrouter-key"
 USE_OPENROUTER=false
+OPENAI_API_KEY="sk-..."
+OPENROUTER_API_KEY="sk-or-..."
 LLM_MODEL="gpt-4o-mini"
+# Kafka (opsiyonel - event pipeline)
+KAFKA_BROKERS=localhost:9092
+SCHEMA_REGISTRY_URL=http://localhost:8081
 ```
 
 ## 🚦 Scripts
 
 ```bash
-# Development
-npm run dev              # Hot reload ile çalıştır
-npm run build           # Production build
-npm run start           # Production mode
-
-# Database
-npx prisma migrate dev  # Yeni migration oluştur
-npx prisma generate     # Prisma Client güncelle
-npx prisma studio       # Database GUI
-npx tsx prisma/seed.ts  # Seed verileri
-
-# Testing
-npm run test            # Test çalıştır
-npm run lint            # Lint kontrolü
+pnpm dev              # hot reload (tsx)
+pnpm build            # tsc → dist
+pnpm start            # production
+pnpm db:migrate:deploy / db:migrate:dev / db:generate / db:studio / db:seed
+pnpm test / typecheck / lint
+pnpm consume:ingest | consume:normalizer | consume:matcher | consume:persister
 ```
 
 ## 📁 Proje Yapısı
 
 ```
-cheep-backend-express/
-├── src/
-│   ├── api/              # API routes
-│   │   ├── auth/
-│   │   ├── products/
-│   │   ├── stores/
-│   │   ├── categories/
-│   │   ├── lists/
-│   │   ├── users/
-│   │   ├── store-prices/
-│   │   └── feedback/
-│   ├── config/           # Configuration
-│   ├── middleware/       # Custom middleware
-│   ├── schema/           # Validation schemas
-│   ├── services/         # Business logic
-│   │   ├── compare-engine.service.ts
-│   │   ├── llm-product-matcher.service.ts
-│   │   └── route-optimizer.service.ts
-│   ├── types/            # TypeScript types
-│   └── utils/            # Utilities
-├── prisma/
-│   ├── schema.prisma     # Database schema
-│   ├── migrations/       # Migration files
-│   └── seed.ts           # Seed script
-└── package.json
+src/
+├── api/            # auth, products, stores, categories, lists, users, store-prices, feedback
+├── consumers/      # ingest, normalizer, matcher, persister (Kafka)
+├── kafka/          # client, producer, consumer, schema-registry, avro/
+├── config/         # config (env doğrulama: JWT, ingest key, CORS)
+├── middleware/     # auth, ingest-auth, country, rate-limit, error, sanitize
+├── services/       # compare-engine, route-optimizer, llm-product-matcher, ingest
+├── utils/          # prisma, logger, similarity, country
+└── types/
+prisma/             # schema.prisma, migrations/, seed.ts
 ```
 
-## 🐛 Troubleshooting
+## 🔐 Test Kullanıcısı
 
-### Database Connection Error
-```bash
-# PostgreSQL'in çalıştığından emin olun
-# DATABASE_URL'i kontrol edin
-```
-
-### Migration Errors
-```bash
-# Migration'ı resetle
-npx prisma migrate reset
-```
-
-### Prisma Client Error
-```bash
-# Prisma Client'ı yeniden oluştur
-npx prisma generate
-```
-
-## 📚 Daha Fazla Bilgi
-
-Detaylı API dokümantasyonu için Swagger UI kullanın: `http://localhost:3000/api-docs`
+`test@cheep.com` / `test123456`

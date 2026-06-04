@@ -5,9 +5,13 @@
 ## 📋 Özellikler
 
 ### ✅ Çoklu Market Desteği
-- **Türkiye**: Migros, CarrefourSA, A101, BİM
-- **Polonya**: (Hazırlık aşamasında)
+- **Türkiye**: Migros, CarrefourSA, A101, ŞOK
+- **Polonya**: (Hazırlık aşamasında — Biedronka, Żabka, Lidl)
 - Yeni market eklemek için sadece config dosyasını güncelle
+
+### ✅ İki Import Modu
+- **HTTP** (varsayılan): backend `bulk-upsert` endpoint'ine `x-api-key` ile gönderim
+- **Kafka** (`INGEST_MODE=kafka`): `raw.products.v1` topic'ine Avro üretimi (event-driven pipeline)
 
 ### ✅ Scalable 3-Stage Pipeline
 - **Stage 1**: Market-level normalization (LLM ile batch processing)
@@ -60,8 +64,18 @@ LLM_MODEL=openai/gpt-4o-mini
 OPENAI_API_KEY=sk-your-openai-key-here
 LLM_MODEL=gpt-4o-mini
 
+# Backend ingestion (ürün/fiyat yazma endpoint'leri x-api-key ister)
+INGEST_API_KEY=scraper-icin-paylasilan-anahtar
+
 # Opsiyonel
 AUTO_CREATE_SUBCATEGORIES=false
+LOG_LEVEL=INFO
+EMBEDDING_MODEL=text-embedding-3-small
+
+# Kafka modu (INGEST_MODE=kafka iken)
+KAFKA_BROKERS=localhost:9092
+SCHEMA_REGISTRY_URL=http://localhost:8081
+COUNTRY_CODE=TR
 ```
 
 **.env dosyası konumu:**
@@ -199,8 +213,20 @@ python import_to_backend.py --api-url http://localhost:3000/api/v1
 **Script otomatik olarak:**
 - En son matched products dosyasını bulur
 - Backend API formatına çevirir
-- 900'lük parçalar halinde gönderir (backend limiti 1000)
+- 900'lük parçalar halinde gönderir (backend limiti 1000), `x-api-key` header'ı ile
 - İstatistikleri gösterir
+
+#### Kafka modu (event-driven pipeline)
+
+HTTP yerine `raw.products.v1` topic'ine Avro üretmek için:
+
+```bash
+# Önce backend reposunda Redpanda'yı başlat:
+#   docker compose -f ../../docker-compose.kafka.yml up -d
+INGEST_MODE=kafka COUNTRY_CODE=TR python import_to_backend.py
+```
+
+Backend tarafındaki consumer'lar (normalizer → matcher → persister) bu event'leri tüketip Postgres'e yazar.
 
 **Çıktı:**
 ```
