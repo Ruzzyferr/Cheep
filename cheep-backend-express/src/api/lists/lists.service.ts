@@ -56,10 +56,10 @@ export const getUserLists = async (userId: number, status?: string) => {
                 
                 // Market sayısı aynıysa, en ucuz fiyata göre (azdan çoka)
                 const aMinPrice = a.product?.store_prices && a.product.store_prices.length > 0
-                    ? Math.min(...a.product.store_prices.map(sp => parseFloat(sp.price)))
+                    ? Math.min(...a.product.store_prices.map(sp => Number(sp.price)))
                     : Infinity;
                 const bMinPrice = b.product?.store_prices && b.product.store_prices.length > 0
-                    ? Math.min(...b.product.store_prices.map(sp => parseFloat(sp.price)))
+                    ? Math.min(...b.product.store_prices.map(sp => Number(sp.price)))
                     : Infinity;
                 
                 return aMinPrice - bMinPrice;
@@ -120,10 +120,10 @@ export const getListById = async (listId: number, userId: number) => {
             
             // Market sayısı aynıysa, en ucuz fiyata göre (azdan çoka)
             const aMinPrice = a.product?.store_prices && a.product.store_prices.length > 0
-                ? Math.min(...a.product.store_prices.map(sp => parseFloat(sp.price)))
+                ? Math.min(...a.product.store_prices.map(sp => Number(sp.price)))
                 : Infinity;
             const bMinPrice = b.product?.store_prices && b.product.store_prices.length > 0
-                ? Math.min(...b.product.store_prices.map(sp => parseFloat(sp.price)))
+                ? Math.min(...b.product.store_prices.map(sp => Number(sp.price)))
                 : Infinity;
             
             return aMinPrice - bMinPrice;

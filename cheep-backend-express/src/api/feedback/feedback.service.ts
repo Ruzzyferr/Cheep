@@ -137,7 +137,7 @@ export const getPriceAccuracyStats = async (storePriceId: number) => {
 
     const suggestedPrices = feedbacks
         .filter((f) => f.suggested_price !== null)
-        .map((f) => f.suggested_price as number);
+        .map((f) => Number(f.suggested_price));
 
     const avgSuggestedPrice =
         suggestedPrices.length > 0

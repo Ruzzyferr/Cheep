@@ -13,6 +13,8 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
     const { category_id, brand, search, limit = 50, offset = 0 } = params;
 
     const where: Prisma.ProductWhereInput = {};
+    // Raw SQL filtresinde kullanılmak üzere çözülen kategori id listesi
+    let categoryIdsForSql: number[] | null = null;
 
     if (category_id) {
         // 🔥 Parent kategorinin alt kategorilerini de dahil et
@@ -30,13 +32,16 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
             if (category.children && category.children.length > 0) {
                 const categoryIds = [category.id, ...category.children.map(c => c.id)];
                 where.category_id = { in: categoryIds };
+                categoryIdsForSql = categoryIds;
             } else {
                 // Alt kategoriyse, sadece kendi ID'sini kullan
                 where.category_id = category_id;
+                categoryIdsForSql = [category_id];
             }
         } else {
             // Kategori bulunamadıysa, yine de filtrele (hata verme)
             where.category_id = category_id;
+            categoryIdsForSql = [category_id];
         }
     }
 
@@ -58,31 +63,22 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
     // 🔥 DATABASE SEVİYESİNDE SIRALAMA: Market sayısına göre (çoktan aza)
     // Raw SQL ile store_prices count'una göre sıralama
     
-    // WHERE clause builder
+    // WHERE clause builder — orijinal parametrelerden kurulur (tip güvenli)
     let whereClause = Prisma.sql`WHERE 1=1`;
-    
-    if (where.category_id) {
-        if (typeof where.category_id === 'object' && 'in' in where.category_id) {
-            // Array olarak gelen category_id'ler (parent + children)
-            whereClause = Prisma.sql`${whereClause} AND p.category_id IN (${Prisma.join(where.category_id.in)})`;
-        } else {
-            // Tekil category_id
-            whereClause = Prisma.sql`${whereClause} AND p.category_id = ${where.category_id}`;
-        }
+
+    if (categoryIdsForSql && categoryIdsForSql.length > 0) {
+        whereClause = Prisma.sql`${whereClause} AND p.category_id IN (${Prisma.join(categoryIdsForSql)})`;
     }
-    
-    if (where.brand?.contains) {
-        whereClause = Prisma.sql`${whereClause} AND p.brand ILIKE ${'%' + where.brand.contains + '%'}`;
+
+    if (brand) {
+        whereClause = Prisma.sql`${whereClause} AND p.brand ILIKE ${'%' + brand + '%'}`;
     }
-    
-    if (where.OR) {
-        const searchName = where.OR[0]?.name?.contains || '';
-        const searchBrand = where.OR[1]?.brand?.contains || '';
-        const searchBarcode = where.OR[2]?.ean_barcode?.contains || '';
+
+    if (search) {
         whereClause = Prisma.sql`${whereClause} AND (
-            p.name ILIKE ${'%' + searchName + '%'} OR
-            p.brand ILIKE ${'%' + searchBrand + '%'} OR
-            p.ean_barcode LIKE ${'%' + searchBarcode + '%'}
+            p.name ILIKE ${'%' + search + '%'} OR
+            p.brand ILIKE ${'%' + search + '%'} OR
+            p.ean_barcode LIKE ${'%' + search + '%'}
         )`;
     }
     

@@ -800,7 +800,9 @@ export class CategoryMatcher {
                 standardSlug = standardCategory.slug;
                 parentStandardName = null;
             } else {
-                // Alt kategori - parent'ını bul
+                // Alt kategori - parent'ını bul (varsayılan olarak kendi adı/slug'ı)
+                standardName = standardCategory.name;
+                standardSlug = standardCategory.slug;
                 for (const cat of STANDARD_CATEGORIES) {
                     const found = cat.subcategories.find(sub => sub.name === standardCategory.name);
                     if (found) {

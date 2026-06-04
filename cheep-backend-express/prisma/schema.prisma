@@ -197,17 +197,13 @@ model ListItem {
 // KULLANICI GERİ BİLDİRİMLERİ
 // ============================================
 
-enum FeedbackType {
-  fiyat_yanlis // Fiyat yanlış bildirildi
-  stok_yok // Ürün stokta yok
-}
-
 model PriceFeedback {
-  id             Int          @id @default(autoincrement())
-  user_id        Int
-  store_price_id Int
-  feedback_type  FeedbackType
-  reported_price Decimal?     @db.Decimal(10, 2) // Kullanıcının bildirdiği fiyat (opsiyonel)
+  id              Int      @id @default(autoincrement())
+  user_id         Int
+  store_price_id  Int
+  is_accurate     Boolean // Fiyat doğru mu? (true = doğru, false = yanlış)
+  suggested_price Decimal? @db.Decimal(10, 2) // Kullanıcının önerdiği fiyat (opsiyonel)
+  comment         String? // Opsiyonel kullanıcı yorumu
 
   created_at DateTime @default(now())
 

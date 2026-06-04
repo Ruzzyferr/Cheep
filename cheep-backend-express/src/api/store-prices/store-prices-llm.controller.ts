@@ -136,6 +136,13 @@ async function saveProcessedProducts(processedProducts: any[]) {
                 stats.newProducts++;
             }
 
+            // Eşleşen ürün silinmiş olabilir → null ise bu ürünü atla
+            if (!product) {
+                logger.warn(`[LLMImport] Ürün bulunamadı (matched_product_id: ${processed.matched_product_id}) - atlanıyor`);
+                stats.failed++;
+                continue;
+            }
+
             // 2. Her market için fiyat kaydet
             for (const priceData of processed.prices) {
                 await prisma.storePrice.upsert({
