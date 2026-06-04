@@ -313,6 +313,51 @@ export const getProductPrices = async (id: number) => {
     return product.store_prices;
 };
 
+/**
+ * Bir ürünün fiyat geçmişini market bazında zaman serisi olarak döndürür.
+ * @param days Kaç günlük geçmiş (default 90)
+ */
+export const getProductPriceHistory = async (id: number, days = 90) => {
+    const since = new Date();
+    since.setDate(since.getDate() - Math.max(1, Math.min(days, 365)));
+
+    const rows = await prisma.priceHistory.findMany({
+        where: { product_id: id, recorded_at: { gte: since } },
+        include: { store: { select: { id: true, name: true, logo_url: true } } },
+        orderBy: { recorded_at: 'asc' },
+    });
+
+    // Market bazında grupla
+    const byStore = new Map<number, {
+        store: { id: number; name: string; logo_url: string | null };
+        points: Array<{ price: number; recorded_at: Date }>;
+    }>();
+
+    for (const row of rows) {
+        if (!byStore.has(row.store_id)) {
+            byStore.set(row.store_id, { store: row.store, points: [] });
+        }
+        byStore.get(row.store_id)!.points.push({
+            price: Number(row.price),
+            recorded_at: row.recorded_at,
+        });
+    }
+
+    const series = Array.from(byStore.values());
+    const allPrices = rows.map(r => Number(r.price));
+
+    return {
+        product_id: id,
+        days,
+        series,
+        summary: {
+            lowest: allPrices.length ? Math.min(...allPrices) : null,
+            highest: allPrices.length ? Math.max(...allPrices) : null,
+            dataPoints: allPrices.length,
+        },
+    };
+};
+
 export const compareProductPrices = async (id: number) => {
     const product = await prisma.product.findUnique({
         where: { id },

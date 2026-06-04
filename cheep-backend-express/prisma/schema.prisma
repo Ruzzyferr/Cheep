@@ -48,6 +48,7 @@ model Store {
   // İlişkiler
   store_prices      StorePrice[]
   favorite_by_users UserFavoriteStore[]
+  price_history     PriceHistory[]
 
   @@map("stores")
 }
@@ -109,9 +110,10 @@ model Product {
   updated_at DateTime @updatedAt
 
   // İlişkiler
-  category     Category?    @relation(fields: [category_id], references: [id], onDelete: SetNull)
-  store_prices StorePrice[]
-  list_items   ListItem[]
+  category      Category?      @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  store_prices  StorePrice[]
+  list_items    ListItem[]
+  price_history PriceHistory[]
 
   @@index([ean_barcode])
   @@index([muadil_grup_id])
@@ -196,6 +198,25 @@ model ListItem {
 // ============================================
 // KULLANICI GERİ BİLDİRİMLERİ
 // ============================================
+
+// ============================================
+// FİYAT GEÇMİŞİ (zaman serisi)
+// ============================================
+
+model PriceHistory {
+  id          Int      @id @default(autoincrement())
+  store_id    Int
+  product_id  Int
+  price       Decimal  @db.Decimal(10, 2)
+  recorded_at DateTime @default(now())
+
+  store   Store   @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@index([product_id, recorded_at])
+  @@index([store_id, product_id])
+  @@map("price_history")
+}
 
 model PriceFeedback {
   id              Int      @id @default(autoincrement())

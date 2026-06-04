@@ -424,6 +424,27 @@ router.get('/:id/prices', ProductController.getProductPrices);
 
 /**
  * @swagger
+ * /api/v1/products/{id}/history:
+ *   get:
+ *     summary: Ürünün fiyat geçmişini (zaman serisi) market bazında getirir
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: days
+ *         schema: { type: integer, default: 90, minimum: 1, maximum: 365 }
+ *         description: Kaç günlük geçmiş
+ *     responses:
+ *       200:
+ *         description: Market bazında fiyat geçmişi serileri ve özet (lowest/highest)
+ */
+router.get('/:id/history', ProductController.getProductPriceHistory);
+
+/**
+ * @swagger
  * /api/v1/products/{id}/compare:
  *   get:
  *     summary: Ürünün fiyat karşılaştırmasını yapar

@@ -101,6 +101,17 @@ export const getProductPrices = async (req: Request, res: Response, next: NextFu
     }
 };
 
+export const getProductPriceHistory = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const days = req.query.days ? Number(req.query.days) : 90;
+        const history = await ProductService.getProductPriceHistory(Number(id), days);
+        res.status(200).json(history);
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const compareProductPrices = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;

@@ -21,6 +21,25 @@ interface UpsertData {
     muadil_grup_id?: string;
 }
 
+/**
+ * Fiyat geçmişine bir kayıt ekler. Sadece fiyat gerçekten değiştiğinde (veya ilk
+ * kez kaydedildiğinde) çağrılmalıdır; böylece zaman serisi tablosu şişmez.
+ */
+const recordPriceHistory = async (
+    storeId: number,
+    productId: number,
+    price: Decimal
+): Promise<void> => {
+    try {
+        await prisma.priceHistory.create({
+            data: { store_id: storeId, product_id: productId, price },
+        });
+    } catch (err) {
+        // Geçmiş kaydı kritik değil; ana akışı bozmadan logla.
+        logger.warn(`[PriceHistory] Kayıt eklenemedi (product ${productId}): ${(err as Error).message}`);
+    }
+};
+
 // ++ GÜNCELLENMİŞ FONKSİYON: Artık hem ürünü hem fiyatı yönetiyor
 export const upsertStorePrice = async (data: UpsertData) => {
     const { store_id, store_sku, price, unit, source, confidence_score, ...productData } = data;
@@ -33,6 +52,7 @@ export const upsertStorePrice = async (data: UpsertData) => {
     const { product } = await productMatcher.findOrCreateProduct(productData);
 
     const numericStoreId = Number(store_id);
+    const newPrice = new Decimal(price);
 
     const existingByProduct = await prisma.storePrice.findUnique({
         where: {
@@ -44,20 +64,28 @@ export const upsertStorePrice = async (data: UpsertData) => {
     });
 
     if (existingByProduct) {
-        return prisma.storePrice.update({
-            where: {
-                id: existingByProduct.id,
-            },
+        const priceChanged = !existingByProduct.price.equals(newPrice);
+        const updated = await prisma.storePrice.update({
+            where: { id: existingByProduct.id },
             data: {
                 store_sku,
-                price: new Decimal(price),
+                price: newPrice,
                 unit,
                 last_updated_at: new Date(),
             },
         });
+        if (priceChanged) {
+            await recordPriceHistory(numericStoreId, product.id, newPrice);
+        }
+        return updated;
     }
 
-    return prisma.storePrice.upsert({
+    // Bu ürün için bu markette henüz fiyat yok → store_sku ile upsert et.
+    const existingBySku = await prisma.storePrice.findUnique({
+        where: { store_id_store_sku: { store_id: numericStoreId, store_sku } },
+    });
+
+    const result = await prisma.storePrice.upsert({
         where: {
             store_id_store_sku: {
                 store_id: numericStoreId,
@@ -68,18 +96,25 @@ export const upsertStorePrice = async (data: UpsertData) => {
             store_id: numericStoreId,
             product_id: product.id,
             store_sku,
-            price: new Decimal(price),
+            price: newPrice,
             unit,
             source,
             confidence_score,
         },
         update: {
             product_id: product.id,
-            price: new Decimal(price),
+            price: newPrice,
             unit,
             last_updated_at: new Date(),
         },
     });
+
+    // Yeni kayıt veya fiyat değişimi ise geçmişe yaz.
+    if (!existingBySku || !existingBySku.price.equals(newPrice)) {
+        await recordPriceHistory(numericStoreId, product.id, newPrice);
+    }
+
+    return result;
 };
 
 // ++ PERFORMANS İYİLEŞTİRMESİ YAPILAN FONKSİYON ++
