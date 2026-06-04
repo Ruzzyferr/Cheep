@@ -4,9 +4,9 @@ node_modules/
 .pnpm/
 **/.pnpm/
 
-# pnpm store ve lock dosyaları
+# pnpm store
 .pnpm-store/
-pnpm-lock.yaml
+# Not: pnpm-lock.yaml repoya dahildir (tekrarlanabilir kurulum + CI için).
 
 # Derlenmiş dosyalar
 dist/
