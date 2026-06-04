@@ -1,5 +1,6 @@
 import { prisma } from '../../utils/prisma.client.js';
 import { Prisma } from '@prisma/client';
+import { getCountryIdByCode } from '../../utils/country.js';
 
 interface GetAllProductsParams {
     category_id?: number;
@@ -7,12 +8,16 @@ interface GetAllProductsParams {
     search?: string;
     limit?: number;
     offset?: number;
+    countryId?: number;
 }
 
 export const getAllProducts = async (params: GetAllProductsParams) => {
-    const { category_id, brand, search, limit = 50, offset = 0 } = params;
+    const { category_id, brand, search, limit = 50, offset = 0, countryId } = params;
 
     const where: Prisma.ProductWhereInput = {};
+    if (countryId) {
+        where.country_id = countryId;
+    }
     // Raw SQL filtresinde kullanılmak üzere çözülen kategori id listesi
     let categoryIdsForSql: number[] | null = null;
 
@@ -65,6 +70,10 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
     
     // WHERE clause builder — orijinal parametrelerden kurulur (tip güvenli)
     let whereClause = Prisma.sql`WHERE 1=1`;
+
+    if (countryId) {
+        whereClause = Prisma.sql`${whereClause} AND p.country_id = ${countryId}`;
+    }
 
     if (categoryIdsForSql && categoryIdsForSql.length > 0) {
         whereClause = Prisma.sql`${whereClause} AND p.category_id IN (${Prisma.join(categoryIdsForSql)})`;
@@ -202,6 +211,8 @@ export const createProduct = async (data: {
     image_url?: string;
     category_id?: number;
     muadil_grup_id?: string;
+    country_id?: number;
+    country_code?: string;
 }) => {
     // Barkod varsa, aynı barkodlu ürün kontrolü
     if (data.ean_barcode) {
@@ -214,8 +225,11 @@ export const createProduct = async (data: {
         }
     }
 
+    const { country_code, country_id, ...rest } = data;
+    const resolvedCountryId = country_id ?? (await getCountryIdByCode(country_code));
+
     return await prisma.product.create({
-        data,
+        data: { ...rest, country_id: resolvedCountryId },
         include: {
             category: true,
         },
@@ -229,7 +243,12 @@ export const upsertProduct = async (data: {
     image_url?: string;
     category_id?: number;
     muadil_grup_id?: string;
+    country_id?: number;
+    country_code?: string;
 }) => {
+    const { country_code, country_id, ...rest } = data;
+    const resolvedCountryId = country_id ?? (await getCountryIdByCode(country_code));
+
     // Eğer barkod varsa, ona göre upsert yap
     if (data.ean_barcode) {
         return await prisma.product.upsert({
@@ -241,7 +260,7 @@ export const upsertProduct = async (data: {
                 category_id: data.category_id,
                 muadil_grup_id: data.muadil_grup_id,
             },
-            create: data,
+            create: { ...rest, country_id: resolvedCountryId },
             include: {
                 category: true,
             },
@@ -250,7 +269,7 @@ export const upsertProduct = async (data: {
 
     // Barkod yoksa direkt oluştur
     return await prisma.product.create({
-        data,
+        data: { ...rest, country_id: resolvedCountryId },
         include: {
             category: true,
         },

@@ -19,10 +19,12 @@ model User {
   email         String   @unique
   password_hash String
   name          String
+  country_id    Int? // Tercih edilen ülke (konumdan veya seçimden)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
   // İlişkiler
+  country         Country?            @relation(fields: [country_id], references: [id], onDelete: SetNull)
   lists           List[]
   favorite_stores UserFavoriteStore[]
   price_feedbacks PriceFeedback[]
@@ -31,25 +33,49 @@ model User {
 }
 
 // ============================================
+// ÜLKE (çok-ülke / konum bazlı)
+// ============================================
+
+model Country {
+  id       Int    @id @default(autoincrement())
+  code     String @unique // ISO 3166-1 alpha-2: "TR", "PL"
+  name     String // "Türkiye", "Polska"
+  currency String // "TRY", "PLN"
+
+  created_at DateTime @default(now())
+
+  // İlişkiler
+  stores   Store[]
+  products Product[]
+  users    User[]
+
+  @@map("countries")
+}
+
+// ============================================
 // MARKET VE KONUM
 // ============================================
 
 model Store {
-  id       Int     @id @default(autoincrement())
-  name     String
-  logo_url String?
-  address  String?
-  lat      Float? // Enlem (Latitude)
-  lon      Float? // Boylam (Longitude)
+  id         Int     @id @default(autoincrement())
+  name       String
+  logo_url   String?
+  address    String?
+  city       String?
+  lat        Float? // Enlem (Latitude)
+  lon        Float? // Boylam (Longitude)
+  country_id Int
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   // İlişkiler
+  country           Country             @relation(fields: [country_id], references: [id], onDelete: Cascade)
   store_prices      StorePrice[]
   favorite_by_users UserFavoriteStore[]
   price_history     PriceHistory[]
 
+  @@index([country_id])
   @@map("stores")
 }
 
@@ -105,16 +131,19 @@ model Product {
   image_url      String?
   category_id    Int?
   muadil_grup_id String? // Muadil ürünleri gruplamak için
+  country_id     Int
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   // İlişkiler
+  country       Country        @relation(fields: [country_id], references: [id], onDelete: Cascade)
   category      Category?      @relation(fields: [category_id], references: [id], onDelete: SetNull)
   store_prices  StorePrice[]
   list_items    ListItem[]
   price_history PriceHistory[]
 
+  @@index([country_id])
   @@index([ean_barcode])
   @@index([muadil_grup_id])
   @@index([category_id])

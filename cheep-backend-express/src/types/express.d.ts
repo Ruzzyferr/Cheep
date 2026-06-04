@@ -8,6 +8,10 @@ declare namespace Express {
             created_at: Date;
             updated_at: Date;
         };
+        country?: {
+            id: number;
+            code: string;
+        };
     }
 }
 

@@ -3,6 +3,7 @@ import {
     calculateSimilarity,
     jaccardSimilarity,
 } from '../../utils/similarity.js';
+import { getCountryIdByCode } from '../../utils/country.js';
 
 /**
  * Product Matching Service
@@ -153,6 +154,8 @@ export class ProductMatcher {
         category_id?: number | string | null;
         image_url?: string;
         muadil_grup_id?: string | null;
+        country_id?: number;
+        country_code?: string;
     }): Promise<{ product: any; isNew: boolean }> {
         const providedMuadil = data.muadil_grup_id?.trim();
         if (providedMuadil) {
@@ -217,12 +220,14 @@ export class ProductMatcher {
         }
 
         const muadilToPersist = fingerprint || generatedFingerprint || providedMuadil || '';
+        const countryId = data.country_id ?? (await getCountryIdByCode(data.country_code));
 
         const newProduct = await prisma.product.create({
             data: {
                 name: data.name,
                 brand: data.brand,
                 category_id: categoryId,
+                country_id: countryId,
                 image_url: data.image_url,
                 muadil_grup_id: muadilToPersist && muadilToPersist.length > 0 ? muadilToPersist : undefined,
             },

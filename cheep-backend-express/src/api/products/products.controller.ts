@@ -18,6 +18,7 @@ export const getAllProducts = async (req: Request, res: Response, next: NextFunc
             search: search as string | undefined,
             limit: Number(limit),
             offset: Number(offset),
+            countryId: req.country?.id,
         });
 
         res.status(200).json({

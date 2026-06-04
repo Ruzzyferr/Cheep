@@ -142,8 +142,9 @@ const swaggerUiOptions = {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
-// Ana Rotalar
-app.use('/api/v1', apiRouter);
+// Ana Rotalar — her API isteğinde ülke çözümlenir (x-country header veya default)
+import { resolveCountry } from './middleware/country.middleware.js';
+app.use('/api/v1', resolveCountry, apiRouter);
 
 // Ana sayfa
 app.get('/', (req: Request, res: Response) => {

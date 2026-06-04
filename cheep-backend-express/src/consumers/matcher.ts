@@ -27,6 +27,7 @@ async function main() {
                     unit: n.unit ?? undefined,
                     category_id: n.categoryId ?? undefined,
                     image_url: n.imageUrl ?? undefined,
+                    country_code: n.countryCode,
                 });
 
                 const matched: MatchedProduct = {

@@ -21,6 +21,19 @@ async function main() {
     });
     console.log('✅ Test kullanıcısı oluşturuldu:', testUser.email);
 
+    // 1b. Ülke (çok-ülke modeli) — Türkiye
+    const tr = await prisma.country.upsert({
+        where: { code: 'TR' },
+        update: {},
+        create: { code: 'TR', name: 'Türkiye', currency: 'TRY' },
+    });
+    await prisma.country.upsert({
+        where: { code: 'PL' },
+        update: {},
+        create: { code: 'PL', name: 'Polska', currency: 'PLN' },
+    });
+    console.log('✅ Ülkeler oluşturuldu');
+
     // 2. Marketler oluştur
     const migros = await prisma.store.upsert({
         where: { id: 1 },
@@ -32,6 +45,7 @@ async function main() {
             address: 'Konak, İzmir',
             lat: 38.4192,
             lon: 27.1287,
+            country_id: tr.id,
         },
     });
 
@@ -45,6 +59,7 @@ async function main() {
             address: 'Bornova, İzmir',
             lat: 38.4636,
             lon: 27.2156,
+            country_id: tr.id,
         },
     });
 
@@ -58,6 +73,7 @@ async function main() {
             address: 'Karşıyaka, İzmir',
             lat: 38.4531,
             lon: 27.1025,
+            country_id: tr.id,
         },
     });
 
@@ -71,6 +87,7 @@ async function main() {
             address: 'Buca, İzmir',
             lat: 38.3846,
             lon: 27.1779,
+            country_id: tr.id,
         },
     });
 
@@ -145,6 +162,7 @@ async function main() {
             name: 'Pınar Süt 1L',
             brand: 'Pınar',
             ean_barcode: '8690572000001',
+            country_id: tr.id,
             category_id: sutId, // ALT KATEGORİ!
             muadil_grup_id: 'sut-1l-tam-yag',
             image_url: 'https://example.com/pinar-sut.jpg',
@@ -164,6 +182,7 @@ async function main() {
             name: 'Sütaş Süt 1L',
             brand: 'Sütaş',
             ean_barcode: '8690504000001',
+            country_id: tr.id,
             category_id: sutId, // ALT KATEGORİ!
             muadil_grup_id: 'sut-1l-tam-yag',
             image_url: 'https://example.com/sutas-sut.jpg',
@@ -183,6 +202,7 @@ async function main() {
             name: 'İçim Süt 1L',
             brand: 'İçim',
             ean_barcode: '8690632000001',
+            country_id: tr.id,
             category_id: sutId, // ALT KATEGORİ!
             muadil_grup_id: 'sut-1l-tam-yag',
             image_url: 'https://example.com/ichim-sut.jpg',
@@ -201,6 +221,7 @@ async function main() {
             name: 'Pınar Beyaz Peynir 500g',
             brand: 'Pınar',
             ean_barcode: '8690572000002',
+            country_id: tr.id,
             category_id: peynirId, // ALT KATEGORİ!
             image_url: 'https://example.com/pinar-peynir.jpg',
         },
@@ -218,6 +239,7 @@ async function main() {
             name: 'Uno Beyaz Ekmek',
             brand: 'Uno',
             ean_barcode: '8690506000001',
+            country_id: tr.id,
             category_id: ekmekId, // ALT KATEGORİ!
             image_url: 'https://example.com/ekmek.jpg',
         },
@@ -233,6 +255,7 @@ async function main() {
         create: {
             name: 'Domates',
             ean_barcode: '2000000000001',
+            country_id: tr.id,
             category_id: sebzeId, // ALT KATEGORİ!
             image_url: 'https://example.com/domates.jpg',
         },
@@ -250,6 +273,7 @@ async function main() {
             name: 'Coca Cola 1L',
             brand: 'Coca Cola',
             ean_barcode: '5449000000996',
+            country_id: tr.id,
             category_id: icecekId, // ANA KATEGORİ (alt kategorisi yok)
             image_url: 'https://example.com/coca-cola.jpg',
         },

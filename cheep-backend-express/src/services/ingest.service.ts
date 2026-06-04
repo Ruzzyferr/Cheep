@@ -8,6 +8,7 @@ import { llmProductMatcher } from './llm-product-matcher.service.js';
 import { prisma } from '../utils/prisma.client.js';
 import logger from '../utils/logger.js';
 import { Decimal } from '@prisma/client/runtime/library';
+import { getCountryIdByCode } from '../utils/country.js';
 
 export interface RawProductInput {
     name: string;
@@ -38,7 +39,8 @@ export interface IngestResult {
  */
 export async function processRawProducts(
     products: RawProductInput[],
-    useLlm = true
+    useLlm = true,
+    countryCode?: string
 ): Promise<IngestResult> {
     logger.info(`[Ingest] ${products.length} ürün işleniyor (LLM: ${useLlm})`);
 
@@ -48,7 +50,8 @@ export async function processRawProducts(
 
     logger.info(`[Ingest] İşleme tamamlandı: ${processedProducts.length} ürün`);
 
-    const results = await saveProcessedProducts(processedProducts);
+    const countryId = await getCountryIdByCode(countryCode);
+    const results = await saveProcessedProducts(processedProducts, countryId);
 
     return {
         total: products.length,
@@ -63,7 +66,7 @@ export async function processRawProducts(
     };
 }
 
-async function saveProcessedProducts(processedProducts: any[]) {
+async function saveProcessedProducts(processedProducts: any[], countryId: number) {
     const stats = {
         successful: 0,
         failed: 0,
@@ -95,6 +98,7 @@ async function saveProcessedProducts(processedProducts: any[]) {
                         name: processed.normalized_name,
                         brand: processed.normalized_brand,
                         category_id: categoryId,
+                        country_id: countryId,
                         image_url: processed.prices[0]?.image_url,
                         muadil_grup_id:
                             processed.muadil_grup_id ||
