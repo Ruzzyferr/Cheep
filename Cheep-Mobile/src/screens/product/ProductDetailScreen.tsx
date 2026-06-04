@@ -17,7 +17,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { productService, categoryService } from '../../services';
 import { Card, Button } from '../../components/ui';
 import { StoreChip } from '../../components/store/StoreChip';
+import { PriceTrendCard } from '../../components/product/PriceTrendCard';
 import { SelectListModal } from '../../components/list/SelectListModal';
+import type { PriceHistoryResponse } from '../../services/product.service';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { Product, StorePrice } from '../../types';
@@ -41,11 +43,27 @@ export function ProductDetailScreen({
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showListModal, setShowListModal] = useState(false);
+  const [priceHistory, setPriceHistory] = useState<PriceHistoryResponse | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(true);
 
   useEffect(() => {
     loadProduct();
+    loadPriceHistory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
+
+  const loadPriceHistory = async () => {
+    try {
+      setHistoryLoading(true);
+      const data = await productService.getPriceHistory(productId, 90);
+      setPriceHistory(data);
+    } catch (error) {
+      console.warn('Could not fetch price history:', error);
+      setPriceHistory(null);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
 
   const loadProduct = async () => {
     try {
@@ -279,6 +297,11 @@ export function ProductDetailScreen({
             </View>
           </Card>
         )}
+
+        {/* Price History Trend */}
+        <View style={styles.detailsSection}>
+          <PriceTrendCard history={priceHistory} loading={historyLoading} />
+        </View>
 
         {/* Product Details */}
         {(product.ean_barcode || product.category || categoryWithParent) && (

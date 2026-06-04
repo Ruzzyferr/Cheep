@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
     BY_ID: (id: number) => `/products/${id}`,
     SEARCH: '/products',
     PRICES: (id: number) => `/products/${id}/prices`,
+    HISTORY: (id: number) => `/products/${id}/history`,
     COMPARE: (id: number) => `/products/${id}/compare-prices`,
   },
 
