@@ -54,3 +54,23 @@ export async function getUserLocation(): Promise<Coords | null> {
     return await locationStorage.getLocation();
   }
 }
+
+/**
+ * Cihaz konumundan ISO ülke kodunu (örn. "TR", "PL") çözer (reverse-geocode).
+ * İzin yoksa/başarısızsa null döner; çağıran taraf kullanıcı seçimine/default'a düşer.
+ */
+export async function getCountryCode(): Promise<string | null> {
+  try {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') return null;
+    const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
+    const places = await Location.reverseGeocodeAsync({
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude,
+    });
+    const iso = places[0]?.isoCountryCode;
+    return iso ? iso.toUpperCase() : null;
+  } catch {
+    return null;
+  }
+}

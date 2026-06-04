@@ -5,7 +5,7 @@
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { API_BASE_URL, API_TIMEOUT, API_ENDPOINTS } from '../constants/api';
-import { authStorage } from '../utils/storage';
+import { authStorage, countryStorage } from '../utils/storage';
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -47,9 +47,15 @@ apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     // Get token from storage
     const token = await authStorage.getToken();
-    
+
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // Ülke scoping: saklanan ISO ülke kodunu x-country header'ı olarak gönder
+    const country = await countryStorage.getCountry();
+    if (country && config.headers) {
+      config.headers['x-country'] = country;
     }
     
     // Log request in development

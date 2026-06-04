@@ -12,6 +12,7 @@ const STORAGE_KEYS = {
   USER_DATA: 'user_data',
   ONBOARDING_COMPLETED: 'onboarding_completed',
   USER_LOCATION: 'user_location',
+  USER_COUNTRY: 'user_country',
   FAVORITE_STORES: 'favorite_stores',
 } as const;
 
@@ -114,6 +115,17 @@ export const userStorage = {
 
   async removeUser(): Promise<void> {
     await storage.removeItem(STORAGE_KEYS.USER_DATA);
+  },
+};
+
+// Country functions (konumdan veya kullanıcı seçiminden ISO kod, örn. "TR")
+export const countryStorage = {
+  async saveCountry(code: string): Promise<void> {
+    await storage.setItem(STORAGE_KEYS.USER_COUNTRY, code.toUpperCase());
+  },
+
+  async getCountry(): Promise<string | null> {
+    return await storage.getItem(STORAGE_KEYS.USER_COUNTRY);
   },
 };
 

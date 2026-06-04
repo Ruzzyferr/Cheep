@@ -23,7 +23,8 @@ import { EmptyListCard } from '../../components/home/EmptyListCard';
 import { SmartDealCard, StatsCard } from '../../components/home';
 import { CategoryItem } from '../../components/home/CategoryItem';
 import { NearbyStoreCard } from '../../components/home/NearbyStoreCard';
-import { getUserLocation, haversineKm, formatDistance, type Coords } from '../../utils/geo';
+import { getUserLocation, getCountryCode, haversineKm, formatDistance, type Coords } from '../../utils/geo';
+import { countryStorage } from '../../utils/storage';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { Product, Store, ShoppingList } from '../../types';
@@ -76,9 +77,14 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
   const [listStoreNames, setListStoreNames] = useState<string[]>([]);
   const [userCoords, setUserCoords] = useState<Coords | null>(null);
 
-  // Cihaz konumunu bir kez al (gerçek mesafe hesabı için)
+  // Cihaz konumunu bir kez al (gerçek mesafe hesabı için) + ülkeyi çöz/sakla
   useEffect(() => {
     getUserLocation().then(setUserCoords).catch(() => setUserCoords(null));
+    getCountryCode()
+      .then((code) => {
+        if (code) return countryStorage.saveCountry(code);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
