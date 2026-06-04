@@ -54,11 +54,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (data: LoginRequest) => {
     try {
       const response = await authService.login(data);
-      
-      // Save token and user
+
+      // Save tokens and user
       await authStorage.saveToken(response.token);
+      if (response.refreshToken) {
+        await authStorage.saveRefreshToken(response.refreshToken);
+      }
       await userStorage.saveUser(response.user);
-      
+
       setUser(response.user);
     } catch (error) {
       console.error('Login error:', error);
@@ -69,11 +72,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (data: RegisterRequest) => {
     try {
       const response = await authService.register(data);
-      
-      // Save token and user
+
+      // Save tokens and user
       await authStorage.saveToken(response.token);
+      if (response.refreshToken) {
+        await authStorage.saveRefreshToken(response.refreshToken);
+      }
       await userStorage.saveUser(response.user);
-      
+
       setUser(response.user);
     } catch (error) {
       console.error('Register error:', error);
@@ -83,8 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await authStorage.removeToken();
-      await userStorage.removeUser();
+      await authStorage.clearAuth();
       setUser(null);
     } catch (error) {
       console.error('Logout error:', error);

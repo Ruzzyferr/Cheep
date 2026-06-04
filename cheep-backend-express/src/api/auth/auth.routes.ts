@@ -58,4 +58,27 @@ router.post('/register', authLimiter, validate(registerSchema), AuthController.r
  */
 router.post('/login', authLimiter, validate(loginSchema), AuthController.login);
 
+/**
+ * @swagger
+ * /api/v1/auth/refresh:
+ *   post:
+ *     summary: Refresh token ile yeni access token alır
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken: { type: string }
+ *     responses:
+ *       200:
+ *         description: Yeni token ve refreshToken
+ *       401:
+ *         description: Geçersiz/süresi dolmuş refresh token
+ */
+router.post('/refresh', AuthController.refresh);
+
 export default router;

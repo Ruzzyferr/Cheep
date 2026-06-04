@@ -8,6 +8,7 @@ import * as SecureStore from 'expo-secure-store';
 // Keys
 const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth_token',
+  REFRESH_TOKEN: 'refresh_token',
   USER_DATA: 'user_data',
   ONBOARDING_COMPLETED: 'onboarding_completed',
   USER_LOCATION: 'user_location',
@@ -75,6 +76,28 @@ export const authStorage = {
   async hasToken(): Promise<boolean> {
     const token = await this.getToken();
     return !!token;
+  },
+
+  // Refresh token
+  async saveRefreshToken(token: string): Promise<void> {
+    await storage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
+  },
+
+  async getRefreshToken(): Promise<string | null> {
+    return await storage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+  },
+
+  async removeRefreshToken(): Promise<void> {
+    await storage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+  },
+
+  // Tüm auth verisini temizle (logout / refresh başarısız)
+  async clearAuth(): Promise<void> {
+    await Promise.all([
+      storage.removeItem(STORAGE_KEYS.AUTH_TOKEN),
+      storage.removeItem(STORAGE_KEYS.REFRESH_TOKEN),
+      storage.removeItem(STORAGE_KEYS.USER_DATA),
+    ]);
   },
 };
 
