@@ -220,9 +220,19 @@ class MatchedProductsImporter:
         Args:
             payloads: API formatında payload listesi
         """
+        # INGEST_MODE=kafka ise HTTP yerine Kafka'ya (raw.products.v1) üret.
+        if os.getenv("INGEST_MODE", "http").lower() == "kafka":
+            from common.kafka_producer import RawProductProducer
+            country_code = os.getenv("COUNTRY_CODE", "TR")
+            producer = RawProductProducer()
+            produced = producer.produce_payloads(payloads, country_code)
+            self.stats['success'] = self.stats.get('success', 0) + produced
+            logger.info(f"📨 Kafka modu: {produced} ürün raw.products.v1'e üretildi")
+            return
+
         CHUNK_SIZE = 900  # Backend limiti 1000, güvenli değer
         total_payloads = len(payloads)
-        
+
         logger.info(f"✅ {total_payloads} ürün API formatına çevrildi")
         logger.info(f"📤 {CHUNK_SIZE} boyutlu parçalar halinde gönderiliyor...")
         

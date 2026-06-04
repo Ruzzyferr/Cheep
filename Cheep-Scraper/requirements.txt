@@ -14,5 +14,9 @@ lxml==4.9.0  # BeautifulSoup için parser
 numpy==1.24.0  # Cosine similarity hesaplamaları için
 python-dotenv==1.0.0  # .env dosyası desteği için
 
+# Kafka producer (INGEST_MODE=kafka) — raw.products.v1'e Avro üretimi
+confluent-kafka==2.5.3
+fastavro==1.9.7
+
 
 
