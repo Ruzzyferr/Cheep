@@ -16,11 +16,11 @@ export const spacing = {
 
 export const borderRadius = {
   none: 0,
-  sm: 4,
-  md: 6,        // Reduced from 8 - less rounded
-  lg: 8,        // Reduced from 12
-  xl: 12,       // Reduced from 16
-  '2xl': 16,    // Reduced from 24
+  sm: 8,        // Fintech: yumuşak köşeler
+  md: 12,
+  lg: 16,       // Kartlar için standart
+  xl: 20,
+  '2xl': 28,
   full: 9999,
 } as const;
 
@@ -34,31 +34,31 @@ export const iconSize = {
 
 export const layout = {
   // Container padding
-  containerPadding: 16,
-  
-  // Screen padding
-  screenPadding: 16,
-  
+  containerPadding: 20,
+
+  // Screen padding (fintech: ferah yatay boşluk)
+  screenPadding: 20,
+
   // Card padding
-  cardPadding: 16,
-  
+  cardPadding: 18,
+
   // Section spacing
-  sectionSpacing: 24,
-  
+  sectionSpacing: 28,
+
   // Header height
   headerHeight: 56,
-  
+
   // Tab bar height
-  tabBarHeight: 60,
-  
+  tabBarHeight: 62,
+
   // FAB size
-  fabSize: 56,
-  
+  fabSize: 58,
+
   // Input height
-  inputHeight: 48,
-  
+  inputHeight: 52,
+
   // Button height
-  buttonHeight: 48,
+  buttonHeight: 52,
 } as const;
 
 export type SpacingKey = keyof typeof spacing;
