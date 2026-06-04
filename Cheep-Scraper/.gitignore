@@ -11,6 +11,7 @@ data/*.json
 .idea/
 
 # Playwright browser data (persistent context)
+# Chrome oturum/cache verisi - ilk çalıştırmada yeniden üretilir, ASLA commit edilmez
 browser_data/
 **/browser_data/
 !**/browser_data/README.md

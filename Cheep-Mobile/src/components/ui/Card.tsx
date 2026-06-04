@@ -4,7 +4,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { View, StyleSheet, ViewStyle, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ViewStyle, StyleProp, TouchableOpacity } from 'react-native';
 import { colors, spacing, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 
@@ -13,7 +13,7 @@ interface CardProps {
   onPress?: () => void;
   variant?: 'default' | 'outlined' | 'elevated';
   padding?: keyof typeof spacing | 'none';
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function Card({

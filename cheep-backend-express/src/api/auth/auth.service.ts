@@ -3,6 +3,33 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../../utils/prisma.client.js';
 import { config } from '../../config/index.js';
 
+const ACCESS_TOKEN_TTL = '1h';
+const REFRESH_TOKEN_TTL = '30d';
+
+interface AccessPayload {
+    userId: number;
+}
+
+interface RefreshPayload {
+    userId: number;
+    type: 'refresh';
+}
+
+/**
+ * Bir kullanıcı için access (kısa ömürlü) ve refresh (uzun ömürlü) token üretir.
+ */
+const generateTokens = (userId: number) => {
+    const token = jwt.sign({ userId } as AccessPayload, config.jwtSecret, {
+        expiresIn: ACCESS_TOKEN_TTL,
+    });
+    const refreshToken = jwt.sign(
+        { userId, type: 'refresh' } as RefreshPayload,
+        config.jwtSecret,
+        { expiresIn: REFRESH_TOKEN_TTL }
+    );
+    return { token, refreshToken };
+};
+
 // Kullanıcı kayıt servisi
 export const registerUser = async (email: string, pass: string, name: string) => {
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -21,9 +48,7 @@ export const registerUser = async (email: string, pass: string, name: string) =>
     });
 
     const { password_hash: _, ...userWithoutPassword } = user;
-    const token = jwt.sign({ userId: user.id }, config.jwtSecret, { expiresIn: '7d' });
-
-    return { user: userWithoutPassword, token };
+    return { user: userWithoutPassword, ...generateTokens(user.id) };
 };
 
 // Kullanıcı giriş servisi
@@ -39,7 +64,28 @@ export const loginUser = async (email: string, pass: string) => {
     }
 
     const { password_hash: _, ...userWithoutPassword } = user;
-    const token = jwt.sign({ userId: user.id }, config.jwtSecret, { expiresIn: '7d' });
+    return { user: userWithoutPassword, ...generateTokens(user.id) };
+};
 
-    return { user: userWithoutPassword, token };
+/**
+ * Geçerli bir refresh token karşılığında yeni bir access token (ve refresh token) üretir.
+ */
+export const refreshAccessToken = async (refreshToken: string) => {
+    let decoded: RefreshPayload;
+    try {
+        decoded = jwt.verify(refreshToken, config.jwtSecret) as RefreshPayload;
+    } catch {
+        throw new Error('Geçersiz veya süresi dolmuş refresh token.');
+    }
+
+    if (decoded.type !== 'refresh') {
+        throw new Error('Geçersiz token tipi.');
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
+    if (!user) {
+        throw new Error('Kullanıcı bulunamadı.');
+    }
+
+    return generateTokens(user.id);
 };

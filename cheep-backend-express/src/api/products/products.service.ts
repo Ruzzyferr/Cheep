@@ -1,5 +1,6 @@
 import { prisma } from '../../utils/prisma.client.js';
 import { Prisma } from '@prisma/client';
+import { getCountryIdByCode } from '../../utils/country.js';
 
 interface GetAllProductsParams {
     category_id?: number;
@@ -7,12 +8,18 @@ interface GetAllProductsParams {
     search?: string;
     limit?: number;
     offset?: number;
+    countryId?: number;
 }
 
 export const getAllProducts = async (params: GetAllProductsParams) => {
-    const { category_id, brand, search, limit = 50, offset = 0 } = params;
+    const { category_id, brand, search, limit = 50, offset = 0, countryId } = params;
 
     const where: Prisma.ProductWhereInput = {};
+    if (countryId) {
+        where.country_id = countryId;
+    }
+    // Raw SQL filtresinde kullanılmak üzere çözülen kategori id listesi
+    let categoryIdsForSql: number[] | null = null;
 
     if (category_id) {
         // 🔥 Parent kategorinin alt kategorilerini de dahil et
@@ -30,13 +37,16 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
             if (category.children && category.children.length > 0) {
                 const categoryIds = [category.id, ...category.children.map(c => c.id)];
                 where.category_id = { in: categoryIds };
+                categoryIdsForSql = categoryIds;
             } else {
                 // Alt kategoriyse, sadece kendi ID'sini kullan
                 where.category_id = category_id;
+                categoryIdsForSql = [category_id];
             }
         } else {
             // Kategori bulunamadıysa, yine de filtrele (hata verme)
             where.category_id = category_id;
+            categoryIdsForSql = [category_id];
         }
     }
 
@@ -58,31 +68,26 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
     // 🔥 DATABASE SEVİYESİNDE SIRALAMA: Market sayısına göre (çoktan aza)
     // Raw SQL ile store_prices count'una göre sıralama
     
-    // WHERE clause builder
+    // WHERE clause builder — orijinal parametrelerden kurulur (tip güvenli)
     let whereClause = Prisma.sql`WHERE 1=1`;
-    
-    if (where.category_id) {
-        if (typeof where.category_id === 'object' && 'in' in where.category_id) {
-            // Array olarak gelen category_id'ler (parent + children)
-            whereClause = Prisma.sql`${whereClause} AND p.category_id IN (${Prisma.join(where.category_id.in)})`;
-        } else {
-            // Tekil category_id
-            whereClause = Prisma.sql`${whereClause} AND p.category_id = ${where.category_id}`;
-        }
+
+    if (countryId) {
+        whereClause = Prisma.sql`${whereClause} AND p.country_id = ${countryId}`;
     }
-    
-    if (where.brand?.contains) {
-        whereClause = Prisma.sql`${whereClause} AND p.brand ILIKE ${'%' + where.brand.contains + '%'}`;
+
+    if (categoryIdsForSql && categoryIdsForSql.length > 0) {
+        whereClause = Prisma.sql`${whereClause} AND p.category_id IN (${Prisma.join(categoryIdsForSql)})`;
     }
-    
-    if (where.OR) {
-        const searchName = where.OR[0]?.name?.contains || '';
-        const searchBrand = where.OR[1]?.brand?.contains || '';
-        const searchBarcode = where.OR[2]?.ean_barcode?.contains || '';
+
+    if (brand) {
+        whereClause = Prisma.sql`${whereClause} AND p.brand ILIKE ${'%' + brand + '%'}`;
+    }
+
+    if (search) {
         whereClause = Prisma.sql`${whereClause} AND (
-            p.name ILIKE ${'%' + searchName + '%'} OR
-            p.brand ILIKE ${'%' + searchBrand + '%'} OR
-            p.ean_barcode LIKE ${'%' + searchBarcode + '%'}
+            p.name ILIKE ${'%' + search + '%'} OR
+            p.brand ILIKE ${'%' + search + '%'} OR
+            p.ean_barcode LIKE ${'%' + search + '%'}
         )`;
     }
     
@@ -206,6 +211,8 @@ export const createProduct = async (data: {
     image_url?: string;
     category_id?: number;
     muadil_grup_id?: string;
+    country_id?: number;
+    country_code?: string;
 }) => {
     // Barkod varsa, aynı barkodlu ürün kontrolü
     if (data.ean_barcode) {
@@ -218,8 +225,11 @@ export const createProduct = async (data: {
         }
     }
 
+    const { country_code, country_id, ...rest } = data;
+    const resolvedCountryId = country_id ?? (await getCountryIdByCode(country_code));
+
     return await prisma.product.create({
-        data,
+        data: { ...rest, country_id: resolvedCountryId },
         include: {
             category: true,
         },
@@ -233,7 +243,12 @@ export const upsertProduct = async (data: {
     image_url?: string;
     category_id?: number;
     muadil_grup_id?: string;
+    country_id?: number;
+    country_code?: string;
 }) => {
+    const { country_code, country_id, ...rest } = data;
+    const resolvedCountryId = country_id ?? (await getCountryIdByCode(country_code));
+
     // Eğer barkod varsa, ona göre upsert yap
     if (data.ean_barcode) {
         return await prisma.product.upsert({
@@ -245,7 +260,7 @@ export const upsertProduct = async (data: {
                 category_id: data.category_id,
                 muadil_grup_id: data.muadil_grup_id,
             },
-            create: data,
+            create: { ...rest, country_id: resolvedCountryId },
             include: {
                 category: true,
             },
@@ -254,7 +269,7 @@ export const upsertProduct = async (data: {
 
     // Barkod yoksa direkt oluştur
     return await prisma.product.create({
-        data,
+        data: { ...rest, country_id: resolvedCountryId },
         include: {
             category: true,
         },
@@ -315,6 +330,51 @@ export const getProductPrices = async (id: number) => {
     }
 
     return product.store_prices;
+};
+
+/**
+ * Bir ürünün fiyat geçmişini market bazında zaman serisi olarak döndürür.
+ * @param days Kaç günlük geçmiş (default 90)
+ */
+export const getProductPriceHistory = async (id: number, days = 90) => {
+    const since = new Date();
+    since.setDate(since.getDate() - Math.max(1, Math.min(days, 365)));
+
+    const rows = await prisma.priceHistory.findMany({
+        where: { product_id: id, recorded_at: { gte: since } },
+        include: { store: { select: { id: true, name: true, logo_url: true } } },
+        orderBy: { recorded_at: 'asc' },
+    });
+
+    // Market bazında grupla
+    const byStore = new Map<number, {
+        store: { id: number; name: string; logo_url: string | null };
+        points: Array<{ price: number; recorded_at: Date }>;
+    }>();
+
+    for (const row of rows) {
+        if (!byStore.has(row.store_id)) {
+            byStore.set(row.store_id, { store: row.store, points: [] });
+        }
+        byStore.get(row.store_id)!.points.push({
+            price: Number(row.price),
+            recorded_at: row.recorded_at,
+        });
+    }
+
+    const series = Array.from(byStore.values());
+    const allPrices = rows.map(r => Number(r.price));
+
+    return {
+        product_id: id,
+        days,
+        series,
+        summary: {
+            lowest: allPrices.length ? Math.min(...allPrices) : null,
+            highest: allPrices.length ? Math.max(...allPrices) : null,
+            dataPoints: allPrices.length,
+        },
+    };
 };
 
 export const compareProductPrices = async (id: number) => {

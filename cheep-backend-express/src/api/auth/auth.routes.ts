@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import * as AuthController from './auth.controller.js'; // <-- .js uzantısı
 import { authLimiter } from '../../middleware/rate-limit.middleware.js';
+import { validate } from '../../schema/validation.middleware.js';
+import { registerSchema, loginSchema } from './auth.schema.js';
 
 const router = Router();
 
@@ -32,7 +34,7 @@ const router = Router();
  *       201:
  *         description: Kullanıcı başarıyla oluşturuldu
  */
-router.post('/register', authLimiter, AuthController.register);
+router.post('/register', authLimiter, validate(registerSchema), AuthController.register);
 
 /**
  * @swagger
@@ -54,6 +56,29 @@ router.post('/register', authLimiter, AuthController.register);
  *       200:
  *         description: Başarılı giriş
  */
-router.post('/login', authLimiter, AuthController.login);
+router.post('/login', authLimiter, validate(loginSchema), AuthController.login);
+
+/**
+ * @swagger
+ * /api/v1/auth/refresh:
+ *   post:
+ *     summary: Refresh token ile yeni access token alır
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [refreshToken]
+ *             properties:
+ *               refreshToken: { type: string }
+ *     responses:
+ *       200:
+ *         description: Yeni token ve refreshToken
+ *       401:
+ *         description: Geçersiz/süresi dolmuş refresh token
+ */
+router.post('/refresh', AuthController.refresh);
 
 export default router;

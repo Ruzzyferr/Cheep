@@ -1,30 +1,31 @@
 /**
  * 🎨 Cheep Color Palette
- * Minimal, tech-driven design system
- * Inspired by: Apple × Stripe × Linear
+ * Modern fintech / clean design system
+ * Vibrant teal accent · neutral white surfaces · soft elevation
+ * Inspired by: Revolut × N26 × Stripe
  */
 
 export const colors = {
-  // Primary Colors - Deep Navy
+  // Primary Colors - Vibrant Teal (brand accent: buttons, FAB, active states, prices)
   primary: {
-    main: '#0B1C2D',      // Deep navy
-    light: '#162B44',     // Dark slate
-    dark: '#050E17',      // Near black
-    50: '#F4F7FB',
-    100: '#E5E7EB',
-    200: '#CBD2D9',
-    300: '#9CA3AF',
-    400: '#6B7280',
-    500: '#0B1C2D',
-    600: '#162B44',
-    700: '#050E17',
-    800: '#030A10',
-    900: '#020508',
+    main: '#0D9488',      // Teal 600 - güçlü, beyaz üstünde okunur
+    light: '#14B8A6',     // Teal 500
+    dark: '#0F766E',      // Teal 700 - basılı/koyu durum
+    50: '#F0FDFA',
+    100: '#CCFBF1',
+    200: '#99F6E4',
+    300: '#5EEAD4',
+    400: '#2DD4BF',
+    500: '#14B8A6',
+    600: '#0D9488',
+    700: '#0F766E',
+    800: '#115E59',
+    900: '#134E4A',
   },
 
-  // Secondary Colors - Muted Teal (for savings/positive feedback)
+  // Secondary Colors - Teal aksanın açık tonu (savings/positive vurgular)
   secondary: {
-    main: '#14B8A6',      // Muted teal
+    main: '#14B8A6',      // Teal
     light: '#5EEAD4',
     dark: '#0D9488',
     50: '#F0FDFA',
@@ -37,12 +38,12 @@ export const colors = {
     700: '#0F766E',
   },
 
-  // Background Colors
+  // Background Colors - temiz, nötr
   background: {
-    default: '#F4F7FB',   // Soft off-white / light gray
-    paper: '#FFFFFF',     // Pure white for cards
+    default: '#F6F8FA',   // Çok açık nötr gri zemin
+    paper: '#FFFFFF',     // Kartlar için saf beyaz
     card: '#FFFFFF',      // Card background
-    input: '#F9FAFB',     // Input background
+    input: '#F3F5F7',     // Input background
     // Dark mode
     dark: '#0A0F1A',      // Very dark navy / near-black
     darkPaper: '#0F172A', // Dark card
@@ -101,14 +102,14 @@ export const colors = {
   divider: '#E5E7EB',
 
   // Overlay
-  overlay: 'rgba(11, 28, 45, 0.5)',
+  overlay: 'rgba(15, 23, 42, 0.45)',
 
   // Transparent
   transparent: 'transparent',
 
   // Specific UI Elements
-  fab: '#0B1C2D',           // Navy FAB
-  tabBarActive: '#0B1C2D',
+  fab: '#0D9488',           // Teal FAB
+  tabBarActive: '#0D9488',
   tabBarInactive: '#94A3B8',
   
   // Store Chips (Market logoları için) - Muted versions

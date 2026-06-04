@@ -13,6 +13,7 @@ import {
   TextStyle,
 } from 'react-native';
 import { colors, typography, spacing, borderRadius } from '../../theme';
+import { shadows } from '../../theme/shadows';
 
 interface ButtonProps {
   title: string;
@@ -60,7 +61,10 @@ export function Button({
       style={buttonStyles}
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.7}
+      activeOpacity={0.85}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{ disabled: disabled || loading, busy: loading }}
     >
       {loading ? (
         <ActivityIndicator
@@ -81,13 +85,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: borderRadius.md,
+    borderRadius: borderRadius.lg,
     paddingHorizontal: spacing.lg,
   },
 
   // Variants
   primary: {
     backgroundColor: colors.primary.main,
+    ...shadows.fab,
   },
   secondary: {
     backgroundColor: colors.secondary.main,
@@ -128,7 +133,7 @@ const styles = StyleSheet.create({
     ...typography.styles.button,
   },
   text_secondary: {
-    color: colors.text.primary,
+    color: colors.background.paper,
     ...typography.styles.button,
   },
   text_outline: {

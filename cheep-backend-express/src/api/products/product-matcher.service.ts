@@ -1,4 +1,9 @@
 import { prisma } from '../../utils/prisma.client.js';
+import {
+    calculateSimilarity,
+    jaccardSimilarity,
+} from '../../utils/similarity.js';
+import { getCountryIdByCode } from '../../utils/country.js';
 
 /**
  * Product Matching Service
@@ -122,68 +127,7 @@ function generateProductFingerprint(data: {
     return uniqueWords.join('-');
 }
 
-// ============================================
-// 2. SIMILARITY ALGORITHMS
-// ============================================
-
-/**
- * Levenshtein Distance (Edit Distance)
- * İki string arasındaki karakter farkını hesaplar
- */
-function levenshteinDistance(str1: string, str2: string): number {
-    const matrix: number[][] = [];
-
-    for (let i = 0; i <= str2.length; i++) {
-        matrix[i] = [i];
-    }
-
-    for (let j = 0; j <= str1.length; j++) {
-        matrix[0][j] = j;
-    }
-
-    for (let i = 1; i <= str2.length; i++) {
-        for (let j = 1; j <= str1.length; j++) {
-            if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-                matrix[i][j] = matrix[i - 1][j - 1];
-            } else {
-                matrix[i][j] = Math.min(
-                    matrix[i - 1][j - 1] + 1, // substitution
-                    matrix[i][j - 1] + 1,     // insertion
-                    matrix[i - 1][j] + 1      // deletion
-                );
-            }
-        }
-    }
-
-    return matrix[str2.length][str1.length];
-}
-
-/**
- * Similarity Score (0-1 arası)
- * 1 = tamamen aynı
- * 0 = tamamen farklı
- */
-function calculateSimilarity(str1: string, str2: string): number {
-    const maxLength = Math.max(str1.length, str2.length);
-    if (maxLength === 0) return 1.0;
-
-    const distance = levenshteinDistance(str1, str2);
-    return 1 - distance / maxLength;
-}
-
-/**
- * Jaccard Similarity (kelime bazlı)
- * İki metin arasındaki ortak kelimelere bakar
- */
-function jaccardSimilarity(str1: string, str2: string): number {
-    const set1 = new Set(str1.split(' '));
-    const set2 = new Set(str2.split(' '));
-
-    const intersection = new Set([...set1].filter(x => set2.has(x)));
-    const union = new Set([...set1, ...set2]);
-
-    return intersection.size / union.size;
-}
+// Benzerlik algoritmaları artık ../../utils/similarity.ts içinde (DRY + test edilebilir).
 
 // ============================================
 // 3. PRODUCT MATCHING SERVICE
@@ -210,6 +154,8 @@ export class ProductMatcher {
         category_id?: number | string | null;
         image_url?: string;
         muadil_grup_id?: string | null;
+        country_id?: number;
+        country_code?: string;
     }): Promise<{ product: any; isNew: boolean }> {
         const providedMuadil = data.muadil_grup_id?.trim();
         if (providedMuadil) {
@@ -274,12 +220,14 @@ export class ProductMatcher {
         }
 
         const muadilToPersist = fingerprint || generatedFingerprint || providedMuadil || '';
+        const countryId = data.country_id ?? (await getCountryIdByCode(data.country_code));
 
         const newProduct = await prisma.product.create({
             data: {
                 name: data.name,
                 brand: data.brand,
                 category_id: categoryId,
+                country_id: countryId,
                 image_url: data.image_url,
                 muadil_grup_id: muadilToPersist && muadilToPersist.length > 0 ? muadilToPersist : undefined,
             },

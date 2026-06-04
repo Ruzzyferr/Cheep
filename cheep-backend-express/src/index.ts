@@ -7,6 +7,8 @@ import apiRouter from './api/index.js';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware.js';
 import morgan from "morgan";
 import logger from "./utils/logger.js";
+import { config } from './config/index.js';
+import { prisma } from './utils/prisma.client.js';
 
 dotenv.config();
 
@@ -19,7 +21,13 @@ const stream: morgan.StreamOptions = {
 app.use(morgan('dev', { stream }));
 
 // Middleware
-app.use(cors());
+// CORS: ALLOWED_ORIGINS tanımlıysa allowlist uygula, değilse (dev) origin'i yansıt.
+app.use(cors({
+    origin: config.allowedOrigins.length ? config.allowedOrigins : true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -27,14 +35,10 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 import { sanitizeInput } from './middleware/sanitize.middleware.js';
 app.use(sanitizeInput);
 
-// Rate limiting (sadece production'da)
+// Rate limiting (tüm ortamlarda aktif; dev için limit yüksek tutulur)
 import { generalLimiter } from './middleware/rate-limit.middleware.js';
-if (process.env.NODE_ENV === 'production') {
-    app.use('/api/', generalLimiter);
-    console.log('✅ Rate limiting enabled (Production mode)');
-} else {
-    console.log('⚠️  Rate limiting disabled (Development mode)');
-}
+app.use('/api/', generalLimiter);
+logger.info('✅ Rate limiting enabled');
 
 // Swagger Yapılandırması
 const swaggerOptions = {
@@ -138,8 +142,9 @@ const swaggerUiOptions = {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
 
-// Ana Rotalar
-app.use('/api/v1', apiRouter);
+// Ana Rotalar — her API isteğinde ülke çözümlenir (x-country header veya default)
+import { resolveCountry } from './middleware/country.middleware.js';
+app.use('/api/v1', resolveCountry, apiRouter);
 
 // Ana sayfa
 app.get('/', (req: Request, res: Response) => {
@@ -174,7 +179,7 @@ app.use(notFoundHandler);
 // Error Handler (en sonda olmalı)
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════╗
 ║                                               ║
@@ -187,4 +192,34 @@ app.listen(PORT, () => {
 ║                                               ║
 ╚═══════════════════════════════════════════════╝
     `);
+});
+
+// --- Graceful shutdown ---
+const shutdown = (signal: string) => {
+    logger.info(`${signal} alındı. Sunucu kapatılıyor...`);
+    server.close(async () => {
+        try {
+            await prisma.$disconnect();
+            logger.info('Prisma bağlantısı kapatıldı. Çıkılıyor.');
+            process.exit(0);
+        } catch (err) {
+            logger.error('Kapatma sırasında hata:', err);
+            process.exit(1);
+        }
+    });
+    // Zorla kapanma güvenliği (10s)
+    setTimeout(() => {
+        logger.error('Zamanında kapatılamadı, zorla çıkılıyor.');
+        process.exit(1);
+    }, 10_000).unref();
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+process.on('unhandledRejection', (reason) => {
+    logger.error('Unhandled Rejection:', reason);
+});
+process.on('uncaughtException', (err) => {
+    logger.error('Uncaught Exception:', err);
 });

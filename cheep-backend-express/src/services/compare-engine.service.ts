@@ -117,8 +117,8 @@ export async function compareShoppingList(
     userId: number,
     options: CompareOptions = {}
 ): Promise<CompareResult> {
-    // Defaults
-    const maxStores = options.maxStores || 3;
+    // Defaults — maxStores'u [1,5] aralığına sınırla (kombinatorik patlamayı önle)
+    const maxStores = Math.min(Math.max(options.maxStores || 3, 1), 5);
     const includeMissing = options.includeMissingProducts !== false;
 
     // 1. Liste ve ürünleri getir
@@ -331,7 +331,26 @@ async function calculateMultiStoreStrategies(
         });
     });
 
-    const allStores = Array.from(storeMap.values());
+    let allStores = Array.from(storeMap.values());
+
+    // Kombinatorik patlamayı önle: aday market sayısını kapsama (coverage) göre sınırla.
+    // C(N, k) çok marketli senaryolarda hızla büyür; en çok ürün taşıyan ilk N marketi seçeriz.
+    const MAX_CANDIDATE_STORES = 8;
+    if (allStores.length > MAX_CANDIDATE_STORES) {
+        const coverage = new Map<number, number>();
+        listItems.forEach(item => {
+            const seen = new Set<number>();
+            item.product.store_prices.forEach(sp => {
+                if (!seen.has(sp.store_id)) {
+                    seen.add(sp.store_id);
+                    coverage.set(sp.store_id, (coverage.get(sp.store_id) || 0) + 1);
+                }
+            });
+        });
+        allStores = allStores
+            .sort((a, b) => (coverage.get(b.id) || 0) - (coverage.get(a.id) || 0))
+            .slice(0, MAX_CANDIDATE_STORES);
+    }
 
     // 2'li, 3'lü kombinasyonlar için
     for (let storeCount = 2; storeCount <= Math.min(maxStores, allStores.length); storeCount++) {

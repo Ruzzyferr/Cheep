@@ -547,7 +547,8 @@ class CarrefourSAPlaywrightScraper:
                             return True
                         else:
                             return False
-                    except:
+                    except Exception as e:
+                        self.logger.debug(f"Pagination data attribute parse edilemedi, diğer yöntemler deneniyor: {e}")
                         pass
 
             # 3. "Next" butonu var mı?
@@ -649,8 +650,9 @@ class CarrefourSAPlaywrightScraper:
             if price_content:
                 try:
                     price = Decimal(str(price_content))
-                except:
-                    # Eğer content yoksa text'ten parse et
+                except Exception as e:
+                    # Content geçersizse text'ten parse et
+                    self.logger.debug(f"Fiyat content attribute'undan parse edilemedi ('{price_content}'), text'ten parse ediliyor: {e}")
                     price_text = price_elem.get_text(strip=True)
                     price = self.parse_price(price_text)
             else:
@@ -711,7 +713,8 @@ class CarrefourSAPlaywrightScraper:
                 if qty_str:
                     try:
                         quantity = float(qty_str)
-                    except:
+                    except Exception as e:
+                        self.logger.debug(f"data-quantity float'a çevrilemedi ('{qty_str}'), varsayılan değer kullanılıyor: {e}")
                         pass
                 
                 # Unit - displayUnit input'undan veya dataLayerItemData'dan

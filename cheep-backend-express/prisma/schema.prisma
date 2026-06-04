@@ -19,10 +19,12 @@ model User {
   email         String   @unique
   password_hash String
   name          String
+  country_id    Int? // Tercih edilen ülke (konumdan veya seçimden)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
   // İlişkiler
+  country         Country?            @relation(fields: [country_id], references: [id], onDelete: SetNull)
   lists           List[]
   favorite_stores UserFavoriteStore[]
   price_feedbacks PriceFeedback[]
@@ -31,24 +33,49 @@ model User {
 }
 
 // ============================================
+// ÜLKE (çok-ülke / konum bazlı)
+// ============================================
+
+model Country {
+  id       Int    @id @default(autoincrement())
+  code     String @unique // ISO 3166-1 alpha-2: "TR", "PL"
+  name     String // "Türkiye", "Polska"
+  currency String // "TRY", "PLN"
+
+  created_at DateTime @default(now())
+
+  // İlişkiler
+  stores   Store[]
+  products Product[]
+  users    User[]
+
+  @@map("countries")
+}
+
+// ============================================
 // MARKET VE KONUM
 // ============================================
 
 model Store {
-  id       Int     @id @default(autoincrement())
-  name     String
-  logo_url String?
-  address  String?
-  lat      Float? // Enlem (Latitude)
-  lon      Float? // Boylam (Longitude)
+  id         Int     @id @default(autoincrement())
+  name       String
+  logo_url   String?
+  address    String?
+  city       String?
+  lat        Float? // Enlem (Latitude)
+  lon        Float? // Boylam (Longitude)
+  country_id Int
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   // İlişkiler
+  country           Country             @relation(fields: [country_id], references: [id], onDelete: Cascade)
   store_prices      StorePrice[]
   favorite_by_users UserFavoriteStore[]
+  price_history     PriceHistory[]
 
+  @@index([country_id])
   @@map("stores")
 }
 
@@ -104,15 +131,19 @@ model Product {
   image_url      String?
   category_id    Int?
   muadil_grup_id String? // Muadil ürünleri gruplamak için
+  country_id     Int
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   // İlişkiler
-  category     Category?    @relation(fields: [category_id], references: [id], onDelete: SetNull)
-  store_prices StorePrice[]
-  list_items   ListItem[]
+  country       Country        @relation(fields: [country_id], references: [id], onDelete: Cascade)
+  category      Category?      @relation(fields: [category_id], references: [id], onDelete: SetNull)
+  store_prices  StorePrice[]
+  list_items    ListItem[]
+  price_history PriceHistory[]
 
+  @@index([country_id])
   @@index([ean_barcode])
   @@index([muadil_grup_id])
   @@index([category_id])
@@ -197,17 +228,32 @@ model ListItem {
 // KULLANICI GERİ BİLDİRİMLERİ
 // ============================================
 
-enum FeedbackType {
-  fiyat_yanlis // Fiyat yanlış bildirildi
-  stok_yok // Ürün stokta yok
+// ============================================
+// FİYAT GEÇMİŞİ (zaman serisi)
+// ============================================
+
+model PriceHistory {
+  id          Int      @id @default(autoincrement())
+  store_id    Int
+  product_id  Int
+  price       Decimal  @db.Decimal(10, 2)
+  recorded_at DateTime @default(now())
+
+  store   Store   @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@index([product_id, recorded_at])
+  @@index([store_id, product_id])
+  @@map("price_history")
 }
 
 model PriceFeedback {
-  id             Int          @id @default(autoincrement())
-  user_id        Int
-  store_price_id Int
-  feedback_type  FeedbackType
-  reported_price Decimal?     @db.Decimal(10, 2) // Kullanıcının bildirdiği fiyat (opsiyonel)
+  id              Int      @id @default(autoincrement())
+  user_id         Int
+  store_price_id  Int
+  is_accurate     Boolean // Fiyat doğru mu? (true = doğru, false = yanlış)
+  suggested_price Decimal? @db.Decimal(10, 2) // Kullanıcının önerdiği fiyat (opsiyonel)
+  comment         String? // Opsiyonel kullanıcı yorumu
 
   created_at DateTime @default(now())
 

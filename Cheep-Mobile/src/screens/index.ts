@@ -6,7 +6,7 @@
 export * from './auth';
 
 // Home Screens
-export { HomeScreen } from './home/HomeScreen';
+export { NewHomeScreen } from './home/NewHomeScreen';
 
 // Product Screens
 export { ProductDetailScreen } from './product/ProductDetailScreen';

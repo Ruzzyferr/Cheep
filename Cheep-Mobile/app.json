@@ -24,6 +24,14 @@
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Cheep, yakınınızdaki marketlere olan mesafeyi göstermek için konumunuzu kullanır."
+        }
+      ]
+    ]
   }
 }

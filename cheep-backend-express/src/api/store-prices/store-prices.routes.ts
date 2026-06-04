@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as StorePriceController from './store-prices.controller.js';
 import * as LLMStorePriceController from './store-prices-llm.controller.js';
 import { validate } from '../../schema/validation.middleware.js';
+import { requireIngestKey } from '../../middleware/ingest-auth.middleware.js';
 import {
     bulkUpsertStorePricesSchema,
     upsertStorePriceSchema
@@ -73,6 +74,7 @@ const router = Router();
  */
 router.post(
     '/upsert',
+    requireIngestKey,
     validate(upsertStorePriceSchema),
     StorePriceController.upsertStorePrice
 );
@@ -161,6 +163,7 @@ router.post(
  */
 router.post(
     '/bulk-upsert',
+    requireIngestKey,
     validate(bulkUpsertStorePricesSchema),
     StorePriceController.bulkUpsertStorePrices
 );
@@ -259,6 +262,6 @@ router.post(
  *                 message:
  *                   type: string
  */
-router.post('/import-with-llm', LLMStorePriceController.importWithLLM);
+router.post('/import-with-llm', requireIngestKey, LLMStorePriceController.importWithLLM);
 
 export default router;

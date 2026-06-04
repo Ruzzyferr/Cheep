@@ -56,10 +56,10 @@ export const getUserLists = async (userId: number, status?: string) => {
                 
                 // Market sayısı aynıysa, en ucuz fiyata göre (azdan çoka)
                 const aMinPrice = a.product?.store_prices && a.product.store_prices.length > 0
-                    ? Math.min(...a.product.store_prices.map(sp => parseFloat(sp.price)))
+                    ? Math.min(...a.product.store_prices.map(sp => Number(sp.price)))
                     : Infinity;
                 const bMinPrice = b.product?.store_prices && b.product.store_prices.length > 0
-                    ? Math.min(...b.product.store_prices.map(sp => parseFloat(sp.price)))
+                    ? Math.min(...b.product.store_prices.map(sp => Number(sp.price)))
                     : Infinity;
                 
                 return aMinPrice - bMinPrice;
@@ -120,10 +120,10 @@ export const getListById = async (listId: number, userId: number) => {
             
             // Market sayısı aynıysa, en ucuz fiyata göre (azdan çoka)
             const aMinPrice = a.product?.store_prices && a.product.store_prices.length > 0
-                ? Math.min(...a.product.store_prices.map(sp => parseFloat(sp.price)))
+                ? Math.min(...a.product.store_prices.map(sp => Number(sp.price)))
                 : Infinity;
             const bMinPrice = b.product?.store_prices && b.product.store_prices.length > 0
-                ? Math.min(...b.product.store_prices.map(sp => parseFloat(sp.price)))
+                ? Math.min(...b.product.store_prices.map(sp => Number(sp.price)))
                 : Infinity;
             
             return aMinPrice - bMinPrice;
@@ -145,31 +145,33 @@ export const createList = async (
     }
 ) => {
     // 🔥 KURAL: Aynı anda sadece 1 aktif liste olabilir
-    // Eğer yeni liste aktif olacaksa (is_template=false), mevcut aktif listeleri completed yap
-    if (!data.is_template) {
-        await prisma.list.updateMany({
-            where: {
-                user_id: userId,
-                status: 'active',
-            },
+    // "mevcut aktifleri completed yap + yeni listeyi oluştur" atomik olmalı (race condition).
+    return await prisma.$transaction(async (tx) => {
+        if (!data.is_template) {
+            await tx.list.updateMany({
+                where: {
+                    user_id: userId,
+                    status: 'active',
+                },
+                data: {
+                    status: 'completed',
+                    completed_at: new Date(),
+                },
+            });
+        }
+
+        return await tx.list.create({
             data: {
-                status: 'completed',
-                completed_at: new Date(),
+                user_id: userId,
+                name: data.name,
+                is_template: data.is_template || false,
+                budget: data.budget ? new Decimal(data.budget) : null,
+                status: 'active', // Yeni liste her zaman active olarak oluşturulur
+            },
+            include: {
+                list_items: true,
             },
         });
-    }
-
-    return await prisma.list.create({
-        data: {
-            user_id: userId,
-            name: data.name,
-            is_template: data.is_template || false,
-            budget: data.budget ? new Decimal(data.budget) : null,
-            status: 'active', // Yeni liste her zaman active olarak oluşturulur
-        },
-        include: {
-            list_items: true,
-        },
     });
 };
 
@@ -282,32 +284,35 @@ export const createFromTemplate = async (
         throw new Error('Şablon bulunamadı');
     }
 
-    // Yeni liste oluştur
-    const newList = await prisma.list.create({
-        data: {
-            user_id: userId,
-            name: listName || `${template.name} (Kopya)`,
-            budget: template.budget,
-            is_template: false,
-            status: 'active',
-        },
-    });
-
-    // Şablon ürünlerini kopyala
-    if (template.list_items.length > 0) {
-        await prisma.listItem.createMany({
-            data: template.list_items.map(item => ({
-                list_id: newList.id,
-                product_id: item.product_id,
-                quantity: item.quantity,
-                unit: item.unit,
-            })),
+    // Yeni liste oluştur + şablon ürünlerini kopyala — atomik olmalı.
+    const newListId = await prisma.$transaction(async (tx) => {
+        const newList = await tx.list.create({
+            data: {
+                user_id: userId,
+                name: listName || `${template.name} (Kopya)`,
+                budget: template.budget,
+                is_template: false,
+                status: 'active',
+            },
         });
-    }
+
+        if (template.list_items.length > 0) {
+            await tx.listItem.createMany({
+                data: template.list_items.map(item => ({
+                    list_id: newList.id,
+                    product_id: item.product_id,
+                    quantity: item.quantity,
+                    unit: item.unit,
+                })),
+            });
+        }
+
+        return newList.id;
+    });
 
     // Tüm ilişkilerle birlikte getir
     return await prisma.list.findUnique({
-        where: { id: newList.id },
+        where: { id: newListId },
         include: {
             list_items: {
                 include: {
@@ -425,42 +430,47 @@ export const replaceWithCompletedList = async (
         throw new Error('Geçmiş liste bulunamadı veya erişim yetkiniz yok');
     }
 
-    // ESKİ AKTİF LİSTEYİ SİL (eğer belirtildiyse)
-    if (oldActiveListId) {
-        await prisma.list.delete({
-            where: {
-                id: oldActiveListId,
-                user_id: userId, // Güvenlik kontrolü
+    // Eski listeyi sil + yeni listeyi oluştur + ürünleri kopyala — atomik olmalı.
+    const newListId = await prisma.$transaction(async (tx) => {
+        // ESKİ AKTİF LİSTEYİ SİL (eğer belirtildiyse)
+        if (oldActiveListId) {
+            await tx.list.delete({
+                where: {
+                    id: oldActiveListId,
+                    user_id: userId, // Güvenlik kontrolü
+                },
+            });
+        }
+
+        // Yeni liste oluştur
+        const newList = await tx.list.create({
+            data: {
+                user_id: userId,
+                name: completedList.name,
+                budget: completedList.budget,
+                is_template: false,
+                status: 'active',
             },
         });
-    }
 
-    // Yeni liste oluştur
-    const newList = await prisma.list.create({
-        data: {
-            user_id: userId,
-            name: completedList.name,
-            budget: completedList.budget,
-            is_template: false,
-            status: 'active',
-        },
+        // Ürünleri kopyala
+        if (completedList.list_items.length > 0) {
+            await tx.listItem.createMany({
+                data: completedList.list_items.map(item => ({
+                    list_id: newList.id,
+                    product_id: item.product_id,
+                    quantity: item.quantity,
+                    unit: item.unit,
+                })),
+            });
+        }
+
+        return newList.id;
     });
-
-    // Ürünleri kopyala
-    if (completedList.list_items.length > 0) {
-        await prisma.listItem.createMany({
-            data: completedList.list_items.map(item => ({
-                list_id: newList.id,
-                product_id: item.product_id,
-                quantity: item.quantity,
-                unit: item.unit,
-            })),
-        });
-    }
 
     // Tüm ilişkilerle birlikte getir
     return await prisma.list.findUnique({
-        where: { id: newList.id },
+        where: { id: newListId },
         include: {
             list_items: {
                 include: {

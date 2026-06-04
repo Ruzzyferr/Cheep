@@ -4,6 +4,7 @@ Matched products JSON dosyasını backend API'ye gönderir.
 """
 
 import json
+import os
 import requests
 import logging
 import sys
@@ -46,6 +47,11 @@ class MatchedProductsImporter:
             api_url: Backend API base URL
         """
         self.api_url = api_url.rstrip('/')
+        # Backend ingestion endpoint'leri için ortak header'lar (x-api-key auth dahil)
+        self.headers = {}
+        ingest_api_key = os.getenv('INGEST_API_KEY')
+        if ingest_api_key:
+            self.headers['x-api-key'] = ingest_api_key
         self.category_map = {}  # category_name -> category_id
         self.missing_categories = set()  # Eksik kategorileri takip et (tekrar yazmamak için)
         self.stats = {
@@ -128,6 +134,7 @@ class MatchedProductsImporter:
                 response = requests.post(
                     f"{self.api_url}/categories",
                     json=category_data,
+                    headers=self.headers,
                     timeout=10
                 )
                 response.raise_for_status()
@@ -213,9 +220,19 @@ class MatchedProductsImporter:
         Args:
             payloads: API formatında payload listesi
         """
+        # INGEST_MODE=kafka ise HTTP yerine Kafka'ya (raw.products.v1) üret.
+        if os.getenv("INGEST_MODE", "http").lower() == "kafka":
+            from common.kafka_producer import RawProductProducer
+            country_code = os.getenv("COUNTRY_CODE", "TR")
+            producer = RawProductProducer()
+            produced = producer.produce_payloads(payloads, country_code)
+            self.stats['success'] = self.stats.get('success', 0) + produced
+            logger.info(f"📨 Kafka modu: {produced} ürün raw.products.v1'e üretildi")
+            return
+
         CHUNK_SIZE = 900  # Backend limiti 1000, güvenli değer
         total_payloads = len(payloads)
-        
+
         logger.info(f"✅ {total_payloads} ürün API formatına çevrildi")
         logger.info(f"📤 {CHUNK_SIZE} boyutlu parçalar halinde gönderiliyor...")
         
@@ -231,6 +248,7 @@ class MatchedProductsImporter:
                 response = requests.post(
                     f"{self.api_url}/store-prices/bulk-upsert",
                     json=bulk_payload,
+                    headers=self.headers,
                     timeout=120  # Uzun timeout (çok veri varsa)
                 )
                 

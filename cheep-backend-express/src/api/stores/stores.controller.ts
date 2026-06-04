@@ -3,7 +3,7 @@ import * as StoreService from './stores.service.js';
 
 export const getAllStores = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const stores = await StoreService.getAllStores();
+        const stores = await StoreService.getAllStores(req.country?.id);
         res.status(200).json({
             success: true,
             data: stores,

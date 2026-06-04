@@ -7,6 +7,23 @@ import apiClient from './api.client';
 import { API_ENDPOINTS } from '../constants/api';
 import type { Product, StorePrice, ApiResponse } from '../types';
 
+export interface PriceHistoryPoint {
+  price: number;
+  recorded_at: string;
+}
+
+export interface PriceHistorySeries {
+  store: { id: number; name: string; logo_url: string | null };
+  points: PriceHistoryPoint[];
+}
+
+export interface PriceHistoryResponse {
+  product_id: number;
+  days: number;
+  series: PriceHistorySeries[];
+  summary: { lowest: number | null; highest: number | null; dataPoints: number };
+}
+
 export const productService = {
   /**
    * Get all products (with filters)
@@ -42,6 +59,18 @@ export const productService = {
       API_ENDPOINTS.PRODUCTS.PRICES(id)
     );
     return response.data.data || [];
+  },
+
+  /**
+   * Get product price history (per-store time series)
+   * Not: backend yanıtı doğrudan döndürür (ApiResponse sarmalı yok).
+   */
+  async getPriceHistory(id: number, days = 90): Promise<PriceHistoryResponse> {
+    const response = await apiClient.get<PriceHistoryResponse>(
+      API_ENDPOINTS.PRODUCTS.HISTORY(id),
+      { params: { days } }
+    );
+    return response.data;
   },
 
   /**

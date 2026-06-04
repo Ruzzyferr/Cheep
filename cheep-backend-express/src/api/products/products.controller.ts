@@ -18,6 +18,7 @@ export const getAllProducts = async (req: Request, res: Response, next: NextFunc
             search: search as string | undefined,
             limit: Number(limit),
             offset: Number(offset),
+            countryId: req.country?.id,
         });
 
         res.status(200).json({
@@ -96,6 +97,17 @@ export const getProductPrices = async (req: Request, res: Response, next: NextFu
         const { id } = req.params;
         const prices = await ProductService.getProductPrices(Number(id));
         res.status(200).json(prices);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getProductPriceHistory = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { id } = req.params;
+        const days = req.query.days ? Number(req.query.days) : 90;
+        const history = await ProductService.getProductPriceHistory(Number(id), days);
+        res.status(200).json(history);
     } catch (error) {
         next(error);
     }

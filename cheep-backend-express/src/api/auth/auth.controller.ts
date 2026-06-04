@@ -8,6 +8,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         res.status(201).json({
             success: true,
             token: result.token,
+            refreshToken: result.refreshToken,
             user: result.user
         });
     } catch (error) {
@@ -22,9 +23,25 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         res.status(200).json({
             success: true,
             token: result.token,
+            refreshToken: result.refreshToken,
             user: result.user
         });
     } catch (error) {
         next(error);
+    }
+};
+
+export const refresh = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            res.status(400).json({ success: false, message: 'refreshToken zorunludur.' });
+            return;
+        }
+        const tokens = await AuthService.refreshAccessToken(refreshToken);
+        res.status(200).json({ success: true, ...tokens });
+    } catch (error) {
+        // Refresh hatası 401 olmalı (yeniden login gerekir)
+        res.status(401).json({ success: false, message: (error as Error).message });
     }
 };

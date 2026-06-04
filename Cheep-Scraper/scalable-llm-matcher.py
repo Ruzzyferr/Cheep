@@ -21,6 +21,7 @@ import os
 import sys
 import time
 import logging
+from logging.handlers import RotatingFileHandler
 import asyncio
 import re
 from typing import List, Dict, Optional, Tuple
@@ -52,11 +53,11 @@ else:
 
 # Logging setup (dotenv'den önce basit logger)
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, os.getenv('LOG_LEVEL', 'INFO').upper(), logging.INFO),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler('scalable-matcher.log', encoding='utf-8')
+        RotatingFileHandler('scalable-matcher.log', encoding='utf-8', maxBytes=10*1024*1024, backupCount=5)
     ]
 )
 logger = logging.getLogger(__name__)
@@ -359,7 +360,7 @@ class ScalableLLMProductMatcher:
     🚀 3 Aşamalı Scalable Product Matching Pipeline
     """
     
-    BATCH_SIZE = 300  # LLM batch boyutu (rate limit için azaltıldı: 300 -> 150)
+    BATCH_SIZE = 300  # LLM batch boyutu (rate limit dengesi için 300)
     EMBEDDING_BATCH = 1000  # Embedding batch
     SIMILARITY_THRESHOLD = 0.70  # Benzerlik eşiği
     HIGH_SIMILARITY_THRESHOLD = 0.90  # Yüksek benzerlik eşiği
@@ -414,7 +415,7 @@ class ScalableLLMProductMatcher:
             self.llm_model = os.getenv('LLM_MODEL', 'gpt-4o-mini')
             logger.info(f"[Matcher] ✅ OpenAI API kullanılıyor - Model: {self.llm_model}")
         
-        self.embedding_model = 'text-embedding-3-small'
+        self.embedding_model = os.getenv('EMBEDDING_MODEL', 'text-embedding-3-small')
         
         # 🔄 Retry / backoff ayarları
         self.max_retries = int(os.getenv("LLM_MAX_RETRIES", "6"))

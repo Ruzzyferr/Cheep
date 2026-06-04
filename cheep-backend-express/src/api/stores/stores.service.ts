@@ -1,7 +1,10 @@
 import { prisma } from '../../utils/prisma.client.js';
+import { getCountryIdByCode } from '../../utils/country.js';
 
-export const getAllStores = async () => {
-    return await prisma.store.findMany();
+export const getAllStores = async (countryId?: number) => {
+    return await prisma.store.findMany({
+        where: countryId ? { country_id: countryId } : undefined,
+    });
 };
 
 export const getStoreById = async (id: number) => {
@@ -27,8 +30,11 @@ export const createStore = async (data: {
     name: string;
     logo_url?: string;
     address?: string;
+    city?: string;
     lat?: number;
     lon?: number;
+    country_id?: number;
+    country_code?: string;
 }) => {
     // Aynı isimde market varsa güncelle
     const existing = await getStoreByName(data.name);
@@ -36,8 +42,11 @@ export const createStore = async (data: {
         return existing;
     }
 
+    const { country_code, country_id, ...rest } = data;
+    const resolvedCountryId = country_id ?? (await getCountryIdByCode(country_code));
+
     return await prisma.store.create({
-        data,
+        data: { ...rest, country_id: resolvedCountryId },
     });
 };
 

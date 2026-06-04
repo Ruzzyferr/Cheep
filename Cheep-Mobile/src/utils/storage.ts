@@ -8,9 +8,11 @@ import * as SecureStore from 'expo-secure-store';
 // Keys
 const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth_token',
+  REFRESH_TOKEN: 'refresh_token',
   USER_DATA: 'user_data',
   ONBOARDING_COMPLETED: 'onboarding_completed',
   USER_LOCATION: 'user_location',
+  USER_COUNTRY: 'user_country',
   FAVORITE_STORES: 'favorite_stores',
 } as const;
 
@@ -76,6 +78,28 @@ export const authStorage = {
     const token = await this.getToken();
     return !!token;
   },
+
+  // Refresh token
+  async saveRefreshToken(token: string): Promise<void> {
+    await storage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
+  },
+
+  async getRefreshToken(): Promise<string | null> {
+    return await storage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+  },
+
+  async removeRefreshToken(): Promise<void> {
+    await storage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+  },
+
+  // Tüm auth verisini temizle (logout / refresh başarısız)
+  async clearAuth(): Promise<void> {
+    await Promise.all([
+      storage.removeItem(STORAGE_KEYS.AUTH_TOKEN),
+      storage.removeItem(STORAGE_KEYS.REFRESH_TOKEN),
+      storage.removeItem(STORAGE_KEYS.USER_DATA),
+    ]);
+  },
 };
 
 // User data functions
@@ -91,6 +115,17 @@ export const userStorage = {
 
   async removeUser(): Promise<void> {
     await storage.removeItem(STORAGE_KEYS.USER_DATA);
+  },
+};
+
+// Country functions (konumdan veya kullanıcı seçiminden ISO kod, örn. "TR")
+export const countryStorage = {
+  async saveCountry(code: string): Promise<void> {
+    await storage.setItem(STORAGE_KEYS.USER_COUNTRY, code.toUpperCase());
+  },
+
+  async getCountry(): Promise<string | null> {
+    return await storage.getItem(STORAGE_KEYS.USER_COUNTRY);
   },
 };
 

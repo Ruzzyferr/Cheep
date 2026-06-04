@@ -10,7 +10,8 @@ import { colors, spacing, borderRadius, typography } from '../../theme';
 
 interface NearbyStoreCardProps {
   storeName: string;
-  distance: string;
+  distance?: string;
+  subtitle?: string;
   logoUrl?: string;
   onPress: () => void;
 }
@@ -18,9 +19,11 @@ interface NearbyStoreCardProps {
 export function NearbyStoreCard({
   storeName,
   distance,
+  subtitle,
   logoUrl,
   onPress,
 }: NearbyStoreCardProps) {
+  const metaText = distance ?? subtitle;
   return (
     <TouchableOpacity
       style={styles.container}
@@ -39,10 +42,12 @@ export function NearbyStoreCard({
 
       <View style={styles.content}>
         <Text style={styles.storeName}>{storeName}</Text>
-        <View style={styles.distanceRow}>
-          <MaterialIcons name="location-on" size={12} color={colors.text.secondary} />
-          <Text style={styles.distance}>{distance}</Text>
-        </View>
+        {metaText ? (
+          <View style={styles.distanceRow}>
+            <MaterialIcons name="location-on" size={12} color={colors.text.secondary} />
+            <Text style={styles.distance} numberOfLines={1}>{metaText}</Text>
+          </View>
+        ) : null}
       </View>
 
       <MaterialIcons name="chevron-right" size={20} color={colors.text.secondary} />
