@@ -3,10 +3,12 @@
  * Backend endpoint'leri ve configuration
  */
 
-// Backend URL (development)
-export const API_BASE_URL = __DEV__
-  ? 'http://192.168.1.100:3000/api/v1'
-  : 'https://api.cheep.com/api/v1';
+// Backend URL — EXPO_PUBLIC_API_URL ile override edilebilir.
+// Expo, EXPO_PUBLIC_* ile başlayan değişkenleri build/runtime'da otomatik inline eder.
+// Android emülatöründe localhost yerine 10.0.2.2, fiziksel cihazda bilgisayarın LAN IP'sini kullanın.
+export const API_BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL ??
+  (__DEV__ ? 'http://localhost:3000/api/v1' : 'https://api.cheep.com/api/v1');
 
 // API Endpoints
 export const API_ENDPOINTS = {
