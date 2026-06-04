@@ -9,7 +9,6 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "eslint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -26,7 +25,6 @@
     "expo-haptics": "~15.0.1",
     "expo-image": "~3.0.0",
     "expo-linking": "~8.0.2",
-    "expo-router": "~6.0.0",
     "expo-secure-store": "~15.0.1",
     "expo-splash-screen": "~31.0.1",
     "expo-status-bar": "~3.0.0",
@@ -42,13 +40,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
-    "@eslint/js": "^9.39.1",
     "@types/react": "~19.1.0",
     "eslint": "^9.39.1",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-native": "^5.0.0",
-    "typescript": "^5.7.2",
-    "typescript-eslint": "^8.49.0"
+    "typescript": "^5.7.2"
   },
   "private": true
 }
