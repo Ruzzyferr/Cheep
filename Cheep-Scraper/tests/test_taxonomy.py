@@ -95,5 +95,42 @@ def test_nonfood_form_word_beats_trailing_food_scent():
     assert classify("Mis Çilekli Süt 200 ml") == ("Süt Ürünleri", "Süt")
 
 
+def test_processed_food_not_produce():
+    # processed/branded items must leave raw produce for their real category
+    assert classify("7 Days Çilekli Kruvasan 60 G") == ("Fırın & Pastane", "Poğaça & Börek")
+    assert classify("Nimet Elmalı Kurabiye 400 G") == ("Atıştırmalık", "Bisküvi")
+    assert classify("Tat Domates Püresi 200 G") == ("Temel Gıda", "Konserve")
+    assert classify("Migros Kabak Çekirdeği 200 G") == ("Atıştırmalık", "Kuruyemiş")
+    assert top("Teekanne Şeftali Karışık Meyve Çayı 20'li") == "İçecek"
+    assert classify("Ülker Pastil Ihlamur Limon Propolis 22 G") == ("Atıştırmalık", "Şekerleme")
+
+
+def test_supplements_have_a_home():
+    assert top("Bio Protein Muz Aromalı Protein Tozu 420 G") == "Sağlık & Takviye"
+    assert top("Voop C Vitamini D3 Çinko Portakal Aromalı 20 Saşe") == "Sağlık & Takviye"
+
+
+def test_nonfood_on_produce_substring():
+    # words that merely CONTAIN a produce token must not become produce
+    assert top("Wee Baby Klasik Cam Biberon 250 Ml") == "Bebek"          # biber-on
+    assert top("Asya Lale İlkbahar Çiçek Soğanı") == "Ev & Yaşam"        # soğan
+    assert top("Kiwi Pets Fare Şekilli Evcil Hayvan Oyuncağı") == "Pet Shop"
+    assert top("Parmex Nar Çiçeği Aseton 125ml") == "Kişisel Bakım & Kozmetik"
+
+
+def test_produce_lands_in_specific_sub_not_genel():
+    # raw market category "Manav" must not flatten produce into "Genel"
+    assert classify("Domates Kg", "Meyve Sebze") == ("Meyve & Sebze", "Sebze")
+    assert classify("Elma Fuji Kg", "Manav") == ("Meyve & Sebze", "Meyve")
+    assert classify("Mantar 300 g Paket", "Sebze") == ("Meyve & Sebze", "Sebze")
+    assert classify("Yaban Mersini Paket 125 G", "Meyve") == ("Meyve & Sebze", "Meyve")
+
+
+def test_corn_cereal_not_vegetable():
+    # "Mısır Gevreği" (cornflakes) must be breakfast cereal, not Sebze via "mısır"
+    assert classify("Nestle Mısır Gevreği 500 G") == ("Kahvaltılık", "Kahvaltılık Gevrek")
+    assert classify("Taze Mısır Açık Adet")[0] == "Meyve & Sebze"
+
+
 def test_unknown_falls_to_diger():
     assert top("Xyzzy Foobar 123") == "Diğer"
