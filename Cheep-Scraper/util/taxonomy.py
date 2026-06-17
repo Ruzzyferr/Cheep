@@ -40,8 +40,12 @@ CANONICAL_TAXONOMY: Dict[str, List[str]] = {
     "Kişisel Bakım & Kozmetik": ["Şampuan", "Sabun", "Diş Macunu", "Deodorant",
                                   "Duş Jeli", "Tıraş", "Cilt Bakım", "Ped & Hijyen"],
     "Bebek": ["Bebek Bezi", "Bebek Maması", "Bebek Bakım"],
-    "Ev & Yaşam": ["Mutfak Gereçleri", "Pil & Aydınlatma", "Kırtasiye"],
-    "Pet Shop": ["Kedi Maması", "Köpek Maması"],
+    "Ev & Yaşam": ["Mutfak Gereçleri", "Pil & Aydınlatma", "Kırtasiye",
+                   "Cam & Sofra", "Mum & Dekor"],
+    "Pet Shop": ["Kedi Maması", "Köpek Maması", "Pet Bakım"],
+    "Elektronik": ["Elektronik"],
+    "Oyuncak & Hobi": ["Oyuncak"],
+    "Giyim & Tekstil": ["Giyim", "Ev Tekstili"],
     "Diğer": ["Diğer"],
 }
 
@@ -82,7 +86,9 @@ _RULES: List[Tuple[str, List[str]]] = [
     ("Sebze", ["domates", "salatalik", "biber", "patlican", "sogan", "patates",
                "havuc", "kabak", "sebze", "marul", "ispanak", "brokoli", "sarimsak"]),
     ("Meyve", ["elma", "muz", "portakal", "armut", "uzum", "cilek", "karpuz",
-               "kavun", "mandalina", "limon", "seftali", "kiraz", "meyve", "nar", "kivi"]),
+               "kavun", "mandalina", "limon", "seftali", "kiraz", "meyve", "nar",
+               "kivi", "kiwi", "avokado", "ananas", "mango", "erik", "kayisi",
+               "incir", "nektarin", "greyfurt"]),
     ("Yeşillik", ["maydanoz", "roka", "dereotu", "nane", "yesillik"]),
     ("Kuru Meyve", ["kuru kayisi", "kuru uzum", "kuru incir", "hurma", "kuru meyve"]),
     # Temel Gıda
@@ -102,6 +108,7 @@ _RULES: List[Tuple[str, List[str]]] = [
     ("Sirke", ["sirke"]),
     ("Çorba", ["corba", "corbasi"]),
     ("Konserve", ["konserve", "turşu", "tursu"]),
+    ("Salça", ["mayonez", "ketcap", "ketchup", "hardal", "calve", "sos", "mayo"]),
     # Atıştırmalık
     ("Gofret", ["gofret"]),
     ("Çikolata", ["cikolata", "cikolatali", "bar cikolata"]),
@@ -131,11 +138,12 @@ _RULES: List[Tuple[str, List[str]]] = [
     ("Pasta & Kek", ["pasta", "kek", "kekı", "browni", "muffin"]),
     ("Poğaça & Börek", ["pogaca", "borek", "acma", "simit"]),
     # Dondurma
-    ("Dondurma", ["dondurma", "magnum", "cornetto", "maras dondurma"]),
+    ("Dondurma", ["dondurma", "magnum", "cornetto", "maras dondurma", "algida",
+                  "carte dor", "golf", "max dondurma", "twister", "calippo"]),
     # Temizlik
     ("Çamaşır Suyu", ["camasir suyu", "domestos", "comert"]),
     ("Çamaşır Deterjanı", ["camasir deterjani", "deterjan", "omo", "ariel", "persil"]),
-    ("Bulaşık Deterjanı", ["bulasik deterjani", "bulasik", "fairy", "pril"]),
+    ("Bulaşık Deterjanı", ["bulasik deterjani", "bulasik", "fairy", "pril", "mintax"]),
     ("Yumuşatıcı", ["yumusatici", "yumuşatıcı", "vernel", "yumos", "comfort"]),
     ("Yüzey Temizleyici", ["yuzey temizleyici", "cif", "yuzey temizlik", "cam temizleyici"]),
     ("Çöp Poşeti", ["cop posedi", "cop poseti", "cop torbasi"]),
@@ -165,6 +173,24 @@ _RULES: List[Tuple[str, List[str]]] = [
     ("Mutfak Gereçleri", ["streç film", "strec film", "aleminyum folyo", "alüminyum folyo",
                           "pisirme kagidi"]),
     ("Kırtasiye", ["defter", "kalem", "silgi"]),
+    ("Cam & Sofra", ["bardak", "tabak", "kase", "tencere", "tava", "paşabahçe",
+                     "pasabahce", "saklama kabi", "termos", "matara", "surahi"]),
+    ("Mum & Dekor", ["mum", "cerceve", "çerçeve", "biblo", "vazo", "süs", "sus"]),
+    # Pet bakım (mama dışı)
+    ("Pet Bakım", ["kedi kumu", "kopek tasma", "pet sampuan", "kemik", "kus yemi",
+                   "akvaryum", "tasma"]),
+    # Non-food top categories
+    ("Elektronik", ["telefon", "kulaklik", "kulaklık", "powerbank", "sarj aleti",
+                    "şarj aleti", "televizyon", "hoparlor", "mouse", "klavye",
+                    "philips", "sinbo", "onvo", "kettle", "blender", "supurge",
+                    "süpürge", "tost makinesi", "sac kurutma", "fön", "ütü",
+                    "mikrodalga", "airfryer", "kamera", "tablet", "kablo"]),
+    ("Oyuncak", ["oyuncak", "puzzle", "yapboz", "lego", "oyun hamuru", "figur",
+                 "figür", "peluş", "pelus", "araba oyuncak", "bebek oyuncak"]),
+    ("Giyim", ["corap", "çorap", "tisort", "tişört", "terlik", "bornoz", "tayt",
+               "atlet", "kulot", "külot", "bot ", "esofman", "eşofman", "pijama"]),
+    ("Ev Tekstili", ["nevresim", "carsaf", "çarşaf", "havlu set", "yastik",
+                     "yastık", "battaniye", "yorgan", "pike", "havlu seti"]),
 ]
 
 _TR = str.maketrans({"ı": "i", "İ": "i", "ş": "s", "Ş": "s", "ğ": "g", "Ğ": "g",
@@ -195,9 +221,48 @@ def _score(text: str, tokens: set, keywords: List[str]) -> int:
     return s
 
 
+# Fallback: map a market's own category name -> canonical TOP, used only when the
+# product NAME yields no match. Ordered: more specific phrases first.
+_RAW_TOP_ALIASES = [
+    ("dondurma", "Dondurma"),
+    ("kahvalt", "Kahvaltılık"),
+    ("sut ", "Süt Ürünleri"), ("sut urun", "Süt Ürünleri"), ("sut ve", "Süt Ürünleri"),
+    ("et ", "Et, Tavuk & Balık"), ("tavuk", "Et, Tavuk & Balık"),
+    ("balik", "Et, Tavuk & Balık"), ("sarkuteri", "Et, Tavuk & Balık"),
+    ("meyve", "Meyve & Sebze"), ("sebze", "Meyve & Sebze"),
+    ("dondurulmus", "Donuk & Hazır Yemek"), ("donuk", "Donuk & Hazır Yemek"),
+    ("pratik yemek", "Donuk & Hazır Yemek"), ("hazir yemek", "Donuk & Hazır Yemek"),
+    ("firin", "Fırın & Pastane"), ("pastane", "Fırın & Pastane"), ("ekmek", "Fırın & Pastane"),
+    ("atistirma", "Atıştırmalık"), ("cikolata", "Atıştırmalık"), ("biskuvi", "Atıştırmalık"),
+    ("misir gevre", "Kahvaltılık"),
+    ("icecek", "İçecek"), ("mesrubat", "İçecek"), ("su ", "İçecek"),
+    ("kagit", "Kağıt & Hijyen"),
+    ("kisisel bakim", "Kişisel Bakım & Kozmetik"), ("kozmetik", "Kişisel Bakım & Kozmetik"),
+    ("makyaj", "Kişisel Bakım & Kozmetik"),
+    ("temizlik", "Temizlik"), ("deterjan", "Temizlik"), ("banyo temizley", "Temizlik"),
+    ("anne", "Bebek"), ("bebek", "Bebek"), ("cocuk", "Bebek"),
+    ("evcil", "Pet Shop"), ("pet", "Pet Shop"),
+    ("elektronik", "Elektronik"),
+    ("oyuncak", "Oyuncak & Hobi"),
+    ("giyim", "Giyim & Tekstil"), ("aksesuar", "Giyim & Tekstil"), ("tekstil", "Giyim & Tekstil"),
+    ("yemeklik", "Temel Gıda"), ("bakliyat", "Temel Gıda"), ("makarna", "Temel Gıda"),
+    ("temel gida", "Temel Gıda"), ("baharat", "Temel Gıda"),
+    ("ev ", "Ev & Yaşam"), ("yasam", "Ev & Yaşam"), ("mutfak", "Ev & Yaşam"),
+    ("saglikli", "Temel Gıda"), ("organik", "Temel Gıda"),
+]
+
+
+def _raw_top(text: str) -> Optional[str]:
+    for needle, top in _RAW_TOP_ALIASES:
+        if needle in text:
+            return top
+    return None
+
+
 def classify(name: str, raw_category: Optional[str] = None,
              ascendants: Optional[List[str]] = None) -> Tuple[str, str]:
-    """Classify a product into (top, subcategory). Name is primary signal."""
+    """Classify a product into (top, subcategory). Name is the primary signal;
+    the market's own category is a tie-break, then a top-level fallback."""
     name_text = _norm(name)
     name_tokens = set(name_text.split())
 
@@ -213,4 +278,9 @@ def classify(name: str, raw_category: Optional[str] = None,
 
     if best_sub and best_score > 0:
         return (SUB_TO_TOP[best_sub], best_sub)
+
+    # name + keywords found nothing -> trust the market's own category (top only)
+    top = _raw_top(hint_text + " ")
+    if top:
+        return (top, "Genel")
     return ("Diğer", "Diğer")
