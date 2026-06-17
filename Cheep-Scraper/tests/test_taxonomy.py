@@ -130,6 +130,8 @@ def test_corn_cereal_not_vegetable():
     # "Mısır Gevreği" (cornflakes) must be breakfast cereal, not Sebze via "mısır"
     assert classify("Nestle Mısır Gevreği 500 G") == ("Kahvaltılık", "Kahvaltılık Gevrek")
     assert classify("Taze Mısır Açık Adet")[0] == "Meyve & Sebze"
+    assert classify("Migros Mısır Nişastası 250 G") == ("Temel Gıda", "Un")
+    assert top("Çerezza Patlamış Mısır 100 G") == "Atıştırmalık"
 
 
 def test_unknown_falls_to_diger():
