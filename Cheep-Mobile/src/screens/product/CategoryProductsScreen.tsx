@@ -262,6 +262,7 @@ export function CategoryProductsScreen({
         data={products}
         numColumns={2}
         keyExtractor={(item) => item.id.toString()}
+        style={styles.list}
         contentContainerStyle={styles.gridContainer}
         columnWrapperStyle={styles.row}
         refreshControl={
@@ -340,6 +341,10 @@ const styles = StyleSheet.create({
   subcategoriesScroll: {
     paddingHorizontal: layout.screenPadding,
     paddingBottom: spacing.sm,
+  },
+
+  list: {
+    flex: 1,
   },
 
   gridContainer: {

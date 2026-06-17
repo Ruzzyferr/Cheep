@@ -29,7 +29,7 @@ from sok.sok_scraper import SokScraper  # noqa: E402
 from a101.a101_scraper import A101Scraper  # noqa: E402
 from carrefour.carrefour_scraper import CarrefourScraper  # noqa: E402
 from util.taxonomy import classify  # noqa: E402
-from scrapers.matching import group_products, _size_key  # noqa: E402
+from scrapers.matching import group_products, _size_key, size_signature  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s",
                     handlers=[logging.StreamHandler(sys.stdout)])
@@ -65,10 +65,10 @@ def build_catalog(products: list) -> list:
         setattr(p, "_sub", sub)
         p.category = f"{top} > {sub}"
 
-    # group within (top, canonical-size) buckets — faster and never crosses size
+    # group within (top, pack-aware-size) buckets — faster and never crosses size
     buckets = collections.defaultdict(list)
     for p in products:
-        buckets[(p._top, _size_key(p.quantity, p.unit))].append(p)
+        buckets[(p._top, size_signature(p.name, p.quantity, p.unit))].append(p)
 
     catalog = []
     for _, group_items in buckets.items():
@@ -88,7 +88,7 @@ def build_catalog(products: list) -> list:
                 "raw_category": rep.raw_category,
                 "category_top": rep._top, "category_sub": rep._sub,
                 "quantity": rep.quantity, "unit": rep.unit,
-                "size_key": _size_key(rep.quantity, rep.unit),
+                "size_key": size_signature(rep.name, rep.quantity, rep.unit),
                 "image_url": rep.image_url, "country_code": "TR",
                 "markets": [m.store for m in grp],
                 "prices": prices,

@@ -32,19 +32,76 @@ _UNIT_TOKENS = [
 _UNIT_ALT = "|".join(_UNIT_TOKENS)
 
 _NUM = r"\d+(?:[.,]\d+)?"
-# 2x200 g  /  6 x 1 L
+# 2x200 g  /  6 x 1 L  /  6*180 ml  /  6X1L  (any of x × * as the multiplier)
 _MULTIPACK_RE = re.compile(
-    rf"(\d+)\s*[x×]\s*({_NUM})\s*({_UNIT_ALT})\b", re.IGNORECASE
+    rf"(\d+)\s*[x×*]\s*({_NUM})\s*({_UNIT_ALT})\b", re.IGNORECASE
 )
 # 500 g  /  1,5 L  /  500ml
 _SIMPLE_RE = re.compile(rf"({_NUM})\s*({_UNIT_ALT})\b", re.IGNORECASE)
-# count packs: 10'lu / 32'li / 6 lı / 24'lük  -> (count, adet)
-_COUNTPACK_RE = re.compile(r"(\d+)\s*['’`]?\s*(?:li|lı|lu|lü|lük|lik|luk|adet|adetlik)\b",
+# count packs: 10'lu / 32'li / 6 lı / 24'lük  -> count
+_COUNTPACK_RE = re.compile(r"(\d+)\s*['’`]?\s*(?:li|lı|lu|lü|lük|lik|luk|adet|adetlik|ad)\b",
                            re.IGNORECASE)
+
+# Above this count a "N'li … Xg/ml" almost always means N pieces of a TOTAL X
+# (100'lü 320 g tea), not N units of X each; at/below it the size is per-unit
+# (6'lı 200 ml ayran = 1200 ml). Multipacks written "N x X" are ALWAYS per-unit.
+_PER_UNIT_COUNT_MAX = 12
 
 
 def _to_float(s: str) -> float:
     return float(s.replace(",", "."))
+
+
+def _base(qty: float, unit: str) -> str:
+    """Canonical (grams / millilitres / adet) numeric+unit string for a size."""
+    u = normalize_unit(unit)
+    if u == "kg":
+        return f"{round(qty * 1000, 2)}g"
+    if u in ("g",):
+        return f"{round(qty, 2)}g"
+    if u in ("l",):
+        return f"{round(qty * 1000, 2)}ml"
+    if u == "cl":
+        return f"{round(qty * 10, 2)}ml"
+    if u == "ml":
+        return f"{round(qty, 2)}ml"
+    return f"{round(qty, 2)}adet"
+
+
+def extract_size_and_pack(text):
+    """Return (total_qty, unit, pack_count) parsed from a name/size string.
+
+    - "6x200 ml" / "6*200 ml"      -> (1200, ml, 6)   (explicit per-unit pack)
+    - "İçim Ayran 6'lı 200 ml"     -> (1200, ml, 6)   (count<=12 -> per-unit)
+    - "Lipton 100'lü 320 g"        -> (320,  g, 100)  (count>12  -> size is total)
+    - "Süt 1 L"                    -> (1.0,  l, 1)
+    - "Yumurta 10'lu"              -> (10,   adet, 1) (no size -> count is the qty)
+    """
+    if not text:
+        return (1.0, "adet", 1)
+
+    m = _MULTIPACK_RE.search(text)
+    if m:
+        count = int(m.group(1))
+        amount = _to_float(m.group(2))
+        return (round(count * amount, 4), normalize_unit(m.group(3)), count)
+
+    size_matches = list(_SIMPLE_RE.finditer(text))
+    cm = _COUNTPACK_RE.search(text)
+    count = int(cm.group(1)) if cm else 1
+
+    if size_matches:
+        last = size_matches[-1]
+        amount = _to_float(last.group(1))
+        unit = normalize_unit(last.group(2))
+        if count > 1 and count <= _PER_UNIT_COUNT_MAX:
+            return (round(count * amount, 4), unit, count)
+        return (amount, unit, count if count > 1 else 1)
+
+    if cm:  # count pack with no mass/volume size -> the count IS the quantity
+        return (float(count), "adet", 1)
+
+    return (1.0, "adet", 1)
 
 
 def normalize_unit(unit: Optional[str]) -> str:
@@ -54,53 +111,20 @@ def normalize_unit(unit: Optional[str]) -> str:
 
 
 def parse_quantity_and_unit(text: Optional[str]) -> Tuple[float, str]:
-    """Parse a quantity string. Returns (quantity, canonical_unit).
+    """Parse a quantity string. Returns (TOTAL quantity, canonical_unit).
 
-    "2x200 g" -> (400.0, "g"); "1,5 L" -> (1.5, "l"); falls back to (1.0, "adet").
+    "2x200 g" -> (400.0, "g"); "1,5 L" -> (1.5, "l"); "6'lı 200 ml" -> (1200.0,
+    "ml"); falls back to (1.0, "adet"). A multipack's TOTAL content is returned so
+    a 6-pack never compares as a single bottle.
     """
-    if not text:
-        return (1.0, "adet")
-    s = text.strip()
-
-    m = _MULTIPACK_RE.search(s)
-    if m:
-        count = float(m.group(1))
-        amount = _to_float(m.group(2))
-        return (round(count * amount, 4), normalize_unit(m.group(3)))
-
-    m = _SIMPLE_RE.search(s)
-    if m:
-        return (_to_float(m.group(1)), normalize_unit(m.group(2)))
-
-    return (1.0, "adet")
+    qty, unit, _ = extract_size_and_pack(text or "")
+    return (qty, unit)
 
 
 def extract_size_from_name(name: Optional[str]) -> Tuple[float, str]:
-    """Extract package size from a product name.
-
-    Prefers a multipack token; otherwise the last size token in the name
-    (sizes are conventionally at the end). Returns (1.0, "adet") if none found.
-    """
-    if not name:
-        return (1.0, "adet")
-
-    m = _MULTIPACK_RE.search(name)
-    if m:
-        count = float(m.group(1))
-        amount = _to_float(m.group(2))
-        return (round(count * amount, 4), normalize_unit(m.group(3)))
-
-    matches = list(_SIMPLE_RE.finditer(name))
-    if matches:
-        last = matches[-1]
-        return (_to_float(last.group(1)), normalize_unit(last.group(2)))
-
-    # no mass/volume size -> try a count pack (10'lu, 32'li, 24'lük)
-    cm = _COUNTPACK_RE.search(name)
-    if cm:
-        return (float(cm.group(1)), "adet")
-
-    return (1.0, "adet")
+    """Extract TOTAL package size from a product name (see extract_size_and_pack)."""
+    qty, unit, _ = extract_size_and_pack(name or "")
+    return (qty, unit)
 
 
 def compute_unit_price(

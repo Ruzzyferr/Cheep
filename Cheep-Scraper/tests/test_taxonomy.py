@@ -134,5 +134,90 @@ def test_corn_cereal_not_vegetable():
     assert top("Çerezza Patlamış Mısır 100 G") == "Atıştırmalık"
 
 
+def test_candy_is_not_cooking_sugar():
+    # "Şeker" sub is cooking sugar only; confectionery -> Atıştırmalık/Şekerleme
+    assert classify("Haribo Altın Ayıcık 175 G") == ("Atıştırmalık", "Şekerleme")
+    assert classify("Uzungil Nane Aromalı Akide Şekeri 180 G") == ("Atıştırmalık", "Şekerleme")
+    assert classify("Ülker Yupo Metre Çilek Aromalı 50 G") == ("Atıştırmalık", "Şekerleme")
+    # real cooking sugar stays
+    assert classify("Balküpü Toz Şeker 1 Kg") == ("Temel Gıda", "Şeker")
+
+
+def test_ice_cream_brand_beats_flavour():
+    # frozen brand/type words win over a chocolate/nut flavour, wherever they sit
+    assert top("Carte d'Or Bitter Beyaz İsviçre Çikolatası 850 Ml") == "Dondurma"
+    assert top("Algida Magnum Badem 100 ml") == "Dondurma"
+    assert top("Algida Keyif Kakao Vanilya 750 ml") == "Dondurma"
+    assert top("Eti Alaska Frigo Sütlü 60 ml") == "Dondurma"
+
+
+def test_baby_products_win_over_adult_lookalikes():
+    assert top("Sebamed Bebek Şampuanı 500 Ml") == "Bebek"
+    assert top("Dalin Bıcı Bıcı Kolonya 150 Ml") == "Bebek"
+    assert top("Hipp Babysanft Güneş Kremi SPF 50+ 200 ml") == "Bebek"
+    assert top("Aptamil 1 Bebek Sütü 400 G") == "Bebek"
+    assert top("Eti Cicibebe Bebe Bisküvisi 172 G") == "Bebek"
+    # a normal adult shampoo is unaffected
+    assert classify("Elidor Şampuan Bukle Belirginleştirici 500 ml")[0] == "Kişisel Bakım & Kozmetik"
+
+
+def test_packaging_word_does_not_beat_food_head_noun():
+    # a cup/bowl/pan word leading the name must not steal the food
+    assert classify("İçim Bardak Ayran 200 Ml") == ("Süt Ürünleri", "Ayran")
+    assert classify("Becel Klasik Kase Margarin 250 G")[0] == "Süt Ürünleri"
+    assert classify("Sütaş Tava Yoğurt 1000 G") == ("Süt Ürünleri", "Yoğurt")
+    assert classify("Uno Karadeniz Tava Ekmeği 470 G") == ("Fırın & Pastane", "Ekmek")
+    assert top("Knorr Çabuk Arabiata Bardak Makarna 48 G") == "Temel Gıda"
+    assert top("Lipton Yellow Bardak Poşet Çay 100'lü") == "İçecek"
+    # but a genuine glass/appliance with the food word as a modifier stays homeware/electronics
+    assert classify("Lav Lara Su Bardağı 6'lı 205 Cc")[0] == "Ev & Yaşam"
+    assert top("Arzum Okka Türk Kahvesi Makinesi") == "Elektronik"
+
+
+def test_spreads_go_to_breakfast_not_nuts_or_chocolate():
+    assert classify("Ülker Çokokrem 400 Gr") == ("Kahvaltılık", "Tahin & Pekmez")
+    assert classify("Nutella 750 G") == ("Kahvaltılık", "Tahin & Pekmez")
+    assert classify("Fellas %100 Fıstık Ezmesi 350 G") == ("Kahvaltılık", "Tahin & Pekmez")
+    assert classify("Torku Frema Kakaolu Fındıklı Krema 400 G") == ("Kahvaltılık", "Tahin & Pekmez")
+
+
+def test_snack_brand_beats_dairy_meat_flavour():
+    assert top("Doritos Nacho Peynirli 135 g") == "Atıştırmalık"
+    assert top("Lay's Yoğurt & Mevsim Yeşillikleri 125 G") == "Atıştırmalık"
+    assert top("Ülker Çizi Çıtır Peynir & Soğan 120 g") == "Atıştırmalık"
+
+
+def test_pet_food_not_human_meat_or_fish():
+    assert top("Gourmet Gold Ton Balıklı 85 Gr") == "Pet Shop"
+    assert top("Friskies Somonlu Yaş Mama 85 G") == "Pet Shop"
+    assert top("Pedigree Biftekli Köpek Maması 2.2 Kg") == "Pet Shop"
+
+
+def test_bouillon_and_broth_are_pantry_not_juice():
+    assert top("Knorr Tavuk Suyu Bulyon 24'lü") == "Temel Gıda"
+    assert top("Fide İlikli Kemik Suyu 480 Ml") == "Temel Gıda"
+
+
+def test_kakao_krema_do_not_swallow_finished_products():
+    # cocoa/cream MODIFIER words must not pull finished snacks into baking/dairy
+    assert classify("Ülker Biskrem Kakaolu 200 G") == ("Atıştırmalık", "Bisküvi")
+    assert top("Ülker Bitter Kare Çikolata %80 Kakaolu 60 G") == "Atıştırmalık"
+    assert top("Eti Petit Beurre Kakao Kremalı 270 g") == "Atıştırmalık"
+    assert top("Balocco Wafers Kakaolu 250 G") == "Atıştırmalık"
+    # genuine baking cocoa / chips stay
+    assert classify("Dr.Oetker Kakao 50 G") == ("Temel Gıda", "Pasta Malzemeleri")
+    assert classify("Pakmaya Sütlü Parça Çikolata 70 G") == ("Temel Gıda", "Pasta Malzemeleri")
+
+
+def test_tablet_word_is_not_electronics():
+    assert top("Finish Quantum 50 Tablet Bulaşık Makinesi") == "Temizlik"
+    assert top("Milka Sütlü Çikolata Tablet 80 G") == "Atıştırmalık"
+
+
+def test_blueberry_cookies_is_a_biscuit_not_produce():
+    assert classify("Original Gourmet Blueberry Cookies 180 G") == ("Atıştırmalık", "Bisküvi")
+    assert classify("Adalılar Tanem Soslu Mısır 120 G")[0] == "Atıştırmalık"
+
+
 def test_unknown_falls_to_diger():
     assert top("Xyzzy Foobar 123") == "Diğer"

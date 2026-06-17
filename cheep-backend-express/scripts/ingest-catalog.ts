@@ -99,63 +99,108 @@ async function main() {
   }
   console.log("   kategori:", catId.size);
 
-  // 4) Products — clean reload for the country (cascades store_prices),
-  //    then create fresh so category changes take effect. (Weekly refresh;
-  //    prod should switch to upsert-by-muadil to preserve user lists.)
-  await prisma.product.deleteMany({ where: { country_id: country.id } });
-
+  // 4) Products — UPSERT by muadil_grup_id so product IDs stay STABLE across weekly
+  //    scrapes. Stable IDs preserve user lists AND price history (deleting+recreating
+  //    would cascade-wipe both). Category/name/brand/image are refreshed to latest.
   const groupKey = (it: CatalogItem) => `${slugify(it.name)}__${it.size_key}`;
+  const catOf = (it: CatalogItem) =>
+    catId.get("s:" + `${slugify(it.category_top)}--${slugify(it.category_sub)}`) ?? null;
+
   const existing = await prisma.product.findMany({
-    where: { country_id: country.id, muadil_grup_id: { not: null } },
+    where: { country_id: country.id },
     select: { id: true, muadil_grup_id: true },
   });
   const pmap = new Map<string, number>();
   for (const p of existing) if (p.muadil_grup_id) pmap.set(p.muadil_grup_id, p.id);
 
+  // create products that are new to this catalog
+  const seen = new Set<string>();
   const toCreate: any[] = [];
   for (const it of catalog) {
     const gid = groupKey(it);
-    if (pmap.has(gid)) continue;
-    const subSlug = `${slugify(it.category_top)}--${slugify(it.category_sub)}`;
-    toCreate.push({
-      name: it.name, brand: it.brand, image_url: it.image_url,
-      category_id: catId.get("s:" + subSlug) ?? null,
-      muadil_grup_id: gid, country_id: country.id,
-    });
+    if (seen.has(gid)) continue;
+    seen.add(gid);
+    if (!pmap.has(gid)) {
+      toCreate.push({
+        name: it.name, brand: it.brand, image_url: it.image_url,
+        category_id: catOf(it), muadil_grup_id: gid, country_id: country.id,
+      });
+    }
   }
-  // createMany in chunks, then refetch ids
   for (let i = 0; i < toCreate.length; i += 1000) {
     await prisma.product.createMany({ data: toCreate.slice(i, i + 1000), skipDuplicates: true });
   }
   const all = await prisma.product.findMany({
-    where: { country_id: country.id, muadil_grup_id: { not: null } },
+    where: { country_id: country.id },
     select: { id: true, muadil_grup_id: true },
   });
   for (const p of all) if (p.muadil_grup_id) pmap.set(p.muadil_grup_id, p.id);
-  console.log("   ürün (yeni):", toCreate.length, " toplam:", pmap.size);
+
+  // refresh existing products' category/name/brand/image to the latest catalog values
+  const seen2 = new Set<string>();
+  let pending: Promise<unknown>[] = [];
+  for (const it of catalog) {
+    const gid = groupKey(it);
+    if (seen2.has(gid)) continue;
+    seen2.add(gid);
+    const pid = pmap.get(gid);
+    if (!pid) continue;
+    pending.push(prisma.product.update({
+      where: { id: pid },
+      data: { name: it.name, brand: it.brand, image_url: it.image_url, category_id: catOf(it) },
+    }));
+    if (pending.length >= 200) { await Promise.all(pending); pending = []; }
+  }
+  await Promise.all(pending);
+  console.log("   ürün: yeni", toCreate.length, "| toplam", pmap.size);
 
   // 5) StorePrices — refresh all prices for the involved stores
   const storeIds = Object.keys(STORE_NAMES).map(Number);
   await prisma.storePrice.deleteMany({ where: { store_id: { in: storeIds } } });
 
-  const rows: any[] = [];
+  // One price per (store, product): when a store lists the same canonical product
+  // more than once (duplicate SKUs / stale listings), keep the LOWEST price so the
+  // shopper always sees the best available — never an arbitrary stale-high one.
+  const best = new Map<string, any>();
   for (const it of catalog) {
     const pid = pmap.get(groupKey(it));
     if (!pid) continue;
     for (const pr of it.prices) {
       if (!pr.store_id) continue;
-      rows.push({
-        store_id: pr.store_id, product_id: pid, store_sku: pr.sku || null,
-        price: pr.price, unit: it.unit, source: "scrape",
-      });
+      const key = `${pr.store_id}:${pid}`;
+      const prev = best.get(key);
+      if (!prev || Number(pr.price) < Number(prev.price)) {
+        best.set(key, {
+          store_id: pr.store_id, product_id: pid, store_sku: pr.sku || null,
+          price: pr.price, unit: it.unit, source: "scrape",
+        });
+      }
     }
   }
+  const rows = [...best.values()];
   let inserted = 0;
   for (let i = 0; i < rows.length; i += 1000) {
     const r = await prisma.storePrice.createMany({ data: rows.slice(i, i + 1000), skipDuplicates: true });
     inserted += r.count;
   }
   console.log("   store_price:", inserted);
+
+  // 6) Price history — append today's snapshot (one row per store+product per day),
+  //    so product detail can chart each market's price over time. Re-runs on the same
+  //    day replace that day's snapshot; rows older than 90 days are pruned.
+  const dayStart = new Date(); dayStart.setHours(0, 0, 0, 0);
+  await prisma.priceHistory.deleteMany({
+    where: { store_id: { in: storeIds }, recorded_at: { gte: dayStart } },
+  });
+  const hist = rows.map((r) => ({ store_id: r.store_id, product_id: r.product_id, price: r.price }));
+  let hcount = 0;
+  for (let i = 0; i < hist.length; i += 1000) {
+    const r = await prisma.priceHistory.createMany({ data: hist.slice(i, i + 1000) });
+    hcount += r.count;
+  }
+  const cutoff = new Date(Date.now() - 90 * 24 * 3600 * 1000);
+  const pruned = await prisma.priceHistory.deleteMany({ where: { recorded_at: { lt: cutoff } } });
+  console.log("   price_history: +", hcount, "| pruned(>90d):", pruned.count);
   console.log("✅ ingest tamam.");
 }
 

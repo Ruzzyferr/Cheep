@@ -41,6 +41,9 @@ def test_parse_multipack():
     assert parse_quantity_and_unit("2x200 g") == (400.0, "g")
     # 6 x 1 L -> 6 L
     assert parse_quantity_and_unit("6 x 1 L") == (6.0, "l")
+    # the * separator must work too (was silently treated as a single 180 ml)
+    assert parse_quantity_and_unit("6*180 ml") == (1080.0, "ml")
+    assert parse_quantity_and_unit("Nesquik Kakaolu Süt 6*180 ml") == (1080.0, "ml")
 
 
 def test_parse_fallback():
@@ -60,8 +63,31 @@ def test_extract_count_packs():
     assert extract_size_from_name("Yumurta 10'lu") == (10.0, "adet")
     assert extract_size_from_name("Selpak Tuvalet Kağıdı 32'li") == (32.0, "adet")
     assert extract_size_from_name("Cif Krem 24'lük Koli") == (24.0, "adet")
-    # a real size still wins over a count pack
-    assert extract_size_from_name("İçim Ayran 6'lı 200 ml") == (200.0, "ml")
+
+
+def test_count_pack_with_size_is_total_so_packs_dont_match_singles():
+    # a small count (<=12) is a per-unit multipack -> TOTAL content
+    assert extract_size_from_name("İçim Ayran 6'lı 200 ml") == (1200.0, "ml")
+    assert extract_size_from_name("Coca-Cola 1,5 L 6'lı") == (9.0, "l")
+    # a large count with a gram size is the TOTAL weight (100 tea bags = 320 g)
+    assert extract_size_from_name("Lipton 100'lü 320 g") == (320.0, "g")
+
+
+def test_multipack_separators_and_pack_count():
+    from scrapers.units import extract_size_and_pack
+    assert extract_size_and_pack("6*180 ml") == (1080.0, "ml", 6)
+    assert extract_size_and_pack("6 x 200 ml") == (1200.0, "ml", 6)
+    assert extract_size_and_pack("İçim Ayran 6'lı 200 ml") == (1200.0, "ml", 6)
+    assert extract_size_and_pack("Lipton 100'lü 320 g") == (320.0, "g", 100)
+    assert extract_size_and_pack("Süt 1 L") == (1.0, "l", 1)
+
+
+def test_size_signature_separates_packs_from_singles():
+    from scrapers.matching import size_signature
+    single = size_signature("Coca-Cola Zero 1,5 L", 1.5, "l")
+    six = size_signature("Coca-Cola Zero 1,5 L 6'lı", 1.5, "l")
+    assert single != six                 # 6-pack must not bucket with a single
+    assert single == size_signature("Coca-Cola Zero 1500 ml", 1500, "ml")
 
 
 def test_compute_unit_price():
