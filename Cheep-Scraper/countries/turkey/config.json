@@ -14,14 +14,12 @@
     {
       "name": "CarrefourSA",
       "store_id": 2,
-      "scraper_path": "../../carrefour/carrefoursa_api_scraper.py",
-      "scraper_class": "CarrefourSAPlaywrightScraper",
-      "scraper_method": "scrape_all_categories",
+      "scraper_path": "../../carrefour/carrefour_scraper.py",
+      "scraper_class": "CarrefourScraper",
+      "scraper_method": "fetch_products",
       "output_pattern": "carrefoursa_products_{timestamp}.json",
       "enabled": true,
-      "headless": false,
-      "user_data_dir": "./browser_data/carrefoursa",
-      "note": "user_data_dir ile persistent browser context kullanılır (Cloudflare bypass için en iyi yöntem)"
+      "note": "requests + SSR (Cloudflare yok); dataLayerItemData kartları; menüden departman/yaprak kategori, ?page=N"
     },
     {
       "name": "ŞOK",

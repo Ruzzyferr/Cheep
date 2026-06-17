@@ -27,6 +27,7 @@ sys.path.insert(0, str(ROOT))
 from migros.migros_api_scraper import MigrosAPISafeScraper  # noqa: E402
 from sok.sok_scraper import SokScraper  # noqa: E402
 from a101.a101_scraper import A101Scraper  # noqa: E402
+from carrefour.carrefour_scraper import CarrefourScraper  # noqa: E402
 from util.taxonomy import classify  # noqa: E402
 from scrapers.matching import group_products, _size_key  # noqa: E402
 
@@ -46,6 +47,8 @@ def scrape_all() -> list:
     products += MigrosAPISafeScraper(max_pages_per_term=6, delay=0.6).fetch_products()
     log.info("--- ŞOK ---")
     products += SokScraper(max_pages_per_cat=60, delay=0.6).fetch_products()
+    log.info("--- CarrefourSA ---")
+    products += CarrefourScraper(max_pages_per_cat=50, delay=0.6).fetch_products()
     log.info("--- A101 ---")
     products += A101Scraper(headless=True, delay=1.0).fetch_products()
     log.info(f"scraped total: {len(products)}")
