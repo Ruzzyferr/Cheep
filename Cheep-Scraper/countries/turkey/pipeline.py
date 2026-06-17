@@ -134,7 +134,8 @@ def main():
 
     if args.ingest:
         import subprocess
-        backend = ROOT / "cheep-backend-express"
+        # ROOT is the scraper root (Cheep-Scraper); the backend is its sibling.
+        backend = ROOT.parent / "cheep-backend-express"
         log.info("--ingest: backend'e yükleniyor (Prisma)...")
         # On Windows npx is a .cmd shim; pass the whole command as a string with
         # shell=True so cmd resolves it (a list + shell=True fails with WinError 267).
