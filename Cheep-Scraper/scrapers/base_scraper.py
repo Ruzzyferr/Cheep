@@ -14,18 +14,24 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class Product:
-    """Scrape edilen ürün modeli"""
+    """Tüm market scraper'larının ürettiği tek (kanonik) ürün modeli."""
     name: str
-    price: Decimal
+    price: Decimal                      # kullanıcının ödediği güncel fiyat (TL)
     store: str
     brand: Optional[str] = None
     barcode: Optional[str] = None
-    category: Optional[str] = None
-    unit: str = "adet"
-    quantity: float = 1.0
+    sku: Optional[str] = None
+    category: Optional[str] = None       # kanonik kategori (matcher dolduracak)
+    raw_category: Optional[str] = None   # market'in ham kategorisi
+    unit: str = "adet"                   # normalize birim (kg/g/l/ml/adet/paket)
+    quantity: float = 1.0                # paket boyutu (ör. 1.5 -> 1.5 L)
+    unit_price: Optional[Decimal] = None # birim-başı fiyat (TL/kg, TL/l, TL/adet)
+    unit_price_unit: Optional[str] = None
+    original_price: Optional[Decimal] = None  # indirim öncesi (varsa)
     in_stock: bool = True
     image_url: Optional[str] = None
     product_url: Optional[str] = None
+    country_code: str = "TR"
     scraped_at: datetime = None
 
     def __post_init__(self):
@@ -33,20 +39,28 @@ class Product:
             self.scraped_at = datetime.now()
 
     def to_dict(self) -> Dict:
-        """Dictionary'ye çevir"""
+        """Dictionary'ye çevir (JSON/ingest için)."""
+        def num(v):
+            return float(v) if v is not None else None
         return {
             'name': self.name,
             'brand': self.brand,
             'barcode': self.barcode,
+            'sku': self.sku,
             'category': self.category,
-            'price': float(self.price),
+            'raw_category': self.raw_category,
+            'price': num(self.price),
+            'original_price': num(self.original_price),
             'unit': self.unit,
             'quantity': self.quantity,
+            'unit_price': num(self.unit_price),
+            'unit_price_unit': self.unit_price_unit,
             'in_stock': self.in_stock,
             'image_url': self.image_url,
             'product_url': self.product_url,
             'store': self.store,
-            'scraped_at': self.scraped_at.isoformat()
+            'country_code': self.country_code,
+            'scraped_at': self.scraped_at.isoformat(),
         }
 
     def validate(self) -> bool:
