@@ -85,6 +85,7 @@ def build_catalog(products: list) -> list:
                 })
             catalog.append({
                 "name": rep.name, "brand": rep.brand,
+                "raw_category": rep.raw_category,
                 "category_top": rep._top, "category_sub": rep._sub,
                 "quantity": rep.quantity, "unit": rep.unit,
                 "size_key": _size_key(rep.quantity, rep.unit),

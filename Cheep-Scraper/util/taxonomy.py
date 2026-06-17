@@ -28,7 +28,7 @@ CANONICAL_TAXONOMY: Dict[str, List[str]] = {
                    "Salça", "Baharat", "Sirke", "Çorba", "Konserve",
                    "Pasta Malzemeleri"],
     "Atıştırmalık": ["Çikolata", "Bisküvi", "Gofret", "Cips", "Kuruyemiş", "Kraker",
-                     "Şekerleme", "Sakız"],
+                     "Şekerleme", "Sakız", "Tahıllı Bar"],
     "İçecek": ["Su", "Maden Suyu", "Gazlı İçecek", "Meyve Suyu", "Çay", "Kahve",
                "Enerji İçeceği"],
     "Donuk & Hazır Yemek": ["Dondurulmuş Gıda", "Hazır Yemek", "Pizza"],
@@ -38,7 +38,8 @@ CANONICAL_TAXONOMY: Dict[str, List[str]] = {
                  "Yumuşatıcı", "Yüzey Temizleyici", "Çöp Poşeti"],
     "Kağıt & Hijyen": ["Tuvalet Kağıdı", "Kağıt Havlu", "Peçete", "Islak Mendil"],
     "Kişisel Bakım & Kozmetik": ["Şampuan", "Sabun", "Diş Macunu", "Deodorant",
-                                  "Duş Jeli", "Tıraş", "Cilt Bakım", "Ped & Hijyen"],
+                                  "Duş Jeli", "Tıraş", "Cilt Bakım", "Ped & Hijyen",
+                                  "Parfüm & Kolonya", "Makyaj"],
     "Bebek": ["Bebek Bezi", "Bebek Maması", "Bebek Bakım"],
     "Ev & Yaşam": ["Mutfak Gereçleri", "Pil & Aydınlatma", "Kırtasiye",
                    "Cam & Sofra", "Mum & Dekor"],
@@ -121,7 +122,8 @@ _RULES: List[Tuple[str, List[str]]] = [
               "patos", "cipso", "tortilla"]),
     ("Kuruyemiş", ["kuruyemis", "findik", "fistik", "ceviz", "badem", "leblebi",
                    "antep fistigi", "kaju"]),
-    ("Kraker", ["kraker"]),
+    ("Kraker", ["kraker", "grissini", "galeta", "cubuk kraker"]),
+    ("Tahıllı Bar", ["tahilli bar", "protein bar", "granola bar", "musli bar", "yulaf bar"]),
     ("Şekerleme", ["sekerleme", "jelibon", "lokum", "marshmallow", "akide"]),
     ("Sakız", ["sakiz", "sakizi"]),
     # İçecek
@@ -168,6 +170,9 @@ _RULES: List[Tuple[str, List[str]]] = [
     ("Tıraş", ["tiras", "tiras kopugu", "tiras bicagi"]),
     ("Cilt Bakım", ["cilt bakim", "nemlendirici", "yuz kremi", "el kremi", "vucut losyonu"]),
     ("Ped & Hijyen", ["ped", "hijyenik ped", "gunluk ped", "tampon"]),
+    ("Parfüm & Kolonya", ["kolonya", "parfum", "edt", "edp", "cologne", "after shave"]),
+    ("Makyaj", ["ruj", "rimel", "maskara", "oje", "fondoten", "allik", "far",
+                "eyeliner", "kapatici"]),
     # Bebek
     ("Bebek Bezi", ["bebek bezi", "prima", "molfix", "sleepy", "onlu bez", "külot bez"]),
     ("Bebek Maması", ["bebek mamasi", "devam sutu", "kasik mama"]),
@@ -289,6 +294,10 @@ _RAW_TOP_ALIASES = [
     ("temizlik", "Temizlik"), ("deterjan", "Temizlik"), ("banyo temizley", "Temizlik"),
     ("anne", "Bebek"), ("bebek", "Bebek"), ("cocuk", "Bebek"),
     ("evcil", "Pet Shop"), ("pet", "Pet Shop"),
+    ("kolonya", "Kişisel Bakım & Kozmetik"), ("parfum", "Kişisel Bakım & Kozmetik"),
+    ("makyaj", "Kişisel Bakım & Kozmetik"), ("kavanoz", "Bebek"), ("mama", "Bebek"),
+    ("cekirdek", "Atıştırmalık"), ("kuruyemis", "Atıştırmalık"), ("cerez", "Atıştırmalık"),
+    ("meze", "Atıştırmalık"),
     ("elektronik", "Elektronik"),
     ("oyuncak", "Oyuncak & Hobi"),
     ("giyim", "Giyim & Tekstil"), ("aksesuar", "Giyim & Tekstil"), ("tekstil", "Giyim & Tekstil"),
@@ -342,24 +351,34 @@ def classify(name: str, raw_category: Optional[str] = None,
     if strong_best is not None:
         return (SUB_TO_TOP[strong_best[3]], strong_best[3])
 
-    # 2) otherwise trust the market's own category over a lone flavour word —
-    #    "Portakallı Revani" (raw: Pastane) shouldn't become Meyve just for "portakal"
+    # market's own category — tier it too (a product-TYPE hint like "Dondurulmuş
+    # Patates" must beat a raw-produce hint like "patates"->Sebze)
     hint_text = _norm(" ".join(filter(None, [raw_category or ""] + (ascendants or []))))
     hint_tokens = set(hint_text.split())
-    best_sub, best_score = None, 0
+    s_sub = s_sc = w_sub = w_sc = None
+    s_sc = w_sc = 0
     for sub, kws in _RULES:
         sc = _score(hint_text, hint_tokens, kws)
-        if sc > best_score:
-            best_score, best_sub = sc, sub
-    if best_sub and best_score > 0:
-        return (SUB_TO_TOP[best_sub], best_sub)
+        if sc <= 0:
+            continue
+        if sub in _WEAK_SUBS:
+            if sc > w_sc:
+                w_sc, w_sub = sc, sub
+        elif sc > s_sc:
+            s_sc, s_sub = sc, sub
 
-    # 3) only a raw-produce/flavour word matched the name, and no useful hint
-    if weak_best is not None:
-        return (SUB_TO_TOP[weak_best[3]], weak_best[3])
-
-    # name + keywords found nothing -> trust the market's own category (top only)
+    # 2) strong (product-type) hint from the market category
+    if s_sub:
+        return (SUB_TO_TOP[s_sub], s_sub)
+    # 3) market top-level category authority (raw "Atıştırmalık"/"Kolonya"/"Mama")
     top = _raw_top(hint_text + " ")
     if top:
         return (top, "Genel")
+    # 4) a raw-produce/flavour word in the name
+    if weak_best is not None:
+        return (SUB_TO_TOP[weak_best[3]], weak_best[3])
+    # 5) raw-produce hint
+    if w_sub:
+        return (SUB_TO_TOP[w_sub], w_sub)
+
     return ("Diğer", "Diğer")
