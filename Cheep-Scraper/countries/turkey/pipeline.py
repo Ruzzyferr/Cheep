@@ -104,7 +104,7 @@ def main():
                          "(use after a taxonomy change to avoid a fresh scrape)")
     args = ap.parse_args()
 
-    from base_scraper import Product  # noqa
+    from scrapers.base_scraper import Product  # noqa
     if args.rebuild:
         log.info(f"--rebuild: ham önbellekten okunuyor: {args.rebuild}")
         with open(args.rebuild, encoding="utf-8") as f:
