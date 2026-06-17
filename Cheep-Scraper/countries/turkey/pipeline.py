@@ -114,7 +114,12 @@ def main():
     log.info("kategori dağılımı: " + ", ".join(f"{k}={v}" for k, v in dist.most_common()))
 
     if args.ingest:
-        log.info("--ingest: backend'e gönderim (Faz 3) — import_to_backend ile bağlanacak")
+        import subprocess
+        backend = ROOT / "cheep-backend-express"
+        log.info("--ingest: backend'e yükleniyor (Prisma)...")
+        r = subprocess.run(["npx", "tsx", "scripts/ingest-catalog.ts", str(path)],
+                           cwd=str(backend), shell=(sys.platform == "win32"))
+        log.info(f"ingest exit={r.returncode}")
 
 
 if __name__ == "__main__":
