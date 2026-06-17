@@ -33,7 +33,8 @@ Cheep'i Türkiye pazarı için üretime hazır hale getirmek:
 | Migros API | ⚠️ Tarayıcı UA ile 404 (403 değil) → endpoint/slug güncel değil, onarılabilir |
 | Postgres (localhost:5432) | 🔧 Başlangıçta kapalı; Docker Desktop başlatıldı → compose ile ayağa kaldırılacak |
 | Node 24 / pnpm 10 | ✅ |
-| LLM anahtarı (OpenAI/OpenRouter) | ❓ `.env` kontrol edilecek; yoksa deterministik matcher'a düşülür |
+| Pipeline LLM (OpenAI gpt-4o-mini) | ❌ `.env` anahtarı 429 / kredi yok → **pipeline LLM'siz** (deterministik kural+fuzzy), Claude (geliştirme) doğrular |
+| Runtime AI (uygulama içi sohbet) | 🟢 **Google Gemini** (`gemini-2.0-flash`, ücretsiz tier). Runtime doğrulama için `GEMINI_API_KEY` gerekir |
 
 ## 4. Kapsam ve Fazlar
 
@@ -95,7 +96,8 @@ Cheep'i Türkiye pazarı için üretime hazır hale getirmek:
 ## 6. Riskler & Açık Sorular
 
 - **Market API keşfi:** ŞOK/A101/Tarım Kredi endpoint'leri Playwright probe ile netleşene kadar kesin değil. Cloudflare sertleşirse A101 gecikebilir.
-- **LLM maliyeti/anahtar:** Normalizer/matcher LLM ister (~$8/16K ürün). Anahtar yoksa deterministik fuzzy matcher + kural tabanlı kategori eşlemeye düşülür (kalite biraz düşebilir, raporlanır).
+- **Pipeline LLM kararı:** OpenAI anahtarı kredisiz (429). Karar: **pipeline LLM'siz** — deterministik fuzzy matcher (Levenshtein/Jaccard) + kural/regex tabanlı kanonik kategori eşleme. Kalite Claude (geliştirme) ile gerçek veri üzerinde doğrulanır. Maliyet yok.
+- **Runtime AI (Gemini):** Uygulama içi AI sohbeti `gemini-2.0-flash` (ücretsiz tier) kullanır. Yayındaki uygulama kendi `GEMINI_API_KEY`'ini ister; runtime doğrulama bu anahtara bağlıdır (kod+kontrat anahtarsız hazırlanır, sohbet anahtar gelince doğrulanır).
 - **Expo web ≠ native:** Web'de doğrulama native'in birebir aynısı değil; native-only farklar typecheck + not ile kapatılır.
 - **Scraping etiği/hukuk:** rate-limit korunur; yalnızca herkese açık fiyat verisi; robots/şartlar dikkate alınır (mevcut README uyarısı geçerli).
 
@@ -104,3 +106,19 @@ Cheep'i Türkiye pazarı için üretime hazır hale getirmek:
 - BİM (online SKU-bazlı fiyat kataloğu yok; broşür-OCR ayrı bir epic).
 - Polonya/yeni ülke genişlemesi (altyapı hazır, bu turda veri eklenmez).
 - Yeni backend özellikleri (watchlist, push alerter consumer vb.) — yalnızca veri doğruluğu/temizliği için gerekenler.
+- RAG doğal-dil fiyat asistanı, fotoğraf→liste (vision) — bu turda hariç (ileride eklenebilir).
+
+## 8. Yapay Zeka Asistanı (Gemini)
+
+Uygulamaya tam AI desteği: **Google Gemini** (`gemini-2.0-flash`, ücretsiz tier) ile üç kullanıcı-yönelik özellik. Sağlayıcı soyutlanır (ileride OpenRouter/Claude'a geçilebilir).
+
+**Mimari:** Backend'de izole bir `ai` modülü (Gemini client + prompt'lar + DB-grounding). Mobilde bir **AI sohbet ekranı**. AI ürün önerirken **uydurmaz** — DB'deki gerçek ürünlerle eşler (isim+fuzzy), bulunmayanı "bulunamadı" der.
+
+**Özellikler:**
+1. **Yemek → liste:** Kullanıcı "şu yemekleri yapacağım" der → Gemini malzeme + gramaj çıkarır → DB ürünleriyle eşlenir → yeni bir alışveriş listesi oluşturulur, kullanıcı listeye yönlendirilir. (Porsiyon + diyet tercihi opsiyonel.)
+2. **Bütçeye göre sepet:** "X TL'ye … sepet" → bütçe içinde ürün seti önerilir, compare-engine ile en ucuz market(ler)e dağıtılır.
+3. **Haftalık yemek planı + liste:** "1 haftalık ekonomik plan" → 7 günlük menü + birleşik alışveriş listesi + en iyi rota.
+
+**Endpoint taslağı (öneri):** `POST /api/v1/ai/recipe-list`, `/ai/budget-basket`, `/ai/meal-plan` (auth'lu, country-scoped). Gemini çıktısı yapılandırılmış JSON; backend DB-grounding + liste oluşturma yapar.
+
+**Doğrulama:** Anahtar yokken kontrat + DB-grounding birim testleriyle; anahtar gelince gerçek Gemini yanıtıyla uçtan uca (Expo web + Playwright).

@@ -15,7 +15,8 @@
 - Ingest endpoint'leri `x-api-key` (INGEST_API_KEY) ister; country_id zorunlu (default TR).
 - "Emin olmadan bitti deme": her faz somut kanıtla kapanır (gerçek veri örneği / yeşil test / ekran görüntüsü).
 - Para birimi: Decimal/Number; fiyat > 0; gramaj normalize (kg/g/l/ml/adet/paket/kutu).
-- LLM anahtarı yoksa deterministik fuzzy matcher + kural tabanlı kategori eşlemeye düş; raporla.
+- Pipeline (kategori/eşleştirme) **LLM'siz**: deterministik fuzzy matcher + kural/regex kanonik eşleme; Claude (geliştirme) gerçek veriyle doğrular.
+- Runtime AI = **Google Gemini** (`gemini-2.0-flash`, ücretsiz). Sağlayıcı soyutlanır. `GEMINI_API_KEY` yoksa kontrat+grounding testleriyle, gelince gerçek yanıtla doğrula. AI önerileri DB'deki gerçek ürünlere bağlanır (uydurma yok).
 
 ---
 
@@ -114,13 +115,38 @@
 
 ---
 
-## Faz 5 — Uçtan Uca & Teslim
+## Faz 5 — Yapay Zeka Asistanı (Gemini)
 
-### Task 5.1: Uçtan uca doğrulama + dokümantasyon + commit
+### Task 5.1: Backend AI modülü + Gemini client (sağlayıcı soyut)
+**Files:** Create: `cheep-backend-express/src/services/ai/gemini.client.ts`, `src/services/ai/ai.service.ts`, `src/api/ai/ai.routes.ts`, `ai.controller.ts`; Modify: `src/config/index.ts` (GEMINI_API_KEY, opsiyonel), `src/index.ts` (route mount), `.env.example`
+**Interfaces:** Produces: `generateStructured(prompt, schema) -> object` (Gemini REST `generateContent`, JSON çıktı); `groundProductsByNames(names: string[], countryId) -> matched[]` (DB + fuzzy eşleme, uydurma yok)
+- [ ] Gemini client (REST `v1beta/models/gemini-2.0-flash:generateContent`, `GEMINI_API_KEY` env). Anahtar yoksa net hata/devre dışı bayrağı.
+- [ ] DB-grounding yardımcı: AI'nın döndürdüğü ürün adlarını gerçek `products` ile eşle (similarity.ts kullan), eşleşmeyeni "bulunamadı" işaretle.
+- **Gate:** grounding birim testi yeşil (mock ürünlerle); route mount; tsc yeşil.
+
+### Task 5.2: AI endpoint'leri (recipe-list / budget-basket / meal-plan)
+**Files:** Modify: `src/api/ai/*`; Create: `test/ai-grounding.test.ts`
+**Interfaces:** Consumes: 5.1. Produces: `POST /api/v1/ai/recipe-list`, `/ai/budget-basket`, `/ai/meal-plan` (auth + x-country)
+- [ ] **recipe-list:** girdiyi (yemekler, porsiyon) Gemini'ye yapılandırılmış prompt; çıktı malzeme+gramaj → grounding → liste oluştur (mevcut lists.service ile).
+- [ ] **budget-basket:** bütçe+tercih → ürün seti → compare-engine ile en ucuz market dağıtımı.
+- [ ] **meal-plan:** 7 günlük menü + birleşik liste + rota.
+- [ ] Anahtarsız: kontrat + grounding testleri; anahtarlıysa gerçek yanıt smoke testi.
+- **Gate:** endpoint'ler kontrat testlerinde doğru; tsc + vitest yeşil.
+
+### Task 5.3: Mobil AI sohbet ekranı
+**Files:** Create: `Cheep-Mobile/src/screens/ai/AIAssistantScreen.tsx`, `src/services/ai.service.ts`, ilgili bileşenler; Modify: navigation (yeni sekme/giriş), api.client
+- [ ] Premium sohbet UI (mesaj baloncukları, öneri çipleri "Yemek listesi/Bütçe sepeti/Haftalık plan", yükleniyor/boş/hata durumları).
+- [ ] 3 akış: girdi → endpoint → sonuç kartı → "Listeye ekle/Listeyi gör" yönlendirme.
+- [ ] Expo web + Playwright ile her akışın SS'i (mock/gerçek yanıt).
+- **Gate:** mobil tsc yeşil; her AI akışının SS'i; navigasyon akıcı.
+
+## Faz 6 — Uçtan Uca & Teslim
+
+### Task 6.1: Uçtan uca doğrulama + dokümantasyon + commit
 **Files:** Modify: README'ler, docs; commit
-- [ ] Tüm zincir: scrape → DB → API → mobil; Playwright ile uçtan uca senaryo + SS'ler.
-- [ ] README/docs güncelle (yeni marketler, taksonomi, birim-başı fiyat, UI). Anlamlı commit'ler.
-- **Gate:** uçtan uca yeşil; dürüst durum raporu (doğrulanan vs cihaz-gerektiren); branch hazır.
+- [ ] Tüm zincir: scrape → DB → API → mobil (+AI); Playwright ile uçtan uca senaryo + SS'ler.
+- [ ] README/docs güncelle (yeni marketler, taksonomi, birim-başı fiyat, UI, Gemini AI asistanı). Anlamlı commit'ler.
+- **Gate:** uçtan uca yeşil; dürüst durum raporu (doğrulanan vs cihaz/anahtar-gerektiren); branch hazır.
 
 ---
 
