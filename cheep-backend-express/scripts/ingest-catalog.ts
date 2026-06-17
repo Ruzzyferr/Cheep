@@ -99,7 +99,11 @@ async function main() {
   }
   console.log("   kategori:", catId.size);
 
-  // 4) Products — upsert by muadil_grup_id (preload existing -> map)
+  // 4) Products — clean reload for the country (cascades store_prices),
+  //    then create fresh so category changes take effect. (Weekly refresh;
+  //    prod should switch to upsert-by-muadil to preserve user lists.)
+  await prisma.product.deleteMany({ where: { country_id: country.id } });
+
   const groupKey = (it: CatalogItem) => `${slugify(it.name)}__${it.size_key}`;
   const existing = await prisma.product.findMany({
     where: { country_id: country.id, muadil_grup_id: { not: null } },

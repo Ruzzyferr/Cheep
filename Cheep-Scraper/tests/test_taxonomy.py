@@ -69,5 +69,20 @@ def test_breakfast_and_staples():
     assert top("Yayla Kırmızı Mercimek 1 kg") == "Temel Gıda"
 
 
+def test_head_noun_decides_over_flavor():
+    # the LAST keyword (head noun) wins, not the flavour modifier
+    assert classify("Mis Çikolatalı Süt 200 ml")[0] == "Süt Ürünleri"
+    assert classify("Ülker Sütlü Çikolata 80 G")[0] == "Atıştırmalık"
+    assert classify("Eti Çilekli Gofret 35 G")[1] == "Gofret"
+    assert classify("Kemal Kükrer Elma Sirkesi 500 ml")[1] == "Sirke"
+    assert classify("Blendax Limon Özlü Şampuan 500 ml")[1] == "Şampuan"
+
+
+def test_turkish_suffix_inflection():
+    # pekmezi -> pekmez, reçeli -> reçel
+    assert classify("Seyidoğlu Üzüm Pekmezi 700 G") == ("Kahvaltılık", "Tahin & Pekmez")
+    assert classify("Tamek Çilek Reçeli 380 G") == ("Kahvaltılık", "Reçel")
+
+
 def test_unknown_falls_to_diger():
     assert top("Xyzzy Foobar 123") == "Diğer"

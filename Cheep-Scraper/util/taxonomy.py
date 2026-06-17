@@ -59,14 +59,18 @@ SUB_TO_TOP: Dict[str, str] = {
 # inflected forms) so "baligi" never matches "bal".
 _RULES: List[Tuple[str, List[str]]] = [
     # Süt Ürünleri
-    ("Süt", ["sut", "sutu", "laktozsuz sut", "uht sut", "yagli sut"]),
+    ("Süt", ["sut", "sutu", "laktozsuz sut", "uht sut", "yagli sut", "milkshake",
+             "badem sutu", "badem icecegi", "bademli icecek", "yulaf sutu",
+             "soya sutu", "hindistan cevizi icecegi", "cikolatali sut", "muzlu sut",
+             "cilekli sut", "kakaolu sut", "sut bazli icecek"]),
     ("Peynir", ["peynir", "peyniri", "kasar", "kashar", "lor", "cokelek", "labne"]),
     ("Yoğurt", ["yogurt", "yogurdu", "probiyotik", "probiyo", "quark", "activia",
                 "danino", "yoshake", "babymix", "icilebilir yogurt"]),
     ("Tereyağı", ["tereyagi", "tereyag"]),
     ("Ayran", ["ayran"]),
     ("Kefir", ["kefir", "kefirim", "kefirix", "kefirzadem"]),
-    ("Kaymak & Krema", ["kaymak", "krema"]),
+    ("Kaymak & Krema", ["kaymak", "sivi krema", "krema santi", "cisil krema",
+                        "mutfak kremasi"]),
     # Kahvaltılık
     ("Yumurta", ["yumurta", "yumurtasi"]),
     ("Bal", ["bal", "bali", "petek bal"]),
@@ -125,7 +129,8 @@ _RULES: List[Tuple[str, List[str]]] = [
                       "soda icecek", "gazli icecek"]),
     ("Maden Suyu", ["maden suyu", "soda"]),
     ("Su", ["su", "dogal kaynak suyu", "kaynak suyu"]),
-    ("Meyve Suyu", ["meyve suyu", "meyve nektari", "ice tea", "ledra", "nektar"]),
+    ("Meyve Suyu", ["meyve suyu", "meyve nektari", "ice tea", "ledra", "nektar",
+                    "suyu", "ayran icecek"]),
     ("Çay", ["cay", "poset cay", "demlik cay", "yesil cay", "bitki cayi"]),
     ("Kahve", ["kahve", "kahvesi", "nescafe", "filtre kahve", "turk kahvesi", "espresso"]),
     ("Enerji İçeceği", ["enerji icecegi", "redbull", "red bull", "energy"]),
@@ -135,7 +140,9 @@ _RULES: List[Tuple[str, List[str]]] = [
     ("Hazır Yemek", ["hazir yemek", "mantı", "manti"]),
     # Fırın
     ("Ekmek", ["ekmek", "ekmegi", "bazlama", "lavas", "tost ekmegi"]),
-    ("Pasta & Kek", ["pasta", "kek", "kekı", "browni", "muffin"]),
+    ("Pasta & Kek", ["pasta", "kek", "kekı", "browni", "muffin", "cheesecake",
+                     "revani", "sufle", "tiramisu", "profiterol", "ekler",
+                     "magnolia", "supangle", "kadayif", "baklava"]),
     ("Poğaça & Börek", ["pogaca", "borek", "acma", "simit"]),
     # Dondurma
     ("Dondurma", ["dondurma", "magnum", "cornetto", "maras dondurma", "algida",
@@ -221,6 +228,46 @@ def _score(text: str, tokens: set, keywords: List[str]) -> int:
     return s
 
 
+def _token_matches(kw: str, tokens: set) -> bool:
+    """Single-word keyword matches a token exactly, or as a prefix with a short
+    Turkish suffix (pekmez->pekmezi, recel->receli, sut->only exact since <4)."""
+    if kw in tokens:
+        return True
+    if len(kw) >= 4:
+        for t in tokens:
+            if t.startswith(kw) and len(t) - len(kw) <= 2:
+                return True
+    return False
+
+
+def _name_match(text: str, tokens: set, keywords: List[str]):
+    """Return (matched, last_end_position, hit_count) for keywords against the
+    NAME. last_end_position = how far into the name the matched keyword ends;
+    the product's *head noun* (category) is conventionally last, so the latest
+    match wins ("Çikolatalı Süt"->Süt, "Sütlü Çikolata"->Çikolata)."""
+    last, hits = -1, 0
+    for kw in keywords:
+        k = _norm(kw)
+        if not k:
+            continue
+        if " " in k:
+            pos = text.rfind(k)
+            if pos >= 0:
+                hits += 1
+                last = max(last, pos + len(k))
+        else:
+            if k in tokens:
+                hits += 1
+                last = max(last, text.rfind(k) + len(k))
+            elif len(k) >= 4:
+                for t in tokens:
+                    if t.startswith(k) and len(t) - len(k) <= 2:
+                        hits += 1
+                        last = max(last, text.rfind(t) + len(t))
+                        break
+    return (last >= 0, last, hits)
+
+
 # Fallback: map a market's own category name -> canonical TOP, used only when the
 # product NAME yields no match. Ordered: more specific phrases first.
 _RAW_TOP_ALIASES = [
@@ -259,25 +306,57 @@ def _raw_top(text: str) -> Optional[str]:
     return None
 
 
+# Raw-produce / flavour subcategories — weak: they lose to any product-TYPE match.
+_WEAK_SUBS = {"Meyve", "Sebze", "Yeşillik", "Kuru Meyve"}
+
+
 def classify(name: str, raw_category: Optional[str] = None,
              ascendants: Optional[List[str]] = None) -> Tuple[str, str]:
-    """Classify a product into (top, subcategory). Name is the primary signal;
-    the market's own category is a tie-break, then a top-level fallback."""
+    """Classify a product into (top, subcategory).
+
+    Primary signal is the NAME, decided by the *head noun* heuristic: the
+    keyword that appears LAST in the name wins (Turkish puts the product type
+    last — "Çikolatalı Süt"->Süt, "Sütlü Çikolata"->Çikolata, "Elma Sirkesi"->
+    Sirke). Ties break on hit count, then rule order. If the name matches no
+    rule, fall back to the market's own category (top-level), then "Diğer"."""
     name_text = _norm(name)
     name_tokens = set(name_text.split())
 
+    # Two tiers: product-TYPE subcategories (strong) always beat raw-produce/
+    # flavour subcategories (weak), regardless of position — so "Kefir Orman
+    # Meyveli" -> Kefir, "Elma Sirkesi" -> Sirke, "Limon Kokulu Sabun" -> Sabun.
+    # Within a tier the latest-positioned (head-noun) match wins.
+    strong_best = weak_best = None
+    for idx, (sub, kws) in enumerate(_RULES):
+        matched, last_pos, hits = _name_match(name_text, name_tokens, kws)
+        if not matched:
+            continue
+        cand = (last_pos, hits, -idx, sub)
+        if sub in _WEAK_SUBS:
+            if weak_best is None or cand[:3] > weak_best[:3]:
+                weak_best = cand
+        else:
+            if strong_best is None or cand[:3] > strong_best[:3]:
+                strong_best = cand
+    # 1) a product-TYPE keyword in the name is the strongest signal
+    if strong_best is not None:
+        return (SUB_TO_TOP[strong_best[3]], strong_best[3])
+
+    # 2) otherwise trust the market's own category over a lone flavour word —
+    #    "Portakallı Revani" (raw: Pastane) shouldn't become Meyve just for "portakal"
     hint_text = _norm(" ".join(filter(None, [raw_category or ""] + (ascendants or []))))
     hint_tokens = set(hint_text.split())
-
     best_sub, best_score = None, 0
     for sub, kws in _RULES:
-        score = _score(name_text, name_tokens, kws) * 2  # name weighted x2
-        score += _score(hint_text, hint_tokens, kws)     # raw category as hint
-        if score > best_score:
-            best_score, best_sub = score, sub
-
+        sc = _score(hint_text, hint_tokens, kws)
+        if sc > best_score:
+            best_score, best_sub = sc, sub
     if best_sub and best_score > 0:
         return (SUB_TO_TOP[best_sub], best_sub)
+
+    # 3) only a raw-produce/flavour word matched the name, and no useful hint
+    if weak_best is not None:
+        return (SUB_TO_TOP[weak_best[3]], weak_best[3])
 
     # name + keywords found nothing -> trust the market's own category (top only)
     top = _raw_top(hint_text + " ")
