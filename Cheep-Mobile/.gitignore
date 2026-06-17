@@ -40,3 +40,8 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Playwright UI screenshots (proof artifacts, not source)
+screenshots/
+shot.py
+flow.py

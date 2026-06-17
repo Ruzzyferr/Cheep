@@ -4,6 +4,22 @@
  */
 
 import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
+
+// expo-secure-store has no web implementation; on web fall back to localStorage
+// so the app (and Playwright-driven web testing) works there too.
+const isWeb = Platform.OS === 'web';
+const webStore = {
+  setItemAsync: async (k: string, v: string) => {
+    if (typeof localStorage !== 'undefined') localStorage.setItem(k, v);
+  },
+  getItemAsync: async (k: string) =>
+    typeof localStorage !== 'undefined' ? localStorage.getItem(k) : null,
+  deleteItemAsync: async (k: string) => {
+    if (typeof localStorage !== 'undefined') localStorage.removeItem(k);
+  },
+};
+const store = isWeb ? webStore : SecureStore;
 
 // Keys
 const STORAGE_KEYS = {
@@ -21,7 +37,7 @@ export const storage = {
   // Save item
   async setItem(key: string, value: string): Promise<void> {
     try {
-      await SecureStore.setItemAsync(key, value);
+      await store.setItemAsync(key, value);
     } catch (error) {
       console.error('Storage setItem error:', error);
       throw error;
@@ -31,7 +47,7 @@ export const storage = {
   // Get item
   async getItem(key: string): Promise<string | null> {
     try {
-      return await SecureStore.getItemAsync(key);
+      return await store.getItemAsync(key);
     } catch (error) {
       console.error('Storage getItem error:', error);
       return null;
@@ -41,7 +57,7 @@ export const storage = {
   // Remove item
   async removeItem(key: string): Promise<void> {
     try {
-      await SecureStore.deleteItemAsync(key);
+      await store.deleteItemAsync(key);
     } catch (error) {
       console.error('Storage removeItem error:', error);
       throw error;
@@ -52,7 +68,7 @@ export const storage = {
   async clear(): Promise<void> {
     try {
       const keys = Object.values(STORAGE_KEYS);
-      await Promise.all(keys.map(key => SecureStore.deleteItemAsync(key)));
+      await Promise.all(keys.map(key => store.deleteItemAsync(key)));
     } catch (error) {
       console.error('Storage clear error:', error);
       throw error;
