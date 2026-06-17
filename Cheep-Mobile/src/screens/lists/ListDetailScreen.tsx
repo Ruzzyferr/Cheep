@@ -9,7 +9,6 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  ActivityIndicator,
   Alert,
   TouchableOpacity,
 } from 'react-native';
@@ -17,7 +16,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listService } from '../../services';
-import { Button, Card } from '../../components/ui';
+import { Button, Card, ListSkeleton } from '../../components/ui';
 import { EmptyState } from '../../components/common/EmptyState';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
@@ -110,8 +109,8 @@ export function ListDetailScreen({
 
   if (loading) {
     return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={colors.primary.main} />
+      <View style={styles.container}>
+        <ListSkeleton count={5} />
       </View>
     );
   }

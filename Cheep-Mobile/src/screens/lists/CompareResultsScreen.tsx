@@ -14,10 +14,12 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { listService } from '../../services';
 import { Card } from '../../components/ui';
 import { StoreChip } from '../../components/store/StoreChip';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
+import { shadows } from '../../theme/shadows';
 import type { CompareResponse, RouteStrategy } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 
@@ -313,6 +315,14 @@ function RouteCard({
       style={[styles.routeCard, isBest && styles.bestRoute].filter(Boolean) as any}
       onPress={onPress}
     >
+      {/* Best badge */}
+      {isBest && (
+        <View style={styles.bestBadge}>
+          <MaterialIcons name="star" size={13} color={colors.background.paper} />
+          <Text style={styles.bestBadgeText}>Önerilen Rota</Text>
+        </View>
+      )}
+
       {/* Header */}
       <View style={styles.routeHeader}>
         <Text style={styles.routeType}>
@@ -470,9 +480,29 @@ const styles = StyleSheet.create({
   },
 
   bestRoute: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.primary.main,
     backgroundColor: colors.background.paper,
+    ...shadows.md,
+  },
+
+  bestBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
+    backgroundColor: colors.primary.main,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: borderRadius.full,
+    marginBottom: spacing.sm,
+  },
+
+  bestBadgeText: {
+    ...typography.styles.caption,
+    color: colors.background.paper,
+    fontWeight: '700',
+    fontSize: 11,
   },
 
   routeHeader: {
