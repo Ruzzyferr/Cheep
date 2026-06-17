@@ -56,6 +56,14 @@ def test_extract_size_from_name():
     assert extract_size_from_name("Domates") == (1.0, "adet")
 
 
+def test_extract_count_packs():
+    assert extract_size_from_name("Yumurta 10'lu") == (10.0, "adet")
+    assert extract_size_from_name("Selpak Tuvalet Kağıdı 32'li") == (32.0, "adet")
+    assert extract_size_from_name("Cif Krem 24'lük Koli") == (24.0, "adet")
+    # a real size still wins over a count pack
+    assert extract_size_from_name("İçim Ayran 6'lı 200 ml") == (200.0, "ml")
+
+
 def test_compute_unit_price():
     # 30 TL for 1.5 L -> 20 TL/l
     assert compute_unit_price(Decimal("30"), 1.5, "l") == (Decimal("20.00"), "l")

@@ -54,11 +54,30 @@ def sig_tokens(name: str) -> frozenset:
 
 
 def _size_key(qty, unit) -> str:
+    """Canonical size bucket. Mass -> grams, volume -> millilitres, else adet.
+
+    So 1 L and 1000 ml land in the same bucket, while 1 L (1000 ml) and 200 ml —
+    or 5 kg (5000 g) and 500 g — never do. This is what keeps different package
+    sizes from ever being matched as the same product.
+    """
     try:
-        q = round(float(qty), 3)
+        q = float(qty)
     except (TypeError, ValueError):
         q = 0.0
-    return f"{q}{(unit or 'adet').lower()}"
+    u = (unit or "adet").strip().lower()
+    if u in ("kg", "kilogram", "kilo"):
+        base_q, base_u = q * 1000.0, "g"
+    elif u in ("g", "gr", "gram"):
+        base_q, base_u = q, "g"
+    elif u in ("l", "lt", "litre", "liter"):
+        base_q, base_u = q * 1000.0, "ml"
+    elif u == "cl":
+        base_q, base_u = q * 10.0, "ml"
+    elif u in ("ml", "mililitre"):
+        base_q, base_u = q, "ml"
+    else:
+        base_q, base_u = q, "adet"
+    return f"{round(base_q, 2)}{base_u}"
 
 
 def fingerprint(name: str, qty, unit) -> str:

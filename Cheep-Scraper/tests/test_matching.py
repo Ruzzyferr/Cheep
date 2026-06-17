@@ -51,3 +51,33 @@ def test_distinct_products_stay_separate():
     b = P("Fanta Portakal 1 L", "ŞOK", 1.0, "l")
     groups = group_products([a, b])
     assert b not in _group_of(groups, a)
+
+
+# --- gramaj must be flawless (user-reported failure scenarios) --------------
+def test_different_volume_never_groups():
+    one_l = P("Pınar Süt Tam Yağlı 1 L", "Migros", 1.0, "l")
+    ml200 = P("Pınar Süt Tam Yağlı 200 ml", "ŞOK", 200.0, "ml")
+    groups = group_products([one_l, ml200])
+    assert ml200 not in _group_of(groups, one_l)
+
+
+def test_different_mass_never_groups():
+    big = P("Omo Toz Deterjan 5 kg", "Migros", 5.0, "kg")
+    small = P("Omo Toz Deterjan 500 g", "ŞOK", 500.0, "g")
+    groups = group_products([big, small])
+    assert small not in _group_of(groups, big)
+
+
+def test_equivalent_volume_unifies():
+    # 1 L and 1000 ml are the same size -> should group
+    a = P("Pınar Süt Tam Yağlı 1 L", "Migros", 1.0, "l")
+    b = P("Pınar Süt Tam Yağlı 1000 ml", "ŞOK", 1000.0, "ml")
+    groups = group_products([a, b])
+    assert b in _group_of(groups, a)
+
+
+def test_count_packs_of_different_size_separate():
+    ten = P("Yumurta 10'lu", "Migros", 10.0, "adet")
+    thirty = P("Yumurta 30'lu", "ŞOK", 30.0, "adet")
+    groups = group_products([ten, thirty])
+    assert thirty not in _group_of(groups, ten)

@@ -38,6 +38,9 @@ _MULTIPACK_RE = re.compile(
 )
 # 500 g  /  1,5 L  /  500ml
 _SIMPLE_RE = re.compile(rf"({_NUM})\s*({_UNIT_ALT})\b", re.IGNORECASE)
+# count packs: 10'lu / 32'li / 6 lı / 24'lük  -> (count, adet)
+_COUNTPACK_RE = re.compile(r"(\d+)\s*['’`]?\s*(?:li|lı|lu|lü|lük|lik|luk|adet|adetlik)\b",
+                           re.IGNORECASE)
 
 
 def _to_float(s: str) -> float:
@@ -91,6 +94,11 @@ def extract_size_from_name(name: Optional[str]) -> Tuple[float, str]:
     if matches:
         last = matches[-1]
         return (_to_float(last.group(1)), normalize_unit(last.group(2)))
+
+    # no mass/volume size -> try a count pack (10'lu, 32'li, 24'lük)
+    cm = _COUNTPACK_RE.search(name)
+    if cm:
+        return (float(cm.group(1)), "adet")
 
     return (1.0, "adet")
 
