@@ -24,14 +24,24 @@
       "note": "user_data_dir ile persistent browser context kullanılır (Cloudflare bypass için en iyi yöntem)"
     },
     {
+      "name": "ŞOK",
+      "store_id": 5,
+      "scraper_path": "../../sok/sok_scraper.py",
+      "scraper_class": "SokScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "sok_products_{timestamp}.json",
+      "enabled": true,
+      "note": "requests.Session + cms/categories header'ları; kategori sayfaları ?page=N ile sayfalı (SSR HTML)"
+    },
+    {
       "name": "A101",
       "store_id": 3,
-      "scraper_path": "scrapers/a101/a101_scraper.py",
+      "scraper_path": "../../a101/a101_scraper.py",
       "scraper_class": "A101Scraper",
       "scraper_method": "fetch_products",
       "output_pattern": "a101_products_{timestamp}.json",
       "enabled": false,
-      "note": "Scraper henüz implement edilmedi"
+      "note": "Cloudflare -> Playwright persistent context"
     },
     {
       "name": "BİM",
