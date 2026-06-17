@@ -63,6 +63,25 @@ class Product:
             'scraped_at': self.scraped_at.isoformat(),
         }
 
+    @classmethod
+    def from_dict(cls, d: Dict) -> "Product":
+        """Rebuild a Product from a to_dict() payload (raw cache -> re-classify)."""
+        def dec(v):
+            return Decimal(str(v)) if v is not None else None
+        scraped = d.get("scraped_at")
+        return cls(
+            name=d["name"], price=dec(d.get("price")) or Decimal("0"),
+            store=d["store"], brand=d.get("brand"), barcode=d.get("barcode"),
+            sku=d.get("sku"), category=d.get("category"),
+            raw_category=d.get("raw_category"), unit=d.get("unit", "adet"),
+            quantity=d.get("quantity", 1.0), unit_price=dec(d.get("unit_price")),
+            unit_price_unit=d.get("unit_price_unit"),
+            original_price=dec(d.get("original_price")),
+            in_stock=d.get("in_stock", True), image_url=d.get("image_url"),
+            product_url=d.get("product_url"), country_code=d.get("country_code", "TR"),
+            scraped_at=datetime.fromisoformat(scraped) if scraped else None,
+        )
+
     def validate(self) -> bool:
         """Ürün verisini validate et"""
         if not self.name or len(self.name.strip()) == 0:

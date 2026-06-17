@@ -99,9 +99,27 @@ def build_catalog(products: list) -> list:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ingest", action="store_true", help="post catalog to backend (Faz 3)")
+    ap.add_argument("--rebuild", metavar="RAW_JSON",
+                    help="skip scraping; re-classify+match from a raw_*.json cache "
+                         "(use after a taxonomy change to avoid a fresh scrape)")
     args = ap.parse_args()
 
-    products = scrape_all()
+    from base_scraper import Product  # noqa
+    if args.rebuild:
+        log.info(f"--rebuild: ham önbellekten okunuyor: {args.rebuild}")
+        with open(args.rebuild, encoding="utf-8") as f:
+            raw = json.load(f)
+        products = [Product.from_dict(d) for d in raw]
+        log.info(f"önbellekten {len(products)} ürün yüklendi (scrape atlandı)")
+    else:
+        products = scrape_all()
+        # cache raw products so a later taxonomy tweak can --rebuild without scraping
+        rts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        raw_path = OUT / f"raw_{rts}.json"
+        with open(raw_path, "w", encoding="utf-8") as f:
+            json.dump([p.to_dict() for p in products], f, ensure_ascii=False)
+        log.info(f"🗄️  ham önbellek -> {raw_path.name}")
+
     catalog = build_catalog(products)
 
     multi = [c for c in catalog if len(c["markets"]) > 1]
