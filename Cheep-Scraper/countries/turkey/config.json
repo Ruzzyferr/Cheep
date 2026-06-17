@@ -40,8 +40,10 @@
       "scraper_class": "A101Scraper",
       "scraper_method": "fetch_products",
       "output_pattern": "a101_products_{timestamp}.json",
-      "enabled": false,
-      "note": "Cloudflare -> Playwright persistent context"
+      "enabled": true,
+      "headless": true,
+      "user_data_dir": "browser_data/a101",
+      "note": "Cloudflare -> Playwright persistent context; Store/getProductsByCategory rio API"
     },
     {
       "name": "BİM",
