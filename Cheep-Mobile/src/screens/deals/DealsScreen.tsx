@@ -10,12 +10,12 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { productService } from '../../services';
 import { EmptyState } from '../../components/common/EmptyState';
+import { ListSkeleton } from '../../components/ui';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { Product } from '../../types';
@@ -138,12 +138,10 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
       </View>
 
       {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={colors.primary.main} />
-        </View>
+        <ListSkeleton count={6} />
       ) : deals.length === 0 ? (
         <EmptyState
-          icon="🎯"
+          icon="local-offer"
           title="Henüz fırsat yok"
           description="Birden fazla markette satılan ürünler eklendikçe en iyi tasarruflar burada görünecek"
         />

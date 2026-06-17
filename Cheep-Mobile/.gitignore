@@ -45,3 +45,6 @@ app-example
 screenshots/
 shot.py
 flow.py
+tour.py
+verify.py
+cat_shot.py

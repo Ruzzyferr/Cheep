@@ -1,15 +1,19 @@
 /**
  * 🌵 Empty State
- * Display when no data available
+ * Premium empty state: tinted circular icon badge, refined copy, primary CTA.
  */
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { Animated, View, Text, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Button } from '../ui';
 import { colors, typography, spacing } from '../../theme';
 
 interface EmptyStateProps {
-  icon?: string;
+  /** MaterialIcons name (preferred) — falls back to emoji string if not found. */
+  icon?: keyof typeof MaterialIcons.glyphMap;
+  /** Legacy emoji support. */
+  emoji?: string;
   title: string;
   description?: string;
   actionLabel?: string;
@@ -17,21 +21,38 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  icon,
+  icon = 'inbox',
+  emoji,
   title,
   description,
   actionLabel,
   onAction,
 }: EmptyStateProps) {
+  const fade = useRef(new Animated.Value(0)).current;
+  const lift = useRef(new Animated.Value(12)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fade, { toValue: 1, duration: 380, useNativeDriver: true }),
+      Animated.timing(lift, { toValue: 0, duration: 380, useNativeDriver: true }),
+    ]).start();
+  }, [fade, lift]);
+
   return (
-    <View style={styles.container}>
-      {icon && <Text style={styles.icon}>{icon}</Text>}
+    <Animated.View style={[styles.container, { opacity: fade, transform: [{ translateY: lift }] }]}>
+      <View style={styles.badge}>
+        {emoji ? (
+          <Text style={styles.emoji}>{emoji}</Text>
+        ) : (
+          <MaterialIcons name={icon} size={40} color={colors.primary.main} />
+        )}
+      </View>
       <Text style={styles.title}>{title}</Text>
       {description && <Text style={styles.description}>{description}</Text>}
       {actionLabel && onAction && (
-        <Button title={actionLabel} onPress={onAction} style={styles.button} variant="outline" />
+        <Button title={actionLabel} onPress={onAction} style={styles.button} />
       )}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -43,10 +64,18 @@ const styles = StyleSheet.create({
     padding: spacing.xl,
   },
 
-  icon: {
-    fontSize: 48,
-    marginBottom: spacing.md,
-    opacity: 0.6,
+  badge: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: colors.primary[50],
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+
+  emoji: {
+    fontSize: 44,
   },
 
   title: {
@@ -54,17 +83,20 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     textAlign: 'center',
     marginBottom: spacing.sm,
+    fontWeight: '700',
   },
 
   description: {
     ...typography.styles.body1,
     color: colors.text.secondary,
     textAlign: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.lg,
+    maxWidth: 280,
+    lineHeight: 22,
   },
 
   button: {
-    marginTop: spacing.md,
+    marginTop: spacing.xs,
+    minWidth: 200,
   },
 });
-

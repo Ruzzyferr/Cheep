@@ -52,8 +52,9 @@ export function SmartDealCard({
           {storeName}
         </Text>
         <View style={styles.priceRow}>
-          <Text style={styles.price}>{price}₺</Text>
-          <Text style={styles.unit}>/{unit}</Text>
+          <Text style={styles.priceCurrency}>₺</Text>
+          <Text style={styles.price}>{price}</Text>
+          <Text style={styles.fromLabel}>'den</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -142,12 +143,26 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
 
+  priceCurrency: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.primary.main,
+    marginRight: 1,
+  },
+
   price: {
     ...typography.styles.h4,
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: colors.primary.main,
     letterSpacing: -0.3,
+  },
+
+  fromLabel: {
+    ...typography.styles.caption,
+    fontSize: 10,
+    color: colors.text.hint,
+    marginLeft: spacing.xs / 2,
   },
 
   unit: {

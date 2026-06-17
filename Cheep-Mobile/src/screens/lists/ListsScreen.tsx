@@ -18,6 +18,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { listService } from '../../services';
 import { ListCard } from '../../components/list/ListCard';
 import { EmptyState } from '../../components/common/EmptyState';
+import { ListSkeleton } from '../../components/ui';
 import { CreateListModal } from '../../components/list/CreateListModal';
 import { getShouldOpenCreateModalFromFAB, setShouldOpenCreateModalFromFAB } from '../../utils/fabState';
 import { colors, typography, spacing, layout } from '../../theme';
@@ -114,17 +115,20 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
   const renderEmptyState = () => {
     const emptyStates = {
       active: {
+        icon: 'playlist-add-check' as const,
         title: 'Henüz liste yok',
-        description: 'İlk alışveriş listeni oluştur',
+        description: 'İlk alışveriş listeni oluştur, en uygun marketi anında bulalım.',
         actionLabel: 'Liste Oluştur' as const,
       },
       completed: {
+        icon: 'history' as const,
         title: 'Tamamlanmış liste yok',
-        description: 'Karşılaştırdığınız listeler burada görünecek',
+        description: 'Karşılaştırdığınız listeler burada görünecek.',
       },
       templates: {
+        icon: 'bookmark-border' as const,
         title: 'Şablon liste yok',
-        description: 'Sık kullandığınız listeleri şablon olarak kaydedin',
+        description: 'Sık kullandığınız listeleri şablon olarak kaydedin.',
       },
     };
 
@@ -132,6 +136,7 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
     const hasAction = 'actionLabel' in state && state.actionLabel;
     return (
       <EmptyState
+        icon={state.icon}
         title={state.title}
         description={state.description}
         {...(hasAction && { actionLabel: state.actionLabel, onAction: handleCreateList })}
@@ -181,26 +186,30 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
       </View>
 
       {/* Lists */}
-      <FlatList
-        data={lists}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <ListCard
-            list={item}
-            onPress={() => navigation.navigate('ListDetail', { listId: item.id })}
-            onDelete={handleDeleteList}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary.main}
-          />
-        }
-        ListEmptyComponent={!loading ? renderEmptyState : null}
-      />
+      {loading && lists.length === 0 ? (
+        <ListSkeleton count={4} />
+      ) : (
+        <FlatList
+          data={lists}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <ListCard
+              list={item}
+              onPress={() => navigation.navigate('ListDetail', { listId: item.id })}
+              onDelete={handleDeleteList}
+            />
+          )}
+          contentContainerStyle={styles.listContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={colors.primary.main}
+            />
+          }
+          ListEmptyComponent={renderEmptyState}
+        />
+      )}
 
       {/* Create List Modal */}
       <CreateListModal

@@ -21,6 +21,7 @@ import { productService, storeService, listService, categoryService } from '../.
 import { ActiveListCard } from '../../components/home/ActiveListCard';
 import { EmptyListCard } from '../../components/home/EmptyListCard';
 import { SmartDealCard, StatsCard } from '../../components/home';
+import { DealCardsSkeleton } from '../../components/ui';
 import { CategoryItem } from '../../components/home/CategoryItem';
 import { NearbyStoreCard } from '../../components/home/NearbyStoreCard';
 import { getUserLocation, getCountryCode, haversineKm, formatDistance, type Coords } from '../../utils/geo';
@@ -66,7 +67,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
   const [nearbyStores, setNearbyStores] = useState<Store[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [estimatedPrice, setEstimatedPrice] = useState<{ min: number; max: number } | null>(null);
   const [savingsPercent, setSavingsPercent] = useState<number | undefined>(undefined);
@@ -512,6 +513,9 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
             </TouchableOpacity>
           </View>
 
+          {loading && featuredProducts.length === 0 ? (
+            <DealCardsSkeleton />
+          ) : (
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -536,6 +540,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
               );
             })}
           </ScrollView>
+          )}
         </View>
 
         {/* Categories */}

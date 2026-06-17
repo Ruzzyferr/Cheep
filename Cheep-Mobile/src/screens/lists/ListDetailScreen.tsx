@@ -153,6 +153,7 @@ export function ListDetailScreen({
         ]}
         ListEmptyComponent={
           <EmptyState
+            icon="add-shopping-cart"
             title="Liste boş"
             description="Bu listeye henüz ürün eklenmemiş"
             actionLabel="Ürün Ekle"

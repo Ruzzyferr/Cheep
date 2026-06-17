@@ -19,6 +19,7 @@ import { CommonActions } from '@react-navigation/native';
 import { productService, categoryService, listService } from '../../services';
 import { ProductGridCard } from '../../components/product/ProductGridCard';
 import { CategoryChip } from '../../components/common/CategoryChip';
+import { GridSkeleton } from '../../components/ui';
 import { colors, typography, spacing, layout } from '../../theme';
 import type { Product } from '../../types';
 import type { Category } from '../../services/category.service';
@@ -35,7 +36,7 @@ export function CategoryProductsScreen({
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   
   // FlatList scroll kontrolü için ref
@@ -253,6 +254,9 @@ export function CategoryProductsScreen({
       </View>
 
       {/* Products Grid */}
+      {loading && products.length === 0 ? (
+        <GridSkeleton count={6} />
+      ) : (
       <FlatList
         ref={flatListRef}
         data={products}
@@ -288,6 +292,7 @@ export function CategoryProductsScreen({
           </View>
         }
       />
+      )}
     </View>
   );
 }
