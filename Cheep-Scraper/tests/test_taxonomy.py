@@ -84,5 +84,16 @@ def test_turkish_suffix_inflection():
     assert classify("Tamek Çilek Reçeli 380 G") == ("Kahvaltılık", "Reçel")
 
 
+def test_nonfood_form_word_beats_trailing_food_scent():
+    # a soap/spray/cologne is never produce, even when a fruit/nut scent trails it
+    assert classify("Ebru Sıvı Sabun Hindistan Cevizi 750 ml") == ("Kişisel Bakım & Kozmetik", "Sabun")
+    assert top("Pereja Vücut Spreyi Portakal Çiçeği 200 ml") == "Kişisel Bakım & Kozmetik"
+    assert top("Bestway Limon Desenli Deniz Yatak") == "Oyuncak & Hobi"
+    assert classify("Blendax Limon Özlü Şampuan 500 ml") == ("Kişisel Bakım & Kozmetik", "Şampuan")
+    # but a genuine food head noun still wins over a flavour modifier
+    assert classify("Kemal Kükrer Elma Sirkesi 500 ml") == ("Temel Gıda", "Sirke")
+    assert classify("Mis Çilekli Süt 200 ml") == ("Süt Ürünleri", "Süt")
+
+
 def test_unknown_falls_to_diger():
     assert top("Xyzzy Foobar 123") == "Diğer"

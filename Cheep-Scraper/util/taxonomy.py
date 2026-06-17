@@ -170,7 +170,8 @@ _RULES: List[Tuple[str, List[str]]] = [
     ("Tıraş", ["tiras", "tiras kopugu", "tiras bicagi"]),
     ("Cilt Bakım", ["cilt bakim", "nemlendirici", "yuz kremi", "el kremi", "vucut losyonu"]),
     ("Ped & Hijyen", ["ped", "hijyenik ped", "gunluk ped", "tampon"]),
-    ("Parfüm & Kolonya", ["kolonya", "parfum", "edt", "edp", "cologne", "after shave"]),
+    ("Parfüm & Kolonya", ["kolonya", "parfum", "edt", "edp", "cologne", "after shave",
+                          "vucut spreyi", "body mist", "vucut misti", "deo parfum"]),
     ("Makyaj", ["ruj", "rimel", "maskara", "oje", "fondoten", "allik", "far",
                 "eyeliner", "kapatici"]),
     # Bebek
@@ -198,7 +199,9 @@ _RULES: List[Tuple[str, List[str]]] = [
                     "süpürge", "tost makinesi", "sac kurutma", "fön", "ütü",
                     "mikrodalga", "airfryer", "kamera", "tablet", "kablo"]),
     ("Oyuncak", ["oyuncak", "puzzle", "yapboz", "lego", "oyun hamuru", "figur",
-                 "figür", "peluş", "pelus", "araba oyuncak", "bebek oyuncak"]),
+                 "figür", "peluş", "pelus", "araba oyuncak", "bebek oyuncak",
+                 "sisme yatak", "deniz yatak", "deniz simidi", "deniz simit",
+                 "sisme havuz", "kolluk", "can yelegi"]),
     ("Giyim", ["corap", "çorap", "tisort", "tişört", "terlik", "bornoz", "tayt",
                "atlet", "kulot", "külot", "bot ", "esofman", "eşofman", "pijama"]),
     ("Ev Tekstili", ["nevresim", "carsaf", "çarşaf", "havlu set", "yastik",
@@ -318,6 +321,15 @@ def _raw_top(text: str) -> Optional[str]:
 # Raw-produce / flavour subcategories — weak: they lose to any product-TYPE match.
 _WEAK_SUBS = {"Meyve", "Sebze", "Yeşillik", "Kuru Meyve"}
 
+# Non-food tops are DOMINANT: a soap / shampoo / cologne / detergent / spray is
+# never produce, so a form word from these wins over a food-ingredient word that
+# merely appears later as a scent ("Sıvı Sabun Hindistan Cevizi" -> Sabun, not
+# Kuruyemiş; "Vücut Spreyi Portakal" -> Parfüm, not Meyve). Position-based head
+# noun ("Çikolatalı Süt"->Süt) only decides WITHIN a tier.
+_NONFOOD_TOPS = {"Temizlik", "Kağıt & Hijyen", "Kişisel Bakım & Kozmetik",
+                 "Bebek", "Pet Shop", "Elektronik", "Oyuncak & Hobi",
+                 "Giyim & Tekstil", "Ev & Yaşam"}
+
 
 def classify(name: str, raw_category: Optional[str] = None,
              ascendants: Optional[List[str]] = None) -> Tuple[str, str]:
@@ -331,11 +343,11 @@ def classify(name: str, raw_category: Optional[str] = None,
     name_text = _norm(name)
     name_tokens = set(name_text.split())
 
-    # Two tiers: product-TYPE subcategories (strong) always beat raw-produce/
-    # flavour subcategories (weak), regardless of position — so "Kefir Orman
-    # Meyveli" -> Kefir, "Elma Sirkesi" -> Sirke, "Limon Kokulu Sabun" -> Sabun.
-    # Within a tier the latest-positioned (head-noun) match wins.
-    strong_best = weak_best = None
+    # Three tiers: non-food form words (dominant) beat food product-TYPE words
+    # (strong) beat raw-produce/flavour words (weak), regardless of position — so
+    # "Sıvı Sabun Hindistan Cevizi" -> Sabun, "Kefir Orman Meyveli" -> Kefir,
+    # "Elma Sirkesi" -> Sirke. Within a tier the latest (head-noun) match wins.
+    dominant_best = strong_best = weak_best = None
     for idx, (sub, kws) in enumerate(_RULES):
         matched, last_pos, hits = _name_match(name_text, name_tokens, kws)
         if not matched:
@@ -344,10 +356,16 @@ def classify(name: str, raw_category: Optional[str] = None,
         if sub in _WEAK_SUBS:
             if weak_best is None or cand[:3] > weak_best[:3]:
                 weak_best = cand
+        elif SUB_TO_TOP[sub] in _NONFOOD_TOPS:
+            if dominant_best is None or cand[:3] > dominant_best[:3]:
+                dominant_best = cand
         else:
             if strong_best is None or cand[:3] > strong_best[:3]:
                 strong_best = cand
-    # 1) a product-TYPE keyword in the name is the strongest signal
+    # 0) a non-food form word (soap/cologne/spray/detergent) dominates everything
+    if dominant_best is not None:
+        return (SUB_TO_TOP[dominant_best[3]], dominant_best[3])
+    # 1) a food product-TYPE keyword in the name is the next strongest signal
     if strong_best is not None:
         return (SUB_TO_TOP[strong_best[3]], strong_best[3])
 

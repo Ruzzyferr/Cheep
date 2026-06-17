@@ -118,8 +118,14 @@ def main():
         import subprocess
         backend = ROOT / "cheep-backend-express"
         log.info("--ingest: backend'e yükleniyor (Prisma)...")
-        r = subprocess.run(["npx", "tsx", "scripts/ingest-catalog.ts", str(path)],
-                           cwd=str(backend), shell=(sys.platform == "win32"))
+        # On Windows npx is a .cmd shim; pass the whole command as a string with
+        # shell=True so cmd resolves it (a list + shell=True fails with WinError 267).
+        if sys.platform == "win32":
+            cmd = f'npx tsx scripts/ingest-catalog.ts "{path}"'
+            r = subprocess.run(cmd, cwd=str(backend), shell=True)
+        else:
+            r = subprocess.run(["npx", "tsx", "scripts/ingest-catalog.ts", str(path)],
+                               cwd=str(backend))
         log.info(f"ingest exit={r.returncode}")
 
 
