@@ -23,4 +23,19 @@ describe('evaluateProductConstraints', () => {
     expect(v.hidden).toBe(false);
     expect(v.warnings).toEqual([]);
   });
+
+  // Allergen-category warnings (conservative v1 heuristic for baked goods)
+  it('alerji olanlara pastane kategorisinde uyarı verir', () => {
+    const v = evaluateProductConstraints('Bisküvi', { allergies: ['peanut'] });
+    expect(v.warnings.length).toBeGreaterThan(0);
+    expect(v.warnings[0]).toContain('Alerjen içerebilir');
+  });
+  it('alerji olanlara meyve sebzede uyarı vermez', () => {
+    const v = evaluateProductConstraints('Meyve & Sebze', { allergies: ['peanut'] });
+    expect(v.warnings).toEqual([]);
+  });
+  it('alerji boş olunca pastanede uyarı vermez', () => {
+    const v = evaluateProductConstraints('Fırın & Pastane', { allergies: [] });
+    expect(v.warnings).toEqual([]);
+  });
 });

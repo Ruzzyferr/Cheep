@@ -25,6 +25,7 @@ export function evaluateProductConstraints(
   if (profile.avoid?.includes('pork_gelatin') && has(cat, ['sarkuteri', 'şarküteri', 'sucuk', 'salam'])) {
     warnings.push('Domuz/jelatin içerebilir — etiketi kontrol et');
   }
+  // Conservative v1 heuristic: warn allergic users about likely-allergen baked goods categories
   if (profile.allergies && profile.allergies.length > 0 && isAnimal === false && has(cat, ['fırın', 'pastane', 'bisküvi', 'çikolata'])) {
     warnings.push('Alerjen içerebilir — etiketi kontrol et');
   }
