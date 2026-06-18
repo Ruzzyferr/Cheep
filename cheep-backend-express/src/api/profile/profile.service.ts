@@ -1,11 +1,11 @@
 import { prisma } from '../../utils/prisma.client.js';
 
 export interface ProfileInput {
-    household_size?: string;
-    diet?: string;
+    household_size?: string | null;
+    diet?: string | null;
     avoid?: string[];
     allergies?: string[];
-    weekly_budget?: number;
+    weekly_budget?: number | null;
     onboarding_done?: boolean;
 }
 

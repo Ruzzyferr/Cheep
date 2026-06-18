@@ -75,8 +75,8 @@ export function ProfileScreen({
           const profile = await profileService.getProfile();
           if (!alive) return;
           if (profile) {
-            setHouseholdSize(profile.household_size);
-            setDiet(profile.diet);
+            setHouseholdSize(profile.household_size ?? undefined);
+            setDiet(profile.diet ?? undefined);
             setAvoid(profile.avoid ?? []);
             setAllergies(profile.allergies ?? []);
             setWeeklyBudget(profile.weekly_budget != null ? String(profile.weekly_budget) : '');
@@ -128,16 +128,15 @@ export function ProfileScreen({
   const handleSavePreferences = async () => {
     setPrefSaving(true);
     try {
-      const budgetNum = weeklyBudget.trim() ? Number(weeklyBudget.trim()) : undefined;
+      const budgetRaw = weeklyBudget.trim();
+      const budgetNum = budgetRaw && !isNaN(Number(budgetRaw)) ? Number(budgetRaw) : null;
       const patch: Partial<UserProfile> = {
         onboarding_done: true, // never flip back
-        household_size: householdSize,
-        diet: diet,
+        household_size: householdSize ?? null,
+        diet: diet ?? null,
         avoid: avoid,
         allergies: allergies,
-        ...(budgetNum != null && !isNaN(budgetNum)
-          ? { weekly_budget: budgetNum }
-          : {}),
+        weekly_budget: budgetNum,
       };
       await profileService.updateProfile(patch);
       Alert.alert('Kaydedildi', 'Tercihleriniz güncellendi.');
