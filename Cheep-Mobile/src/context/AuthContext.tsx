@@ -107,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await authStorage.clearAuth();
       setUser(null);
+      setOnboardingDone(false);
     } catch (error) {
       console.error('Logout error:', error);
     }
