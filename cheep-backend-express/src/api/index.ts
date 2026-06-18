@@ -8,6 +8,7 @@ import usersRouter from './users/users.routes.js';
 import listsRouter from './lists/lists.routes.js';
 import feedbackRouter from './feedback/feedback.routes.js';
 import profileRouter from './profile/profile.routes.js';
+import assistantRouter from './assistant/assistant.routes.js';
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/users', usersRouter);
 router.use('/lists', listsRouter);
 router.use('/feedback', feedbackRouter);
 router.use('/profile', profileRouter);
+router.use('/assistant', assistantRouter);
 
 export default router;

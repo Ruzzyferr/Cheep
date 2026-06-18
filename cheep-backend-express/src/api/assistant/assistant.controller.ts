@@ -1,0 +1,115 @@
+import { type Request, type Response, type NextFunction } from 'express';
+import * as AssistantService from './assistant.service.js';
+
+// ============================================
+// THREAD CRUD
+// ============================================
+
+/**
+ * Yeni sohbet thread'i oluştur
+ */
+export const create = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    const thread = await AssistantService.createThread(req.user.id);
+
+    res.status(201).json({
+      success: true,
+      data: thread,
+      message: 'Sohbet başlatıldı',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Kullanıcının tüm thread'lerini listele
+ */
+export const list = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    const threads = await AssistantService.listThreads(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      data: threads,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Tek bir thread'i mesajlarıyla getir
+ */
+export const get = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    const thread = await AssistantService.getThread(parseInt(req.params.id), req.user.id);
+
+    res.status(200).json({
+      success: true,
+      data: thread,
+    });
+  } catch (e: any) {
+    res.status(e.status ?? 500).json({ success: false, message: e.message });
+  }
+};
+
+/**
+ * Thread'i sil
+ */
+export const remove = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    const result = await AssistantService.deleteThread(parseInt(req.params.id), req.user.id);
+
+    res.status(200).json(result);
+  } catch (e: any) {
+    res.status(e.status ?? 500).json({ success: false, message: e.message });
+  }
+};
+
+/**
+ * Kullanıcı mesajı gönder ve asistan yanıtı al
+ */
+export const message = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    const result = await AssistantService.sendMessage(
+      req.user.id,
+      parseInt(req.params.id),
+      req.body.content,
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (e: any) {
+    res
+      .status(e.status ?? 502)
+      .json({ success: false, message: e.message ?? 'Asistan yanıt veremedi' });
+  }
+};
