@@ -22,6 +22,7 @@ model User {
   country_id    Int? // Tercih edilen ülke (konumdan veya seçimden)
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
+  is_premium    Boolean  @default(false)
 
   // İlişkiler
   country         Country?            @relation(fields: [country_id], references: [id], onDelete: SetNull)
