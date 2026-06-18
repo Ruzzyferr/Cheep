@@ -49,6 +49,32 @@ const SUGGESTIONS = [
   'Hızlı kahvaltı tarifi ver',
 ];
 
+// ─── EmptyState Component ───────────────────────────────────
+interface EmptyStateProps {
+  onSuggestion: (text: string) => void;
+}
+
+const EmptyState = ({ onSuggestion }: EmptyStateProps) => (
+  <View style={styles.emptyContainer}>
+    <MessageBubble
+      role="model"
+      content="Merhaba! Bugün ne pişirelim? Tarif yaz ya da 'haftalık liste hazırla' de."
+    />
+    <View style={styles.suggestions}>
+      {SUGGESTIONS.map((s) => (
+        <TouchableOpacity
+          key={s}
+          style={styles.suggestionChip}
+          onPress={() => onSuggestion(s)}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.suggestionText}>{s}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  </View>
+);
+
 // ============================================================
 // Screen
 // ============================================================
@@ -80,7 +106,7 @@ export function AssistantChatScreen({
   };
 
   // ─── New chat ────────────────────────────────────────────────
-  const handleNewChat = async () => {
+  const handleNewChat = useCallback(async () => {
     try {
       const thread = await assistantService.createThread();
       setThreadId(thread.id);
@@ -90,7 +116,7 @@ export function AssistantChatScreen({
       console.error('Failed to create new thread:', err);
       Alert.alert('Hata', 'Yeni sohbet başlatılamadı.');
     }
-  };
+  }, []);
 
   // ─── Send message ────────────────────────────────────────────
   const handleSend = useCallback(async (text?: string) => {
@@ -171,10 +197,9 @@ export function AssistantChatScreen({
   }, [inputValue, threadId, sending]);
 
   // ─── Suggestion chip press ───────────────────────────────────
-  const handleSuggestion = (text: string) => {
-    setInputValue(text);
+  const handleSuggestion = useCallback((text: string) => {
     handleSend(text);
-  };
+  }, [handleSend]);
 
   // ─── Render item ─────────────────────────────────────────────
   const renderItem = ({ item }: { item: LocalMessage }) => {
@@ -194,28 +219,6 @@ export function AssistantChatScreen({
     }
     return <MessageBubble role={item.role} content={item.content} />;
   };
-
-  // ─── Empty state ─────────────────────────────────────────────
-  const EmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <MessageBubble
-        role="model"
-        content="Merhaba! Bugün ne pişirelim? Tarif yaz ya da 'haftalık liste hazırla' de."
-      />
-      <View style={styles.suggestions}>
-        {SUGGESTIONS.map((s) => (
-          <TouchableOpacity
-            key={s}
-            style={styles.suggestionChip}
-            onPress={() => handleSuggestion(s)}
-            activeOpacity={0.75}
-          >
-            <Text style={styles.suggestionText}>{s}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
-  );
 
   // ─── Header buttons ──────────────────────────────────────────
   useEffect(() => {
@@ -262,7 +265,7 @@ export function AssistantChatScreen({
           styles.listContent,
           { paddingBottom: insets.bottom + 80 },
         ]}
-        ListEmptyComponent={<EmptyState />}
+        ListEmptyComponent={<EmptyState onSuggestion={handleSuggestion} />}
         onContentSizeChange={() =>
           flatListRef.current?.scrollToEnd({ animated: false })
         }
