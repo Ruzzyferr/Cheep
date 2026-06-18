@@ -69,13 +69,14 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: '100%',
     height: 112, // h-28 = 112px
-    backgroundColor: colors.background.input,
+    backgroundColor: colors.background.card,
+    padding: spacing.sm,
   },
 
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    resizeMode: 'contain',
   },
 
   placeholderImage: {

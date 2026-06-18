@@ -103,14 +103,15 @@ const styles = StyleSheet.create({
     height: 96,
     borderRadius: borderRadius.md,
     overflow: 'hidden',
-    backgroundColor: colors.background.input,
+    backgroundColor: colors.background.card,
+    padding: spacing.xs,
     marginBottom: spacing.sm,
   },
 
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    resizeMode: 'contain',
   },
 
   placeholderImage: {
