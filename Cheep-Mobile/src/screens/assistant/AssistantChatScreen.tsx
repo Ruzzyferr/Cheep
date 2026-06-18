@@ -22,6 +22,7 @@ import { MessageBubble } from '../../components/assistant/MessageBubble';
 import { ChatInputBar } from '../../components/assistant/ChatInputBar';
 import { ToolActivityChip } from '../../components/assistant/ToolActivityChip';
 import { ListActionCard } from '../../components/assistant/ListActionCard';
+import { ThreadListSheet } from '../../components/assistant/ThreadListSheet';
 import { colors, spacing, typography, borderRadius, layout } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { AssistantStackScreenProps } from '../../navigation/types';
@@ -89,6 +90,7 @@ export function AssistantChatScreen({
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [sending, setSending] = useState(false);
+  const [historyVisible, setHistoryVisible] = useState(false);
 
   // ─── Init: create thread on mount ───────────────────────────
   useEffect(() => {
@@ -115,6 +117,27 @@ export function AssistantChatScreen({
     } catch (err) {
       console.error('Failed to create new thread:', err);
       Alert.alert('Hata', 'Yeni sohbet başlatılamadı.');
+    }
+  }, []);
+
+  // ─── Load thread from history ────────────────────────────────
+  const loadThread = useCallback(async (id: number) => {
+    try {
+      const thread = await assistantService.getThread(id);
+      setThreadId(thread.id);
+      // Map ChatMessage[] → LocalMessage[]; skip tool/system messages
+      const mapped: LocalMessage[] = (thread.messages ?? [])
+        .filter((m) => m.role === 'user' || m.role === 'model')
+        .map((m) => ({
+          id: `hist-${m.id}`,
+          role: m.role,
+          content: m.content,
+        }));
+      setMessages(mapped);
+      setInputValue('');
+    } catch (err) {
+      console.error('loadThread error:', err);
+      Alert.alert('Hata', 'Sohbet yüklenemedi.');
     }
   }, []);
 
@@ -226,12 +249,10 @@ export function AssistantChatScreen({
       title: '✨ Asistan',
       headerRight: () => (
         <View style={styles.headerButtons}>
-          {/* 🕘 History — TODO Task 9: open ThreadListSheet */}
+          {/* 🕘 History — opens ThreadListSheet */}
           <TouchableOpacity
             style={styles.headerButton}
-            onPress={() => {
-              // TODO Task 9: open ThreadListSheet bottom sheet
-            }}
+            onPress={() => setHistoryVisible(true)}
             accessibilityLabel="Geçmiş sohbetler"
           >
             <MaterialIcons name="history" size={22} color={colors.text.primary} />
@@ -275,6 +296,14 @@ export function AssistantChatScreen({
         onChangeText={setInputValue}
         onSend={() => handleSend()}
         sending={sending}
+      />
+
+      <ThreadListSheet
+        visible={historyVisible}
+        onClose={() => setHistoryVisible(false)}
+        onSelectThread={loadThread}
+        onNewChat={handleNewChat}
+        activeThreadId={threadId}
       />
     </KeyboardAvoidingView>
   );
