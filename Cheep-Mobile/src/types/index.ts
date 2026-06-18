@@ -72,6 +72,11 @@ export interface Category {
 // PRODUCT TYPES
 // ============================================
 
+export interface ProductConstraint {
+  hidden: boolean;
+  warnings: string[];
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -84,6 +89,7 @@ export interface Product {
   updated_at: string;
   category?: Category;
   store_prices?: StorePrice[];
+  constraint?: ProductConstraint;
 }
 
 export interface StorePrice {

@@ -8,6 +8,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
+import type { ProductConstraint } from '../../types';
 
 interface PriceInfo {
   storeName: string;
@@ -21,6 +22,7 @@ interface ProductGridCardProps {
   topThreePrices: PriceInfo[];
   onPress: () => void;
   onAddToCart: () => void;
+  constraint?: ProductConstraint;
 }
 
 export function ProductGridCard({
@@ -30,6 +32,7 @@ export function ProductGridCard({
   topThreePrices,
   onPress,
   onAddToCart,
+  constraint,
 }: ProductGridCardProps) {
   return (
     <TouchableOpacity
@@ -58,6 +61,16 @@ export function ProductGridCard({
         <Text style={styles.productName} numberOfLines={2}>
           {productName}
         </Text>
+
+        {/* Constraint badges */}
+        {constraint?.warnings && constraint.warnings.length > 0 && (
+          <View style={styles.warningBadge}>
+            <Text style={styles.warningBadgeText}>⚠️ etiketi kontrol et</Text>
+          </View>
+        )}
+        {constraint?.hidden && (
+          <Text style={styles.dietLabel}>diyetine uymuyor</Text>
+        )}
 
         {/* Top 3 Prices */}
         <View style={styles.pricesContainer}>
@@ -165,6 +178,30 @@ const styles = StyleSheet.create({
 
   priceValue: {
     fontWeight: '600',
+  },
+
+  warningBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.warning.bg,
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    marginBottom: 4,
+  },
+
+  warningBadgeText: {
+    ...typography.styles.caption,
+    fontSize: 10,
+    fontWeight: '600',
+    color: colors.warning.dark,
+  },
+
+  dietLabel: {
+    ...typography.styles.caption,
+    fontSize: 10,
+    color: colors.text.hint,
+    marginBottom: 4,
+    fontStyle: 'italic',
   },
 
   buttonContainer: {

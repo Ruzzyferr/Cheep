@@ -1,6 +1,8 @@
 import { type Request, type Response, type NextFunction } from 'express';
 import * as ProductService from './products.service.js';
 import {productMatcher} from "./product-matcher.service.js";
+import { getProfile } from '../profile/profile.service.js';
+import { evaluateProductConstraints } from '../../services/product-constraints.js';
 
 export const getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -21,9 +23,28 @@ export const getAllProducts = async (req: Request, res: Response, next: NextFunc
             countryId: req.country?.id,
         });
 
+        let products: (typeof result.products[number] & { constraint?: { hidden: boolean; warnings: string[] } })[] = result.products;
+
+        if (req.user) {
+            const profile = await getProfile(req.user.id);
+            if (profile) {
+                products = result.products.map(p => ({
+                    ...p,
+                    constraint: evaluateProductConstraints(
+                        (p as any).category?.name ?? null,
+                        {
+                            diet: profile.diet ?? undefined,
+                            avoid: Array.isArray(profile.avoid) ? (profile.avoid as string[]) : undefined,
+                            allergies: Array.isArray(profile.allergies) ? (profile.allergies as string[]) : undefined,
+                        }
+                    ),
+                }));
+            }
+        }
+
         res.status(200).json({
             success: true,
-            data: result.products,
+            data: products,
             pagination: result.pagination
         });
     } catch (error) {

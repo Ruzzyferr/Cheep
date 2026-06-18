@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as ProductController from './products.controller.js';
 import { validate } from '../../schema/validation.middleware.js';
 import { requireIngestKey } from '../../middleware/ingest-auth.middleware.js';
+import { optionalAuthenticate } from '../../middleware/auth.middleware.js';
 import {
     createProductSchema,
     updateProductSchema,
@@ -183,6 +184,7 @@ const router = Router();
  */
 router.get(
     '/',
+    optionalAuthenticate,
     validate(getProductsQuerySchema, 'query'),
     ProductController.getAllProducts
 );
