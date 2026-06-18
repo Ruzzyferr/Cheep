@@ -39,11 +39,30 @@ def test_same_product_across_markets_groups_together():
     assert other not in g      # different brand -> different group
 
 
-def test_near_duplicate_extra_word_groups():
+def test_extra_descriptor_word_blocks_merge():
+    # STRICT identity: an extra real descriptor = a different product. "Tavuk Göğüs
+    # Bonfile" (a specific cut) is not the same shelf item as plain "Tavuk Göğüs".
     a = P("Banvit Tavuk Göğüs Bonfile 1 kg", "Migros", 1.0, "kg")
     b = P("Banvit Tavuk Göğüs 1 kg", "ŞOK", 1.0, "kg")
     groups = group_products([a, b])
-    assert b in _group_of(groups, a)
+    assert b not in _group_of(groups, a)
+
+
+def test_identical_name_merges_despite_word_order_and_bilingual_noise():
+    # same product, different market naming (word order + "MEN" bilingual dupe) -> merge
+    mig = P("NIVEA MEN Erkek Pump Sprey Deodorant Fresh Active 75 Ml", "Migros", 75.0, "ml")
+    car = P("Nivea Fresh Active Pump Sprey Deodorant Erkek 75 ml", "CarrefourSA", 75.0, "ml")
+    assert car in _group_of(group_products([mig, car]), mig)
+
+
+def test_version_and_gender_variants_stay_separate():
+    # the exact live-QA failure: Active vs Natural, Erkek vs Kadın are NOT one product
+    active = P("Nivea Fresh Active Erkek Deo Sprey 75 ml", "A101", 75.0, "ml")
+    natural = P("Nivea Fresh Natural Erkek Deo Sprey 75 ml", "Migros", 75.0, "ml")
+    kadin = P("Nivea Fresh Active Kadın Deo Sprey 75 ml", "ŞOK", 75.0, "ml")
+    groups = group_products([active, natural, kadin])
+    assert natural not in _group_of(groups, active)   # Active ≠ Natural
+    assert kadin not in _group_of(groups, active)      # Erkek ≠ Kadın
 
 
 def test_distinct_products_stay_separate():
@@ -160,6 +179,22 @@ def test_model_number_disagreement_blocks_merge():
     a = P("Piranha 7888 RGB Hoparlör", "A101", 1.0, "adet")
     b = P("Piranha 7890 RGB Hoparlör", "A101", 1.0, "adet")
     assert b not in _group_of(group_products([a, b]), a)
+
+
+def test_product_subtype_words_block_merge():
+    # live-QA regressions: different shelf products were merging into fake "deals"
+    # because the distinguishing word wasn't a discriminator.
+    plain = P("Sensodyne Diş Macunu 75 ml", "A101", 75.0, "ml", price=75)
+    white = P("Sensodyne Whitening Diş Macunu 75 Ml", "Migros", 75.0, "ml", price=224)
+    assert white not in _group_of(group_products([plain, white]), plain)
+
+    sosis = P("Namet Hindi Sosis 7/24 140 G", "Migros", 140.0, "g", price=87)
+    kokteyl = P("Namet 7/24 Hindi Kokteyl Sosis 140 G", "A101", 140.0, "g", price=17)
+    assert kokteyl not in _group_of(group_products([sosis, kokteyl]), sosis)
+
+    erkek = P("Nivea Fresh Active Erkek Deo Sprey 75 ml", "A101", 75.0, "ml")
+    kadin = P("Nivea Deodorant Fresh Active Kadın 75 ml", "ŞOK", 75.0, "ml")
+    assert kadin not in _group_of(group_products([erkek, kadin]), erkek)
 
 
 def test_counted_dimension_separates_products():

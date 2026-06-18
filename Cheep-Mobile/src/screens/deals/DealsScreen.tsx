@@ -31,6 +31,12 @@ interface Deal {
   storeCount: number;
 }
 
+function median(nums: number[]): number {
+  const s = [...nums].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
 function buildDeals(products: Product[]): Deal[] {
   const deals: Deal[] = [];
   for (const product of products) {
@@ -41,16 +47,20 @@ function buildDeals(products: Product[]): Deal[] {
 
     const sorted = [...prices].sort((a, b) => a.price - b.price);
     const cheapest = sorted[0];
-    const dearest = sorted[sorted.length - 1];
-    const savings = dearest.price - cheapest.price;
+    // Reference = MEDIAN of all stores, not the max. A single inflated/wrong
+    // listing (one market's outlier price) can no longer manufacture a huge
+    // fake "saving"; a real sale corroborated by several stores still shows,
+    // because the median then sits at the higher price.
+    const reference = median(sorted.map((p) => p.price));
+    const savings = reference - cheapest.price;
     if (savings <= 0) continue;
 
     deals.push({
       product,
       cheapestPrice: cheapest.price,
-      dearestPrice: dearest.price,
+      dearestPrice: reference,
       savings,
-      savingsPct: (savings / dearest.price) * 100,
+      savingsPct: (savings / reference) * 100,
       cheapestStore: cheapest.store,
       storeCount: prices.length,
     });

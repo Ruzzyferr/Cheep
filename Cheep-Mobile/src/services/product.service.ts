@@ -72,26 +72,5 @@ export const productService = {
     );
     return response.data;
   },
-
-  /**
-   * Compare product prices across stores
-   */
-  async compareProductPrices(id: number): Promise<any> {
-    const response = await apiClient.get<ApiResponse<any>>(
-      API_ENDPOINTS.PRODUCTS.COMPARE(id)
-    );
-    return response.data.data;
-  },
-
-  /**
-   * Search products
-   */
-  async searchProducts(query: string): Promise<Product[]> {
-    const response = await apiClient.get<ApiResponse<Product[]>>(
-      API_ENDPOINTS.PRODUCTS.SEARCH,
-      { params: { search: query } }
-    );
-    return response.data.data || [];
-  },
 };
 

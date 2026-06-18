@@ -24,6 +24,9 @@ _STOPWORDS = {
     "ve", "ile", "icin", "the", "no", "numara", "boy", "tane", "x",
     "orijinal", "original", "klasik", "classic", "rahat", "lezzet",
     "nefis", "enfes", "essiz", "secme", "avantajli", "ekonomik",
+    # bilingual gender dupes — "erkek"/"kadin" carry the real signal, so the English
+    # tag is noise (Migros "NIVEA MEN Erkek …" must still equal A101 "Nivea … Erkek …")
+    "men", "women",
 }
 # Unit / measurement tokens to drop from identity (size handled separately).
 _UNIT_TOKENS = {"kg", "g", "gr", "l", "lt", "ml", "cl", "cc", "litre", "gram"}
@@ -55,6 +58,11 @@ _DISCRIMINATORS = frozenset({
     "ananasli", "seftali", "visne", "visneli", "kayisi", "kayisili", "limon",
     "limonlu", "portakal", "portakalli", "naneli", "ballı", "balli", "kekikli",
     "sarimsakli", "baharatli", "peynirli", "sucuklu", "kahveli", "antep",
+    # product sub-type / line (live QA: these were over-merging into fake "deals"
+    # — e.g. plain "Sensodyne Diş Macunu" with "Sensodyne Whitening", "Hindi Sosis"
+    # with "Hindi Kokteyl Sosis", men's vs women's deodorant). Normalized forms.
+    "kokteyl", "whitening", "beyazlatici", "beyazlatma", "beyazlik",
+    "erkek", "kadin", "unisex", "cocuk", "hassas", "hassasiyet",
 })
 
 _TR = str.maketrans({"ı": "i", "İ": "i", "ş": "s", "Ş": "s", "ğ": "g", "Ğ": "g",
@@ -201,15 +209,20 @@ def _jaccard(a: frozenset, b: frozenset) -> float:
     return len(a & b) / len(a | b)
 
 
-def group_products(products: List, threshold: float = 0.75) -> List[List]:
+def group_products(products: List, threshold: float = 1.0) -> List[List]:
     """Cluster products into equivalence groups across markets.
 
-    Two products may group only if they share the same package size AND the same
-    brand; within a (brand, size) bucket they merge when token-Jaccard >= threshold
-    (exact fingerprint is the special case Jaccard == 1.0). Requiring an equal brand
-    means different brands of the same item (Bahçıvan vs Tarabya mozzarella 200 g)
-    stay SEPARATE products — a shopper picks a brand, and we only compare that exact
-    brand+size across markets.
+    STRICT identity: two listings group only if they share the same brand, the same
+    package size AND their *significant name tokens are identical* (modulo word order,
+    units, sizes, and packaging/marketing noise stripped by `_STOPWORDS`). Any real
+    descriptor difference keeps them apart — different versions / extra names are
+    DIFFERENT products a shopper chooses between, not the same item:
+      "Nivea Fresh Active" ≠ "Nivea Fresh Natural", "… Erkek" ≠ "… Kadın",
+      "Sensodyne Diş Macunu" ≠ "Sensodyne Whitening Diş Macunu",
+      "Hindi Sosis" ≠ "Hindi Kokteyl Sosis", "Pınar … Sosis" ≠ "Pınar Lezzet Keyfi … Sosis".
+    This deliberately prefers UNDER-merging (a true twin may occasionally stay split
+    if a market's naming differs) over FALSE-merging, which manufactures bogus price
+    gaps / "deals". `threshold` is kept for signature compatibility but ignored.
     """
     items = list(products)
     n = len(items)
@@ -238,15 +251,10 @@ def group_products(products: List, threshold: float = 0.75) -> List[List]:
             i = idxs[a_pos]
             for b_pos in range(a_pos + 1, len(idxs)):
                 j = idxs[b_pos]
-                # never merge across a discriminator disagreement (variant/flavour/type)
-                if (toks[i] ^ toks[j]) & _DISCRIMINATORS:
-                    continue
-                # different model/code numbers => different products (Piranha 7888≠7890)
-                ni = {t for t in toks[i] if t.isdigit()}
-                nj = {t for t in toks[j] if t.isdigit()}
-                if ni and nj and ni != nj:
-                    continue
-                if _jaccard(toks[i], toks[j]) >= threshold:
+                # STRICT: merge only when the significant token sets are IDENTICAL.
+                # (Word order, units, sizes and packaging/marketing noise are already
+                # removed by sig_tokens/_STOPWORDS, so equality here means "same name".)
+                if toks[i] == toks[j]:
                     union(i, j)
 
     groups = {}

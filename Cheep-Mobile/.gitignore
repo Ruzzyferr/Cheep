@@ -50,3 +50,5 @@ verify.py
 cat_shot.py
 listflow.py
 catscroll.py
+e2e_journey.py
+e2e_deals.py

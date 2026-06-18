@@ -84,10 +84,19 @@ export function SelectListModal({
     }
   };
 
-  const handleCreateNew = () => {
-    onClose();
-    // TODO: Navigate to create list screen
-    Alert.alert('Bilgi', 'Yeni liste oluşturma özelliği yakında eklenecek');
+  const handleCreateNew = async () => {
+    try {
+      setAdding(-1);
+      const newList = await listService.createList({ name: 'Alışveriş Listem' });
+      await listService.addItem(newList.id, { product_id: productId, quantity, unit });
+      onSelect(newList.id);
+      onClose();
+    } catch (error) {
+      console.error('Create+add error:', error);
+      Alert.alert('Hata', 'Liste oluşturulurken bir hata oluştu');
+    } finally {
+      setAdding(null);
+    }
   };
 
   return (

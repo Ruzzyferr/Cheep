@@ -107,19 +107,27 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         .filter((cat) => cat.parent_id === null)
         .slice(0, 7);
 
-      // Fiyat farkına göre sırala (en büyük fark en üstte)
+      // Fiyat farkına göre sırala (en büyük fark en üstte). Referans olarak en
+      // pahalı değil MEDYAN fiyatı kullanırız: tek bir marketin hatalı/aşırı
+      // yüksek fiyatı listeyi sahte indirimlerle dolduramaz; birden çok market
+      // doğruladığında gerçek indirim yine en üste çıkar.
+      const median = (nums: number[]) => {
+        const s = [...nums].sort((a, b) => a - b);
+        const m = Math.floor(s.length / 2);
+        return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+      };
       const productsWithPriceDifference = products
         .filter((product) => product.store_prices && product.store_prices.length >= 2) // En az 2 fiyat olmalı
         .map((product) => {
           const prices = product.store_prices!.map((sp) => parseFloat(sp.price));
           const minPrice = Math.min(...prices);
-          const maxPrice = Math.max(...prices);
-          const priceDifference = maxPrice - minPrice;
+          const reference = median(prices); // "normal" fiyat (aykırı değere dayanıklı)
+          const priceDifference = Math.max(0, reference - minPrice);
           return {
             ...product,
             priceDifference,
             minPrice,
-            maxPrice,
+            maxPrice: reference,
           };
         })
         .sort((a, b) => b.priceDifference - a.priceDifference); // Büyükten küçüğe sırala
@@ -436,7 +444,15 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
                 <Text style={styles.subtitle}>Kontrol Paneli</Text>
               </View>
               <View style={styles.headerRight}>
-                <TouchableOpacity style={styles.iconButton}>
+                <TouchableOpacity
+                  style={styles.iconButton}
+                  onPress={() =>
+                    navigation.navigate('CategoryProducts', {
+                      categoryId: 0,
+                      categoryName: 'Tüm Kategoriler',
+                    })
+                  }
+                >
                   <MaterialCommunityIcons name="magnify" size={20} color={colors.text.secondary} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconButton}>
