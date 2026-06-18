@@ -85,8 +85,8 @@ export const assistantService = {
       );
       return response.data.data!;
     } catch (e: any) {
-      if (e?.response?.status === 429 && e?.response?.data?.code === 'DAILY_LIMIT') {
-        throw Object.assign(new Error(e.response.data.message), { dailyLimit: true });
+      if (e?.status === 429 && e?.data?.code === 'DAILY_LIMIT') {
+        throw Object.assign(new Error(e?.data?.message ?? 'Günlük mesaj limitin doldu.'), { dailyLimit: true });
       }
       throw e;
     }
