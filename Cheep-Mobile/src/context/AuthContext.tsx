@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authService } from '../services';
+import { authService, profileService } from '../services';
 import { authStorage, userStorage } from '../utils/storage';
 import type { User, LoginRequest, RegisterRequest } from '../types';
 
@@ -12,10 +12,12 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  onboardingDone: boolean;
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  refreshOnboarding: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [onboardingDone, setOnboardingDone] = useState(false);
 
   // Check authentication on mount
   useEffect(() => {
@@ -30,10 +33,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const refreshOnboarding = async () => {
+    try {
+      const p = await profileService.getProfile();
+      setOnboardingDone(!!p?.onboarding_done);
+    } catch {
+      setOnboardingDone(false);
+    }
+  };
+
   const checkAuth = async () => {
     try {
       const hasToken = await authStorage.hasToken();
-      
+
       if (hasToken) {
         const savedUser = await userStorage.getUser<User>();
         if (savedUser) {
@@ -42,6 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Fetch user if token exists but user data is missing
           await refreshUser();
         }
+        // Load onboarding status after establishing the session
+        await refreshOnboarding();
       }
     } catch (error) {
       console.error('Check auth error:', error);
@@ -63,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await userStorage.saveUser(response.user);
 
       setUser(response.user);
+      await refreshOnboarding();
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -81,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await userStorage.saveUser(response.user);
 
       setUser(response.user);
+      await refreshOnboarding();
     } catch (error) {
       console.error('Register error:', error);
       throw error;
@@ -113,10 +129,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     isLoading,
     isAuthenticated: !!user,
+    onboardingDone,
     login,
     register,
     logout,
     refreshUser,
+    refreshOnboarding,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
