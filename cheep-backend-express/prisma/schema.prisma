@@ -28,6 +28,7 @@ model User {
   lists           List[]
   favorite_stores UserFavoriteStore[]
   price_feedbacks PriceFeedback[]
+  profile         UserProfile?
 
   @@map("users")
 }
@@ -266,4 +267,25 @@ model PriceFeedback {
   @@index([store_price_id])
   @@index([created_at])
   @@map("price_feedbacks")
+}
+
+// ============================================
+// KULLANICI PROFİLİ (onboarding)
+// ============================================
+
+model UserProfile {
+  id              Int      @id @default(autoincrement())
+  user_id         Int      @unique
+  household_size  String?  // '1' | '2' | '3-4' | '5+'
+  diet            String?  // 'omnivore' | 'vegetarian' | 'vegan' | 'pescatarian'
+  avoid           Json?    // ['pork_gelatin','alcohol', ...]
+  allergies       Json?    // ['lactose','gluten','peanut','tree_nut', ...serbest]
+  weekly_budget   Decimal? @db.Decimal(10, 2)
+  onboarding_done Boolean  @default(false)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
 }
