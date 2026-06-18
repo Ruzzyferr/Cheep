@@ -281,6 +281,7 @@ export function CategoryProductsScreen({
                 categoryName={item.category?.name}
                 imageUrl={item.image_url || undefined}
                 topThreePrices={topThreePrices}
+                constraint={item.constraint}
                 onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
                 onAddToCart={() => handleAddToCart(item)}
               />
