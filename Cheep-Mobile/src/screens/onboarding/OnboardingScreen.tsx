@@ -22,6 +22,7 @@ import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services';
 import { colors, typography, spacing, borderRadius, layout } from '../../theme';
 import { ONBOARDING_QUESTIONS } from './onboardingConfig';
+import type { UserProfile } from '../../types';
 
 // ─── Answer types ────────────────────────────────────────────────────────────
 type Answers = {
@@ -268,15 +269,22 @@ export function OnboardingScreen() {
     setFinishing(true);
     try {
       // Build payload: only answered fields + onboarding_done
-      const payload: Record<string, unknown> = { ...answers, onboarding_done: true };
-      // Convert budget string to number if present
-      if (payload.weekly_budget !== undefined && payload.weekly_budget !== '') {
-        payload.weekly_budget = Number(payload.weekly_budget);
-      } else {
-        delete payload.weekly_budget;
+      const payload: Partial<UserProfile> = {
+        household_size: answers.household_size,
+        diet: answers.diet,
+        avoid: answers.avoid,
+        allergies: answers.allergies,
+        onboarding_done: true,
+      };
+      // Convert budget string to number if present and non-empty
+      if (answers.weekly_budget && answers.weekly_budget !== '') {
+        const budgetNum = Number(answers.weekly_budget);
+        if (!isNaN(budgetNum)) {
+          payload.weekly_budget = budgetNum;
+        }
       }
 
-      await profileService.updateProfile(payload as any);
+      await profileService.updateProfile(payload);
       await refreshOnboarding(); // flips RootNavigator gate to Main
     } catch (error: any) {
       Alert.alert(
