@@ -149,6 +149,13 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Listelerim</Text>
+        <TouchableOpacity
+          style={styles.headerAddButton}
+          onPress={handleCreateList}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <MaterialIcons name="add" size={28} color={colors.primary.main} />
+        </TouchableOpacity>
       </View>
 
       {/* Tabs */}
@@ -234,6 +241,9 @@ const styles = StyleSheet.create({
     paddingTop: spacing.xl,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
 
   title: {
@@ -241,6 +251,10 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontWeight: '700',
     letterSpacing: -0.5,
+  },
+
+  headerAddButton: {
+    padding: spacing.xs,
   },
 
   tabs: {

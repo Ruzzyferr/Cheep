@@ -7,17 +7,16 @@ import React, { useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation, CommonActions } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { listService } from '../services';
-import { setShouldOpenCreateModalFromFAB } from '../utils/fabState';
 import { HomeNavigator } from './HomeNavigator';
 import { ListsNavigator } from './ListsNavigator';
 import { DealsNavigator } from './DealsNavigator';
 import { ProfileNavigator } from './ProfileNavigator';
-import { colors, spacing, shadows, borderRadius, typography } from '../theme';
-import type { TabParamList } from './types';
+import { colors, spacing, shadows } from '../theme';
+import type { TabParamList, RootStackParamList } from './types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -185,63 +184,32 @@ export function TabNavigator() {
 // FAB Button Component (HTML'deki gibi ortada)
 function TabFAB() {
   const insets = useSafeAreaInsets();
-  
-  const handlePress = async () => {
-    try {
-      // Get tab navigation ref from global
-      const tabNavigation = (global as any).__tabNavigationRef as BottomTabNavigationProp<TabParamList> | undefined;
-      
-      if (!tabNavigation) {
-        console.error('Tab navigator not found');
-        return;
-      }
-      
-      // Check if there's an active list
-      const activeLists = await listService.getLists('active');
-      const activeList = activeLists.find((l) => l.status === 'active' && !l.is_template);
-      
-      if (activeList) {
-        // Aktif liste varsa → Liste detay sayfasına git
-        tabNavigation.dispatch(
-          CommonActions.navigate({
-            name: 'Lists',
-            params: {
-              screen: 'ListDetail',
-              params: { listId: activeList.id },
-            },
-          })
-        );
-      } else {
-        // Aktif liste yoksa → Yeni liste oluştur
-        // Set global flag and navigate to Lists tab
-        // ListsScreen will check this flag when focused
-        setShouldOpenCreateModalFromFAB(true);
-        tabNavigation.navigate('Lists');
-      }
-    } catch (error) {
-      console.error('Error checking active lists:', error);
-      // On error, navigate to Home screen
-      const tabNavigation = (global as any).__tabNavigationRef as BottomTabNavigationProp<TabParamList> | undefined;
-      if (tabNavigation) {
-        tabNavigation.navigate('Home');
-      }
+  const navigation = useNavigation<BottomTabNavigationProp<TabParamList>>();
+
+  const handlePress = () => {
+    // Navigate to the Assistant screen (a full-screen root stack route above the tabs)
+    const rootNavigation = navigation.getParent<StackNavigationProp<RootStackParamList>>();
+    if (rootNavigation) {
+      rootNavigation.navigate('Assistant');
+    } else {
+      console.error('Root navigator not found');
     }
   };
 
   return (
-    <View 
+    <View
       style={[
         styles.fabContainer,
         { bottom: insets.bottom + 16 } // Tab bar içinde ortalamak için: (72 - 40) / 2 = 16
-      ]} 
+      ]}
       pointerEvents="box-none"
     >
-      <TouchableOpacity 
-        style={styles.fabButton} 
+      <TouchableOpacity
+        style={styles.fabButton}
         onPress={handlePress}
         activeOpacity={0.9}
       >
-        <MaterialIcons name="add" size={20} color={colors.background.paper} />
+        <MaterialIcons name="auto-awesome" size={20} color={colors.background.paper} />
       </TouchableOpacity>
     </View>
   );

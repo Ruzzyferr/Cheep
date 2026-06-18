@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { AuthNavigator } from './AuthNavigator';
 import { TabNavigator } from './TabNavigator';
 import { OnboardingNavigator } from './OnboardingNavigator';
+import { AssistantNavigator } from './AssistantNavigator';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { colors } from '../theme';
 import type { RootStackParamList } from './types';
@@ -36,7 +37,10 @@ export function RootNavigator() {
         ) : !onboardingDone ? (
           <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
         ) : (
-          <Stack.Screen name="Main" component={TabNavigator} />
+          <>
+            <Stack.Screen name="Main" component={TabNavigator} />
+            <Stack.Screen name="Assistant" component={AssistantNavigator} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
