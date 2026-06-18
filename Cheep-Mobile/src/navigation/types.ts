@@ -104,6 +104,20 @@ export type DealsStackScreenProps<T extends keyof DealsStackParamList> =
   >;
 
 // ============================================
+// ASSISTANT STACK
+// ============================================
+
+export type AssistantStackParamList = {
+  AssistantChat: { threadId?: number } | undefined;
+};
+
+export type AssistantStackScreenProps<T extends keyof AssistantStackParamList> =
+  CompositeScreenProps<
+    StackScreenProps<AssistantStackParamList, T>,
+    RootStackScreenProps<keyof RootStackParamList>
+  >;
+
+// ============================================
 // PROFILE STACK
 // ============================================
 
