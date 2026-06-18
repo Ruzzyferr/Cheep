@@ -188,12 +188,9 @@ function TabFAB() {
 
   const handlePress = () => {
     // Navigate to the Assistant screen (a full-screen root stack route above the tabs)
-    const rootNavigation = navigation.getParent<StackNavigationProp<RootStackParamList>>();
-    if (rootNavigation) {
-      rootNavigation.navigate('Assistant');
-    } else {
-      console.error('Root navigator not found');
-    }
+    // Use getParent if available, otherwise fall back to current navigation
+    const target = (navigation.getParent() ?? navigation) as any;
+    target.navigate('Assistant');
   };
 
   return (
