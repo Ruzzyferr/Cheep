@@ -65,13 +65,6 @@ export function ThreadListSheet({
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
 
-  // Load threads whenever sheet opens
-  useEffect(() => {
-    if (visible) {
-      loadThreads();
-    }
-  }, [visible]);
-
   const loadThreads = useCallback(async () => {
     try {
       setLoading(true);
@@ -84,6 +77,13 @@ export function ThreadListSheet({
       setLoading(false);
     }
   }, []);
+
+  // Load threads whenever sheet opens
+  useEffect(() => {
+    if (visible) {
+      loadThreads();
+    }
+  }, [visible, loadThreads]);
 
   const handleSelect = useCallback(
     (id: number) => {
@@ -123,41 +123,44 @@ export function ThreadListSheet({
     onClose();
   }, [onNewChat, onClose]);
 
-  const renderThread = ({ item }: { item: ChatThread }) => {
-    const isActive = item.id === activeThreadId;
-    return (
-      <TouchableOpacity
-        style={[styles.row, isActive && styles.rowActive]}
-        onPress={() => handleSelect(item.id)}
-        activeOpacity={0.7}
-      >
-        <MaterialIcons
-          name="chat-bubble-outline"
-          size={20}
-          color={isActive ? colors.primary.main : colors.text.secondary}
-          style={styles.rowIcon}
-        />
-        <View style={styles.rowInfo}>
-          <Text style={[styles.rowTitle, isActive && styles.rowTitleActive]} numberOfLines={1}>
-            {item.title ?? 'Yeni sohbet'}
-          </Text>
-          <Text style={styles.rowDate}>{formatRelative(item.updated_at)}</Text>
-        </View>
-        {deleting === item.id ? (
-          <ActivityIndicator size="small" color={colors.error?.main ?? '#EF4444'} />
-        ) : (
-          <TouchableOpacity
-            onPress={() => handleDelete(item.id)}
-            style={styles.deleteButton}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            accessibilityLabel="Sohbeti sil"
-          >
-            <MaterialIcons name="delete-outline" size={20} color={colors.text.secondary} />
-          </TouchableOpacity>
-        )}
-      </TouchableOpacity>
-    );
-  };
+  const renderThread = useCallback(
+    ({ item }: { item: ChatThread }) => {
+      const isActive = item.id === activeThreadId;
+      return (
+        <TouchableOpacity
+          style={[styles.row, isActive && styles.rowActive]}
+          onPress={() => handleSelect(item.id)}
+          activeOpacity={0.7}
+        >
+          <MaterialIcons
+            name="chat-bubble-outline"
+            size={20}
+            color={isActive ? colors.primary.main : colors.text.secondary}
+            style={styles.rowIcon}
+          />
+          <View style={styles.rowInfo}>
+            <Text style={[styles.rowTitle, isActive && styles.rowTitleActive]} numberOfLines={1}>
+              {item.title ?? 'Yeni sohbet'}
+            </Text>
+            <Text style={styles.rowDate}>{formatRelative(item.updated_at)}</Text>
+          </View>
+          {deleting === item.id ? (
+            <ActivityIndicator size="small" color={colors.error?.main ?? '#EF4444'} />
+          ) : (
+            <TouchableOpacity
+              onPress={() => handleDelete(item.id)}
+              style={styles.deleteButton}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityLabel="Sohbeti sil"
+            >
+              <MaterialIcons name="delete-outline" size={20} color={colors.text.secondary} />
+            </TouchableOpacity>
+          )}
+        </TouchableOpacity>
+      );
+    },
+    [deleting, activeThreadId, handleSelect, handleDelete]
+  );
 
   return (
     <Modal
@@ -179,7 +182,7 @@ export function ThreadListSheet({
           {/* New chat action */}
           <TouchableOpacity style={styles.newChatRow} onPress={handleNewChat} activeOpacity={0.7}>
             <MaterialIcons name="add" size={22} color={colors.primary.main} />
-            <Text style={styles.newChatText}>＋ Yeni sohbet</Text>
+            <Text style={styles.newChatText}>Yeni sohbet</Text>
           </TouchableOpacity>
 
           {/* Divider */}
