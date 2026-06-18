@@ -191,18 +191,20 @@ function StoreSection({
 
 // Product Row Component
 function ProductRow({ productAllocation }: { productAllocation: ProductAllocation }) {
+  const { product, quantity, unit } = productAllocation;
+  const displayName = product.brand
+    ? `${product.brand} · ${product.name}`
+    : product.name;
+
   return (
     <Card padding="sm" style={styles.productCard}>
       <View style={styles.productRow}>
         <View style={styles.productInfo}>
           <Text style={styles.productName} numberOfLines={2}>
-            {productAllocation.product.name}
+            {displayName}
           </Text>
-          {productAllocation.product.brand && (
-            <Text style={styles.productBrand}>{productAllocation.product.brand}</Text>
-          )}
           <Text style={styles.productQuantity}>
-            {productAllocation.quantity} {productAllocation.unit}
+            {quantity} {unit}
           </Text>
         </View>
         <View style={styles.productPrices}>
@@ -387,12 +389,6 @@ const styles = StyleSheet.create({
     ...typography.styles.body1,
     color: colors.text.primary,
     fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-
-  productBrand: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
     marginBottom: spacing.xs,
   },
 
