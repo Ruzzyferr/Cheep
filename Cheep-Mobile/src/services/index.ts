@@ -8,4 +8,5 @@ export { listService } from './list.service';
 export { productService } from './product.service';
 export { storeService } from './store.service';
 export { categoryService } from './category.service';
+export { profileService } from './profile.service';
 

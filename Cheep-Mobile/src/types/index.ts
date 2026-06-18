@@ -283,3 +283,16 @@ export interface ApiError {
   errors?: Record<string, string[]>;
 }
 
+// ============================================
+// PROFILE TYPES
+// ============================================
+
+export interface UserProfile {
+  household_size?: string;
+  diet?: string;
+  avoid?: string[];
+  allergies?: string[];
+  weekly_budget?: number;
+  onboarding_done: boolean;
+}
+
