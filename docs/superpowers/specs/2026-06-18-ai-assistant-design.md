@@ -1,7 +1,7 @@
 # Cheep AI Asistanı — Tasarım Dokümanı (Faz 5)
 
 **Tarih:** 2026-06-18
-**Durum:** Onaylı tasarım — uygulama 5a ile başlar
+**Durum:** Onaylı tasarım — uygulama 5-0 (marka-bağımsız temel) + 5a ile başlar
 **Sağlayıcı:** Google Gemini (`gemini-2.0-flash`) via `@google/generative-ai`
 
 ## 1. Amaç ve Vizyon
@@ -19,15 +19,16 @@ Hedef kitle geniştir (öğrenci, yurtta kalan, yaşlı; farklı ülkeler). Asis
 ## 2. Kapsam ve Fazlama
 
 Mimarinin tamamı bu spec'te belgelenir; uygulama fazlara bölünür. **writing-plans önce
-5a için plan çıkarır.**
+5-0 + 5a için plan çıkarır** (5-0 küçük bir temel parça, 5a onun üstüne biner).
 
 | Faz | İçerik | Kapsadığı kullanıcı istekleri |
 |---|---|---|
+| **5-0 — Marka-bağımsız liste öğeleri (temel)** | `ListItem.brand_independent` + compare motorunun muadil-grup genişletmesi + elle/asistan ekleme toggle'ı + sonuç ekranında seçilen marka gösterimi | "yarım yağlı süt 1L, marka farketmez → en ucuzu hangi markette" |
 | **5a — Agentic sohbet çekirdeği (metin)** | Tool-calling agent + thread persistence (silinebilir) + araçlar (liste oku/oluştur/ekle/çıkar, ürün/fiyat ara, en ucuz rota) + clarifying-question akışı + mobil chat ekranı | tarif→liste, haftalık plan, bütçe sepeti, "zaten listende var, kalsın mı?" diyaloğu |
 | **5b — Multimodal** | Görsel girdi: yemek fotoğrafı → yemeği tanı → tarif → liste | Instagram SS → liste |
 | **5c — Kişiselleştirme hafızası** | Tercih profili (sevdiği/sevmediği, diyet, demografik kesim, ülke-mutfak) → sistem prompt'unu besler | kesime/ülkeye özel öneri, "her gün ne pişirirsin" |
 
-5a çekirdeği oturunca 5b ve 5c üstüne biner. **Bu doküman ve ilk implementasyon planı yalnızca 5a'yı bağlar; 5b/5c yol haritası olarak burada durur, ayrı spec gerektirmeden plan aşamasında detaylandırılabilir.**
+5a çekirdeği oturunca 5b ve 5c üstüne biner. **Bu doküman ve ilk implementasyon planı 5-0 + 5a'yı bağlar; 5b/5c yol haritası olarak burada durur, ayrı spec gerektirmeden plan aşamasında detaylandırılabilir.**
 
 ## 3. Sağlayıcı ve Maliyet
 
@@ -97,6 +98,15 @@ model ChatMessage {
 **Silme:** Kullanıcı bir sohbeti silince **hard delete** (`onDelete: Cascade` mesajları da siler).
 Gizlilik için en temizi; "isteğe bağlı silinebilir" gereksinimini karşılar.
 
+**Marka-bağımsız öğeler (Faz 5-0):** `ListItem`'a tek alan eklenir:
+
+```prisma
+brand_independent Boolean @default(false) // true → muadil grubundaki en ucuz markayı seç
+```
+
+`product_id` **temsilci ürün** olarak kalır (ad/gramaj/görsel/`muadil_grup_id` buradan
+gelir). Bayrak açıkken compare, sabit ürün yerine grubun tamamını değerlendirir (bkz. 4.8).
+
 ### 4.3 Araç seti (function-calling)
 
 Tüm araçlar **in-process** olarak mevcut servisleri çağırır (HTTP değil). Her araç
@@ -108,7 +118,7 @@ Tüm araçlar **in-process** olarak mevcut servisleri çağırır (HTTP değil).
 | `get_user_lists` | — | Kullanıcının listeleri | `lists.service` |
 | `get_list_items` | `listId: number` | Listedeki ürünler (miktar/birim) | `lists.service` |
 | `create_list` | `name: string, budget?: number` | Yeni liste açar | `lists.service` |
-| `add_items_to_list` | `listId: number, items: {query,quantity?,unit?}[]` | Ürün(ler) ekler (matcher ile eşleştirir) | `lists.service` + product matcher |
+| `add_items_to_list` | `listId: number, items: {query,quantity?,unit?,brandIndependent?}[]` | Ürün(ler) ekler (matcher ile eşleştirir) | `lists.service` + product matcher |
 | `remove_list_item` | `listId: number, itemId: number` | Ürün çıkarır | `lists.service` |
 | `get_product_prices` | `productId: number` | Marketlere göre fiyat | `store-prices.service` |
 | `get_cheapest_route` | `listId: number` | En ucuz rota karşılaştırması | `lists-compare` |
@@ -116,6 +126,11 @@ Tüm araçlar **in-process** olarak mevcut servisleri çağırır (HTTP değil).
 `add_items_to_list`, serbest metin ürün adını (örn. "kırmızı mercimek") mevcut ürün
 eşleştirme mantığıyla katalog ürününe bağlar; eşleşme bulunamazsa araç sonucu bunu
 bildirir ve model kullanıcıya sorar.
+
+**Asistan "akıllı marka" davranışı:** Kullanıcı jenerik/markasız istediğinde ("süt ekle",
+"yarım yağlı süt 1L") asistan `brandIndependent: true` geçer → en ucuz marka seçilir.
+Kullanıcı marka belirtirse ("Pınar süt") `brandIndependent` `false` kalır (marka sabit).
+Sistem prompt'una bu kural yazılır.
 
 ### 4.4 Agent döngüsü (`assistant.service.ts`)
 
@@ -155,6 +170,24 @@ erişim 404).
 - **Hata:** Gemini hatası/timeout → 502 + kullanıcı dostu mesaj; kısmi tool sonuçları
   kaybolmaz (mesaj kaydı tutarlı bırakılır).
 - **Rate-limit:** kullanıcı başına; 429 zarif yönetilir.
+
+### 4.8 Marka-bağımsız compare (Faz 5-0)
+
+`compare-engine.service.ts` şu an her `ListItem`'ı sabit `product_id` ile fiyatlandırır.
+Değişiklik: `item.brand_independent === true` olan öğeler için, fiyat seçiminde tek ürün
+yerine **muadil grubun tamamı** değerlendirilir.
+
+- Öğenin `product.muadil_grup_id`'si yoksa (tekil ürün) davranış değişmez = marka sabit.
+- Varsa: her market için o gruptaki **o markette mevcut en ucuz ürün** seçilir. Böylece
+  en-ucuz-market seçimi, doğal olarak en ucuz markayı barındıran marketi öne çıkarır
+  (örn. A101'deki B markası, Migros'taki A markasından ucuzsa A101 kazanır).
+- Mevcut `findAlternativeProducts` mantığı (grup içi ürünleri çekme) yeniden kullanılır;
+  fark, alternatifi "öneri" yerine **seçilen fiyat** yapmaktır.
+- Sonuç şemasına seçilen ürünün **gerçek markası ve adı** eklenir ki sonuç ekranı
+  "A101 — B Markası ₺X" gösterebilsin (temsilci ürünün değil, kazanan ürünün markası).
+
+Bu değişiklik geriye dönük uyumludur: `brand_independent` varsayılan `false`, mevcut
+listeler aynen çalışır.
 
 ## 5. Mobil Tasarım (5a)
 
@@ -205,6 +238,18 @@ yanıt gelince asistan mesajı + olası `ListActionCard` render edilir.
 
 Fintech teal/beyaz, yumuşak gölgeler; mevcut skeleton/empty-state desenleri yeniden kullanılır.
 
+### 5.6 Marka-bağımsız UI (Faz 5-0)
+
+- **Elle ekleme:** Ürün ekleme satırında küçük bir **"Marka farketmez" toggle**'ı
+  (varsayılan **kapalı**). Açıkken öğe muadil-grup moduna geçer; satırda küçük bir
+  "en ucuz marka" rozeti gösterilir.
+- **Mevcut öğe:** `ListDetail`'de öğeye dokununca aynı toggle ile sonradan açılıp kapatılabilir.
+- **Asistanda:** Ayrı toggle yok; asistan kararı verir (4.3). Asistan marka-bağımsız öğe
+  eklediğinde `ListActionCard`/mesajda bunu belirtir ("marka farketmez olarak eklendi").
+- **Karşılaştırma sonucu:** Marka-bağımsız öğeler için sonuç satırı, temsilci ürünün değil
+  **kazanan ürünün markası + adı**nı ve marketini gösterir (örn. "A101 · B Markası Süt 1L ₺X").
+  Bir "marka farketmez" etiketi öğenin neden o markette seçildiğini açıklar.
+
 ## 6. Test Stratejisi
 
 - **Backend birim testleri (vitest):** agent döngüsü Gemini client mock'lanarak —
@@ -212,6 +257,10 @@ Fintech teal/beyaz, yumuşak gölgeler; mevcut skeleton/empty-state desenleri ye
   (c) maks-tur koruması, (d) thread/mesaj CRUD + user scope (başkasının thread'i 404),
   (e) hard delete cascade.
 - **Araç executor testleri:** her araç mevcut servisle doğru sonuç/şekil döndürüyor mu.
+- **Marka-bağımsız compare (5-0):** (a) `brand_independent` öğede compare grubun en ucuz
+  markasını seçiyor (A101/B < Migros/A → A101 kazanır), (b) muadil grubu olmayan tekil
+  ürün marka-sabit gibi davranıyor, (c) sonuç şeması kazanan ürünün gerçek marka/adını
+  döndürüyor, (d) `brand_independent=false` mevcut davranışı bozmuyor (regresyon).
 - **Mobil:** `tsc --noEmit` temiz; Expo web (:8081) + Playwright ile login → Asistan →
   örnek mesaj → liste oluşturma akışı ekran görüntüsüyle doğrulanır.
 - Gerçek Gemini çağrısı testlerde yapılmaz (mock); manuel doğrulama gerçek anahtarla yapılır.
@@ -222,6 +271,9 @@ Fintech teal/beyaz, yumuşak gölgeler; mevcut skeleton/empty-state desenleri ye
 - Free katman rate-limiti yoğun kullanımda darboğaz olabilir → kullanıcı-başı limit + 429 yönetimi.
 - Ürün eşleştirme (`add_items_to_list`) mevcut matcher kalitesine bağlı; eşleşmeyince
   asistan kullanıcıya sorar (graceful deg: liste boş kalmaz, kullanıcı yönlendirilir).
+- **Marka-bağımsız (5-0)** doğruluğu `muadil_grup_id` kalitesine bağlı: gruplar yanlış/eksikse
+  yanlış marka "en ucuz" seçilebilir. Tekil ürünlerde otomatik marka-sabite düşer (güvenli).
+  Mevcut matcher zaten markasız fingerprint ile grupluyor; ek gruplama işi gerektirmez.
 
 ## 8. Yol Haritası (5b / 5c — bilgi amaçlı)
 
