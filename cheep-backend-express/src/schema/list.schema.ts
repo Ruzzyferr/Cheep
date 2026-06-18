@@ -37,6 +37,7 @@ export const addListItemSchema = Joi.object({
     unit: Joi.string()
         .valid('adet', 'kg', 'g', 'l', 'ml', 'cl', 'paket', 'kutu')
         .default('adet'),
+    brand_independent: Joi.boolean().optional(),
 });
 
 export const updateListItemSchema = Joi.object({
@@ -44,4 +45,5 @@ export const updateListItemSchema = Joi.object({
     unit: Joi.string()
         .valid('adet', 'kg', 'g', 'l', 'ml', 'cl', 'paket', 'kutu')
         .optional(),
+    brand_independent: Joi.boolean().optional(),
 }).min(1);

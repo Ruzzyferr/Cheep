@@ -495,6 +495,7 @@ export const addItemToList = async (
         product_id: number;
         quantity?: number;
         unit?: string;
+        brand_independent?: boolean;
     }
 ) => {
     // Liste kontrolü
@@ -535,6 +536,7 @@ export const addItemToList = async (
             data: {
                 quantity: data.quantity || existingItem.quantity,
                 unit: data.unit || existingItem.unit,
+                brand_independent: data.brand_independent ?? existingItem.brand_independent,
             },
             include: {
                 product: {
@@ -557,6 +559,7 @@ export const addItemToList = async (
             product_id: data.product_id,
             quantity: data.quantity || 1,
             unit: data.unit || 'adet',
+            brand_independent: data.brand_independent ?? false,
         },
         include: {
             product: {
@@ -581,6 +584,7 @@ export const updateListItem = async (
     data: {
         quantity?: number;
         unit?: string;
+        brand_independent?: boolean;
     }
 ) => {
     // Item'ın sahibi mi kontrol et
@@ -600,6 +604,7 @@ export const updateListItem = async (
         data: {
             quantity: data.quantity,
             unit: data.unit,
+            brand_independent: data.brand_independent,
         },
         include: {
             product: {
