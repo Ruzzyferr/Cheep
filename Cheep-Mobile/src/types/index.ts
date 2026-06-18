@@ -124,6 +124,7 @@ export interface ListItem {
   product_id: number;
   quantity: number;
   unit: string;
+  brand_independent: boolean;
   created_at: string;
   updated_at: string;
   product?: Product;

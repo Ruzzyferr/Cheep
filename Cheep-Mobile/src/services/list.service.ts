@@ -78,6 +78,17 @@ export const listService = {
   },
 
   /**
+   * Update item in list (quantity, unit, brand_independent)
+   */
+  async updateItem(itemId: number, data: { quantity?: number; unit?: string; brand_independent?: boolean }): Promise<any> {
+    const response = await apiClient.put<ApiResponse<any>>(
+      `/lists/items/${itemId}`,
+      data
+    );
+    return response.data.data;
+  },
+
+  /**
    * Delete item from list
    */
   async deleteItem(listId: number, itemId: number): Promise<void> {

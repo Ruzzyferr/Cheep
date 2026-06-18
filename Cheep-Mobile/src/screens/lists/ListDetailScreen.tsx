@@ -54,6 +54,15 @@ export function ListDetailScreen({
     }
   };
 
+  const handleToggleBrandIndependent = async (item: ListItem) => {
+    try {
+      await listService.updateItem(item.id, { brand_independent: !item.brand_independent });
+      await loadList();
+    } catch {
+      Alert.alert('Hata', 'Marka tercihi güncellenirken bir hata oluştu');
+    }
+  };
+
   const handleCompare = () => {
     if (!list) return;
     navigation.navigate('CompareResults', { listId: list.id });
@@ -145,7 +154,13 @@ export function ListDetailScreen({
       <FlatList
         data={items}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <ListItemCard item={item} onDelete={handleDeleteItem} />}
+        renderItem={({ item }) => (
+          <ListItemCard
+            item={item}
+            onDelete={handleDeleteItem}
+            onToggleBrandIndependent={handleToggleBrandIndependent}
+          />
+        )}
         contentContainerStyle={[
           styles.listContent,
           items.length > 0 && { paddingBottom: 120 } // Space for button at bottom (72 tab bar + 48 button + padding)
@@ -188,35 +203,46 @@ export function ListDetailScreen({
 function ListItemCard({
   item,
   onDelete,
+  onToggleBrandIndependent,
 }: {
   item: ListItem;
   onDelete: (id: number) => void;
+  onToggleBrandIndependent: (item: ListItem) => void;
 }) {
   const product = item.product;
   if (!product) return null;
 
   return (
-    <Card padding="md" style={styles.itemCard}>
-      <View style={styles.itemContent}>
-        <View style={styles.itemInfo}>
-          <Text style={styles.productName} numberOfLines={2}>
-            {product.name}
-          </Text>
-          {product.brand && (
-            <Text style={styles.productBrand}>{product.brand}</Text>
-          )}
-          <Text style={styles.quantity}>
-            {item.quantity} {item.unit}
-          </Text>
+    <TouchableOpacity
+      onLongPress={() => onToggleBrandIndependent(item)}
+      activeOpacity={0.8}
+      accessibilityLabel="Marka tercihini değiştirmek için uzun basın"
+    >
+      <Card padding="md" style={styles.itemCard}>
+        <View style={styles.itemContent}>
+          <View style={styles.itemInfo}>
+            <Text style={styles.productName} numberOfLines={2}>
+              {product.name}
+            </Text>
+            {product.brand && !item.brand_independent && (
+              <Text style={styles.productBrand}>{product.brand}</Text>
+            )}
+            {item.brand_independent && (
+              <Text style={styles.brandFreeBadge}>🏷️ marka farketmez</Text>
+            )}
+            <Text style={styles.quantity}>
+              {item.quantity} {item.unit}
+            </Text>
+          </View>
+          <Button
+            title="Sil"
+            onPress={() => onDelete(item.id)}
+            variant="text"
+            size="small"
+          />
         </View>
-        <Button
-          title="Sil"
-          onPress={() => onDelete(item.id)}
-          variant="text"
-          size="small"
-        />
-      </View>
-    </Card>
+      </Card>
+    </TouchableOpacity>
   );
 }
 
@@ -318,6 +344,13 @@ const styles = StyleSheet.create({
   quantity: {
     ...typography.styles.body2,
     color: colors.text.hint,
+  },
+
+  brandFreeBadge: {
+    ...typography.styles.caption,
+    color: colors.primary.main,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
   },
 
   actions: {
