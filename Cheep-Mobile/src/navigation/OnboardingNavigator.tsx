@@ -1,23 +1,24 @@
 /**
- * 🚀 Onboarding Navigator (placeholder)
- * Real wizard built in Task 6 — this file will be replaced.
+ * 🐦 Onboarding Navigator
+ * Single-screen stack that hosts the animated mascot wizard.
+ * On finish, OnboardingScreen calls profileService.updateProfile + refreshOnboarding
+ * which flips RootNavigator to Main automatically.
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { OnboardingScreen } from '../screens/onboarding/OnboardingScreen';
+
+type OnboardingStackParamList = {
+  OnboardingMain: undefined;
+};
+
+const Stack = createStackNavigator<OnboardingStackParamList>();
 
 export function OnboardingNavigator() {
   return (
-    <View style={styles.container}>
-      <Text>Onboarding</Text>
-    </View>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="OnboardingMain" component={OnboardingScreen} />
+    </Stack.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
