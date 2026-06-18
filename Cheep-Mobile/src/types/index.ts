@@ -139,6 +139,7 @@ export interface AddListItemRequest {
   product_id: number;
   quantity?: number;
   unit?: string;
+  brand_independent?: boolean;
 }
 
 // ============================================

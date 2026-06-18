@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Switch,
 } from 'react-native';
 import { listService } from '../../services';
 import { Card, Button } from '../ui';
@@ -39,6 +40,7 @@ export function SelectListModal({
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState<number | null>(null);
+  const [brandIndependent, setBrandIndependent] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -66,6 +68,7 @@ export function SelectListModal({
         product_id: productId,
         quantity,
         unit,
+        brand_independent: brandIndependent,
       });
       Alert.alert('Başarılı', 'Ürün listeye eklendi', [
         {
@@ -88,7 +91,7 @@ export function SelectListModal({
     try {
       setAdding(-1);
       const newList = await listService.createList({ name: 'Alışveriş Listem' });
-      await listService.addItem(newList.id, { product_id: productId, quantity, unit });
+      await listService.addItem(newList.id, { product_id: productId, quantity, unit, brand_independent: brandIndependent });
       onSelect(newList.id);
       onClose();
     } catch (error) {
@@ -121,6 +124,11 @@ export function SelectListModal({
             </View>
           ) : (
             <>
+              <View style={styles.toggleRow}>
+                <Text style={styles.toggleLabel}>Marka farketmez (en ucuzu)</Text>
+                <Switch value={brandIndependent} onValueChange={setBrandIndependent} />
+              </View>
+
               <FlatList
                 data={lists}
                 keyExtractor={(item) => item.id.toString()}
@@ -278,6 +286,21 @@ const styles = StyleSheet.create({
     padding: layout.screenPadding,
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
+  },
+
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    paddingHorizontal: layout.screenPadding,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+
+  toggleLabel: {
+    ...typography.styles.body1,
+    color: colors.text.primary,
   },
 });
 
