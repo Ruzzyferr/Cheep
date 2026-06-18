@@ -3,6 +3,7 @@ import { createChatSession } from '../../services/gemini.client.js';
 import { toolDeclarations, buildToolExecutor } from './assistant.tools.js';
 import { runAgentLoop } from './agent-loop.js';
 import { getProfile } from '../profile/profile.service.js';
+import { checkDailyLimit, startOfTrDay } from '../../services/assistant-limit.js';
 
 // ============================================
 // OWNER GUARD
@@ -67,13 +68,23 @@ export function buildSystemPrompt(profile: any): string {
 export const sendMessage = async (userId: number, threadId: number, content: string) => {
   await assertOwner(threadId, userId);
 
-  const [history, profile] = await Promise.all([
+  // Günlük limit kontrolü (Gemini çağrısından ÖNCE)
+  const dayStart = startOfTrDay(new Date());
+  const [history, profile, todayCount, limitUser] = await Promise.all([
     prisma.chatMessage.findMany({
       where: { thread_id: threadId },
       orderBy: { created_at: 'asc' },
     }),
     getProfile(userId),
+    prisma.chatMessage.count({
+      where: { role: 'user', thread: { user_id: userId }, created_at: { gte: dayStart } },
+    }),
+    prisma.user.findUnique({ where: { id: userId }, select: { is_premium: true } }),
   ]);
+  const verdict = checkDailyLimit(todayCount, limitUser?.is_premium ?? false);
+  if (!verdict.allowed) {
+    throw Object.assign(new Error('Günlük mesaj limitin doldu.'), { status: 429, code: 'DAILY_LIMIT' });
+  }
 
   const session = createChatSession({
     systemInstruction: buildSystemPrompt(profile),
@@ -108,5 +119,5 @@ export const sendMessage = async (userId: number, threadId: number, content: str
     },
   });
 
-  return { message: result.text, toolCalls: result.toolCalls };
+  return { message: result.text, toolCalls: result.toolCalls, remaining: Math.max(0, verdict.remaining - 1) };
 };

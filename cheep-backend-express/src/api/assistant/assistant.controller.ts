@@ -109,6 +109,13 @@ export const message = async (req: Request, res: Response) => {
     });
   } catch (e: any) {
     console.error('[assistant] message handler error:', e);
+    if (e?.code === 'DAILY_LIMIT') {
+      res.status(429).json({
+        success: false, code: 'DAILY_LIMIT', remaining: 0,
+        message: 'Günlük 5 mesaj hakkın doldu. Sınırsız için Premium\'a geç.',
+      });
+      return;
+    }
     if (e.status === 404) {
       res.status(404).json({ success: false, message: e.message });
       return;
