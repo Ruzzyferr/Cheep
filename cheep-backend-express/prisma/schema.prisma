@@ -29,6 +29,7 @@ model User {
   favorite_stores UserFavoriteStore[]
   price_feedbacks PriceFeedback[]
   profile         UserProfile?
+  chat_threads    ChatThread[]
 
   @@map("users")
 }
@@ -267,6 +268,36 @@ model PriceFeedback {
   @@index([store_price_id])
   @@index([created_at])
   @@map("price_feedbacks")
+}
+
+// ============================================
+// SOHBET (AI ASİSTAN)
+// ============================================
+
+model ChatThread {
+  id         Int           @id @default(autoincrement())
+  user_id    Int
+  title      String?
+  created_at DateTime      @default(now())
+  updated_at DateTime      @updatedAt
+  user       User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  messages   ChatMessage[]
+
+  @@index([user_id])
+  @@map("chat_threads")
+}
+
+model ChatMessage {
+  id         Int        @id @default(autoincrement())
+  thread_id  Int
+  role       String     // 'user' | 'model' | 'tool'
+  content    String     @db.Text
+  tool_calls Json?
+  created_at DateTime   @default(now())
+  thread     ChatThread @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+
+  @@index([thread_id])
+  @@map("chat_messages")
 }
 
 // ============================================
