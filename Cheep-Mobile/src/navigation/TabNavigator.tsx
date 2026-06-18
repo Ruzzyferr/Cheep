@@ -3,13 +3,12 @@
  * Bottom tab navigation
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import type { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeNavigator } from './HomeNavigator';
 import { ListsNavigator } from './ListsNavigator';
@@ -19,18 +18,6 @@ import { colors, spacing, shadows } from '../theme';
 import type { TabParamList, RootStackParamList } from './types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
-
-// Wrapper component to capture tab navigation ref
-function HomeNavigatorWithRef() {
-  const navigation = useNavigation<BottomTabNavigationProp<TabParamList>>();
-  
-  useEffect(() => {
-    // Store tab navigation ref in global for FAB access
-    (global as any).__tabNavigationRef = navigation;
-  }, [navigation]);
-  
-  return <HomeNavigator />;
-}
 
 export function TabNavigator() {
   const insets = useSafeAreaInsets();
@@ -71,7 +58,7 @@ export function TabNavigator() {
       >
         <Tab.Screen
           name="Home"
-          component={HomeNavigatorWithRef}
+          component={HomeNavigator}
           options={{
             tabBarLabel: 'Ana Sayfa',
             tabBarIcon: ({ color, focused }) => (

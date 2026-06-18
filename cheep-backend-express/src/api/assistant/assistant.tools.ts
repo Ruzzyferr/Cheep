@@ -148,7 +148,8 @@ export function buildToolExecutor(userId: number) {
 
         case 'add_items_to_list': {
           const results: any[] = [];
-          for (const item of args.items as any[]) {
+          const items = (args.items ?? []).slice(0, 50);
+          for (const item of items as any[]) {
             // getAllProducts returns { products: [...], pagination: {...} }
             const searchResult = await Products.getAllProducts({ search: item.query, limit: 1 });
             const products: any[] = searchResult.products ?? (searchResult as any);

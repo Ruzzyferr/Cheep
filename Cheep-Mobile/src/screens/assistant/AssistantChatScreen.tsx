@@ -42,7 +42,7 @@ interface LocalMessage {
   };
 }
 
-const LIST_TOOL_NAMES = ['create_list', 'add_items_to_list', 'add_item_to_list'];
+const LIST_TOOL_NAMES = ['create_list', 'add_items_to_list'];
 
 const SUGGESTIONS = [
   'Haftalık liste hazırla',

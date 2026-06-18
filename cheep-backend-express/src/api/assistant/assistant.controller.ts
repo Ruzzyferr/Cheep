@@ -108,8 +108,24 @@ export const message = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (e: any) {
-    res
-      .status(e.status ?? 502)
-      .json({ success: false, message: e.message ?? 'Asistan yanıt veremedi' });
+    console.error('[assistant] message handler error:', e);
+    if (e.status === 404) {
+      res.status(404).json({ success: false, message: e.message });
+      return;
+    }
+    const isQuota =
+      /429|quota|too many requests/i.test(e.message ?? '') ||
+      e.status === 429;
+    if (isQuota) {
+      res.status(503).json({
+        success: false,
+        message: 'Asistan şu an çok yoğun, lütfen birazdan tekrar dene.',
+      });
+      return;
+    }
+    res.status(502).json({
+      success: false,
+      message: 'Asistan şu an yanıt veremedi, lütfen tekrar dene.',
+    });
   }
 };
