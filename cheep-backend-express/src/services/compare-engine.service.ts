@@ -1,5 +1,6 @@
 import { prisma } from '../utils/prisma.client.js';
 import * as RouteOptimizer from './route-optimizer.service.js';
+import { resolveItemStoreOptions, PricedProduct, StoreOption } from './brand-independent-pricing.js';
 
 // ============================================
 // TYPE DEFINITIONS
@@ -20,6 +21,7 @@ interface ProductInList {
     product_id: number;
     quantity: number;
     unit: string;
+    brand_independent: boolean;
     product: {
         id: number;
         name: string;
@@ -150,6 +152,47 @@ export async function compareShoppingList(
 
     const listItems = list.list_items as unknown as ProductInList[];
 
+    // Marka-bağımsız öğeler için muadil grup ürünlerini çek (tek sorgu)
+    const muadilIds = Array.from(new Set(
+        listItems
+            .filter(i => i.brand_independent && i.product.muadil_grup_id)
+            .map(i => i.product.muadil_grup_id as string)
+    ));
+    const siblingsByGroup = new Map<string, PricedProduct[]>();
+    if (muadilIds.length > 0) {
+        const siblings = await prisma.product.findMany({
+            where: { muadil_grup_id: { in: muadilIds } },
+            include: { store_prices: { include: { store: true } } },
+        });
+        for (const s of siblings) {
+            const gid = s.muadil_grup_id as string;
+            const arr = siblingsByGroup.get(gid) || [];
+            arr.push({
+                id: s.id, name: s.name, brand: s.brand, image_url: s.image_url,
+                store_prices: (s as any).store_prices.map((sp: any) => ({
+                    store_id: sp.store_id, price: Number(sp.price), store: sp.store,
+                })),
+            });
+            siblingsByGroup.set(gid, arr);
+        }
+    }
+
+    // Her liste öğesi için market→seçenek haritası
+    const itemOptions = new Map<number, Map<number, StoreOption>>();
+    for (const item of listItems) {
+        const representative: PricedProduct = {
+            id: item.product.id, name: item.product.name, brand: item.product.brand,
+            image_url: item.product.image_url,
+            store_prices: item.product.store_prices.map(sp => ({
+                store_id: sp.store_id, price: Number(sp.price), store: sp.store,
+            })),
+        };
+        const siblings = item.brand_independent && item.product.muadil_grup_id
+            ? (siblingsByGroup.get(item.product.muadil_grup_id) || []).filter(s => s.id !== item.product.id)
+            : [];
+        itemOptions.set(item.id, resolveItemStoreOptions(representative, item.brand_independent, siblings));
+    }
+
     // 2. Tüm stratejileri hesapla
     const strategies: RouteStrategy[] = [];
 
@@ -157,7 +200,8 @@ export async function compareShoppingList(
     const singleStoreStrategies = await calculateSingleStoreStrategies(
         listItems,
         list.budget,
-        options
+        options,
+        itemOptions
     );
     strategies.push(...singleStoreStrategies);
 
@@ -167,7 +211,8 @@ export async function compareShoppingList(
             listItems,
             list.budget,
             maxStores,
-            options
+            options,
+            itemOptions
         );
         strategies.push(...multiStoreStrategies);
     }
@@ -199,16 +244,15 @@ export async function compareShoppingList(
 async function calculateSingleStoreStrategies(
     listItems: ProductInList[],
     budget: any,
-    options: CompareOptions
+    options: CompareOptions,
+    itemOptions: Map<number, Map<number, StoreOption>>
 ): Promise<RouteStrategy[]> {
     // Tüm benzersiz marketleri bul
     const storeMap = new Map<number, any>();
-    
+
     listItems.forEach(item => {
-        item.product.store_prices.forEach(sp => {
-            if (!storeMap.has(sp.store_id)) {
-                storeMap.set(sp.store_id, sp.store);
-            }
+        itemOptions.get(item.id)!.forEach(opt => {
+            if (!storeMap.has(opt.store_id)) storeMap.set(opt.store_id, opt.store);
         });
     });
 
@@ -231,40 +275,24 @@ async function calculateSingleStoreStrategies(
 
         // Her ürün için bu marketteki fiyatı bul
         listItems.forEach(item => {
-            const storePrice = item.product.store_prices.find(
-                sp => sp.store_id === storeId
-            );
-
-            if (storePrice) {
-                const pricePerUnit = Number(storePrice.price);
+            const opt = itemOptions.get(item.id)!.get(storeId);
+            if (opt) {
+                const pricePerUnit = opt.price;
                 const totalPrice = pricePerUnit * item.quantity;
-
                 allocation.products.push({
                     listItemId: item.id,
                     product: {
-                        id: item.product.id,
-                        name: item.product.name,
-                        brand: item.product.brand,
-                        image_url: item.product.image_url,
+                        id: opt.product.id, name: opt.product.name,
+                        brand: opt.product.brand, image_url: opt.product.image_url,
                     },
-                    quantity: item.quantity,
-                    unit: item.unit,
-                    pricePerUnit,
-                    totalPrice,
+                    quantity: item.quantity, unit: item.unit, pricePerUnit, totalPrice,
                 });
-
                 allocation.subtotal += totalPrice;
             } else {
-                // Ürün bu markette yok
                 missingProducts.push({
                     listItemId: item.id,
-                    product: {
-                        id: item.product.id,
-                        name: item.product.name,
-                        brand: item.product.brand,
-                    },
-                    quantity: item.quantity,
-                    unit: item.unit,
+                    product: { id: item.product.id, name: item.product.name, brand: item.product.brand },
+                    quantity: item.quantity, unit: item.unit,
                 });
             }
         });
@@ -317,17 +345,16 @@ async function calculateMultiStoreStrategies(
     listItems: ProductInList[],
     budget: any,
     maxStores: number,
-    options: CompareOptions
+    options: CompareOptions,
+    itemOptions: Map<number, Map<number, StoreOption>>
 ): Promise<RouteStrategy[]> {
     const strategies: RouteStrategy[] = [];
 
     // Tüm benzersiz marketleri bul
     const storeMap = new Map<number, any>();
     listItems.forEach(item => {
-        item.product.store_prices.forEach(sp => {
-            if (!storeMap.has(sp.store_id)) {
-                storeMap.set(sp.store_id, sp.store);
-            }
+        itemOptions.get(item.id)!.forEach(opt => {
+            if (!storeMap.has(opt.store_id)) storeMap.set(opt.store_id, opt.store);
         });
     });
 
@@ -361,7 +388,8 @@ async function calculateMultiStoreStrategies(
                 listItems,
                 storeCombination,
                 budget,
-                options
+                options,
+                itemOptions
             );
             
             if (strategy) {
@@ -381,7 +409,8 @@ function calculateOptimalAllocation(
     listItems: ProductInList[],
     stores: any[],
     budget: any,
-    options: CompareOptions
+    options: CompareOptions,
+    itemOptions: Map<number, Map<number, StoreOption>>
 ): RouteStrategy | null {
     const storeIds = stores.map(s => s.id);
     const allocations: Map<number, StoreAllocation> = new Map();
@@ -404,51 +433,30 @@ function calculateOptimalAllocation(
 
     // Her ürün için en ucuz marketi bul
     listItems.forEach(item => {
-        let cheapestPrice = Infinity;
-        let cheapestStoreId: number | null = null;
-        let cheapestStorePrice: any = null;
-
-        // Bu kombinasyondaki marketler arasında en ucuzu bul
-        item.product.store_prices.forEach(sp => {
-            if (storeIds.includes(sp.store_id)) {
-                const price = Number(sp.price);
-                if (price < cheapestPrice) {
-                    cheapestPrice = price;
-                    cheapestStoreId = sp.store_id;
-                    cheapestStorePrice = sp;
-                }
-            }
-        });
-
-        if (cheapestStoreId && cheapestStorePrice) {
-            const allocation = allocations.get(cheapestStoreId)!;
-            const totalPrice = cheapestPrice * item.quantity;
-
+        let best: StoreOption | null = null;
+        const opts = itemOptions.get(item.id)!;
+        for (const storeId of storeIds) {
+            const opt = opts.get(storeId);
+            if (opt && (!best || opt.price < best.price)) best = opt;
+        }
+        if (best) {
+            const allocation = allocations.get(best.store_id)!;
+            const totalPrice = best.price * item.quantity;
             allocation.products.push({
                 listItemId: item.id,
                 product: {
-                    id: item.product.id,
-                    name: item.product.name,
-                    brand: item.product.brand,
-                    image_url: item.product.image_url,
+                    id: best.product.id, name: best.product.name,
+                    brand: best.product.brand, image_url: best.product.image_url,
                 },
-                quantity: item.quantity,
-                unit: item.unit,
-                pricePerUnit: cheapestPrice,
-                totalPrice,
+                quantity: item.quantity, unit: item.unit,
+                pricePerUnit: best.price, totalPrice,
             });
-
             allocation.subtotal += totalPrice;
         } else {
             missingProducts.push({
                 listItemId: item.id,
-                product: {
-                    id: item.product.id,
-                    name: item.product.name,
-                    brand: item.product.brand,
-                },
-                quantity: item.quantity,
-                unit: item.unit,
+                product: { id: item.product.id, name: item.product.name, brand: item.product.brand },
+                quantity: item.quantity, unit: item.unit,
             });
         }
     });
