@@ -210,6 +210,7 @@ model ListItem {
   product_id Int
   quantity   Float  @default(1) // Miktar (1.5 kg, 2 adet vb.)
   unit       String @default("adet") // kg, adet, lt, g, ml vb.
+  brand_independent Boolean @default(false) // true → muadil grubundaki en ucuz markayı seç
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
