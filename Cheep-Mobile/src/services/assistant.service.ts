@@ -26,6 +26,7 @@ export interface ChatMessage {
 export interface SendMessageResponse {
   message: string;
   toolCalls: any[];
+  remaining?: number;
 }
 
 // ============================================
@@ -77,10 +78,17 @@ export const assistantService = {
     id: number,
     content: string
   ): Promise<SendMessageResponse> {
-    const response = await apiClient.post<ApiResponse<SendMessageResponse>>(
-      `/assistant/threads/${id}/messages`,
-      { content }
-    );
-    return response.data.data!;
+    try {
+      const response = await apiClient.post<ApiResponse<SendMessageResponse>>(
+        `/assistant/threads/${id}/messages`,
+        { content }
+      );
+      return response.data.data!;
+    } catch (e: any) {
+      if (e?.response?.status === 429 && e?.response?.data?.code === 'DAILY_LIMIT') {
+        throw Object.assign(new Error(e.response.data.message), { dailyLimit: true });
+      }
+      throw e;
+    }
   },
 };

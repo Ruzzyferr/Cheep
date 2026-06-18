@@ -20,10 +20,11 @@ interface ChatInputBarProps {
   onChangeText: (t: string) => void;
   onSend: () => void;
   sending: boolean;
+  disabled?: boolean;
 }
 
-export function ChatInputBar({ value, onChangeText, onSend, sending }: ChatInputBarProps) {
-  const canSend = !sending && value.trim().length > 0;
+export function ChatInputBar({ value, onChangeText, onSend, sending, disabled }: ChatInputBarProps) {
+  const canSend = !sending && !disabled && value.trim().length > 0;
 
   return (
     <View style={styles.container}>
@@ -36,7 +37,7 @@ export function ChatInputBar({ value, onChangeText, onSend, sending }: ChatInput
         multiline
         maxLength={1000}
         returnKeyType="default"
-        editable={!sending}
+        editable={!sending && !disabled}
       />
       <TouchableOpacity
         style={[styles.sendButton, canSend ? styles.sendButtonActive : styles.sendButtonDisabled]}

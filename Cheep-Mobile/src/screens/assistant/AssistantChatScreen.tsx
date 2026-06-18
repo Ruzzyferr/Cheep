@@ -13,6 +13,7 @@ import {
   Platform,
   TouchableOpacity,
   Alert,
+  Pressable,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -91,6 +92,8 @@ export function AssistantChatScreen({
   const [inputValue, setInputValue] = useState('');
   const [sending, setSending] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
 
   // ─── Init: create thread on mount ───────────────────────────
   useEffect(() => {
@@ -144,7 +147,7 @@ export function AssistantChatScreen({
   // ─── Send message ────────────────────────────────────────────
   const handleSend = useCallback(async (text?: string) => {
     const content = (text ?? inputValue).trim();
-    if (!content || !threadId || sending) return;
+    if (!content || !threadId || sending || limitReached) return;
 
     const userMsg: LocalMessage = {
       id: `user-${Date.now()}`,
@@ -175,6 +178,12 @@ export function AssistantChatScreen({
         content: res.message,
       };
 
+      // Update remaining count
+      if (typeof res.remaining === 'number') {
+        setRemaining(res.remaining);
+        if (res.remaining <= 0) setLimitReached(true);
+      }
+
       const newMsgs: LocalMessage[] = [assistantMsg];
 
       // Check for list tool calls → show ListActionCard
@@ -203,21 +212,28 @@ export function AssistantChatScreen({
         ...prev.filter((m) => m.id !== 'typing'),
         ...newMsgs,
       ]);
-    } catch (err) {
+    } catch (err: any) {
       console.error('sendMessage error:', err);
-      setMessages((prev) => [
-        ...prev.filter((m) => m.id !== 'typing'),
-        {
-          id: `err-${Date.now()}`,
-          role: 'model',
-          content: 'Bir hata oluştu. Lütfen tekrar deneyin.',
-        },
-      ]);
+      if (err?.dailyLimit) {
+        // Daily limit hit — show banner, not an error bubble
+        setLimitReached(true);
+        setRemaining(0);
+        setMessages((prev) => prev.filter((m) => m.id !== 'typing'));
+      } else {
+        setMessages((prev) => [
+          ...prev.filter((m) => m.id !== 'typing'),
+          {
+            id: `err-${Date.now()}`,
+            role: 'model',
+            content: 'Bir hata oluştu. Lütfen tekrar deneyin.',
+          },
+        ]);
+      }
     } finally {
       setSending(false);
       setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [inputValue, threadId, sending]);
+  }, [inputValue, threadId, sending, limitReached]);
 
   // ─── Suggestion chip press ───────────────────────────────────
   const handleSuggestion = useCallback((text: string) => {
@@ -249,6 +265,10 @@ export function AssistantChatScreen({
       title: '✨ Asistan',
       headerRight: () => (
         <View style={styles.headerButtons}>
+          {/* remaining/5 indicator */}
+          {remaining !== null && (
+            <Text style={styles.remainingBadge}>{remaining}/5</Text>
+          )}
           {/* 🕘 History — opens ThreadListSheet */}
           <TouchableOpacity
             style={styles.headerButton}
@@ -268,7 +288,7 @@ export function AssistantChatScreen({
         </View>
       ),
     });
-  }, [navigation, handleNewChat]);
+  }, [navigation, handleNewChat, remaining]);
 
   // ─── Render ──────────────────────────────────────────────────
   return (
@@ -291,11 +311,25 @@ export function AssistantChatScreen({
           flatListRef.current?.scrollToEnd({ animated: false })
         }
       />
+      {limitReached && (
+        <View style={styles.limitBanner}>
+          <Text style={styles.limitBannerText}>
+            Günlük 5 mesajlık limitin doldu.{' '}
+          </Text>
+          <Pressable
+            onPress={() => Alert.alert('Yakında', 'Premium özelliği yakında kullanıma açılacak.')}
+            accessibilityRole="button"
+          >
+            <Text style={styles.limitBannerLink}>Sınırsız için Premium'a geç.</Text>
+          </Pressable>
+        </View>
+      )}
       <ChatInputBar
         value={inputValue}
         onChangeText={setInputValue}
         onSend={() => handleSend()}
         sending={sending}
+        disabled={limitReached}
       />
 
       <ThreadListSheet
@@ -350,5 +384,30 @@ const styles = StyleSheet.create({
   },
   headerButton: {
     padding: spacing.xs,
+  },
+  remainingBadge: {
+    ...typography.styles.caption,
+    color: colors.text.secondary,
+    fontWeight: '600',
+    paddingHorizontal: spacing.xs,
+  },
+  limitBanner: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    backgroundColor: colors.primary['50'],
+    borderTopWidth: 1,
+    borderTopColor: colors.primary['200'],
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  limitBannerText: {
+    ...typography.styles.body2,
+    color: colors.text.secondary,
+  },
+  limitBannerLink: {
+    ...typography.styles.body2,
+    color: colors.primary.dark,
+    fontWeight: '600',
   },
 });
