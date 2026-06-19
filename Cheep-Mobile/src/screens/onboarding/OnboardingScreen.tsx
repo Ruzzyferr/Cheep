@@ -268,14 +268,23 @@ export function OnboardingScreen() {
   const finish = async () => {
     setFinishing(true);
     try {
-      // Build payload: only answered fields + onboarding_done
+      // Build payload from DEFINED answers only — tanımsız household_size/diet
+      // gönderip mevcut profil değerlerini (örn. tekrar onboarding'de) ezmeyiz.
       const payload: Partial<UserProfile> = {
-        household_size: answers.household_size,
-        diet: answers.diet,
-        avoid: answers.avoid,
-        allergies: answers.allergies,
         onboarding_done: true,
       };
+      if (answers.household_size !== undefined) {
+        payload.household_size = answers.household_size;
+      }
+      if (answers.diet !== undefined) {
+        payload.diet = answers.diet;
+      }
+      if (answers.avoid !== undefined) {
+        payload.avoid = answers.avoid;
+      }
+      if (answers.allergies !== undefined) {
+        payload.allergies = answers.allergies;
+      }
       // Convert budget string to number if present and non-empty
       if (answers.weekly_budget && answers.weekly_budget !== '') {
         const budgetNum = Number(answers.weekly_budget);

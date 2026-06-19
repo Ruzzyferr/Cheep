@@ -3,7 +3,7 @@
  * Mağazalar arası en büyük fiyat farkına (tasarrufa) sahip ürünler.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -72,17 +72,30 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  // Unmount sonrası setState yapmamak için canlılık bayrağı.
+  const aliveRef = useRef(true);
+
+  useEffect(() => {
+    aliveRef.current = true;
+    return () => {
+      aliveRef.current = false;
+    };
+  }, []);
 
   const load = useCallback(async () => {
     try {
       const products = await productService.getProducts({ limit: 200 });
+      if (!aliveRef.current) return;
       setDeals(buildDeals(products));
     } catch (error) {
+      if (!aliveRef.current) return;
       console.warn('Deals load error:', error);
       setDeals([]);
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (aliveRef.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, []);
 

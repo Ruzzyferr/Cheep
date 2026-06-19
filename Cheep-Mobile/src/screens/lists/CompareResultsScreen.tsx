@@ -38,26 +38,32 @@ export function CompareResultsScreen({
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
-    compareList();
+    let alive = true;
+
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await listService.compareList(listId, {
+          maxStores: 3,
+          includeMissingProducts: true,
+        });
+        if (!alive) return;
+        setResults(data);
+      } catch (error) {
+        if (!alive) return;
+        console.error('Compare error:', error);
+        Alert.alert('Hata', 'Karşılaştırma yapılırken bir hata oluştu');
+        navigation.goBack();
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listId]);
-
-  const compareList = async () => {
-    try {
-      setLoading(true);
-      const data = await listService.compareList(listId, {
-        maxStores: 3,
-        includeMissingProducts: true,
-      });
-      setResults(data);
-    } catch (error) {
-      console.error('Compare error:', error);
-      Alert.alert('Hata', 'Karşılaştırma yapılırken bir hata oluştu');
-      navigation.goBack();
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (

@@ -16,12 +16,10 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { productService, categoryService } from '../../services';
 import { Card, Button } from '../../components/ui';
-import { StoreChip } from '../../components/store/StoreChip';
 import { PriceTrendCard } from '../../components/product/PriceTrendCard';
 import { SelectListModal } from '../../components/list/SelectListModal';
 import type { PriceHistoryResponse } from '../../services/product.service';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
-import { shadows } from '../../theme/shadows';
 import type { Product, StorePrice } from '../../types';
 import type { HomeStackScreenProps } from '../../navigation/types';
 import type { Category } from '../../services/category.service';
@@ -47,86 +45,99 @@ export function ProductDetailScreen({
   const [historyLoading, setHistoryLoading] = useState(true);
 
   useEffect(() => {
+    // `alive` flag: unmount sonrası setState/navigate yapmamak için.
+    let alive = true;
+
+    const loadPriceHistory = async () => {
+      try {
+        setHistoryLoading(true);
+        const data = await productService.getPriceHistory(productId, 90);
+        if (!alive) return;
+        setPriceHistory(data);
+      } catch (error) {
+        if (!alive) return;
+        console.warn('Could not fetch price history:', error);
+        setPriceHistory(null);
+      } finally {
+        if (alive) setHistoryLoading(false);
+      }
+    };
+
+    const loadProduct = async () => {
+      try {
+        setLoading(true);
+        const productData = await productService.getProductById(productId);
+        if (!alive) return;
+
+        setProduct(productData);
+
+        // Fetch category with parent information if category exists
+        if (productData.category_id) {
+          try {
+            const categoryData = await categoryService.getCategoryById(productData.category_id);
+            if (!alive) return;
+            setCategoryWithParent(categoryData);
+          } catch (error) {
+            if (!alive) return;
+            console.warn('Could not fetch category details:', error);
+            setCategoryWithParent(null);
+          }
+        }
+
+        // Use store_prices from productData if available, otherwise fetch separately
+        let pricesData: StorePrice[] = [];
+        if (productData.store_prices && productData.store_prices.length > 0) {
+          pricesData = productData.store_prices;
+        } else {
+          // Fallback: fetch prices separately if not included in product data
+          try {
+            pricesData = await productService.getProductPrices(productId);
+          } catch (error) {
+            console.warn('Could not fetch prices separately:', error);
+          }
+        }
+        if (!alive) return;
+
+        const sortedPrices = pricesData.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+        setPrices(sortedPrices);
+
+        // Calculate price statistics from prices data
+        if (sortedPrices.length > 0) {
+          const priceValues = sortedPrices.map((p) => parseFloat(p.price));
+          const cheapest = sortedPrices[0];
+          const mostExpensive = sortedPrices[sortedPrices.length - 1];
+          const averagePrice = priceValues.reduce((sum, p) => sum + p, 0) / priceValues.length;
+          const priceDifference = parseFloat(mostExpensive.price) - parseFloat(cheapest.price);
+          const savingsPercentage = parseFloat(mostExpensive.price) > 0
+            ? (priceDifference / parseFloat(mostExpensive.price)) * 100
+            : 0;
+
+          setPriceStats({
+            cheapest,
+            mostExpensive,
+            averagePrice,
+            priceDifference,
+            savingsPercentage,
+          });
+        } else {
+          // Reset stats if no prices
+          setPriceStats(null);
+        }
+      } catch (error) {
+        if (!alive) return;
+        console.error('Load product error:', error);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    };
+
     loadProduct();
     loadPriceHistory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    return () => {
+      alive = false;
+    };
   }, [productId]);
-
-  const loadPriceHistory = async () => {
-    try {
-      setHistoryLoading(true);
-      const data = await productService.getPriceHistory(productId, 90);
-      setPriceHistory(data);
-    } catch (error) {
-      console.warn('Could not fetch price history:', error);
-      setPriceHistory(null);
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
-
-  const loadProduct = async () => {
-    try {
-      setLoading(true);
-      const productData = await productService.getProductById(productId);
-      
-      setProduct(productData);
-      
-      // Fetch category with parent information if category exists
-      if (productData.category_id) {
-        try {
-          const categoryData = await categoryService.getCategoryById(productData.category_id);
-          setCategoryWithParent(categoryData);
-        } catch (error) {
-          console.warn('Could not fetch category details:', error);
-          setCategoryWithParent(null);
-        }
-      }
-      
-      // Use store_prices from productData if available, otherwise fetch separately
-      let pricesData: StorePrice[] = [];
-      if (productData.store_prices && productData.store_prices.length > 0) {
-        pricesData = productData.store_prices;
-      } else {
-        // Fallback: fetch prices separately if not included in product data
-        try {
-          pricesData = await productService.getProductPrices(productId);
-        } catch (error) {
-          console.warn('Could not fetch prices separately:', error);
-        }
-      }
-      
-      const sortedPrices = pricesData.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-      setPrices(sortedPrices);
-
-      // Calculate price statistics from prices data
-      if (sortedPrices.length > 0) {
-        const priceValues = sortedPrices.map((p) => parseFloat(p.price));
-        const cheapest = sortedPrices[0];
-        const mostExpensive = sortedPrices[sortedPrices.length - 1];
-        const averagePrice = priceValues.reduce((sum, p) => sum + p, 0) / priceValues.length;
-        const priceDifference = parseFloat(mostExpensive.price) - parseFloat(cheapest.price);
-        const savingsPercentage = parseFloat(mostExpensive.price) > 0
-          ? (priceDifference / parseFloat(mostExpensive.price)) * 100 
-          : 0;
-
-        setPriceStats({
-          cheapest,
-          mostExpensive,
-          averagePrice,
-          priceDifference,
-          savingsPercentage,
-        });
-      } else {
-        // Reset stats if no prices
-        setPriceStats(null);
-      }
-    } catch (error) {
-      console.error('Load product error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -222,8 +233,7 @@ export function ProductDetailScreen({
           prices.map((storePrice, index) => {
             const isCheapest = priceStats?.cheapest?.id === storePrice.id;
             const priceValue = parseFloat(storePrice.price);
-            const cheapestPrice = priceStats?.cheapest ? parseFloat(priceStats.cheapest.price) : priceValue;
-            const savings = priceStats?.mostExpensive 
+            const savings = priceStats?.mostExpensive
               ? ((parseFloat(priceStats.mostExpensive.price) - priceValue) / parseFloat(priceStats.mostExpensive.price)) * 100
               : 0;
 

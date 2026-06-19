@@ -19,7 +19,7 @@ import { BlurView } from 'expo-blur';
 import { MaterialIcons } from '@expo/vector-icons';
 import { listService } from '../../services';
 import { Button, Input } from '../ui';
-import { colors, typography, spacing, layout, borderRadius } from '../../theme';
+import { colors, typography, spacing, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 
 interface CreateListModalProps {

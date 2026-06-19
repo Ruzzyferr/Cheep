@@ -13,13 +13,16 @@ interface ListActionCardProps {
   title: string;
   itemCount?: number;
   onPress: () => void;
+  /** Liste id'si henüz yoksa kart pasif olur (görüntüleme tıklanamaz). */
+  disabled?: boolean;
 }
 
-export function ListActionCard({ title, itemCount, onPress }: ListActionCardProps) {
+export function ListActionCard({ title, itemCount, onPress, disabled }: ListActionCardProps) {
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={[styles.container, disabled && styles.containerDisabled]}
       onPress={onPress}
+      disabled={disabled}
       activeOpacity={0.85}
       accessibilityLabel={`${title} listesini görüntüle`}
     >
@@ -54,6 +57,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.primary['200'],
     ...shadows.sm,
+  },
+  containerDisabled: {
+    opacity: 0.6,
   },
   iconWrap: {
     marginRight: spacing.sm,

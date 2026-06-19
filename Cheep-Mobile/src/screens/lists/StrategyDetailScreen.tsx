@@ -21,6 +21,13 @@ import { shadows } from '../../theme/shadows';
 import type { StoreAllocation, ProductAllocation } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 
+// route.params üzerinden gelen sayısal alanlar null/string olabilir; .toFixed
+// çağırmadan önce güvenli bir sayıya zorla (geçersizse 0).
+const num = (v: unknown): number => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+
 export function StrategyDetailScreen({
   route,
   navigation,
@@ -39,19 +46,19 @@ export function StrategyDetailScreen({
               {strategy.type === 'single_store' ? 'Tek Market' : 'Çoklu Market'}
             </Text>
             <View style={styles.scoreBadge}>
-              <Text style={styles.scoreText}>Skor: {strategy.score}/100</Text>
+              <Text style={styles.scoreText}>Skor: {num(strategy.score)}/100</Text>
             </View>
           </View>
 
           <View style={styles.priceRow}>
             <View>
               <Text style={styles.priceLabel}>Toplam Tutar</Text>
-              <Text style={styles.priceValue}>₺{strategy.totalPrice.toFixed(2)}</Text>
+              <Text style={styles.priceValue}>₺{num(strategy.totalPrice).toFixed(2)}</Text>
             </View>
-            {strategy.totalDistance > 0 && (
+            {num(strategy.totalDistance) > 0 && (
               <View>
                 <Text style={styles.priceLabel}>Toplam Mesafe</Text>
-                <Text style={styles.priceValue}>{strategy.totalDistance.toFixed(1)} km</Text>
+                <Text style={styles.priceValue}>{num(strategy.totalDistance).toFixed(1)} km</Text>
               </View>
             )}
           </View>
@@ -74,7 +81,7 @@ export function StrategyDetailScreen({
                 {strategy.budgetRemaining !== null && (
                   <Text>
                     {' '}
-                    ({withinBudget ? '+' : ''}₺{strategy.budgetRemaining.toFixed(2)})
+                    ({withinBudget ? '+' : ''}₺{num(strategy.budgetRemaining).toFixed(2)})
                   </Text>
                 )}
               </Text>
@@ -84,7 +91,7 @@ export function StrategyDetailScreen({
           {/* Coverage */}
           <View style={styles.coverageRow}>
             <Text style={styles.coverageLabel}>Kapsama:</Text>
-            <Text style={styles.coverageValue}>{strategy.coveragePercentage}%</Text>
+            <Text style={styles.coverageValue}>{num(strategy.coveragePercentage)}%</Text>
           </View>
         </View>
 
@@ -172,7 +179,7 @@ function StoreSection({
           <StoreChip storeName={storeAllocation.store.name} />
         </View>
         <Text style={styles.storeSubtotal}>
-          ₺{storeAllocation.subtotal.toFixed(2)}
+          ₺{num(storeAllocation.subtotal).toFixed(2)}
         </Text>
       </View>
 
@@ -209,10 +216,10 @@ function ProductRow({ productAllocation }: { productAllocation: ProductAllocatio
         </View>
         <View style={styles.productPrices}>
           <Text style={styles.productUnitPrice}>
-            ₺{productAllocation.pricePerUnit.toFixed(2)} / {productAllocation.unit}
+            ₺{num(productAllocation.pricePerUnit).toFixed(2)} / {productAllocation.unit}
           </Text>
           <Text style={styles.productTotalPrice}>
-            ₺{productAllocation.totalPrice.toFixed(2)}
+            ₺{num(productAllocation.totalPrice).toFixed(2)}
           </Text>
         </View>
       </View>

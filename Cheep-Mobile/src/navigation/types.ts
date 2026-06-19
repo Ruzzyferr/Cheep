@@ -79,6 +79,10 @@ export type ListsStackParamList = {
   CreateList: undefined;
   ListDetail: { listId: number };
   CompareResults: { listId: number };
+  // NOT: `strategy` tam bir nesne olarak param'da taşınır (serileştirilebilir
+  // düz veri olduğu için React Navigation uyarısı vermez). İd ile yeniden
+  // türetmek compare'i yeniden çalıştırmayı gerektirir; mevcut akış zaten
+  // CompareResults'tan hesaplanmış stratejiyi geçirdiğinden bilinçli tercih.
   StrategyDetail: { listId: number; strategy: RouteStrategy };
   TemplateDetail: { templateId: number };
 };

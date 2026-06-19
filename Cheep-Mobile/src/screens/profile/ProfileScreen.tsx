@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import { Card, Button } from '../../components/ui';
@@ -29,6 +30,9 @@ const HOUSEHOLD_OPTIONS = ONBOARDING_QUESTIONS.find((q) => q.key === 'household_
 const DIET_OPTIONS = ONBOARDING_QUESTIONS.find((q) => q.key === 'diet')!.options!;
 const AVOID_OPTIONS = ONBOARDING_QUESTIONS.find((q) => q.key === 'avoid')!.options!;
 const ALLERGY_OPTIONS = ONBOARDING_QUESTIONS.find((q) => q.key === 'allergies')!.options!;
+
+// Uygulama sürümünü app config'ten oku (hardcode değil); yoksa makul varsayılan.
+const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 
 export function ProfileScreen({
   navigation,
@@ -109,7 +113,7 @@ export function ProfileScreen({
   };
 
   const handleAbout = () => {
-    Alert.alert('Cheep Hakkında', 'Cheep · Sürüm 1.0.0\nTürkiye marketlerinde en uygun fiyatı bul.');
+    Alert.alert('Cheep Hakkında', `Cheep · Sürüm ${APP_VERSION}\nTürkiye marketlerinde en uygun fiyatı bul.`);
   };
 
   const toggleMulti = (arr: string[], setArr: (v: string[]) => void, value: string) => {
@@ -312,24 +316,10 @@ export function ProfileScreen({
           )}
         </View>
 
-        {/* Account Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Hesap</Text>
-          <Card padding="none" variant="elevated">
-            <MenuItem
-              icon="edit"
-              title="Profili Düzenle"
-              onPress={() => console.log('Edit profile')}
-            />
-            <Divider />
-            <MenuItem
-              icon="store"
-              title="Favori Marketler"
-              subtitle="Favori marketlerinizi yönetin"
-              onPress={() => console.log('Favorite stores')}
-            />
-          </Card>
-        </View>
+        {/* Account Section — "Profili Düzenle" / "Favori Marketler" için henüz
+            gerçek bir ekran yok (ProfileNavigator'da kayıtlı değil). Kırık
+            görünmemeleri için bu menü öğeleri gizlendi; profil düzenleme zaten
+            yukarıdaki "Tercihlerim" bölümünden yapılabiliyor. */}
 
         {/* App Section */}
         <View style={styles.section}>
@@ -345,7 +335,7 @@ export function ProfileScreen({
             <MenuItem
               icon="info-outline"
               title="Hakkında"
-              subtitle="Sürüm 1.0.0"
+              subtitle={`Sürüm ${APP_VERSION}`}
               onPress={handleAbout}
             />
           </Card>

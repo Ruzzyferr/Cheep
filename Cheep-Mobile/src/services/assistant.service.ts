@@ -16,16 +16,26 @@ export interface ChatThread {
   updated_at: string;
 }
 
+/**
+ * Bir Gemini araç çağrısı. Backend agent-loop her çağrıyı
+ * `{ name, args, result }` olarak döndürür (bkz. agent-loop.ts AgentResult).
+ */
+export interface ToolCall {
+  name: string;
+  args?: Record<string, unknown>;
+  result?: unknown;
+}
+
 export interface ChatMessage {
   id: number;
   role: string;
   content: string;
-  tool_calls?: any;
+  tool_calls?: ToolCall[];
 }
 
 export interface SendMessageResponse {
   message: string;
-  toolCalls: any[];
+  toolCalls: ToolCall[];
   remaining?: number;
 }
 

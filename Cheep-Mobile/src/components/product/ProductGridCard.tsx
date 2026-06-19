@@ -7,7 +7,6 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius } from '../../theme';
-import { shadows } from '../../theme/shadows';
 import type { ProductConstraint } from '../../types';
 
 interface PriceInfo {

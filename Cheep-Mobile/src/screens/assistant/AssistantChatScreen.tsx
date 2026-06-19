@@ -17,15 +17,15 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { CommonActions } from '@react-navigation/native';
 import { assistantService } from '../../services/assistant.service';
-import type { ChatMessage } from '../../services/assistant.service';
+import type { ToolCall } from '../../services/assistant.service';
 import { MessageBubble } from '../../components/assistant/MessageBubble';
 import { ChatInputBar } from '../../components/assistant/ChatInputBar';
 import { ToolActivityChip } from '../../components/assistant/ToolActivityChip';
 import { ListActionCard } from '../../components/assistant/ListActionCard';
 import { ThreadListSheet } from '../../components/assistant/ThreadListSheet';
-import { colors, spacing, typography, borderRadius, layout } from '../../theme';
-import { shadows } from '../../theme/shadows';
+import { colors, spacing, typography, borderRadius } from '../../theme';
 import type { AssistantStackScreenProps } from '../../navigation/types';
 
 // ============================================================
@@ -44,6 +44,19 @@ interface LocalMessage {
 }
 
 const LIST_TOOL_NAMES = ['create_list', 'add_items_to_list'];
+
+/**
+ * Bir liste aracı çağrısından gerçek liste id'sini çöz:
+ * - create_list → oluşturulan liste sonucu içinde `id` döner
+ * - add_items_to_list → liste id'si `args.listId` olarak gelir
+ */
+function resolveListId(call: ToolCall): number | undefined {
+  const fromResult = (call.result as { id?: number } | undefined)?.id;
+  if (typeof fromResult === 'number') return fromResult;
+  const fromArgs = call.args?.listId;
+  if (typeof fromArgs === 'number') return fromArgs;
+  return undefined;
+}
 
 const SUGGESTIONS = [
   'Haftalık liste hazırla',
@@ -189,18 +202,23 @@ export function AssistantChatScreen({
       // Check for list tool calls → show ListActionCard
       if (res.toolCalls && Array.isArray(res.toolCalls)) {
         const listCall = res.toolCalls.find(
-          (tc: any) => tc?.name && LIST_TOOL_NAMES.includes(tc.name)
+          (tc) => tc?.name && LIST_TOOL_NAMES.includes(tc.name)
         );
         if (listCall) {
-          const args = listCall.args ?? listCall.input ?? {};
+          const args = listCall.args ?? {};
+          const items = args.items;
           const cardMsg: LocalMessage = {
             id: `card-${Date.now()}`,
             role: 'list_card',
             content: '',
             listCard: {
-              title: args.name ?? args.list_name ?? 'Yeni Liste',
-              itemCount: args.items ? args.items.length : undefined,
-              listId: undefined, // resolved after server returns the list id; TODO Task 9/10
+              title:
+                (typeof args.name === 'string' && args.name) ||
+                (typeof args.list_name === 'string' && args.list_name) ||
+                'Yeni Liste',
+              itemCount: Array.isArray(items) ? items.length : undefined,
+              // Gerçek liste id'sini araç çağrısından çöz (backend sonuç/args).
+              listId: resolveListId(listCall),
             },
           };
           newMsgs.push(cardMsg);
@@ -246,12 +264,28 @@ export function AssistantChatScreen({
       return <ToolActivityChip label="yazıyor..." />;
     }
     if (item.role === 'list_card' && item.listCard) {
+      const cardListId = item.listCard.listId;
       return (
         <ListActionCard
           title={item.listCard.title}
           itemCount={item.listCard.itemCount}
+          disabled={cardListId === undefined}
           onPress={() => {
-            // TODO Task 9/10: navigate to ListDetail when listId is available
+            if (cardListId === undefined) return;
+            // Asistan ekranı tab'ların üstündeki bir root-stack route'u olduğundan,
+            // hedef listeye Main → Lists → ListDetail olarak iç içe gideriz.
+            navigation.dispatch(
+              CommonActions.navigate({
+                name: 'Main',
+                params: {
+                  screen: 'Lists',
+                  params: {
+                    screen: 'ListDetail',
+                    params: { listId: cardListId },
+                  },
+                },
+              })
+            );
           }}
         />
       );
@@ -320,7 +354,7 @@ export function AssistantChatScreen({
             onPress={() => Alert.alert('Yakında', 'Premium özelliği yakında kullanıma açılacak.')}
             accessibilityRole="button"
           >
-            <Text style={styles.limitBannerLink}>Sınırsız için Premium'a geç.</Text>
+            <Text style={styles.limitBannerLink}>Sınırsız için Premium&apos;a geç.</Text>
           </Pressable>
         </View>
       )}

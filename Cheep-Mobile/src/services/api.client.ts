@@ -58,19 +58,21 @@ apiClient.interceptors.request.use(
       config.headers['x-country'] = country;
     }
     
-    // Log request in development
+    // Log request in development — sadece method + url. Gövde (config.data) ASLA
+    // loglanmaz: login/register parolaları ve token/refreshToken sızıntısını önler.
     if (__DEV__) {
       console.log('📤 API Request:', {
         method: config.method?.toUpperCase(),
         url: config.url,
-        data: config.data,
       });
     }
-    
+
     return config;
   },
   (error) => {
-    console.error('Request interceptor error:', error);
+    if (__DEV__) {
+      console.error('Request interceptor error:', error?.message ?? error);
+    }
     return Promise.reject(error);
   }
 );
@@ -78,25 +80,24 @@ apiClient.interceptors.request.use(
 // Response interceptor (handle errors)
 apiClient.interceptors.response.use(
   (response) => {
-    // Log response in development
+    // Log response in development — gövde (response.data) loglanmaz: auth uçları
+    // token/refreshToken döndürür, bunların konsola sızmasını engelleriz.
     if (__DEV__) {
       console.log('📥 API Response:', {
         status: response.status,
         url: response.config.url,
-        data: response.data,
       });
     }
-    
+
     return response;
   },
   async (error: AxiosError) => {
-    // Log error in development
+    // Log error in development — yanıt gövdesi loglanmaz (gizli alan sızıntısı riski)
     if (__DEV__) {
       console.error('❌ API Error:', {
         status: error.response?.status,
         url: error.config?.url,
         message: error.message,
-        data: error.response?.data,
       });
     }
     

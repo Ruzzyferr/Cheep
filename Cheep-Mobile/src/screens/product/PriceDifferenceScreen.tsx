@@ -23,7 +23,6 @@ export function PriceDifferenceScreen({
   navigation,
 }: HomeStackScreenProps<'PriceDifferenceList'>) {
   const [products, setProducts] = useState<(Product & { priceDifference?: number; minPrice?: number; maxPrice?: number })[]>([]);
-  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -32,14 +31,19 @@ export function PriceDifferenceScreen({
 
   const loadProducts = async () => {
     try {
-      setLoading(true);
       const allProducts = await productService.getProducts({ limit: 200 }); // Daha fazla ürün çekiyoruz
 
       // Fiyat farkına göre sırala (en büyük fark en üstte)
       const productsWithPriceDifference = allProducts
-        .filter((product) => product.store_prices && product.store_prices.length >= 2) // En az 2 fiyat olmalı
         .map((product) => {
-          const prices = product.store_prices!.map((sp) => parseFloat(sp.price));
+          // Geçersiz/boş fiyatları (NaN) ele: ₺NaN / Infinity render etmeyi önler.
+          const prices = (product.store_prices ?? [])
+            .map((sp) => parseFloat(sp.price))
+            .filter((p) => Number.isFinite(p));
+          return { product, prices };
+        })
+        .filter(({ prices }) => prices.length >= 2) // En az 2 geçerli fiyat olmalı
+        .map(({ product, prices }) => {
           const minPrice = Math.min(...prices);
           const maxPrice = Math.max(...prices);
           const priceDifference = maxPrice - minPrice;
@@ -56,8 +60,6 @@ export function PriceDifferenceScreen({
       setProducts(productsWithPriceDifference);
     } catch (error) {
       console.error('❌ Load products error:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -68,8 +70,10 @@ export function PriceDifferenceScreen({
   };
 
   const getLowestPrice = (product: Product) => {
-    if (!product.store_prices?.length) return null;
-    const prices = product.store_prices.map((sp) => parseFloat(sp.price));
+    const prices = (product.store_prices ?? [])
+      .map((sp) => parseFloat(sp.price))
+      .filter((p) => Number.isFinite(p));
+    if (prices.length === 0) return null;
     return Math.min(...prices).toFixed(2);
   };
 

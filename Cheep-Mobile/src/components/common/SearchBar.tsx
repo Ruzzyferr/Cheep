@@ -4,9 +4,9 @@
  */
 
 import React from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius } from '../../theme';
-import { shadows } from '../../theme/shadows';
 
 interface SearchBarProps {
   value: string;
@@ -15,8 +15,6 @@ interface SearchBarProps {
   onSubmit?: () => void;
   onClear?: () => void;
 }
-
-import { MaterialIcons } from '@expo/vector-icons';
 
 export function SearchBar({
   value,

@@ -8,7 +8,9 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeNavigator } from './HomeNavigator';
 import { ListsNavigator } from './ListsNavigator';
@@ -61,10 +63,10 @@ export function TabNavigator() {
           component={HomeNavigator}
           options={{
             tabBarLabel: 'Ana Sayfa',
-            tabBarIcon: ({ color, focused }) => (
-              <MaterialIcons 
-                name={focused ? "home" : "home"} 
-                size={24} 
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons
+                name="home"
+                size={24}
                 color={color}
               />
             ),
@@ -80,11 +82,11 @@ export function TabNavigator() {
           component={ListsNavigator}
           options={{
             tabBarLabel: 'Listelerim',
-            tabBarIcon: ({ color, focused }) => (
-              <MaterialIcons 
-                name={focused ? "list-alt" : "list-alt"} 
-                size={24} 
-                color={color} 
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons
+                name="list-alt"
+                size={24}
+                color={color}
               />
             ),
             tabBarItemStyle: {
@@ -122,10 +124,10 @@ export function TabNavigator() {
           component={DealsNavigator}
           options={{
             tabBarLabel: 'Fırsatlar',
-            tabBarIcon: ({ color, focused }) => (
-              <MaterialIcons 
-                name={focused ? "sell" : "sell"} 
-                size={24} 
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons
+                name="sell"
+                size={24}
                 color={color}
               />
             ),
@@ -141,10 +143,10 @@ export function TabNavigator() {
           component={ProfileNavigator}
           options={{
             tabBarLabel: 'Profil',
-            tabBarIcon: ({ color, focused }) => (
-              <MaterialIcons 
-                name={focused ? "person" : "person"} 
-                size={24} 
+            tabBarIcon: ({ color }) => (
+              <MaterialIcons
+                name="person"
+                size={24}
                 color={color}
               />
             ),
@@ -169,15 +171,20 @@ export function TabNavigator() {
 }
 
 // FAB Button Component (HTML'deki gibi ortada)
+// Asistan, tab'ların üstündeki bir root-stack route'u. Tab navigasyonunu root
+// stack ile compose ederek 'Assistant'a tip güvenli şekilde gidebiliriz.
+type TabFABNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<TabParamList>,
+  StackNavigationProp<RootStackParamList>
+>;
+
 function TabFAB() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation<BottomTabNavigationProp<TabParamList>>();
+  const navigation = useNavigation<TabFABNavigationProp>();
 
   const handlePress = () => {
     // Navigate to the Assistant screen (a full-screen root stack route above the tabs)
-    // Use getParent if available, otherwise fall back to current navigation
-    const target = (navigation.getParent() ?? navigation) as any;
-    target.navigate('Assistant');
+    navigation.navigate('Assistant');
   };
 
   return (

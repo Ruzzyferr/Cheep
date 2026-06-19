@@ -6,9 +6,21 @@
 // Backend URL — EXPO_PUBLIC_API_URL ile override edilebilir.
 // Expo, EXPO_PUBLIC_* ile başlayan değişkenleri build/runtime'da otomatik inline eder.
 // Android emülatöründe localhost yerine 10.0.2.2, fiziksel cihazda bilgisayarın LAN IP'sini kullanın.
-export const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL ??
-  (__DEV__ ? 'http://localhost:3000/api/v1' : 'https://api.cheep.com/api/v1');
+//
+// Release/production build'lerde EXPO_PUBLIC_API_URL ZORUNLUDUR: tanımsızsa
+// placeholder bir URL'e sessizce düşmek yerine başlangıçta gürültülü hata veririz.
+function resolveApiBaseUrl(): string {
+  const fromEnv = process.env.EXPO_PUBLIC_API_URL;
+  if (fromEnv) return fromEnv;
+  if (__DEV__) {
+    return 'http://localhost:3000/api/v1';
+  }
+  throw new Error(
+    'EXPO_PUBLIC_API_URL tanımlı değil. Production build için bu ortam değişkeni zorunludur.'
+  );
+}
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 // API Endpoints
 export const API_ENDPOINTS = {

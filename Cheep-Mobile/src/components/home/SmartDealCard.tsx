@@ -54,7 +54,7 @@ export function SmartDealCard({
         <View style={styles.priceRow}>
           <Text style={styles.priceCurrency}>₺</Text>
           <Text style={styles.price}>{price}</Text>
-          <Text style={styles.fromLabel}>'den</Text>
+          <Text style={styles.fromLabel}>&apos;den</Text>
         </View>
       </View>
     </TouchableOpacity>

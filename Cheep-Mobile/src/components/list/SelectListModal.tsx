@@ -43,23 +43,28 @@ export function SelectListModal({
   const [brandIndependent, setBrandIndependent] = useState(false);
 
   useEffect(() => {
-    if (visible) {
-      loadLists();
-    }
-  }, [visible]);
+    if (!visible) return;
+    let alive = true;
 
-  const loadLists = async () => {
-    try {
-      setLoading(true);
-      const data = await listService.getLists('active');
-      setLists(data);
-    } catch (error) {
-      console.error('Load lists error:', error);
-      Alert.alert('Hata', 'Listeler yüklenirken bir hata oluştu');
-    } finally {
-      setLoading(false);
-    }
-  };
+    (async () => {
+      try {
+        setLoading(true);
+        const data = await listService.getLists('active');
+        if (!alive) return;
+        setLists(data);
+      } catch (error) {
+        if (!alive) return;
+        console.error('Load lists error:', error);
+        Alert.alert('Hata', 'Listeler yüklenirken bir hata oluştu');
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, [visible]);
 
   const handleSelectList = async (listId: number) => {
     try {
@@ -146,7 +151,7 @@ export function SelectListModal({
                             {item.list_items.length} ürün
                           </Text>
                         )}
-                        {item.budget && (
+                        {item.budget && Number.isFinite(parseFloat(item.budget)) && (
                           <Text style={styles.listBudget}>
                             Bütçe: ₺{parseFloat(item.budget).toFixed(2)}
                           </Text>

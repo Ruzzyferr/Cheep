@@ -12,9 +12,9 @@ import {
   TouchableOpacity,
   FlatList,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Alert } from 'react-native';
 import { CommonActions } from '@react-navigation/native';
 import { productService, categoryService, listService } from '../../services';
 import { ProductGridCard } from '../../components/product/ProductGridCard';
@@ -42,6 +42,10 @@ export function CategoryProductsScreen({
   // FlatList scroll kontrolü için ref
   const flatListRef = React.useRef<FlatList>(null);
 
+  // Eşzamanlı loadProducts isteklerinde sadece en son yanıtı uygulamak için
+  // artan bir istek kimliği tutarız (eski yanıt yenisini ezemez).
+  const loadProductsReqId = React.useRef(0);
+
   // Scroll'u en üste götür
   const scrollToTop = () => {
     setTimeout(() => {
@@ -53,21 +57,21 @@ export function CategoryProductsScreen({
     loadCategories();
   }, []);
 
+  // Kategori değiştiğinde alt kategorileri yükle (loadSubcategories
+  // selectedSubcategory'yi null'a çeker → aşağıdaki effect ürünleri yükler).
   useEffect(() => {
     loadSubcategories();
-    loadProducts();
-    // Kategori değiştiğinde scroll'u en üste götür
-    scrollToTop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory]);
 
+  // Kategori veya alt kategori değiştiğinde (null dahil) ürünleri yükle.
+  // İki ayrı fetch effect'ini tek bir yere indirgedik; istek kimliği guard'ı
+  // overlapping isteklerde sadece en güncel yanıtın uygulanmasını sağlar.
   useEffect(() => {
-    // Alt kategori değiştiğinde (null dahil) ürünleri yükle
     loadProducts();
-    // Scroll'u en üste götür
     scrollToTop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedSubcategory]);
+  }, [selectedCategory, selectedSubcategory]);
 
   const loadCategories = async () => {
     try {
@@ -90,31 +94,34 @@ export function CategoryProductsScreen({
   };
 
   const loadProducts = async () => {
+    const reqId = ++loadProductsReqId.current;
     try {
       setLoading(true);
       const categoryIdToUse = selectedSubcategory || selectedCategory;
-      
+
       // 🔥 Parent kategori veya "Tümü" seçiliyse daha yüksek limit
       const isParentOrAll = selectedSubcategory === null || selectedSubcategory === 0;
       const limit = isParentOrAll ? 300 : 100;  // Parent/Tümü: 300, Alt kategori: 100
-      
-      const params: any = {
+
+      const params: { limit: number; category_id?: number } = {
         limit: limit,
       };
-      
+
       // Eğer "Tüm Kategoriler" (id=0) DEĞİLSE, category_id parametresi ekle
       if (categoryIdToUse !== 0) {
         params.category_id = categoryIdToUse;
       }
-      
-      console.log('🔍 Loading products with params:', params, '(Parent/Tümü:', isParentOrAll, ')');
+
       const productsData = await productService.getProducts(params);
+      // Sadece en son istek kazanır: eski yanıt geç gelirse yok say.
+      if (reqId !== loadProductsReqId.current) return;
       setProducts(productsData);
-      console.log('📦 Products loaded:', productsData.length, 'for category:', categoryIdToUse);
     } catch (error) {
+      if (reqId !== loadProductsReqId.current) return;
       console.error('❌ Load products error:', error);
     } finally {
-      setLoading(false);
+      // Sadece en son istek loading state'ini kapatabilir.
+      if (reqId === loadProductsReqId.current) setLoading(false);
     }
   };
 

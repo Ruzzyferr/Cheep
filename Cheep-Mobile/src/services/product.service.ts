@@ -63,14 +63,25 @@ export const productService = {
 
   /**
    * Get product price history (per-store time series)
-   * Not: backend yanıtı doğrudan döndürür (ApiResponse sarmalı yok).
+   *
+   * Not: bu uç, diğerlerinden farklı olarak yanıtı DOĞRUDAN döndürür
+   * (ApiResponse `{ success, data }` sarmalı YOKTUR — backend `res.json(history)`).
+   * Bu yüzden burada bilinçli olarak `response.data.data` değil `response.data`
+   * okuruz. Olası bozuk/eksik yanıtlara karşı güvenli bir varsayılana normalize
+   * ederiz ki tüketiciler (PriceTrendCard) çökmesin.
    */
   async getPriceHistory(id: number, days = 90): Promise<PriceHistoryResponse> {
-    const response = await apiClient.get<PriceHistoryResponse>(
+    const response = await apiClient.get<Partial<PriceHistoryResponse>>(
       API_ENDPOINTS.PRODUCTS.HISTORY(id),
       { params: { days } }
     );
-    return response.data;
+    const raw = response.data;
+    return {
+      product_id: raw?.product_id ?? id,
+      days: raw?.days ?? days,
+      series: Array.isArray(raw?.series) ? raw.series : [],
+      summary: raw?.summary ?? { lowest: null, highest: null, dataPoints: 0 },
+    };
   },
 };
 

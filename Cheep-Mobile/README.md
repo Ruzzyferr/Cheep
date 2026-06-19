@@ -5,9 +5,12 @@ React Native + Expo ile geliştirilmiş akıllı alışveriş asistanı. Premium
 ## 🚀 Özellikler
 
 - **Auth** — Login/Register, JWT **access + refresh** (SecureStore), 401'de sessiz token yenileme
+- **Onboarding** — maskotlu sihirbaz (5 alışveriş-odaklı soru: hane, diyet, alerji, bütçe); ilk girişte profil oluşturur
+- **AI Asistan** — Gemini sohbet ekranı: doğal dille liste yönetimi, optimistic gönderim, tool-call sonuçlarında `ListActionCard`, yazıyor göstergesi, sohbet geçmişi (thread) + silme, **günlük limit göstergesi/kilidi**
 - **Home** — aktif liste, akıllı fırsatlar, kategoriler, **gerçek mesafeli** yakındaki marketler (expo-location)
-- **Lists** — oluştur/düzenle, aktif/tamamlanan/şablon, istatistikler
-- **Compare** — çoklu market karşılaştırması, en iyi rota, bütçe kontrolü, 7-faktör skorlama
+- **Lists** — oluştur/düzenle, aktif/tamamlanan/şablon, istatistikler; öğelerde **marka-bağımsız** toggle (muadil-grup en ucuz)
+- **Compare** — çoklu market karşılaştırması, en iyi rota, bütçe kontrolü, 7-faktör skorlama; kazanan marka rozeti
+- **Profile** — diyet/alerjen/bütçe tercihlerini düzenleme; ürün kartlarında profile-bazlı uyarı/diyet-uyumu rozetleri
 - **Product Detail** — market fiyatları + **fiyat geçmişi grafiği** (sparkline)
 - **Deals** — marketler arası en yüksek tasarruflu ürünler
 - **Country scoping** — cihaz konumundan ISO ülke kodu çözülür, `x-country` header'ı ile API ülkeye göre yanıt verir
@@ -44,11 +47,12 @@ Text:             #0F172A / #64748B
 
 ```
 src/
-├── components/   # ui/, product/ (PriceTrendCard), home/, list/, store/, common/
-├── context/      # AuthContext (access+refresh)
-├── navigation/   # RootNavigator, TabNavigator, *Navigator
-├── screens/      # auth, home (NewHomeScreen), product, lists, store, deals, profile
-├── services/     # api.client (token+country interceptor), auth/product/list/store services
+├── components/   # ui/, product/ (PriceTrendCard), home/, list/, store/, common/,
+│                 #   assistant/ (MessageBubble, ChatInputBar, ToolActivityChip, ListActionCard, ThreadListSheet)
+├── context/      # AuthContext (access+refresh, onboardingDone)
+├── navigation/   # RootNavigator (onboarding gate), TabNavigator (merkez FAB → Asistan), Assistant/Onboarding/*Navigator
+├── screens/      # auth, onboarding, home (NewHomeScreen), product, lists, store, deals, profile, assistant
+├── services/     # api.client (token+country interceptor), auth/product/list/store/profile/assistant services
 ├── theme/        # colors, typography, spacing, shadows
 ├── utils/        # storage (token/refresh/country/location), geo (haversine + reverseGeocode)
 └── constants/    # api.ts (EXPO_PUBLIC_API_URL)
@@ -58,8 +62,9 @@ App.tsx           # giriş (index.js → App.tsx → RootNavigator)
 ## 🧭 Navigation
 
 ```
-Root → Auth (Login/Register)  |  Tab (Home / Lists / Deals / Profile)
+Root → Auth (Login/Register)  |  Onboarding (ilk giriş)  |  Tab (Home / Lists / Asistan-FAB / Deals / Profile)
 Home: HomeMain → ProductDetail → StoreDetail → CategoryProducts
+Assistant: ChatScreen (thread geçmişi sheet'i)
 Deals: DealsMain → (Home stack'e cross-tab) ProductDetail
 ```
 

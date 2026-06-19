@@ -5,11 +5,12 @@
 
 import apiClient from './api.client';
 import { API_ENDPOINTS } from '../constants/api';
-import type { 
-  AuthResponse, 
-  LoginRequest, 
+import type {
+  AuthResponse,
+  LoginRequest,
   RegisterRequest,
-  ApiResponse 
+  ApiResponse,
+  User
 } from '../types';
 
 export const authService = {
@@ -38,8 +39,8 @@ export const authService = {
   /**
    * Get current user
    */
-  async getMe() {
-    const response = await apiClient.get<ApiResponse<any>>(
+  async getMe(): Promise<ApiResponse<User>> {
+    const response = await apiClient.get<ApiResponse<User>>(
       API_ENDPOINTS.USERS.ME
     );
     return response.data;

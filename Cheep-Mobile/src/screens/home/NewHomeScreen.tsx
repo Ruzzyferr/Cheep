@@ -3,20 +3,18 @@
  * Yenilenmiş ana sayfa tasarımı
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '../../context/AuthContext';
 import { productService, storeService, listService, categoryService } from '../../services';
 import { ActiveListCard } from '../../components/home/ActiveListCard';
 import { EmptyListCard } from '../../components/home/EmptyListCard';
@@ -26,8 +24,7 @@ import { CategoryItem } from '../../components/home/CategoryItem';
 import { NearbyStoreCard } from '../../components/home/NearbyStoreCard';
 import { getUserLocation, getCountryCode, haversineKm, formatDistance, type Coords } from '../../utils/geo';
 import { countryStorage } from '../../utils/storage';
-import { colors, typography, spacing, layout, borderRadius } from '../../theme';
-import { shadows } from '../../theme/shadows';
+import { colors, typography, spacing, layout } from '../../theme';
 import type { Product, Store, ShoppingList } from '../../types';
 import type { Category } from '../../services/category.service';
 import type { HomeStackScreenProps } from '../../navigation/types';
@@ -59,9 +56,7 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) {
-  const { user } = useAuth();
   const insets = useSafeAreaInsets();
-  const [searchQuery, setSearchQuery] = useState('');
   const [activeList, setActiveList] = useState<ShoppingList | null>(null);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [nearbyStores, setNearbyStores] = useState<Store[]>([]);
@@ -74,13 +69,27 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
   const [monthlySavings, setMonthlySavings] = useState<number>(0);
   const [monthlySavingsIncrease, setMonthlySavingsIncrease] = useState<number>(0);
   const [potentialSavings, setPotentialSavings] = useState<number>(0);
-  const [listStoreLogos, setListStoreLogos] = useState<string[]>([]);
   const [listStoreNames, setListStoreNames] = useState<string[]>([]);
   const [userCoords, setUserCoords] = useState<Coords | null>(null);
+  // Unmount sonrası setState yapmamak için canlılık bayrağı.
+  const aliveRef = useRef(true);
+
+  useEffect(() => {
+    aliveRef.current = true;
+    return () => {
+      aliveRef.current = false;
+    };
+  }, []);
 
   // Cihaz konumunu bir kez al (gerçek mesafe hesabı için) + ülkeyi çöz/sakla
   useEffect(() => {
-    getUserLocation().then(setUserCoords).catch(() => setUserCoords(null));
+    getUserLocation()
+      .then((coords) => {
+        if (aliveRef.current) setUserCoords(coords);
+      })
+      .catch(() => {
+        if (aliveRef.current) setUserCoords(null);
+      });
     getCountryCode()
       .then((code) => {
         if (code) return countryStorage.saveCountry(code);
@@ -101,6 +110,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         storeService.getStores(),
         categoryService.getParentCategories(),
       ]);
+      if (!aliveRef.current) return;
 
       // Ana sayfada maksimum 7 parent kategori göster (Tümü hariç, toplam 8 kategori olacak)
       const parentCategories = allCategories
@@ -117,9 +127,15 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
       };
       const productsWithPriceDifference = products
-        .filter((product) => product.store_prices && product.store_prices.length >= 2) // En az 2 fiyat olmalı
         .map((product) => {
-          const prices = product.store_prices!.map((sp) => parseFloat(sp.price));
+          // Geçersiz/boş fiyatları (NaN) ele: ₺NaN / Infinity render etmeyi önler.
+          const prices = (product.store_prices ?? [])
+            .map((sp) => parseFloat(sp.price))
+            .filter((p) => Number.isFinite(p));
+          return { product, prices };
+        })
+        .filter(({ prices }) => prices.length >= 2) // En az 2 geçerli fiyat olmalı
+        .map(({ product, prices }) => {
           const minPrice = Math.min(...prices);
           const reference = median(prices); // "normal" fiyat (aykırı değere dayanıklı)
           const priceDifference = Math.max(0, reference - minPrice);
@@ -132,14 +148,16 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         })
         .sort((a, b) => b.priceDifference - a.priceDifference); // Büyükten küçüğe sırala
 
-      console.log('📊 Data loaded:', {
-        lists: lists.length,
-        products: products.length,
-        productsWithPriceDifference: productsWithPriceDifference.length,
-        stores: stores.length,
-        allCategories: allCategories.length,
-        parentCategories: parentCategories.length,
-      });
+      if (__DEV__) {
+        console.log('📊 Data loaded:', {
+          lists: lists.length,
+          products: products.length,
+          productsWithPriceDifference: productsWithPriceDifference.length,
+          stores: stores.length,
+          allCategories: allCategories.length,
+          parentCategories: parentCategories.length,
+        });
+      }
 
       const firstActiveList = lists[0] || null;
       setActiveList(firstActiveList);
@@ -152,13 +170,15 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         try {
           // Liste detayını al (list_items ile birlikte)
           const listDetail = await listService.getListById(firstActiveList.id);
-          
+          if (!aliveRef.current) return;
+
           // Eğer liste öğeleri varsa, rotaları hesapla
           if (listDetail.list_items && listDetail.list_items.length > 0) {
             const compareResult = await listService.compareList(firstActiveList.id, {
               maxStores: 3,
               includeMissingProducts: true,
             });
+            if (!aliveRef.current) return;
 
             // Tüm rotaların fiyatlarını al
             const routePrices = compareResult.strategies
@@ -232,14 +252,12 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
               setEstimatedPrice(null);
               setSavingsPercent(undefined);
               setPotentialSavings(0);
-              setListStoreLogos([]);
               setListStoreNames([]);
             }
           } else {
             setEstimatedPrice(null);
             setSavingsPercent(undefined);
             setPotentialSavings(0);
-            setListStoreLogos([]);
             setListStoreNames([]);
           }
         } catch (error) {
@@ -252,57 +270,65 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         setEstimatedPrice(null);
         setSavingsPercent(undefined);
         setPotentialSavings(0);
-        setListStoreLogos([]);
         setListStoreNames([]);
       }
 
-      // Bu ay içindeki toplam tasarrufu hesapla (tamamlanmış listelerden)
+      // Bu ay içindeki toplam tasarrufu hesapla (tamamlanmış listelerden).
+      // N+1 compare isteği fırtınasını önlemek için: yalnızca bu ay/geçen aya ait
+      // listeleri al, en yeniden eskiye sırala ve en fazla MAX_SAVINGS_COMPARES
+      // tanesini karşılaştır.
       try {
+        const MAX_SAVINGS_COMPARES = 6;
         const completedLists = await listService.getLists('completed');
+        if (!aliveRef.current) return;
         const currentMonth = new Date().getMonth();
         const currentYear = new Date().getFullYear();
-        
+        const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+        const inMonth = (d: Date, m: number, y: number) =>
+          d.getMonth() === m && d.getFullYear() === y;
+
+        // İlgili listeleri (bu ay + geçen ay) seç, en yeniden eskiye sırala, sınırla.
+        const relevant = completedLists
+          .filter((list) => {
+            if (!list.completed_at) return false;
+            const d = new Date(list.completed_at);
+            return (
+              inMonth(d, currentMonth, currentYear) ||
+              inMonth(d, previousMonth, previousYear)
+            );
+          })
+          .sort(
+            (a, b) =>
+              new Date(b.completed_at as string).getTime() -
+              new Date(a.completed_at as string).getTime()
+          )
+          .slice(0, MAX_SAVINGS_COMPARES);
+
         let totalSavings = 0;
         let previousMonthSavings = 0;
-        
-        for (const list of completedLists) {
-          if (list.completed_at) {
-            const completedDate = new Date(list.completed_at);
-            const listMonth = completedDate.getMonth();
-            const listYear = completedDate.getFullYear();
-            
-            // Bu ay içindeki listeler
-            if (listMonth === currentMonth && listYear === currentYear) {
-              // Tamamlanmış listelerden tasarruf hesaplamak için compare sonuçlarını al
-              try {
-                const compareResult = await listService.compareList(list.id, {
-                  maxStores: 3,
-                  includeMissingProducts: true,
-                });
-                totalSavings += compareResult.summary.maxSavings || 0;
-              } catch (error) {
-                // Hata durumunda devam et
-                console.warn('Error calculating savings for completed list:', list.id);
-              }
+
+        for (const list of relevant) {
+          const completedDate = new Date(list.completed_at as string);
+          try {
+            const compareResult = await listService.compareList(list.id, {
+              maxStores: 3,
+              includeMissingProducts: true,
+            });
+            if (!aliveRef.current) return;
+            const savings = compareResult.summary.maxSavings || 0;
+            if (inMonth(completedDate, currentMonth, currentYear)) {
+              totalSavings += savings;
+            } else {
+              previousMonthSavings += savings;
             }
-            
-            // Önceki ay içindeki listeler
-            const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-            const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-            if (listMonth === previousMonth && listYear === previousYear) {
-              try {
-                const compareResult = await listService.compareList(list.id, {
-                  maxStores: 3,
-                  includeMissingProducts: true,
-                });
-                previousMonthSavings += compareResult.summary.maxSavings || 0;
-              } catch (error) {
-                console.warn('Error calculating savings for previous month list:', list.id);
-              }
-            }
+          } catch {
+            console.warn('Error calculating savings for completed list:', list.id);
           }
         }
-        
+
+        if (!aliveRef.current) return;
         setMonthlySavings(Math.round(totalSavings));
         setMonthlySavingsIncrease(Math.round(totalSavings - previousMonthSavings));
       } catch (error) {
@@ -311,7 +337,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
     } catch (error) {
       console.error('❌ Load data error:', error);
     } finally {
-      setLoading(false);
+      if (aliveRef.current) setLoading(false);
     }
   };
 
@@ -322,8 +348,10 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
   };
 
   const getLowestPrice = (product: Product) => {
-    if (!product.store_prices?.length) return null;
-    const prices = product.store_prices.map((sp) => parseFloat(sp.price));
+    const prices = (product.store_prices ?? [])
+      .map((sp) => parseFloat(sp.price))
+      .filter((p) => Number.isFinite(p));
+    if (prices.length === 0) return null;
     return Math.min(...prices).toFixed(2);
   };
 
@@ -339,8 +367,10 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
     if (product.priceDifference !== undefined) {
       return product.priceDifference;
     }
-    if (!product.store_prices?.length || product.store_prices.length < 2) return 0;
-    const prices = product.store_prices.map((sp) => parseFloat(sp.price));
+    const prices = (product.store_prices ?? [])
+      .map((sp) => parseFloat(sp.price))
+      .filter((p) => Number.isFinite(p));
+    if (prices.length < 2) return 0;
     return Math.max(...prices) - Math.min(...prices);
   };
 

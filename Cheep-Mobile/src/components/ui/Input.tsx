@@ -35,7 +35,10 @@ export function Input({
   ...textInputProps
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const [isSecure, setIsSecure] = useState(secureTextEntry);
+  // Görünürlüğü prop'tan türet: `secureTextEntry` parent toggle'ı değişirse
+  // anlık yansır. Yerel `reveal` yalnızca göz ikonuyla geçici açmayı tutar.
+  const [reveal, setReveal] = useState(false);
+  const isSecure = secureTextEntry ? !reveal : false;
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -67,7 +70,7 @@ export function Input({
         {secureTextEntry && (
           <TouchableOpacity
             style={styles.rightIcon}
-            onPress={() => setIsSecure(!isSecure)}
+            onPress={() => setReveal((prev) => !prev)}
           >
             <Text>{isSecure ? '👁️' : '👁️‍🗨️'}</Text>
           </TouchableOpacity>

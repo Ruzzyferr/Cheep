@@ -32,24 +32,37 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
   const [refreshing, setRefreshing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
+  // handleCreateList stale `lists` üzerinden kapanmasın diye en güncel listeyi
+  // ref'te tutarız (gecikmeli setTimeout çağrısı doğru veriyi görür).
+  const listsRef = useRef<ShoppingList[]>([]);
+  useEffect(() => {
+    listsRef.current = lists;
+  }, [lists]);
+
   // Reload lists when screen comes into focus
   useFocusEffect(
     useCallback(() => {
       loadLists();
-      
+
       // Check if we should open create modal (from FAB)
       const routeParams = route.params;
       const shouldOpen = routeParams?.openCreateModal || getShouldOpenCreateModalFromFAB();
-      
+
+      let timer: ReturnType<typeof setTimeout> | undefined;
       if (shouldOpen) {
         // Clear the flags
         setShouldOpenCreateModalFromFAB(false);
         navigation.setParams({ openCreateModal: undefined });
         // Open modal after a short delay to ensure lists are loaded
-        setTimeout(() => {
+        timer = setTimeout(() => {
           handleCreateList();
         }, 300);
       }
+
+      // Blur/unmount'ta bekleyen timer'ı temizle (sızıntı + stale çağrıyı önler).
+      return () => {
+        if (timer) clearTimeout(timer);
+      };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeTab, route.params?.openCreateModal])
   );
@@ -80,8 +93,9 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
   };
 
   const handleCreateList = async () => {
-    // Aktif liste var mı kontrol et
-    const activeLists = lists.filter((l) => l.status === 'active' && !l.is_template);
+    // Aktif liste var mı kontrol et — gecikmeli çağrılarda stale state'ten
+    // kaçınmak için ref'teki en güncel listeyi kullan.
+    const activeLists = listsRef.current.filter((l) => l.status === 'active' && !l.is_template);
     if (activeLists.length > 0) {
       Alert.alert(
         'Aktif Liste Mevcut',

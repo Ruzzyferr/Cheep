@@ -3,7 +3,7 @@
  * Shopping list items and actions
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,

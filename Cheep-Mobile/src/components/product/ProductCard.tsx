@@ -17,10 +17,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onPress, showStore = false }: ProductCardProps) {
-  // Get lowest price
-  const lowestPrice = product.store_prices?.length
-    ? Math.min(...product.store_prices.map(sp => parseFloat(sp.price)))
-    : null;
+  // Get lowest price — geçersiz/boş fiyatları (NaN) ele ki ₺NaN render edilmesin.
+  const validPrices = (product.store_prices ?? [])
+    .map((sp) => parseFloat(sp.price))
+    .filter((p) => Number.isFinite(p));
+  const lowestPrice = validPrices.length ? Math.min(...validPrices) : null;
 
   const storeName = product.store_prices?.[0]?.store?.name;
 
