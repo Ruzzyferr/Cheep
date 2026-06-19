@@ -4,6 +4,7 @@ import {
     jaccardSimilarity,
 } from '../../utils/similarity.js';
 import { getCountryIdByCode } from '../../utils/country.js';
+import { extractGramaj } from '../../services/brand-independent-pricing.js';
 
 /**
  * Product Matching Service
@@ -114,17 +115,24 @@ function normalizeProductName(name: string): string {
     return cleanProductText(name);
 }
 
-function generateProductFingerprint(data: {
+export function generateProductFingerprint(data: {
     name: string;
     brand?: string;
 }): string {
     const cleaned = cleanProductText(data.name, data.brand);
-    if (!cleaned) return '';
+
+    // STRICT: gramaj/boyut fingerprint'e dahil edilir. cleanProductText birimleri
+    // temizlediği için "Süt 1L" ve "Süt 2L" aksi halde aynı fingerprint'e düşerdi.
+    // Gramaj farkı olan ürünler ASLA birleşmesin diye boyut token'ı eklenir.
+    const gramaj = extractGramaj(data.name); // örn. "1000ml", "500g", "10adet" ya da null
+
+    if (!cleaned) return gramaj ? `@${gramaj}` : '';
 
     const uniqueWords = Array.from(new Set(cleaned.split(' ').filter(Boolean)));
     uniqueWords.sort();
 
-    return uniqueWords.join('-');
+    const base = uniqueWords.join('-');
+    return gramaj ? `${base}@${gramaj}` : base;
 }
 
 // Benzerlik algoritmaları artık ../../utils/similarity.ts içinde (DRY + test edilebilir).
@@ -196,7 +204,11 @@ export class ProductMatcher {
         }
 
         const candidates = await this.findSimilarProducts(data);
-        const bestMatch = candidates.find(c => c.similarity >= 0.85);
+        // STRICT: gramajı eşleşmeyen aday ASLA otomatik birleşmez (0.85 fuzzy dahil).
+        const incomingGramaj = extractGramaj(data.name);
+        const bestMatch = candidates.find(
+            c => c.similarity >= 0.85 && extractGramaj(c.name) === incomingGramaj
+        );
         if (bestMatch) {
             const product = await prisma.product.findUnique({
                 where: { id: bestMatch.id },
@@ -330,21 +342,24 @@ export class ProductMatcher {
      * Manuel olarak ürünleri birleştir
      */
     async mergeProducts(sourceProductId: number, targetProductId: number) {
-        // Source product'ın tüm fiyatlarını target'a taşı
-        await prisma.storePrice.updateMany({
-            where: { product_id: sourceProductId },
-            data: { product_id: targetProductId },
-        });
+        // Çoklu yazma + delete atomik olmalı: yarıda kalırsa veri tutarsız kalır.
+        await prisma.$transaction(async (tx) => {
+            // Source product'ın tüm fiyatlarını target'a taşı
+            await tx.storePrice.updateMany({
+                where: { product_id: sourceProductId },
+                data: { product_id: targetProductId },
+            });
 
-        // Source product'ın list item'larını target'a taşı
-        await prisma.listItem.updateMany({
-            where: { product_id: sourceProductId },
-            data: { product_id: targetProductId },
-        });
+            // Source product'ın list item'larını target'a taşı
+            await tx.listItem.updateMany({
+                where: { product_id: sourceProductId },
+                data: { product_id: targetProductId },
+            });
 
-        // Source product'ı sil
-        await prisma.product.delete({
-            where: { id: sourceProductId },
+            // Source product'ı sil
+            await tx.product.delete({
+                where: { id: sourceProductId },
+            });
         });
 
         return { success: true };

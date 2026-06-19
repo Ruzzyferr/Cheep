@@ -3,6 +3,7 @@ import * as ListController from './lists.controller.js';
 import * as ListCompareController from './lists-compare.controller.js';
 import { authenticate, optionalAuthenticate } from '../../middleware/auth.middleware.js';
 import { validate } from '../../schema/validation.middleware.js';
+import { validateIdParam } from '../../middleware/validate-id.middleware.js';
 import {
     createListSchema,
     updateListSchema,
@@ -129,7 +130,7 @@ router.get('/', authenticate, ListController.getMyLists);
  *       404:
  *         description: Liste bulunamadı
  */
-router.get('/:id', authenticate, ListController.getListById);
+router.get('/:id', authenticate, validateIdParam('id'), ListController.getListById);
 
 /**
  * @swagger
@@ -210,6 +211,7 @@ router.post(
 router.put(
     '/:id',
     authenticate,
+    validateIdParam('id'),
     validate(updateListSchema),
     ListController.updateList
 );
@@ -236,7 +238,7 @@ router.put(
  *       404:
  *         description: Liste bulunamadı
  */
-router.delete('/:id', authenticate, ListController.deleteList);
+router.delete('/:id', authenticate, validateIdParam('id'), ListController.deleteList);
 
 /**
  * @swagger
@@ -283,7 +285,7 @@ router.delete('/:id', authenticate, ListController.deleteList);
  *                       type: string
  *                       example: "100.25"
  */
-router.get('/:id/statistics', authenticate, ListController.getListStatistics);
+router.get('/:id/statistics', authenticate, validateIdParam('id'), ListController.getListStatistics);
 
 // ============================================
 // TEMPLATES
@@ -335,6 +337,7 @@ router.get('/templates/all', ListController.getTemplates);
 router.post(
     '/templates/:templateId/create',
     authenticate,
+    validateIdParam('templateId'),
     ListController.createFromTemplate
 );
 
@@ -377,7 +380,7 @@ router.post(
  *       401:
  *         description: Yetkisiz erişim
  */
-router.post('/completed/:completedListId/import-to-existing', authenticate, ListController.importFromCompletedList);
+router.post('/completed/:completedListId/import-to-existing', authenticate, validateIdParam('completedListId'), ListController.importFromCompletedList);
 
 /**
  * @swagger
@@ -411,7 +414,7 @@ router.post('/completed/:completedListId/import-to-existing', authenticate, List
  *       401:
  *         description: Yetkisiz erişim
  */
-router.post('/completed/:completedListId/create-new', authenticate, ListController.replaceWithCompletedList);
+router.post('/completed/:completedListId/create-new', authenticate, validateIdParam('completedListId'), ListController.replaceWithCompletedList);
 
 // ============================================
 // LIST ITEMS
@@ -464,6 +467,7 @@ router.post('/completed/:completedListId/create-new', authenticate, ListControll
 router.post(
     '/:id/items',
     authenticate,
+    validateIdParam('id'),
     validate(addListItemSchema),
     ListController.addItemToList
 );
@@ -506,6 +510,7 @@ router.post(
 router.put(
     '/items/:itemId',
     authenticate,
+    validateIdParam('itemId'),
     validate(updateListItemSchema),
     ListController.updateListItem
 );
@@ -532,7 +537,7 @@ router.put(
  *       404:
  *         description: Item bulunamadı
  */
-router.delete('/:id/items/:itemId', authenticate, ListController.removeItemFromList);
+router.delete('/:id/items/:itemId', authenticate, validateIdParam('id'), validateIdParam('itemId'), ListController.removeItemFromList);
 
 /**
  * @swagger
@@ -556,7 +561,7 @@ router.delete('/:id/items/:itemId', authenticate, ListController.removeItemFromL
  *       404:
  *         description: Liste bulunamadı
  */
-router.delete('/:id/clear', authenticate, ListController.clearList);
+router.delete('/:id/clear', authenticate, validateIdParam('id'), ListController.clearList);
 
 // ============================================
 // COMPARE ENGINE
@@ -675,6 +680,7 @@ router.delete('/:id/clear', authenticate, ListController.clearList);
 router.post(
     '/:id/compare',
     authenticate,
+    validateIdParam('id'),
     compareLimiter,
     validate(compareListSchema),
     ListCompareController.compareList
@@ -708,6 +714,7 @@ router.post(
 router.post(
     '/:id/use-route',
     authenticate,
+    validateIdParam('id'),
     ListCompareController.useRoute
 );
 

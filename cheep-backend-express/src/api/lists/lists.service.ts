@@ -1,5 +1,6 @@
 import { prisma } from '../../utils/prisma.client.js';
 import { Decimal } from '@prisma/client/runtime/library';
+import { notFound } from '../../utils/app-error.js';
 
 // ============================================
 // LIST CRUD OPERATIONS
@@ -104,7 +105,7 @@ export const getListById = async (listId: number, userId: number) => {
     });
 
     if (!list) {
-        throw new Error('Liste bulunamadı veya erişim yetkiniz yok');
+        throw notFound('Liste bulunamadı veya erişim yetkiniz yok');
     }
 
     // 🔥 SIRA: Liste elemanlarını market sayısına göre sırala (3 market → 2 market → 1 market)
@@ -196,7 +197,7 @@ export const updateList = async (
     });
 
     if (!list) {
-        throw new Error('Liste bulunamadı veya erişim yetkiniz yok');
+        throw notFound('Liste bulunamadı veya erişim yetkiniz yok');
     }
 
     return await prisma.list.update({
@@ -231,7 +232,7 @@ export const deleteList = async (listId: number, userId: number) => {
     });
 
     if (!list) {
-        throw new Error('Liste bulunamadı veya erişim yetkiniz yok');
+        throw notFound('Liste bulunamadı veya erişim yetkiniz yok');
     }
 
     await prisma.list.delete({
@@ -281,7 +282,7 @@ export const createFromTemplate = async (
     });
 
     if (!template || !template.is_template) {
-        throw new Error('Şablon bulunamadı');
+        throw notFound('Şablon bulunamadı');
     }
 
     // Yeni liste oluştur + şablon ürünlerini kopyala — atomik olmalı.
@@ -348,7 +349,7 @@ export const importFromCompletedList = async (
     });
 
     if (!completedList) {
-        throw new Error('Geçmiş liste bulunamadı veya erişim yetkiniz yok');
+        throw notFound('Geçmiş liste bulunamadı veya erişim yetkiniz yok');
     }
 
     // Hedef listeyi doğrula
@@ -361,37 +362,28 @@ export const importFromCompletedList = async (
     });
 
     if (!targetList) {
-        throw new Error('Hedef liste bulunamadı veya aktif değil');
+        throw notFound('Hedef liste bulunamadı veya aktif değil');
     }
 
-    // Ürünleri mevcut listeye ekle (duplicate kontrolü ile)
-    let addedCount = 0;
-    let skippedCount = 0;
-
-    for (const item of completedList.list_items) {
-        const exists = await prisma.listItem.findUnique({
-            where: {
-                list_id_product_id: {
-                    list_id: targetListId,
-                    product_id: item.product_id,
-                },
-            },
+    // Ürünleri mevcut listeye ekle — tek transaction + createMany(skipDuplicates).
+    // (list_id, product_id) unique olduğundan zaten var olanlar atlanır (N+1 yok).
+    const total = completedList.list_items.length;
+    const added = await prisma.$transaction(async (tx) => {
+        if (total === 0) return 0;
+        const result = await tx.listItem.createMany({
+            data: completedList.list_items.map(item => ({
+                list_id: targetListId,
+                product_id: item.product_id,
+                quantity: item.quantity,
+                unit: item.unit,
+            })),
+            skipDuplicates: true,
         });
+        return result.count;
+    });
 
-        if (!exists) {
-            await prisma.listItem.create({
-                data: {
-                    list_id: targetListId,
-                    product_id: item.product_id,
-                    quantity: item.quantity,
-                    unit: item.unit,
-                },
-            });
-            addedCount++;
-        } else {
-            skippedCount++;
-        }
-    }
+    const addedCount = added;
+    const skippedCount = total - added;
 
     // Güncellenmiş listeyi getir
     const updatedList = await getListById(targetListId, userId);
@@ -427,18 +419,23 @@ export const replaceWithCompletedList = async (
     });
 
     if (!completedList) {
-        throw new Error('Geçmiş liste bulunamadı veya erişim yetkiniz yok');
+        throw notFound('Geçmiş liste bulunamadı veya erişim yetkiniz yok');
     }
 
     // Eski listeyi sil + yeni listeyi oluştur + ürünleri kopyala — atomik olmalı.
     const newListId = await prisma.$transaction(async (tx) => {
         // ESKİ AKTİF LİSTEYİ SİL (eğer belirtildiyse)
         if (oldActiveListId) {
+            // Önce sahiplik doğrula (delete'e non-unique where geçilemez → IDOR riski).
+            const owned = await tx.list.findFirst({
+                where: { id: oldActiveListId, user_id: userId },
+                select: { id: true },
+            });
+            if (!owned) {
+                throw notFound('Silinecek liste bulunamadı veya erişim yetkiniz yok');
+            }
             await tx.list.delete({
-                where: {
-                    id: oldActiveListId,
-                    user_id: userId, // Güvenlik kontrolü
-                },
+                where: { id: oldActiveListId },
             });
         }
 
@@ -507,7 +504,7 @@ export const addItemToList = async (
     });
 
     if (!list) {
-        throw new Error('Liste bulunamadı veya erişim yetkiniz yok');
+        throw notFound('Liste bulunamadı veya erişim yetkiniz yok');
     }
 
     // Ürün var mı kontrol et
@@ -516,7 +513,7 @@ export const addItemToList = async (
     });
 
     if (!product) {
-        throw new Error('Ürün bulunamadı');
+        throw notFound('Ürün bulunamadı');
     }
 
     // Zaten var mı kontrol et
@@ -596,7 +593,7 @@ export const updateListItem = async (
     });
 
     if (!item || item.list.user_id !== userId) {
-        throw new Error('Ürün bulunamadı veya erişim yetkiniz yok');
+        throw notFound('Ürün bulunamadı veya erişim yetkiniz yok');
     }
 
     return await prisma.listItem.update({
@@ -637,7 +634,7 @@ export const removeItemFromList = async (
     });
 
     if (!item || item.list.user_id !== userId || item.list_id !== listId) {
-        throw new Error('Ürün bulunamadı veya erişim yetkiniz yok');
+        throw notFound('Ürün bulunamadı veya erişim yetkiniz yok');
     }
 
     await prisma.listItem.delete({
@@ -660,7 +657,7 @@ export const clearList = async (listId: number, userId: number) => {
     });
 
     if (!list) {
-        throw new Error('Liste bulunamadı veya erişim yetkiniz yok');
+        throw notFound('Liste bulunamadı veya erişim yetkiniz yok');
     }
 
     await prisma.listItem.deleteMany({
@@ -697,7 +694,7 @@ export const getListStatistics = async (listId: number, userId: number) => {
     });
 
     if (!list) {
-        throw new Error('Liste bulunamadı veya erişim yetkiniz yok');
+        throw notFound('Liste bulunamadı veya erişim yetkiniz yok');
     }
 
     const totalItems = list.list_items.length;

@@ -20,8 +20,9 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Seed (prisma/seed.ts) ile tutarlı id eşlemesi: ŞOK = 4 (önceden yanlışlıkla 5 idi).
 const STORE_NAMES: Record<number, string> = {
-  1: "Migros", 2: "CarrefourSA", 3: "A101", 5: "ŞOK",
+  1: "Migros", 2: "CarrefourSA", 3: "A101", 4: "ŞOK",
 };
 
 type PriceRow = {
@@ -156,7 +157,6 @@ async function main() {
 
   // 5) StorePrices — refresh all prices for the involved stores
   const storeIds = Object.keys(STORE_NAMES).map(Number);
-  await prisma.storePrice.deleteMany({ where: { store_id: { in: storeIds } } });
 
   // One price per (store, product): when a store lists the same canonical product
   // more than once (duplicate SKUs / stale listings), keep the LOWEST price so the
@@ -178,11 +178,17 @@ async function main() {
     }
   }
   const rows = [...best.values()];
-  let inserted = 0;
-  for (let i = 0; i < rows.length; i += 1000) {
-    const r = await prisma.storePrice.createMany({ data: rows.slice(i, i + 1000), skipDuplicates: true });
-    inserted += r.count;
-  }
+
+  // Delete + reinsert atomik olmalı: yarıda kalırsa fiyatlar boş kalır.
+  const inserted = await prisma.$transaction(async (tx) => {
+    await tx.storePrice.deleteMany({ where: { store_id: { in: storeIds } } });
+    let count = 0;
+    for (let i = 0; i < rows.length; i += 1000) {
+      const r = await tx.storePrice.createMany({ data: rows.slice(i, i + 1000), skipDuplicates: true });
+      count += r.count;
+    }
+    return count;
+  });
   console.log("   store_price:", inserted);
 
   // 6) Price history — append today's snapshot (one row per store+product per day),

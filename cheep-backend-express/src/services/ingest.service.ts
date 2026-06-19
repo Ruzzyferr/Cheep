@@ -74,6 +74,7 @@ async function saveProcessedProducts(processedProducts: any[], countryId: number
         matchedProducts: 0,
         updatedPrices: 0,
     };
+    const errorSamples: string[] = [];
 
     for (const processed of processedProducts) {
         try {
@@ -115,37 +116,69 @@ async function saveProcessedProducts(processedProducts: any[], countryId: number
             }
 
             for (const priceData of processed.prices) {
-                await prisma.storePrice.upsert({
-                    where: {
-                        store_id_store_sku: {
-                            store_id: priceData.store_id,
-                            store_sku: priceData.store_sku,
+                const hasSku =
+                    priceData.store_sku !== null &&
+                    priceData.store_sku !== undefined &&
+                    String(priceData.store_sku).length > 0;
+
+                const create = {
+                    store_id: priceData.store_id,
+                    product_id: product.id,
+                    store_sku: hasSku ? priceData.store_sku : null,
+                    price: new Decimal(priceData.price),
+                    unit: priceData.unit,
+                    source: 'llm_import',
+                    confidence_score: processed.confidence,
+                };
+                const update = {
+                    product_id: product.id,
+                    price: new Decimal(priceData.price),
+                    unit: priceData.unit,
+                    last_updated_at: new Date(),
+                };
+
+                // store_sku NULL ise Postgres'te NULL'lar distinct → store_id_store_sku
+                // upsert her seferinde INSERT dener ve @@unique([store_id, product_id])
+                // kısıtını ihlal eder. Bu durumda store_id_product_id key'i üzerinden upsert et.
+                if (hasSku) {
+                    await prisma.storePrice.upsert({
+                        where: {
+                            store_id_store_sku: {
+                                store_id: priceData.store_id,
+                                store_sku: priceData.store_sku,
+                            },
                         },
-                    },
-                    create: {
-                        store_id: priceData.store_id,
-                        product_id: product.id,
-                        store_sku: priceData.store_sku,
-                        price: new Decimal(priceData.price),
-                        unit: priceData.unit,
-                        source: 'llm_import',
-                        confidence_score: processed.confidence,
-                    },
-                    update: {
-                        product_id: product.id,
-                        price: new Decimal(priceData.price),
-                        unit: priceData.unit,
-                        last_updated_at: new Date(),
-                    },
-                });
+                        create,
+                        update: { ...update, store_sku: priceData.store_sku },
+                    });
+                } else {
+                    await prisma.storePrice.upsert({
+                        where: {
+                            store_id_product_id: {
+                                store_id: priceData.store_id,
+                                product_id: product.id,
+                            },
+                        },
+                        create,
+                        update,
+                    });
+                }
                 stats.updatedPrices++;
             }
 
             stats.successful++;
         } catch (error: any) {
             logger.error(`[Ingest] Ürün kaydetme hatası: ${error.message}`);
+            if (errorSamples.length < 3) errorSamples.push(error.message);
             stats.failed++;
         }
+    }
+
+    // Sistematik hataları sessizce yutma: özet + örnek hata yüzeye çıkarılır.
+    if (stats.failed > 0) {
+        logger.error(
+            `[Ingest] ${stats.failed}/${processedProducts.length} kayıt başarısız. Örnek hatalar: ${errorSamples.join(' | ')}`
+        );
     }
 
     return stats;

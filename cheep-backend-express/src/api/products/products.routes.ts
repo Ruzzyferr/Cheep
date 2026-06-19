@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as ProductController from './products.controller.js';
 import { validate } from '../../schema/validation.middleware.js';
 import { requireIngestKey } from '../../middleware/ingest-auth.middleware.js';
+import { validateIdParam } from '../../middleware/validate-id.middleware.js';
 import { optionalAuthenticate } from '../../middleware/auth.middleware.js';
 import {
     createProductSchema,
@@ -212,7 +213,7 @@ router.get(
  *       404:
  *         description: Ürün bulunamadı
  */
-router.get('/:id', ProductController.getProductById);
+router.get('/:id', validateIdParam('id'), ProductController.getProductById);
 
 /**
  * @swagger
@@ -376,6 +377,7 @@ router.post(
 router.put(
     '/:id',
     requireIngestKey,
+    validateIdParam('id'),
     validate(updateProductSchema),
     ProductController.updateProduct
 );
@@ -398,7 +400,7 @@ router.put(
  *       404:
  *         description: Ürün bulunamadı
  */
-router.delete('/:id', requireIngestKey, ProductController.deleteProduct);
+router.delete('/:id', requireIngestKey, validateIdParam('id'), ProductController.deleteProduct);
 
 /**
  * @swagger
@@ -422,7 +424,7 @@ router.delete('/:id', requireIngestKey, ProductController.deleteProduct);
  *               items:
  *                 $ref: '#/components/schemas/StorePrice'
  */
-router.get('/:id/prices', ProductController.getProductPrices);
+router.get('/:id/prices', validateIdParam('id'), ProductController.getProductPrices);
 
 /**
  * @swagger
@@ -443,7 +445,7 @@ router.get('/:id/prices', ProductController.getProductPrices);
  *       200:
  *         description: Market bazında fiyat geçmişi serileri ve özet (lowest/highest)
  */
-router.get('/:id/history', ProductController.getProductPriceHistory);
+router.get('/:id/history', validateIdParam('id'), ProductController.getProductPriceHistory);
 
 /**
  * @swagger
@@ -510,7 +512,7 @@ router.get('/:id/history', ProductController.getProductPriceHistory);
  *                   type: string
  *                   example: "7.45%"
  */
-router.get('/:id/compare', ProductController.compareProductPrices);
+router.get('/:id/compare', validateIdParam('id'), ProductController.compareProductPrices);
 
 /**
  * @swagger
@@ -626,7 +628,7 @@ router.post(
  *                     type: string
  *                     example: "high-confidence"
  */
-router.get('/debug/similar', ProductController.debugSimilarProducts);
+router.get('/debug/similar', requireIngestKey, ProductController.debugSimilarProducts);
 
 /**
  * @swagger

@@ -1,5 +1,7 @@
 import { type Request, type Response, type NextFunction } from 'express';
+import { Prisma } from '@prisma/client';
 import logger from "../utils/logger.js";
+import { AppError } from '../utils/app-error.js';
 
 /**
  * Global Error Handler Middleware
@@ -13,8 +15,40 @@ export const errorHandler = (
     // Tam hata sadece loglara yazılır; HTTP yanıtında detay/stack sızdırılmaz.
     logger.error(error.stack || error.message || String(error));
 
-    // Prisma hataları
-    if (error.name === 'PrismaClientKnownRequestError') {
+    // Uygulama hataları (status taşıyan) — mesaj korunur.
+    if (error instanceof AppError) {
+        return res.status(error.statusCode).json({
+            success: false,
+            message: error.message,
+            ...(error.code ? { code: error.code } : {}),
+        });
+    }
+
+    // status taşıyan diğer hatalar (ör. assistant Object.assign(..., { status }))
+    const anyErr = error as any;
+    if (typeof anyErr?.statusCode === 'number' || typeof anyErr?.status === 'number') {
+        const code = anyErr.statusCode ?? anyErr.status;
+        return res.status(code).json({
+            success: false,
+            message: error.message || 'Hata',
+            ...(anyErr.code ? { code: anyErr.code } : {}),
+        });
+    }
+
+    // Prisma hataları — koda göre ayrıştır.
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+            return res.status(409).json({
+                success: false,
+                message: 'Bu kayıt zaten mevcut',
+            });
+        }
+        if (error.code === 'P2025') {
+            return res.status(404).json({
+                success: false,
+                message: 'Kayıt bulunamadı',
+            });
+        }
         return res.status(400).json({
             success: false,
             message: 'Database hatası',
@@ -22,7 +56,7 @@ export const errorHandler = (
     }
 
     // Prisma validation hataları
-    if (error.name === 'PrismaClientValidationError') {
+    if (error instanceof Prisma.PrismaClientValidationError) {
         return res.status(400).json({
             success: false,
             message: 'Geçersiz veri',

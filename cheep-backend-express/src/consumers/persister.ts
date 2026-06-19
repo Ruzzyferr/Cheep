@@ -17,36 +17,45 @@ import logger from '../utils/logger.js';
 async function persistOne(m: MatchedProduct): Promise<void> {
     const newPrice = new Decimal(m.price);
 
-    const existing = await prisma.storePrice.findUnique({
-        where: { store_id_store_sku: { store_id: m.storeId, store_sku: m.storeSku } },
-    });
-    const oldPrice = existing ? existing.price : null;
-    const priceChanged = !existing || !existing.price.equals(newPrice);
+    // Fiyat + geçmiş tek transaction'da atomik yazılır. oldPrice/priceChanged
+    // transaction İÇİNDE okunarak read-then-write yarışı engellenir.
+    const { priceChanged, oldPrice } = await prisma.$transaction(async (tx) => {
+        const existing = await tx.storePrice.findUnique({
+            where: { store_id_store_sku: { store_id: m.storeId, store_sku: m.storeSku } },
+        });
+        const old = existing ? existing.price : null;
+        const changed = !existing || !existing.price.equals(newPrice);
 
-    await prisma.storePrice.upsert({
-        where: { store_id_store_sku: { store_id: m.storeId, store_sku: m.storeSku } },
-        create: {
-            store_id: m.storeId,
-            product_id: m.productId,
-            store_sku: m.storeSku,
-            price: newPrice,
-            unit: m.unit ?? 'adet',
-            source: 'kafka',
-            confidence_score: m.confidence,
-        },
-        update: {
-            product_id: m.productId,
-            price: newPrice,
-            unit: m.unit ?? undefined,
-            last_updated_at: new Date(),
-        },
-    });
-
-    if (priceChanged) {
-        await prisma.priceHistory.create({
-            data: { store_id: m.storeId, product_id: m.productId, price: newPrice },
+        await tx.storePrice.upsert({
+            where: { store_id_store_sku: { store_id: m.storeId, store_sku: m.storeSku } },
+            create: {
+                store_id: m.storeId,
+                product_id: m.productId,
+                store_sku: m.storeSku,
+                price: newPrice,
+                unit: m.unit ?? 'adet',
+                source: 'kafka',
+                confidence_score: m.confidence,
+            },
+            update: {
+                product_id: m.productId,
+                price: newPrice,
+                unit: m.unit ?? undefined,
+                last_updated_at: new Date(),
+            },
         });
 
+        if (changed) {
+            await tx.priceHistory.create({
+                data: { store_id: m.storeId, product_id: m.productId, price: newPrice },
+            });
+        }
+
+        return { priceChanged: changed, oldPrice: old };
+    });
+
+    // at-least-once: publish transaction COMMIT'inden SONRA yapılır.
+    if (priceChanged) {
         const event: PriceEvent = {
             productId: m.productId,
             storeId: m.storeId,

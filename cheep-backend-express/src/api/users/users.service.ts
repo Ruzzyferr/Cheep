@@ -1,4 +1,5 @@
 import { prisma } from '../../utils/prisma.client.js';
+import { notFound, conflict } from '../../utils/app-error.js';
 
 /**
  * Kullanıcı bilgilerini günceller
@@ -53,7 +54,7 @@ export const addFavoriteStore = async (userId: number, storeId: number) => {
     });
 
     if (existing) {
-        throw new Error('Bu market zaten favorilerinizde');
+        throw conflict('Bu market zaten favorilerinizde');
     }
 
     await prisma.userFavoriteStore.create({
@@ -80,7 +81,7 @@ export const removeFavoriteStore = async (userId: number, storeId: number) => {
     });
 
     if (!existing) {
-        throw new Error('Bu market favorilerinizde değil');
+        throw notFound('Bu market favorilerinizde değil');
     }
 
     await prisma.userFavoriteStore.delete({

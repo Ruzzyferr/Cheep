@@ -2,6 +2,7 @@ import logger from '../../utils/logger.js';
 import { prisma } from '../../utils/prisma.client.js';
 import { Decimal } from '@prisma/client/runtime/library';
 import {productMatcher} from "../products/product-matcher.service.js";
+import { badRequest } from '../../utils/app-error.js';
 
 // ++ YENİ: Ürün ve fiyat bilgilerini bir arada içeren tip tanımı
 interface UpsertData {
@@ -45,7 +46,7 @@ export const upsertStorePrice = async (data: UpsertData) => {
     const { store_id, store_sku, price, unit, source, confidence_score, ...productData } = data;
 
     if (!store_sku) {
-        throw new Error('Import işlemi için store_sku zorunludur.');
+        throw badRequest('Import işlemi için store_sku zorunludur.');
     }
 
     // 1. Yeni Product Matcher'ı kullanarak ürünü bul veya oluştur.

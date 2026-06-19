@@ -12,7 +12,7 @@ export const createProductSchema = Joi.object({
         'any.required': 'Ürün adı zorunludur',
     }),
     brand: Joi.string().max(100).optional().allow(null, ''),
-    barcode: Joi.string().max(50).optional().allow(null, ''),
+    ean_barcode: Joi.string().max(50).optional().allow(null, ''),
     image_url: Joi.string().uri().optional().allow(null, ''),
     category_id: Joi.string().optional().allow(null, ''),
     muadil_grup_id: Joi.string().optional().allow(null, ''),
@@ -21,7 +21,7 @@ export const createProductSchema = Joi.object({
 export const updateProductSchema = Joi.object({
     name: Joi.string().min(2).max(255).optional(),
     brand: Joi.string().max(100).optional().allow(null, ''),
-    barcode: Joi.string().max(50).optional().allow(null, ''),
+    ean_barcode: Joi.string().max(50).optional().allow(null, ''),
     image_url: Joi.string().uri().optional().allow(null, ''),
     category_id: Joi.string().optional().allow(null, ''),
     muadil_grup_id: Joi.string().optional().allow(null, ''),

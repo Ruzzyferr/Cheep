@@ -4,6 +4,8 @@
 // ============================================
 import { prisma } from '../../utils/prisma.client.js';
 import slugifyModule from 'slugify';
+import logger from '../../utils/logger.js';
+import { notFound, conflict, badRequest } from '../../utils/app-error.js';
 
 const slugify =
     (slugifyModule as unknown as typeof import('slugify')['default']) ??
@@ -47,10 +49,8 @@ export const getParentCategories = async () => {
         },
     });
     
-    // Debug log
-    console.log(`📊 Parent categories found: ${categories.length}`);
-    categories.forEach(cat => console.log(`  - ${cat.name} (ID: ${cat.id}, parent_id: ${cat.parent_id})`));
-    
+    logger.debug(`[Categories] Parent categories found: ${categories.length}`);
+
     return categories;
 };
 
@@ -195,7 +195,7 @@ export const createCategory = async (data: {
     });
 
     if (existing) {
-        throw new Error('Bu slug zaten kullanılıyor');
+        throw conflict('Bu slug zaten kullanılıyor');
     }
 
     // Parent kontrolü
@@ -204,7 +204,7 @@ export const createCategory = async (data: {
             where: { id: data.parent_id },
         });
         if (!parent) {
-            throw new Error('Parent kategori bulunamadı');
+            throw badRequest('Parent kategori bulunamadı');
         }
     }
 
@@ -237,7 +237,7 @@ export const updateCategory = async (
 ) => {
     const category = await prisma.category.findUnique({ where: { id } });
     if (!category) {
-        throw new Error('Kategori bulunamadı');
+        throw notFound('Kategori bulunamadı');
     }
 
     // Slug değişiyorsa, unique kontrolü
@@ -246,21 +246,21 @@ export const updateCategory = async (
             where: { slug: data.slug },
         });
         if (existing) {
-            throw new Error('Bu slug zaten kullanılıyor');
+            throw conflict('Bu slug zaten kullanılıyor');
         }
     }
 
     // Parent kontrolü
     if (data.parent_id !== undefined) {
         if (data.parent_id === id) {
-            throw new Error('Kategori kendi parent\'ı olamaz');
+            throw badRequest('Kategori kendi parent\'ı olamaz');
         }
         if (data.parent_id !== null) {
             const parent = await prisma.category.findUnique({
                 where: { id: data.parent_id },
             });
             if (!parent) {
-                throw new Error('Parent kategori bulunamadı');
+                throw badRequest('Parent kategori bulunamadı');
             }
         }
     }
@@ -290,17 +290,17 @@ export const deleteCategory = async (id: number) => {
     });
 
     if (!category) {
-        throw new Error('Kategori bulunamadı');
+        throw notFound('Kategori bulunamadı');
     }
 
     // Alt kategorileri varsa silinemez
     if (category.children.length > 0) {
-        throw new Error('Alt kategorileri olan kategori silinemez');
+        throw conflict('Alt kategorileri olan kategori silinemez');
     }
 
     // Ürünleri varsa uyar
     if (category._count.products > 0) {
-        throw new Error(`Bu kategoride ${category._count.products} ürün var. Önce ürünleri taşıyın.`);
+        throw conflict(`Bu kategoride ${category._count.products} ürün var. Önce ürünleri taşıyın.`);
     }
 
     await prisma.category.delete({ where: { id } });
@@ -312,18 +312,25 @@ export const deleteCategory = async (id: number) => {
 export const getCategoryBreadcrumb = async (categoryId: number) => {
     const breadcrumb: any[] = [];
     let currentId: number | null = categoryId;
+    const visited = new Set<number>(); // parent döngüsüne karşı koruma (sonsuz loop engeli)
 
     while (currentId !== null) {
-        // @ts-ignore
-        const category = await prisma.category.findUnique({
-            where: { id: currentId },
-            select: {
-                id: true,
-                name: true,
-                slug: true,
-                parent_id: true,
-            },
-        });
+        if (visited.has(currentId)) {
+            logger.warn(`[Categories] Breadcrumb parent döngüsü tespit edildi (id: ${currentId})`);
+            break;
+        }
+        visited.add(currentId);
+
+        const category: { id: number; name: string; slug: string; parent_id: number | null } | null =
+            await prisma.category.findUnique({
+                where: { id: currentId },
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    parent_id: true,
+                },
+            });
 
         if (!category) break;
 

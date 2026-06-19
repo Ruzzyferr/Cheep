@@ -5,6 +5,8 @@
 import { Router } from 'express';
 import * as CategoryController from './categories.controller.js';
 import { validate } from '../../schema/validation.middleware.js';
+import { requireIngestKey } from '../../middleware/ingest-auth.middleware.js';
+import { validateIdParam } from '../../middleware/validate-id.middleware.js';
 import { createCategorySchema, updateCategorySchema } from './category.schema.js';
 
 const router = Router();
@@ -183,7 +185,7 @@ router.get('/tree', CategoryController.getCategoryTree);
  *                 parent_id: 1
  *                 display_order: 2
  */
-router.get('/:id/subcategories', CategoryController.getSubcategories);
+router.get('/:id/subcategories', validateIdParam('id'), CategoryController.getSubcategories);
 
 /**
  * @swagger
@@ -215,7 +217,7 @@ router.get('/:id/subcategories', CategoryController.getSubcategories);
  *                 name: "Peynir"
  *                 slug: "peynir"
  */
-router.get('/:id/breadcrumb', CategoryController.getCategoryBreadcrumb);
+router.get('/:id/breadcrumb', validateIdParam('id'), CategoryController.getCategoryBreadcrumb);
 
 /**
  * @swagger
@@ -247,7 +249,7 @@ router.get('/:id/breadcrumb', CategoryController.getCategoryBreadcrumb);
  *                   type: integer
  *                   example: 42
  */
-router.get('/:id/product-count', CategoryController.getCategoryProductCount);
+router.get('/:id/product-count', validateIdParam('id'), CategoryController.getCategoryProductCount);
 
 /**
  * @swagger
@@ -271,7 +273,7 @@ router.get('/:id/product-count', CategoryController.getCategoryProductCount);
  *       404:
  *         description: Kategori bulunamadı
  */
-router.get('/:id', CategoryController.getCategoryById);
+router.get('/:id', validateIdParam('id'), CategoryController.getCategoryById);
 
 /**
  * @swagger
@@ -332,7 +334,7 @@ router.get('/slug/:slug', CategoryController.getCategoryBySlug);
  *       400:
  *         description: Validation hatası
  */
-router.post('/', validate(createCategorySchema), CategoryController.createCategory);
+router.post('/', requireIngestKey, validate(createCategorySchema), CategoryController.createCategory);
 
 /**
  * @swagger
@@ -370,7 +372,7 @@ router.post('/', validate(createCategorySchema), CategoryController.createCatego
  *       404:
  *         description: Kategori bulunamadı
  */
-router.put('/:id', validate(updateCategorySchema), CategoryController.updateCategory);
+router.put('/:id', requireIngestKey, validateIdParam('id'), validate(updateCategorySchema), CategoryController.updateCategory);
 
 /**
  * @swagger
@@ -395,7 +397,7 @@ router.put('/:id', validate(updateCategorySchema), CategoryController.updateCate
  *       404:
  *         description: Kategori bulunamadı
  */
-router.delete('/:id', CategoryController.deleteCategory);
+router.delete('/:id', requireIngestKey, validateIdParam('id'), CategoryController.deleteCategory);
 
 export default router;
 

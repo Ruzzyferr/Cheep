@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import * as StoreController from './stores.controller.js';
 import { validate } from '../../schema/validation.middleware.js';
+import { requireIngestKey } from '../../middleware/ingest-auth.middleware.js';
+import { validateIdParam } from '../../middleware/validate-id.middleware.js';
 import { createStoreSchema, updateStoreSchema } from './store.schema.js';
 
 const router = Router();
@@ -48,7 +50,7 @@ router.get('/', StoreController.getAllStores);
  *       404:
  *         description: Market bulunamadı
  */
-router.get('/:id', StoreController.getStoreById);
+router.get('/:id', validateIdParam('id'), StoreController.getStoreById);
 
 /**
  * @swagger
@@ -95,7 +97,7 @@ router.get('/:id', StoreController.getStoreById);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/', validate(createStoreSchema), StoreController.createStore);
+router.post('/', requireIngestKey, validate(createStoreSchema), StoreController.createStore);
 
 /**
  * @swagger
@@ -132,7 +134,7 @@ router.post('/', validate(createStoreSchema), StoreController.createStore);
  *       404:
  *         description: Market bulunamadı
  */
-router.put('/:id', validate(updateStoreSchema), StoreController.updateStore);
+router.put('/:id', requireIngestKey, validateIdParam('id'), validate(updateStoreSchema), StoreController.updateStore);
 
 /**
  * @swagger
@@ -152,6 +154,6 @@ router.put('/:id', validate(updateStoreSchema), StoreController.updateStore);
  *       404:
  *         description: Market bulunamadı
  */
-router.delete('/:id', StoreController.deleteStore);
+router.delete('/:id', requireIngestKey, validateIdParam('id'), StoreController.deleteStore);
 
 export default router;

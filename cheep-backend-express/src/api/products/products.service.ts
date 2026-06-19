@@ -1,6 +1,7 @@
 import { prisma } from '../../utils/prisma.client.js';
 import { Prisma } from '@prisma/client';
 import { getCountryIdByCode } from '../../utils/country.js';
+import { notFound, conflict } from '../../utils/app-error.js';
 
 interface GetAllProductsParams {
     category_id?: number;
@@ -108,7 +109,13 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
         OFFSET ${offset}
     `;
 
-    const total = await prisma.product.count({ where });
+    // total, listeleme ile AYNI filtreden türetilir (whereClause) — sapma olmaz.
+    const totalRows = await prisma.$queryRaw<Array<{ count: bigint }>>`
+        SELECT COUNT(*)::bigint as count
+        FROM "products" p
+        ${whereClause}
+    `;
+    const total = Number(totalRows[0]?.count ?? 0);
 
     // Eğer ürün yoksa boş array döndür
     if (products.length === 0) {
@@ -138,6 +145,7 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
                 orderBy: {
                     price: 'asc',
                 },
+                take: 50, // makul üst sınır (her market en fazla 1 fiyat → liste için fazlasıyla yeterli)
             },
         },
     });
@@ -175,7 +183,7 @@ export const getProductById = async (id: number) => {
     });
 
     if (!product) {
-        throw new Error('Ürün bulunamadı');
+        throw notFound('Ürün bulunamadı');
     }
 
     return product;
@@ -198,7 +206,7 @@ export const getProductByBarcode = async (barcode: string) => {
     });
 
     if (!product) {
-        throw new Error('Ürün bulunamadı');
+        throw notFound('Ürün bulunamadı');
     }
 
     return product;
@@ -221,7 +229,7 @@ export const createProduct = async (data: {
         });
 
         if (existing) {
-            throw new Error('Bu barkoda sahip ürün zaten mevcut');
+            throw conflict('Bu barkoda sahip ürün zaten mevcut');
         }
     }
 
@@ -281,7 +289,7 @@ export const updateProduct = async (
     data: {
         name?: string;
         brand?: string;
-        barcode?: string;
+        ean_barcode?: string;
         image_url?: string;
         category_id?: number;
         muadil_grup_id?: string;
@@ -289,7 +297,7 @@ export const updateProduct = async (
 ) => {
     const product = await prisma.product.findUnique({ where: { id } });
     if (!product) {
-        throw new Error('Ürün bulunamadı');
+        throw notFound('Ürün bulunamadı');
     }
 
     return await prisma.product.update({
@@ -304,7 +312,7 @@ export const updateProduct = async (
 export const deleteProduct = async (id: number) => {
     const product = await prisma.product.findUnique({ where: { id } });
     if (!product) {
-        throw new Error('Ürün bulunamadı');
+        throw notFound('Ürün bulunamadı');
     }
 
     await prisma.product.delete({ where: { id } });
@@ -326,7 +334,7 @@ export const getProductPrices = async (id: number) => {
     });
 
     if (!product) {
-        throw new Error('Ürün bulunamadı');
+        throw notFound('Ürün bulunamadı');
     }
 
     return product.store_prices;
@@ -393,7 +401,7 @@ export const compareProductPrices = async (id: number) => {
     });
 
     if (!product) {
-        throw new Error('Ürün bulunamadı');
+        throw notFound('Ürün bulunamadı');
     }
 
     if (product.store_prices.length === 0) {

@@ -22,49 +22,34 @@ const escapeHTML = (str: string): string => {
 
 /**
  * Recursive sanitization helper
+ *
+ * NOT: String değerleri ARTIK HTML-entity ile encode ETMİYORUZ — bu, saklanan
+ * metni bozuyordu (ör. "Çay & Kahve" → "Çay &amp; Kahve"). Girdi doğrulaması
+ * Joi ile yapılır; çıktı encode'u (XSS) sunum katmanının sorumluluğundadır.
+ * Burada yalnızca NoSQL-injection için $ ile başlayan object key'leri elenir.
  */
-const sanitizeValue = (value: any, key?: string): any => {
-    // Numeric field'ları (price, lat, lon, vs.) ve URL'leri sanitize'dan muaf tut
-    const numericFields = ['price', 'lat', 'lon', 'confidence_score', 'quantity', 'budget'];
-    const urlFields = ['image_url', 'logo_url', 'url', 'product_url'];
-    // Text field'ları (ürün adı, marka, vs.) sanitize'dan muaf tut - database güvenli
-    const textFields = ['name', 'brand', 'sku', 'store_sku', 'unit', 'email', 'address', 'slug', 'muadil_grup_id'];
-    
-    if (key && (numericFields.includes(key) || urlFields.includes(key) || textFields.includes(key))) {
-        return value; // Bu field'ları olduğu gibi döndür
-    }
-    
+const sanitizeValue = (value: any): any => {
     if (typeof value === 'string') {
-        // XSS koruması: SADECE gerçekten tehlikeli karakterleri encode et
-        // ' (apostrophe) ve / (slash) normal karakterler, encode ETME
-        let sanitized = value
-            .replace(/&/g, '&amp;')    // & → &amp;
-            .replace(/</g, '&lt;')     // < → &lt;
-            .replace(/>/g, '&gt;')     // > → &gt;
-            .replace(/"/g, '&quot;')   // " → &quot;
-            .replace(/\$/g, '&#36;');  // $ → &#36; (NoSQL injection koruması)
-        
-        // ' ve / karakterlerini ENCODE ETME - bunlar normal karakterler
-        
-        return sanitized;
+        // Metni olduğu gibi koru (mutasyon yok).
+        return value;
     }
-    
+
     if (Array.isArray(value)) {
-        return value.map((item) => sanitizeValue(item, key));
+        return value.map((item) => sanitizeValue(item));
     }
-    
+
     if (value !== null && typeof value === 'object') {
         const sanitized: any = {};
         for (const objKey in value) {
-            // Object key'lerinde $ karakterini kontrol et
+            // Object key'lerinde $ karakterini kontrol et (NoSQL injection koruması)
             if (objKey.includes('$')) {
                 continue; // Tehlikeli key'leri atla
             }
-            sanitized[objKey] = sanitizeValue(value[objKey], objKey);
+            sanitized[objKey] = sanitizeValue(value[objKey]);
         }
         return sanitized;
     }
-    
+
     return value;
 };
 
@@ -72,27 +57,12 @@ const sanitizeValue = (value: any, key?: string): any => {
  * Request body, query ve params'ı sanitize eden middleware
  */
 export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
+    // Sadece $ ile başlayan tehlikeli object key'lerini eler; metin değerlerini
+    // BOZMAZ (HTML-entity encode yapılmaz). Joi validation asıl korumayı sağlar.
     if (req.body) {
         req.body = sanitizeValue(req.body);
     }
-    
-    // req.query ve req.params read-only oldukları için in-place sanitize ediyoruz
-    if (req.query) {
-        for (const key in req.query) {
-            if (Object.prototype.hasOwnProperty.call(req.query, key)) {
-                (req.query as any)[key] = sanitizeValue(req.query[key], key);
-            }
-        }
-    }
-    
-    if (req.params) {
-        for (const key in req.params) {
-            if (Object.prototype.hasOwnProperty.call(req.params, key)) {
-                (req.params as any)[key] = sanitizeValue(req.params[key], key);
-            }
-        }
-    }
-    
+
     next();
 };
 

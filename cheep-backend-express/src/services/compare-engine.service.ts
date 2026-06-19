@@ -1,6 +1,7 @@
 import { prisma } from '../utils/prisma.client.js';
 import * as RouteOptimizer from './route-optimizer.service.js';
 import { resolveItemStoreOptions, PricedProduct, StoreOption } from './brand-independent-pricing.js';
+import { notFound } from '../utils/app-error.js';
 
 // ============================================
 // TYPE DEFINITIONS
@@ -147,7 +148,7 @@ export async function compareShoppingList(
     });
 
     if (!list) {
-        throw new Error('Liste bulunamadı veya erişim yetkiniz yok');
+        throw notFound('Liste bulunamadı veya erişim yetkiniz yok');
     }
 
     const listItems = list.list_items as unknown as ProductInList[];

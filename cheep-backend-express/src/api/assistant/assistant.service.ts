@@ -4,6 +4,7 @@ import { toolDeclarations, buildToolExecutor } from './assistant.tools.js';
 import { runAgentLoop } from './agent-loop.js';
 import { getProfile } from '../profile/profile.service.js';
 import { checkDailyLimit, startOfTrDay } from '../../services/assistant-limit.js';
+import { AppError, notFound } from '../../utils/app-error.js';
 
 // ============================================
 // OWNER GUARD
@@ -11,7 +12,7 @@ import { checkDailyLimit, startOfTrDay } from '../../services/assistant-limit.js
 
 const assertOwner = async (threadId: number, userId: number) => {
   const t = await prisma.chatThread.findFirst({ where: { id: threadId, user_id: userId } });
-  if (!t) throw Object.assign(new Error('Sohbet bulunamadı'), { status: 404 });
+  if (!t) throw notFound('Sohbet bulunamadı');
   return t;
 };
 
@@ -83,7 +84,7 @@ export const sendMessage = async (userId: number, threadId: number, content: str
   ]);
   const verdict = checkDailyLimit(todayCount, limitUser?.is_premium ?? false);
   if (!verdict.allowed) {
-    throw Object.assign(new Error('Günlük mesaj limitin doldu.'), { status: 429, code: 'DAILY_LIMIT' });
+    throw new AppError('Günlük mesaj limitin doldu.', 429, 'DAILY_LIMIT');
   }
 
   const session = createChatSession({

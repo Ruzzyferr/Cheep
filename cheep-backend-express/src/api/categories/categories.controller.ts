@@ -1,6 +1,7 @@
 import { type Request, type Response, type NextFunction } from 'express';
 import * as CategoryService from './categories.service.js';
 import { categoryMatcher } from './category-matcher.service.js';
+import logger from '../../utils/logger.js';
 
 /**
  * Tüm kategorileri getir (düz liste)
@@ -130,8 +131,8 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
         // (Bu durumda scraper'dan geliyordur)
         if (!slug && (parent_id === null || parent_id === undefined)) {
             const productName = req.body.product_name; // Opsiyonel: Ürün adı (daha iyi eşleştirme için)
-            console.log(`🔍 Category Matcher: Finding or creating "${name}"${productName ? ` (product: "${productName}")` : ''}`);
-            
+            logger.debug(`[Categories] Matcher: "${name}"${productName ? ` (product: "${productName}")` : ''}`);
+
             try {
                 const categoryId = await categoryMatcher.findOrCreateCategory(name, productName);
                 const category = await CategoryService.getCategoryById(categoryId);
@@ -142,7 +143,7 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
                     message: 'Kategori eşleştirildi veya oluşturuldu (smart matching)',
                 });
             } catch (matchError: any) {
-                console.error(`❌ Category Matcher error for "${name}":`, matchError);
+                logger.error(`[Categories] Matcher error for "${name}": ${matchError?.message}`);
                 return res.status(500).json({
                     success: false,
                     message: 'Kategori eşleştirme hatası',

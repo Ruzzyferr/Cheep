@@ -1,7 +1,30 @@
 import { prisma } from '../../utils/prisma.client.js';
+import { notFound, forbidden } from '../../utils/app-error.js';
+
+const feedbackInclude = {
+    user: {
+        select: {
+            id: true,
+            name: true,
+            email: true,
+        },
+    },
+    store_price: {
+        include: {
+            product: true,
+            store: true,
+        },
+    },
+} as const;
 
 /**
- * Kullanıcının bir fiyat için verdiği geri bildirimi oluşturur
+ * Kullanıcının bir fiyat için verdiği geri bildirimi oluşturur (veya günceller).
+ *
+ * NOT: Eşzamanlı çift istek yarışını önlemek için (user_id, store_price_id) çifti
+ * üzerinde bir unique constraint gerekir. Migration eklendi:
+ * prisma/migrations/.../migration.sql — DB'ye uygulanınca aşağıdaki upsert
+ * gerçekten atomik (race-free) olur. Constraint henüz uygulanmadıysa transaction
+ * yine de okuma-yazma penceresini daraltır.
  */
 export const createPriceFeedback = async (data: {
     user_id: number;
@@ -10,59 +33,40 @@ export const createPriceFeedback = async (data: {
     suggested_price?: number | null;
     comment?: string | null;
 }) => {
-    // Aynı kullanıcı ve store_price için birden fazla feedback olmamalı
-    const existing = await prisma.priceFeedback.findFirst({
-        where: {
-            user_id: data.user_id,
-            store_price_id: data.store_price_id,
-        },
+    // store_price gerçekten var mı? (yoksa 404 — FK hatası 500'e düşmesin)
+    const storePrice = await prisma.storePrice.findUnique({
+        where: { id: data.store_price_id },
+        select: { id: true },
     });
-
-    if (existing) {
-        // Varsa güncelle
-        return await prisma.priceFeedback.update({
-            where: { id: existing.id },
-            data: {
-                is_accurate: data.is_accurate,
-                suggested_price: data.suggested_price,
-                comment: data.comment,
-            },
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                    },
-                },
-                store_price: {
-                    include: {
-                        product: true,
-                        store: true,
-                    },
-                },
-            },
-        });
+    if (!storePrice) {
+        throw notFound('Fiyat kaydı bulunamadı');
     }
 
-    // Yoksa oluştur
-    return await prisma.priceFeedback.create({
-        data,
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                },
+    // Tek transaction: var olanı güncelle, yoksa oluştur (yarış penceresini daraltır).
+    return await prisma.$transaction(async (tx) => {
+        const existing = await tx.priceFeedback.findFirst({
+            where: {
+                user_id: data.user_id,
+                store_price_id: data.store_price_id,
             },
-            store_price: {
-                include: {
-                    product: true,
-                    store: true,
+        });
+
+        if (existing) {
+            return await tx.priceFeedback.update({
+                where: { id: existing.id },
+                data: {
+                    is_accurate: data.is_accurate,
+                    suggested_price: data.suggested_price,
+                    comment: data.comment,
                 },
-            },
-        },
+                include: feedbackInclude,
+            });
+        }
+
+        return await tx.priceFeedback.create({
+            data,
+            include: feedbackInclude,
+        });
     });
 };
 
@@ -111,11 +115,11 @@ export const deleteFeedback = async (feedbackId: number, userId: number) => {
     });
 
     if (!feedback) {
-        throw new Error('Feedback bulunamadı');
+        throw notFound('Feedback bulunamadı');
     }
 
     if (feedback.user_id !== userId) {
-        throw new Error('Bu feedback size ait değil');
+        throw forbidden('Bu feedback size ait değil');
     }
 
     await prisma.priceFeedback.delete({

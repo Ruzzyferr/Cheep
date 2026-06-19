@@ -3,6 +3,7 @@ import * as FeedbackController from './feedback.controller.js';
 import { validate } from '../../schema/validation.middleware.js';
 import { createPriceFeedbackSchema } from './feedback.schema.js';
 import { authenticate } from '../../middleware/auth.middleware.js';
+import { validateIdParam } from '../../middleware/validate-id.middleware.js';
 import { feedbackLimiter } from '../../middleware/rate-limit.middleware.js';
 
 const router = Router();
@@ -84,7 +85,7 @@ router.get('/my', authenticate, FeedbackController.getUserFeedbacks);
  *       200:
  *         description: Feedback'ler başarıyla alındı
  */
-router.get('/price/:storePriceId', FeedbackController.getPriceFeedbacks);
+router.get('/price/:storePriceId', validateIdParam('storePriceId'), FeedbackController.getPriceFeedbacks);
 
 /**
  * @swagger
@@ -102,7 +103,7 @@ router.get('/price/:storePriceId', FeedbackController.getPriceFeedbacks);
  *       200:
  *         description: İstatistikler başarıyla alındı
  */
-router.get('/price/:storePriceId/stats', FeedbackController.getPriceAccuracyStats);
+router.get('/price/:storePriceId/stats', validateIdParam('storePriceId'), FeedbackController.getPriceAccuracyStats);
 
 /**
  * @swagger
@@ -126,7 +127,7 @@ router.get('/price/:storePriceId/stats', FeedbackController.getPriceAccuracyStat
  *       404:
  *         description: Feedback bulunamadı
  */
-router.delete('/:feedbackId', authenticate, FeedbackController.deleteFeedback);
+router.delete('/:feedbackId', authenticate, validateIdParam('feedbackId'), FeedbackController.deleteFeedback);
 
 export default router;
 

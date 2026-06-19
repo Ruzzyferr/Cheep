@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as UserController from './users.controller.js';
 import { authenticate } from '../../middleware/auth.middleware.js';
+import { validateIdParam } from '../../middleware/validate-id.middleware.js';
 
 const router = Router();
 
@@ -145,7 +146,7 @@ router.get('/me/favorite-stores', authenticate, UserController.getFavoriteStores
  *       404:
  *         description: Market bulunamadı
  */
-router.post('/me/favorite-stores/:storeId', authenticate, UserController.addFavoriteStore);
+router.post('/me/favorite-stores/:storeId', authenticate, validateIdParam('storeId'), UserController.addFavoriteStore);
 
 /**
  * @swagger
@@ -169,7 +170,7 @@ router.post('/me/favorite-stores/:storeId', authenticate, UserController.addFavo
  *       401:
  *         description: Yetkisiz erişim
  */
-router.delete('/me/favorite-stores/:storeId', authenticate, UserController.removeFavoriteStore);
+router.delete('/me/favorite-stores/:storeId', authenticate, validateIdParam('storeId'), UserController.removeFavoriteStore);
 
 export default router;
 

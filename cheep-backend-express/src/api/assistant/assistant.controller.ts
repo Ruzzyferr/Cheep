@@ -65,7 +65,7 @@ export const get = async (req: Request, res: Response) => {
       data: thread,
     });
   } catch (e: any) {
-    res.status(e.status ?? 500).json({ success: false, message: e.message });
+    res.status(e.statusCode ?? e.status ?? 500).json({ success: false, message: e.message });
   }
 };
 
@@ -83,7 +83,7 @@ export const remove = async (req: Request, res: Response) => {
 
     res.status(200).json(result);
   } catch (e: any) {
-    res.status(e.status ?? 500).json({ success: false, message: e.message });
+    res.status(e.statusCode ?? e.status ?? 500).json({ success: false, message: e.message });
   }
 };
 
@@ -116,13 +116,13 @@ export const message = async (req: Request, res: Response) => {
       });
       return;
     }
-    if (e.status === 404) {
+    if ((e.statusCode ?? e.status) === 404) {
       res.status(404).json({ success: false, message: e.message });
       return;
     }
     const isQuota =
       /429|quota|too many requests/i.test(e.message ?? '') ||
-      e.status === 429;
+      (e.statusCode ?? e.status) === 429;
     if (isQuota) {
       res.status(503).json({
         success: false,
