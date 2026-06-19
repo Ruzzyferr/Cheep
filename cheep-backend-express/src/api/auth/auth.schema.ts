@@ -25,3 +25,14 @@ export const loginSchema = Joi.object({
         'any.required': 'Şifre zorunludur',
     }),
 });
+
+export const changePasswordSchema = Joi.object({
+    currentPassword: Joi.string().required().messages({
+        'any.required': 'Mevcut şifre zorunludur',
+    }),
+    newPassword: Joi.string().min(6).max(50).required().messages({
+        'string.min': 'Yeni şifre en az 6 karakter olmalıdır',
+        'string.max': 'Yeni şifre en fazla 50 karakter olmalıdır',
+        'any.required': 'Yeni şifre zorunludur',
+    }),
+});

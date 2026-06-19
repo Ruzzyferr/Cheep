@@ -45,3 +45,33 @@ export const refresh = async (req: Request, res: Response, next: NextFunction) =
         res.status(401).json({ success: false, message: (error as Error).message });
     }
 };
+
+/**
+ * Çıkış: kullanıcının tüm refresh token'larını geçersiz kılar (token_version bump).
+ */
+export const logout = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await AuthService.logoutUser(req.user!.id);
+        res.status(200).json({ success: true, message: 'Çıkış yapıldı.' });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Parola değiştirme: mevcut parolayı doğrular, yenisini yazar, eski oturumları sonlandırır.
+ * Çağırana taze access/refresh çifti döner.
+ */
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const tokens = await AuthService.changePassword(
+            req.user!.id,
+            currentPassword,
+            newPassword
+        );
+        res.status(200).json({ success: true, ...tokens });
+    } catch (error) {
+        next(error);
+    }
+};

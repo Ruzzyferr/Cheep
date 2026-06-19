@@ -1,6 +1,6 @@
 import express, { type Application, type Request, type Response } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import apiRouter from './api/index.js';
@@ -10,15 +10,24 @@ import logger from "./utils/logger.js";
 import { config } from './config/index.js';
 import { prisma } from './utils/prisma.client.js';
 
-dotenv.config();
+// dotenv config'i './config' içinde bir kez yapılır; burada tekrar etmeye gerek yok.
 
 const app: Application = express();
-const PORT = process.env.PORT || 3000;
+const PORT = config.port;
 
 const stream: morgan.StreamOptions = {
     write: (message) => logger.http(message.trim()),
 };
 app.use(morgan('dev', { stream }));
+
+// Güvenlik header'ları (HSTS, X-Frame-Options, X-Content-Type-Options, vb.)
+// Swagger UI'ın çalışabilmesi için CSP'yi yalnızca production'da uygula.
+app.use(
+    helmet({
+        contentSecurityPolicy: config.isProduction ? undefined : false,
+        crossOriginEmbedderPolicy: false,
+    })
+);
 
 // Middleware
 // CORS: ALLOWED_ORIGINS tanımlıysa allowlist uygula, değilse (dev) origin'i yansıt.
@@ -221,5 +230,7 @@ process.on('unhandledRejection', (reason) => {
     logger.error('Unhandled Rejection:', reason);
 });
 process.on('uncaughtException', (err) => {
+    // Yakalanmamış istisnada process tutarsız durumda olabilir → logla ve çık.
     logger.error('Uncaught Exception:', err);
+    process.exit(1);
 });

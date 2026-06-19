@@ -2,7 +2,8 @@ import { Router } from 'express';
 import * as AuthController from './auth.controller.js'; // <-- .js uzantısı
 import { authLimiter } from '../../middleware/rate-limit.middleware.js';
 import { validate } from '../../schema/validation.middleware.js';
-import { registerSchema, loginSchema } from './auth.schema.js';
+import { authenticate } from '../../middleware/auth.middleware.js';
+import { registerSchema, loginSchema, changePasswordSchema } from './auth.schema.js';
 
 const router = Router();
 
@@ -80,5 +81,53 @@ router.post('/login', authLimiter, validate(loginSchema), AuthController.login);
  *         description: Geçersiz/süresi dolmuş refresh token
  */
 router.post('/refresh', AuthController.refresh);
+
+/**
+ * @swagger
+ * /api/v1/auth/logout:
+ *   post:
+ *     summary: Çıkış yapar ve tüm refresh token'ları geçersiz kılar
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Çıkış yapıldı
+ *       401:
+ *         description: Yetkisiz erişim
+ */
+router.post('/logout', authenticate, AuthController.logout);
+
+/**
+ * @swagger
+ * /api/v1/auth/change-password:
+ *   post:
+ *     summary: Parola değiştirir; eski oturumları sonlandırır ve yeni token çifti döner
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [currentPassword, newPassword]
+ *             properties:
+ *               currentPassword: { type: string, format: password }
+ *               newPassword: { type: string, format: password, minLength: 6 }
+ *     responses:
+ *       200:
+ *         description: Parola değiştirildi; yeni token ve refreshToken
+ *       401:
+ *         description: Mevcut şifre hatalı veya yetkisiz
+ */
+router.post(
+    '/change-password',
+    authenticate,
+    authLimiter,
+    validate(changePasswordSchema),
+    AuthController.changePassword
+);
 
 export default router;

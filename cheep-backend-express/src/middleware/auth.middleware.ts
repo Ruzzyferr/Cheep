@@ -2,10 +2,12 @@ import { type Request, type Response, type NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/index.js';
 import { prisma } from '../utils/prisma.client.js';
+import logger from '../utils/logger.js';
 
 // JWT payload tipini genişlet
 interface JwtPayload {
     userId: number;
+    type?: string; // 'access' | 'refresh' — refresh token bearer olarak kullanılamaz
 }
 
 /**
@@ -68,6 +70,15 @@ export const authenticate = async (
             throw err;
         }
 
+        // 3b. Refresh token bearer olarak kullanılamaz — sadece access token kabul.
+        if (decoded.type === 'refresh') {
+            res.status(401).json({
+                success: false,
+                message: 'Geçersiz token.',
+            });
+            return;
+        }
+
         // 4. User'ı database'den çek
         const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
@@ -94,7 +105,7 @@ export const authenticate = async (
         // 6. Bir sonraki middleware'e geç
         next();
     } catch (error) {
-        console.error('Auth Middleware Error:', error);
+        logger.error('Auth Middleware Error:', error);
         res.status(500).json({
             success: false,
             message: 'Kimlik doğrulama sırasında bir hata oluştu.',
@@ -135,6 +146,12 @@ export const optionalAuthenticate = async (
         try {
             const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
 
+            // Refresh token bearer olarak kullanılamaz (access token değilse atla).
+            if (decoded.type === 'refresh') {
+                next();
+                return;
+            }
+
             const user = await prisma.user.findUnique({
                 where: { id: decoded.userId },
                 select: {
@@ -151,12 +168,12 @@ export const optionalAuthenticate = async (
             }
         } catch (err) {
             // Token geçersiz ama optional olduğu için hata vermeden devam et
-            console.warn('Optional auth failed:', err);
+            logger.warn('Optional auth failed:', err);
         }
 
         next();
     } catch (error) {
-        console.error('Optional Auth Middleware Error:', error);
+        logger.error('Optional Auth Middleware Error:', error);
         next();
     }
 };

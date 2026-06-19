@@ -23,6 +23,7 @@ model User {
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
   is_premium    Boolean  @default(false)
+  token_version Int      @default(0) // refresh token iptali: logout/parola değişiminde +1
 
   // İlişkiler
   country         Country?            @relation(fields: [country_id], references: [id], onDelete: SetNull)
@@ -265,6 +266,7 @@ model PriceFeedback {
   user        User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
   store_price StorePrice @relation(fields: [store_price_id], references: [id], onDelete: Cascade)
 
+  @@unique([user_id, store_price_id]) // Aynı kullanıcı bir fiyata yalnızca bir feedback verir
   @@index([user_id])
   @@index([store_price_id])
   @@index([created_at])
