@@ -4,11 +4,13 @@ Express 5 + TypeScript (ESM) + Prisma + PostgreSQL ile geliştirilmiş RESTful A
 
 ## 📋 Modüller
 
-- **Auth** — JWT **access (1s) + refresh (30g)** token; `/auth/refresh` ile sessiz yenileme
-- **Products** — CRUD, arama, fiyat karşılaştırma, fuzzy matching, **fiyat geçmişi** (`/:id/history`)
-- **Stores / Categories / Lists** — yönetim, hiyerarşik kategoriler, şablonlar, istatistikler
+- **Auth** — JWT **access (1s) + refresh (30g)** token; `/auth/refresh` ile sessiz yenileme; **rotasyon + iptal** (`logout` / `change-password` ile `token_version` bump), access'ten **ayrı refresh secret**
+- **Products** — CRUD, arama, fiyat karşılaştırma, fuzzy matching, **fiyat geçmişi** (`/:id/history`); opsiyonel auth ile profile-bazlı kısıt rozetleri
+- **Stores / Categories / Lists** — yönetim, hiyerarşik kategoriler, şablonlar, istatistikler; liste öğelerinde **marka-bağımsız** (muadil-grup en ucuz) bayrağı
 - **Store Prices** — fiyat upsert, toplu import, **LLM import** (API-key korumalı ingestion)
-- **Compare Engine** — 7-faktör skorlama, TSP rota optimizasyonu (sınırlı kombinatorik)
+- **Compare Engine** — 7-faktör skorlama, TSP rota optimizasyonu (sınırlı kombinatorik); marka-bağımsız öğeler için aynı-gramaj muadil ikamesi
+- **Profile** — kullanıcı profili (hane, diyet, alerjen, haftalık bütçe); saf kategori-sezgili kısıt değerlendirici (`GET/PUT /profile`)
+- **Assistant** — Gemini tool-calling agent (thread CRUD + mesaj); kullanıcıya scope'lu araçlar, **günlük mesaj limiti** (free 5/gün, premium yüksek tavan, TR-günü reset)
 - **Feedback** — kullanıcı fiyat doğruluk geri bildirimleri (is_accurate / suggested_price)
 - **Country multi-tenancy** — ülke-bazlı ürün/mağaza scoping (`x-country` header)
 - **Kafka consumers** — normalizer / matcher / persister / ingest (bkz. kök `docker-compose.kafka.yml`)
@@ -20,7 +22,7 @@ Express 5 + TypeScript (ESM) + Prisma + PostgreSQL ile geliştirilmiş RESTful A
 pnpm install
 
 # 2. Ortam değişkenleri
-cp .env.example .env   # DATABASE_URL, JWT_SECRET (≥32), ALLOWED_ORIGINS, INGEST_API_KEY, LLM anahtarları
+cp .env.example .env   # DATABASE_URL, JWT_SECRET + JWT_REFRESH_SECRET (≥32, farklı), ALLOWED_ORIGINS, INGEST_API_KEY, GEMINI_API_KEY, LLM anahtarları
 
 # 3. Migration'lar (feedback boolean modeli + price_history + country dahil) ve client
 pnpm db:migrate:deploy
@@ -33,16 +35,20 @@ pnpm db:seed
 pnpm dev               # http://localhost:3000
 ```
 
-> ⚠️ Bu sürüm 3 yeni migration getirir: `feedback_boolean_model`, `add_price_history`, `add_country`. Mevcut bir DB'de mutlaka `pnpm db:migrate:deploy` çalıştırın (country_id mevcut veriye `TR` olarak backfill edilir).
+> ⚠️ Mevcut bir DB'de mutlaka `pnpm db:migrate:deploy` çalıştırın. Yeni migration'lar arasında: `feedback_boolean_model`, `add_price_history`, `add_country` (country_id mevcut veriye `TR` backfill), `add_brand_independent`, `add_user_profile`, `add_chat_threads`, `add_user_is_premium`, `add_price_feedback_unique`, `add_user_token_version`.
 
 ## 🔑 Öne Çıkan Endpoint'ler
 
 ```
 POST /api/v1/auth/register | login | refresh
+POST /api/v1/auth/logout            # tüm refresh token'ları iptal eder (token_version++)
+POST /api/v1/auth/change-password   # mevcut parolayı doğrular, oturumları sonlandırır, yeni çift döner
 GET  /api/v1/products            (x-country ile ülkeye göre filtrelenir)
 GET  /api/v1/products/:id/history?days=90     # fiyat geçmişi (zaman serisi)
 GET  /api/v1/products/:id/compare
 GET  /api/v1/stores              (x-country ile filtrelenir)
+GET  | PUT /api/v1/profile        # kullanıcı profili (diyet/alerjen/bütçe)
+POST /api/v1/assistant/threads | GET threads | POST threads/:id/messages   # AI asistan (auth + günlük limit)
 POST /api/v1/store-prices/upsert | bulk-upsert | import-with-llm   # x-api-key (INGEST_API_KEY) gerekir
 POST /api/v1/lists/:id/compare   # rota optimizasyonu (sahibe özel)
 POST /api/v1/feedback
@@ -53,13 +59,18 @@ Tam dokümantasyon: **Swagger UI** → `http://localhost:3000/api-docs`
 ## 🔐 Güvenlik
 
 - **Auth:** access + refresh token; tüm korumalı route'larda `authenticate`; sahiplik (IDOR) kontrolleri
+- **Refresh rotasyonu + iptal:** kullanıcı başına `token_version`; `logout`/`change-password` ile +1 → dağıtılmış tüm refresh token'lar anında geçersiz. Refresh token'lar **access'ten ayrı secret** (`JWT_REFRESH_SECRET`) ile imzalanır; `type` claim izolasyonu refresh'in bearer access olarak kullanılmasını engeller
+- **Helmet** güvenlik header'ları (HSTS, X-Content-Type-Options, X-Frame-Options)
+- **Validation:** Joi + `stripUnknown` → mass-assignment güvenli (`user_id`/`is_premium`/`password_hash` enjekte edilemez)
+- **AI asistan:** her tool kimliği doğrulanmış `userId`'ye scope'lu (model başka kullanıcıya erişemez); batch ≤50/tur; provider hataları client'a sızdırılmadan sanitize edilir; **günlük mesaj limiti** Gemini çağrısından önce uygulanır
 - **Ingestion:** ürün/fiyat yazma endpoint'leri `x-api-key` (`INGEST_API_KEY`) ile korunur — scraper bunu gönderir
-- **CORS:** `ALLOWED_ORIGINS` allowlist; **rate limiting** her ortamda aktif
+- **Raw SQL:** yalnızca parametreli `Prisma.sql`/`Prisma.join` (string concat yok); CORS `ALLOWED_ORIGINS` allowlist; **rate limiting** her ortamda aktif
 - Hata yanıtlarında stack/detay sızdırılmaz; graceful shutdown (SIGTERM/SIGINT)
+- Çok-ajanlı güvenlik denetiminden geçti (istismar edilebilir auth-bypass / IDOR / injection bulgusu yok)
 
 ## 🗄️ Veritabanı (Prisma)
 
-Ana tablolar: `countries`, `users`, `stores` (lat/lon/city/country_id), `categories` (hiyerarşik), `products` (country_id, muadil_grup_id), `store_prices`, `price_history`, `lists`, `list_items`, `price_feedbacks`, `user_favorite_stores`.
+Ana tablolar: `countries`, `users` (is_premium, token_version), `user_profiles` (diyet/alerjen/bütçe), `stores` (lat/lon/city/country_id), `categories` (hiyerarşik), `products` (country_id, muadil_grup_id), `store_prices`, `price_history`, `lists`, `list_items` (brand_independent), `price_feedbacks`, `user_favorite_stores`, `chat_threads`, `chat_messages`.
 
 ```
 Country → Store / Product (1:N)     Store/Product → PriceHistory (1:N)
@@ -98,10 +109,14 @@ PORT=3000
 NODE_ENV=development
 DATABASE_URL="postgresql://user:pass@localhost:5432/cheep?schema=public"
 JWT_SECRET="en-az-32-karakterlik-gizli-deger"
+JWT_REFRESH_SECRET="en-az-32-karakterlik-FARKLI-refresh-degeri"   # access secret'tan farklı olmalı
 ALLOWED_ORIGINS="http://localhost:8081,https://app.cheep.com"
 INGEST_API_KEY="scraper-icin-paylasilan-anahtar"
 DEFAULT_COUNTRY_CODE=TR
-# LLM (opsiyonel)
+# AI Asistan (Gemini)
+GEMINI_API_KEY="..."
+GEMINI_MODEL=gemini-2.0-flash
+# LLM (opsiyonel - ürün eşleştirme/import)
 USE_OPENROUTER=false
 OPENAI_API_KEY="sk-..."
 OPENROUTER_API_KEY="sk-or-..."
@@ -126,13 +141,14 @@ pnpm consume:ingest | consume:normalizer | consume:matcher | consume:persister
 
 ```
 src/
-├── api/            # auth, products, stores, categories, lists, users, store-prices, feedback
+├── api/            # auth, products, stores, categories, lists, users, store-prices, feedback, profile, assistant
 ├── consumers/      # ingest, normalizer, matcher, persister (Kafka)
 ├── kafka/          # client, producer, consumer, schema-registry, avro/
-├── config/         # config (env doğrulama: JWT, ingest key, CORS)
-├── middleware/     # auth, ingest-auth, country, rate-limit, error, sanitize
-├── services/       # compare-engine, route-optimizer, llm-product-matcher, ingest
-├── utils/          # prisma, logger, similarity, country
+├── config/         # config (env doğrulama: JWT + refresh secret, ingest key, CORS)
+├── middleware/     # auth, ingest-auth, country, rate-limit, error, sanitize, validate-id
+├── services/       # compare-engine, route-optimizer, llm-product-matcher, ingest,
+│                   #   refresh-token, assistant-limit, brand-independent-pricing, product-constraints, gemini.client
+├── utils/          # prisma, logger, similarity, country, app-error
 └── types/
 prisma/             # schema.prisma, migrations/, seed.ts
 ```
