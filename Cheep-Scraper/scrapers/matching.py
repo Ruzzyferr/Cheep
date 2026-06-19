@@ -136,8 +136,15 @@ def brand_key(product) -> str:
     """Normalized brand for matching. Two products are the SAME purchasable item
     only if they share a brand — a shopper choosing "Bahçıvan" must never be shown
     "Tarabya" as the same product. Prefer the scraped brand field; fall back to the
-    first significant name token (which is conventionally the brand in TR market
-    names: "Bahçıvan Mozzarella …" -> bahcivan)."""
+    first significant name token (conventionally the brand in TR market names:
+    "Bahçıvan Mozzarella …" -> bahcivan).
+
+    The fallback is essential for cross-market matching: not every scraper populates
+    the `brand` field (e.g. ŞOK leaves it empty), so deriving the brand from the name
+    is what lets the SAME item from a brand-less market still bucket with a market
+    that did record the brand. Different produce GRADES are not merged by this — the
+    bucket additionally requires identical significant name tokens, so "Kırmızı Elma"
+    and "Yeşil Elma" stay apart even though both fall back to the "elma" brand key."""
     b = _norm(getattr(product, "brand", "") or "")
     if b:
         # keep only the first 1-2 brand tokens (drop sub-brand noise)

@@ -90,15 +90,35 @@ class RawProductProducer:
         self._topic = RAW_PRODUCTS_TOPIC
 
     def produce_payloads(self, payloads: List[Dict], country_code: str) -> int:
-        """API payload listesini raw event olarak üretir. Üretilen kayıt sayısını döner."""
-        count = 0
+        """API payload listesini raw event olarak üretir. ONAYLANMIŞ teslim sayısını
+        döner (broker tarafından kabul edilen). Teslim hataları on_delivery
+        callback'iyle yüzeye çıkarılır ve sayıma DAHİL EDİLMEZ."""
+        delivered = 0
+        failed = 0
+
+        def _on_delivery(err, msg):
+            nonlocal delivered, failed
+            if err is not None:
+                failed += 1
+                logger.error("❌ Kafka teslim hatası: %s", err)
+            else:
+                delivered += 1
+
+        produced = 0
         for payload in payloads:
             event = _payload_to_event(payload, country_code)
-            self._producer.produce(topic=self._topic, key=country_code, value=event)
-            count += 1
-            # Periyodik flush ile bellek kontrolü
-            if count % 500 == 0:
+            self._producer.produce(
+                topic=self._topic, key=country_code, value=event,
+                on_delivery=_on_delivery,
+            )
+            produced += 1
+            # Periyodik poll ile delivery callback'lerini tetikle / bellek kontrolü
+            if produced % 500 == 0:
                 self._producer.poll(0)
         self._producer.flush()
-        logger.info("✅ %d ham ürün '%s' topic'ine üretildi (country=%s)", count, self._topic, country_code)
-        return count
+        if failed:
+            logger.warning("⚠️ %d/%d ürün teslim EDİLEMEDİ (country=%s)",
+                           failed, produced, country_code)
+        logger.info("✅ %d/%d ham ürün '%s' topic'ine teslim edildi (country=%s)",
+                    delivered, produced, self._topic, country_code)
+        return delivered

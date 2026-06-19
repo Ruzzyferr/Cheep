@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from scrapers.base_scraper import Product  # noqa: E402
-from scrapers.matching import fingerprint, group_products  # noqa: E402
+from scrapers.matching import fingerprint, group_products, brand_key  # noqa: E402
 
 
 def P(name, store, qty, unit, price=10):
@@ -195,6 +195,45 @@ def test_product_subtype_words_block_merge():
     erkek = P("Nivea Fresh Active Erkek Deo Sprey 75 ml", "A101", 75.0, "ml")
     kadin = P("Nivea Deodorant Fresh Active Kadın 75 ml", "ŞOK", 75.0, "ml")
     assert kadin not in _group_of(group_products([erkek, kadin]), erkek)
+
+
+# --- brand key derivation for produce / unbranded (finding #2) --------------
+def test_scraped_brand_still_wins():
+    p = P("Mozzarella Peyniri 200 G", "Migros", 200.0, "g")
+    p.brand = "Bahçıvan"
+    assert brand_key(p) == "bahcivan"
+
+
+def test_unbranded_falls_back_to_first_name_token():
+    # No scraped brand -> the first significant name token (conventionally the brand
+    # in TR market names) is used, so a brand-less market still buckets with markets
+    # that DID record the brand.
+    p = P("Pınar Süt 1 L", "ŞOK", 1.0, "l")  # ŞOK leaves .brand empty
+    assert brand_key(p) == "pinar"
+
+
+def test_brandless_market_still_matches_branded_market():
+    # REGRESSION GUARD: ŞOK does not populate `brand`, but the same item from Migros
+    # does. They must still group together (this is the core cross-market purpose).
+    sok = P("Pınar Süt 1 L", "ŞOK", 1.0, "l")          # .brand == None
+    migros = P("Pınar Süt 1 L", "Migros", 1.0, "l")
+    migros.brand = "Pınar"
+    assert sok in _group_of(group_products([sok, migros]), migros)
+
+
+def test_different_grade_produce_stays_separate():
+    # Both fall back to the "elma" brand key, but different significant tokens
+    # (kirmizi vs yesil) keep them apart under strict token-equality — no false merge.
+    red = P("Kırmızı Elma", "Migros", 1.0, "kg")
+    green = P("Yeşil Elma", "ŞOK", 1.0, "kg")
+    groups = group_products([red, green])
+    assert green not in _group_of(groups, red)
+
+
+def test_same_unbranded_produce_across_markets_still_merges():
+    a = P("Yeşil Elma", "Migros", 1.0, "kg")
+    b = P("Yeşil Elma", "ŞOK", 1.0, "kg")
+    assert b in _group_of(group_products([a, b]), a)
 
 
 def test_counted_dimension_separates_products():

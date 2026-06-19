@@ -134,34 +134,39 @@ class A101Scraper:
                 args=["--disable-blink-features=AutomationControlled"])
             page = ctx.pages[0] if ctx.pages else ctx.new_page()
 
-            captured = {"body": None}
+            # Accumulate EVERY matching response body for the current slug — a
+            # category can paginate over several getProductsByCategory calls and
+            # keeping only the last one silently drops whole batches.
+            captured = {"bodies": []}
 
             def on_resp(r):
                 if "Store/getProductsByCategory" in r.url:
                     try:
-                        captured["body"] = r.text()
-                    except Exception:
-                        pass
+                        captured["bodies"].append(r.text())
+                    except Exception as e:  # playwright body already consumed/gone
+                        self.logger.debug(f"response body alınamadı: {e}")
             page.on("response", on_resp)
 
             cats = slugs or self._category_slugs(page)
             self.logger.info(f"🗂️  {len(cats)} kategori: {cats}")
             for slug in cats:
-                captured["body"] = None
+                captured["bodies"] = []
                 try:
                     page.goto(f"{BASE}/kapida/{slug}", wait_until="domcontentloaded", timeout=45000)
                     page.wait_for_timeout(4500)
                 except Exception as e:
                     self.logger.warning(f"⚠️ {slug}: {e}")
                     continue
-                if not captured["body"]:
-                    continue
-                try:
-                    data = json.loads(captured["body"])
-                except Exception:
+                if not captured["bodies"]:
                     continue
                 raw = []
-                self._collect_products(data, raw)
+                for body in captured["bodies"]:
+                    try:
+                        data = json.loads(body)
+                    except (ValueError, TypeError) as e:
+                        self.logger.warning(f"⚠️ {slug} JSON parse: {e}")
+                        continue
+                    self._collect_products(data, raw)
                 got = 0
                 for it in raw:
                     prod = self._parse(it, seen)

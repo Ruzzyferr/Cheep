@@ -146,40 +146,13 @@ class BaseScraper(ABC):
 
     def parse_quantity_and_unit(self, quantity_str: str) -> tuple[float, str]:
         """
-        Gramaj/miktar bilgisini parse eder
+        Gramaj/miktar bilgisini parse eder. Tutarlılık için tek kaynak olan
+        scrapers.units'a delege eder (kendi zayıf parser'ını tekrar etmez).
         Örnek: "5 kg" -> (5.0, "kg")
         Örnek: "2x200 g" -> (400.0, "g")
         """
-        import re
-
-        quantity_str = quantity_str.strip().lower()
-
-        # Çoklu paket durumu: 2x200 g -> 400 g
-        multi_pattern = r'(\d+)\s*x\s*(\d+)\s*([a-z]+)'
-        match = re.search(multi_pattern, quantity_str)
-        if match:
-            count = float(match.group(1))
-            amount = float(match.group(2))
-            unit = match.group(3)
-            return (count * amount, unit)
-
-        # Normal format: 5 kg
-        normal_pattern = r'(\d+(?:[.,]\d+)?)\s*([a-z]+)'
-        match = re.search(normal_pattern, quantity_str)
-        if match:
-            quantity = float(match.group(1).replace(',', '.'))
-            unit = match.group(2)
-            return (quantity, unit)
-
-        # Sadece sayı varsa: "5" -> (5.0, "adet")
-        number_pattern = r'(\d+(?:[.,]\d+)?)'
-        match = re.search(number_pattern, quantity_str)
-        if match:
-            quantity = float(match.group(1).replace(',', '.'))
-            return (quantity, "adet")
-
-        self.logger.warning(f"Could not parse quantity: {quantity_str}")
-        return (1.0, "adet")
+        from scrapers.units import parse_quantity_and_unit as _pqu
+        return _pqu(quantity_str)
 
     def normalize_unit(self, unit: str) -> str:
         """

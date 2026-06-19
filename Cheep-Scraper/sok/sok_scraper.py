@@ -34,7 +34,8 @@ from scrapers.units import extract_size_from_name, compute_unit_price  # noqa: E
 BASE = "https://www.sokmarket.com.tr"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
-_PRICE_RE = re.compile(r"([\d.]+,\d+)")
+# Match TR prices with OR without decimals so integer-TL ("45 TL") isn't dropped.
+_PRICE_RE = re.compile(r"([\d.]+(?:,\d+)?)")
 _PID_RE = re.compile(r"-p-(\d+)")
 
 
@@ -125,7 +126,9 @@ class SokScraper:
         img_el = a.select_one("img")
         image_url = None
         if img_el:
-            image_url = img_el.get("src") or (img_el.get("srcset", "").split(" ")[0] or None)
+            # guard empty src="" so we fall back to srcset instead of storing ""
+            src = (img_el.get("src") or "").strip()
+            image_url = src or (img_el.get("srcset", "").split(" ")[0] or None)
 
         qty, unit = extract_size_from_name(name)
         unit_price, unit_price_unit = compute_unit_price(price, qty, unit)

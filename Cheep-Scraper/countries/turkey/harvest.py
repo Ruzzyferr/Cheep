@@ -34,19 +34,34 @@ def save(store_slug: str, products):
     return path
 
 
-def main():
-    log.info("=== Migros tam hasat ===")
-    mig = MigrosAPISafeScraper(max_pages_per_term=6, delay=0.6)
-    mp = mig.fetch_products()
-    save("migros", mp)
+def _harvest(label: str, slug: str, scraper):
+    """Run one scraper with isolation: a crash in one market must not abort the
+    other, and a zero-product result is surfaced (not silently swallowed)."""
+    log.info(f"=== {label} tam hasat ===")
+    try:
+        products = scraper.fetch_products()
+    except Exception as e:  # noqa: BLE001 - isolate per-market failure, but log it
+        log.error(f"❌ {label} hasadı başarısız: {e}", exc_info=True)
+        return []
+    if not products:
+        log.warning(f"⚠️  {label}: 0 ürün döndü (kaynak değişmiş veya engellenmiş olabilir)")
+    else:
+        save(slug, products)
+    return products
 
-    log.info("=== ŞOK tam hasat ===")
-    sok = SokScraper(max_pages_per_cat=60, delay=0.6)
-    sp = sok.fetch_products()
-    save("sok", sp)
+
+def main() -> int:
+    mp = _harvest("Migros", "migros", MigrosAPISafeScraper(max_pages_per_term=6, delay=0.6))
+    sp = _harvest("ŞOK", "sok", SokScraper(max_pages_per_cat=60, delay=0.6))
 
     log.info(f"=== TOPLAM: Migros={len(mp)}  ŞOK={len(sp)}  =  {len(mp)+len(sp)} ürün ===")
+    # Non-zero exit if BOTH markets yielded nothing — so a silent total failure is
+    # visible to any caller / scheduler.
+    if not mp and not sp:
+        log.error("❌ Hiçbir markettan ürün alınamadı.")
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

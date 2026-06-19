@@ -101,13 +101,22 @@ class CarrefourScraper:
                     or card.select_one(".item-price"))
         if not price_el:
             return None
-        raw_price = price_el.get("content") or price_el.get_text(strip=True)
-        pm = re.search(r"\d+[.,]?\d*", (raw_price or "").replace(".", "").replace(",", "."))
-        # robust TL parse
-        val = re.sub(r"[^\d,.]", "", raw_price or "")
-        if not val:
+        # The `content` attribute is machine-readable (dot-decimal, e.g. "12.50");
+        # the visible text is TR-formatted (e.g. "1.234,56 TL"). Parse accordingly.
+        content_price = price_el.get("content")
+        if content_price:
+            val = re.sub(r"[^\d.]", "", content_price)
+        else:
+            # Robust TR text parse: keep digits/.,, then treat ',' as the decimal
+            # separator and '.' as a thousands separator. "1.234" (no comma) is 1234,
+            # NOT 1.234; "1.234,56" is 1234.56; "12,50" is 12.50.
+            val = re.sub(r"[^\d,.]", "", price_el.get_text(strip=True))
+            if "," in val:
+                val = val.replace(".", "").replace(",", ".")
+            else:
+                val = val.replace(".", "")
+        if not val or not any(ch.isdigit() for ch in val):
             return None
-        val = val.replace(".", "").replace(",", ".") if "," in val else val
         try:
             price = Decimal(val)
         except Exception:

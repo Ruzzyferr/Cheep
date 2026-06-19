@@ -98,8 +98,8 @@ class CountryMatcherRunner:
                         for result in summary.get('results', []):
                             if result.get('market') == market['name']:
                                 return Path(result['output_file'])
-                except:
-                    pass
+                except (OSError, ValueError, KeyError) as e:
+                    logger.warning(f"⚠️  {latest_summary.name} okunamadı: {e}")
             
             return None
         

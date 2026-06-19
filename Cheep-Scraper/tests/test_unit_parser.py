@@ -82,6 +82,41 @@ def test_multipack_separators_and_pack_count():
     assert extract_size_and_pack("Süt 1 L") == (1.0, "l", 1)
 
 
+def test_large_count_volume_pack_is_not_collapsed():
+    # REGRESSION (finding #1): a large count with a VOLUME/MASS per-unit size used
+    # to suppress the count and collapse to a single unit, understating size N×.
+    # "24'lü 1 L" is 24 bottles of 1 L = 24 L, NOT a single 1 L bottle.
+    assert extract_size_from_name("24'lü 1 L") == (24.0, "l")
+    # a per-unit ml size multiplies too (6'lı handled by the small-count path)
+    assert extract_size_from_name("6'lı 500 ml") == (3000.0, "ml")
+    # large count where the size is clearly the TOTAL weight stays as-is
+    # (100 tea bags = 320 g total, not 100 × 320 g)
+    assert extract_size_from_name("Lipton 100'lü 320 g") == (320.0, "g")
+    # a large count with NO mass/volume size is still a piece count
+    assert extract_size_from_name("Selpak Tuvalet Kağıdı 32'li") == (32.0, "adet")
+
+
+def test_multipack_shapes_small_and_large_counts():
+    from scrapers.units import extract_size_and_pack
+    # small count, ml per-unit -> multiply (6 × 200 = 1200 ml)
+    assert extract_size_and_pack("6'lı 200 ml") == (1200.0, "ml", 6)
+    # small count, large bottle in a small pack MUST NOT be dropped:
+    #   "2'li 5 L" = 2 × 5 = 10 L (amount 5 > count 2, but small-count path always
+    #   multiplies, so the big bottle is preserved)
+    assert extract_size_and_pack("2'li 5 L") == (10.0, "l", 2)
+    # decimal per-unit size, small count -> multiply (6 × 1.5 = 9 L)
+    assert extract_size_and_pack("6'lı 1.5 L") == (9.0, "l", 6)
+    # boundary count (==12) is still per-unit -> multiply (12 × 1 = 12 L)
+    assert extract_size_and_pack("12'li 1 L") == (12.0, "l", 12)
+    # large count (>12) with a small per-unit volume -> multiply (24 × 1 = 24 L)
+    assert extract_size_and_pack("24'lü 1 L") == (24.0, "l", 24)
+    # large count (>12) where the size is clearly a TOTAL weight -> keep as-is
+    #   (100 tea bags weigh 320 g in total, not 100 × 320 g)
+    assert extract_size_and_pack("Lipton 100'lü 320 g") == (320.0, "g", 100)
+    # large count with a DISCRETE/piece size (no mass/volume) -> count is the qty
+    assert extract_size_and_pack("Selpak Tuvalet Kağıdı 32'li") == (32.0, "adet", 1)
+
+
 def test_size_signature_separates_packs_from_singles():
     from scrapers.matching import size_signature
     single = size_signature("Coca-Cola Zero 1,5 L", 1.5, "l")

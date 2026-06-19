@@ -426,8 +426,6 @@ class ScalableLLMProductMatcher:
         self.embedding_batch_delay = float(os.getenv("EMBEDDING_BATCH_DELAY", "1.0"))  # Embedding batch'ler arası delay
         self.adaptive_delay = True  # 429 alırsa delay'i otomatik artır
         self.current_delay = self.batch_delay  # Dinamik delay (429 sonrası artar)
-        self.adaptive_delay = True  # 429 alırsa delay'i otomatik artır
-        self.current_delay = self.batch_delay  # Dinamik delay (429 sonrası artar)
     
     # ============================================
     # 🎯 ANA ENTRY POINT
@@ -820,7 +818,9 @@ SADECE JSON döndür, başka açıklama yapma!"""
             normalized_name = normalize_text(product.normalized_name)
             # Normalize size
             size_value, size_unit = self.normalize_size(product.size)
-            size_key = f"{int(size_value)}_{size_unit}" if size_value > 0 and size_unit != "unknown" else "no_size"
+            # round (don't truncate) so fractional grams/ml don't collapse to 0
+            # (0.5 g -> "0.5_g", not "0_g")
+            size_key = f"{round(size_value, 3)}_{size_unit}" if size_value > 0 and size_unit != "unknown" else "no_size"
             
             # Exact match key
             exact_key = f"{normalized_brand}|{normalized_name}|{size_key}"
@@ -1069,8 +1069,10 @@ SADECE JSON döndür!"""
                 
         except Exception as e:
             logger.error(f"[LLM Verify] Parse hatası: {e}")
-            # Belirsizse merge et
-            return self._merge_group(cluster, verified=False)
+            # Belirsiz/parse hatası -> MERGE ETME. Bir fiyatlandırma sistemi için
+            # şüpheli durumda ayrı (distinct) bırakmak güvenlidir; yanlış birleştirme
+            # sahte fiyat farkı/"fırsat" üretir.
+            return self._convert_to_matched(cluster.items[0])
     
     def _convert_to_matched(self, product: ProductWithEmbedding) -> MatchedProduct:
         """ProductWithEmbedding -> MatchedProduct"""
@@ -1224,20 +1226,41 @@ SADECE JSON döndür!"""
         
         size_str = size_str.lower().strip()
         
-        # Birim dönüşümleri
+        # Birim dönüşümleri. NOT: eşleştirme EXACT (tam) yapılır — eskiden kullanılan
+        # `endswith` gevşek eşleşmesi "ml".endswith("l") yüzünden TÜM ml/cl değerlerini
+        # litre (×1000) sayıyordu ("1000 ml" -> 1.000.000 ml). Artık birim token'ı
+        # _UNIT_LOOKUP'ta birebir aranır.
         conversions = {
             # Hacim
             ('l', 'lt', 'litre', 'liter'): ('ml', 1000),
-            ('ml', 'mililitre'): ('ml', 1),
-            ('cl'): ('ml', 10),
-            # Ağırlık  
+            ('ml', 'mililitre', 'milliliter', 'cc'): ('ml', 1),
+            ('cl',): ('ml', 10),
+            # Ağırlık
             ('kg', 'kilogram', 'kilo'): ('g', 1000),
             ('g', 'gr', 'gram'): ('g', 1),
             ('mg', 'miligram'): ('g', 0.001),
             # Adet
             ("'lı", "'li", "'lu", "'lü", "adet", "pk", "paket"): ('adet', 1),
         }
-        
+        # Tam-eşleşme tablosu: token -> (base_unit, multiplier)
+        unit_lookup = {}
+        for units, mapping in conversions.items():
+            for u in units:
+                unit_lookup[u] = mapping
+
+        _COUNT_SUFFIXES = ("'lı", "'li", "'lu", "'lü", "lı", "li", "lu", "lü")
+
+        def _resolve(unit: str):
+            """Bir birim token'ını (base_unit, multiplier)'a çevir. Sadece TAM
+            eşleşme + adet sayım eki ('lı/'li…) tanınır; yoksa None döner."""
+            unit = unit.lower().strip()
+            if unit in unit_lookup:
+                return unit_lookup[unit]
+            # "12'li" / "12li" gibi sayım ekleri -> adet
+            if unit.endswith(_COUNT_SUFFIXES):
+                return ('adet', 1)
+            return None
+
         # 🔥 ÇOKLU PAKET FORMATI: "4 Adet x 28 gr" veya "4x28g" veya "4 x 28 gr"
         # Pattern: sayı + (adet/paket/x) + x + sayı + birim
         multi_pattern = r'(\d+(?:[.,]\d+)?)\s*(?:adet|paket|x)\s*x\s*(\d+(?:[.,]\d+)?)\s*([a-zığüşöçı]+)'
@@ -1246,19 +1269,16 @@ SADECE JSON döndür!"""
             count = float(multi_match.group(1).replace(',', '.'))
             amount = float(multi_match.group(2).replace(',', '.'))
             unit = multi_match.group(3).lower()
-            
+
             # Toplam miktarı hesapla
             total_value = count * amount
-            
-            # Birim eşleştirmesi
-            for units, (base_unit, multiplier) in conversions.items():
-                if unit in units or any(unit.endswith(u) for u in units if u not in ("'lı", "'li", "'lu", "'lü")):
-                    if unit.endswith(("'lı", "'li", "'lu", "'lü")):
-                        return (total_value, "adet")
-                    return (total_value * multiplier, base_unit)
-            
+
+            resolved = _resolve(unit)
+            if resolved:
+                base_unit, multiplier = resolved
+                return (total_value * multiplier, base_unit)
             return (total_value, unit)
-        
+
         # Tek paket formatı: "500g" veya "1 Litre"
         # Pattern: sayı (nokta/virgül destekler) + birim
         match = re.search(r'(\d+(?:[.,]\d+)?)\s*([a-zığüşöçı\']+)', size_str)
@@ -1268,28 +1288,36 @@ SADECE JSON döndür!"""
                 value = float(value_str)
             except ValueError:
                 return (0, "unknown")
-            
+
             unit = match.group(2).lower()
-            
-            # Birim eşleştirmesi
-            for units, (base_unit, multiplier) in conversions.items():
-                if unit in units or any(unit.endswith(u) for u in units if u not in ("'lı", "'li", "'lu", "'lü")):
-                    # "'lı" gibi suffix'ler için özel kontrol
-                    if unit.endswith(("'lı", "'li", "'lu", "'lü")):
-                        return (value, "adet")
-                    return (value * multiplier, base_unit)
-            
-            # Eğer eşleşme yoksa, direkt birimi kullan
-            # Ama değeri normalize et
+
+            resolved = _resolve(unit)
+            if resolved:
+                base_unit, multiplier = resolved
+                return (value * multiplier, base_unit)
+
+            # Eğer eşleşme yoksa, direkt birimi kullan (değer korunur)
             return (value, unit)
-        
-        # Sayı bulunamadı, sadece birim var mı?
-        for units, (base_unit, multiplier) in conversions.items():
-            for u in units:
-                if u in size_str:
-                    # Varsayılan olarak 1 kabul et
-                    return (1 * multiplier, base_unit)
-        
+
+        # Sayı bulunamadı. Eski hata: birimi serbest metnin İÇİNDE substring olarak
+        # arıyordu ("l boy" -> 1000 ml, çünkü 'l' "boy"un yanındaydı). Artık:
+        #   * birim ayrı bir TOKEN olmalı (substring değil), VE
+        #   * dizide birimle uyumsuz başka serbest-metin token'ı OLMAMALI.
+        # Yani "lt" tek başına -> 1 litre, ama "l boy"/"büyük boy" -> unknown
+        # (belirsiz metni 1 L sanıp sahte eşleşme üretme — konservatif).
+        tokens = re.findall(r"[a-zığüşöçı']+", size_str)
+        unit_hit = None
+        for tok in tokens:
+            resolved = _resolve(tok)
+            if resolved:
+                unit_hit = unit_hit or resolved
+            else:
+                # birim dışı serbest-metin token'ı -> bu bir gramaj değil, açıklama
+                return (0, "unknown")
+        if unit_hit:
+            base_unit, multiplier = unit_hit
+            return (1 * multiplier, base_unit)  # varsayılan 1 birim
+
         return (0, "unknown")
     
     def _generate_muadil_grup_id(
@@ -1580,28 +1608,30 @@ SADECE JSON döndür!"""
         Returns:
             True: Size'lar uyumlu (aynı veya yok)
             False: Size'lar farklı, aynı ürün olamaz
+
+        Bir fiyatlandırma sistemi için size BELİRSİZLİĞİNDE birleştirme YAPMA
+        (konservatif): eksik/bilinmeyen bir gramaj, farklı paket boyutlarını
+        sahte "fırsat" olarak gösterebilir.
         """
-        # İkisi de yoksa veya boşsa, uyumlu kabul et
+        # İkisi de yoksa: gramaj bilgisi olmayan iki ürün — birleştirmeyi BLOKE et.
         if not size1 and not size2:
-            return True
-        
-        # Biri yoksa, diğeri varsa - uyumlu kabul et (esnek davran)
+            return False
+
+        # Biri yok, diğeri var: eksik gramaj bir merge'i BLOKE etmeli (esnek değil).
         if not size1 or not size2:
-            return True
-        
+            return False
+
         # Normalize et (normalize_size fonksiyonunu kullan)
         val1, unit1 = self.normalize_size(size1)
         val2, unit2 = self.normalize_size(size2)
-        
-        # İkisi de unknown ise, string similarity kullan
+
+        # İkisi de unknown ise: yalnızca string birebir aynıysa uyumlu say;
+        # benzerlik tahmini ile birleştirme yapma (konservatif).
         if unit1 == "unknown" and unit2 == "unknown":
             s1 = size1.strip().lower() if size1 else ""
             s2 = size2.strip().lower() if size2 else ""
-            if s1 == s2:
-                return True
-            similarity = self._string_similarity(s1, s2)
-            return similarity > 0.5
-        
+            return bool(s1) and s1 == s2
+
         # Biri unknown, diğeri değil - farklı kabul et
         if unit1 == "unknown" or unit2 == "unknown":
             return False

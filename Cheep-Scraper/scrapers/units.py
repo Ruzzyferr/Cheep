@@ -42,9 +42,13 @@ _SIMPLE_RE = re.compile(rf"({_NUM})\s*({_UNIT_ALT})\b", re.IGNORECASE)
 _COUNTPACK_RE = re.compile(r"(\d+)\s*['’`]?\s*(?:li|lı|lu|lü|lük|lik|luk|adet|adetlik|ad)\b",
                            re.IGNORECASE)
 
-# Above this count a "N'li … Xg/ml" almost always means N pieces of a TOTAL X
-# (100'lü 320 g tea), not N units of X each; at/below it the size is per-unit
-# (6'lı 200 ml ayran = 1200 ml). Multipacks written "N x X" are ALWAYS per-unit.
+# Units whose size is a real physical amount (volume / mass), as opposed to a
+# discrete piece count. For these a count multiplier means "N items of X each".
+_VOLUME_MASS_UNITS = frozenset({"l", "ml", "cl", "g", "kg"})
+
+# Above this count a "N'li … Xg/ml" can mean N pieces of a TOTAL X (100'lü 320 g
+# tea) rather than N units of X each; at/below it the size is per-unit (6'lı 200
+# ml ayran = 1200 ml). Multipacks written "N x X" are ALWAYS per-unit.
 _PER_UNIT_COUNT_MAX = 12
 
 
@@ -94,8 +98,18 @@ def extract_size_and_pack(text):
         last = size_matches[-1]
         amount = _to_float(last.group(1))
         unit = normalize_unit(last.group(2))
-        if count > 1 and count <= _PER_UNIT_COUNT_MAX:
-            return (round(count * amount, 4), unit, count)
+        if count > 1:
+            # Small counts are unambiguous per-unit multipacks (6'lı 200 ml).
+            if count <= _PER_UNIT_COUNT_MAX:
+                return (round(count * amount, 4), unit, count)
+            # Large counts: only suppress the count for DISCRETE/piece sizes. For a
+            # volume/mass per-pack size we must not collapse to a single unit. When
+            # the per-pack amount is a typical per-unit size (small relative to the
+            # count, e.g. "24'lü 1 L"), multiply count×size for the true total;
+            # when it is clearly already a TOTAL (large, e.g. "100'lü 320 g" tea),
+            # keep it as-is.
+            if unit in _VOLUME_MASS_UNITS and amount <= count:
+                return (round(count * amount, 4), unit, count)
         return (amount, unit, count if count > 1 else 1)
 
     if cm:  # count pack with no mass/volume size -> the count IS the quantity

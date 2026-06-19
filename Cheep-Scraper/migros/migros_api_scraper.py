@@ -98,13 +98,49 @@ class MigrosAPISafeScraper:
             time.sleep(self.delay)
         return products
 
+    def _get_with_retry(self, params: dict, max_retries: int = 4):
+        """GET with exponential backoff + explicit 429/5xx handling.
+
+        Retries transient failures (timeouts, connection errors, 429, 5xx) with
+        exponential backoff so a single hiccup doesn't abort the whole term.
+        Honours a Retry-After header on 429 when present. Raises on final failure
+        so the caller's per-term isolation (try/except in fetch_products) still
+        kicks in.
+        """
+        backoff = 1.0
+        last_exc: Optional[Exception] = None
+        for attempt in range(max_retries):
+            try:
+                resp = requests.get(self.api_url, headers=self.headers,
+                                    params=params, timeout=30)
+                if resp.status_code == 429 or resp.status_code >= 500:
+                    retry_after = resp.headers.get("Retry-After")
+                    try:
+                        wait = float(retry_after) if retry_after else backoff
+                    except (TypeError, ValueError):
+                        wait = backoff
+                    self.logger.warning(
+                        f"⏳ HTTP {resp.status_code} (attempt {attempt + 1}/{max_retries}) "
+                        f"-> {wait:.1f}s bekleniyor")
+                    time.sleep(wait)
+                    backoff = min(backoff * 2, 30.0)
+                    continue
+                resp.raise_for_status()
+                return resp
+            except requests.RequestException as e:
+                last_exc = e
+                self.logger.warning(
+                    f"⚠️ istek hatası (attempt {attempt + 1}/{max_retries}): {e}")
+                time.sleep(backoff)
+                backoff = min(backoff * 2, 30.0)
+        raise last_exc or RuntimeError("request failed after retries")
+
     def _scrape_term(self, term: str, seen: set) -> List[Product]:
         out: List[Product] = []
         page = 0
         while page < self.max_pages_per_term:
             params = {"q": term, "sayfa": page, "reid": str(int(time.time() * 1000))}
-            resp = requests.get(self.api_url, headers=self.headers, params=params, timeout=30)
-            resp.raise_for_status()
+            resp = self._get_with_retry(params)
             data = resp.json()
             if not data.get("successful"):
                 break
