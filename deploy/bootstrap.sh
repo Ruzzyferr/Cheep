@@ -50,7 +50,15 @@ echo "==> Servisler ayağa kaldırılıyor (build)"
 cd "$APP_DIR/deploy"
 docker compose -f docker-compose.prod.yml up -d --build
 
-echo "==> Migration'lar (container açılışında da koşar) + seed (tek sefer)"
+echo "==> Backend hazır olana (migration'lar bitene) kadar bekle"
+# Container açılışta `migrate deploy` çalıştırır; seed bundan ÖNCE koşarsa tablolar
+# henüz yoktur (yarış durumu). Health endpoint'i hazır olunca migration'lar bitmiştir.
+for i in $(seq 1 60); do
+  if curl -fsS http://localhost:3000/health >/dev/null 2>&1; then echo "backend hazır"; break; fi
+  sleep 3
+done
+
+echo "==> Seed (tek sefer)"
 docker compose -f docker-compose.prod.yml exec -T backend pnpm db:seed || \
   echo "(seed atlandı/zaten yapılmış olabilir)"
 
