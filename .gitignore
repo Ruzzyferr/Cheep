@@ -133,3 +133,8 @@ cheep-backend-express/build/
 
 
 
+
+# Deploy secrets (sunucuya özel — asla commit edilmez)
+deploy/.env
+deploy/.droplet-ip
+deploy/*.pem
