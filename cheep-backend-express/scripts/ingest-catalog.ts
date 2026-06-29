@@ -180,6 +180,8 @@ async function main() {
   const rows = [...best.values()];
 
   // Delete + reinsert atomik olmalı: yarıda kalırsa fiyatlar boş kalır.
+  // Binlerce fiyatın delete+insert'i varsayılan 5sn'lik interaktif transaction
+  // limitini aşar → timeout/maxWait yükseltilir (tüm katalog için yeterli pay).
   const inserted = await prisma.$transaction(async (tx) => {
     await tx.storePrice.deleteMany({ where: { store_id: { in: storeIds } } });
     let count = 0;
@@ -188,7 +190,7 @@ async function main() {
       count += r.count;
     }
     return count;
-  });
+  }, { timeout: 120_000, maxWait: 120_000 });
   console.log("   store_price:", inserted);
 
   // 6) Price history — append today's snapshot (one row per store+product per day),
