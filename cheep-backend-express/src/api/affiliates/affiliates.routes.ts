@@ -10,7 +10,7 @@ const router = Router();
  * @swagger
  * tags:
  *   name: Affiliates
- *   description: "Markete git / sepeti tamamla" tıklama takibi ve yönlendirme
+ *   description: Markete git ve sepeti tamamla tıklama takibi ve yönlendirme
  */
 
 /**
@@ -35,7 +35,7 @@ const router = Router();
  *               context: { type: string, enum: [cart, product, store] }
  *     responses:
  *       200:
- *         description: "{ url, store }"
+ *         description: Açılacak URL ve mağaza bilgisi döner
  *       404:
  *         description: Mağaza bulunamadı
  */
