@@ -1,0 +1,5 @@
+# Shell scriptleri ve Docker dosyaları Linux sunucuda LF olmalı (CRLF bash'i bozar)
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+deploy/.env.production.example text eol=lf
