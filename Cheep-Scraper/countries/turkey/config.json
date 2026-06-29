@@ -23,7 +23,7 @@
     },
     {
       "name": "ŞOK",
-      "store_id": 5,
+      "store_id": 4,
       "scraper_path": "../../sok/sok_scraper.py",
       "scraper_class": "SokScraper",
       "scraper_method": "fetch_products",
@@ -45,7 +45,7 @@
     },
     {
       "name": "BİM",
-      "store_id": 4,
+      "store_id": 5,
       "scraper_path": "scrapers/bim/bim_scraper.py",
       "scraper_class": "BIMScraper",
       "scraper_method": "fetch_products",

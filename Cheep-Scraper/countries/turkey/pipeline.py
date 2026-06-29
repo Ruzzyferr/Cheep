@@ -38,7 +38,7 @@ log = logging.getLogger("pipeline")
 OUT = Path(__file__).resolve().parent / "output"
 OUT.mkdir(exist_ok=True)
 
-STORE_IDS = {"Migros": 1, "CarrefourSA": 2, "A101": 3, "BİM": 4, "ŞOK": 5}
+STORE_IDS = {"Migros": 1, "CarrefourSA": 2, "A101": 3, "ŞOK": 4, "BİM": 5}
 
 
 def scrape_all() -> list:
