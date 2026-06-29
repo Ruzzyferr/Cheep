@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import * as AuthController from './auth.controller.js'; // <-- .js uzantısı
-import { authLimiter } from '../../middleware/rate-limit.middleware.js';
+import { authLimiter, verifyLimiter } from '../../middleware/rate-limit.middleware.js';
 import { validate } from '../../schema/validation.middleware.js';
 import { authenticate } from '../../middleware/auth.middleware.js';
-import { registerSchema, loginSchema, changePasswordSchema } from './auth.schema.js';
+import { registerSchema, loginSchema, changePasswordSchema, verifyEmailSchema } from './auth.schema.js';
 
 const router = Router();
 
@@ -81,6 +81,56 @@ router.post('/login', authLimiter, validate(loginSchema), AuthController.login);
  *         description: Geçersiz/süresi dolmuş refresh token
  */
 router.post('/refresh', AuthController.refresh);
+
+/**
+ * @swagger
+ * /api/v1/auth/verify-email:
+ *   post:
+ *     summary: 6 haneli kod ile e-posta adresini doğrular
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [code]
+ *             properties:
+ *               code: { type: string, example: "123456" }
+ *     responses:
+ *       200:
+ *         description: E-posta doğrulandı
+ *       400:
+ *         description: Kod hatalı veya süresi dolmuş
+ */
+router.post(
+    '/verify-email',
+    authenticate,
+    verifyLimiter,
+    validate(verifyEmailSchema),
+    AuthController.verifyEmail
+);
+
+/**
+ * @swagger
+ * /api/v1/auth/resend-verification:
+ *   post:
+ *     summary: E-posta doğrulama kodunu yeniden gönderir
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Kod yeniden gönderildi
+ */
+router.post(
+    '/resend-verification',
+    authenticate,
+    verifyLimiter,
+    AuthController.resendVerification
+);
 
 /**
  * @swagger

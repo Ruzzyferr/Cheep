@@ -25,6 +25,11 @@ model User {
   is_premium    Boolean  @default(false)
   token_version Int      @default(0) // refresh token iptali: logout/parola değişiminde +1
 
+  // E-posta doğrulama (kayıt sonrası 6 haneli kod)
+  email_verified             Boolean   @default(false)
+  email_verification_code    String? // bcrypt hash'lenmiş 6 haneli kod
+  email_verification_expires DateTime? // kodun son geçerlilik anı
+
   // İlişkiler
   country         Country?            @relation(fields: [country_id], references: [id], onDelete: SetNull)
   lists           List[]
@@ -32,6 +37,7 @@ model User {
   price_feedbacks PriceFeedback[]
   profile         UserProfile?
   chat_threads    ChatThread[]
+  affiliate_clicks AffiliateClick[]
 
   @@map("users")
 }
@@ -69,6 +75,7 @@ model Store {
   lat        Float? // Enlem (Latitude)
   lon        Float? // Boylam (Longitude)
   country_id Int
+  website_url String? // Online market / sepet tamamlama bağlantısı (affiliate temeli)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -78,9 +85,34 @@ model Store {
   store_prices      StorePrice[]
   favorite_by_users UserFavoriteStore[]
   price_history     PriceHistory[]
+  affiliate_clicks  AffiliateClick[]
 
   @@index([country_id])
   @@map("stores")
+}
+
+// ============================================
+// AFFILIATE TIKLAMA TAKİBİ
+// ============================================
+// Kullanıcı "Sepeti markette tamamla" / "Markete git" dediğinde kaydedilir.
+// URL üretimi sunucu tarafında olduğu için ileride gerçek affiliate linkine
+// geçince mobil güncelleme gerekmez.
+model AffiliateClick {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  store_id   Int
+  list_id    Int? // sepet bağlamı (varsa)
+  product_id Int? // tek ürün bağlamı (varsa)
+  context    String   @default("store") // 'cart' | 'product' | 'store'
+  created_at DateTime @default(now())
+
+  user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  store Store @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([store_id])
+  @@index([created_at])
+  @@map("affiliate_clicks")
 }
 
 model UserFavoriteStore {

@@ -2,8 +2,29 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../utils/prisma.client.js';
 import { config } from '../../config/index.js';
-import { AppError, conflict, notFound } from '../../utils/app-error.js';
+import { AppError, conflict, notFound, badRequest } from '../../utils/app-error.js';
 import { isRefreshTokenCurrent, type RefreshPayload } from '../../services/refresh-token.js';
+import {
+    generateVerificationCode,
+    verificationExpiry,
+    isCodeExpired,
+    isValidCodeFormat,
+} from '../../services/email-verification.js';
+import { sendVerificationEmail } from '../../services/email.service.js';
+import logger from '../../utils/logger.js';
+
+type UserRecord = { password_hash: string;[k: string]: unknown };
+
+/** Kullanıcı nesnesinden hassas/iç alanları çıkarır (client'a dönmeden önce). */
+const sanitizeUser = (user: UserRecord) => {
+    const {
+        password_hash: _pw,
+        email_verification_code: _c,
+        email_verification_expires: _e,
+        ...safe
+    } = user;
+    return safe;
+};
 
 const ACCESS_TOKEN_TTL = '1h';
 const REFRESH_TOKEN_TTL = '30d';
@@ -39,16 +60,96 @@ export const registerUser = async (email: string, pass: string, name: string) =>
 
     const password_hash = await bcrypt.hash(pass, 10);
 
+    // 6 haneli doğrulama kodu üret, hash'leyerek sakla (düz metin sadece e-postaya gider)
+    const code = generateVerificationCode();
+    const codeHash = await bcrypt.hash(code, 10);
+
     const user = await prisma.user.create({
         data: {
             email,
             password_hash,
             name,
+            email_verification_code: codeHash,
+            email_verification_expires: verificationExpiry(),
         },
     });
 
-    const { password_hash: _, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword, ...generateTokens(user.id, user.token_version) };
+    // E-postayı gönder — başarısız olsa bile kayıt akışı BOZULMAZ (kullanıcı "yeniden gönder" diyebilir)
+    void sendVerificationEmail(email, name, code).catch((err) =>
+        logger.error('[auth] doğrulama e-postası gönderilemedi:', err)
+    );
+    if (!config.smtpEnabled) {
+        logger.warn(`[auth] (DEV) ${email} için doğrulama kodu: ${code}`);
+    }
+
+    return { user: sanitizeUser(user), ...generateTokens(user.id, user.token_version) };
+};
+
+/**
+ * E-posta doğrulama: kullanıcının girdiği 6 haneli kodu saklanan hash ile karşılaştırır.
+ * Başarılıysa `email_verified = true` yapar ve kodu temizler.
+ */
+export const verifyEmailCode = async (userId: number, code: string) => {
+    if (!isValidCodeFormat(code)) {
+        throw badRequest('Doğrulama kodu 6 haneli olmalıdır.');
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+        throw notFound('Kullanıcı bulunamadı.');
+    }
+    if (user.email_verified) {
+        return { user: sanitizeUser(user) }; // zaten doğrulanmış — idempotent
+    }
+    if (!user.email_verification_code || isCodeExpired(user.email_verification_expires)) {
+        throw new AppError('Doğrulama kodunun süresi dolmuş. Yeni kod isteyin.', 400, 'CODE_EXPIRED');
+    }
+
+    const ok = await bcrypt.compare(code, user.email_verification_code);
+    if (!ok) {
+        throw new AppError('Doğrulama kodu hatalı.', 400, 'CODE_INVALID');
+    }
+
+    const updated = await prisma.user.update({
+        where: { id: userId },
+        data: {
+            email_verified: true,
+            email_verification_code: null,
+            email_verification_expires: null,
+        },
+    });
+
+    return { user: sanitizeUser(updated) };
+};
+
+/**
+ * Yeni doğrulama kodu üretip e-posta ile tekrar gönderir.
+ */
+export const resendVerification = async (userId: number) => {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+        throw notFound('Kullanıcı bulunamadı.');
+    }
+    if (user.email_verified) {
+        throw badRequest('E-posta adresi zaten doğrulanmış.');
+    }
+
+    const code = generateVerificationCode();
+    const codeHash = await bcrypt.hash(code, 10);
+    await prisma.user.update({
+        where: { id: userId },
+        data: {
+            email_verification_code: codeHash,
+            email_verification_expires: verificationExpiry(),
+        },
+    });
+
+    void sendVerificationEmail(user.email, user.name, code).catch((err) =>
+        logger.error('[auth] doğrulama e-postası (yeniden) gönderilemedi:', err)
+    );
+    if (!config.smtpEnabled) {
+        logger.warn(`[auth] (DEV) ${user.email} için yeni doğrulama kodu: ${code}`);
+    }
 };
 
 // Kullanıcı giriş servisi
@@ -63,8 +164,7 @@ export const loginUser = async (email: string, pass: string) => {
         throw new AppError('Geçersiz email veya şifre.', 401);
     }
 
-    const { password_hash: _, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword, ...generateTokens(user.id, user.token_version) };
+    return { user: sanitizeUser(user), ...generateTokens(user.id, user.token_version) };
 };
 
 /**

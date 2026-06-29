@@ -64,6 +64,27 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
 // --- HTTP port ---
 const port = Number(process.env.PORT) || 3000;
 
+// --- SMTP (e-posta doğrulama / bildirim) ---
+// Üretimde değerler yoksa e-posta gönderimi devre dışı kalır (kayıt yine de çalışır,
+// kod log'a yazılır). Gmail/Workspace: host smtp.gmail.com, port 465 (secure).
+const smtp = {
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: Number(process.env.SMTP_PORT) || 465,
+    user: process.env.SMTP_USER || '',
+    // Gmail uygulama şifreleri boşluklu gösterilir; boşlukları temizle.
+    password: (process.env.SMTP_PASSWORD || '').replace(/\s+/g, ''),
+    fromEmail: process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER || '',
+    fromName: process.env.SMTP_FROM_NAME || 'Cheep',
+};
+const smtpEnabled = Boolean(smtp.user && smtp.password);
+
+if (isProduction && !smtpEnabled) {
+    // eslint-disable-next-line no-console
+    console.warn(
+        '⚠️  SMTP yapılandırılmadı (SMTP_USER/SMTP_PASSWORD). E-posta doğrulama kodları gönderilemeyecek.'
+    );
+}
+
 export const config = {
     isProduction,
     jwtSecret: jwtSecret as string,
@@ -71,4 +92,6 @@ export const config = {
     ingestApiKey,
     allowedOrigins,
     port,
+    smtp,
+    smtpEnabled,
 };

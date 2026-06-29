@@ -26,6 +26,16 @@ export const loginSchema = Joi.object({
     }),
 });
 
+export const verifyEmailSchema = Joi.object({
+    code: Joi.string()
+        .pattern(/^\d{6}$/)
+        .required()
+        .messages({
+            'string.pattern.base': 'Doğrulama kodu 6 haneli olmalıdır',
+            'any.required': 'Doğrulama kodu zorunludur',
+        }),
+});
+
 export const changePasswordSchema = Joi.object({
     currentPassword: Joi.string().required().messages({
         'any.required': 'Mevcut şifre zorunludur',

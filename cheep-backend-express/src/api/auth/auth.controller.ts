@@ -31,6 +31,31 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     }
 };
 
+/**
+ * E-posta doğrulama: kullanıcı 6 haneli kodu gönderir; doğruysa hesap doğrulanır.
+ */
+export const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { code } = req.body;
+        const result = await AuthService.verifyEmailCode(req.user!.id, String(code));
+        res.status(200).json({ success: true, user: result.user });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Doğrulama kodunu yeniden gönderir.
+ */
+export const resendVerification = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await AuthService.resendVerification(req.user!.id);
+        res.status(200).json({ success: true, message: 'Doğrulama kodu e-postana gönderildi.' });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const refresh = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { refreshToken } = req.body;
