@@ -10,4 +10,5 @@ export { storeService } from './store.service';
 export { categoryService } from './category.service';
 export { profileService } from './profile.service';
 export { assistantService } from './assistant.service';
+export { affiliateService } from './affiliate.service';
 

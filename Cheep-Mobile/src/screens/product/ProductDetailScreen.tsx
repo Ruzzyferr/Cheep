@@ -14,10 +14,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { productService, categoryService } from '../../services';
+import { productService, categoryService, affiliateService } from '../../services';
 import { Card, Button } from '../../components/ui';
 import { PriceTrendCard } from '../../components/product/PriceTrendCard';
 import { SelectListModal } from '../../components/list/SelectListModal';
+import { openExternalUrl } from '../../utils/linking';
 import type { PriceHistoryResponse } from '../../services/product.service';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { Product, StorePrice } from '../../types';
@@ -40,6 +41,7 @@ export function ProductDetailScreen({
     savingsPercentage: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [openingStore, setOpeningStore] = useState(false);
   const [showListModal, setShowListModal] = useState(false);
   const [priceHistory, setPriceHistory] = useState<PriceHistoryResponse | null>(null);
   const [historyLoading, setHistoryLoading] = useState(true);
@@ -307,6 +309,40 @@ export function ProductDetailScreen({
             </View>
           </Card>
         )}
+
+        {/* Affiliate: en ucuz markette al */}
+        {priceStats?.cheapest?.store?.id ? (
+          <Button
+            title={`En ucuz markette al (${priceStats.cheapest.store.name})`}
+            onPress={async () => {
+              const store = priceStats.cheapest!.store!;
+              setOpeningStore(true);
+              try {
+                const res = await affiliateService.trackClick({
+                  storeId: store.id,
+                  productId,
+                  context: 'product',
+                });
+                await openExternalUrl(res.url);
+              } catch {
+                // openExternalUrl kendi uyarısını gösterir
+              } finally {
+                setOpeningStore(false);
+              }
+            }}
+            loading={openingStore}
+            fullWidth
+            style={styles.buyButton}
+            icon={
+              <MaterialIcons
+                name="open-in-new"
+                size={18}
+                color={colors.background.paper}
+                style={styles.buyButtonIcon}
+              />
+            }
+          />
+        ) : null}
 
         {/* Price History Trend */}
         <View style={styles.detailsSection}>
@@ -677,6 +713,14 @@ const styles = StyleSheet.create({
 
   detailsSection: {
     marginTop: spacing.lg,
+  },
+
+  buyButton: {
+    marginTop: spacing.md,
+  },
+
+  buyButtonIcon: {
+    marginRight: spacing.xs,
   },
 
   detailRow: {

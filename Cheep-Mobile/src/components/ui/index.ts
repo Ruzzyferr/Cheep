@@ -5,6 +5,7 @@
 export { Button } from './Button';
 export { Card } from './Card';
 export { Input } from './Input';
+export { CodeInput } from './CodeInput';
 export { FAB } from './FAB';
 export { Skeleton, DealCardsSkeleton, ListSkeleton, GridSkeleton } from './Skeleton';
 

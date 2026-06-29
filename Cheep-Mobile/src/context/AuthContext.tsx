@@ -12,12 +12,15 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  emailVerified: boolean;
   onboardingDone: boolean;
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   refreshOnboarding: () => Promise<void>;
+  verifyEmail: (code: string) => Promise<void>;
+  resendVerification: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -126,16 +129,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // E-posta doğrulama: kodu gönderir, dönen güncel kullanıcıyı kaydeder (gate açılır)
+  const verifyEmail = async (code: string) => {
+    const res = await authService.verifyEmail(code);
+    await userStorage.saveUser(res.user);
+    setUser(res.user);
+  };
+
+  const resendVerification = async () => {
+    await authService.resendVerification();
+  };
+
+  // Eski kayıtlarda email_verified olmayabilir → undefined "doğrulanmış" sayılır.
+  const emailVerified = user ? user.email_verified !== false : false;
+
   const value: AuthContextType = {
     user,
     isLoading,
     isAuthenticated: !!user,
+    emailVerified,
     onboardingDone,
     login,
     register,
     logout,
     refreshUser,
     refreshOnboarding,
+    verifyEmail,
+    resendVerification,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

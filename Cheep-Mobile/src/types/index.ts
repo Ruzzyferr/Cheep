@@ -11,8 +11,15 @@ export interface User {
   id: number;
   email: string;
   name: string;
+  // Eski kayıtlarda alan olmayabilir → undefined "doğrulanmış" sayılır (kilitlenmeyi önler)
+  email_verified?: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface VerifyEmailResponse {
+  success: boolean;
+  user: User;
 }
 
 export interface AuthResponse {
@@ -44,8 +51,26 @@ export interface Store {
   address: string | null;
   lat: number | null;
   lon: number | null;
+  website_url?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// ============================================
+// AFFILIATE TYPES
+// ============================================
+
+export interface AffiliateClickRequest {
+  storeId: number;
+  listId?: number;
+  productId?: number;
+  context?: 'cart' | 'product' | 'store';
+}
+
+export interface AffiliateClickResponse {
+  success: boolean;
+  url: string;
+  store: { id: number; name: string };
 }
 
 // ============================================

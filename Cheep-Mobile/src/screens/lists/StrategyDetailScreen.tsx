@@ -3,7 +3,7 @@
  * Detailed view of a shopping strategy/route
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
 import { Card, Button } from '../../components/ui';
 import { StoreChip } from '../../components/store/StoreChip';
-import { listService } from '../../services';
+import { listService, affiliateService } from '../../services';
+import { openExternalUrl } from '../../utils/linking';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { StoreAllocation, ProductAllocation } from '../../types';
@@ -102,6 +103,7 @@ export function StrategyDetailScreen({
             storeAllocation={storeAllocation}
             storeIndex={storeIndex}
             totalStores={strategy.stores.length}
+            listId={listId}
           />
         ))}
 
@@ -164,11 +166,32 @@ function StoreSection({
   storeAllocation,
   storeIndex,
   totalStores,
+  listId,
 }: {
   storeAllocation: StoreAllocation;
   storeIndex: number;
   totalStores: number;
+  listId: number;
 }) {
+  const [opening, setOpening] = useState(false);
+  const storeName = storeAllocation.store.name;
+
+  const handleCompleteAtStore = async () => {
+    setOpening(true);
+    try {
+      const res = await affiliateService.trackClick({
+        storeId: storeAllocation.store.id,
+        listId,
+        context: 'cart',
+      });
+      await openExternalUrl(res.url);
+    } catch {
+      Alert.alert('Hata', 'Mağaza bağlantısı açılamadı. Lütfen tekrar deneyin.');
+    } finally {
+      setOpening(false);
+    }
+  };
+
   return (
     <View style={styles.section}>
       <View style={styles.storeHeader}>
@@ -176,7 +199,7 @@ function StoreSection({
           <Text style={styles.storeNumber}>
             {totalStores > 1 ? `Market ${storeIndex + 1}` : 'Market'}
           </Text>
-          <StoreChip storeName={storeAllocation.store.name} />
+          <StoreChip storeName={storeName} />
         </View>
         <Text style={styles.storeSubtotal}>
           ₺{num(storeAllocation.subtotal).toFixed(2)}
@@ -192,6 +215,25 @@ function StoreSection({
           />
         ))}
       </View>
+
+      {/* Affiliate: sepeti bu markette tamamla */}
+      <Button
+        title={`Sepeti ${storeName}'te tamamla`}
+        onPress={handleCompleteAtStore}
+        loading={opening}
+        variant="outline"
+        size="small"
+        fullWidth
+        style={styles.completeButton}
+        icon={
+          <MaterialIcons
+            name="open-in-new"
+            size={16}
+            color={colors.primary.main}
+            style={styles.completeIcon}
+          />
+        }
+      />
     </View>
   );
 }
@@ -376,6 +418,15 @@ const styles = StyleSheet.create({
 
   productsList: {
     // gap replaced with marginBottom in render
+  },
+
+  completeButton: {
+    marginTop: spacing.sm,
+    borderColor: colors.primary.main,
+  },
+
+  completeIcon: {
+    marginRight: spacing.xs,
   },
 
   productCard: {

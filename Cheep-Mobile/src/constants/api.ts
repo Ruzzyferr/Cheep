@@ -29,6 +29,13 @@ export const API_ENDPOINTS = {
     REGISTER: '/auth/register',
     LOGIN: '/auth/login',
     REFRESH: '/auth/refresh',
+    VERIFY_EMAIL: '/auth/verify-email',
+    RESEND_VERIFICATION: '/auth/resend-verification',
+  },
+
+  // Affiliate
+  AFFILIATES: {
+    CLICK: '/affiliates/click',
   },
 
   // Users

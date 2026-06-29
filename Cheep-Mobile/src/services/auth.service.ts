@@ -10,7 +10,8 @@ import type {
   LoginRequest,
   RegisterRequest,
   ApiResponse,
-  User
+  User,
+  VerifyEmailResponse
 } from '../types';
 
 export const authService = {
@@ -42,6 +43,27 @@ export const authService = {
   async getMe(): Promise<ApiResponse<User>> {
     const response = await apiClient.get<ApiResponse<User>>(
       API_ENDPOINTS.USERS.ME
+    );
+    return response.data;
+  },
+
+  /**
+   * E-posta doğrulama (6 haneli kod)
+   */
+  async verifyEmail(code: string): Promise<VerifyEmailResponse> {
+    const response = await apiClient.post<VerifyEmailResponse>(
+      API_ENDPOINTS.AUTH.VERIFY_EMAIL,
+      { code }
+    );
+    return response.data;
+  },
+
+  /**
+   * Doğrulama kodunu yeniden gönder
+   */
+  async resendVerification(): Promise<{ success: boolean; message: string }> {
+    const response = await apiClient.post<{ success: boolean; message: string }>(
+      API_ENDPOINTS.AUTH.RESEND_VERIFICATION
     );
     return response.data;
   },

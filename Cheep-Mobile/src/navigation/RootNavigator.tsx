@@ -11,6 +11,7 @@ import { AuthNavigator } from './AuthNavigator';
 import { TabNavigator } from './TabNavigator';
 import { OnboardingNavigator } from './OnboardingNavigator';
 import { AssistantNavigator } from './AssistantNavigator';
+import { VerifyEmailScreen } from '../screens/auth/VerifyEmailScreen';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { colors } from '../theme';
 import type { RootStackParamList } from './types';
@@ -18,7 +19,7 @@ import type { RootStackParamList } from './types';
 const Stack = createStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
-  const { isAuthenticated, isLoading, onboardingDone } = useAuth();
+  const { isAuthenticated, isLoading, emailVerified, onboardingDone } = useAuth();
 
   // Show loading screen while checking auth
   if (isLoading) {
@@ -34,6 +35,8 @@ export function RootNavigator() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!isAuthenticated ? (
           <Stack.Screen name="Auth" component={AuthNavigator} />
+        ) : !emailVerified ? (
+          <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
         ) : !onboardingDone ? (
           <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
         ) : (

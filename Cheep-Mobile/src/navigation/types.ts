@@ -14,6 +14,7 @@ import type { RouteStrategy } from '../types';
 
 export type RootStackParamList = {
   Auth: undefined;
+  VerifyEmail: undefined;
   Main: undefined;
   Onboarding: undefined;
   Assistant: undefined;
