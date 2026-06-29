@@ -3,12 +3,15 @@ import { config } from '../config/index.js';
 import logger from '../utils/logger.js';
 
 /**
- * E-posta servisi (Gmail/Workspace SMTP).
+ * E-posta servisi — iki taşıma desteği:
+ *   1) HTTP API (Resend, 443 portu)  → bulut sunucularında SMTP bloklansa bile çalışır (ÖNERİLEN)
+ *   2) SMTP (Gmail/Workspace, 465)    → yerel/dev veya SMTP'ye izin veren ortamlar
+ * Hiçbiri yoksa içerik log'a yazılır (dev/test). Kayıt akışı e-posta hatasında
+ * ASLA başarısız olmaz — çağıran tarafı bunu yutar.
  *
- * Transporter tembel (lazy) oluşturulur; SMTP yapılandırılmamışsa gönderim
- * sessizce atlanır ve içerik log'a yazılır (geliştirme/test). Kayıt akışı
- * e-posta hatasında ASLA başarısız olmamalı — çağıran tarafı bunu yutar.
+ * Öncelik: RESEND_API_KEY varsa Resend; yoksa SMTP; o da yoksa log.
  */
+
 let transporter: Transporter | null = null;
 
 const getTransporter = (): Transporter | null => {
@@ -17,11 +20,8 @@ const getTransporter = (): Transporter | null => {
     transporter = nodemailer.createTransport({
         host: config.smtp.host,
         port: config.smtp.port,
-        secure: config.smtp.port === 465, // 465 => TLS
-        auth: {
-            user: config.smtp.user,
-            pass: config.smtp.password,
-        },
+        secure: config.smtp.port === 465,
+        auth: { user: config.smtp.user, pass: config.smtp.password },
     });
     return transporter;
 };
@@ -33,32 +33,62 @@ interface SendMailArgs {
     text: string;
 }
 
-const sendMail = async ({ to, subject, html, text }: SendMailArgs): Promise<boolean> => {
-    const tx = getTransporter();
-    if (!tx) {
-        logger.warn(`[email] SMTP devre dışı — gönderilmedi. (to=${to}, subject="${subject}")`);
-        return false;
-    }
+const fromHeader = () => `"${config.smtp.fromName}" <${config.email.fromEmail}>`;
+
+/** Resend HTTP API üzerinden gönderim (port 443). */
+const sendViaResend = async ({ to, subject, html, text }: SendMailArgs): Promise<boolean> => {
     try {
-        await tx.sendMail({
-            from: `"${config.smtp.fromName}" <${config.smtp.fromEmail}>`,
-            to,
-            subject,
-            text,
-            html,
+        const res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${config.email.resendApiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                from: fromHeader(),
+                to: [to],
+                subject,
+                html,
+                text,
+            }),
         });
-        logger.info(`[email] gönderildi: to=${to}, subject="${subject}"`);
+        if (!res.ok) {
+            const body = await res.text().catch(() => '');
+            logger.error(`[email] Resend hata ${res.status}: ${body.slice(0, 300)}`);
+            return false;
+        }
+        logger.info(`[email] Resend ile gönderildi: to=${to}, subject="${subject}"`);
         return true;
     } catch (err) {
-        logger.error('[email] gönderim hatası:', err);
+        logger.error('[email] Resend gönderim hatası:', err);
         return false;
     }
 };
 
-/**
- * Doğrulama testi — SMTP kimlik bilgileri geçerli mi? (deploy öncesi kontrol)
- */
+/** SMTP üzerinden gönderim. */
+const sendViaSmtp = async ({ to, subject, html, text }: SendMailArgs): Promise<boolean> => {
+    const tx = getTransporter();
+    if (!tx) return false;
+    try {
+        await tx.sendMail({ from: fromHeader(), to, subject, text, html });
+        logger.info(`[email] SMTP ile gönderildi: to=${to}, subject="${subject}"`);
+        return true;
+    } catch (err) {
+        logger.error('[email] SMTP gönderim hatası:', err);
+        return false;
+    }
+};
+
+const sendMail = async (args: SendMailArgs): Promise<boolean> => {
+    if (config.email.resendApiKey) return sendViaResend(args);
+    if (config.smtpEnabled) return sendViaSmtp(args);
+    logger.warn(`[email] Taşıma yok (Resend/SMTP) — gönderilmedi. (to=${args.to})`);
+    return false;
+};
+
+/** Deploy öncesi taşıma kontrolü. */
 export const verifyEmailTransport = async (): Promise<boolean> => {
+    if (config.email.resendApiKey) return true; // HTTP API: anahtar varsa hazır
     const tx = getTransporter();
     if (!tx) return false;
     try {
@@ -76,9 +106,7 @@ const brandHeader = `
     <div style="font-size:22px;font-weight:700;color:#0D9488;letter-spacing:.5px;">Cheep</div>
   </div>`;
 
-/**
- * 6 haneli e-posta doğrulama kodunu gönderir.
- */
+/** 6 haneli e-posta doğrulama kodunu gönderir. */
 export const sendVerificationEmail = async (
     to: string,
     name: string,

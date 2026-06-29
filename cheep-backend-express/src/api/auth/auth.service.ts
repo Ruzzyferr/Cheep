@@ -78,7 +78,7 @@ export const registerUser = async (email: string, pass: string, name: string) =>
     void sendVerificationEmail(email, name, code).catch((err) =>
         logger.error('[auth] doğrulama e-postası gönderilemedi:', err)
     );
-    if (!config.smtpEnabled) {
+    if (!config.emailEnabled) {
         logger.warn(`[auth] (DEV) ${email} için doğrulama kodu: ${code}`);
     }
 
@@ -147,7 +147,7 @@ export const resendVerification = async (userId: number) => {
     void sendVerificationEmail(user.email, user.name, code).catch((err) =>
         logger.error('[auth] doğrulama e-postası (yeniden) gönderilemedi:', err)
     );
-    if (!config.smtpEnabled) {
+    if (!config.emailEnabled) {
         logger.warn(`[auth] (DEV) ${user.email} için yeni doğrulama kodu: ${code}`);
     }
 };

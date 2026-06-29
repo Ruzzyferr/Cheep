@@ -78,10 +78,18 @@ const smtp = {
 };
 const smtpEnabled = Boolean(smtp.user && smtp.password);
 
-if (isProduction && !smtpEnabled) {
+// --- E-posta taşıma (Resend HTTP API tercih edilir; bulutta SMTP bloklanabilir) ---
+const email = {
+    resendApiKey: process.env.RESEND_API_KEY || '',
+    // Gönderen adresi: EMAIL_FROM > SMTP_FROM_EMAIL > SMTP_USER
+    fromEmail: process.env.EMAIL_FROM || smtp.fromEmail,
+};
+const emailEnabled = Boolean(email.resendApiKey) || smtpEnabled;
+
+if (isProduction && !emailEnabled) {
     // eslint-disable-next-line no-console
     console.warn(
-        '⚠️  SMTP yapılandırılmadı (SMTP_USER/SMTP_PASSWORD). E-posta doğrulama kodları gönderilemeyecek.'
+        '⚠️  E-posta taşıma yok (RESEND_API_KEY veya SMTP_*). Doğrulama kodları gönderilemeyecek.'
     );
 }
 
@@ -94,4 +102,6 @@ export const config = {
     port,
     smtp,
     smtpEnabled,
+    email,
+    emailEnabled,
 };
