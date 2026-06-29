@@ -17,8 +17,8 @@ export function getStoreLogoAsset(storeName: string | null | undefined): any {
   // Market isimlerine göre asset dosyalarını eşleştir
   const logoMap: Record<string, any> = {
     'migros': require('../../assets/images/TurkiyeCompanies/M-Migros.png'),
-    'carrefour': require('../../assets/images/TurkiyeCompanies/carrefour.png'),
-    'carrefoursa': require('../../assets/images/TurkiyeCompanies/carrefour.png'),
+    'carrefour': require('../../assets/images/TurkiyeCompanies/carrefour.webp'),
+    'carrefoursa': require('../../assets/images/TurkiyeCompanies/carrefour.webp'),
     'a101': null, // Henüz asset yok
     'sok': null, // Henüz asset yok
     'bim': null, // Henüz asset yok

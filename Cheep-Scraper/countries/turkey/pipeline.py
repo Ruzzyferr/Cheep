@@ -43,14 +43,23 @@ STORE_IDS = {"Migros": 1, "CarrefourSA": 2, "A101": 3, "ŞOK": 4, "BİM": 5}
 
 def scrape_all() -> list:
     products = []
-    log.info("--- Migros ---")
-    products += MigrosAPISafeScraper(max_pages_per_term=6, delay=0.6).fetch_products()
-    log.info("--- ŞOK ---")
-    products += SokScraper(max_pages_per_cat=60, delay=0.6).fetch_products()
-    log.info("--- CarrefourSA ---")
-    products += CarrefourScraper(max_pages_per_cat=50, delay=0.6).fetch_products()
-    log.info("--- A101 ---")
-    products += A101Scraper(headless=True, delay=1.0).fetch_products()
+
+    # Her market izole çalışır: biri başarısız olursa (ör. anti-bot 403, Cloudflare)
+    # diğerleri ve genel pipeline ETKİLENMEZ — eldeki veriyle devam edilir.
+    def run(name: str, factory):
+        log.info(f"--- {name} ---")
+        try:
+            res = factory().fetch_products()
+            log.info(f"{name}: +{len(res)} ürün")
+            products.extend(res)
+        except Exception as e:
+            log.error(f"{name} scrape BAŞARISIZ, atlanıyor: {e}")
+
+    run("Migros", lambda: MigrosAPISafeScraper(max_pages_per_term=6, delay=0.6))
+    run("ŞOK", lambda: SokScraper(max_pages_per_cat=60, delay=0.6))
+    run("CarrefourSA", lambda: CarrefourScraper(max_pages_per_cat=50, delay=0.6))
+    run("A101", lambda: A101Scraper(headless=True, delay=1.0))
+
     log.info(f"scraped total: {len(products)}")
     return products
 
