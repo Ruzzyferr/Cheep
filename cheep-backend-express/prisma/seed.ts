@@ -12,11 +12,12 @@ async function main() {
     const hashedPassword = await bcrypt.hash(seedPassword, 10);
     const testUser = await prisma.user.upsert({
         where: { email: 'test@cheep.com' },
-        update: {},
+        update: { email_verified: true },
         create: {
             email: 'test@cheep.com',
             password_hash: hashedPassword,
             name: 'Test Kullanıcı',
+            email_verified: true, // demo kullanıcı önceden doğrulanmış
         },
     });
     console.log('✅ Test kullanıcısı oluşturuldu:', testUser.email);
