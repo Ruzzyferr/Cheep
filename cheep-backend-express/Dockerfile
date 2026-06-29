@@ -17,8 +17,9 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Kaynak + Prisma client üretimi + TypeScript derleme
+# Not: `pnpm build` script'i rimraf'a bağlı; imajda olmayabilir → doğrudan tsc kullan.
 COPY . .
-RUN pnpm db:generate && pnpm build
+RUN pnpm db:generate && rm -rf dist && pnpm exec tsc
 
 ENV NODE_ENV=production
 EXPOSE 3000
