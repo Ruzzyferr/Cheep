@@ -4,14 +4,18 @@
  */
 
 export const typography = {
-  // Font Families - Inter/SF Pro-like
-  // Using system fonts that match Inter/SF Pro aesthetic
+  // Font Families
+  // Display = Space Grotesk (characterful grotesk, great numerals) for headings
+  // and prices. Body stays on the platform System font so inline fontWeight still
+  // works everywhere (custom fonts ignore fontWeight).
   fontFamily: {
-    regular: 'System', // Inter Regular / SF Pro Regular
-    medium: 'System', // Inter Medium / SF Pro Medium
-    semibold: 'System', // Inter SemiBold / SF Pro Semibold
-    bold: 'System', // Inter Bold / SF Pro Bold
-    display: 'System',
+    regular: 'System',
+    medium: 'System',
+    semibold: 'System',
+    bold: 'System',
+    display: 'SpaceGrotesk_700Bold',
+    displaySemibold: 'SpaceGrotesk_600SemiBold',
+    displayMedium: 'SpaceGrotesk_500Medium',
   },
 
   // Font Sizes
@@ -43,26 +47,34 @@ export const typography = {
 
   // Text Styles (Predefined combinations)
   styles: {
-    // Headers
+    // Headers — Space Grotesk display
     h1: {
-      fontSize: 30,
+      fontFamily: 'SpaceGrotesk_700Bold',
+      fontSize: 32,
       fontWeight: '700' as const,
-      lineHeight: 36,
+      lineHeight: 38,
+      letterSpacing: -0.6,
     },
     h2: {
-      fontSize: 24,
+      fontFamily: 'SpaceGrotesk_700Bold',
+      fontSize: 25,
       fontWeight: '700' as const,
       lineHeight: 32,
+      letterSpacing: -0.4,
     },
     h3: {
+      fontFamily: 'SpaceGrotesk_600SemiBold',
       fontSize: 20,
       fontWeight: '600' as const,
       lineHeight: 28,
+      letterSpacing: -0.2,
     },
     h4: {
+      fontFamily: 'SpaceGrotesk_600SemiBold',
       fontSize: 18,
       fontWeight: '600' as const,
       lineHeight: 24,
+      letterSpacing: -0.2,
     },
 
     // Body Text
@@ -113,18 +125,30 @@ export const typography = {
       textTransform: 'uppercase' as const,
     },
 
-    // Price (fiyat gösterimi için)
+    // Price (fiyat gösterimi için) — Space Grotesk, tabular feel
     price: {
-      fontSize: 20,
+      fontFamily: 'SpaceGrotesk_700Bold',
+      fontSize: 22,
       fontWeight: '700' as const,
       lineHeight: 28,
+      letterSpacing: -0.3,
     },
 
     // Price Small (küçük fiyat)
     priceSmall: {
+      fontFamily: 'SpaceGrotesk_600SemiBold',
       fontSize: 16,
       fontWeight: '600' as const,
       lineHeight: 24,
+    },
+
+    // Hero number (savings, big stats)
+    display: {
+      fontFamily: 'SpaceGrotesk_700Bold',
+      fontSize: 44,
+      fontWeight: '700' as const,
+      lineHeight: 48,
+      letterSpacing: -1,
     },
   },
 } as const;

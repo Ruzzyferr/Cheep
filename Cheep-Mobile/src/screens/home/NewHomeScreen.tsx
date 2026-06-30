@@ -1,43 +1,46 @@
 /**
- * 🏠 New Home Screen
- * Yenilenmiş ana sayfa tasarımı
+ * 🏠 Home — "Fresh Market" flagship
+ * Cream canvas · forest savings hero · mascot · premium animated cards.
  */
 
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { productService, storeService, listService, categoryService } from '../../services';
-import { ActiveListCard } from '../../components/home/ActiveListCard';
-import { EmptyListCard } from '../../components/home/EmptyListCard';
-import { SmartDealCard, StatsCard } from '../../components/home';
-import { DealCardsSkeleton } from '../../components/ui';
-import { CategoryItem } from '../../components/home/CategoryItem';
-import { NearbyStoreCard } from '../../components/home/NearbyStoreCard';
-import { getUserLocation, getCountryCode, haversineKm, formatDistance, type Coords } from '../../utils/geo';
+import { useAuth } from '../../context/AuthContext';
+import { CheepMascot } from '../../components/brand/CheepMascot';
+import { FadeInUp, AnimatedNumber, PressableScale, Float } from '../../components/anim';
+import { getStoreLogoAsset } from '../../utils/storeLogo';
+import { getCountryCode } from '../../utils/geo';
 import { countryStorage } from '../../utils/storage';
 import { getCategoryIcon, categoryHomeRank } from '../../utils/categoryIcon';
 import { compareInsights, byCoverageThenScore } from '../../utils/compareInsights';
-import { colors, typography, spacing, layout } from '../../theme';
+import { colors, typography, spacing, layout, borderRadius } from '../../theme';
+import { shadows } from '../../theme/shadows';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { Product, Store, ShoppingList } from '../../types';
 import type { Category } from '../../services/category.service';
 import type { HomeStackScreenProps } from '../../navigation/types';
 
+const tl = (n: number) => '₺' + Math.round(n).toLocaleString('tr-TR');
+
 export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const [activeList, setActiveList] = useState<ShoppingList | null>(null);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [nearbyStores, setNearbyStores] = useState<Store[]>([]);
+  const [markets, setMarkets] = useState<Store[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [estimatedPrice, setEstimatedPrice] = useState<{ min: number; max: number } | null>(null);
@@ -46,8 +49,6 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
   const [monthlySavingsIncrease, setMonthlySavingsIncrease] = useState<number>(0);
   const [potentialSavings, setPotentialSavings] = useState<number>(0);
   const [listStoreNames, setListStoreNames] = useState<string[]>([]);
-  const [userCoords, setUserCoords] = useState<Coords | null>(null);
-  // Unmount sonrası setState yapmamak için canlılık bayrağı.
   const aliveRef = useRef(true);
 
   useEffect(() => {
@@ -57,15 +58,9 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
     };
   }, []);
 
-  // Cihaz konumunu bir kez al (gerçek mesafe hesabı için) + ülkeyi çöz/sakla
+  // Ülkeyi çöz/sakla (konum bazlı). Mesafe gösterimi YOK — mağaza koordinatları
+  // zincir-seviyesinde placeholder olduğu için yanıltıcı olurdu.
   useEffect(() => {
-    getUserLocation()
-      .then((coords) => {
-        if (aliveRef.current) setUserCoords(coords);
-      })
-      .catch(() => {
-        if (aliveRef.current) setUserCoords(null);
-      });
     getCountryCode()
       .then((code) => {
         if (code) return countryStorage.saveCountry(code);
@@ -82,24 +77,17 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
       setLoading(true);
       const [lists, products, stores, allCategories] = await Promise.all([
         listService.getLists('active'),
-        productService.getProducts({ limit: 100 }), // Daha fazla ürün çekiyoruz fiyat farkı hesaplamak için
+        productService.getProducts({ limit: 100 }),
         storeService.getStores(),
         categoryService.getParentCategories(),
       ]);
       if (!aliveRef.current) return;
 
-      // Ana sayfada maksimum 7 parent kategori göster (Tümü hariç, toplam 8 kategori).
-      // Önce günlük market kategorilerini öne al (API sırası Giyim/Oyuncak/Sağlık ile
-      // başlıyordu — market uygulaması için anlamsız); bilinmeyenler sonda kalır.
       const parentCategories = allCategories
         .filter((cat) => cat.parent_id === null)
         .sort((a, b) => categoryHomeRank(a.name) - categoryHomeRank(b.name))
         .slice(0, 7);
 
-      // Fiyat farkına göre sırala (en büyük fark en üstte). Referans olarak en
-      // pahalı değil MEDYAN fiyatı kullanırız: tek bir marketin hatalı/aşırı
-      // yüksek fiyatı listeyi sahte indirimlerle dolduramaz; birden çok market
-      // doğruladığında gerçek indirim yine en üste çıkar.
       const median = (nums: number[]) => {
         const s = [...nums].sort((a, b) => a - b);
         const m = Math.floor(s.length / 2);
@@ -107,111 +95,54 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
       };
       const productsWithPriceDifference = products
         .map((product) => {
-          // Geçersiz/boş fiyatları (NaN) ele: ₺NaN / Infinity render etmeyi önler.
           const prices = (product.store_prices ?? [])
             .map((sp) => parseFloat(sp.price))
             .filter((p) => Number.isFinite(p));
           return { product, prices };
         })
-        .filter(({ prices }) => prices.length >= 2) // En az 2 geçerli fiyat olmalı
+        .filter(({ prices }) => prices.length >= 2)
         .map(({ product, prices }) => {
           const minPrice = Math.min(...prices);
-          const reference = median(prices); // "normal" fiyat (aykırı değere dayanıklı)
+          const reference = median(prices);
           const priceDifference = Math.max(0, reference - minPrice);
-          return {
-            ...product,
-            priceDifference,
-            minPrice,
-            maxPrice: reference,
-          };
+          return { ...product, priceDifference, minPrice, maxPrice: reference };
         })
-        .sort((a, b) => b.priceDifference - a.priceDifference); // Büyükten küçüğe sırala
-
-      if (__DEV__) {
-        console.log('📊 Data loaded:', {
-          lists: lists.length,
-          products: products.length,
-          productsWithPriceDifference: productsWithPriceDifference.length,
-          stores: stores.length,
-          allCategories: allCategories.length,
-          parentCategories: parentCategories.length,
-        });
-      }
+        .sort((a, b) => b.priceDifference - a.priceDifference);
 
       const firstActiveList = lists[0] || null;
       setActiveList(firstActiveList);
       setFeaturedProducts(productsWithPriceDifference);
-      setNearbyStores(stores);
+      setMarkets(stores);
       setCategories(parentCategories);
 
-      // Aktif liste varsa ve liste öğeleri varsa, fiyat hesaplaması yap
       if (firstActiveList && firstActiveList.list_items && firstActiveList.list_items.length > 0) {
         try {
-          // Liste detayını al (list_items ile birlikte)
           const listDetail = await listService.getListById(firstActiveList.id);
           if (!aliveRef.current) return;
-
-          // Eğer liste öğeleri varsa, rotaları hesapla
           if (listDetail.list_items && listDetail.list_items.length > 0) {
             const compareResult = await listService.compareList(firstActiveList.id, {
               maxStores: 3,
               includeMissingProducts: true,
             });
             if (!aliveRef.current) return;
-
-            // Kapsama-bilinçli tahmin: fiyatlar yalnızca aynı ürünleri kapsayan
-            // (tercihen tüm listeyi karşılayan) rotalardan; eksik ürünlü ucuz rota
-            // tahmini sahte düşürmesin.
             const insights = compareInsights(compareResult.strategies);
-
             if (insights.cheapest) {
               setEstimatedPrice({ min: Math.round(insights.min), max: Math.round(insights.max) });
               setSavingsPercent(insights.savingsPct > 0 ? insights.savingsPct : undefined);
               setPotentialSavings(Math.round(insights.savings));
-
-              // Önerilen rota: önce en eksiksiz sepet, sonra en yüksek skor
               const bestRoute = [...compareResult.strategies].sort(byCoverageThenScore)[0];
-
               if (bestRoute && bestRoute.stores.length > 0) {
-                // Store isimlerini topla (logolar assets'ten yüklenecek)
-                const storeNames: string[] = [];
-                const seenStoreIds = new Set<number>();
-                
-                bestRoute.stores.forEach(storeAllocation => {
-                  if (!seenStoreIds.has(storeAllocation.store.id)) {
-                    seenStoreIds.add(storeAllocation.store.id);
-                    // Store ismini al
-                    if (storeAllocation.store.name) {
-                      storeNames.push(storeAllocation.store.name);
-                    }
+                const names: string[] = [];
+                const seen = new Set<number>();
+                bestRoute.stores.forEach((sa) => {
+                  if (!seen.has(sa.store.id)) {
+                    seen.add(sa.store.id);
+                    if (sa.store.name) names.push(sa.store.name);
                   }
                 });
-                
-                setListStoreNames(storeNames);
+                setListStoreNames(names);
               } else {
-                // En iyi rota yoksa, tüm ürünlerdeki marketleri topla
-                const allStoreIds = new Set<number>();
-                listDetail.list_items?.forEach(item => {
-                  item.product?.store_prices?.forEach(sp => {
-                    if (sp.store_id) {
-                      allStoreIds.add(sp.store_id);
-                    }
-                  });
-                });
-
-                const storeNames: string[] = [];
-                const seenStoreNames = new Set<string>();
-                allStoreIds.forEach(storeId => {
-                  const storePrice = listDetail.list_items
-                    ?.flatMap(item => item.product?.store_prices || [])
-                    .find(sp => sp.store_id === storeId);
-                  if (storePrice?.store?.name && !seenStoreNames.has(storePrice.store.name)) {
-                    seenStoreNames.add(storePrice.store.name);
-                    storeNames.push(storePrice.store.name);
-                  }
-                });
-                
-                setListStoreNames(storeNames.slice(0, 5)); // Maksimum 5 market
+                setListStoreNames([]);
               }
             } else {
               setEstimatedPrice(null);
@@ -219,88 +150,59 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
               setPotentialSavings(0);
               setListStoreNames([]);
             }
-          } else {
-            setEstimatedPrice(null);
-            setSavingsPercent(undefined);
-            setPotentialSavings(0);
-            setListStoreNames([]);
           }
         } catch (error) {
-          console.error('❌ Error calculating list prices:', error);
+          console.error('list price calc error:', error);
           setEstimatedPrice(null);
           setSavingsPercent(undefined);
         }
       } else {
-        // Liste yoksa veya liste öğeleri yoksa, fiyat bilgilerini temizle
         setEstimatedPrice(null);
         setSavingsPercent(undefined);
         setPotentialSavings(0);
         setListStoreNames([]);
       }
 
-      // Bu ay içindeki toplam tasarrufu hesapla (tamamlanmış listelerden).
-      // N+1 compare isteği fırtınasını önlemek için: yalnızca bu ay/geçen aya ait
-      // listeleri al, en yeniden eskiye sırala ve en fazla MAX_SAVINGS_COMPARES
-      // tanesini karşılaştır.
+      // Bu ay toplam tasarruf (tamamlanmış listelerden, sınırlı).
       try {
-        const MAX_SAVINGS_COMPARES = 6;
-        const completedLists = await listService.getLists('completed');
+        const MAX = 6;
+        const completed = await listService.getLists('completed');
         if (!aliveRef.current) return;
-        const currentMonth = new Date().getMonth();
-        const currentYear = new Date().getFullYear();
-        const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-        const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-
-        const inMonth = (d: Date, m: number, y: number) =>
-          d.getMonth() === m && d.getFullYear() === y;
-
-        // İlgili listeleri (bu ay + geçen ay) seç, en yeniden eskiye sırala, sınırla.
-        const relevant = completedLists
-          .filter((list) => {
-            if (!list.completed_at) return false;
-            const d = new Date(list.completed_at);
-            return (
-              inMonth(d, currentMonth, currentYear) ||
-              inMonth(d, previousMonth, previousYear)
-            );
+        const cm = new Date().getMonth();
+        const cy = new Date().getFullYear();
+        const pm = cm === 0 ? 11 : cm - 1;
+        const py = cm === 0 ? cy - 1 : cy;
+        const inMonth = (d: Date, m: number, y: number) => d.getMonth() === m && d.getFullYear() === y;
+        const relevant = completed
+          .filter((l) => {
+            if (!l.completed_at) return false;
+            const d = new Date(l.completed_at);
+            return inMonth(d, cm, cy) || inMonth(d, pm, py);
           })
-          .sort(
-            (a, b) =>
-              new Date(b.completed_at as string).getTime() -
-              new Date(a.completed_at as string).getTime()
-          )
-          .slice(0, MAX_SAVINGS_COMPARES);
-
-        let totalSavings = 0;
-        let previousMonthSavings = 0;
-
-        for (const list of relevant) {
-          const completedDate = new Date(list.completed_at as string);
+          .sort((a, b) => new Date(b.completed_at as string).getTime() - new Date(a.completed_at as string).getTime())
+          .slice(0, MAX);
+        let total = 0;
+        let prev = 0;
+        for (const l of relevant) {
+          const cd = new Date(l.completed_at as string);
           try {
-            const compareResult = await listService.compareList(list.id, {
-              maxStores: 3,
-              includeMissingProducts: true,
-            });
+            const cr = await listService.compareList(l.id, { maxStores: 3, includeMissingProducts: true });
             if (!aliveRef.current) return;
-            const savings = compareResult.summary.maxSavings || 0;
-            if (inMonth(completedDate, currentMonth, currentYear)) {
-              totalSavings += savings;
-            } else {
-              previousMonthSavings += savings;
-            }
+            const sv = compareInsights(cr.strategies).savings || 0;
+            if (inMonth(cd, cm, cy)) total += sv;
+            else prev += sv;
           } catch {
-            console.warn('Error calculating savings for completed list:', list.id);
+            /* skip */
           }
         }
-
         if (!aliveRef.current) return;
-        setMonthlySavings(Math.round(totalSavings));
-        setMonthlySavingsIncrease(Math.round(totalSavings - previousMonthSavings));
+        setMonthlySavings(Math.round(total));
+        setMonthlySavingsIncrease(Math.round(total - prev));
       } catch (error) {
-        console.warn('Error calculating monthly savings:', error);
+        console.warn('monthly savings error:', error);
       }
     } catch (error) {
-      console.error('❌ Load data error:', error);
+      console.error('load data error:', error);
     } finally {
       if (aliveRef.current) setLoading(false);
     }
@@ -322,384 +224,495 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
 
   const getStoreName = (product: Product) => {
     if (!product.store_prices?.length) return '';
-    const lowestPriceItem = product.store_prices.reduce((prev, curr) =>
+    const lowest = product.store_prices.reduce((prev, curr) =>
       parseFloat(prev.price) < parseFloat(curr.price) ? prev : curr
     );
-    return lowestPriceItem.store?.name || '';
+    return lowest.store?.name || '';
   };
 
-  const getPriceDifference = (product: Product & { priceDifference?: number }) => {
-    if (product.priceDifference !== undefined) {
-      return product.priceDifference;
-    }
-    const prices = (product.store_prices ?? [])
-      .map((sp) => parseFloat(sp.price))
-      .filter((p) => Number.isFinite(p));
-    if (prices.length < 2) return 0;
-    return Math.max(...prices) - Math.min(...prices);
-  };
-
-  const getPriceDifferencePercent = (product: Product & { priceDifference?: number; maxPrice?: number }) => {
+  const getDiscountPercent = (product: Product & { priceDifference?: number; maxPrice?: number }) => {
     if (!product.maxPrice || product.maxPrice === 0) return 0;
-    const difference = getPriceDifference(product);
-    return Math.round((difference / product.maxPrice) * 100);
+    const diff = product.priceDifference ?? 0;
+    return Math.round((diff / product.maxPrice) * 100);
   };
+
+  const firstName = (user?.name || '').trim().split(' ')[0];
+  const hasSavings = monthlySavings > 0;
+  const itemCount = activeList?.list_items?.length ?? 0;
+
+  const goActiveList = () => {
+    if (!activeList) return;
+    navigation.dispatch(
+      CommonActions.navigate({
+        name: 'Lists',
+        params: { screen: 'ListDetail', params: { listId: activeList.id } },
+      })
+    );
+  };
+  const goLists = () => navigation.dispatch(CommonActions.navigate({ name: 'Lists' }));
+  const goSearch = () =>
+    navigation.navigate('CategoryProducts', { categoryId: 0, categoryName: 'Tüm Kategoriler' });
 
   return (
     <View style={styles.container}>
-      {/* Content */}
       <ScrollView
-        style={styles.content}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
-        stickyHeaderIndices={[0]}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingTop: insets.top + spacing.sm, paddingBottom: insets.bottom + 110 }}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary.main}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary.main} />
         }
       >
-        {/* Sticky Header */}
-        <View style={[styles.header, { paddingTop: insets.top }]}>
-          <View style={styles.headerContent}>
-            <View style={styles.headerTop}>
-              <View style={styles.headerLeft}>
-                <Text style={styles.headerTitle}>Cheep</Text>
-                <View style={styles.divider} />
-                <Text style={styles.subtitle}>Kontrol Paneli</Text>
-              </View>
-              <View style={styles.headerRight}>
-                <TouchableOpacity
-                  style={styles.iconButton}
-                  onPress={() =>
-                    navigation.navigate('CategoryProducts', {
-                      categoryId: 0,
-                      categoryName: 'Tüm Kategoriler',
-                    })
-                  }
-                >
-                  <MaterialCommunityIcons name="magnify" size={20} color={colors.text.secondary} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconButton}>
-                  <MaterialCommunityIcons name="bell-outline" size={20} color={colors.text.secondary} />
-                  <View style={styles.notificationDot} />
-                </TouchableOpacity>
-              </View>
-            </View>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.brandRow}>
+            <CheepMascot size={34} shadow={false} />
+            <Text style={styles.wordmark}>Cheep</Text>
           </View>
-        </View>
-        {/* Active List Analysis Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Aktif Liste Analizi</Text>
-          {activeList ? (
-            <ActiveListCard
-              listName={activeList.name}
-              foundItems={activeList.list_items?.length || 0}
-              totalItems={activeList.list_items?.length || 0}
-              estimatedPrice={estimatedPrice || undefined}
-              savingsPercent={savingsPercent}
-              storeNames={listStoreNames.length > 0 ? listStoreNames : nearbyStores.slice(0, 5).map(s => s.name).filter(Boolean)}
-              onPress={() => {
-                navigation.dispatch(
-                  CommonActions.navigate({
-                    name: 'Lists',
-                    params: {
-                      screen: 'ListDetail',
-                      params: { listId: activeList.id },
-                    },
-                  })
-                );
-              }}
-            />
-          ) : (
-            <EmptyListCard
-              onCreateList={() => {
-                navigation.dispatch(
-                  CommonActions.navigate({
-                    name: 'Lists',
-                  })
-                );
-              }}
-            />
-          )}
-        </View>
-
-        {/* Stats Cards */}
-        <View style={styles.statsSection}>
-          <StatsCard
-            icon="savings"
-            iconColor={colors.secondary.main}
-            label="Bu Ay Tasarruf"
-            value={`${monthlySavings.toLocaleString('tr-TR')}₺`}
-            badge={monthlySavingsIncrease > 0 ? `+${monthlySavingsIncrease.toLocaleString('tr-TR')}₺` : monthlySavingsIncrease < 0 ? `${monthlySavingsIncrease.toLocaleString('tr-TR')}₺` : potentialSavings > 0 ? `+${potentialSavings}₺ potansiyel` : undefined}
-            badgeColor={colors.secondary.main}
-          />
-          <View style={styles.statsGap} />
-          <StatsCard
-            icon="analytics"
-            iconColor="#F59E0B"
-            label="Fiyat Endeksi"
-            value="Stabil"
-          />
-        </View>
-
-        {/* Smart Deals */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionLabel}>Akıllı Fırsatlar</Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('PriceDifferenceList')}
-            >
-              <Text style={styles.seeAllText}>Tümünü İncele</Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.iconBtn} onPress={goSearch} activeOpacity={0.7}>
+              <MaterialIcons name="search" size={22} color={colors.text.primary} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconBtn} activeOpacity={0.7}>
+              <MaterialIcons name="notifications-none" size={22} color={colors.text.primary} />
+              <View style={styles.dot} />
             </TouchableOpacity>
           </View>
+        </View>
 
-          {loading && featuredProducts.length === 0 ? (
-            <DealCardsSkeleton />
+        {/* Savings hero (signature) */}
+        <FadeInUp delay={40} style={styles.sectionPad}>
+          <View style={styles.hero}>
+            <View style={styles.heroBody}>
+              <Text style={styles.heroGreeting}>
+                {firstName ? `Merhaba ${firstName}` : 'Merhaba'} 👋
+              </Text>
+              <Text style={styles.heroOverline}>{hasSavings ? 'BU AY TASARRUF' : 'POTANSİYEL TASARRUF'}</Text>
+              <AnimatedNumber
+                value={hasSavings ? monthlySavings : potentialSavings}
+                format={tl}
+                style={styles.heroNumber}
+              />
+              <Text style={styles.heroSub}>
+                {hasSavings
+                  ? monthlySavingsIncrease > 0
+                    ? `Geçen aya göre +${tl(monthlySavingsIncrease)}`
+                    : 'En ucuz rotaları seçerek biriktirdin'
+                  : activeList
+                    ? 'Listeni en ucuz rotayla tamamla, bu kadar kazan'
+                    : 'İlk listeni oluştur, tasarrufa başla'}
+              </Text>
+            </View>
+            <Float style={styles.heroMascot}>
+              <CheepMascot size={92} expression={hasSavings ? 'celebrate' : 'happy'} shadow={false} />
+            </Float>
+          </View>
+        </FadeInUp>
+
+        {/* Active list / create */}
+        <FadeInUp delay={110} style={styles.sectionPad}>
+          {activeList ? (
+            <PressableScale onPress={goActiveList} style={styles.listCard}>
+              <View style={styles.listCardTop}>
+                <Text style={styles.overline}>AKTİF LİSTE</Text>
+                {estimatedPrice && savingsPercent ? (
+                  <View style={styles.savePill}>
+                    <MaterialIcons name="trending-down" size={13} color={colors.success.dark} />
+                    <Text style={styles.savePillText}>%{savingsPercent}</Text>
+                  </View>
+                ) : null}
+              </View>
+              <Text style={styles.listName}>{activeList.name}</Text>
+              <Text style={styles.listMeta}>
+                {itemCount} ürün
+                {estimatedPrice ? `  ·  Tahmini ₺${estimatedPrice.min}–₺${estimatedPrice.max}` : ''}
+              </Text>
+              {listStoreNames.length > 0 && (
+                <View style={styles.miniLogos}>
+                  {listStoreNames.slice(0, 4).map((n, i) => (
+                    <MarketBadge key={i} name={n} size={26} />
+                  ))}
+                </View>
+              )}
+              <View style={styles.listCta}>
+                <MaterialCommunityIcons name="map-marker-path" size={18} color={colors.background.paper} />
+                <Text style={styles.listCtaText}>En Ucuz Rotayı Gör</Text>
+                <MaterialIcons name="arrow-forward" size={18} color={colors.background.paper} />
+              </View>
+            </PressableScale>
           ) : (
+            <PressableScale onPress={goLists} style={styles.emptyCard}>
+              <CheepMascot size={64} expression="search" />
+              <View style={styles.emptyBody}>
+                <Text style={styles.emptyTitle}>Henüz listen yok</Text>
+                <Text style={styles.emptySub}>İlk alışveriş listeni oluştur, en ucuz rotayı bulalım.</Text>
+              </View>
+              <View style={styles.emptyPlus}>
+                <MaterialIcons name="add" size={22} color={colors.background.paper} />
+              </View>
+            </PressableScale>
+          )}
+        </FadeInUp>
+
+        {/* Categories */}
+        <FadeInUp delay={170}>
+          <View style={styles.sectionHead}>
+            <Text style={styles.sectionTitle}>Kategoriler</Text>
+            <TouchableOpacity onPress={goSearch}>
+              <Text style={styles.link}>Tümü</Text>
+            </TouchableOpacity>
+          </View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalScroll}
+            contentContainerStyle={styles.catRail}
           >
-            {featuredProducts.slice(0, 6).map((product) => {
-              const price = getLowestPrice(product);
-              const storeName = getStoreName(product);
-              // Fiyat farkı yüzdesini göster
-              const discountPercent = getPriceDifferencePercent(product);
+            {categories.map((c) => (
+              <PressableScale
+                key={c.id}
+                style={styles.catCard}
+                onPress={() =>
+                  navigation.navigate('CategoryProducts', { categoryId: c.id, categoryName: c.name })
+                }
+              >
+                <View style={styles.catIcon}>
+                  <MaterialCommunityIcons
+                    name={getCategoryIcon(c.name) as any}
+                    size={26}
+                    color={colors.primary.main}
+                  />
+                </View>
+                <Text style={styles.catName} numberOfLines={1}>
+                  {c.name}
+                </Text>
+              </PressableScale>
+            ))}
+          </ScrollView>
+        </FadeInUp>
+
+        {/* Smart deals */}
+        <FadeInUp delay={230}>
+          <View style={styles.sectionHead}>
+            <Text style={styles.sectionTitle}>Fırsatlar</Text>
+            <TouchableOpacity onPress={() => navigation.navigate('PriceDifferenceList')}>
+              <Text style={styles.link}>Tümünü incele</Text>
+            </TouchableOpacity>
+          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dealRail}>
+            {featuredProducts.slice(0, 8).map((p) => {
+              const price = getLowestPrice(p);
+              const store = getStoreName(p);
+              const disc = getDiscountPercent(p as any);
               return (
-                <SmartDealCard
-                  key={product.id}
-                  productName={product.name}
-                  price={price || '0.00'}
-                  unit={product.store_prices?.[0]?.unit || 'adet'}
-                  storeName={storeName}
-                  imageUrl={product.image_url || undefined}
-                  discountPercent={discountPercent > 0 ? discountPercent : undefined}
-                  onPress={() => navigation.navigate('ProductDetail', { productId: product.id })}
-                />
+                <PressableScale
+                  key={p.id}
+                  style={styles.dealCard}
+                  onPress={() => navigation.navigate('ProductDetail', { productId: p.id })}
+                >
+                  <View style={styles.dealImageWrap}>
+                    {p.image_url ? (
+                      <Image source={{ uri: p.image_url }} style={styles.dealImage} />
+                    ) : (
+                      <MaterialIcons name="inventory-2" size={28} color={colors.text.hint} />
+                    )}
+                    {disc > 0 && (
+                      <View style={styles.dealBadge}>
+                        <Text style={styles.dealBadgeText}>-%{disc}</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.dealName} numberOfLines={2}>
+                    {p.name}
+                  </Text>
+                  <Text style={styles.dealStore} numberOfLines={1}>
+                    {store}
+                  </Text>
+                  <Text style={styles.dealPrice}>
+                    ₺{price}
+                    <Text style={styles.dealPriceFrom}>'den</Text>
+                  </Text>
+                </PressableScale>
               );
             })}
           </ScrollView>
-          )}
-        </View>
+        </FadeInUp>
 
-        {/* Categories */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Kategoriler</Text>
-          <View style={styles.categoryGrid}>
-            {/* Tümü category (special case - en başta) */}
-            <CategoryItem
-              key={0}
-              name="Tümü"
-              icon="apps"
-              isActive={selectedCategory === 0}
-              onPress={() => {
-                setSelectedCategory(0);
-                navigation.navigate('CategoryProducts', {
-                  categoryId: 0,
-                  categoryName: 'Tüm Kategoriler',
-                });
-              }}
-            />
-            {/* Dynamic categories from API - 7 parent categories (Tümü ile toplam 8) */}
-            {categories.slice(0, 7).map((category) => (
-              <CategoryItem
-                key={category.id}
-                name={category.name}
-                icon={getCategoryIcon(category.name)}
-                isActive={selectedCategory === category.id}
-                onPress={() => {
-                  setSelectedCategory(category.id);
-                  navigation.navigate('CategoryProducts', {
-                    categoryId: category.id,
-                    categoryName: category.name,
-                  });
-                }}
-              />
+        {/* Markets we compare (no fake distance) */}
+        <FadeInUp delay={290}>
+          <View style={styles.sectionHead}>
+            <Text style={styles.sectionTitle}>Karşılaştırdığımız marketler</Text>
+          </View>
+          <View style={styles.marketsWrap}>
+            {markets.map((s) => (
+              <PressableScale
+                key={s.id}
+                style={styles.marketChip}
+                onPress={() => navigation.navigate('StoreDetail', { storeId: s.id })}
+              >
+                <MarketBadge name={s.name} size={34} />
+                <Text style={styles.marketName} numberOfLines={1}>
+                  {s.name}
+                </Text>
+              </PressableScale>
             ))}
           </View>
-        </View>
-
-        {/* Nearby Stores */}
-        <View style={[styles.section, styles.lastSection]}>
-          <Text style={styles.sectionLabel}>Yakındaki Mağazalar</Text>
-          {nearbyStores.length > 0 ? (
-            nearbyStores
-              .map((store) => {
-                const hasCoords =
-                  userCoords && store.lat != null && store.lon != null;
-                const km = hasCoords
-                  ? haversineKm(userCoords, { lat: store.lat as number, lon: store.lon as number })
-                  : null;
-                return { store, km };
-              })
-              // Mesafesi bilinenleri yakından uzağa sırala (bilinmeyenler sona)
-              .sort((a, b) => (a.km ?? Infinity) - (b.km ?? Infinity))
-              .map(({ store, km }) => (
-                <NearbyStoreCard
-                  key={store.id}
-                  storeName={store.name}
-                  distance={km != null ? formatDistance(km) : undefined}
-                  subtitle={km == null ? store.address || undefined : undefined}
-                  logoUrl={store.logo_url || undefined}
-                  onPress={() => navigation.navigate('StoreDetail', { storeId: store.id })}
-                />
-              ))
-          ) : (
-            <Text style={styles.emptyText}>Yakında market bulunamadı</Text>
-          )}
-        </View>
+        </FadeInUp>
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.default,
-  },
+// Market badge — real local logo if we have it, else a colored initial.
+function MarketBadge({ name, size = 32 }: { name: string; size?: number }) {
+  const asset = getStoreLogoAsset(name);
+  const key = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const tint =
+    (colors.storeChips as Record<string, string>)[
+      key.includes('carrefour') ? 'carrefoursa' : key
+    ] || colors.primary.main;
+  if (asset) {
+    return (
+      <View style={[badge.wrap, { width: size, height: size, borderRadius: size / 3 }]}>
+        <Image source={asset} style={{ width: size * 0.74, height: size * 0.74, resizeMode: 'contain' }} />
+      </View>
+    );
+  }
+  return (
+    <View style={[badge.wrap, { width: size, height: size, borderRadius: size / 3, backgroundColor: tint }]}>
+      <Text style={[badge.initial, { fontSize: size * 0.4 }]}>{name.charAt(0).toUpperCase()}</Text>
+    </View>
+  );
+}
 
-  header: {
-    backgroundColor: `${colors.background.paper}F2`, // ~95% opacity
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-
-  headerContent: {
-    flexDirection: 'column',
-    paddingTop: spacing.md,
-    paddingBottom: spacing.md,
-    gap: spacing.md,
-  },
-
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+const badge = StyleSheet.create({
+  wrap: {
+    backgroundColor: colors.background.paper,
     alignItems: 'center',
-    paddingHorizontal: layout.screenPadding,
-    minHeight: 44, // Daha iyi dokunma alanı ve ortalama için
-    paddingVertical: spacing.xs,
-  },
-
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    lineHeight: 24,
-    letterSpacing: -0.5,
-    color: colors.text.primary,
-  },
-
-  divider: {
-    width: 1,
-    height: 16,
-    backgroundColor: colors.border.light,
-  },
-
-  subtitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.text.secondary,
-    letterSpacing: 0.5,
-  },
-
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-
-  iconButton: {
-    width: 32,
-    height: 32,
     justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-
-  notificationDot: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#EF4444',
     borderWidth: 1,
-    borderColor: colors.background.paper,
+    borderColor: colors.border.light,
   },
-
-  content: {
-    flex: 1,
-  },
-
-  section: {
-    padding: layout.screenPadding,
-    gap: spacing.sm,
-  },
-
-  sectionLabel: {
-    ...typography.styles.overline,
-    fontSize: 10,
-    fontWeight: '600',
-    color: colors.text.secondary,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    marginBottom: spacing.sm,
-  },
-
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginBottom: spacing.sm,
-  },
-
-  seeAllText: {
-    ...typography.styles.body2,
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.secondary.main,
-  },
-
-  statsSection: {
-    flexDirection: 'row',
-    paddingHorizontal: layout.screenPadding,
-    marginBottom: spacing.md,
-  },
-
-  statsGap: {
-    width: spacing.sm,
-  },
-
-  horizontalScroll: {
-    paddingRight: layout.screenPadding,
-    paddingBottom: spacing.md,
-  },
-
-  categoryGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-
-  lastSection: {
-    // Padding removed - now handled by ScrollView contentContainerStyle
-  },
-
-  emptyText: {
-    ...typography.styles.body2,
-    color: colors.text.hint,
-    textAlign: 'center',
-    paddingVertical: spacing.lg,
+  initial: {
+    color: colors.background.paper,
+    fontWeight: '800',
   },
 });
 
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background.default },
+
+  // Header
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: layout.screenPadding,
+    paddingBottom: spacing.sm,
+  },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  wordmark: { ...typography.styles.h3, color: colors.text.primary },
+  headerActions: { flexDirection: 'row', gap: spacing.sm },
+  iconBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.paper,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  dot: {
+    position: 'absolute',
+    top: 9,
+    right: 10,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: colors.accent.main,
+  },
+
+  sectionPad: { paddingHorizontal: layout.screenPadding },
+
+  // Hero
+  hero: {
+    flexDirection: 'row',
+    backgroundColor: colors.primary.main,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
+    marginTop: spacing.xs,
+    overflow: 'hidden',
+    ...shadows.md,
+  },
+  heroBody: { flex: 1 },
+  heroGreeting: {
+    ...typography.styles.body2,
+    color: colors.primary[100],
+    marginBottom: spacing.sm,
+  },
+  heroOverline: {
+    ...typography.styles.overline,
+    color: colors.primary[200],
+    marginBottom: 2,
+  },
+  heroNumber: {
+    ...typography.styles.display,
+    color: colors.background.paper,
+  },
+  heroSub: {
+    ...typography.styles.body2,
+    color: colors.primary[100],
+    marginTop: spacing.xs,
+    maxWidth: 200,
+  },
+  heroMascot: { alignSelf: 'center' },
+
+  // Active list card
+  listCard: {
+    backgroundColor: colors.background.paper,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
+    marginTop: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    ...shadows.sm,
+  },
+  listCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  overline: { ...typography.styles.overline, color: colors.text.secondary },
+  savePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: colors.success.bg,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 3,
+    borderRadius: borderRadius.full,
+  },
+  savePillText: { ...typography.styles.caption, color: colors.success.dark, fontWeight: '700' },
+  listName: { ...typography.styles.h3, color: colors.text.primary, marginTop: spacing.xs },
+  listMeta: { ...typography.styles.body2, color: colors.text.secondary, marginTop: 2 },
+  miniLogos: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.md },
+  listCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.primary.main,
+    borderRadius: borderRadius.md,
+    paddingVertical: spacing.md,
+    marginTop: spacing.md,
+  },
+  listCtaText: { ...typography.styles.button, color: colors.background.paper },
+
+  // Empty card
+  emptyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.background.paper,
+    borderRadius: borderRadius.xl,
+    padding: spacing.lg,
+    marginTop: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    ...shadows.sm,
+  },
+  emptyBody: { flex: 1 },
+  emptyTitle: { ...typography.styles.h4, color: colors.text.primary },
+  emptySub: { ...typography.styles.body2, color: colors.text.secondary, marginTop: 2 },
+  emptyPlus: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.accent.main,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Sections
+  sectionHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: layout.screenPadding,
+    marginTop: spacing.xl,
+    marginBottom: spacing.md,
+  },
+  sectionTitle: { ...typography.styles.h4, color: colors.text.primary },
+  link: { ...typography.styles.subtitle2, color: colors.accent.main },
+
+  // Category rail
+  catRail: { paddingHorizontal: layout.screenPadding, gap: spacing.sm },
+  catCard: {
+    width: 78,
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  catIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.secondary[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  catName: { ...typography.styles.caption, color: colors.text.secondary, textAlign: 'center' },
+
+  // Deal rail
+  dealRail: { paddingHorizontal: layout.screenPadding, gap: spacing.md, paddingRight: spacing.xl },
+  dealCard: {
+    width: 150,
+    backgroundColor: colors.background.paper,
+    borderRadius: borderRadius.lg,
+    padding: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    ...shadows.sm,
+  },
+  dealImageWrap: {
+    height: 96,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.default,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    marginBottom: spacing.sm,
+  },
+  dealImage: { width: '86%', height: '86%', resizeMode: 'contain' },
+  dealBadge: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    backgroundColor: colors.accent.main,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+  },
+  dealBadgeText: { ...typography.styles.caption, color: colors.background.paper, fontWeight: '800', fontSize: 11 },
+  dealName: { ...typography.styles.subtitle2, color: colors.text.primary, minHeight: 36 },
+  dealStore: { ...typography.styles.caption, color: colors.text.secondary, marginTop: 2 },
+  dealPrice: { ...typography.styles.price, color: colors.primary.main, marginTop: spacing.xs },
+  dealPriceFrom: { ...typography.styles.caption, color: colors.text.hint, fontWeight: '400' },
+
+  // Markets
+  marketsWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    paddingHorizontal: layout.screenPadding,
+  },
+  marketChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.background.paper,
+    borderRadius: borderRadius.full,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingRight: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  marketName: { ...typography.styles.subtitle2, color: colors.text.primary },
+});

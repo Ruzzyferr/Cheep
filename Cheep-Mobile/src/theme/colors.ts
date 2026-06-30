@@ -1,118 +1,138 @@
 /**
- * 🎨 Cheep Color Palette
- * Modern fintech / clean design system
- * Vibrant teal accent · neutral white surfaces · soft elevation
- * Inspired by: Revolut × N26 × Stripe
+ * 🎨 Cheep Color Palette — "Fresh Market"
+ * Light, editorial, premium-grocery system.
+ * Cream paper · deep forest green (brand) · warm clementine accent · mascot mint.
+ *
+ * Token NAMES are preserved from the previous theme so every screen picks up the
+ * new look automatically; semantics: `primary`=forest (brand/CTA), `secondary`=
+ * mint-green (positive/savings), `accent`=clementine (warm highlights/deals).
  */
 
 export const colors = {
-  // Primary Colors - Vibrant Teal (brand accent: buttons, FAB, active states, prices)
+  // Primary — Forest green (brand, CTAs, active states)
   primary: {
-    main: '#0D9488',      // Teal 600 - güçlü, beyaz üstünde okunur
-    light: '#14B8A6',     // Teal 500
-    dark: '#0F766E',      // Teal 700 - basılı/koyu durum
-    50: '#F0FDFA',
-    100: '#CCFBF1',
-    200: '#99F6E4',
-    300: '#5EEAD4',
-    400: '#2DD4BF',
-    500: '#14B8A6',
-    600: '#0D9488',
-    700: '#0F766E',
-    800: '#115E59',
-    900: '#134E4A',
+    main: '#1F6F4A',
+    light: '#2E9E78',
+    dark: '#16513A',
+    50: '#ECF6F0',
+    100: '#D2EBDD',
+    200: '#A9D8BF',
+    300: '#7FC4A1',
+    400: '#54B083',
+    500: '#2E9E78',
+    600: '#1F6F4A',
+    700: '#16513A',
+    800: '#0F3A29',
+    900: '#0A2A1E',
   },
 
-  // Secondary Colors - Teal aksanın açık tonu (savings/positive vurgular)
+  // Secondary — Mascot mint (positive / savings, soft fills)
   secondary: {
-    main: '#14B8A6',      // Teal
-    light: '#5EEAD4',
-    dark: '#0D9488',
-    50: '#F0FDFA',
-    100: '#CCFBF1',
-    200: '#99F6E4',
-    300: '#5EEAD4',
-    400: '#2DD4BF',
-    500: '#14B8A6',
-    600: '#0D9488',
-    700: '#0F766E',
+    main: '#2E9E78',
+    light: '#57C99A',
+    dark: '#1F6F4A',
+    50: '#EAF7F0',
+    100: '#D5EFE2',
+    200: '#AEE0C8',
+    300: '#86D0AD',
+    400: '#57C99A',
+    500: '#2E9E78',
+    600: '#1F6F4A',
+    700: '#16513A',
   },
 
-  // Background Colors - temiz, nötr
+  // Accent — Clementine (warm highlights, deals, savings emphasis)
+  accent: {
+    main: '#F0682B',
+    light: '#F89B6F',
+    dark: '#C8521E',
+    50: '#FDEEE6',
+    100: '#FAD8C6',
+    200: '#F6B89C',
+    300: '#F39872',
+    400: '#F0682B',
+    500: '#D85B22',
+    600: '#C8521E',
+  },
+
+  // Backgrounds — warm cream paper
   background: {
-    default: '#F6F8FA',   // Çok açık nötr gri zemin
-    paper: '#FFFFFF',     // Kartlar için saf beyaz
-    card: '#FFFFFF',      // Card background
-    input: '#F3F5F7',     // Input background
-    // Dark mode
-    dark: '#0A0F1A',      // Very dark navy / near-black
-    darkPaper: '#0F172A', // Dark card
-    darkCard: '#0F172A',
+    default: '#FBFAF6',   // cream canvas
+    paper: '#FFFFFF',     // cards
+    card: '#FFFFFF',
+    input: '#F3F1EA',     // warm input
+    // Dark mode (kept for later)
+    dark: '#10140F',
+    darkPaper: '#171C15',
+    darkCard: '#171C15',
   },
 
-  // Text Colors
+  // Text — warm ink
   text: {
-    primary: '#0F172A',   // Almost black
-    secondary: '#64748B', // Slate gray
-    disabled: '#CBD5E1',
-    hint: '#94A3B8',
-    // Dark mode
-    darkPrimary: '#F1F5F9', // Soft gray, not pure white
-    darkSecondary: '#CBD5E1',
+    primary: '#14211B',   // ink
+    secondary: '#5B6B62', // warm gray-green
+    disabled: '#C2CDC6',
+    hint: '#93A29A',
+    darkPrimary: '#F2F5F0',
+    darkSecondary: '#C2CDC6',
   },
 
-  // Status Colors - Muted and professional
+  // Status
   success: {
-    main: '#14B8A6',      // Muted teal
-    light: '#5EEAD4',
-    dark: '#0D9488',
-    bg: '#F0FDFA',        // Very subtle background
+    main: '#1F8E5A',
+    light: '#57C99A',
+    dark: '#16693F',
+    bg: '#E8F6EE',
   },
-
   error: {
-    main: '#EF4444',      // Red (kept for errors)
-    light: '#F87171',
-    dark: '#DC2626',
-    bg: '#FEF2F2',
+    main: '#E5484D',
+    light: '#F0787C',
+    dark: '#C13438',
+    bg: '#FCEDED',
   },
-
   warning: {
-    main: '#F59E0B',      // Amber
-    light: '#FBBF24',
-    dark: '#D97706',
-    bg: '#FFFBEB',
+    main: '#D98324',
+    light: '#EBA94E',
+    dark: '#A9631A',
+    bg: '#FBEFD9',
   },
-
   info: {
-    main: '#3B82F6',      // Blue
+    main: '#3B82F6',
     light: '#60A5FA',
     dark: '#2563EB',
     bg: '#EFF6FF',
   },
 
-  // Border & Divider
+  // Border & Divider — warm neutrals
   border: {
-    main: '#E5E7EB',      // Subtle gray
-    light: '#F3F4F6',
-    dark: '#D1D5DB',
-    // Dark mode
-    darkMain: '#1E293B',
+    main: '#E7E3D8',
+    light: '#F0EDE4',
+    dark: '#D8D3C6',
+    darkMain: '#26301F',
   },
+  divider: '#E7E3D8',
 
-  divider: '#E5E7EB',
-
-  // Overlay
-  overlay: 'rgba(15, 23, 42, 0.45)',
-
-  // Transparent
+  overlay: 'rgba(20, 33, 27, 0.45)',
   transparent: 'transparent',
 
-  // Specific UI Elements
-  fab: '#0D9488',           // Teal FAB
-  tabBarActive: '#0D9488',
-  tabBarInactive: '#94A3B8',
-  
-  // Store Chips (Market logoları için) - Muted versions
+  // Brand tokens (mascot + canvas) — for illustrative surfaces
+  brand: {
+    forest: '#1F6F4A',
+    mint: '#57C99A',
+    mintSoft: '#E8F7EF',
+    cream: '#FBFAF6',
+    clementine: '#F0682B',
+    lilac: '#C9B8E8',
+    lilacSoft: '#EFEAF8',
+    ink: '#14211B',
+  },
+
+  // Specific UI elements
+  fab: '#1F6F4A',
+  tabBarActive: '#1F6F4A',
+  tabBarInactive: '#93A29A',
+
+  // Store brand colors
   storeChips: {
     bim: '#6B8E7F',
     migros: '#FF7A00',
@@ -125,4 +145,3 @@ export const colors = {
 export type ColorKey = keyof typeof colors;
 export type PrimaryColor = keyof typeof colors.primary;
 export type SecondaryColor = keyof typeof colors.secondary;
-
