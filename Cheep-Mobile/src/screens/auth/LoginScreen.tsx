@@ -12,7 +12,10 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Button, Input } from '../../components/ui';
+import { CheepMascot } from '../../components/brand/CheepMascot';
+import { FadeInUp, Float } from '../../components/anim';
 import { useAuth } from '../../context/AuthContext';
 import { colors, typography, spacing, layout } from '../../theme';
 
@@ -69,18 +72,20 @@ export function LoginScreen({ navigation }: any) {
         keyboardShouldPersistTaps="handled"
       >
         {/* Logo */}
-        <View style={styles.logoContainer}>
-          <View style={styles.logoPlaceholder}>
-            <Text style={styles.logoText}>🐦</Text>
-          </View>
+        <FadeInUp style={styles.logoContainer}>
+          <Float>
+            <View style={styles.logoPlaceholder}>
+              <CheepMascot size={96} shadow={false} />
+            </View>
+          </Float>
           <Text style={styles.appName}>Cheep</Text>
           <Text style={styles.tagline}>Akıllı Alışveriş Asistanı</Text>
-        </View>
+        </FadeInUp>
 
         {/* Form */}
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>Hoş Geldiniz!</Text>
-          <Text style={styles.subtitle}>Hesabınıza giriş yapın</Text>
+        <FadeInUp delay={120} style={styles.formContainer}>
+          <Text style={styles.title}>Hoş geldin 👋</Text>
+          <Text style={styles.subtitle}>Hesabına giriş yap</Text>
 
           <Input
             label="Email"
@@ -91,7 +96,7 @@ export function LoginScreen({ navigation }: any) {
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
-            leftIcon={<Text>📧</Text>}
+            leftIcon={<MaterialIcons name="mail-outline" size={20} color={colors.text.hint} />}
             required
           />
 
@@ -104,6 +109,7 @@ export function LoginScreen({ navigation }: any) {
             secureTextEntry
             autoCapitalize="none"
             autoComplete="password"
+            leftIcon={<MaterialIcons name="lock-outline" size={20} color={colors.text.hint} />}
             required
           />
 
@@ -124,7 +130,7 @@ export function LoginScreen({ navigation }: any) {
               variant="text"
             />
           </View>
-        </View>
+        </FadeInUp>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -148,17 +154,9 @@ const styles = StyleSheet.create({
   },
 
   logoPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.primary.light,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
-  },
-
-  logoText: {
-    fontSize: 50,
   },
 
   appName: {

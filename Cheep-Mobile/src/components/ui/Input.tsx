@@ -13,6 +13,7 @@ import {
   TextInputProps,
   TouchableOpacity,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 
 interface InputProps extends TextInputProps {
@@ -71,8 +72,13 @@ export function Input({
           <TouchableOpacity
             style={styles.rightIcon}
             onPress={() => setReveal((prev) => !prev)}
+            hitSlop={8}
           >
-            <Text>{isSecure ? '👁️' : '👁️‍🗨️'}</Text>
+            <MaterialIcons
+              name={isSecure ? 'visibility-off' : 'visibility'}
+              size={20}
+              color={colors.text.hint}
+            />
           </TouchableOpacity>
         )}
         
@@ -105,10 +111,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.background.input,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border.light,
-    height: 48,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1.5,
+    borderColor: colors.border.main,
+    height: 54,
     paddingHorizontal: spacing.md,
   },
 

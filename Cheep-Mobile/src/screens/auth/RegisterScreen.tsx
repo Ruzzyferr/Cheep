@@ -12,9 +12,14 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Button, Input } from '@/src/components';
+import { CheepMascot } from '../../components/brand/CheepMascot';
+import { FadeInUp } from '../../components/anim';
 import { useAuth } from '../../context/AuthContext';
 import { colors, typography, spacing, layout } from '../../theme';
+
+const hint = (name: any) => <MaterialIcons name={name} size={20} color={colors.text.hint} />;
 
 export function RegisterScreen({ navigation }: any) {
   const { register } = useAuth();
@@ -80,12 +85,17 @@ export function RegisterScreen({ navigation }: any) {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>Hesap Oluştur</Text>
-          <Text style={styles.subtitle}>Cheep&apos;e katılın ve tasarruf edin</Text>
-        </View>
+        <FadeInUp style={styles.header}>
+          <View style={styles.brandRow}>
+            <CheepMascot size={56} shadow={false} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.title}>Hesap oluştur</Text>
+              <Text style={styles.subtitle}>Cheep&apos;e katıl, tasarrufa başla</Text>
+            </View>
+          </View>
+        </FadeInUp>
 
-        <View style={styles.formContainer}>
+        <FadeInUp delay={100} style={styles.formContainer}>
           <Input
             label="İsim"
             placeholder="Adınız Soyadınız"
@@ -94,7 +104,7 @@ export function RegisterScreen({ navigation }: any) {
             error={errors.name}
             autoCapitalize="words"
             autoComplete="name"
-            leftIcon={<Text>👤</Text>}
+            leftIcon={hint('person-outline')}
             required
           />
 
@@ -107,7 +117,7 @@ export function RegisterScreen({ navigation }: any) {
             keyboardType="email-address"
             autoCapitalize="none"
             autoComplete="email"
-            leftIcon={<Text>📧</Text>}
+            leftIcon={hint('mail-outline')}
             required
           />
 
@@ -120,6 +130,7 @@ export function RegisterScreen({ navigation }: any) {
             secureTextEntry
             autoCapitalize="none"
             autoComplete="password"
+            leftIcon={hint('lock-outline')}
             required
           />
 
@@ -131,6 +142,7 @@ export function RegisterScreen({ navigation }: any) {
             error={errors.confirmPassword}
             secureTextEntry
             autoCapitalize="none"
+            leftIcon={hint('lock-outline')}
             required
           />
 
@@ -151,7 +163,7 @@ export function RegisterScreen({ navigation }: any) {
               variant="text"
             />
           </View>
-        </View>
+        </FadeInUp>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -171,6 +183,12 @@ const styles = StyleSheet.create({
   header: {
     marginTop: spacing['2xl'],
     marginBottom: spacing.xl,
+  },
+
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
   },
 
   title: {

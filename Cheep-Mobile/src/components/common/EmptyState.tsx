@@ -7,6 +7,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Button } from '../ui';
+import { CheepMascot, type MascotExpression } from '../brand/CheepMascot';
 import { colors, typography, spacing } from '../../theme';
 
 interface EmptyStateProps {
@@ -14,6 +15,8 @@ interface EmptyStateProps {
   icon?: keyof typeof MaterialIcons.glyphMap;
   /** Legacy emoji support. */
   emoji?: string;
+  /** Show the Cheep mascot instead of an icon badge (friendlier empty states). */
+  mascot?: MascotExpression;
   title: string;
   description?: string;
   actionLabel?: string;
@@ -23,6 +26,7 @@ interface EmptyStateProps {
 export function EmptyState({
   icon = 'inbox',
   emoji,
+  mascot,
   title,
   description,
   actionLabel,
@@ -40,13 +44,19 @@ export function EmptyState({
 
   return (
     <Animated.View style={[styles.container, { opacity: fade, transform: [{ translateY: lift }] }]}>
-      <View style={styles.badge}>
-        {emoji ? (
-          <Text style={styles.emoji}>{emoji}</Text>
-        ) : (
-          <MaterialIcons name={icon} size={40} color={colors.primary.main} />
-        )}
-      </View>
+      {mascot ? (
+        <View style={styles.mascotWrap}>
+          <CheepMascot size={104} expression={mascot} />
+        </View>
+      ) : (
+        <View style={styles.badge}>
+          {emoji ? (
+            <Text style={styles.emoji}>{emoji}</Text>
+          ) : (
+            <MaterialIcons name={icon} size={40} color={colors.primary.main} />
+          )}
+        </View>
+      )}
       <Text style={styles.title}>{title}</Text>
       {description && <Text style={styles.description}>{description}</Text>}
       {actionLabel && onAction && (
@@ -71,6 +81,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary[50],
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+
+  mascotWrap: {
     marginBottom: spacing.lg,
   },
 

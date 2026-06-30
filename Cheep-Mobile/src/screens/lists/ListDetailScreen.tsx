@@ -170,7 +170,7 @@ export function ListDetailScreen({
         ]}
         ListEmptyComponent={
           <EmptyState
-            icon="add-shopping-cart"
+            mascot="search"
             title="Liste boş"
             description="Bu listeye henüz ürün eklenmemiş"
             actionLabel="Ürün Ekle"

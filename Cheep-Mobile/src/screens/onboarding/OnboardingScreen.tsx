@@ -20,6 +20,8 @@ import {
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { profileService } from '../../services';
+import { CheepMascot } from '../../components/brand/CheepMascot';
+import { Float } from '../../components/anim';
 import { colors, typography, spacing, borderRadius, layout } from '../../theme';
 import { ONBOARDING_QUESTIONS } from './onboardingConfig';
 import type { UserProfile } from '../../types';
@@ -349,9 +351,9 @@ export function OnboardingScreen() {
 
         {/* Mascot */}
         <View style={styles.mascotContainer}>
-          <View style={styles.mascotCircle}>
-            <Text style={styles.mascotEmoji}>🐦</Text>
-          </View>
+          <Float>
+            <CheepMascot size={88} expression="happy" />
+          </Float>
           <Text style={styles.mascotText}>{question.mascot}</Text>
         </View>
 

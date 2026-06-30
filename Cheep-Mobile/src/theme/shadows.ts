@@ -47,13 +47,13 @@ export const shadows = {
     elevation: 10,
   },
 
-  // FAB shadow - teal-tonlu, belirgin
+  // FAB / primary button shadow — forest-tonlu, yumuşak (premium)
   fab: {
-    shadowColor: '#0D9488',
+    shadowColor: '#1F6F4A',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.32,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOpacity: 0.22,
+    shadowRadius: 14,
+    elevation: 6,
   },
 
   // Card shadow - yumuşak floating
