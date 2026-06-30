@@ -42,6 +42,29 @@ export const productService = {
   },
 
   /**
+   * Get products WITH pagination metadata (for infinite scroll).
+   * Backend returns { success, data, pagination: { total, limit, offset, hasMore } }.
+   */
+  async getProductsPage(params?: {
+    search?: string;
+    category_id?: number;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ items: Product[]; hasMore: boolean; total: number }> {
+    const response = await apiClient.get<ApiResponse<Product[]> & {
+      pagination?: { total: number; limit: number; offset: number; hasMore: boolean };
+    }>(API_ENDPOINTS.PRODUCTS.ALL, { params });
+    const items = response.data.data || [];
+    const pg = response.data.pagination;
+    const limit = params?.limit ?? 50;
+    return {
+      items,
+      hasMore: pg ? !!pg.hasMore : items.length >= limit,
+      total: pg?.total ?? items.length,
+    };
+  },
+
+  /**
    * Get product by ID
    */
   async getProductById(id: number): Promise<Product> {

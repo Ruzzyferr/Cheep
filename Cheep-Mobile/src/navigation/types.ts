@@ -18,6 +18,7 @@ export type RootStackParamList = {
   Main: undefined;
   Onboarding: undefined;
   Assistant: undefined;
+  Intro: { replay?: boolean } | undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

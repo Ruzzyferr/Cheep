@@ -12,6 +12,7 @@ import { TabNavigator } from './TabNavigator';
 import { OnboardingNavigator } from './OnboardingNavigator';
 import { AssistantNavigator } from './AssistantNavigator';
 import { VerifyEmailScreen } from '../screens/auth/VerifyEmailScreen';
+import { IntroTourScreen } from '../screens/intro/IntroTourScreen';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { colors } from '../theme';
 import type { RootStackParamList } from './types';
@@ -19,7 +20,7 @@ import type { RootStackParamList } from './types';
 const Stack = createStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
-  const { isAuthenticated, isLoading, emailVerified, onboardingDone } = useAuth();
+  const { isAuthenticated, isLoading, emailVerified, onboardingDone, introSeen } = useAuth();
 
   // Show loading screen while checking auth
   if (isLoading) {
@@ -33,7 +34,10 @@ export function RootNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!isAuthenticated ? (
+        {!introSeen ? (
+          // İlk açılış: "nasıl kullanılır" tanıtımı (auth'tan önce)
+          <Stack.Screen name="Intro" component={IntroTourScreen} />
+        ) : !isAuthenticated ? (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         ) : !emailVerified ? (
           <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
@@ -43,6 +47,12 @@ export function RootNavigator() {
           <>
             <Stack.Screen name="Main" component={TabNavigator} />
             <Stack.Screen name="Assistant" component={AssistantNavigator} />
+            {/* Profil'den tekrar oynatma için (replay) */}
+            <Stack.Screen
+              name="Intro"
+              component={IntroTourScreen}
+              options={{ presentation: 'modal' }}
+            />
           </>
         )}
       </Stack.Navigator>

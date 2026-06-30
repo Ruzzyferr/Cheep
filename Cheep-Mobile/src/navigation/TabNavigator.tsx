@@ -16,14 +16,24 @@ import { HomeNavigator } from './HomeNavigator';
 import { ListsNavigator } from './ListsNavigator';
 import { DealsNavigator } from './DealsNavigator';
 import { ProfileNavigator } from './ProfileNavigator';
+import { CartProvider, useCart } from '../context/CartContext';
 import { colors, spacing, shadows } from '../theme';
 import type { TabParamList, RootStackParamList } from './types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
 export function TabNavigator() {
+  return (
+    <CartProvider>
+      <TabNavigatorInner />
+    </CartProvider>
+  );
+}
+
+function TabNavigatorInner() {
   const insets = useSafeAreaInsets();
-  
+  const { count } = useCart();
+
   return (
     <View style={styles.container}>
       <Tab.Navigator
@@ -82,6 +92,15 @@ export function TabNavigator() {
           component={ListsNavigator}
           options={{
             tabBarLabel: 'Listelerim',
+            // Aktif listedeki ürün sayısını rozet olarak göster — kullanıcı
+            // Listelerim'e girmeden sepetinde kaç ürün olduğunu görür.
+            tabBarBadge: count > 0 ? count : undefined,
+            tabBarBadgeStyle: {
+              backgroundColor: colors.primary.main,
+              color: colors.background.paper,
+              fontSize: 10,
+              fontWeight: '700',
+            },
             tabBarIcon: ({ color }) => (
               <MaterialIcons
                 name="list-alt"

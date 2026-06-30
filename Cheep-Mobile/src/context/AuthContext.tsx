@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService, profileService } from '../services';
-import { authStorage, userStorage } from '../utils/storage';
+import { authStorage, userStorage, introStorage } from '../utils/storage';
 import type { User, LoginRequest, RegisterRequest } from '../types';
 
 interface AuthContextType {
@@ -14,6 +14,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   emailVerified: boolean;
   onboardingDone: boolean;
+  introSeen: boolean;
+  markIntroSeen: () => Promise<void>;
   login: (data: LoginRequest) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
@@ -29,6 +31,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [onboardingDone, setOnboardingDone] = useState(false);
+  const [introSeen, setIntroSeen] = useState(false);
+
+  const markIntroSeen = async () => {
+    await introStorage.markSeen();
+    setIntroSeen(true);
+  };
 
   // Check authentication on mount
   useEffect(() => {
@@ -47,6 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
+      // Intro tour'u daha önce gördü mü? (auth'tan bağımsız, ilk açılış kapısı)
+      setIntroSeen(await introStorage.hasSeen());
+
       const hasToken = await authStorage.hasToken();
 
       if (hasToken) {
@@ -149,6 +160,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: !!user,
     emailVerified,
     onboardingDone,
+    introSeen,
+    markIntroSeen,
     login,
     register,
     logout,

@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   ScrollView,
   Alert,
@@ -89,11 +90,26 @@ export function StrategyDetailScreen({
             </View>
           )}
 
-          {/* Coverage */}
-          <View style={styles.coverageRow}>
-            <Text style={styles.coverageLabel}>Kapsama:</Text>
-            <Text style={styles.coverageValue}>{num(strategy.coveragePercentage)}%</Text>
-          </View>
+          {/* Coverage — net görsel durum */}
+          {(() => {
+            const missing = strategy.missingProducts.length;
+            const full = missing === 0;
+            return (
+              <View style={[styles.covBadge, full ? styles.covFull : styles.covPartial]}>
+                <MaterialIcons
+                  name={full ? 'check-circle' : 'error-outline'}
+                  size={16}
+                  color={full ? colors.success.dark : colors.warning.dark}
+                />
+                <Text style={[styles.covText, full ? styles.covTextFull : styles.covTextPartial]}>
+                  {full ? 'Tüm ürünler bu rotada' : `${missing} ürün bu rotada yok`}
+                </Text>
+                <Text style={[styles.covPct, full ? styles.covTextFull : styles.covTextPartial]}>
+                  %{num(strategy.coveragePercentage)}
+                </Text>
+              </View>
+            );
+          })()}
         </View>
 
         {/* Stores */}
@@ -248,6 +264,14 @@ function ProductRow({ productAllocation }: { productAllocation: ProductAllocatio
   return (
     <Card padding="sm" style={styles.productCard}>
       <View style={styles.productRow}>
+        {/* Thumbnail — ürünü gözle tanımak market sırasını takip etmeyi kolaylaştırır */}
+        <View style={styles.thumb}>
+          {product.image_url ? (
+            <Image source={{ uri: product.image_url }} style={styles.thumbImage} />
+          ) : (
+            <MaterialIcons name="inventory-2" size={20} color={colors.text.hint} />
+          )}
+        </View>
         <View style={styles.productInfo}>
           <Text style={styles.productName} numberOfLines={2}>
             {displayName}
@@ -362,21 +386,40 @@ const styles = StyleSheet.create({
     color: colors.warning.dark,
   },
 
-  coverageRow: {
+  covBadge: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: 8,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.sm,
   },
 
-  coverageLabel: {
-    ...typography.styles.body1,
-    color: colors.text.secondary,
+  covFull: {
+    backgroundColor: colors.success.bg,
   },
 
-  coverageValue: {
-    ...typography.styles.subtitle1,
-    color: colors.text.primary,
+  covPartial: {
+    backgroundColor: colors.warning.bg,
+  },
+
+  covText: {
+    ...typography.styles.body2,
     fontWeight: '600',
+    flex: 1,
+  },
+
+  covPct: {
+    ...typography.styles.body2,
+    fontWeight: '700',
+  },
+
+  covTextFull: {
+    color: colors.success.dark,
+  },
+
+  covTextPartial: {
+    color: colors.warning.dark,
   },
 
   section: {
@@ -436,6 +479,24 @@ const styles = StyleSheet.create({
   productRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  thumb: {
+    width: 44,
+    height: 44,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.background.default,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    marginRight: spacing.sm,
+  },
+
+  thumbImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
   },
 
   productInfo: {

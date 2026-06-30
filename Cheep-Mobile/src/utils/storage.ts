@@ -27,6 +27,7 @@ const STORAGE_KEYS = {
   REFRESH_TOKEN: 'refresh_token',
   USER_DATA: 'user_data',
   ONBOARDING_COMPLETED: 'onboarding_completed',
+  INTRO_SEEN: 'intro_seen',
   USER_LOCATION: 'user_location',
   USER_COUNTRY: 'user_country',
   FAVORITE_STORES: 'favorite_stores',
@@ -142,6 +143,16 @@ export const countryStorage = {
 
   async getCountry(): Promise<string | null> {
     return await storage.getItem(STORAGE_KEYS.USER_COUNTRY);
+  },
+};
+
+// Intro tour ("how to use") — shown once on first launch, cihazda saklanır.
+export const introStorage = {
+  async hasSeen(): Promise<boolean> {
+    return (await storage.getItem(STORAGE_KEYS.INTRO_SEEN)) === '1';
+  },
+  async markSeen(): Promise<void> {
+    await storage.setItem(STORAGE_KEYS.INTRO_SEEN, '1');
   },
 };
 

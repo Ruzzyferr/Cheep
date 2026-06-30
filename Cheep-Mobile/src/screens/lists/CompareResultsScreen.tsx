@@ -20,6 +20,7 @@ import { Card } from '../../components/ui';
 import { StoreChip } from '../../components/store/StoreChip';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
+import { compareInsights, byCoverageThenScore, missingCount } from '../../utils/compareInsights';
 import type { CompareResponse, RouteStrategy } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 
@@ -78,7 +79,12 @@ export function CompareResultsScreen({
     return null;
   }
 
-  const { strategies, summary } = results;
+  const { strategies } = results;
+
+  // Kapsama-bilinçli özet: fiyatlar yalnızca AYNI ürünleri kapsayan rotalar
+  // arasında karşılaştırılabilir (eksik ürünlü ucuz rota yanıltıcıdır).
+  const insights = compareInsights(strategies);
+  const totalItems = results.totalItems;
 
   // Filtreleme ve sıralama
   let filteredStrategies = [...strategies];
@@ -110,7 +116,9 @@ export function CompareResultsScreen({
         return priceDiff;
       case 'score':
       default:
-        return b.score - a.score;
+        // "Önerilen": önce en eksiksiz sepet, sonra en yüksek skor. Daha ucuz
+        // ama eksik bir rota, tam bir sepetin önüne ASLA geçmesin.
+        return byCoverageThenScore(a, b);
     }
   });
 
@@ -158,9 +166,9 @@ export function CompareResultsScreen({
           <Text style={styles.filterLabel}>Sıralama</Text>
           <View style={styles.filterButtons}>
             {([
-              { value: 'score' as SortOption, label: 'Skor' },
-              { value: 'price' as SortOption, label: 'Fiyat' },
-              { value: 'distance' as SortOption, label: 'Konum' },
+              { value: 'score' as SortOption, label: 'Önerilen' },
+              { value: 'price' as SortOption, label: 'En ucuz' },
+              { value: 'distance' as SortOption, label: 'En yakın' },
               { value: 'price_distance' as SortOption, label: 'Fiyat + Konum' },
             ]).map((option) => (
               <TouchableOpacity
@@ -185,40 +193,53 @@ export function CompareResultsScreen({
         </View>
       </View>
 
-      {/* Summary Cards */}
+      {/* Summary */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Özet</Text>
         <View style={styles.summaryGrid}>
-          {summary.cheapestOption && (
+          {insights.cheapest && (
             <Card padding="md" style={styles.summaryCard}>
-              <Text style={styles.summaryCardTitle}>En Ucuz</Text>
-              <Text style={styles.summaryCardValue}>
-                ₺{summary.cheapestOption.totalPrice.toFixed(2)}
+              <Text style={styles.summaryCardTitle}>
+                {insights.allComplete ? 'En Ucuz (tüm liste)' : 'En Ucuz'}
               </Text>
-              <Text style={styles.summaryCardSubtext}>
-                {summary.cheapestOption.stores.length} market
+              <Text style={styles.summaryCardValue}>
+                ₺{insights.cheapest.totalPrice.toFixed(2)}
+              </Text>
+              <Text
+                style={[
+                  styles.summaryCardSubtext,
+                  !insights.allComplete && styles.summaryCardSubtextWarn,
+                ]}
+              >
+                {insights.allComplete
+                  ? `${insights.cheapest.stores.length} market · ${totalItems} ürün`
+                  : `${missingCount(insights.cheapest)} ürün eksik · %${insights.cheapest.coveragePercentage}`}
               </Text>
             </Card>
           )}
-          {summary.closestOption && (
-            <Card padding="md" style={styles.summaryCard}>
-              <Text style={styles.summaryCardTitle}>En Yakın</Text>
-              <Text style={styles.summaryCardValue}>
-                {summary.closestOption.totalDistance.toFixed(1)} km
-              </Text>
-              <Text style={styles.summaryCardSubtext}>
-                ₺{summary.closestOption.totalPrice.toFixed(2)}
-              </Text>
-            </Card>
-          )}
-        </View>
-        {summary.maxSavings > 0 && (
-          <Card padding="md" style={styles.savingsCard}>
-            <Text style={styles.savingsText}>
-              Maksimum Tasarruf: ₺{summary.maxSavings.toFixed(2)}
+          <Card padding="md" style={styles.summaryCard}>
+            <Text style={styles.summaryCardTitle}>Tasarruf</Text>
+            <Text style={[styles.summaryCardValue, styles.savingsValue]}>
+              ₺{insights.savings.toFixed(2)}
+            </Text>
+            <Text style={styles.summaryCardSubtext}>
+              {insights.savings > 0 ? `en pahalıya göre %${insights.savingsPct}` : 'tek seçenek'}
             </Text>
           </Card>
-        )}
+        </View>
+        {/* Kapsama açıklaması — kullanıcı neyi karşılaştırdığını net görsün */}
+        <View style={styles.coverageHint}>
+          <MaterialIcons
+            name={insights.allComplete ? 'check-circle' : 'info-outline'}
+            size={15}
+            color={insights.allComplete ? colors.success.main : colors.warning.main}
+          />
+          <Text style={styles.coverageHintText}>
+            {insights.allComplete
+              ? `Bu fiyatlar listenin tamamını (${totalItems} ürün) kapsayan rotalara aittir.`
+              : `Hiçbir rota tüm listeyi karşılamıyor. Fiyatlar en yüksek kapsamalı (%${insights.cheapest?.coveragePercentage ?? 0}) rotalar arasında karşılaştırılıyor.`}
+          </Text>
+        </View>
       </View>
 
       {/* Best Route */}
@@ -303,8 +324,29 @@ export function CompareResultsScreen({
   );
 }
 
+// Coverage Badge — net görsel: tüm ürünler var (yeşil) / N ürün eksik (amber)
+function CoverageBadge({ route }: { route: RouteStrategy }) {
+  const missing = missingCount(route);
+  const full = missing === 0;
+  return (
+    <View style={[styles.covBadge, full ? styles.covFull : styles.covPartial]}>
+      <MaterialIcons
+        name={full ? 'check-circle' : 'error-outline'}
+        size={16}
+        color={full ? colors.success.dark : colors.warning.dark}
+      />
+      <Text style={[styles.covText, full ? styles.covTextFull : styles.covTextPartial]}>
+        {full ? 'Tüm ürünler bu rotada' : `${missing} ürün bu rotada yok`}
+      </Text>
+      <Text style={[styles.covPct, full ? styles.covTextFull : styles.covTextPartial]}>
+        %{route.coveragePercentage.toFixed(0)}
+      </Text>
+    </View>
+  );
+}
+
 // Route Card Component
-function RouteCard({ 
+function RouteCard({
   route, 
   isBest = false,
   onPress,
@@ -346,15 +388,14 @@ function RouteCard({
         ))}
       </View>
 
+      {/* Kapsama — kartın en görünür bilgisi: tüm ürünler var mı, yoksa kaç eksik? */}
+      <CoverageBadge route={route} />
+
       {/* Info */}
       <View style={styles.routeInfo}>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Toplam Tutar:</Text>
           <Text style={styles.infoValue}>₺{route.totalPrice.toFixed(2)}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Kapsama:</Text>
-          <Text style={styles.infoValue}>{route.coveragePercentage.toFixed(0)}%</Text>
         </View>
         {route.totalDistance > 0 && (
           <View style={styles.infoRow}>
@@ -379,15 +420,6 @@ function RouteCard({
             ]}
           >
             {withinBudget ? 'Bütçe dahilinde' : 'Bütçe aşıyor'}
-          </Text>
-        </View>
-      )}
-
-      {/* Missing Products */}
-      {route.missingProducts.length > 0 && (
-        <View style={styles.missing}>
-          <Text style={styles.missingText}>
-            {route.missingProducts.length} ürün bulunamadı
           </Text>
         </View>
       )}
@@ -653,6 +685,69 @@ const styles = StyleSheet.create({
     ...typography.styles.caption,
     color: colors.text.hint,
     marginTop: spacing.xs,
+    textAlign: 'center',
+  },
+
+  summaryCardSubtextWarn: {
+    color: colors.warning.dark,
+    fontWeight: '600',
+  },
+
+  savingsValue: {
+    color: colors.success.main,
+  },
+
+  coverageHint: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.xs,
+  },
+
+  coverageHintText: {
+    ...typography.styles.caption,
+    color: colors.text.secondary,
+    flex: 1,
+    lineHeight: 16,
+  },
+
+  // Coverage badge (route cards)
+  covBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    paddingVertical: 6,
+    paddingHorizontal: spacing.sm,
+    borderRadius: borderRadius.sm,
+    marginBottom: spacing.sm,
+  },
+
+  covFull: {
+    backgroundColor: colors.success.bg,
+  },
+
+  covPartial: {
+    backgroundColor: colors.warning.bg,
+  },
+
+  covText: {
+    ...typography.styles.body2,
+    fontWeight: '600',
+    flex: 1,
+  },
+
+  covPct: {
+    ...typography.styles.body2,
+    fontWeight: '700',
+  },
+
+  covTextFull: {
+    color: colors.success.dark,
+  },
+
+  covTextPartial: {
+    color: colors.warning.dark,
   },
 
   savingsCard: {

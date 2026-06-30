@@ -24,36 +24,12 @@ import { CategoryItem } from '../../components/home/CategoryItem';
 import { NearbyStoreCard } from '../../components/home/NearbyStoreCard';
 import { getUserLocation, getCountryCode, haversineKm, formatDistance, type Coords } from '../../utils/geo';
 import { countryStorage } from '../../utils/storage';
+import { getCategoryIcon, categoryHomeRank } from '../../utils/categoryIcon';
+import { compareInsights, byCoverageThenScore } from '../../utils/compareInsights';
 import { colors, typography, spacing, layout } from '../../theme';
 import type { Product, Store, ShoppingList } from '../../types';
 import type { Category } from '../../services/category.service';
 import type { HomeStackScreenProps } from '../../navigation/types';
-
-// Icon mapping for categories (MaterialCommunityIcons uyumlu)
-const CATEGORY_ICONS: Record<string, string> = {
-  'meyve': 'fruit-grapes',
-  'sebze': 'carrot',
-  'süt': 'cow',
-  'süt ürünleri': 'cow',
-  'et': 'food-drumstick',
-  'tavuk': 'food-drumstick',
-  'fırın': 'bread-slice',
-  'pasta': 'cupcake',
-  'kahvaltı': 'toast',
-  'kahvaltılık': 'egg-fried',
-  'atıştırmalık': 'cookie',
-  'snack': 'cookie',
-  'içecek': 'cup',
-  'içecekler': 'cup',
-  'icecekler': 'cup',
-  'beverage': 'cup',
-  'drinks': 'cup',
-  'temel gıda': 'silverware-fork-knife',
-  'temel': 'silverware-fork-knife',
-  'gıda': 'silverware-fork-knife',
-  'temizlik': 'broom',
-  'default': 'shape',
-};
 
 export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) {
   const insets = useSafeAreaInsets();
@@ -112,9 +88,12 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
       ]);
       if (!aliveRef.current) return;
 
-      // Ana sayfada maksimum 7 parent kategori göster (Tümü hariç, toplam 8 kategori olacak)
+      // Ana sayfada maksimum 7 parent kategori göster (Tümü hariç, toplam 8 kategori).
+      // Önce günlük market kategorilerini öne al (API sırası Giyim/Oyuncak/Sağlık ile
+      // başlıyordu — market uygulaması için anlamsız); bilinmeyenler sonda kalır.
       const parentCategories = allCategories
         .filter((cat) => cat.parent_id === null)
+        .sort((a, b) => categoryHomeRank(a.name) - categoryHomeRank(b.name))
         .slice(0, 7);
 
       // Fiyat farkına göre sırala (en büyük fark en üstte). Referans olarak en
@@ -180,33 +159,19 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
             });
             if (!aliveRef.current) return;
 
-            // Tüm rotaların fiyatlarını al
-            const routePrices = compareResult.strategies
-              .filter(route => route.totalPrice > 0)
-              .map(route => route.totalPrice);
+            // Kapsama-bilinçli tahmin: fiyatlar yalnızca aynı ürünleri kapsayan
+            // (tercihen tüm listeyi karşılayan) rotalardan; eksik ürünlü ucuz rota
+            // tahmini sahte düşürmesin.
+            const insights = compareInsights(compareResult.strategies);
 
-            if (routePrices.length > 0) {
-              const minPrice = Math.min(...routePrices);
-              const maxPrice = Math.max(...routePrices);
-              
-              setEstimatedPrice({ min: Math.round(minPrice), max: Math.round(maxPrice) });
+            if (insights.cheapest) {
+              setEstimatedPrice({ min: Math.round(insights.min), max: Math.round(insights.max) });
+              setSavingsPercent(insights.savingsPct > 0 ? insights.savingsPct : undefined);
+              setPotentialSavings(Math.round(insights.savings));
 
-              // Tasarruf yüzdesini hesapla (en pahalı rota ile en ucuz rota arasındaki fark)
-              if (maxPrice > 0) {
-                const savings = ((maxPrice - minPrice) / maxPrice) * 100;
-                setSavingsPercent(Math.round(savings));
-              } else {
-                setSavingsPercent(undefined);
-              }
+              // Önerilen rota: önce en eksiksiz sepet, sonra en yüksek skor
+              const bestRoute = [...compareResult.strategies].sort(byCoverageThenScore)[0];
 
-              // Potansiyel tasarruf miktarını hesapla
-              const potentialSavingsAmount = maxPrice - minPrice;
-              setPotentialSavings(Math.round(potentialSavingsAmount));
-
-              // En iyi rotadaki marketlerin logo'larını al
-              const bestRoute = compareResult.strategies
-                .sort((a, b) => b.score - a.score)[0]; // En yüksek skorlu rota
-              
               if (bestRoute && bestRoute.stores.length > 0) {
                 // Store isimlerini topla (logolar assets'ten yüklenecek)
                 const storeNames: string[] = [];
@@ -378,75 +343,6 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
     if (!product.maxPrice || product.maxPrice === 0) return 0;
     const difference = getPriceDifference(product);
     return Math.round((difference / product.maxPrice) * 100);
-  };
-
-  const getCategoryIcon = (categoryName: string): string => {
-    // Türkçe locale kullanarak küçük harfe çevir (İ -> i, I -> ı)
-    const lowerName = categoryName.toLocaleLowerCase('tr-TR').trim();
-    
-    // Debug: İçecek kategorisi için özel log
-    if (__DEV__ && (lowerName.includes('içecek') || lowerName.includes('icecek'))) {
-      console.log('🔍 İçecek kategorisi bulundu:', categoryName, '-> lowerName:', lowerName);
-    }
-    
-    // Önce tam eşleşme kontrol et
-    if (CATEGORY_ICONS[lowerName]) {
-      if (__DEV__ && (lowerName.includes('içecek') || lowerName.includes('icecek'))) {
-        console.log('✅ İkon bulundu (tam eşleşme):', CATEGORY_ICONS[lowerName]);
-      }
-      return CATEGORY_ICONS[lowerName];
-    }
-    
-    // Türkçe karakterleri normalize et (içecek -> icecek gibi)
-    // toLocaleLowerCase('tr-TR') zaten İ -> i yapıyor, ama yine de normalize ediyoruz
-    const normalizedName = lowerName
-      .replace(/ı/g, 'i')
-      .replace(/ğ/g, 'g')
-      .replace(/ü/g, 'u')
-      .replace(/ş/g, 's')
-      .replace(/ö/g, 'o')
-      .replace(/ç/g, 'c');
-    
-    if (CATEGORY_ICONS[normalizedName]) {
-      if (__DEV__ && (normalizedName.includes('icecek'))) {
-        console.log('✅ İkon bulundu (normalize eşleşme):', CATEGORY_ICONS[normalizedName]);
-      }
-      return CATEGORY_ICONS[normalizedName];
-    }
-    
-    // Sonra içerik kontrolü yap (hem orijinal hem normalize edilmiş)
-    // Önce normalize edilmiş kategori ismini kontrol et
-    for (const [key, icon] of Object.entries(CATEGORY_ICONS)) {
-      if (key !== 'default') {
-        const normalizedKey = key
-          .replace(/ı/g, 'i')
-          .replace(/ğ/g, 'g')
-          .replace(/ü/g, 'u')
-          .replace(/ş/g, 's')
-          .replace(/ö/g, 'o')
-          .replace(/ç/g, 'c');
-        
-        // Hem orijinal hem normalize edilmiş versiyonları kontrol et
-        if (
-          lowerName.includes(key) || 
-          normalizedName.includes(normalizedKey) ||
-          lowerName.includes(normalizedKey) ||
-          normalizedName.includes(key)
-        ) {
-          if (__DEV__ && (lowerName.includes('içecek') || lowerName.includes('icecek'))) {
-            console.log('✅ İkon bulundu (içerik eşleşmesi):', icon, 'key:', key);
-          }
-          return icon;
-        }
-      }
-    }
-    
-    // Debug için console.log (geliştirme sırasında)
-    if (__DEV__) {
-      console.log('Category icon not found for:', categoryName, 'using default');
-    }
-    
-    return CATEGORY_ICONS.default;
   };
 
   return (

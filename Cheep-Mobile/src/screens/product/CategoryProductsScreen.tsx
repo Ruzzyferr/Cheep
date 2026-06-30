@@ -12,15 +12,18 @@ import {
   TouchableOpacity,
   FlatList,
   RefreshControl,
+  ActivityIndicator,
   Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
-import { productService, categoryService, listService } from '../../services';
+import { productService, categoryService } from '../../services';
 import { ProductGridCard } from '../../components/product/ProductGridCard';
 import { CategoryChip } from '../../components/common/CategoryChip';
+import { SelectListModal } from '../../components/list/SelectListModal';
 import { GridSkeleton } from '../../components/ui';
-import { colors, typography, spacing, layout } from '../../theme';
+import { useCart } from '../../context/CartContext';
+import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { Product } from '../../types';
 import type { Category } from '../../services/category.service';
 import type { HomeStackScreenProps } from '../../navigation/types';
@@ -30,15 +33,26 @@ export function CategoryProductsScreen({
   route,
 }: HomeStackScreenProps<'CategoryProducts'>) {
   const { categoryId, categoryName } = route.params;
-  
+  const cart = useCart();
+
+  // Sepete eklemek için seçilen ürün (liste seçim modalını açar)
+  const [addProduct, setAddProduct] = useState<Product | null>(null);
+
   const [selectedCategory, setSelectedCategory] = useState<number>(categoryId);
   const [selectedSubcategory, setSelectedSubcategory] = useState<number | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  
+
+  // Sayfalama: her istekte PAGE_SIZE kadar çek; sona yaklaşınca bir sonraki sayfayı
+  // ekle (sonsuz kaydırma). Önceden sabit 300/100 limit vardı → liste o noktada
+  // "bitiyor" gibi görünüyordu.
+  const PAGE_SIZE = 24;
+
   // FlatList scroll kontrolü için ref
   const flatListRef = React.useRef<FlatList>(null);
 
@@ -55,6 +69,8 @@ export function CategoryProductsScreen({
 
   useEffect(() => {
     loadCategories();
+    cart.refresh(); // pill'deki aktif liste + sayı güncel olsun
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Kategori değiştiğinde alt kategorileri yükle (loadSubcategories
@@ -93,35 +109,59 @@ export function CategoryProductsScreen({
     }
   };
 
+  const buildParams = (offset: number) => {
+    const categoryIdToUse = selectedSubcategory || selectedCategory;
+    const params: { limit: number; offset: number; category_id?: number } = {
+      limit: PAGE_SIZE,
+      offset,
+    };
+    // "Tüm Kategoriler" (id=0) DEĞİLSE, category_id ekle
+    if (categoryIdToUse !== 0) {
+      params.category_id = categoryIdToUse;
+    }
+    return params;
+  };
+
+  // İlk sayfa (kategori değişiminde sıfırdan yükle)
   const loadProducts = async () => {
     const reqId = ++loadProductsReqId.current;
     try {
       setLoading(true);
-      const categoryIdToUse = selectedSubcategory || selectedCategory;
-
-      // 🔥 Parent kategori veya "Tümü" seçiliyse daha yüksek limit
-      const isParentOrAll = selectedSubcategory === null || selectedSubcategory === 0;
-      const limit = isParentOrAll ? 300 : 100;  // Parent/Tümü: 300, Alt kategori: 100
-
-      const params: { limit: number; category_id?: number } = {
-        limit: limit,
-      };
-
-      // Eğer "Tüm Kategoriler" (id=0) DEĞİLSE, category_id parametresi ekle
-      if (categoryIdToUse !== 0) {
-        params.category_id = categoryIdToUse;
-      }
-
-      const productsData = await productService.getProducts(params);
+      const { items, hasMore: more } = await productService.getProductsPage(buildParams(0));
       // Sadece en son istek kazanır: eski yanıt geç gelirse yok say.
       if (reqId !== loadProductsReqId.current) return;
-      setProducts(productsData);
+      setProducts(items);
+      setHasMore(more);
     } catch (error) {
       if (reqId !== loadProductsReqId.current) return;
       console.error('❌ Load products error:', error);
     } finally {
-      // Sadece en son istek loading state'ini kapatabilir.
       if (reqId === loadProductsReqId.current) setLoading(false);
+    }
+  };
+
+  // Sonraki sayfa (sona yaklaşınca eklenir)
+  const loadMore = async () => {
+    if (loadingMore || loading || !hasMore) return;
+    const reqId = loadProductsReqId.current; // mevcut kategori için geçerli olmalı
+    setLoadingMore(true);
+    try {
+      const { items, hasMore: more } = await productService.getProductsPage(
+        buildParams(products.length)
+      );
+      // Kategori arada değiştiyse bu sayfayı uygulama.
+      if (reqId !== loadProductsReqId.current) return;
+      setProducts((prev) => {
+        // Aynı ürünleri iki kez eklememek için id'ye göre tekille.
+        const seen = new Set(prev.map((p) => p.id));
+        const fresh = items.filter((p) => !seen.has(p.id));
+        return [...prev, ...fresh];
+      });
+      setHasMore(more);
+    } catch (error) {
+      console.error('❌ Load more error:', error);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -155,46 +195,23 @@ export function CategoryProductsScreen({
     return category?.name || categoryName;
   };
 
-  const handleAddToCart = async (product: Product) => {
-    try {
-      // Aktif listeyi bul
-      const activeLists = await listService.getLists('active');
-      const activeList = activeLists.find((list) => !list.is_template);
+  // Sepete ekle: hangi listeye eklediğini kullanıcı görsün diye liste seçim
+  // modalını aç (listeler ve ürün sayıları görünür). Sessizce "aktif listeye"
+  // eklemek yerine kullanıcı bilinçli seçim yapar.
+  const handleAddToCart = (product: Product) => {
+    setAddProduct(product);
+  };
 
-      if (!activeList) {
-        Alert.alert(
-          'Aktif Liste Yok',
-          'Ürünü eklemek için önce bir alışveriş listesi oluşturmalısınız.',
-          [
-            { text: 'Tamam', style: 'cancel' },
-            {
-              text: 'Liste Oluştur',
-              onPress: () => {
-                // Lists tab'ına git
-                navigation.dispatch(
-                  CommonActions.navigate({
-                    name: 'Lists',
-                  })
-                );
-              },
-            },
-          ]
-        );
-        return;
-      }
-
-      // Ürünü aktif listeye ekle
-      await listService.addItem(activeList.id, {
-        product_id: product.id,
-        quantity: 1,
-        unit: product.store_prices?.[0]?.unit || 'adet',
-      });
-
-      Alert.alert('Başarılı', `${product.name} aktif listenize eklendi`);
-    } catch (error: any) {
-      console.error('Add to cart error:', error);
-      const errorMessage = error?.response?.data?.message || 'Ürün eklenirken bir hata oluştu';
-      Alert.alert('Hata', errorMessage);
+  const goToActiveList = () => {
+    if (cart.activeList) {
+      navigation.dispatch(
+        CommonActions.navigate({
+          name: 'Lists',
+          params: { screen: 'ListDetail', params: { listId: cart.activeList.id } },
+        })
+      );
+    } else {
+      navigation.dispatch(CommonActions.navigate({ name: 'Lists' }));
     }
   };
 
@@ -209,8 +226,24 @@ export function CategoryProductsScreen({
           >
             <MaterialIcons name="arrow-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{getCurrentCategoryName()}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>{getCurrentCategoryName()}</Text>
+
+          {/* Aktif liste göstergesi: hangi listeye eklediğini ve kaç ürün
+              olduğunu gösterir; dokununca listeyi açar. */}
+          <TouchableOpacity style={styles.cartPill} onPress={goToActiveList} activeOpacity={0.7}>
+            <MaterialIcons name="shopping-cart" size={18} color={colors.primary.main} />
+            {cart.count > 0 && (
+              <View style={styles.cartPillBadge}>
+                <Text style={styles.cartPillBadgeText}>{cart.count}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
         </View>
+        {cart.activeList && (
+          <Text style={styles.cartPillCaption} numberOfLines={1}>
+            Eklenecek liste: <Text style={styles.cartPillCaptionStrong}>{cart.activeList.name}</Text>
+          </Text>
+        )}
 
         {/* Main Categories */}
         <ScrollView
@@ -295,6 +328,17 @@ export function CategoryProductsScreen({
             </View>
           );
         }}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.4}
+        ListFooterComponent={
+          loadingMore ? (
+            <View style={styles.footerLoading}>
+              <ActivityIndicator size="small" color={colors.primary.main} />
+            </View>
+          ) : !hasMore && products.length > 0 ? (
+            <Text style={styles.footerEnd}>Tüm ürünler gösterildi</Text>
+          ) : null
+        }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Bu kategoride ürün bulunamadı</Text>
@@ -302,6 +346,17 @@ export function CategoryProductsScreen({
         }
       />
       )}
+
+      {/* Liste seçim modalı — eklenecek listeyi kullanıcı seçer */}
+      <SelectListModal
+        visible={!!addProduct}
+        productId={addProduct?.id ?? 0}
+        unit={addProduct?.store_prices?.[0]?.unit || 'adet'}
+        onClose={() => setAddProduct(null)}
+        onSelect={() => {
+          cart.refresh();
+        }}
+      />
     </View>
   );
 }
@@ -341,6 +396,46 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
 
+  cartPill: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.primary[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  cartPillBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 3,
+    borderRadius: 8,
+    backgroundColor: colors.primary.main,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  cartPillBadgeText: {
+    color: colors.background.paper,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+
+  cartPillCaption: {
+    ...typography.styles.caption,
+    color: colors.text.secondary,
+    paddingHorizontal: layout.screenPadding,
+    paddingBottom: spacing.sm,
+  },
+
+  cartPillCaptionStrong: {
+    color: colors.text.primary,
+    fontWeight: '700',
+  },
+
   categoriesScroll: {
     paddingHorizontal: layout.screenPadding,
     paddingBottom: spacing.sm,
@@ -367,6 +462,18 @@ const styles = StyleSheet.create({
 
   gridItem: {
     width: '48%',
+  },
+
+  footerLoading: {
+    paddingVertical: spacing.lg,
+    alignItems: 'center',
+  },
+
+  footerEnd: {
+    ...typography.styles.caption,
+    color: colors.text.hint,
+    textAlign: 'center',
+    paddingVertical: spacing.lg,
   },
 
   emptyContainer: {

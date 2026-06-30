@@ -338,6 +338,16 @@ export function ProfileScreen({
               subtitle={`Sürüm ${APP_VERSION}`}
               onPress={handleAbout}
             />
+            <Divider />
+            <MenuItem
+              icon="help-outline"
+              title="Nasıl kullanılır"
+              subtitle="Tanıtım turunu yeniden izle"
+              onPress={() =>
+                // Intro, root stack'te (replay modu); navigate üst navigatöre yükselir
+                (navigation as any).navigate('Intro', { replay: true })
+              }
+            />
           </Card>
         </View>
 

@@ -43,6 +43,9 @@ app-example
 
 # Playwright UI screenshots (proof artifacts, not source)
 screenshots/
+shots.py
+catshot.py
+gridshot.py
 shot.py
 flow.py
 tour.py
