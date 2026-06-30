@@ -34,8 +34,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [introSeen, setIntroSeen] = useState(false);
 
   const markIntroSeen = async () => {
-    await introStorage.markSeen();
+    // State'i ÖNCE çevir → kapı anında Auth'a geçsin. Depolama (SecureStore)
+    // başarısız olsa/asılsa bile kullanıcı intro'da takılı kalmaz.
     setIntroSeen(true);
+    try {
+      await introStorage.markSeen();
+    } catch (e) {
+      console.warn('intro_seen kaydedilemedi:', e);
+    }
   };
 
   // Check authentication on mount

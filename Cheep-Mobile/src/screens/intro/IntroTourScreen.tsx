@@ -222,6 +222,7 @@ export function IntroTourScreen({ navigation, route }: any) {
         ref={listRef as any}
         data={SLIDES}
         keyExtractor={(s) => s.key}
+        style={styles.list}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -282,6 +283,7 @@ const styles = StyleSheet.create({
   brand: { ...typography.styles.h4, color: colors.primary.main },
   skip: { ...typography.styles.subtitle2, color: colors.text.secondary },
 
+  list: { flex: 1 },
   slide: { width, paddingHorizontal: spacing.xl, justifyContent: 'center' },
   stage: {
     height: 320,
