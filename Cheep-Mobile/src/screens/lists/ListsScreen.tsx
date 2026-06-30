@@ -130,6 +130,7 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
     const emptyStates = {
       active: {
         icon: 'playlist-add-check' as const,
+        mascot: 'search' as const,
         title: 'Henüz liste yok',
         description: 'İlk alışveriş listeni oluştur, en uygun marketi anında bulalım.',
         actionLabel: 'Liste Oluştur' as const,
@@ -151,6 +152,7 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
     return (
       <EmptyState
         icon={state.icon}
+        {...('mascot' in state ? { mascot: state.mascot } : {})}
         title={state.title}
         description={state.description}
         {...(hasAction && { actionLabel: state.actionLabel, onAction: handleCreateList })}

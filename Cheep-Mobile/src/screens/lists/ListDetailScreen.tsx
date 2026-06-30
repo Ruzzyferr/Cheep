@@ -7,6 +7,7 @@ import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
+  Image,
   StyleSheet,
   FlatList,
   Alert,
@@ -223,6 +224,13 @@ function ListItemCard({
     >
       <Card padding="md" style={styles.itemCard}>
         <View style={styles.itemContent}>
+          <View style={styles.itemThumb}>
+            {product.image_url ? (
+              <Image source={{ uri: product.image_url }} style={styles.itemThumbImg} />
+            ) : (
+              <MaterialIcons name="inventory-2" size={20} color={colors.text.hint} />
+            )}
+          </View>
           <View style={styles.itemInfo}>
             <Text style={styles.productName} numberOfLines={2}>
               {product.name}
@@ -325,6 +333,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+
+  itemThumb: {
+    width: 44,
+    height: 44,
+    borderRadius: borderRadius.sm,
+    backgroundColor: colors.background.default,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    marginRight: spacing.md,
+  },
+
+  itemThumbImg: { width: '100%', height: '100%', resizeMode: 'contain' },
 
   itemInfo: {
     flex: 1,

@@ -18,6 +18,7 @@ import { productService, categoryService, affiliateService } from '../../service
 import { Card, Button } from '../../components/ui';
 import { PriceTrendCard } from '../../components/product/PriceTrendCard';
 import { SelectListModal } from '../../components/list/SelectListModal';
+import { getStoreLogoAsset } from '../../utils/storeLogo';
 import { openExternalUrl } from '../../utils/linking';
 import type { PriceHistoryResponse } from '../../services/product.service';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
@@ -158,20 +159,18 @@ export function ProductDetailScreen({
   }
 
   return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}
-    >
-      {/* Product Image */}
-      <View style={styles.imageContainer}>
-        {product.image_url ? (
-          <Image source={{ uri: product.image_url }} style={styles.image} />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <MaterialIcons name="inventory-2" size={48} color={colors.text.hint} />
-          </View>
-        )}
-      </View>
+    <View style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+        {/* Product Image */}
+        <View style={styles.imageContainer}>
+          {product.image_url ? (
+            <Image source={{ uri: product.image_url }} style={styles.image} />
+          ) : (
+            <View style={styles.placeholderImage}>
+              <MaterialIcons name="inventory-2" size={48} color={colors.text.hint} />
+            </View>
+          )}
+        </View>
 
       {/* Product Info */}
       <View style={styles.content}>
@@ -252,14 +251,14 @@ export function ProductDetailScreen({
                 <Card padding="md" style={[styles.priceCard, isCheapest && styles.cheapestCard]}>
                   <View style={styles.priceCardContent}>
                     <View style={styles.storeSection}>
-                      {storePrice.store?.logo_url ? (
+                      {getStoreLogoAsset(storePrice.store?.name) ? (
                         <Image
-                          source={{ uri: storePrice.store.logo_url }}
+                          source={getStoreLogoAsset(storePrice.store?.name)}
                           style={styles.storeLogo}
                         />
                       ) : (
                         <View style={styles.storeLogoPlaceholder}>
-                          <MaterialIcons name="store" size={24} color={colors.text.secondary} />
+                          <MaterialIcons name="storefront" size={22} color={colors.primary.main} />
                         </View>
                       )}
                       <View style={styles.storeInfo}>
@@ -388,7 +387,8 @@ export function ProductDetailScreen({
           fullWidth
           style={styles.addButton}
         />
-      </View>
+        </View>
+      </ScrollView>
 
       <SelectListModal
         visible={showListModal}
@@ -399,7 +399,7 @@ export function ProductDetailScreen({
         }}
         productId={productId}
       />
-    </ScrollView>
+    </View>
   );
 }
 
@@ -421,10 +421,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
+  backBtn: {
+    position: 'absolute',
+    left: layout.screenPadding,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.paper,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+
   imageContainer: {
     width: '100%',
     height: 300,
-    backgroundColor: colors.background.input,
+    backgroundColor: colors.background.paper,
   },
 
   image: {

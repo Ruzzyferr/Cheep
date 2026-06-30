@@ -25,6 +25,8 @@ import { ChatInputBar } from '../../components/assistant/ChatInputBar';
 import { ToolActivityChip } from '../../components/assistant/ToolActivityChip';
 import { ListActionCard } from '../../components/assistant/ListActionCard';
 import { ThreadListSheet } from '../../components/assistant/ThreadListSheet';
+import { CheepMascot } from '../../components/brand/CheepMascot';
+import { Float } from '../../components/anim';
 import { colors, spacing, typography, borderRadius } from '../../theme';
 import type { AssistantStackScreenProps } from '../../navigation/types';
 
@@ -71,6 +73,13 @@ interface EmptyStateProps {
 
 const EmptyState = ({ onSuggestion }: EmptyStateProps) => (
   <View style={styles.emptyContainer}>
+    <View style={styles.assistantIntro}>
+      <Float amplitude={5}>
+        <CheepMascot size={84} expression="happy" />
+      </Float>
+      <Text style={styles.assistantTitle}>Ben Cheep</Text>
+      <Text style={styles.assistantSub}>Alışveriş asistanın</Text>
+    </View>
     <MessageBubble
       role="model"
       content="Merhaba! Bugün ne pişirelim? Tarif yaz ya da 'haftalık liste hazırla' de."
@@ -389,6 +398,19 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
     paddingTop: spacing.xl,
+  },
+  assistantIntro: {
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  assistantTitle: {
+    ...typography.styles.h3,
+    color: colors.text.primary,
+    marginTop: spacing.sm,
+  },
+  assistantSub: {
+    ...typography.styles.body2,
+    color: colors.text.secondary,
   },
   suggestions: {
     flexDirection: 'row',

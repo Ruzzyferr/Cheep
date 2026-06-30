@@ -164,7 +164,7 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
         <ListSkeleton count={6} />
       ) : deals.length === 0 ? (
         <EmptyState
-          icon="local-offer"
+          mascot="search"
           title="Henüz fırsat yok"
           description="Birden fazla markette satılan ürünler eklendikçe en iyi tasarruflar burada görünecek"
         />
