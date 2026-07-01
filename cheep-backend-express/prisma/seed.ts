@@ -28,7 +28,22 @@ async function main() {
         update: {},
         create: { code: 'TR', name: 'Türkiye', currency: 'TRY' },
     });
-    await prisma.country.upsert({
+    const ch = await prisma.country.upsert({
+        where: { code: 'CH' },
+        update: {},
+        create: { code: 'CH', name: 'Schweiz', currency: 'CHF' },
+    });
+    const se = await prisma.country.upsert({
+        where: { code: 'SE' },
+        update: {},
+        create: { code: 'SE', name: 'Sverige', currency: 'SEK' },
+    });
+    const de = await prisma.country.upsert({
+        where: { code: 'DE' },
+        update: {},
+        create: { code: 'DE', name: 'Deutschland', currency: 'EUR' },
+    });
+    const pl = await prisma.country.upsert({
         where: { code: 'PL' },
         update: {},
         create: { code: 'PL', name: 'Polska', currency: 'PLN' },
@@ -91,6 +106,19 @@ async function main() {
             country_id: tr.id,
         },
     });
+
+    // CH 10–19
+    const migrosCh = await prisma.store.upsert({ where: { id: 10 }, update: {}, create: { id: 10, name: 'Migros', logo_url: null, address: 'Zürich', country_id: ch.id } });
+    const coopCh = await prisma.store.upsert({ where: { id: 11 }, update: {}, create: { id: 11, name: 'Coop', logo_url: null, address: 'Bern', country_id: ch.id } });
+    // SE 20–29
+    const ica = await prisma.store.upsert({ where: { id: 20 }, update: {}, create: { id: 20, name: 'ICA', logo_url: null, address: 'Stockholm', country_id: se.id } });
+    const willys = await prisma.store.upsert({ where: { id: 21 }, update: {}, create: { id: 21, name: 'Willys', logo_url: null, address: 'Göteborg', country_id: se.id } });
+    // DE 30–39
+    const rewe = await prisma.store.upsert({ where: { id: 30 }, update: {}, create: { id: 30, name: 'REWE', logo_url: null, address: 'Köln', country_id: de.id } });
+    const kaufland = await prisma.store.upsert({ where: { id: 31 }, update: {}, create: { id: 31, name: 'Kaufland', logo_url: null, address: 'Berlin', country_id: de.id } });
+    // PL 40–49
+    const carrefourPl = await prisma.store.upsert({ where: { id: 40 }, update: {}, create: { id: 40, name: 'Carrefour', logo_url: null, address: 'Warszawa', country_id: pl.id } });
+    const auchan = await prisma.store.upsert({ where: { id: 41 }, update: {}, create: { id: 41, name: 'Auchan', logo_url: null, address: 'Kraków', country_id: pl.id } });
 
     console.log('✅ Marketler oluşturuldu');
 
@@ -324,6 +352,62 @@ async function main() {
     });
 
     console.log('✅ Fiyatlar oluşturuldu');
+
+    // 5b. Yeni ülkeler için örnek ürünler + fiyatlar (CH/SE/DE)
+    const chMilch = await prisma.product.upsert({
+        where: { ean_barcode: '7600000000001' },
+        update: { name: 'M-Budget Milch 1L', country_id: ch.id, category_id: sutId },
+        create: { name: 'M-Budget Milch 1L', brand: 'M-Budget', ean_barcode: '7600000000001', country_id: ch.id, category_id: sutId },
+    });
+    const chCola = await prisma.product.upsert({
+        where: { ean_barcode: '7600000000002' },
+        update: { name: 'Coca-Cola 1L', country_id: ch.id, category_id: icecekId },
+        create: { name: 'Coca-Cola 1L', brand: 'Coca-Cola', ean_barcode: '7600000000002', country_id: ch.id, category_id: icecekId },
+    });
+    const deMilch = await prisma.product.upsert({
+        where: { ean_barcode: '4000000000001' },
+        update: { name: 'Ja! Milch 1L', country_id: de.id, category_id: sutId },
+        create: { name: 'Ja! Milch 1L', brand: 'Ja!', ean_barcode: '4000000000001', country_id: de.id, category_id: sutId },
+    });
+    const deCola = await prisma.product.upsert({
+        where: { ean_barcode: '5449000000012' },
+        update: { name: 'Coca-Cola 1L', country_id: de.id, category_id: icecekId },
+        create: { name: 'Coca-Cola 1L', brand: 'Coca-Cola', ean_barcode: '5449000000012', country_id: de.id, category_id: icecekId },
+    });
+    const icaMjolk = await prisma.product.upsert({
+        where: { ean_barcode: '7300000000001' },
+        update: { name: 'ICA Mjölk 1L', country_id: se.id, category_id: sutId },
+        create: { name: 'ICA Mjölk 1L', brand: 'ICA', ean_barcode: '7300000000001', country_id: se.id, category_id: sutId },
+    });
+    const plMleko = await prisma.product.upsert({
+        where: { ean_barcode: '5900000000001' },
+        update: { name: 'Łaciate Mleko 1L', country_id: pl.id, category_id: sutId },
+        create: { name: 'Łaciate Mleko 1L', brand: 'Łaciate', ean_barcode: '5900000000001', country_id: pl.id, category_id: sutId },
+    });
+
+    await prisma.storePrice.createMany({
+        skipDuplicates: true,
+        data: [
+            // CH — Migros / Coop
+            { store_id: migrosCh.id, product_id: chMilch.id, price: 1.55, unit: 'adet', source: 'seed' },
+            { store_id: coopCh.id, product_id: chMilch.id, price: 1.65, unit: 'adet', source: 'seed' },
+            { store_id: migrosCh.id, product_id: chCola.id, price: 2.20, unit: 'adet', source: 'seed' },
+            { store_id: coopCh.id, product_id: chCola.id, price: 2.35, unit: 'adet', source: 'seed' },
+            // DE — REWE / Kaufland
+            { store_id: rewe.id, product_id: deMilch.id, price: 1.09, unit: 'adet', source: 'seed' },
+            { store_id: kaufland.id, product_id: deMilch.id, price: 0.99, unit: 'adet', source: 'seed' },
+            { store_id: rewe.id, product_id: deCola.id, price: 1.49, unit: 'adet', source: 'seed' },
+            { store_id: kaufland.id, product_id: deCola.id, price: 1.39, unit: 'adet', source: 'seed' },
+            // SE — ICA / Willys
+            { store_id: ica.id, product_id: icaMjolk.id, price: 12.90, unit: 'adet', source: 'seed' },
+            { store_id: willys.id, product_id: icaMjolk.id, price: 11.50, unit: 'adet', source: 'seed' },
+            // PL — Carrefour / Auchan
+            { store_id: carrefourPl.id, product_id: plMleko.id, price: 3.49, unit: 'adet', source: 'seed' },
+            { store_id: auchan.id, product_id: plMleko.id, price: 3.29, unit: 'adet', source: 'seed' },
+        ],
+    });
+
+    console.log('✅ Yeni ülkeler için örnek ürün/fiyatlar oluşturuldu (CH/SE/DE/PL)');
 
     // 6. Test kullanıcısı için favori marketler ekle
     await prisma.userFavoriteStore.createMany({
