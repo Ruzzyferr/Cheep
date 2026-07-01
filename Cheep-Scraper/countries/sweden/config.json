@@ -1,0 +1,13 @@
+{
+  "country": "Sweden",
+  "country_code": "SE",
+  "markets": [
+    { "name": "ICA", "store_id": 20, "scraper_path": "scrapers/ica.py", "scraper_class": "ICAScraper", "scraper_method": "fetch_products", "output_pattern": "ica_products_{timestamp}.json", "enabled": true, "note": "anchor; recon 2026-07-02: requests GET www.ica.se/ = 200 (content/recipes shell, no product data server-side). Playwright (headless chromium) loading the site mints a per-session Bearer token used against the public gateway apimgw-pub.ica.se; GET https://apimgw-pub.ica.se/sverige/digx/offerreader/v1/offers/store/{storeId} with that Bearer returns a real per-store JSON offer listing (name/brand/packageInformation/eans (GTIN)/regularPriceFrom-To/discountValue/requirementValue). Fixture captured from store 12805 (ICA Nara Sergels Torg, Stockholm)." },
+    { "name": "Willys", "store_id": 21, "scraper_path": "scrapers/willys.py", "scraper_class": "WillysScraper", "scraper_method": "fetch_products", "output_pattern": "willys_products_{timestamp}.json", "enabled": false, "note": "anchor blocked; recon 2026-07-02: requests GET www.willys.se/ = 403 'The Amazon CloudFront distribution is configured to block access from your country'; Playwright headless chromium against the same URL got the identical CloudFront 403 geo-block page (not a bot-check -- no product data reachable at this egress location). No fixture captured/fabricated. Re-enable once reachable from an allowed egress (e.g. SE-based proxy)." },
+    { "name": "Coop", "store_id": 22, "scraper_path": "scrapers/coop_se.py", "scraper_class": "CoopSEScraper", "scraper_method": "fetch_products", "output_pattern": "coop_se_products_{timestamp}.json", "enabled": false, "note": "anchor-candidate; needs Store seed row #22 before enabling" },
+    { "name": "Hemköp", "store_id": 23, "scraper_path": "scrapers/hemkop.py", "scraper_class": "HemkopScraper", "scraper_method": "fetch_products", "output_pattern": "hemkop_products_{timestamp}.json", "enabled": false, "note": "anchor-candidate (Axfood); needs Store seed row #23" },
+    { "name": "City Gross", "store_id": 24, "scraper_path": "scrapers/citygross.py", "scraper_class": "CityGrossScraper", "scraper_method": "fetch_products", "output_pattern": "citygross_products_{timestamp}.json", "enabled": false, "note": "best-effort; needs Store seed row #24" }
+  ],
+  "output_dir": "output",
+  "log_dir": "logs"
+}
