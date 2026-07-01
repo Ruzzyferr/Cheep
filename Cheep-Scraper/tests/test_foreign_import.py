@@ -53,6 +53,25 @@ def test_fallback_store_sku_nonempty_for_non_alphanumeric_name():
     assert payloads[0]["store_sku"]
 
 
+def test_malformed_image_url_omitted_clean_url_passed_through():
+    """A `{stack}`-style placeholder (Migros CH) or a relative URL must never
+    reach the payload — the backend's Joi URI validator would reject it and
+    fail the ENTIRE bulk-upsert chunk for one bad image_url. A clean absolute
+    URL should still pass through unchanged."""
+    products = [
+        {"name": "Milch 1L", "price": 1.5, "sku": "A1",
+         "image_url": "https://image.migros.ch/d/{stack}/hash.png"},
+        {"name": "Brot 500g", "price": 2.0, "sku": "A2",
+         "image_url": "/relative/path.png"},
+        {"name": "Cola 2L", "price": 1.2, "sku": "A3",
+         "image_url": "https://cdn.example.com/clean.png"},
+    ]
+    payloads = build_api_payloads(products, store_id=10, category_map=None)
+    assert "image_url" not in payloads[0]
+    assert "image_url" not in payloads[1]
+    assert payloads[2]["image_url"] == "https://cdn.example.com/clean.png"
+
+
 def test_unit_defaults_and_passthrough():
     payloads = build_api_payloads([{"name": "Cola 2L", "price": 1.2, "unit": "l", "sku": "C"}], 31, None)
     assert payloads[0]["unit"] == "l"

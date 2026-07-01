@@ -65,10 +65,27 @@ def build_api_payloads(
             payload["ean_barcode"] = str(barcode).strip()
         if product.get("brand"):
             payload["brand"] = str(product["brand"])
-        if product.get("image_url"):
-            payload["image_url"] = str(product["image_url"])
+        image_url = product.get("image_url")
+        if image_url and _is_clean_absolute_url(str(image_url)):
+            payload["image_url"] = str(image_url)
         payloads.append(payload)
     return payloads
+
+
+def _is_clean_absolute_url(url: str) -> bool:
+    """True only for a non-empty absolute http(s) URL with no unresolved
+    placeholder braces or whitespace.
+
+    The backend validates `image_url` with `Joi.string().uri({allowRelative:
+    false})` and rejects the WHOLE bulk-upsert chunk (up to 900 items) if any
+    single item fails validation — e.g. Migros CH's `{stack}` CDN size
+    placeholder. Omitting a malformed image_url here (rather than sending it)
+    means one bad URL can never take down an entire ingest chunk, regardless
+    of which chain/scraper produced it.
+    """
+    if not url.startswith("http://") and not url.startswith("https://"):
+        return False
+    return not any(c in url for c in ("{", "}", " ", "\t", "\n", "\r"))
 
 
 class ForeignImporter:
@@ -81,6 +98,10 @@ class ForeignImporter:
         key = api_key if api_key is not None else os.getenv("INGEST_API_KEY")
         if key:
             self.headers["x-api-key"] = key
+        else:
+            logger.warning(
+                "INGEST_API_KEY not set — all ingest requests will 401 (no x-api-key header)"
+            )
 
     def import_products(
         self,

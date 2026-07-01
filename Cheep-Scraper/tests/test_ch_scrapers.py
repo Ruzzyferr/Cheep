@@ -42,6 +42,12 @@ def test_migros_ch_parses_fixture():
     assert_valid_products(products)
     assert all(p.country_code == "CH" for p in products)
     assert all(p.store == "Migros" for p in products)
+    # Migros CDN image URLs carry an unresolved `{stack}` size placeholder in
+    # the raw fixture; parse() must never emit a URL containing a `{` — the
+    # backend's Joi URI validator rejects it and fails the whole ingest chunk.
+    assert any(p.image_url is None for p in products), \
+        "fixture should exercise the {stack}-placeholder -> None path"
+    assert all(p.image_url is None or "{" not in p.image_url for p in products)
 
 
 @pytest.mark.skipif(not (FIXTURES / "coop_ch_sample.html").exists() and not (FIXTURES / "coop_ch_sample.json").exists(),

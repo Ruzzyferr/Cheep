@@ -96,9 +96,15 @@ class MigrosCHScraper(BaseScraper):
           barcodes for the same SKU — first is current).
         - sku: `migrosId` (falls back to `migrosOnlineId`/`uid`).
         - category: last entry of `breadcrumb` (deepest category name).
-        - image: `imageTransparent.url` (falls back to `images[0].url`); URL
-          contains a literal `{stack}` placeholder Migros' CDN expects a size
-          token for — left as-is (informational only).
+        - image: `imageTransparent.url` (falls back to `images[0].url`); the
+          raw URL contains a literal `{stack}` placeholder Migros' CDN expects
+          a size token for. No valid concrete token was identified during
+          recon (site is Playwright/XHR-driven; no static asset URL with a
+          resolved `{stack}` value was captured), so any URL with an
+          unresolved `{...}` placeholder is dropped to `None` below rather
+          than emitted raw — the backend's `Joi.string().uri()` validation on
+          `image_url` rejects it, which fails the WHOLE bulk-upsert chunk for
+          one bad image URL (see foreign_import.py hardening too).
         - product_url: top-level `productUrls` (not nested under `offer`).
 
         Items with no `offer.price` (not currently orderable) are skipped.
@@ -139,6 +145,11 @@ class MigrosCHScraper(BaseScraper):
                 images = item.get("images") or []
                 if images and isinstance(images[0], dict):
                     image_url = images[0].get("url")
+            if image_url and "{" in image_url:
+                # Unresolved CDN size placeholder (e.g. `{stack}`) — no known
+                # valid token, so emit no image rather than an invalid URL
+                # that would fail Joi validation for the entire chunk.
+                image_url = None
 
             qty, unit = parse_quantity_and_unit(offer.get("quantity"))
             unit_price, unit_price_unit = compute_unit_price(price, qty, unit)
