@@ -119,6 +119,9 @@ async function main() {
     // PL 40–49
     const carrefourPl = await prisma.store.upsert({ where: { id: 40 }, update: {}, create: { id: 40, name: 'Carrefour', logo_url: null, address: 'Warszawa', country_id: pl.id } });
     const auchan = await prisma.store.upsert({ where: { id: 41 }, update: {}, create: { id: 41, name: 'Auchan', logo_url: null, address: 'Kraków', country_id: pl.id } });
+    const biedronka = await prisma.store.upsert({ where: { id: 44 }, update: {}, create: { id: 44, name: 'Biedronka', logo_url: null, address: 'Warszawa', country_id: pl.id } });
+    const lidlPl = await prisma.store.upsert({ where: { id: 45 }, update: {}, create: { id: 45, name: 'Lidl', logo_url: null, address: 'Warszawa', country_id: pl.id } });
+    const zabka = await prisma.store.upsert({ where: { id: 47 }, update: {}, create: { id: 47, name: 'Żabka', logo_url: null, address: 'Warszawa', country_id: pl.id } });
 
     console.log('✅ Marketler oluşturuldu');
 
