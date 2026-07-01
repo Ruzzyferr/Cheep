@@ -32,7 +32,7 @@ export function ProductDetailScreen({
   navigation,
 }: HomeStackScreenProps<'ProductDetail'>) {
   const { productId } = route.params;
-  const { country } = useLocale();
+  const { country, formatMoney } = useLocale();
   const [product, setProduct] = useState<Product | null>(null);
   const [prices, setPrices] = useState<StorePrice[]>([]);
   const [categoryWithParent, setCategoryWithParent] = useState<Category | null>(null);
@@ -189,7 +189,7 @@ export function ProductDetailScreen({
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>En Ucuz</Text>
                 <Text style={[styles.statValue, styles.cheapestPrice]}>
-                  ₺{parseFloat(priceStats.cheapest?.price || '0').toFixed(2)}
+                  {formatMoney(parseFloat(priceStats.cheapest?.price || '0'))}
                 </Text>
                 {priceStats.cheapest?.store && (
                   <Text style={styles.statStore}>{priceStats.cheapest.store.name}</Text>
@@ -199,7 +199,7 @@ export function ProductDetailScreen({
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>En Pahalı</Text>
                 <Text style={[styles.statValue, styles.expensivePrice]}>
-                  ₺{parseFloat(priceStats.mostExpensive?.price || '0').toFixed(2)}
+                  {formatMoney(parseFloat(priceStats.mostExpensive?.price || '0'))}
                 </Text>
                 {priceStats.mostExpensive?.store && (
                   <Text style={styles.statStore}>{priceStats.mostExpensive.store.name}</Text>
@@ -209,7 +209,7 @@ export function ProductDetailScreen({
               <View style={styles.statItem}>
                 <Text style={styles.statLabel}>Fark</Text>
                 <Text style={[styles.statValue, styles.differencePrice]}>
-                  ₺{priceStats.priceDifference.toFixed(2)}
+                  {formatMoney(priceStats.priceDifference)}
                 </Text>
                 <Text style={styles.savingsPercent}>
                   %{priceStats.savingsPercentage.toFixed(0)} tasarruf
@@ -219,7 +219,7 @@ export function ProductDetailScreen({
             <View style={styles.avgPriceRow}>
               <Text style={styles.avgPriceLabel}>Ortalama Fiyat:</Text>
               <Text style={styles.avgPriceValue}>
-                ₺{priceStats.averagePrice.toFixed(2)}
+                {formatMoney(priceStats.averagePrice)}
               </Text>
             </View>
           </Card>
@@ -286,7 +286,7 @@ export function ProductDetailScreen({
                         </View>
                       )}
                       <Text style={[styles.price, isCheapest && styles.cheapestPriceText]}>
-                        ₺{priceValue.toFixed(2)}
+                        {formatMoney(priceValue)}
                       </Text>
                       {savings > 0 && !isCheapest && (
                         <Text style={styles.savingsBadge}>

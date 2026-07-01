@@ -18,6 +18,7 @@ import { Card, Button } from '../../components/ui';
 import { StoreChip } from '../../components/store/StoreChip';
 import { listService, affiliateService } from '../../services';
 import { openExternalUrl } from '../../utils/linking';
+import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { StoreAllocation, ProductAllocation } from '../../types';
@@ -35,6 +36,7 @@ export function StrategyDetailScreen({
   navigation,
 }: ListsStackScreenProps<'StrategyDetail'>) {
   const { strategy, listId } = route.params;
+  const { formatMoney } = useLocale();
 
   const withinBudget = strategy.budgetStatus === 'within_budget';
 
@@ -55,7 +57,7 @@ export function StrategyDetailScreen({
           <View style={styles.priceRow}>
             <View>
               <Text style={styles.priceLabel}>Toplam Tutar</Text>
-              <Text style={styles.priceValue}>₺{num(strategy.totalPrice).toFixed(2)}</Text>
+              <Text style={styles.priceValue}>{formatMoney(num(strategy.totalPrice))}</Text>
             </View>
             {num(strategy.totalDistance) > 0 && (
               <View>
@@ -83,7 +85,7 @@ export function StrategyDetailScreen({
                 {strategy.budgetRemaining !== null && (
                   <Text>
                     {' '}
-                    ({withinBudget ? '+' : ''}₺{num(strategy.budgetRemaining).toFixed(2)})
+                    ({withinBudget ? '+' : ''}{formatMoney(num(strategy.budgetRemaining))})
                   </Text>
                 )}
               </Text>
@@ -190,6 +192,7 @@ function StoreSection({
   listId: number;
 }) {
   const [opening, setOpening] = useState(false);
+  const { formatMoney } = useLocale();
   const storeName = storeAllocation.store.name;
 
   const handleCompleteAtStore = async () => {
@@ -218,7 +221,7 @@ function StoreSection({
           <StoreChip storeName={storeName} />
         </View>
         <Text style={styles.storeSubtotal}>
-          ₺{num(storeAllocation.subtotal).toFixed(2)}
+          {formatMoney(num(storeAllocation.subtotal))}
         </Text>
       </View>
 
@@ -256,6 +259,7 @@ function StoreSection({
 
 // Product Row Component
 function ProductRow({ productAllocation }: { productAllocation: ProductAllocation }) {
+  const { formatMoney } = useLocale();
   const { product, quantity, unit } = productAllocation;
   const displayName = product.brand
     ? `${product.brand} · ${product.name}`
@@ -282,10 +286,10 @@ function ProductRow({ productAllocation }: { productAllocation: ProductAllocatio
         </View>
         <View style={styles.productPrices}>
           <Text style={styles.productUnitPrice}>
-            ₺{num(productAllocation.pricePerUnit).toFixed(2)} / {productAllocation.unit}
+            {formatMoney(num(productAllocation.pricePerUnit))} / {productAllocation.unit}
           </Text>
           <Text style={styles.productTotalPrice}>
-            ₺{num(productAllocation.totalPrice).toFixed(2)}
+            {formatMoney(num(productAllocation.totalPrice))}
           </Text>
         </View>
       </View>

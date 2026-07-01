@@ -15,6 +15,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { productService } from '../../services';
 import { SmartDealCard } from '../../components/home';
+import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout } from '../../theme';
 import type { Product } from '../../types';
 import type { HomeStackScreenProps } from '../../navigation/types';
@@ -24,6 +25,7 @@ export function PriceDifferenceScreen({
 }: HomeStackScreenProps<'PriceDifferenceList'>) {
   const [products, setProducts] = useState<(Product & { priceDifference?: number; minPrice?: number; maxPrice?: number })[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const { formatMoney } = useLocale();
 
   useEffect(() => {
     loadProducts();
@@ -132,7 +134,7 @@ export function PriceDifferenceScreen({
               <View style={styles.cardContainer}>
                 <SmartDealCard
                   productName={item.name}
-                  price={price || '0.00'}
+                  price={price ? formatMoney(parseFloat(price)) : formatMoney(0)}
                   unit={item.store_prices?.[0]?.unit || 'adet'}
                   storeName={storeName}
                   imageUrl={item.image_url || undefined}
@@ -144,10 +146,10 @@ export function PriceDifferenceScreen({
               {priceDiff > 0 && (
                 <View style={styles.priceDiffInfo}>
                   <Text style={styles.priceDiffText}>
-                    Fiyat farkı: {priceDiff.toFixed(2)}₺
+                    Fiyat farkı: {formatMoney(priceDiff)}
                   </Text>
                   <Text style={styles.priceRangeText}>
-                    {item.minPrice?.toFixed(2)}₺ - {item.maxPrice?.toFixed(2)}₺
+                    {item.minPrice != null ? formatMoney(item.minPrice) : ''} - {item.maxPrice != null ? formatMoney(item.maxPrice) : ''}
                   </Text>
                 </View>
               )}

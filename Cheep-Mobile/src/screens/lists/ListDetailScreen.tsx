@@ -18,6 +18,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listService } from '../../services';
 import { useCart } from '../../context/CartContext';
+import { useLocale } from '../../context/LocaleContext';
 import { Button, Card, ListSkeleton } from '../../components/ui';
 import { EmptyState } from '../../components/common/EmptyState';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
@@ -34,6 +35,7 @@ export function ListDetailScreen({
   const [loading, setLoading] = useState(true);
   const insets = useSafeAreaInsets();
   const cart = useCart();
+  const { formatMoney } = useLocale();
 
   // Reload list when screen comes into focus (e.g., after adding a product)
   useFocusEffect(
@@ -148,7 +150,7 @@ export function ListDetailScreen({
           <Text style={styles.itemCount}>{items.length} ürün</Text>
           {list.budget && (
             <Text style={styles.budget}>
-              Bütçe: ₺{parseFloat(list.budget).toFixed(2)}
+              Bütçe: {formatMoney(parseFloat(list.budget))}
             </Text>
           )}
         </View>
