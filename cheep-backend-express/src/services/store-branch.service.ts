@@ -31,17 +31,24 @@ export function resolveNearestBranchCoords(branches: BranchLite[], user: { lat: 
   return out;
 }
 
-/** DB: fetch country's branches near the user (bbox prefilter), then nearest-per-store. */
-export async function getNearbyStores(countryId: number, user: { lat: number; lon: number }, deltaDeg = 1.0) {
-  const rows = await prisma.storeBranch.findMany({
-    where: {
-      country_id: countryId,
-      lat: { gte: user.lat - deltaDeg, lte: user.lat + deltaDeg },
-      lon: { gte: user.lon - deltaDeg, lte: user.lon + deltaDeg },
-    },
-    select: { id: true, store_id: true, name: true, lat: true, lon: true, address: true, city: true },
-  });
-  return nearestBranchPerStore(rows as BranchLite[], user);
+/** DB: nearest branch per store near the user, widening the bbox until non-empty. */
+export async function getNearbyStores(
+  countryId: number,
+  user: { lat: number; lon: number },
+  deltas: number[] = [1.0, 3.0, 8.0],
+) {
+  for (const delta of deltas) {
+    const rows = await prisma.storeBranch.findMany({
+      where: {
+        country_id: countryId,
+        lat: { gte: user.lat - delta, lte: user.lat + delta },
+        lon: { gte: user.lon - delta, lte: user.lon + delta },
+      },
+      select: { id: true, store_id: true, name: true, lat: true, lon: true, address: true, city: true },
+    });
+    if (rows.length > 0) return nearestBranchPerStore(rows as BranchLite[], user);
+  }
+  return [];
 }
 
 /** DB: nearest branch coords per given store within a country (for compare distance). */
