@@ -1,7 +1,7 @@
 {
   "common": {
     "continue": "Weiter",
-    "skip": "Später",
+    "skip": "Vorerst überspringen",
     "finish": "Fertig",
     "save": "Speichern",
     "cancel": "Abbrechen",
@@ -167,6 +167,7 @@
     "sort_title": "Sortieren nach",
     "sort": { "recommended": "Empfohlen", "cheapest": "Günstigste", "nearest": "Nächstgelegen", "price_distance": "Preis + Entfernung" },
     "summary_title": "Zusammenfassung",
+    "cheapest": "Am günstigsten",
     "cheapest_full": "Günstigste (ganze Liste)",
     "cheapest_meta_full": "{{stores}} Geschäfte · {{items}} Artikel",
     "cheapest_meta_partial": "{{missing}} Artikel fehlen · {{coverage}}%",

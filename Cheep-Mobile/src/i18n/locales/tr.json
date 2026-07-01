@@ -167,6 +167,7 @@
     "sort_title": "Sıralama",
     "sort": { "recommended": "Önerilen", "cheapest": "En ucuz", "nearest": "En yakın", "price_distance": "Fiyat + Konum" },
     "summary_title": "Özet",
+    "cheapest": "En ucuz",
     "cheapest_full": "En Ucuz (tüm liste)",
     "cheapest_meta_full": "{{stores}} market · {{items}} ürün",
     "cheapest_meta_partial": "{{missing}} ürün eksik · %{{coverage}}",

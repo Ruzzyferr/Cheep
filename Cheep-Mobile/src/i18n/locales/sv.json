@@ -167,6 +167,7 @@
     "sort_title": "Sortera efter",
     "sort": { "recommended": "Rekommenderad", "cheapest": "Billigast", "nearest": "Närmast", "price_distance": "Pris + avstånd" },
     "summary_title": "Sammanfattning",
+    "cheapest": "Billigast",
     "cheapest_full": "Billigast (hela listan)",
     "cheapest_meta_full": "{{stores}} butiker · {{items}} varor",
     "cheapest_meta_partial": "{{missing}} varor saknas · {{coverage}}%",

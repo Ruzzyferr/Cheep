@@ -167,6 +167,7 @@
     "sort_title": "Sortuj według",
     "sort": { "recommended": "Polecane", "cheapest": "Najtańsze", "nearest": "Najbliższe", "price_distance": "Cena + odległość" },
     "summary_title": "Podsumowanie",
+    "cheapest": "Najtańszy",
     "cheapest_full": "Najtańsze (cała lista)",
     "cheapest_meta_full": "{{stores}} sklepy · {{items}} produktów",
     "cheapest_meta_partial": "brakuje {{missing}} produktów · {{coverage}}%",

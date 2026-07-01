@@ -167,6 +167,7 @@
     "sort_title": "Sort by",
     "sort": { "recommended": "Recommended", "cheapest": "Cheapest", "nearest": "Nearest", "price_distance": "Price + Distance" },
     "summary_title": "Summary",
+    "cheapest": "Cheapest",
     "cheapest_full": "Cheapest (whole list)",
     "cheapest_meta_full": "{{stores}} stores · {{items}} items",
     "cheapest_meta_partial": "{{missing}} items missing · {{coverage}}%",
