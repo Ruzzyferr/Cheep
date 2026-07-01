@@ -1,5 +1,5 @@
 import { type Request, type Response, type NextFunction } from 'express';
-import { getCountryIdByCode, DEFAULT_COUNTRY_CODE } from '../utils/country.js';
+import { getCountryByCode, DEFAULT_COUNTRY_CODE } from '../utils/country.js';
 
 /**
  * Resolve Country Middleware
@@ -13,9 +13,8 @@ import { getCountryIdByCode, DEFAULT_COUNTRY_CODE } from '../utils/country.js';
 export const resolveCountry = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const headerCode = req.header('x-country')?.trim().toUpperCase();
-        const code = headerCode || DEFAULT_COUNTRY_CODE;
-        const id = await getCountryIdByCode(code);
-        req.country = { id, code };
+        const c = await getCountryByCode(headerCode || DEFAULT_COUNTRY_CODE);
+        req.country = { id: c.id, code: c.code, currency: c.currency };
         next();
     } catch (error) {
         // Bilinmeyen ülke kodu → 400 yerine default'a düşmek yerine açık hata ver

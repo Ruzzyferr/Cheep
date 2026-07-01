@@ -11,6 +11,7 @@ declare namespace Express {
         country?: {
             id: number;
             code: string;
+            currency: string;
         };
     }
 }
