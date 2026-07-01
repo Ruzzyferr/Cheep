@@ -169,7 +169,8 @@ class LLMProductMatcher {
      * Her market için tüm ürünleri tek seferde LLM'e gönderir
      */
     async processMarketGroups(
-        rawProducts: RawProductData[]
+        rawProducts: RawProductData[],
+        currency: string = 'TRY'
     ): Promise<ProcessedProduct[]> {
         if (!this.apiKey) {
             logger.warn('[LLMProductMatcher] API key yok, fallback matching kullanılıyor');
@@ -185,9 +186,9 @@ class LLMProductMatcher {
         // 2. Her market için ayrı ayrı işle
         for (const group of marketGroups) {
             logger.info(`[LLMProductMatcher] ${group.store_name} için ${group.products.length} ürün işleniyor...`);
-            
+
             try {
-                const results = await this.processMarketGroup(group, rawProducts);
+                const results = await this.processMarketGroup(group, rawProducts, currency);
                 allResults.push(...results);
                 
                 // Rate limiting için bekle
@@ -234,7 +235,8 @@ class LLMProductMatcher {
      */
     private async processMarketGroup(
         group: MarketGroup,
-        allProducts: RawProductData[] // Cross-market matching için
+        allProducts: RawProductData[], // Cross-market matching için
+        currency: string = 'TRY'
     ): Promise<ProcessedProduct[]> {
         // Mevcut ürünlerden örnekler al
         const sampleProducts = await prisma.product.findMany({
@@ -260,7 +262,7 @@ class LLMProductMatcher {
             ],
         });
 
-        const prompt = this.buildMarketGroupPrompt(group, sampleProducts, categoryTree);
+        const prompt = this.buildMarketGroupPrompt(group, sampleProducts, categoryTree, currency);
         const response = await this.callLLM(prompt);
         const processed = await this.parseMarketGroupResponse(response, group, allCategories);
 
@@ -386,11 +388,12 @@ JSON formatında cevap ver:
     private buildMarketGroupPrompt(
         group: MarketGroup,
         sampleProducts: Array<{ id: number; name: string; brand?: string | null; category?: { name: string } | null }>,
-        categoryTree: Array<{ name: string; subcategories: string[] }>
+        categoryTree: Array<{ name: string; subcategories: string[] }>,
+        currency: string = 'TRY'
     ): string {
         // Ürünleri sadeleştirilmiş formatta hazırla
         const productsText = group.products
-            .map((p, i) => `${i + 1}. "${p.name}"${p.brand ? ` - Marka: ${p.brand}` : ''}${p.raw_category ? ` [Kategori: ${p.raw_category}]` : ''} - Fiyat: ₺${p.price}${p.unit ? ` / ${p.unit}` : ''} - SKU: ${p.store_sku}`)
+            .map((p, i) => `${i + 1}. "${p.name}"${p.brand ? ` - Marka: ${p.brand}` : ''}${p.raw_category ? ` [Kategori: ${p.raw_category}]` : ''} - Fiyat: ${currency} ${p.price}${p.unit ? ` / ${p.unit}` : ''} - SKU: ${p.store_sku}`)
             .join('\n');
 
         // Database'deki kategorileri formatla

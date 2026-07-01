@@ -45,7 +45,7 @@ export const toolDeclarations: any[] = [
       type: 'object',
       properties: {
         name: { type: 'string', description: 'Liste adı' },
-        budget: { type: 'number', description: 'Opsiyonel bütçe limiti (TL)' },
+        budget: { type: 'number', description: 'Opsiyonel bütçe limiti (kullanıcının para biriminde)' },
       },
       required: ['name'],
     },

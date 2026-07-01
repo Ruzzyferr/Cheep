@@ -44,7 +44,7 @@ export const deleteThread = async (threadId: number, userId: number) => {
 // SYSTEM PROMPT BUILDER (exported for testability)
 // ============================================
 
-export function buildSystemPrompt(profile: any): string {
+export function buildSystemPrompt(profile: any, currency: string = 'TRY'): string {
   const lines = [
     'Sen Cheep akıllı alışveriş asistanısın. Türkçe, sıcak ve yargılamadan konuş; tasarrufu olumlu çerçevele.',
     'Kullanıcının listelerine/ürünlere/fiyatlara araçlarla eriş. Liste değiştirmeden önce gerekirse kısa sorular sor (ör. "listende zaten var, bir tane daha mı?").',
@@ -57,7 +57,7 @@ export function buildSystemPrompt(profile: any): string {
     if (profile.avoid?.length) lines.push(`- Kaçındıkları: ${profile.avoid.join(', ')}`);
     if (profile.allergies?.length) lines.push(`- Alerjiler: ${profile.allergies.join(', ')} (asla önerme)`);
     if (profile.household_size) lines.push(`- Hane: ${profile.household_size} kişi`);
-    if (profile.weekly_budget) lines.push(`- Haftalık bütçe: ${profile.weekly_budget} TL`);
+    if (profile.weekly_budget) lines.push(`- Haftalık bütçe: ${profile.weekly_budget} ${currency}`);
   }
   return lines.join('\n');
 }
@@ -66,7 +66,7 @@ export function buildSystemPrompt(profile: any): string {
 // SEND MESSAGE (agent orchestration)
 // ============================================
 
-export const sendMessage = async (userId: number, threadId: number, content: string) => {
+export const sendMessage = async (userId: number, threadId: number, content: string, currency: string = 'TRY') => {
   await assertOwner(threadId, userId);
 
   // Günlük limit kontrolü (Gemini çağrısından ÖNCE)
@@ -88,7 +88,7 @@ export const sendMessage = async (userId: number, threadId: number, content: str
   }
 
   const session = createChatSession({
-    systemInstruction: buildSystemPrompt(profile),
+    systemInstruction: buildSystemPrompt(profile, currency),
     history: history.map(m => ({
       role: m.role === 'user' ? 'user' as const : 'model' as const,
       parts: [{ text: m.content }],

@@ -8,7 +8,7 @@ import { llmProductMatcher } from './llm-product-matcher.service.js';
 import { prisma } from '../utils/prisma.client.js';
 import logger from '../utils/logger.js';
 import { Decimal } from '@prisma/client/runtime/library';
-import { getCountryIdByCode } from '../utils/country.js';
+import { getCountryByCode } from '../utils/country.js';
 
 export interface RawProductInput {
     name: string;
@@ -44,14 +44,15 @@ export async function processRawProducts(
 ): Promise<IngestResult> {
     logger.info(`[Ingest] ${products.length} ürün işleniyor (LLM: ${useLlm})`);
 
+    const country = await getCountryByCode(countryCode);
+
     const processedProducts = useLlm
-        ? await llmProductMatcher.processMarketGroups(products)
+        ? await llmProductMatcher.processMarketGroups(products, country.currency)
         : await llmProductMatcher.fallbackProcess(products);
 
     logger.info(`[Ingest] İşleme tamamlandı: ${processedProducts.length} ürün`);
 
-    const countryId = await getCountryIdByCode(countryCode);
-    const results = await saveProcessedProducts(processedProducts, countryId);
+    const results = await saveProcessedProducts(processedProducts, country.id);
 
     return {
         total: products.length,
