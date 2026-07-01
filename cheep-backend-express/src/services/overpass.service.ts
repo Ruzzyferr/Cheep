@@ -13,15 +13,34 @@ export function normalizeName(s: string): string {
   return (s || '').split('').map(c => DIACRITICS[c] ?? c).join('').toLowerCase().trim().replace(/\s+/g, ' ');
 }
 
+function tokens(s: string): string[] {
+  return normalizeName(s).split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+/** true if aliasTokens appear as a contiguous run inside nameTokens */
+function phraseInTokens(aliasTokens: string[], nameTokens: string[]): boolean {
+  if (aliasTokens.length === 0 || aliasTokens.length > nameTokens.length) return false;
+  for (let i = 0; i + aliasTokens.length <= nameTokens.length; i++) {
+    let ok = true;
+    for (let j = 0; j < aliasTokens.length; j++) {
+      if (nameTokens[i + j] !== aliasTokens[j]) { ok = false; break; }
+    }
+    if (ok) return true;
+  }
+  return false;
+}
+
 export function matchChain(tags: Record<string, string>, aliases: ChainAlias[]): { store_id: number; chain: string } | null {
-  const brand = normalizeName(tags.brand || '');
-  const name = normalizeName(tags.name || '');
+  const brandNorm = normalizeName(tags.brand || '');
+  const brandTokens = tokens(tags.brand || '');
+  const nameTokens = tokens(tags.name || '');
   for (const a of aliases) {
     for (const alias of a.aliases) {
       const al = normalizeName(alias);
-      if (brand === al || name === al || name.startsWith(al + ' ') || name.includes(' ' + al) || (brand && brand.includes(al)) || name.split(' ')[0] === al) {
-        return { store_id: a.store_id, chain: a.chain };
-      }
+      const alTokens = tokens(alias);
+      if (brandNorm === al) return { store_id: a.store_id, chain: a.chain };
+      if (phraseInTokens(alTokens, brandTokens)) return { store_id: a.store_id, chain: a.chain };
+      if (phraseInTokens(alTokens, nameTokens)) return { store_id: a.store_id, chain: a.chain };
     }
   }
   return null;

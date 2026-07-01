@@ -18,6 +18,15 @@ describe('overpass parse/match', () => {
     expect(matchChain({ name: 'Random Fırın' }, BRAND_ALIASES.TR)).toBeNull();
   });
 
+  it('matchChain uses whole-word matching (no short-alias over-match)', () => {
+    expect(matchChain({ brand: 'Sokrates Kitabevi' }, BRAND_ALIASES.TR)).toBeNull();
+    expect(matchChain({ name: 'Cadde Sokak Fırını' }, BRAND_ALIASES.TR)).toBeNull();
+    expect(matchChain({ brand: 'Basilica Market' }, BRAND_ALIASES.SE)).toBeNull();
+    // legit multi-word branch names still match
+    expect(matchChain({ name: 'ICA Maxi Stormarknad' }, BRAND_ALIASES.SE)?.store_id).toBe(20);
+    expect(matchChain({ brand: 'Carrefour Express' }, BRAND_ALIASES.PL)?.store_id).toBe(40);
+  });
+
   it('parseOverpassElements yields branches for matches only, using node coords or way center', () => {
     const out = parseOverpassElements(fixture, BRAND_ALIASES.TR);
     expect(out).toHaveLength(2);

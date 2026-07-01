@@ -2,7 +2,7 @@ export interface ChainAlias { store_id: number; chain: string; aliases: string[]
 
 export const BRAND_ALIASES: Record<string, ChainAlias[]> = {
   TR: [
-    { store_id: 1, chain: 'Migros', aliases: ['migros', 'migros jet', 'migros m', 'mmm migros', 'money'] },
+    { store_id: 1, chain: 'Migros', aliases: ['migros', 'migros jet', 'migros m', 'mmm migros'] },
     { store_id: 2, chain: 'CarrefourSA', aliases: ['carrefour', 'carrefoursa', 'carrefour sa', 'carrefour express'] },
     { store_id: 3, chain: 'A101', aliases: ['a101', 'a 101'] },
     { store_id: 4, chain: 'ŞOK', aliases: ['sok', 'sok market', 'şok', 'şok market'] },
