@@ -21,7 +21,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useLocale, COUNTRY_CONFIG } from '../../context/LocaleContext';
-import { profileService } from '../../services';
+import { profileService, userService } from '../../services';
 import { CheepMascot } from '../../components/brand/CheepMascot';
 import { Float } from '../../components/anim';
 import { colors, typography, spacing, borderRadius, layout } from '../../theme';
@@ -323,13 +323,19 @@ export function OnboardingScreen() {
   const finish = async () => {
     setFinishing(true);
     try {
+      // Dil + ülke tercihi `users` tablosuna ait — bunlar `/profile` uçunun
+      // bilmediği alanlar (sessizce atılırdı), bu yüzden `/users/me`'ye ayrı
+      // gönderiyoruz. Başarısız olursa onboarding'i bloklamasın (try/catch).
+      try {
+        await userService.updatePreferences({ language, country_code: country });
+      } catch (error) {
+        console.error('Dil/ülke tercihi kaydedilemedi:', error);
+      }
+
       // Build payload from DEFINED answers only — tanımsız household_size/diet
       // gönderip mevcut profil değerlerini (örn. tekrar onboarding'de) ezmeyiz.
       const payload: Partial<UserProfile> = {
         onboarding_done: true,
-        // Dil + ülke tercihini profile de yaz (backend x-country'yi de kullanır).
-        language,
-        country_code: country,
       };
       if (answers.household_size !== undefined) {
         payload.household_size = answers.household_size;
