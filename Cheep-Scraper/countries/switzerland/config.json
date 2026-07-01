@@ -1,0 +1,13 @@
+{
+  "country": "Switzerland",
+  "country_code": "CH",
+  "markets": [
+    { "name": "Migros", "store_id": 10, "scraper_path": "scrapers/migros_ch.py", "scraper_class": "MigrosCHScraper", "scraper_method": "fetch_products", "output_pattern": "migros_ch_products_{timestamp}.json", "enabled": true, "note": "anchor; recon 2026-07-02: requests GET www.migros.ch/ = 200 (SPA shell only); Playwright (headless chromium) navigating /en/search?query=... captures https://www.migros.ch/product-display/public/v4/product-cards -> real product JSON array (name/brand/gtins/offer.price/offer.quantity/breadcrumb). Fixture saved from this endpoint." },
+    { "name": "Coop", "store_id": 11, "scraper_path": "scrapers/coop_ch.py", "scraper_class": "CoopCHScraper", "scraper_method": "fetch_products", "output_pattern": "coop_ch_products_{timestamp}.json", "enabled": false, "note": "anchor blocked; recon 2026-07-02: requests GET www.coop.ch/ = 403; Playwright headless chromium (both bare context and launch_persistent_context with --disable-blink-features=AutomationControlled) also 403, page loads captcha-delivery.com (DataDome) challenge, title stays 'coop.ch'. No product data reachable without a residential proxy / CAPTCHA-solving flow. Re-enable once that's available." },
+    { "name": "Denner", "store_id": 12, "scraper_path": "scrapers/denner.py", "scraper_class": "DennerScraper", "scraper_method": "fetch_products", "output_pattern": "denner_products_{timestamp}.json", "enabled": false, "note": "best-effort; needs Store seed row #12 before enabling" },
+    { "name": "Aldi Suisse", "store_id": 13, "scraper_path": "scrapers/aldi_ch.py", "scraper_class": "AldiCHScraper", "scraper_method": "fetch_products", "output_pattern": "aldi_ch_products_{timestamp}.json", "enabled": false, "note": "hard discounter; leaflet-only likely; needs Store seed row #13" },
+    { "name": "Lidl Suisse", "store_id": 14, "scraper_path": "scrapers/lidl_ch.py", "scraper_class": "LidlCHScraper", "scraper_method": "fetch_products", "output_pattern": "lidl_ch_products_{timestamp}.json", "enabled": false, "note": "hard discounter; leaflet-only likely; needs Store seed row #14" }
+  ],
+  "output_dir": "output",
+  "log_dir": "logs"
+}

@@ -1,0 +1,3888 @@
+[
+  {
+    "brand": "Oh!",
+    "brandLine": "High Protein",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Oh! High Protein · Milk · 05 % fat, UHT, lactose free",
+    "gtins": [
+      "7613404451922"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/289ce2d2cf5e76a52d5d3fe8b4277207c8ae45ad/oh-high-protein-milk-05-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/289ce2d2cf5e76a52d5d3fe8b4277207c8ae45ad/oh-high-protein-milk-05-fat-uht.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204022800000",
+    "migrosOnlineId": "6052988",
+    "name": "Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "2.20",
+        "advertisedValue": 2.2,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "2.20",
+        "effectiveValue": 2.2,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.22
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.22/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204022800000",
+    "title": "Oh! High Protein · Milk · 05 % fat, UHT, lactose free",
+    "uid": 100003149,
+    "versioning": "05 % fat, UHT, lactose free"
+  },
+  {
+    "brand": "Valflora",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Valflora · Milk Drink · IP-SUISSE, 1.5 % fat, UHT",
+    "gtins": [
+      "7623186628863",
+      "22129598",
+      "7610200035233",
+      "7613269779896"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/75facb5775a3993f33b18f63d8eb5d04f2a59c63/valflora-ip-suisse-milk-drink-15-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/75facb5775a3993f33b18f63d8eb5d04f2a59c63/valflora-ip-suisse-milk-drink-15-fat-uht.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204020200000",
+    "migrosOnlineId": "49980",
+    "name": "Milk Drink",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "0.85",
+        "advertisedValue": 0.85,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "0.85",
+        "effectiveValue": 0.85,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.17
+        }
+      },
+      "quantity": "500ml",
+      "quantityPrice": "0.17/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204020200000",
+    "title": "Valflora · Milk Drink · IP-SUISSE, 1.5 % fat, UHT",
+    "uid": 100004908,
+    "versioning": "1.5 % fat, UHT"
+  },
+  {
+    "brand": "Valflora",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Valflora · Whole Milk · IP-SUISSE, 3.5 % fat, UHT",
+    "gtins": [
+      "7613269779841",
+      "22129574",
+      "7610200035202"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/0543f715e03ed9cbd5dd0dc85acd6f4938e21a1f/valflora-ip-suisse-whole-milk-35-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/0543f715e03ed9cbd5dd0dc85acd6f4938e21a1f/valflora-ip-suisse-whole-milk-35-fat-uht.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204016200000",
+    "migrosOnlineId": "49978",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "0.90",
+        "advertisedValue": 0.9,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "0.90",
+        "effectiveValue": 0.9,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.18
+        }
+      },
+      "quantity": "500ml",
+      "quantityPrice": "0.18/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204016200000",
+    "title": "Valflora · Whole Milk · IP-SUISSE, 3.5 % fat, UHT",
+    "uid": 100004909,
+    "versioning": "3.5 % fat, UHT"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495315",
+        "name": "Condensed milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "condensed-milk"
+        ]
+      }
+    ],
+    "description": "Condensed Milk  · Sugared",
+    "gtins": [
+      "7610200010094"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/820babe2f133cb9c63a88f230f9a7ff221a1a7d5/condensed-milk-sugared.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/820babe2f133cb9c63a88f230f9a7ff221a1a7d5/condensed-milk-sugared.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "150103000000",
+    "migrosOnlineId": "51572",
+    "name": "Condensed Milk ",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "price": {
+        "advertisedDisplayValue": "3.20",
+        "advertisedValue": 3.2,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "3.20",
+        "effectiveValue": 3.2,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100g",
+          "value": 1.07
+        }
+      },
+      "quantity": "300g",
+      "quantityPrice": "1.07/100g",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/150103000000",
+    "title": "Condensed Milk  · Sugared",
+    "uid": 100005142,
+    "versioning": "Sugared"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495315",
+        "name": "Condensed milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "condensed-milk"
+        ]
+      }
+    ],
+    "description": "Condensed Milk  · Sugared",
+    "gtins": [
+      "7610200010087"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/9d152c9b3b6b1ddab0f6b8dae5723c7990bf94ee/condensed-milk-sugared.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/9d152c9b3b6b1ddab0f6b8dae5723c7990bf94ee/condensed-milk-sugared.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "150101000000",
+    "migrosOnlineId": "51571",
+    "name": "Condensed Milk ",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "price": {
+        "advertisedDisplayValue": "3.85",
+        "advertisedValue": 3.85,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "3.85",
+        "effectiveValue": 3.85,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100g",
+          "value": 0.97
+        }
+      },
+      "quantity": "397g",
+      "quantityPrice": "0.97/100g",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/150101000000",
+    "title": "Condensed Milk  · Sugared",
+    "uid": 100005145,
+    "versioning": "Sugared"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Whole Milk · Bio, 3.5 % fat, UHT",
+    "gtins": [
+      "7613404845424",
+      "7613404535400",
+      "7610200362735"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/f660dab1144c2514af0385d23cb8876427b4effb/bio-whole-milk-35-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/f660dab1144c2514af0385d23cb8876427b4effb/bio-whole-milk-35-fat-uht.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204015000000",
+    "migrosOnlineId": "53881",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Organic",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483586/labels/bio",
+          "type": "BIO"
+        },
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.95",
+        "advertisedValue": 1.95,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.95",
+        "effectiveValue": 1.95,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.2
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.20/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204015000000",
+    "title": "Whole Milk · Bio, 3.5 % fat, UHT",
+    "uid": 100005465,
+    "versioning": "3.5 % fat, UHT"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Milk Drink · Bio, 2.5% fat, UHT",
+    "gtins": [
+      "7613404845196",
+      "7613404535271",
+      "7610200362759"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/39f5bd0e79fa4826c495cfa048f7e27c82db9cfd/bio-milk-drink-25-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/39f5bd0e79fa4826c495cfa048f7e27c82db9cfd/bio-milk-drink-25-fat-uht.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204019500000",
+    "migrosOnlineId": "53882",
+    "name": "Milk Drink",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Organic",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483586/labels/bio",
+          "type": "BIO"
+        },
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.95",
+        "advertisedValue": 1.95,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.95",
+        "effectiveValue": 1.95,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.2
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.20/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204019500000",
+    "title": "Milk Drink · Bio, 2.5% fat, UHT",
+    "uid": 100005467,
+    "versioning": "2.5% fat, UHT"
+  },
+  {
+    "brand": "M-Budget",
+    "breadcrumb": [
+      {
+        "id": "7494736",
+        "name": "Snacks & sweets",
+        "slugs": [
+          "snacks-sweets"
+        ]
+      },
+      {
+        "id": "7494782",
+        "name": "Chocolate & sweets",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets"
+        ]
+      },
+      {
+        "id": "7495018",
+        "name": "Chocolate bars",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets",
+          "chocolate-bars"
+        ]
+      },
+      {
+        "id": "7495515",
+        "name": "Milk",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets",
+          "chocolate-bars",
+          "milk"
+        ]
+      }
+    ],
+    "description": "M-Budget · Milk",
+    "gtins": [
+      "7613269195306",
+      "7616500010277"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/80b07b8d747d5c4e1de8f59df20107f5cb85f908/m-budget-milk.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/80b07b8d747d5c4e1de8f59df20107f5cb85f908/m-budget-milk.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "100102700000",
+    "migrosOnlineId": "53926",
+    "name": "Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "0.70",
+        "advertisedValue": 0.7,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "0.70",
+        "effectiveValue": 0.7,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100g",
+          "value": 0.7
+        }
+      },
+      "quantity": "100g",
+      "quantityPrice": "0.70/100g",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/100102700000",
+    "title": "M-Budget · Milk",
+    "uid": 100005485
+  },
+  {
+    "brand": "Frey",
+    "breadcrumb": [
+      {
+        "id": "7494736",
+        "name": "Snacks & sweets",
+        "slugs": [
+          "snacks-sweets"
+        ]
+      },
+      {
+        "id": "7494782",
+        "name": "Chocolate & sweets",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets"
+        ]
+      },
+      {
+        "id": "7495018",
+        "name": "Chocolate bars",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets",
+          "chocolate-bars"
+        ]
+      },
+      {
+        "id": "7495515",
+        "name": "Milk",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets",
+          "chocolate-bars",
+          "milk"
+        ]
+      }
+    ],
+    "description": "Frey · Milk · Extra · Enjoy sensual moments with specialties from our extensive range",
+    "gtins": [
+      "7616500016576"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/88f53c1ec33f342f87ee2448251c1e94dcaf4d61/frey-milk-extra.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/88f53c1ec33f342f87ee2448251c1e94dcaf4d61/frey-milk-extra.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "100165700000",
+    "migrosOnlineId": "53933",
+    "name": "Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "6.30",
+        "advertisedValue": 6.3,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "6.30",
+        "effectiveValue": 6.3,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100g",
+          "value": 2.1
+        }
+      },
+      "quantity": "3 x 100g",
+      "quantityPrice": "2.10/100g",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/100165700000",
+    "title": "Frey · Milk · Extra",
+    "uid": 100005493,
+    "versioning": "Extra"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Goat’s Milk · 3% fat, High pasteurized · Highly pasteurized, homogenized",
+    "gtins": [
+      "7611613002409",
+      "7617027576932"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/788b5acedaa966ecf7c0589235d618e3831cfe4e/goats-milk-3-fat-high-pasteurized.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/788b5acedaa966ecf7c0589235d618e3831cfe4e/goats-milk-3-fat-high-pasteurized.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204080100000",
+    "migrosOnlineId": "3463623",
+    "name": "Goat’s Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        },
+        {
+          "description": "cold",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483166/labels/fresh",
+          "type": "FRESHNESS"
+        }
+      ],
+      "price": {
+        "displayUnitPrice": false,
+        "multiplier": 1
+      },
+      "quantity": "500ml",
+      "type": "REGIONAL"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204080100000",
+    "title": "Goat’s Milk · 3% fat, High pasteurized",
+    "uid": 100005937,
+    "versioning": "3% fat, High pasteurized"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Whole Milk · Bio, 3.5% fat, pasteurized",
+    "gtins": [
+      "7613404894064",
+      "7610200313980",
+      "7613404587140"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/f8645d351d6a1ce14c8d38b9523a517e1aa08ea2/bio-whole-milk-35-fat-pasteurized.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/f8645d351d6a1ce14c8d38b9523a517e1aa08ea2/bio-whole-milk-35-fat-pasteurized.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204003200000",
+    "migrosOnlineId": "57521",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Organic",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483586/labels/bio",
+          "type": "BIO"
+        },
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        },
+        {
+          "description": "cold",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483166/labels/fresh",
+          "type": "FRESHNESS"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.85",
+        "advertisedValue": 1.85,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.85",
+        "effectiveValue": 1.85,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.19
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.19/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204003200000",
+    "title": "Whole Milk · Bio, 3.5% fat, pasteurized",
+    "uid": 100006357,
+    "versioning": "3.5% fat, pasteurized"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Milk Drink · IP-SUISSE, aha!, 1.5% Fat, UHT, lactose free",
+    "gtins": [
+      "7610200380265"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/0414b98bea983f76ecd22394002482384f4d2df6/ip-suisse-aha-milk-drink-15-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/0414b98bea983f76ecd22394002482384f4d2df6/ip-suisse-aha-milk-drink-15-fat-uht.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204016500000",
+    "migrosOnlineId": "59257",
+    "name": "Milk Drink",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.95",
+        "advertisedValue": 1.95,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.95",
+        "effectiveValue": 1.95,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.2
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.20/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204016500000",
+    "title": "Milk Drink · IP-SUISSE, aha!, 1.5% Fat, UHT, lactose free",
+    "uid": 100007074,
+    "versioning": "1.5% Fat, UHT, lactose free"
+  },
+  {
+    "brand": "Heidi",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Heidi · Whole Milk · IP-SUISSE, 3.5% fat, High pasteurized · Mountain milk",
+    "gtins": [
+      "7610200390998"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/764bed1957b3d1b77bd968badee381c1f8e474c7/heidi-ip-suisse-whole-milk-35-fat-high-pasteurized.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/764bed1957b3d1b77bd968badee381c1f8e474c7/heidi-ip-suisse-whole-milk-35-fat-high-pasteurized.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204008000000",
+    "migrosOnlineId": "60297",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        },
+        {
+          "description": "cold",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483166/labels/fresh",
+          "type": "FRESHNESS"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.85",
+        "advertisedValue": 1.85,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.85",
+        "effectiveValue": 1.85,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.19
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.19/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204008000000",
+    "title": "Heidi · Whole Milk · IP-SUISSE, 3.5% fat, High pasteurized",
+    "uid": 100007434,
+    "versioning": "3.5% fat, High pasteurized"
+  },
+  {
+    "brand": "Heidi",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Heidi · Milk Drink · IP-SUISSE, 2.5% fat, High pasteurized · Mountain milk",
+    "gtins": [
+      "7610200390981"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/43c7ffeeadaad40b63203c6284788046038f2a9a/heidi-ip-suisse-milk-drink-25-fat-high-pasteurized.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/43c7ffeeadaad40b63203c6284788046038f2a9a/heidi-ip-suisse-milk-drink-25-fat-high-pasteurized.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204008500000",
+    "migrosOnlineId": "60298",
+    "name": "Milk Drink",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        },
+        {
+          "description": "cold",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483166/labels/fresh",
+          "type": "FRESHNESS"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.85",
+        "advertisedValue": 1.85,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.85",
+        "effectiveValue": 1.85,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.19
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.19/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204008500000",
+    "title": "Heidi · Milk Drink · IP-SUISSE, 2.5% fat, High pasteurized",
+    "uid": 100007435,
+    "versioning": "2.5% fat, High pasteurized"
+  },
+  {
+    "brand": "Valflora",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Valflora · Whole Milk · IP-SUISSE, 3.5 % fat, UHT",
+    "gtins": [
+      "7613269880431",
+      "76102844"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/1f586f1581a79b652f6ea492111a0705e4f32a19/valflora-ip-suisse-whole-milk-35-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/1f586f1581a79b652f6ea492111a0705e4f32a19/valflora-ip-suisse-whole-milk-35-fat-uht.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204016300000",
+    "migrosOnlineId": "63185",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "0.60",
+        "advertisedValue": 0.6,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "0.60",
+        "effectiveValue": 0.6,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.24
+        }
+      },
+      "quantity": "250ml",
+      "quantityPrice": "0.24/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204016300000",
+    "title": "Valflora · Whole Milk · IP-SUISSE, 3.5 % fat, UHT",
+    "uid": 100008473,
+    "versioning": "3.5 % fat, UHT"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494736",
+        "name": "Snacks & sweets",
+        "slugs": [
+          "snacks-sweets"
+        ]
+      },
+      {
+        "id": "7494782",
+        "name": "Chocolate & sweets",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets"
+        ]
+      },
+      {
+        "id": "7495018",
+        "name": "Chocolate bars",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets",
+          "chocolate-bars"
+        ]
+      },
+      {
+        "id": "7495515",
+        "name": "Milk",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets",
+          "chocolate-bars",
+          "milk"
+        ]
+      }
+    ],
+    "description": "Milk · aha!, lactose free",
+    "gtins": [
+      "07613312386217",
+      "7616500634343",
+      "7613312051443"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/1403cd2ebd1997d86ebe477ecbb67ae613b0795b/aha-milk.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/1403cd2ebd1997d86ebe477ecbb67ae613b0795b/aha-milk.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "100178800000",
+    "migrosOnlineId": "92089",
+    "name": "Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "2.50",
+        "advertisedValue": 2.5,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "2.50",
+        "effectiveValue": 2.5,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100g",
+          "value": 2.5
+        }
+      },
+      "quantity": "100g",
+      "quantityPrice": "2.50/100g",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/100178800000",
+    "title": "Milk · aha!, lactose free",
+    "uid": 100015887,
+    "versioning": "lactose free"
+  },
+  {
+    "brand": "M-Classic",
+    "brandLine": "Léger",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "M-Classic Léger · Skimmed milk · IP-SUISSE, 0.01% Fat",
+    "gtins": [
+      "7613404536094",
+      "7616600708272"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/2577e6d8d8c403ad314246b41306506048f9d023/m-classic-leger-ip-suisse-skimmed-milk-001-fat.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/2577e6d8d8c403ad314246b41306506048f9d023/m-classic-leger-ip-suisse-skimmed-milk-001-fat.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204021900000",
+    "migrosOnlineId": "102846",
+    "name": "Skimmed milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.50",
+        "advertisedValue": 1.5,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.50",
+        "effectiveValue": 1.5,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.15
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.15/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204021900000",
+    "title": "M-Classic Léger · Skimmed milk · IP-SUISSE, 0.01% Fat",
+    "uid": 100019227,
+    "versioning": "0.01% Fat"
+  },
+  {
+    "brand": "Rapilait",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495315",
+        "name": "Condensed milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "condensed-milk"
+        ]
+      }
+    ],
+    "description": "Rapilait · Skimmed Milk Powder · Instantly Soluble",
+    "gtins": [
+      "7610200017598"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/da990afd83308acfa954a18105a632afdadb2eab/rapilait-skimmed-milk-powder-instantly-soluble.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/da990afd83308acfa954a18105a632afdadb2eab/rapilait-skimmed-milk-powder-instantly-soluble.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "150141000000",
+    "migrosOnlineId": "126212",
+    "name": "Skimmed Milk Powder",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "4.35",
+        "advertisedValue": 4.35,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "4.35",
+        "effectiveValue": 4.35,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100g",
+          "value": 1.24
+        }
+      },
+      "quantity": "350g",
+      "quantityPrice": "1.24/100g",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/150141000000",
+    "title": "Rapilait · Skimmed Milk Powder · Instantly Soluble",
+    "uid": 100023765,
+    "versioning": "Instantly Soluble"
+  },
+  {
+    "brand": "M-Classic",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "M-Classic · Vita Milk · IP-SUISSE, 1.5% Fat, Calcium · With proteins and calcium",
+    "gtins": [
+      "7623186313028",
+      "7613404162842"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/6607b15f775b73f77415422484bc4739c89fc218/m-classic-ip-suisse-vita-milk-15-fat-calcium.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/6607b15f775b73f77415422484bc4739c89fc218/m-classic-ip-suisse-vita-milk-15-fat-calcium.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204023800000",
+    "migrosOnlineId": "4891506",
+    "name": "Vita Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.90",
+        "advertisedValue": 1.9,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.90",
+        "effectiveValue": 1.9,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.19
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.19/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204023800000",
+    "title": "M-Classic · Vita Milk · IP-SUISSE, 1.5% Fat, Calcium",
+    "uid": 100029459,
+    "versioning": "1.5% Fat, Calcium"
+  },
+  {
+    "brand": "V-Love",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494755",
+        "name": "Vegan alternatives to dairy products",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "vegan-alternatives-to-dairy-prod"
+        ]
+      },
+      {
+        "id": "7494890",
+        "name": "Milk & cream alternatives",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "vegan-alternatives-to-dairy-prod",
+          "milk-cream-alternatives"
+        ]
+      },
+      {
+        "id": "7495369",
+        "name": "Plant-based alternatives to milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "vegan-alternatives-to-dairy-prod",
+          "milk-cream-alternatives",
+          "plant-based-alternatives-to-milk"
+        ]
+      }
+    ],
+    "description": "V-Love · Oat Milk · Bio, Barista, vegan, lactose free",
+    "gtins": [
+      "7613404209875",
+      "7623186087677"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/6afa5359a5e05851d588afd5b4ab2576536a20b2/v-love-bio-oat-milk-barista.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/6afa5359a5e05851d588afd5b4ab2576536a20b2/v-love-bio-oat-milk-barista.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204025500000",
+    "migrosOnlineId": "6230780",
+    "name": "Oat Milk",
+    "offer": {
+      "badges": [
+        {
+          "description": "20%",
+          "enrichedDescription": "20%",
+          "rawDescription": "20%",
+          "type": "PERCENTAGE_PROMOTION"
+        },
+        {
+          "description": "2 or more",
+          "enrichedDescription": "2 or more",
+          "rawDescription": "2 or more",
+          "type": "MINIMUM_PIECES"
+        }
+      ],
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Organic",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483586/labels/bio",
+          "type": "BIO"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "2.90",
+        "advertisedValue": 2.9,
+        "displayUnitPrice": false,
+        "effectiveDisplayValue": "2.90",
+        "effectiveValue": 2.9,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.29
+        }
+      },
+      "priceInsteadOfLabel": "was",
+      "promotionDateRange": {
+        "endDate": "2026-07-08",
+        "startDate": "2026-07-02"
+      },
+      "promotionPrice": {
+        "advertisedDisplayValue": "2.32",
+        "advertisedValue": 2.32,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "2.32",
+        "effectiveValue": 2.32,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.23
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.23/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204025500000",
+    "title": "V-Love · Oat Milk · Bio, Barista, vegan, lactose free",
+    "uid": 100032386,
+    "versioning": "Barista, vegan, lactose free"
+  },
+  {
+    "brand": "Valflora",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Valflora · Milk Drink · IP-SUISSE, 1.5% -Fat, UHT",
+    "gtins": [
+      "7623186628771",
+      "7613404323205"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/d5d5d2ccb0bdf36651e7354cb2e31f05bffd020c/valflora-ip-suisse-milk-drink-15-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/d5d5d2ccb0bdf36651e7354cb2e31f05bffd020c/valflora-ip-suisse-milk-drink-15-fat-uht.jpg"
+      },
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/a89296d12cc7e61aa2b6dfc442f8063de69ac518.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204020818000",
+    "migrosOnlineId": "6500592",
+    "name": "Milk Drink",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "8.70",
+        "advertisedValue": 8.7,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "8.70",
+        "effectiveValue": 8.7,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.15
+        }
+      },
+      "quantity": "6 x 1l",
+      "quantityPrice": "0.15/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204020818000",
+    "title": "Valflora · Milk Drink · IP-SUISSE, 1.5% -Fat, UHT",
+    "uid": 100033132,
+    "versioning": "1.5% -Fat, UHT"
+  },
+  {
+    "brand": "Valflora",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Valflora · Whole milk · IP-SUISSE, 3.5 % fat, UHT",
+    "gtins": [
+      "7613404322956"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/114b75535cd5ff46cd89f62531671e35cbb4071f/valflora-ip-suisse-whole-milk-35-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/114b75535cd5ff46cd89f62531671e35cbb4071f/valflora-ip-suisse-whole-milk-35-fat-uht.jpg"
+      },
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/2343e27fc511b8c4b65ae15160731c2a0155684c.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204016818000",
+    "migrosOnlineId": "6500575",
+    "name": "Whole milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "9.30",
+        "advertisedValue": 9.3,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "9.30",
+        "effectiveValue": 9.3,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.16
+        }
+      },
+      "quantity": "6 x 1l",
+      "quantityPrice": "0.16/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204016818000",
+    "title": "Valflora · Whole milk · IP-SUISSE, 3.5 % fat, UHT",
+    "uid": 100033136,
+    "versioning": "3.5 % fat, UHT"
+  },
+  {
+    "brand": "Valflora",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Valflora · Whole Milk · IP-SUISSE, 3.5 % fat, UHT",
+    "gtins": [
+      "7613404535318",
+      "7613269779858",
+      "22125880",
+      "7610200035196",
+      "23001343"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/7f46891098f810e2941bd47d6bff9ba22966e462/valflora-ip-suisse-whole-milk-35-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/7f46891098f810e2941bd47d6bff9ba22966e462/valflora-ip-suisse-whole-milk-35-fat-uht.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204016100000",
+    "migrosOnlineId": "6500635",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.55",
+        "advertisedValue": 1.55,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.55",
+        "effectiveValue": 1.55,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.16
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.16/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204016100000",
+    "title": "Valflora · Whole Milk · IP-SUISSE, 3.5 % fat, UHT",
+    "uid": 100033141,
+    "versioning": "3.5 % fat, UHT"
+  },
+  {
+    "brand": "Valflora",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Valflora · Milk Drink · IP-SUISSE, 1.5 % fat, UHT",
+    "gtins": [
+      "7623186629037",
+      "7613269780212",
+      "7610200035226",
+      "22129581",
+      "7613404535301"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/2ce3d6b8cd48c105186a9593e17bfd521dc12419/valflora-ip-suisse-milk-drink-15-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/2ce3d6b8cd48c105186a9593e17bfd521dc12419/valflora-ip-suisse-milk-drink-15-fat-uht.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204020100000",
+    "migrosOnlineId": "6500617",
+    "name": "Milk Drink",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.45",
+        "advertisedValue": 1.45,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.45",
+        "effectiveValue": 1.45,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.15
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.15/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204020100000",
+    "title": "Valflora · Milk Drink · IP-SUISSE, 1.5 % fat, UHT",
+    "uid": 100033146,
+    "versioning": "1.5 % fat, UHT"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495315",
+        "name": "Condensed milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "condensed-milk"
+        ]
+      }
+    ],
+    "description": "Condensed Milk  · Unsweetened, no added sugar",
+    "gtins": [
+      "7610200010070"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/0037575ec96fa20a11ac9401f93d5e527e970f0d/condensed-milk-unsweetened.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/0037575ec96fa20a11ac9401f93d5e527e970f0d/condensed-milk-unsweetened.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "150111000000",
+    "migrosOnlineId": "217413",
+    "name": "Condensed Milk ",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "price": {
+        "advertisedDisplayValue": "3.80",
+        "advertisedValue": 3.8,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "3.80",
+        "effectiveValue": 3.8,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100g",
+          "value": 0.93
+        }
+      },
+      "quantity": "410g",
+      "quantityPrice": "0.93/100g",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/150111000000",
+    "title": "Condensed Milk  · Unsweetened, no added sugar",
+    "uid": 100036357,
+    "versioning": "Unsweetened, no added sugar"
+  },
+  {
+    "brand": "Frey",
+    "breadcrumb": [
+      {
+        "id": "7494736",
+        "name": "Snacks & sweets",
+        "slugs": [
+          "snacks-sweets"
+        ]
+      },
+      {
+        "id": "7494782",
+        "name": "Chocolate & sweets",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets"
+        ]
+      },
+      {
+        "id": "7495018",
+        "name": "Chocolate bars",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets",
+          "chocolate-bars"
+        ]
+      },
+      {
+        "id": "7495515",
+        "name": "Milk",
+        "slugs": [
+          "snacks-sweets",
+          "chocolate-sweets",
+          "chocolate-bars",
+          "milk"
+        ]
+      }
+    ],
+    "description": "Frey · Milk · Extra, no added sugar",
+    "gtins": [
+      "7616500671485",
+      "7616500912472"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/811f89bd072a6cc4d98a5e36e70f32b7054528a0/frey-milk-extra.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/811f89bd072a6cc4d98a5e36e70f32b7054528a0/frey-milk-extra.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "100130400000",
+    "migrosOnlineId": "219491",
+    "name": "Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "2.30",
+        "advertisedValue": 2.3,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "2.30",
+        "effectiveValue": 2.3,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100g",
+          "value": 2.3
+        }
+      },
+      "quantity": "100g",
+      "quantityPrice": "2.30/100g",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/100130400000",
+    "title": "Frey · Milk · Extra, no added sugar",
+    "uid": 100037358,
+    "versioning": "Extra, no added sugar"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Milk Drink · Bio, 2.5% fat, pasteurized",
+    "gtins": [
+      "7613404894040",
+      "7610200376909",
+      "7613404586983"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/aaffa5ce12128a10f020b87ac0b27395dc42fd98/bio-milk-drink-25-fat-pasteurized.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/aaffa5ce12128a10f020b87ac0b27395dc42fd98/bio-milk-drink-25-fat-pasteurized.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204010800000",
+    "migrosOnlineId": "221197",
+    "name": "Milk Drink",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Organic",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483586/labels/bio",
+          "type": "BIO"
+        },
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        },
+        {
+          "description": "cold",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483166/labels/fresh",
+          "type": "FRESHNESS"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.85",
+        "advertisedValue": 1.85,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.85",
+        "effectiveValue": 1.85,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.19
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.19/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204010800000",
+    "title": "Milk Drink · Bio, 2.5% fat, pasteurized",
+    "uid": 100038885,
+    "versioning": "2.5% fat, pasteurized"
+  },
+  {
+    "brand": "Valflora",
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495312",
+        "name": "UHT milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "uht-milk"
+        ]
+      }
+    ],
+    "description": "Valflora · Milk Drink · IP-SUISSE, 1.5 % fat, UHT",
+    "gtins": [
+      "7623186629006",
+      "7616600712149",
+      "7613404535202"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/b27271c82e73a9c5aed956a9ecc31bb4b2b34ef0/valflora-ip-suisse-milk-drink-15-fat-uht.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/b27271c82e73a9c5aed956a9ecc31bb4b2b34ef0/valflora-ip-suisse-milk-drink-15-fat-uht.jpg"
+      },
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/53975f18de9fc3a72c84848c943c29e5a6b423a4.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204020600000",
+    "migrosOnlineId": "4976070",
+    "name": "Milk Drink",
+    "offer": {
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        }
+      ]
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204020600000",
+    "title": "Valflora · Milk Drink · IP-SUISSE, 1.5 % fat, UHT",
+    "uid": 100048982,
+    "versioning": "1.5 % fat, UHT"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Whole Milk · Bio, Aus der Region, 3.5% fat, pasteurized, Bottle",
+    "gtins": [
+      "7617027171557",
+      "7623186214691",
+      "7623186247941"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/78d63ee9efabd8805ad4542325557ee51b39eab6/aus-der-region-bio-whole-milk-35-fat-pasteurized-bottle.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/78d63ee9efabd8805ad4542325557ee51b39eab6/aus-der-region-bio-whole-milk-35-fat-pasteurized-bottle.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204003300200",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Organic",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483586/labels/bio",
+          "type": "BIO"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.85",
+        "advertisedValue": 1.85,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.85",
+        "effectiveValue": 1.85,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.19
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.19/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "INSTORE_ONLY",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204003300200",
+    "title": "Whole Milk · Bio, Aus der Region, 3.5% fat, pasteurized, Bottle",
+    "uid": 100051470,
+    "versioning": "3.5% fat, pasteurized, Bottle"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Whole Milk · IP-SUISSE, Aus der Region, 3.5% fat, pasteurized, Bottle",
+    "gtins": [
+      "7617027737746"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/da0bdd13d917b881102e5cecfb747aafa651bf2e/ip-suisse-aus-der-region-whole-milk-35-fat-pasteurized-bottl.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/da0bdd13d917b881102e5cecfb747aafa651bf2e/ip-suisse-aus-der-region-whole-milk-35-fat-pasteurized-bottl.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204003500200",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "price": {
+        "advertisedDisplayValue": "1.70",
+        "advertisedValue": 1.7,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.70",
+        "effectiveValue": 1.7,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.17
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.17/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "INSTORE_ONLY",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204003500200",
+    "title": "Whole Milk · IP-SUISSE, Aus der Region, 3.5% fat, pasteurized, Bottle",
+    "uid": 100051471,
+    "versioning": "3.5% fat, pasteurized, Bottle"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Whole Milk · IP-SUISSE, Aus der Region, 3.5% fat, pasteurized",
+    "gtins": [
+      "7623186504983",
+      "7613404676400"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/6c3b29d577a3028b736da290bfb60b6968443df8/ip-suisse-aus-der-region-whole-milk-35-fat-pasteurized.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/6c3b29d577a3028b736da290bfb60b6968443df8/ip-suisse-aus-der-region-whole-milk-35-fat-pasteurized.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204003500300",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "price": {
+        "advertisedDisplayValue": "2.–",
+        "advertisedValue": 2,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "2.–",
+        "effectiveValue": 2,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.2
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.20/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "INSTORE_ONLY",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204003500300",
+    "title": "Whole Milk · IP-SUISSE, Aus der Region, 3.5% fat, pasteurized",
+    "uid": 100051472,
+    "versioning": "3.5% fat, pasteurized"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Whole Milk · IP-SUISSE, Aus der Region, 3.5% fat, pasteurized",
+    "gtins": [
+      "7617027733458"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/de89b944e76486937601e158f246ee55809ea986/ip-suisse-aus-der-region-whole-milk-35-fat-pasteurized.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/de89b944e76486937601e158f246ee55809ea986/ip-suisse-aus-der-region-whole-milk-35-fat-pasteurized.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204004100100",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "price": {
+        "advertisedDisplayValue": "1.75",
+        "advertisedValue": 1.75,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.75",
+        "effectiveValue": 1.75,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.18
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.18/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "INSTORE_ONLY",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204004100100",
+    "title": "Whole Milk · IP-SUISSE, Aus der Region, 3.5% fat, pasteurized",
+    "uid": 100051474,
+    "versioning": "3.5% fat, pasteurized"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Whole Milk · IP-SUISSE, Aus der Region, 3.5% fat, pasteurized, Tetra",
+    "gtins": [
+      "7623186504969",
+      "7613404603079"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/28ee988b734d47346db55ae1235649400ffa4007/ip-suisse-aus-der-region-whole-milk-35-fat-pasteurized-tetra.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/28ee988b734d47346db55ae1235649400ffa4007/ip-suisse-aus-der-region-whole-milk-35-fat-pasteurized-tetra.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204004100300",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "price": {
+        "advertisedDisplayValue": "1.80",
+        "advertisedValue": 1.8,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.80",
+        "effectiveValue": 1.8,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.18
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.18/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "INSTORE_ONLY",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204004100300",
+    "title": "Whole Milk · IP-SUISSE, Aus der Region, 3.5% fat, pasteurized, Tetra",
+    "uid": 100051475,
+    "versioning": "3.5% fat, pasteurized, Tetra"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Züribieter Milk Drink · IP-SUISSE, Aus der Region, 2.5% Milk Fat",
+    "gtins": [
+      "7617027153584"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/12685997cab023ea6088616f264bb51ce5e36cf0/ip-suisse-aus-der-region-zueribieter-milk-drink-25-milk-fat.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/12685997cab023ea6088616f264bb51ce5e36cf0/ip-suisse-aus-der-region-zueribieter-milk-drink-25-milk-fat.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204004700000",
+    "migrosOnlineId": "12293252",
+    "name": "Züribieter Milk Drink",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        },
+        {
+          "description": "cold",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483166/labels/fresh",
+          "type": "FRESHNESS"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.80",
+        "advertisedValue": 1.8,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.80",
+        "effectiveValue": 1.8,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.18
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.18/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204004700000",
+    "title": "Züribieter Milk Drink · IP-SUISSE, Aus der Region, 2.5% Milk Fat",
+    "uid": 100051476,
+    "versioning": "2.5% Milk Fat"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Whole Milk · Demeter, 3.5% fat, pasteurized",
+    "gtins": [
+      "7613404065303"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/139fb4ead4c2e899aa352d07cec9c197a96ed30e/demeter-whole-milk-35-fat-pasteurized.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/139fb4ead4c2e899aa352d07cec9c197a96ed30e/demeter-whole-milk-35-fat-pasteurized.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204008800000",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Organic",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483586/labels/bio",
+          "type": "BIO"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "2.25",
+        "advertisedValue": 2.25,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "2.25",
+        "effectiveValue": 2.25,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.22
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.22/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "INSTORE_ONLY",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204008800000",
+    "title": "Whole Milk · Demeter, 3.5% fat, pasteurized",
+    "uid": 100051480,
+    "versioning": "3.5% fat, pasteurized"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Whole Milk · Demeter, 3.8% fat, pasteurized",
+    "gtins": [
+      "7613404222225"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/70eb804b32d1d3680b0d7af64b1885f0c4f9fadd/demeter-whole-milk-38-fat-pasteurized.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/70eb804b32d1d3680b0d7af64b1885f0c4f9fadd/demeter-whole-milk-38-fat-pasteurized.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204008900000",
+    "name": "Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Organic",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483586/labels/bio",
+          "type": "BIO"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "2.25",
+        "advertisedValue": 2.25,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "2.25",
+        "effectiveValue": 2.25,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.23
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.23/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "INSTORE_ONLY",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204008900000",
+    "title": "Whole Milk · Demeter, 3.8% fat, pasteurized",
+    "uid": 100051481,
+    "versioning": "3.8% fat, pasteurized"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Milk Drink · Aus der Region, IP-SUISSE, 3.5% fat, pasteurized, Bottle",
+    "gtins": [
+      "7617027737784"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/eba8f9e951d0eec4ed1de317e9fafc7063290e02/ip-suisse-aus-der-region-milk-drink-35-fat-pasteurized-bottl.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/eba8f9e951d0eec4ed1de317e9fafc7063290e02/ip-suisse-aus-der-region-milk-drink-35-fat-pasteurized-bottl.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204010900200",
+    "name": "Milk Drink",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "price": {
+        "advertisedDisplayValue": "1.70",
+        "advertisedValue": 1.7,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.70",
+        "effectiveValue": 1.7,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.17
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.17/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "INSTORE_ONLY",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204010900200",
+    "title": "Milk Drink · Aus der Region, IP-SUISSE, 3.5% fat, pasteurized, Bottle",
+    "uid": 100051484,
+    "versioning": "3.5% fat, pasteurized, Bottle"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Milk Drink · IP-SUISSE, Aus der Region, 2.5% fat, pasteurized, Bottle",
+    "gtins": [
+      "7623186504921",
+      "7613404676080"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/9884095cdc1bedb18fea97b911a4c945635d2ad6/ip-suisse-aus-der-region-milk-drink-25-fat-pasteurized-bottl.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/9884095cdc1bedb18fea97b911a4c945635d2ad6/ip-suisse-aus-der-region-milk-drink-25-fat-pasteurized-bottl.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204010900300",
+    "name": "Milk Drink",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "price": {
+        "advertisedDisplayValue": "2.–",
+        "advertisedValue": 2,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "2.–",
+        "effectiveValue": 2,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.2
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.20/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "INSTORE_ONLY",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204010900300",
+    "title": "Milk Drink · IP-SUISSE, Aus der Region, 2.5% fat, pasteurized, Bottle",
+    "uid": 100051485,
+    "versioning": "2.5% fat, pasteurized, Bottle"
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Goat’s Milk · Aus der Region, Past.",
+    "gtins": [
+      "7613269008583"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/eff52e2d0d9664b05067ebf38046818831a80cf5/aus-der-region-goats-milk-past.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/eff52e2d0d9664b05067ebf38046818831a80cf5/aus-der-region-goats-milk-past.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204080000200",
+    "name": "Goat’s Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "price": {
+        "advertisedDisplayValue": "2.30",
+        "advertisedValue": 2.3,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "2.30",
+        "effectiveValue": 2.3,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.46
+        }
+      },
+      "quantity": "500ml",
+      "quantityPrice": "0.46/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "INSTORE_ONLY",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204080000200",
+    "title": "Goat’s Milk · Aus der Region, Past.",
+    "uid": 100051492,
+    "versioning": "Past."
+  },
+  {
+    "breadcrumb": [
+      {
+        "id": "7494731",
+        "name": "Dairy, eggs & fresh convenience food",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo"
+        ]
+      },
+      {
+        "id": "7494751",
+        "name": "Milk, butter & eggs",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs"
+        ]
+      },
+      {
+        "id": "7494867",
+        "name": "Milk & dairy drinks",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks"
+        ]
+      },
+      {
+        "id": "7495313",
+        "name": "Fresh & pasteurised milk",
+        "slugs": [
+          "dairy-eggs-fresh-convenience-foo",
+          "milk-butter-eggs",
+          "milk-dairy-drinks",
+          "fresh-pasteurised-milk"
+        ]
+      }
+    ],
+    "description": "Züribieter Whole Milk · Aus der Region, IP-SUISSE, 3.9% Milk Fat",
+    "gtins": [
+      "7617012070261"
+    ],
+    "imageTransparent": {
+      "cdn": "rokka",
+      "url": "https://image.migros.ch/d/{stack}/de587ac6376f738808a777e536da9d414bd661aa/ip-suisse-aus-der-region-zueribieter-whole-milk-39-milk-fat.png"
+    },
+    "images": [
+      {
+        "cdn": "rokka",
+        "url": "https://image.migros.ch/d/{stack}/o-af-1-t.clr-fff/de587ac6376f738808a777e536da9d414bd661aa/ip-suisse-aus-der-region-zueribieter-whole-milk-39-milk-fat.jpg"
+      }
+    ],
+    "isConsignmentProduct": false,
+    "isMgbCompatible": true,
+    "migrosId": "204003400000",
+    "migrosOnlineId": "12293274",
+    "name": "Züribieter Whole Milk",
+    "offer": {
+      "channel": {
+        "offerType": "OFFLINE",
+        "region": "national"
+      },
+      "displayPrice": true,
+      "isNewOffer": false,
+      "isNotMorningDeliverable": false,
+      "isVariableWeight": false,
+      "maxOrderableQuantityV2": 96,
+      "pictos": [
+        {
+          "description": "Switzerland",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679482984/labels/suisse",
+          "type": "REGION"
+        },
+        {
+          "description": "cold",
+          "imagePath": "https://www-leshop-ch-cld-res.cloudinary.com/image/upload/{stack}/v1679483166/labels/fresh",
+          "type": "FRESHNESS"
+        }
+      ],
+      "price": {
+        "advertisedDisplayValue": "1.80",
+        "advertisedValue": 1.8,
+        "displayUnitPrice": true,
+        "effectiveDisplayValue": "1.80",
+        "effectiveValue": 1.8,
+        "multiplier": 1,
+        "unitPrice": {
+          "unit": "100ml",
+          "value": 0.18
+        }
+      },
+      "quantity": "1l",
+      "quantityPrice": "0.18/100ml",
+      "type": "STANDARD"
+    },
+    "productAvailability": "ONLINE_AND_INSTORE",
+    "productRange": "STANDARD",
+    "productUrls": "https://www.migros.ch/en/product/204003400000",
+    "title": "Züribieter Whole Milk · Aus der Region, IP-SUISSE, 3.9% Milk Fat",
+    "uid": 100051940,
+    "versioning": "3.9% Milk Fat"
+  }
+]
