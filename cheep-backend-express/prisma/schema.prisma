@@ -20,6 +20,7 @@ model User {
   password_hash String
   name          String
   country_id    Int? // Tercih edilen ülke (konumdan veya seçimden)
+  language      String? // Tercih edilen arayüz dili (ISO-639-1: "tr","en","de","pl","sv") — ülkeden bağımsız
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
   is_premium    Boolean  @default(false)
