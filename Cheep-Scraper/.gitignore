@@ -25,6 +25,8 @@ countries/**/output/*.json
 debug_*.html
 cloudflare_blocked_*.html
 *_blocked_*.html
+# ...except committed HTML fixtures (saved live captures used by parse() tests)
+!countries/**/fixtures/*.html
 
 # Old output files
 *_products_*.json
