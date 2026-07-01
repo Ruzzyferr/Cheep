@@ -15,9 +15,11 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
 import { Card } from '../../components/ui';
 import { StoreChip } from '../../components/store/StoreChip';
+import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import { compareInsights, byCoverageThenScore, missingCount } from '../../utils/compareInsights';
@@ -32,6 +34,8 @@ export function CompareResultsScreen({
   navigation,
 }: ListsStackScreenProps<'CompareResults'>) {
   const { listId } = route.params;
+  const { t } = useTranslation();
+  const { formatMoney } = useLocale();
   const [results, setResults] = useState<CompareResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [storeCountFilter, setStoreCountFilter] = useState<StoreCountFilter>('all');
@@ -53,7 +57,7 @@ export function CompareResultsScreen({
       } catch (error) {
         if (!alive) return;
         console.error('Compare error:', error);
-        Alert.alert('Hata', 'Karşılaştırma yapılırken bir hata oluştu');
+        Alert.alert(t('common.error'), t('compare.load_error'));
         navigation.goBack();
       } finally {
         if (alive) setLoading(false);
@@ -70,7 +74,7 @@ export function CompareResultsScreen({
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color={colors.primary.main} />
-        <Text style={styles.loadingText}>Rotalar hesaplanıyor...</Text>
+        <Text style={styles.loadingText}>{t('compare.loading')}</Text>
       </View>
     );
   }
@@ -133,11 +137,11 @@ export function CompareResultsScreen({
     >
       {/* Filters */}
       <View style={styles.filtersSection}>
-        <Text style={styles.sectionTitle}>Filtreler</Text>
-        
+        <Text style={styles.sectionTitle}>{t('compare.filters_title')}</Text>
+
         {/* Market Sayısı Filtresi */}
         <View style={styles.filterGroup}>
-          <Text style={styles.filterLabel}>Market Sayısı</Text>
+          <Text style={styles.filterLabel}>{t('compare.store_count_filter')}</Text>
           <View style={styles.filterButtons}>
             {(['all', '1', '2', '3+'] as StoreCountFilter[]).map((filter) => (
               <TouchableOpacity
@@ -154,7 +158,13 @@ export function CompareResultsScreen({
                     storeCountFilter === filter && styles.filterButtonTextActive,
                   ]}
                 >
-                  {filter === 'all' ? 'Tümü' : filter === '1' ? 'Tek Market' : filter === '2' ? '2 Market' : '3+ Market'}
+                  {filter === 'all'
+                    ? t('common.all')
+                    : filter === '1'
+                    ? t('compare.store_count.one')
+                    : filter === '2'
+                    ? t('compare.store_count.two')
+                    : t('compare.store_count.three_plus')}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -163,13 +173,13 @@ export function CompareResultsScreen({
 
         {/* Sıralama */}
         <View style={styles.filterGroup}>
-          <Text style={styles.filterLabel}>Sıralama</Text>
+          <Text style={styles.filterLabel}>{t('compare.sort_title')}</Text>
           <View style={styles.filterButtons}>
             {([
-              { value: 'score' as SortOption, label: 'Önerilen' },
-              { value: 'price' as SortOption, label: 'En ucuz' },
-              { value: 'distance' as SortOption, label: 'En yakın' },
-              { value: 'price_distance' as SortOption, label: 'Fiyat + Konum' },
+              { value: 'score' as SortOption, label: t('compare.sort.recommended') },
+              { value: 'price' as SortOption, label: t('compare.sort.cheapest') },
+              { value: 'distance' as SortOption, label: t('compare.sort.nearest') },
+              { value: 'price_distance' as SortOption, label: t('compare.sort.price_distance') },
             ]).map((option) => (
               <TouchableOpacity
                 key={option.value}
@@ -195,15 +205,15 @@ export function CompareResultsScreen({
 
       {/* Summary */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Özet</Text>
+        <Text style={styles.sectionTitle}>{t('compare.summary_title')}</Text>
         <View style={styles.summaryGrid}>
           {insights.cheapest && (
             <Card padding="md" style={styles.summaryCard}>
               <Text style={styles.summaryCardTitle}>
-                {insights.allComplete ? 'En Ucuz (tüm liste)' : 'En Ucuz'}
+                {insights.allComplete ? t('compare.cheapest_full') : t('compare.cheapest')}
               </Text>
               <Text style={styles.summaryCardValue}>
-                ₺{insights.cheapest.totalPrice.toFixed(2)}
+                {formatMoney(insights.cheapest.totalPrice)}
               </Text>
               <Text
                 style={[
@@ -212,18 +222,23 @@ export function CompareResultsScreen({
                 ]}
               >
                 {insights.allComplete
-                  ? `${insights.cheapest.stores.length} market · ${totalItems} ürün`
-                  : `${missingCount(insights.cheapest)} ürün eksik · %${insights.cheapest.coveragePercentage}`}
+                  ? t('compare.cheapest_meta_full', { stores: insights.cheapest.stores.length, items: totalItems })
+                  : t('compare.cheapest_meta_partial', {
+                      missing: missingCount(insights.cheapest),
+                      coverage: insights.cheapest.coveragePercentage,
+                    })}
               </Text>
             </Card>
           )}
           <Card padding="md" style={styles.summaryCard}>
-            <Text style={styles.summaryCardTitle}>Tasarruf</Text>
+            <Text style={styles.summaryCardTitle}>{t('compare.savings')}</Text>
             <Text style={[styles.summaryCardValue, styles.savingsValue]}>
-              ₺{insights.savings.toFixed(2)}
+              {formatMoney(insights.savings)}
             </Text>
             <Text style={styles.summaryCardSubtext}>
-              {insights.savings > 0 ? `en pahalıya göre %${insights.savingsPct}` : 'tek seçenek'}
+              {insights.savings > 0
+                ? t('compare.savings_vs_priciest', { percent: insights.savingsPct })
+                : t('compare.savings_single_option')}
             </Text>
           </Card>
         </View>
@@ -236,8 +251,8 @@ export function CompareResultsScreen({
           />
           <Text style={styles.coverageHintText}>
             {insights.allComplete
-              ? `Bu fiyatlar listenin tamamını (${totalItems} ürün) kapsayan rotalara aittir.`
-              : `Hiçbir rota tüm listeyi karşılamıyor. Fiyatlar en yüksek kapsamalı (%${insights.cheapest?.coveragePercentage ?? 0}) rotalar arasında karşılaştırılıyor.`}
+              ? t('compare.coverage_full', { items: totalItems })
+              : t('compare.coverage_partial', { coverage: insights.cheapest?.coveragePercentage ?? 0 })}
           </Text>
         </View>
       </View>
@@ -245,13 +260,13 @@ export function CompareResultsScreen({
       {/* Best Route */}
       {bestRoute && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>En İyi Rota</Text>
-          <RouteCard 
-            route={bestRoute} 
-            isBest 
-            onPress={() => navigation.navigate('StrategyDetail', { 
-              listId, 
-              strategy: bestRoute 
+          <Text style={styles.sectionTitle}>{t('compare.best_route_title')}</Text>
+          <RouteCard
+            route={bestRoute}
+            isBest
+            onPress={() => navigation.navigate('StrategyDetail', {
+              listId,
+              strategy: bestRoute
             })}
           />
         </View>
@@ -260,14 +275,14 @@ export function CompareResultsScreen({
       {/* Other Routes */}
       {otherRoutes.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Alternatif Rotalar</Text>
+          <Text style={styles.sectionTitle}>{t('compare.alt_routes_title')}</Text>
           {otherRoutes.map((strategy, index) => (
-            <RouteCard 
-              key={index} 
+            <RouteCard
+              key={index}
               route={strategy}
-              onPress={() => navigation.navigate('StrategyDetail', { 
-                listId, 
-                strategy 
+              onPress={() => navigation.navigate('StrategyDetail', {
+                listId,
+                strategy
               })}
             />
           ))}
@@ -277,11 +292,11 @@ export function CompareResultsScreen({
       {/* Alternatives */}
       {results.alternatives && results.alternatives.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Alternatif Ürünler</Text>
+          <Text style={styles.sectionTitle}>{t('compare.alt_products_title')}</Text>
           {results.alternatives.map((alt, index) => (
             <Card key={index} padding="md" style={styles.alternativeCard}>
               <Text style={styles.alternativeTitle}>
-                {alt.originalProduct.name} yerine
+                {t('compare.instead_of', { product: alt.originalProduct.name })}
               </Text>
               <Text style={styles.alternativeProduct}>
                 {alt.alternativeProduct.name}
@@ -289,7 +304,7 @@ export function CompareResultsScreen({
               <View style={styles.alternativeInfo}>
                 <Text style={styles.alternativeStore}>{alt.store.name}</Text>
                 <Text style={styles.alternativeSavings}>
-                  ₺{alt.savings.toFixed(2)} tasarruf
+                  {t('compare.alt_savings', { amount: formatMoney(alt.savings) })}
                 </Text>
               </View>
             </Card>
@@ -300,20 +315,20 @@ export function CompareResultsScreen({
       {/* List Info */}
       <View style={styles.section}>
         <Card padding="md">
-          <Text style={styles.summaryTitle}>Liste Bilgileri</Text>
+          <Text style={styles.summaryTitle}>{t('compare.list_info_title')}</Text>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Liste:</Text>
+            <Text style={styles.summaryLabel}>{t('compare.list_label')}</Text>
             <Text style={styles.summaryValue}>{results.listName}</Text>
           </View>
           <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Toplam Ürün:</Text>
+            <Text style={styles.summaryLabel}>{t('compare.total_items_label')}</Text>
             <Text style={styles.summaryValue}>{results.totalItems}</Text>
           </View>
           {results.budget && (
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Bütçe:</Text>
+              <Text style={styles.summaryLabel}>{t('list.budget_label')}</Text>
               <Text style={styles.summaryValue}>
-                ₺{parseFloat(results.budget.toString()).toFixed(2)}
+                {formatMoney(parseFloat(results.budget.toString()))}
               </Text>
             </View>
           )}
@@ -326,6 +341,7 @@ export function CompareResultsScreen({
 
 // Coverage Badge — net görsel: tüm ürünler var (yeşil) / N ürün eksik (amber)
 function CoverageBadge({ route }: { route: RouteStrategy }) {
+  const { t } = useTranslation();
   const missing = missingCount(route);
   const full = missing === 0;
   return (
@@ -336,7 +352,7 @@ function CoverageBadge({ route }: { route: RouteStrategy }) {
         color={full ? colors.success.dark : colors.warning.dark}
       />
       <Text style={[styles.covText, full ? styles.covTextFull : styles.covTextPartial]}>
-        {full ? 'Tüm ürünler bu rotada' : `${missing} ürün bu rotada yok`}
+        {full ? t('compare.coverage_badge_full') : t('compare.coverage_badge_partial', { count: missing })}
       </Text>
       <Text style={[styles.covPct, full ? styles.covTextFull : styles.covTextPartial]}>
         %{route.coveragePercentage.toFixed(0)}
@@ -347,19 +363,21 @@ function CoverageBadge({ route }: { route: RouteStrategy }) {
 
 // Route Card Component
 function RouteCard({
-  route, 
+  route,
   isBest = false,
   onPress,
-}: { 
-  route: RouteStrategy; 
+}: {
+  route: RouteStrategy;
   isBest?: boolean;
   onPress?: () => void;
 }) {
+  const { t } = useTranslation();
+  const { formatMoney } = useLocale();
   const withinBudget = route.budgetStatus === 'within_budget';
 
   return (
-    <Card 
-      padding="md" 
+    <Card
+      padding="md"
       style={[styles.routeCard, isBest && styles.bestRoute].filter(Boolean) as any}
       onPress={onPress}
     >
@@ -367,17 +385,17 @@ function RouteCard({
       {isBest && (
         <View style={styles.bestBadge}>
           <MaterialIcons name="star" size={13} color={colors.background.paper} />
-          <Text style={styles.bestBadgeText}>Önerilen Rota</Text>
+          <Text style={styles.bestBadgeText}>{t('compare.recommended_route_badge')}</Text>
         </View>
       )}
 
       {/* Header */}
       <View style={styles.routeHeader}>
         <Text style={styles.routeType}>
-          {route.type === 'single_store' ? 'Tek Market' : 'Çoklu Market'}
+          {route.type === 'single_store' ? t('compare.route_type.single') : t('compare.route_type.multi')}
         </Text>
         <View style={styles.scoreContainer}>
-          <Text style={styles.score}>Skor: {route.score}/100</Text>
+          <Text style={styles.score}>{t('compare.score', { score: route.score })}</Text>
         </View>
       </View>
 
@@ -394,12 +412,12 @@ function RouteCard({
       {/* Info */}
       <View style={styles.routeInfo}>
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Toplam Tutar:</Text>
-          <Text style={styles.infoValue}>₺{route.totalPrice.toFixed(2)}</Text>
+          <Text style={styles.infoLabel}>{t('compare.total_amount_label')}</Text>
+          <Text style={styles.infoValue}>{formatMoney(route.totalPrice)}</Text>
         </View>
         {route.totalDistance > 0 && (
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Mesafe:</Text>
+            <Text style={styles.infoLabel}>{t('compare.distance_label')}</Text>
             <Text style={styles.infoValue}>{route.totalDistance.toFixed(1)} km</Text>
           </View>
         )}
@@ -419,7 +437,7 @@ function RouteCard({
               withinBudget ? styles.budgetWithinText : styles.budgetOverText,
             ]}
           >
-            {withinBudget ? 'Bütçe dahilinde' : 'Bütçe aşıyor'}
+            {withinBudget ? t('compare.within_budget') : t('compare.over_budget')}
           </Text>
         </View>
       )}
@@ -427,7 +445,7 @@ function RouteCard({
       {/* View Details Button */}
       {onPress && (
         <View style={styles.viewDetails}>
-          <Text style={styles.viewDetailsText}>Detayları Gör →</Text>
+          <Text style={styles.viewDetailsText}>{t('compare.view_details')}</Text>
         </View>
       )}
     </Card>

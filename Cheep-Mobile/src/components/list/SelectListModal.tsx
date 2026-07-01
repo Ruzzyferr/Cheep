@@ -15,8 +15,10 @@ import {
   Alert,
   Switch,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
 import { Card, Button } from '../ui';
+import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { ShoppingList } from '../../types';
 
@@ -35,8 +37,11 @@ export function SelectListModal({
   onSelect,
   productId,
   quantity = 1,
-  unit = 'adet',
+  unit,
 }: SelectListModalProps) {
+  const { t } = useTranslation();
+  const { formatMoney } = useLocale();
+  const effectiveUnit = unit ?? t('common.unit_default');
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState<number | null>(null);
@@ -55,7 +60,7 @@ export function SelectListModal({
       } catch (error) {
         if (!alive) return;
         console.error('Load lists error:', error);
-        Alert.alert('Hata', 'Listeler yüklenirken bir hata oluştu');
+        Alert.alert(t('common.error'), t('list.select_modal.load_error'));
       } finally {
         if (alive) setLoading(false);
       }
@@ -72,12 +77,12 @@ export function SelectListModal({
       await listService.addItem(listId, {
         product_id: productId,
         quantity,
-        unit,
+        unit: effectiveUnit,
         brand_independent: brandIndependent,
       });
-      Alert.alert('Başarılı', 'Ürün listeye eklendi', [
+      Alert.alert(t('list.select_modal.add_success_title'), t('list.select_modal.add_success_body'), [
         {
-          text: 'Tamam',
+          text: t('common.ok'),
           onPress: () => {
             onSelect(listId);
             onClose();
@@ -86,7 +91,7 @@ export function SelectListModal({
       ]);
     } catch (error) {
       console.error('Add item error:', error);
-      Alert.alert('Hata', 'Ürün eklenirken bir hata oluştu');
+      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
     } finally {
       setAdding(null);
     }
@@ -95,13 +100,13 @@ export function SelectListModal({
   const handleCreateNew = async () => {
     try {
       setAdding(-1);
-      const newList = await listService.createList({ name: 'Alışveriş Listem' });
-      await listService.addItem(newList.id, { product_id: productId, quantity, unit, brand_independent: brandIndependent });
+      const newList = await listService.createList({ name: t('list.select_modal.default_new_list_name') });
+      await listService.addItem(newList.id, { product_id: productId, quantity, unit: effectiveUnit, brand_independent: brandIndependent });
       onSelect(newList.id);
       onClose();
     } catch (error) {
       console.error('Create+add error:', error);
-      Alert.alert('Hata', 'Liste oluşturulurken bir hata oluştu');
+      Alert.alert(t('common.error'), t('list.select_modal.create_error'));
     } finally {
       setAdding(null);
     }
@@ -117,7 +122,7 @@ export function SelectListModal({
       <View style={styles.overlay}>
         <View style={styles.modal}>
           <View style={styles.header}>
-            <Text style={styles.title}>Liste Seç</Text>
+            <Text style={styles.title}>{t('list.select_modal.title')}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
@@ -130,7 +135,7 @@ export function SelectListModal({
           ) : (
             <>
               <View style={styles.toggleRow}>
-                <Text style={styles.toggleLabel}>Marka farketmez (en ucuzu)</Text>
+                <Text style={styles.toggleLabel}>{t('list.select_modal.brand_independent')}</Text>
                 <Switch value={brandIndependent} onValueChange={setBrandIndependent} />
               </View>
 
@@ -148,12 +153,12 @@ export function SelectListModal({
                         <Text style={styles.listName}>{item.name}</Text>
                         {item.list_items && (
                           <Text style={styles.listItemCount}>
-                            {item.list_items.length} ürün
+                            {t('list.item_count', { count: item.list_items.length })}
                           </Text>
                         )}
                         {item.budget && Number.isFinite(parseFloat(item.budget)) && (
                           <Text style={styles.listBudget}>
-                            Bütçe: ₺{parseFloat(item.budget).toFixed(2)}
+                            {t('list.budget_label')} {formatMoney(parseFloat(item.budget))}
                           </Text>
                         )}
                       </View>
@@ -168,14 +173,14 @@ export function SelectListModal({
                 contentContainerStyle={styles.listContent}
                 ListEmptyComponent={
                   <View style={styles.empty}>
-                    <Text style={styles.emptyText}>Aktif liste bulunamadı</Text>
+                    <Text style={styles.emptyText}>{t('list.select_modal.no_active_lists')}</Text>
                   </View>
                 }
               />
 
               <View style={styles.footer}>
                 <Button
-                  title="Yeni Liste Oluştur"
+                  title={t('list.select_modal.create_new')}
                   onPress={handleCreateNew}
                   variant="outline"
                   fullWidth

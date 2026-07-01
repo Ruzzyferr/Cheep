@@ -6,7 +6,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../ui';
+import { useLocale } from '../../context/LocaleContext';
 import {colors, typography, spacing, borderRadius} from '../../theme';
 import type { ShoppingList } from '../../types';
 
@@ -17,6 +19,8 @@ interface ListCardProps {
 }
 
 export function ListCard({ list, onPress, onDelete }: ListCardProps) {
+  const { t } = useTranslation();
+  const { formatMoney, formatDate } = useLocale();
   const itemCount = list.list_items?.length || 0;
   const budget = list.budget ? parseFloat(list.budget) : null;
   const isCompleted = list.status === 'completed';
@@ -25,12 +29,12 @@ export function ListCard({ list, onPress, onDelete }: ListCardProps) {
     e.stopPropagation();
     if (onDelete) {
       Alert.alert(
-        'Listeyi Sil',
-        'Bu listeyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+        t('list.delete_title'),
+        t('list.delete_confirm'),
         [
-          { text: 'İptal', style: 'cancel' },
+          { text: t('common.cancel'), style: 'cancel' },
           {
-            text: 'Sil',
+            text: t('list.delete_action'),
             style: 'destructive',
             onPress: () => onDelete(list.id),
           },
@@ -46,17 +50,17 @@ export function ListCard({ list, onPress, onDelete }: ListCardProps) {
           <Text style={styles.name}>{list.name}</Text>
           {list.is_template && (
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>Şablon</Text>
+              <Text style={styles.badgeText}>{t('list.template_badge')}</Text>
             </View>
           )}
           {isCompleted && (
             <View style={[styles.badge, styles.completedBadge]}>
-              <Text style={styles.badgeText}>Tamamlandı</Text>
+              <Text style={styles.badgeText}>{t('list.completed_badge')}</Text>
             </View>
           )}
         </View>
         <View style={styles.headerRight}>
-          <Text style={styles.itemCount}>{itemCount} ürün</Text>
+          <Text style={styles.itemCount}>{t('list.item_count', { count: itemCount })}</Text>
           {onDelete && (
             <TouchableOpacity onPress={handleDelete} style={styles.deleteButton}>
               <MaterialIcons name="delete-outline" size={20} color={colors.text.secondary} />
@@ -67,18 +71,18 @@ export function ListCard({ list, onPress, onDelete }: ListCardProps) {
 
       {budget && (
         <View style={styles.budget}>
-          <Text style={styles.budgetLabel}>Bütçe:</Text>
-          <Text style={styles.budgetAmount}>₺{budget.toFixed(2)}</Text>
+          <Text style={styles.budgetLabel}>{t('list.budget_label')}</Text>
+          <Text style={styles.budgetAmount}>{formatMoney(budget)}</Text>
         </View>
       )}
 
       <View style={styles.footer}>
         <Text style={styles.date}>
-          {new Date(list.updated_at).toLocaleDateString('tr-TR')}
+          {formatDate(list.updated_at)}
         </Text>
         {isCompleted && list.last_compared_at && (
           <Text style={styles.compareDate}>
-            Son karşılaştırma: {new Date(list.last_compared_at).toLocaleDateString('tr-TR')}
+            {t('list.last_compared', { date: formatDate(list.last_compared_at) })}
           </Text>
         )}
       </View>
