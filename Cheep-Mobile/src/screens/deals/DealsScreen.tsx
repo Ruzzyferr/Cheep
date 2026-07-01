@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { productService } from '../../services';
+import { useLocale } from '../../context/LocaleContext';
 import { EmptyState } from '../../components/common/EmptyState';
 import { ListSkeleton } from '../../components/ui';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
@@ -69,6 +70,7 @@ function buildDeals(products: Product[]): Deal[] {
 }
 
 export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) {
+  const { country } = useLocale();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -101,7 +103,8 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
 
   useEffect(() => {
     load();
-  }, [load]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [load, country]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);

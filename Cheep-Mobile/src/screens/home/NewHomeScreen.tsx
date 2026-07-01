@@ -72,7 +72,8 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
 
   useEffect(() => {
     loadData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [country]);
 
   const loadData = async () => {
     try {
