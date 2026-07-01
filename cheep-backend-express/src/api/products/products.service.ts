@@ -166,7 +166,7 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
     };
 };
 
-export const getProductById = async (id: number) => {
+export const getProductById = async (id: number, countryId?: number) => {
     const product = await prisma.product.findUnique({
         where: { id },
         include: {
@@ -182,14 +182,14 @@ export const getProductById = async (id: number) => {
         },
     });
 
-    if (!product) {
+    if (!product || (countryId && product.country_id !== countryId)) {
         throw notFound('Ürün bulunamadı');
     }
 
     return product;
 };
 
-export const getProductByBarcode = async (barcode: string) => {
+export const getProductByBarcode = async (barcode: string, countryId?: number) => {
     const product = await prisma.product.findUnique({
         where: { ean_barcode: barcode },
         include: {
@@ -205,7 +205,7 @@ export const getProductByBarcode = async (barcode: string) => {
         },
     });
 
-    if (!product) {
+    if (!product || (countryId && product.country_id !== countryId)) {
         throw notFound('Ürün bulunamadı');
     }
 
@@ -318,7 +318,7 @@ export const deleteProduct = async (id: number) => {
     await prisma.product.delete({ where: { id } });
 };
 
-export const getProductPrices = async (id: number) => {
+export const getProductPrices = async (id: number, countryId?: number) => {
     const product = await prisma.product.findUnique({
         where: { id },
         include: {
@@ -333,7 +333,7 @@ export const getProductPrices = async (id: number) => {
         },
     });
 
-    if (!product) {
+    if (!product || (countryId && product.country_id !== countryId)) {
         throw notFound('Ürün bulunamadı');
     }
 
@@ -344,7 +344,16 @@ export const getProductPrices = async (id: number) => {
  * Bir ürünün fiyat geçmişini market bazında zaman serisi olarak döndürür.
  * @param days Kaç günlük geçmiş (default 90)
  */
-export const getProductPriceHistory = async (id: number, days = 90) => {
+export const getProductPriceHistory = async (id: number, days = 90, countryId?: number) => {
+    const product = await prisma.product.findUnique({
+        where: { id },
+        select: { country_id: true },
+    });
+
+    if (!product || (countryId && product.country_id !== countryId)) {
+        throw notFound('Ürün bulunamadı');
+    }
+
     const since = new Date();
     since.setDate(since.getDate() - Math.max(1, Math.min(days, 365)));
 
@@ -385,7 +394,7 @@ export const getProductPriceHistory = async (id: number, days = 90) => {
     };
 };
 
-export const compareProductPrices = async (id: number) => {
+export const compareProductPrices = async (id: number, countryId?: number) => {
     const product = await prisma.product.findUnique({
         where: { id },
         include: {
@@ -400,7 +409,7 @@ export const compareProductPrices = async (id: number) => {
         },
     });
 
-    if (!product) {
+    if (!product || (countryId && product.country_id !== countryId)) {
         throw notFound('Ürün bulunamadı');
     }
 

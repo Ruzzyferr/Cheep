@@ -55,7 +55,7 @@ export const getAllProducts = async (req: Request, res: Response, next: NextFunc
 export const getProductById = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const product = await ProductService.getProductById(Number(id));
+        const product = await ProductService.getProductById(Number(id), req.country?.id);
         res.status(200).json({
             success: true,
             data: product
@@ -68,7 +68,7 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
 export const getProductByBarcode = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { barcode } = req.params;
-        const product = await ProductService.getProductByBarcode(barcode);
+        const product = await ProductService.getProductByBarcode(barcode, req.country?.id);
         res.status(200).json(product);
     } catch (error) {
         next(error);
@@ -116,7 +116,7 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
 export const getProductPrices = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const prices = await ProductService.getProductPrices(Number(id));
+        const prices = await ProductService.getProductPrices(Number(id), req.country?.id);
         res.status(200).json(prices);
     } catch (error) {
         next(error);
@@ -127,7 +127,7 @@ export const getProductPriceHistory = async (req: Request, res: Response, next: 
     try {
         const { id } = req.params;
         const days = req.query.days ? Number(req.query.days) : 90;
-        const history = await ProductService.getProductPriceHistory(Number(id), days);
+        const history = await ProductService.getProductPriceHistory(Number(id), days, req.country?.id);
         res.status(200).json(history);
     } catch (error) {
         next(error);
@@ -137,7 +137,7 @@ export const getProductPriceHistory = async (req: Request, res: Response, next: 
 export const compareProductPrices = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { id } = req.params;
-        const comparison = await ProductService.compareProductPrices(Number(id));
+        const comparison = await ProductService.compareProductPrices(Number(id), req.country?.id);
         res.status(200).json(comparison);
     } catch (error) {
         next(error);
