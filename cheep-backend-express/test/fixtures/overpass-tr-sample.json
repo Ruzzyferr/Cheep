@@ -1,0 +1,5 @@
+{ "elements": [
+  { "type": "node", "id": 111, "lat": 37.3212, "lon": 40.7245, "tags": { "shop": "supermarket", "brand": "Migros", "name": "Migros Mardin", "addr:city": "Mardin", "addr:street": "Cumhuriyet Cd." } },
+  { "type": "way", "id": 222, "center": { "lat": 38.4190, "lon": 27.1288 }, "tags": { "shop": "supermarket", "name": "ŞOK Market Konak", "addr:city": "İzmir" } },
+  { "type": "node", "id": 333, "lat": 41.0, "lon": 29.0, "tags": { "shop": "bakery", "name": "Random Fırın" } }
+] }
