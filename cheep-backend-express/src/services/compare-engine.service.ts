@@ -2,6 +2,7 @@ import { prisma } from '../utils/prisma.client.js';
 import * as RouteOptimizer from './route-optimizer.service.js';
 import { resolveItemStoreOptions, PricedProduct, StoreOption } from './brand-independent-pricing.js';
 import { notFound } from '../utils/app-error.js';
+import { nearestBranchCoordsForStores } from './store-branch.service.js';
 
 // ============================================
 // TYPE DEFINITIONS
@@ -67,6 +68,17 @@ export function filterStorePricesByCountry<T extends { product: { store_prices: 
             ),
         },
     }));
+}
+
+/** Verilen mağazaların koordinatlarını, elde varsa en yakın şube koordinatıyla değiştirir. */
+export function applyBranchCoords<T extends { id: number; lat: number | null; lon: number | null }>(
+    stores: T[],
+    branchCoords: Map<number, { lat: number; lon: number }>
+): T[] {
+    return stores.map(s => {
+        const b = branchCoords.get(s.id);
+        return b ? { ...s, lat: b.lat, lon: b.lon } : s;
+    });
 }
 
 interface StoreAllocation {
@@ -222,6 +234,19 @@ export async function compareShoppingList(
             ? (siblingsByGroup.get(item.product.muadil_grup_id) || []).filter(s => s.id !== item.product.id)
             : [];
         itemOptions.set(item.id, resolveItemStoreOptions(representative, item.brand_independent, siblings));
+    }
+
+    // Kullanıcı konumu ve ülke belirtilmişse, mağaza koordinatlarını en yakın şube ile değiştir
+    // (StoreOption.store nesneleri her stratejinin mesafe hesabına aktığı için, burada
+    // değiştirmek hem tekli hem çoklu mağaza rotalarını kapsar.)
+    if (options.userLocation && options.countryId) {
+        const ids = new Set<number>();
+        itemOptions.forEach(m => m.forEach(opt => ids.add(opt.store_id)));
+        const branchCoords = await nearestBranchCoordsForStores([...ids], options.countryId, options.userLocation);
+        itemOptions.forEach(m => m.forEach(opt => {
+            const b = branchCoords.get(opt.store_id);
+            if (b) { opt.store.lat = b.lat; opt.store.lon = b.lon; }
+        }));
     }
 
     // 2. Tüm stratejileri hesapla
