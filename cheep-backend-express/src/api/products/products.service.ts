@@ -190,8 +190,9 @@ export const getProductById = async (id: number, countryId?: number) => {
 };
 
 export const getProductByBarcode = async (barcode: string, countryId?: number) => {
-    const product = await prisma.product.findUnique({
-        where: { ean_barcode: barcode },
+    // ean_barcode is unique per-country now, not globally; scope the lookup when we have a country.
+    const product = await prisma.product.findFirst({
+        where: { ean_barcode: barcode, ...(countryId ? { country_id: countryId } : {}) },
         include: {
             category: true,
             store_prices: {
@@ -222,19 +223,19 @@ export const createProduct = async (data: {
     country_id?: number;
     country_code?: string;
 }) => {
-    // Barkod varsa, aynı barkodlu ürün kontrolü
+    const { country_code, country_id, ...rest } = data;
+    const resolvedCountryId = country_id ?? (await getCountryIdByCode(country_code));
+
+    // Barkod varsa, aynı ülkede aynı barkodlu ürün kontrolü (ean_barcode artık ülke-scope benzersiz)
     if (data.ean_barcode) {
-        const existing = await prisma.product.findUnique({
-            where: { ean_barcode: data.ean_barcode },
+        const existing = await prisma.product.findFirst({
+            where: { ean_barcode: data.ean_barcode, country_id: resolvedCountryId },
         });
 
         if (existing) {
             throw conflict('Bu barkoda sahip ürün zaten mevcut');
         }
     }
-
-    const { country_code, country_id, ...rest } = data;
-    const resolvedCountryId = country_id ?? (await getCountryIdByCode(country_code));
 
     return await prisma.product.create({
         data: { ...rest, country_id: resolvedCountryId },
@@ -257,10 +258,15 @@ export const upsertProduct = async (data: {
     const { country_code, country_id, ...rest } = data;
     const resolvedCountryId = country_id ?? (await getCountryIdByCode(country_code));
 
-    // Eğer barkod varsa, ona göre upsert yap
+    // Eğer barkod varsa, ona göre upsert yap (ean_barcode artık ülke-scope benzersiz)
     if (data.ean_barcode) {
         return await prisma.product.upsert({
-            where: { ean_barcode: data.ean_barcode },
+            where: {
+                country_id_ean_barcode: {
+                    country_id: resolvedCountryId,
+                    ean_barcode: data.ean_barcode,
+                },
+            },
             update: {
                 name: data.name,
                 brand: data.brand,

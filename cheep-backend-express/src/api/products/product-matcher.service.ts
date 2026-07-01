@@ -164,7 +164,22 @@ export class ProductMatcher {
         muadil_grup_id?: string | null;
         country_id?: number;
         country_code?: string;
+        ean_barcode?: string;
     }): Promise<{ product: any; isNew: boolean }> {
+        // EAN-first: exact, language-neutral, cross-store. Country-scoped so the
+        // same physical EAN in two countries stays two distinct products (Phase 1).
+        const ean = data.ean_barcode?.trim() || undefined;
+        const resolvedCountryId =
+            data.country_id ?? (await getCountryIdByCode(data.country_code));
+        if (ean && resolvedCountryId) {
+            const existingByEan = await prisma.product.findFirst({
+                where: { ean_barcode: ean, country_id: resolvedCountryId },
+            });
+            if (existingByEan) {
+                return { product: existingByEan, isNew: false };
+            }
+        }
+
         const providedMuadil = data.muadil_grup_id?.trim();
         if (providedMuadil) {
             const existingByMuadil = await this.findExactMatch(providedMuadil);
@@ -232,7 +247,7 @@ export class ProductMatcher {
         }
 
         const muadilToPersist = fingerprint || generatedFingerprint || providedMuadil || '';
-        const countryId = data.country_id ?? (await getCountryIdByCode(data.country_code));
+        const countryId = resolvedCountryId;
 
         const newProduct = await prisma.product.create({
             data: {
@@ -241,6 +256,7 @@ export class ProductMatcher {
                 category_id: categoryId,
                 country_id: countryId,
                 image_url: data.image_url,
+                ean_barcode: ean,
                 muadil_grup_id: muadilToPersist && muadilToPersist.length > 0 ? muadilToPersist : undefined,
             },
         });

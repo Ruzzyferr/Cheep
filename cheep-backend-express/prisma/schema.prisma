@@ -189,7 +189,7 @@ model Product {
   id             Int     @id @default(autoincrement())
   name           String
   brand          String?
-  ean_barcode    String? @unique // EAN/UPC barkod numarası
+  ean_barcode    String? // EAN/UPC barkod numarası (benzersizlik ülke-scope: @@unique aşağıda)
   image_url      String?
   category_id    Int?
   muadil_grup_id String? // Muadil ürünleri gruplamak için
@@ -206,7 +206,7 @@ model Product {
   price_history PriceHistory[]
 
   @@index([country_id])
-  @@index([ean_barcode])
+  @@unique([country_id, ean_barcode])
   @@index([muadil_grup_id])
   @@index([category_id])
   @@map("products")
