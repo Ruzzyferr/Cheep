@@ -14,6 +14,11 @@ import {
   SpaceGrotesk_600SemiBold,
   SpaceGrotesk_700Bold,
 } from '@expo-google-fonts/space-grotesk';
+import { I18nextProvider } from 'react-i18next';
+import * as Localization from 'expo-localization';
+import i18n, { SUPPORTED_LANGUAGES } from './src/i18n';
+import { LocaleProvider } from './src/context/LocaleContext';
+import { languageStorage } from './src/utils/storage';
 import { AuthProvider } from './src/context/AuthContext';
 import { RootNavigator } from './src/navigation';
 import { colors } from './src/theme';
@@ -31,15 +36,32 @@ export default function App() {
     if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) return null;
+  const [langReady, setLangReady] = React.useState(false);
+  useEffect(() => {
+    (async () => {
+      const saved = await languageStorage.get();
+      const device = Localization.getLocales?.()[0]?.languageCode ?? 'en';
+      const initial = (SUPPORTED_LANGUAGES as readonly string[]).includes(saved ?? '')
+        ? saved!
+        : (SUPPORTED_LANGUAGES as readonly string[]).includes(device) ? device : 'en';
+      await i18n.changeLanguage(initial);
+      setLangReady(true);
+    })();
+  }, []);
+
+  if (!fontsLoaded || !langReady) return null;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <StatusBar barStyle="dark-content" backgroundColor={colors.background.default} />
-        <AuthProvider>
-          <RootNavigator />
-        </AuthProvider>
+        <I18nextProvider i18n={i18n}>
+          <LocaleProvider>
+            <AuthProvider>
+              <RootNavigator />
+            </AuthProvider>
+          </LocaleProvider>
+        </I18nextProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
