@@ -59,6 +59,7 @@ model Country {
   stores   Store[]
   products Product[]
   users    User[]
+  branches StoreBranch[]
 
   @@map("countries")
 }
@@ -87,9 +88,33 @@ model Store {
   favorite_by_users UserFavoriteStore[]
   price_history     PriceHistory[]
   affiliate_clicks  AffiliateClick[]
+  branches          StoreBranch[]
 
   @@index([country_id])
   @@map("stores")
+}
+
+model StoreBranch {
+  id           Int      @id @default(autoincrement())
+  store_id     Int
+  country_id   Int
+  name         String
+  lat          Float
+  lon          Float
+  address      String?
+  city         String?
+  source       String   // 'osm' | 'locator'
+  external_ref String   @unique // 'osm:node/123', 'locator:migros:4567'
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  store   Store   @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  country Country @relation(fields: [country_id], references: [id], onDelete: Cascade)
+
+  @@index([country_id])
+  @@index([store_id])
+  @@index([lat, lon])
+  @@map("store_branches")
 }
 
 // ============================================
