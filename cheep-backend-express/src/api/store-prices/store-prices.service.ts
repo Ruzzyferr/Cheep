@@ -20,6 +20,8 @@ interface UpsertData {
     category_id?: number | string | null; // Hem string hem number kabul et
     ean_barcode?: string;
     muadil_grup_id?: string;
+    country_id?: number;
+    country_code?: string;
 }
 
 /**
@@ -42,7 +44,7 @@ const recordPriceHistory = async (
 };
 
 // ++ GÜNCELLENMİŞ FONKSİYON: Artık hem ürünü hem fiyatı yönetiyor
-export const upsertStorePrice = async (data: UpsertData) => {
+export const upsertStorePrice = async (data: UpsertData, countryId?: number) => {
     const { store_id, store_sku, price, unit, source, confidence_score, ...productData } = data;
 
     if (!store_sku) {
@@ -50,7 +52,12 @@ export const upsertStorePrice = async (data: UpsertData) => {
     }
 
     // 1. Yeni Product Matcher'ı kullanarak ürünü bul veya oluştur.
-    const { product } = await productMatcher.findOrCreateProduct(productData);
+    // req.country (x-country header'ından) her zaman öncelikli: yabancı scrape'ler
+    // (CH/SE/DE/PL) payload'da country_id taşımaz, threadlenmezse yanlışlıkla TR'ye düşer.
+    const { product } = await productMatcher.findOrCreateProduct({
+        ...productData,
+        country_id: countryId ?? productData.country_id,
+    });
 
     const numericStoreId = Number(store_id);
     const newPrice = new Decimal(price);
@@ -119,8 +126,8 @@ export const upsertStorePrice = async (data: UpsertData) => {
 };
 
 // ++ PERFORMANS İYİLEŞTİRMESİ YAPILAN FONKSİYON ++
-export const bulkUpsertStorePrices = async (prices: UpsertData[]) => {
-    const upsertPromises = prices.map(priceData => upsertStorePrice(priceData));
+export const bulkUpsertStorePrices = async (prices: UpsertData[], countryId?: number) => {
+    const upsertPromises = prices.map(priceData => upsertStorePrice(priceData, countryId));
     const outcomes = await Promise.allSettled(upsertPromises);
 
     logger.info('[StorePriceService] Bulk upsert tamamlandı. Sonuçlar işleniyor...');

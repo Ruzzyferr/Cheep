@@ -4,7 +4,8 @@ import logger from '../../utils/logger.js';
 
 export const upsertStorePrice = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const storePrice = await StorePriceService.upsertStorePrice(req.body);
+        const countryId = req.country?.id;
+        const storePrice = await StorePriceService.upsertStorePrice(req.body, countryId);
         res.status(200).json(storePrice);
     } catch (error) {
         next(error);
@@ -14,8 +15,9 @@ export const upsertStorePrice = async (req: Request, res: Response, next: NextFu
 export const bulkUpsertStorePrices = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { prices } = req.body;
+        const countryId = req.country?.id;
         logger.info(`[StorePriceController] /bulk-upsert isteği alındı. Ürün sayısı: ${prices.length}`);
-        const results = await StorePriceService.bulkUpsertStorePrices(prices);
+        const results = await StorePriceService.bulkUpsertStorePrices(prices, countryId);
         res.status(200).json(results);
     } catch (error) {
         next(error);
