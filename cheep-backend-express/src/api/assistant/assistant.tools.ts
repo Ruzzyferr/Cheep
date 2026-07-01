@@ -116,21 +116,24 @@ export const toolDeclarations: any[] = [
 // ============================================
 
 /**
- * Builds a tool executor function scoped to a specific user.
+ * Builds a tool executor function scoped to a specific user (and, when known, country).
  * Returns (name, args) => Promise<any>; never throws — errors are returned as { error }.
+ *
+ * countryId is threaded into every product/route lookup so the assistant never mixes
+ * stores/prices across countries — same invariant enforced on the REST routes.
  *
  * Shape notes:
  * - getAllProducts returns { products: Product[], pagination: {...} } — we extract .products
  * - removeItemFromList signature: (listId, itemId, userId) — 3 args
  * - get_product_prices uses Products.getProductPrices (not store-prices service)
  */
-export function buildToolExecutor(userId: number) {
+export function buildToolExecutor(userId: number, countryId?: number) {
   return async (name: string, args: any): Promise<any> => {
     try {
       switch (name) {
         case 'search_products': {
           // getAllProducts returns { products: [...], pagination: {...} }
-          const result = await Products.getAllProducts({ search: args.query, limit: args.limit ?? 10 });
+          const result = await Products.getAllProducts({ search: args.query, limit: args.limit ?? 10, countryId });
           return result.products ?? result;
         }
 
@@ -151,7 +154,7 @@ export function buildToolExecutor(userId: number) {
           const items = (args.items ?? []).slice(0, 50);
           for (const item of items as any[]) {
             // getAllProducts returns { products: [...], pagination: {...} }
-            const searchResult = await Products.getAllProducts({ search: item.query, limit: 1 });
+            const searchResult = await Products.getAllProducts({ search: item.query, limit: 1, countryId });
             const products: any[] = searchResult.products ?? (searchResult as any);
             if (!products || products.length === 0) {
               results.push({ query: item.query, matched: false });
@@ -176,11 +179,11 @@ export function buildToolExecutor(userId: number) {
 
         case 'get_product_prices': {
           // getProductPrices is on products.service, returns store_prices array
-          return await Products.getProductPrices(args.productId);
+          return await Products.getProductPrices(args.productId, countryId);
         }
 
         case 'get_cheapest_route': {
-          return await compareShoppingList(args.listId, userId, {});
+          return await compareShoppingList(args.listId, userId, { countryId });
         }
 
         default:

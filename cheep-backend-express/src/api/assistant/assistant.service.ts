@@ -66,7 +66,7 @@ export function buildSystemPrompt(profile: any, currency: string = 'TRY'): strin
 // SEND MESSAGE (agent orchestration)
 // ============================================
 
-export const sendMessage = async (userId: number, threadId: number, content: string, currency: string = 'TRY') => {
+export const sendMessage = async (userId: number, threadId: number, content: string, currency: string = 'TRY', countryId?: number) => {
   await assertOwner(threadId, userId);
 
   // Günlük limit kontrolü (Gemini çağrısından ÖNCE)
@@ -96,7 +96,7 @@ export const sendMessage = async (userId: number, threadId: number, content: str
     toolDeclarations,
   });
 
-  const result = await runAgentLoop(session, content, buildToolExecutor(userId), 6);
+  const result = await runAgentLoop(session, content, buildToolExecutor(userId, countryId), 6);
 
   // Persist user message then assistant reply
   await prisma.chatMessage.create({

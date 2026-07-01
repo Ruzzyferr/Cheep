@@ -102,6 +102,7 @@ export const message = async (req: Request, res: Response) => {
       parseInt(req.params.id),
       req.body.content,
       req.country?.currency ?? 'TRY',
+      req.country?.id,
     );
 
     res.status(200).json({
