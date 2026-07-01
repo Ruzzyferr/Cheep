@@ -182,7 +182,7 @@ export class ProductMatcher {
 
         const providedMuadil = data.muadil_grup_id?.trim();
         if (providedMuadil) {
-            const existingByMuadil = await this.findExactMatch(providedMuadil);
+            const existingByMuadil = await this.findExactMatch(providedMuadil, resolvedCountryId);
             if (existingByMuadil) {
                 if (!existingByMuadil.muadil_grup_id || existingByMuadil.muadil_grup_id !== providedMuadil) {
                     await prisma.product.update({
@@ -202,9 +202,9 @@ export class ProductMatcher {
 
         const fingerprint = providedMuadil || generatedFingerprint;
 
-        let exactMatch = fingerprint ? await this.findExactMatch(fingerprint) : null;
+        let exactMatch = fingerprint ? await this.findExactMatch(fingerprint, resolvedCountryId) : null;
         if (!exactMatch && generatedFingerprint && generatedFingerprint !== fingerprint) {
-            exactMatch = await this.findExactMatch(generatedFingerprint);
+            exactMatch = await this.findExactMatch(generatedFingerprint, resolvedCountryId);
         }
 
         if (exactMatch) {
@@ -218,7 +218,7 @@ export class ProductMatcher {
             return { product: exactMatch, isNew: false };
         }
 
-        const candidates = await this.findSimilarProducts(data);
+        const candidates = await this.findSimilarProducts(data, resolvedCountryId);
         // STRICT: gramajı eşleşmeyen aday ASLA otomatik birleşmez (0.85 fuzzy dahil).
         const incomingGramaj = extractGramaj(data.name);
         const bestMatch = candidates.find(
@@ -267,10 +267,11 @@ export class ProductMatcher {
     /**
      * Exact match (fingerprint'e göre)
      */
-    private async findExactMatch(fingerprint: string) {
+    private async findExactMatch(fingerprint: string, countryId?: number) {
         return await prisma.product.findFirst({
             where: {
                 muadil_grup_id: fingerprint,
+                ...(typeof countryId === 'number' ? { country_id: countryId } : {}),
             },
         });
     }
@@ -281,7 +282,7 @@ export class ProductMatcher {
     private async findSimilarProducts(data: {
         name: string;
         brand?: string;
-    }): Promise<ProductMatchCandidate[]> {
+    }, countryId?: number): Promise<ProductMatchCandidate[]> {
         const fingerprint = generateProductFingerprint({
             name: data.name,
             brand: data.brand,
@@ -313,7 +314,10 @@ export class ProductMatcher {
         }
 
         const candidates = await prisma.product.findMany({
-            where: orFilters.length > 0 ? { OR: orFilters } : {},
+            where: {
+                ...(typeof countryId === 'number' ? { country_id: countryId } : {}),
+                ...(orFilters.length > 0 ? { OR: orFilters } : {}),
+            },
             take: 50,
         });
 
