@@ -5,11 +5,13 @@
 
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors, spacing, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 
 interface FeaturedDealCardProps {
   productName: string;
+  /** Already formatted via formatMoney() by the caller — includes the currency symbol. */
   price: string;
   unit: string;
   storeName: string;
@@ -25,6 +27,7 @@ export function FeaturedDealCard({
   imageUrl,
   onPress,
 }: FeaturedDealCardProps) {
+  const { t } = useTranslation();
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.imageContainer}>
@@ -41,10 +44,10 @@ export function FeaturedDealCard({
         <Text style={styles.productName} numberOfLines={1}>
           {productName}
         </Text>
-        <Text style={styles.label}>En Düşük Fiyat</Text>
+        <Text style={styles.label}>{t('home.lowest_price_label')}</Text>
 
         <View style={styles.priceRow}>
-          <Text style={styles.price}>{price}₺</Text>
+          <Text style={styles.price}>{price}</Text>
           <Text style={[styles.unit, { marginLeft: spacing.xs }]}>/{unit}</Text>
         </View>
 

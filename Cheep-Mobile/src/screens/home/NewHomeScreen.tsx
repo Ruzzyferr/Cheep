@@ -16,6 +16,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { productService, storeService, listService, categoryService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import { useLocale } from '../../context/LocaleContext';
@@ -33,12 +34,11 @@ import type { Product, Store, ShoppingList } from '../../types';
 import type { Category } from '../../services/category.service';
 import type { HomeStackScreenProps } from '../../navigation/types';
 
-const tl = (n: number) => '₺' + Math.round(n).toLocaleString('tr-TR');
-
 export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const { country } = useLocale();
+  const { t } = useTranslation();
+  const { country, formatMoney } = useLocale();
   const [activeList, setActiveList] = useState<ShoppingList | null>(null);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [markets, setMarkets] = useState<Store[]>([]);
@@ -254,7 +254,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
   };
   const goLists = () => navigation.dispatch(CommonActions.navigate({ name: 'Lists' }));
   const goSearch = () =>
-    navigation.navigate('CategoryProducts', { categoryId: 0, categoryName: 'Tüm Kategoriler' });
+    navigation.navigate('CategoryProducts', { categoryId: 0, categoryName: t('product.all_categories') });
 
   return (
     <View style={styles.container}>
@@ -287,22 +287,24 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
           <View style={styles.hero}>
             <View style={styles.heroBody}>
               <Text style={styles.heroGreeting}>
-                {firstName ? `Merhaba ${firstName}` : 'Merhaba'} 👋
+                {firstName ? t('home.greeting_named', { name: firstName }) : t('home.greeting')} 👋
               </Text>
-              <Text style={styles.heroOverline}>{hasSavings ? 'BU AY TASARRUF' : 'POTANSİYEL TASARRUF'}</Text>
+              <Text style={styles.heroOverline}>
+                {hasSavings ? t('home.overline_saved') : t('home.overline_potential')}
+              </Text>
               <AnimatedNumber
                 value={hasSavings ? monthlySavings : potentialSavings}
-                format={tl}
+                format={formatMoney}
                 style={styles.heroNumber}
               />
               <Text style={styles.heroSub}>
                 {hasSavings
                   ? monthlySavingsIncrease > 0
-                    ? `Geçen aya göre +${tl(monthlySavingsIncrease)}`
-                    : 'En ucuz rotaları seçerek biriktirdin'
+                    ? t('home.vs_last_month', { amount: formatMoney(monthlySavingsIncrease) })
+                    : t('home.hero_sub_saved')
                   : activeList
-                    ? 'Listeni en ucuz rotayla tamamla, bu kadar kazan'
-                    : 'İlk listeni oluştur, tasarrufa başla'}
+                    ? t('home.hero_sub_active_list')
+                    : t('home.hero_sub_no_list')}
               </Text>
             </View>
             <Float style={styles.heroMascot}>
@@ -316,7 +318,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
           {activeList ? (
             <PressableScale onPress={goActiveList} style={styles.listCard}>
               <View style={styles.listCardTop}>
-                <Text style={styles.overline}>AKTİF LİSTE</Text>
+                <Text style={styles.overline}>{t('home.overline_active_list')}</Text>
                 {estimatedPrice && savingsPercent ? (
                   <View style={styles.savePill}>
                     <MaterialIcons name="trending-down" size={13} color={colors.success.dark} />
@@ -326,8 +328,10 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
               </View>
               <Text style={styles.listName}>{activeList.name}</Text>
               <Text style={styles.listMeta}>
-                {itemCount} ürün
-                {estimatedPrice ? `  ·  Tahmini ₺${estimatedPrice.min}–₺${estimatedPrice.max}` : ''}
+                {t('home.item_count', { count: itemCount })}
+                {estimatedPrice
+                  ? `  ·  ${t('home.estimated_range', { min: formatMoney(estimatedPrice.min), max: formatMoney(estimatedPrice.max) })}`
+                  : ''}
               </Text>
               {listStoreNames.length > 0 && (
                 <View style={styles.miniLogos}>
@@ -338,7 +342,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
               )}
               <View style={styles.listCta}>
                 <MaterialCommunityIcons name="map-marker-path" size={18} color={colors.background.paper} />
-                <Text style={styles.listCtaText}>En Ucuz Rotayı Gör</Text>
+                <Text style={styles.listCtaText}>{t('home.view_cheapest_route')}</Text>
                 <MaterialIcons name="arrow-forward" size={18} color={colors.background.paper} />
               </View>
             </PressableScale>
@@ -346,8 +350,8 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
             <PressableScale onPress={goLists} style={styles.emptyCard}>
               <CheepMascot size={64} expression="search" />
               <View style={styles.emptyBody}>
-                <Text style={styles.emptyTitle}>Henüz listen yok</Text>
-                <Text style={styles.emptySub}>İlk alışveriş listeni oluştur, en ucuz rotayı bulalım.</Text>
+                <Text style={styles.emptyTitle}>{t('home.no_list_title')}</Text>
+                <Text style={styles.emptySub}>{t('home.no_list_sub')}</Text>
               </View>
               <View style={styles.emptyPlus}>
                 <MaterialIcons name="add" size={22} color={colors.background.paper} />
@@ -359,9 +363,9 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         {/* Categories */}
         <FadeInUp delay={170}>
           <View style={styles.sectionHead}>
-            <Text style={styles.sectionTitle}>Kategoriler</Text>
+            <Text style={styles.sectionTitle}>{t('home.categories_title')}</Text>
             <TouchableOpacity onPress={goSearch}>
-              <Text style={styles.link}>Tümü</Text>
+              <Text style={styles.link}>{t('common.all')}</Text>
             </TouchableOpacity>
           </View>
           <ScrollView
@@ -395,9 +399,9 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         {/* Smart deals */}
         <FadeInUp delay={230}>
           <View style={styles.sectionHead}>
-            <Text style={styles.sectionTitle}>Fırsatlar</Text>
+            <Text style={styles.sectionTitle}>{t('home.deals_title')}</Text>
             <TouchableOpacity onPress={() => navigation.navigate('PriceDifferenceList')}>
-              <Text style={styles.link}>Tümünü incele</Text>
+              <Text style={styles.link}>{t('home.view_all')}</Text>
             </TouchableOpacity>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dealRail}>
@@ -430,8 +434,8 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
                     {store}
                   </Text>
                   <Text style={styles.dealPrice}>
-                    ₺{price}
-                    <Text style={styles.dealPriceFrom}>'den</Text>
+                    {formatMoney(parseFloat(price ?? '0'))}
+                    <Text style={styles.dealPriceFrom}>{t('home.deal_from_suffix')}</Text>
                   </Text>
                 </PressableScale>
               );
@@ -442,7 +446,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         {/* Markets we compare (no fake distance) */}
         <FadeInUp delay={290}>
           <View style={styles.sectionHead}>
-            <Text style={styles.sectionTitle}>Karşılaştırdığımız marketler</Text>
+            <Text style={styles.sectionTitle}>{t('home.markets_title')}</Text>
           </View>
           <View style={styles.marketsWrap}>
             {markets.map((s) => (

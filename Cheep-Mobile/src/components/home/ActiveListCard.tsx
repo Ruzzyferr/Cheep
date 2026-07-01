@@ -6,6 +6,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { getStoreLogoAsset } from '../../utils/storeLogo';
 import { useLocale } from '../../context/LocaleContext';
@@ -31,7 +32,8 @@ export function ActiveListCard({
   storeNames = [],
   onPress,
 }: ActiveListCardProps) {
-  const { country } = useLocale();
+  const { t } = useTranslation();
+  const { country, formatMoney } = useLocale();
   // Store names varsa onları kullan, yoksa storeLogos'u kullan (backward compatibility)
   const stores = storeNames.length > 0 ? storeNames : storeLogos;
   return (
@@ -41,14 +43,14 @@ export function ActiveListCard({
           <View style={styles.headerLeft}>
             <Text style={styles.listName}>{listName}</Text>
             <Text style={styles.info}>
-              {totalItems} Ürün
-              {estimatedPrice && ` • Tahmini ${estimatedPrice.min}₺ - ${estimatedPrice.max}₺`}
+              {t('home.item_count', { count: totalItems })}
+              {estimatedPrice && ` • ${t('home.estimated_range', { min: formatMoney(estimatedPrice.min), max: formatMoney(estimatedPrice.max) })}`}
             </Text>
           </View>
           {savingsPercent !== undefined && (
             <View style={styles.savingsBadge}>
               <MaterialIcons name="trending-down" size={14} color={colors.secondary.main} />
-              <Text style={styles.savingsText}>%{savingsPercent} Tasarruf</Text>
+              <Text style={styles.savingsText}>{t('home.savings_percent', { percent: savingsPercent })}</Text>
             </View>
           )}
         </View>
@@ -84,13 +86,13 @@ export function ActiveListCard({
         ) : totalItems === 0 ? (
           <View style={styles.emptyState}>
             <MaterialIcons name="shopping-cart" size={24} color={colors.text.hint} />
-            <Text style={styles.emptyText}>Listeye ürün ekleyerek başlayın</Text>
+            <Text style={styles.emptyText}>{t('home.active_list_empty')}</Text>
           </View>
         ) : null}
 
         <TouchableOpacity style={styles.button} onPress={onPress}>
           <MaterialIcons name="alt-route" size={20} color={colors.background.paper} />
-          <Text style={styles.buttonText}>En Ucuz Rotayı Oluştur</Text>
+          <Text style={styles.buttonText}>{t('home.build_cheapest_route')}</Text>
         </TouchableOpacity>
       </View>
     </View>

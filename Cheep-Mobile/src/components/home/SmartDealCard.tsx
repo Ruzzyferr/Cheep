@@ -6,10 +6,12 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 
 interface SmartDealCardProps {
   productName: string;
+  /** Already formatted via formatMoney() by the caller — includes the currency symbol. */
   price: string;
   unit: string;
   storeName: string;
@@ -27,6 +29,7 @@ export function SmartDealCard({
   discountPercent,
   onPress,
 }: SmartDealCardProps) {
+  const { t } = useTranslation();
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.95}>
       <View style={styles.imageContainer}>
@@ -52,9 +55,7 @@ export function SmartDealCard({
           {storeName}
         </Text>
         <View style={styles.priceRow}>
-          <Text style={styles.priceCurrency}>₺</Text>
-          <Text style={styles.price}>{price}</Text>
-          <Text style={styles.fromLabel}>&apos;den</Text>
+          <Text style={styles.price}>{t('home.deal_from_price', { price })}</Text>
         </View>
       </View>
     </TouchableOpacity>
