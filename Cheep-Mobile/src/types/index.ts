@@ -325,5 +325,8 @@ export interface UserProfile {
   allergies?: string[];
   weekly_budget?: number | null;
   onboarding_done: boolean;
+  // UI dili (örn. "tr") ve alışveriş ülkesi ISO kodu (örn. "DE") — onboarding'de kaydedilir.
+  language?: string;
+  country_code?: string;
 }
 

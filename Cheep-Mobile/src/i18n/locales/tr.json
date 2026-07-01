@@ -4,7 +4,8 @@
     "language_title": "Uygulama dilini seç",
     "language_subtitle": "Bunu daha sonra Profil'den değiştirebilirsin",
     "country_title": "Nerede alışveriş yapıyorsun?",
-    "country_subtitle": "Sana sadece ülkendeki marketleri ve fiyatları gösterelim"
+    "country_subtitle": "Sana sadece ülkendeki marketleri ve fiyatları gösterelim",
+    "per_week": "/hafta"
   },
   "profile": { "language": "Uygulama dili", "country": "Ülke / Marketler", "about": "Cheep Hakkında" },
   "countries": { "TR": "Türkiye", "CH": "İsviçre", "SE": "İsveç", "DE": "Almanya", "PL": "Polonya" },

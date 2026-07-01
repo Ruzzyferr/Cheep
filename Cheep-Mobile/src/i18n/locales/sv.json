@@ -4,7 +4,8 @@
     "language_title": "Välj appspråk",
     "language_subtitle": "Du kan ändra detta senare i Profil",
     "country_title": "Var handlar du?",
-    "country_subtitle": "Vi visar bara butiker och priser i ditt land"
+    "country_subtitle": "Vi visar bara butiker och priser i ditt land",
+    "per_week": "/vecka"
   },
   "profile": { "language": "Appspråk", "country": "Land / Butiker", "about": "Om Cheep" },
   "countries": { "TR": "Turkiet", "CH": "Schweiz", "SE": "Sverige", "DE": "Tyskland", "PL": "Polen" },

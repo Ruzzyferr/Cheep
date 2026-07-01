@@ -4,7 +4,8 @@
     "language_title": "Choose your app language",
     "language_subtitle": "You can change this later in Profile",
     "country_title": "Where do you shop?",
-    "country_subtitle": "Let's show you only the stores and prices in your country"
+    "country_subtitle": "Let's show you only the stores and prices in your country",
+    "per_week": "/week"
   },
   "profile": { "language": "App language", "country": "Country / Stores", "about": "About Cheep" },
   "countries": { "TR": "Turkey", "CH": "Switzerland", "SE": "Sweden", "DE": "Germany", "PL": "Poland" },

@@ -4,7 +4,7 @@
  * Transitions: fade + slide-in via React Native Animated (no extra deps).
  */
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,13 +18,21 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import { useLocale, COUNTRY_CONFIG } from '../../context/LocaleContext';
 import { profileService } from '../../services';
 import { CheepMascot } from '../../components/brand/CheepMascot';
 import { Float } from '../../components/anim';
 import { colors, typography, spacing, borderRadius, layout } from '../../theme';
 import { ONBOARDING_QUESTIONS } from './onboardingConfig';
+import i18n, { SUPPORTED_LANGUAGES } from '../../i18n';
+import { languageStorage } from '../../utils/storage';
+import { getCountryCode } from '../../utils/geo';
 import type { UserProfile } from '../../types';
+
+// Prepended locale steps (language + country) that precede ONBOARDING_QUESTIONS.
+const LOCALE_STEPS = 2;
 
 // ─── Answer types ────────────────────────────────────────────────────────────
 type Answers = {
@@ -153,14 +161,18 @@ function MultiOptions({
 function BudgetInput({
   value,
   onChange,
+  symbol,
+  unitLabel,
 }: {
   value: string | undefined;
   onChange: (v: string) => void;
+  symbol: string;
+  unitLabel: string;
 }) {
   return (
     <View style={optStyles.budgetContainer}>
       <View style={optStyles.budgetInputWrap}>
-        <Text style={optStyles.currencySymbol}>₺</Text>
+        <Text style={optStyles.currencySymbol}>{symbol}</Text>
         <TextInput
           style={optStyles.budgetInput}
           value={value ?? ''}
@@ -170,7 +182,7 @@ function BudgetInput({
           keyboardType="numeric"
           returnKeyType="done"
         />
-        <Text style={optStyles.budgetUnit}>/hafta</Text>
+        <Text style={optStyles.budgetUnit}>{unitLabel}</Text>
       </View>
     </View>
   );
@@ -180,12 +192,45 @@ function BudgetInput({
 
 export function OnboardingScreen() {
   const { refreshOnboarding } = useAuth();
+  const { t } = useTranslation();
+  const { country, setCountry } = useLocale();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [finishing, setFinishing] = useState(false);
+  // UI dili seçimi — varsayılan mevcut i18n dili.
+  const [language, setLanguage] = useState<string>(i18n.language);
 
-  const total = ONBOARDING_QUESTIONS.length;
-  const question = ONBOARDING_QUESTIONS[step];
+  // Two prepended locale steps, then the existing config-driven questions.
+  const total = LOCALE_STEPS + ONBOARDING_QUESTIONS.length;
+  const isLangStep = step === 0;
+  const isCountryStep = step === 1;
+  const questionIndex = step - LOCALE_STEPS;
+  const question =
+    questionIndex >= 0 ? ONBOARDING_QUESTIONS[questionIndex] : undefined;
+
+  const currencySymbol = COUNTRY_CONFIG[country]?.symbol ?? '₺';
+
+  // Ülke varsayılanını konumdan tespit et (yalnızca ilk girişte, desteklenen ise).
+  // getCountryCode desteklenmeyen/izin-yok durumunda null döner → mevcut değer kalır.
+  useEffect(() => {
+    getCountryCode()
+      .then((code) => {
+        if (code) return setCountry(code);
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Locale selection handlers ─────────────────────────────────────────────
+  const handleSelectLanguage = (lang: string) => {
+    setLanguage(lang);
+    i18n.changeLanguage(lang); // onboarding'in geri kalanı seçilen dilde render olsun
+    languageStorage.save(lang);
+  };
+
+  const handleSelectCountry = (code: string) => {
+    setCountry(code); // LocaleContext doğrular + saklar (para birimi/format buradan)
+  };
 
   // Animated values for step transition
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -226,10 +271,12 @@ export function OnboardingScreen() {
   // ── Answer helpers ────────────────────────────────────────────────────────
 
   const handleSingleSelect = (value: string) => {
+    if (!question) return;
     setAnswers((prev) => ({ ...prev, [question.key]: value }));
   };
 
   const handleMultiToggle = (value: string) => {
+    if (!question) return;
     setAnswers((prev) => {
       const current: string[] = (prev[question.key as 'avoid' | 'allergies'] ?? []) as string[];
       const next = current.includes(value)
@@ -254,12 +301,14 @@ export function OnboardingScreen() {
   };
 
   const skip = () => {
-    // Clear the current question's answer and advance
-    setAnswers((prev) => {
-      const next = { ...prev };
-      delete next[question.key];
-      return next;
-    });
+    // Clear the current question's answer and advance (locale steps have no answer)
+    if (question) {
+      setAnswers((prev) => {
+        const next = { ...prev };
+        delete next[question.key];
+        return next;
+      });
+    }
     if (step < total - 1) {
       animateToNextStep(() => setStep((s) => s + 1));
     } else {
@@ -274,6 +323,9 @@ export function OnboardingScreen() {
       // gönderip mevcut profil değerlerini (örn. tekrar onboarding'de) ezmeyiz.
       const payload: Partial<UserProfile> = {
         onboarding_done: true,
+        // Dil + ülke tercihini profile de yaz (backend x-country'yi de kullanır).
+        language,
+        country_code: country,
       };
       if (answers.household_size !== undefined) {
         payload.household_size = answers.household_size;
@@ -308,13 +360,19 @@ export function OnboardingScreen() {
 
   // ── Current answer value ──────────────────────────────────────────────────
 
-  const currentSingle = answers[question.key as 'household_size' | 'diet'] as string | undefined;
-  const currentMulti = (answers[question.key as 'avoid' | 'allergies'] ?? []) as string[];
+  const currentSingle = question
+    ? (answers[question.key as 'household_size' | 'diet'] as string | undefined)
+    : undefined;
+  const currentMulti = (question
+    ? answers[question.key as 'avoid' | 'allergies'] ?? []
+    : []) as string[];
   const currentBudget = answers.weekly_budget;
 
   // ── Can proceed without selection? ───────────────────────────────────────
 
-  const canProceed = question.optional
+  const canProceed = !question
+    ? true // locale steps always have a valid default selected
+    : question.optional
     ? true
     : question.type === 'single'
     ? !!currentSingle
@@ -327,6 +385,27 @@ export function OnboardingScreen() {
   // ── Progress bar width ────────────────────────────────────────────────────
 
   const progressPct = ((step + 1) / total) * 100;
+
+  // ── Locale-step options + localized header text ──────────────────────────
+  const langOptions = SUPPORTED_LANGUAGES.map((code) => ({
+    value: code,
+    label: t(`languages.${code}`),
+  }));
+  const countryOptions = Object.keys(COUNTRY_CONFIG).map((code) => ({
+    value: code,
+    label: t(`countries.${code}`),
+  }));
+
+  const headerMascot = isLangStep
+    ? t('onboarding.language_subtitle')
+    : isCountryStep
+    ? t('onboarding.country_subtitle')
+    : question?.mascot ?? '';
+  const headerTitle = isLangStep
+    ? t('onboarding.language_title')
+    : isCountryStep
+    ? t('onboarding.country_title')
+    : question?.title ?? '';
 
   return (
     <KeyboardAvoidingView
@@ -354,7 +433,7 @@ export function OnboardingScreen() {
           <Float>
             <CheepMascot size={88} expression="happy" />
           </Float>
-          <Text style={styles.mascotText}>{question.mascot}</Text>
+          <Text style={styles.mascotText}>{headerMascot}</Text>
         </View>
 
         {/* Animated question content */}
@@ -364,10 +443,28 @@ export function OnboardingScreen() {
             { opacity: fadeAnim, transform: [{ translateX: slideAnim }] },
           ]}
         >
-          <Text style={styles.questionTitle}>{question.title}</Text>
+          <Text style={styles.questionTitle}>{headerTitle}</Text>
+
+          {/* ── language (step 0) ───────────────────────────────── */}
+          {isLangStep && (
+            <SingleOptions
+              options={langOptions}
+              selected={language}
+              onSelect={handleSelectLanguage}
+            />
+          )}
+
+          {/* ── country (step 1) ────────────────────────────────── */}
+          {isCountryStep && (
+            <SingleOptions
+              options={countryOptions}
+              selected={country}
+              onSelect={handleSelectCountry}
+            />
+          )}
 
           {/* ── single ──────────────────────────────────────────── */}
-          {question.type === 'single' && question.options && (
+          {question?.type === 'single' && question.options && (
             <SingleOptions
               options={question.options}
               selected={currentSingle}
@@ -376,7 +473,7 @@ export function OnboardingScreen() {
           )}
 
           {/* ── multi ───────────────────────────────────────────── */}
-          {question.type === 'multi' && question.options && (
+          {question?.type === 'multi' && question.options && (
             <MultiOptions
               options={question.options}
               selected={currentMulti}
@@ -386,8 +483,13 @@ export function OnboardingScreen() {
           )}
 
           {/* ── budget ──────────────────────────────────────────── */}
-          {question.type === 'budget' && (
-            <BudgetInput value={currentBudget} onChange={handleBudgetChange} />
+          {question?.type === 'budget' && (
+            <BudgetInput
+              value={currentBudget}
+              onChange={handleBudgetChange}
+              symbol={currencySymbol}
+              unitLabel={t('onboarding.per_week')}
+            />
           )}
         </Animated.View>
 
