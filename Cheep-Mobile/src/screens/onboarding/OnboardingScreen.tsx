@@ -88,6 +88,7 @@ function MultiOptions({
   onToggle: (v: string) => void;
   allowCustom?: boolean;
 }) {
+  const { t } = useTranslation();
   const [customText, setCustomText] = useState('');
 
   const handleAddCustom = () => {
@@ -139,7 +140,7 @@ function MultiOptions({
             style={optStyles.customInput}
             value={customText}
             onChangeText={setCustomText}
-            placeholder="Sen yaz…"
+            placeholder={t('onboarding.custom_placeholder')}
             placeholderTextColor={colors.text.hint}
             onSubmitEditing={handleAddCustom}
             returnKeyType="done"
@@ -149,7 +150,7 @@ function MultiOptions({
             onPress={handleAddCustom}
             activeOpacity={0.8}
           >
-            <Text style={optStyles.customAddLabel}>Ekle</Text>
+            <Text style={optStyles.customAddLabel}>{t('onboarding.add')}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -208,7 +209,7 @@ export function OnboardingScreen() {
   const question =
     questionIndex >= 0 ? ONBOARDING_QUESTIONS[questionIndex] : undefined;
 
-  const currencySymbol = COUNTRY_CONFIG[country]?.symbol ?? '₺';
+  const currencySymbol = COUNTRY_CONFIG[country]?.symbol ?? COUNTRY_CONFIG.TR.symbol;
 
   // Kullanıcı ülke adımında elle seçim yaptıysa geo-tespitli varsayılan onu ezmesin.
   const manualCountryPickedRef = useRef(false);
@@ -361,8 +362,8 @@ export function OnboardingScreen() {
       await refreshOnboarding(); // flips RootNavigator gate to Main
     } catch (error: any) {
       Alert.alert(
-        'Hata',
-        error?.message ?? 'Profil kaydedilirken bir hata oluştu. Tekrar deneyin.'
+        t('common.error'),
+        error?.message ?? t('onboarding.finish_error')
       );
       setFinishing(false);
     }
@@ -405,17 +406,26 @@ export function OnboardingScreen() {
     value: code,
     label: t(`countries.${code}`),
   }));
+  // question.options stores i18n KEYS (see onboardingConfig.ts) — resolve them here.
+  const questionOptions = question?.options?.map((opt) => ({
+    value: opt.value,
+    label: t(opt.label),
+  }));
 
   const headerMascot = isLangStep
     ? t('onboarding.language_subtitle')
     : isCountryStep
     ? t('onboarding.country_subtitle')
-    : question?.mascot ?? '';
+    : question?.mascot
+    ? t(question.mascot)
+    : '';
   const headerTitle = isLangStep
     ? t('onboarding.language_title')
     : isCountryStep
     ? t('onboarding.country_title')
-    : question?.title ?? '';
+    : question?.title
+    ? t(question.title)
+    : '';
 
   return (
     <KeyboardAvoidingView
@@ -474,18 +484,18 @@ export function OnboardingScreen() {
           )}
 
           {/* ── single ──────────────────────────────────────────── */}
-          {question?.type === 'single' && question.options && (
+          {question?.type === 'single' && questionOptions && (
             <SingleOptions
-              options={question.options}
+              options={questionOptions}
               selected={currentSingle}
               onSelect={handleSingleSelect}
             />
           )}
 
           {/* ── multi ───────────────────────────────────────────── */}
-          {question?.type === 'multi' && question.options && (
+          {question?.type === 'multi' && questionOptions && (
             <MultiOptions
-              options={question.options}
+              options={questionOptions}
               selected={currentMulti}
               onToggle={handleMultiToggle}
               allowCustom={question.allowCustom}
@@ -510,7 +520,7 @@ export function OnboardingScreen() {
         <View style={styles.actions}>
           {/* Skip always available */}
           <TouchableOpacity style={styles.skipBtn} onPress={skip} activeOpacity={0.7}>
-            <Text style={styles.skipLabel}>Şimdilik geç</Text>
+            <Text style={styles.skipLabel}>{t('common.skip')}</Text>
           </TouchableOpacity>
 
           {/* Continue / Finish */}
@@ -526,7 +536,7 @@ export function OnboardingScreen() {
             {finishing ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text style={styles.continueLabel}>{isLast ? 'Bitir' : 'Devam'}</Text>
+              <Text style={styles.continueLabel}>{isLast ? t('common.finish') : t('common.continue')}</Text>
             )}
           </TouchableOpacity>
         </View>

@@ -45,6 +45,7 @@ export function ProfileScreen({
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const { country, setCountry } = useLocale();
+  const currencySymbol = COUNTRY_CONFIG[country]?.symbol ?? COUNTRY_CONFIG.TR.symbol;
   const [stats, setStats] = useState({ active: 0, completed: 0, templates: 0 });
 
   // ─── Language / Country picker state ───────────────────────────────────────
@@ -111,10 +112,10 @@ export function ProfileScreen({
 
   // ─── Handlers ───────────────────────────────────────────────────────────────
   const handleLogout = () => {
-    Alert.alert('Çıkış Yap', 'Çıkmak istediğinize emin misiniz?', [
-      { text: 'İptal', style: 'cancel' },
+    Alert.alert(t('profile.logout_title'), t('profile.logout_confirm'), [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Çıkış',
+        text: t('profile.logout_action'),
         style: 'destructive',
         onPress: async () => {
           await logout();
@@ -124,7 +125,7 @@ export function ProfileScreen({
   };
 
   const handleAbout = () => {
-    Alert.alert('Cheep Hakkında', `Cheep · Sürüm ${APP_VERSION}\nTürkiye marketlerinde en uygun fiyatı bul.`);
+    Alert.alert(t('profile.about_title'), t('profile.about_body', { version: APP_VERSION }));
   };
 
   // ─── Language / Country handlers ───────────────────────────────────────────
@@ -178,9 +179,9 @@ export function ProfileScreen({
         weekly_budget: budgetNum,
       };
       await profileService.updateProfile(patch);
-      Alert.alert('Kaydedildi', 'Tercihleriniz güncellendi.');
+      Alert.alert(t('profile.prefs_saved_title'), t('profile.prefs_saved_body'));
     } catch {
-      Alert.alert('Hata', 'Tercihler kaydedilemedi. Lütfen tekrar deneyin.');
+      Alert.alert(t('common.error'), t('profile.prefs_save_error'));
     } finally {
       setPrefSaving(false);
     }
@@ -204,14 +205,14 @@ export function ProfileScreen({
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Stats strip */}
         <View style={styles.statsRow}>
-          <StatTile icon="playlist-add-check" value={stats.active} label="Aktif Liste" />
-          <StatTile icon="history" value={stats.completed} label="Tamamlanan" />
-          <StatTile icon="bookmark-border" value={stats.templates} label="Şablon" />
+          <StatTile icon="playlist-add-check" value={stats.active} label={t('profile.stat_active')} />
+          <StatTile icon="history" value={stats.completed} label={t('profile.stat_completed')} />
+          <StatTile icon="bookmark-border" value={stats.templates} label={t('profile.stat_templates')} />
         </View>
 
         {/* ──────────── Tercihlerim ──────────── */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tercihlerim</Text>
+          <Text style={styles.sectionTitle}>{t('profile.preferences_title')}</Text>
 
           {prefLoading ? (
             <View style={styles.loadingWrap}>
@@ -221,12 +222,12 @@ export function ProfileScreen({
             <Card padding="none" variant="elevated">
               {/* Hane büyüklüğü */}
               <View style={styles.prefRow}>
-                <Text style={styles.prefLabel}>Hane büyüklüğü</Text>
+                <Text style={styles.prefLabel}>{t('profile.pref_household_size')}</Text>
                 <View style={styles.chipRow}>
                   {HOUSEHOLD_OPTIONS.map((opt) => (
                     <ChipButton
                       key={opt.value}
-                      label={opt.label}
+                      label={t(opt.label)}
                       selected={householdSize === opt.value}
                       onPress={() =>
                         setHouseholdSize(householdSize === opt.value ? undefined : opt.value)
@@ -240,12 +241,12 @@ export function ProfileScreen({
 
               {/* Beslenme tarzı */}
               <View style={styles.prefRow}>
-                <Text style={styles.prefLabel}>Beslenme tarzı</Text>
+                <Text style={styles.prefLabel}>{t('profile.pref_diet')}</Text>
                 <View style={styles.chipRow}>
                   {DIET_OPTIONS.map((opt) => (
                     <ChipButton
                       key={opt.value}
-                      label={opt.label}
+                      label={t(opt.label)}
                       selected={diet === opt.value}
                       onPress={() =>
                         setDiet(diet === opt.value ? undefined : opt.value)
@@ -259,12 +260,12 @@ export function ProfileScreen({
 
               {/* Kaçınılanlar */}
               <View style={styles.prefRow}>
-                <Text style={styles.prefLabel}>Kaçınılanlar</Text>
+                <Text style={styles.prefLabel}>{t('profile.pref_avoid')}</Text>
                 <View style={styles.chipRow}>
                   {AVOID_OPTIONS.map((opt) => (
                     <ChipButton
                       key={opt.value}
-                      label={opt.label}
+                      label={t(opt.label)}
                       selected={avoid.includes(opt.value)}
                       onPress={() => toggleMulti(avoid, setAvoid, opt.value)}
                     />
@@ -276,12 +277,12 @@ export function ProfileScreen({
 
               {/* Alerji/intolerans */}
               <View style={styles.prefRow}>
-                <Text style={styles.prefLabel}>Alerji / İntolerans</Text>
+                <Text style={styles.prefLabel}>{t('profile.pref_allergies')}</Text>
                 <View style={styles.chipRow}>
                   {ALLERGY_OPTIONS.map((opt) => (
                     <ChipButton
                       key={opt.value}
-                      label={opt.label}
+                      label={t(opt.label)}
                       selected={allergies.includes(opt.value)}
                       onPress={() => toggleMulti(allergies, setAllergies, opt.value)}
                     />
@@ -306,7 +307,7 @@ export function ProfileScreen({
                 <View style={styles.customInputRow}>
                   <TextInput
                     style={styles.customInput}
-                    placeholder="Başka alerji ekle…"
+                    placeholder={t('profile.add_allergy_placeholder')}
                     placeholderTextColor={colors.text.hint}
                     value={customAllergy}
                     onChangeText={setCustomAllergy}
@@ -327,10 +328,10 @@ export function ProfileScreen({
 
               {/* Haftalık bütçe */}
               <View style={styles.prefRow}>
-                <Text style={styles.prefLabel}>Haftalık bütçe (₺)</Text>
+                <Text style={styles.prefLabel}>{t('profile.pref_weekly_budget', { symbol: currencySymbol })}</Text>
                 <TextInput
                   style={styles.budgetInput}
-                  placeholder="Örn: 1500"
+                  placeholder={t('profile.weekly_budget_placeholder')}
                   placeholderTextColor={colors.text.hint}
                   value={weeklyBudget}
                   onChangeText={setWeeklyBudget}
@@ -342,7 +343,7 @@ export function ProfileScreen({
               {/* Save button */}
               <View style={styles.saveBtnWrap}>
                 <Button
-                  title={prefSaving ? 'Kaydediliyor…' : 'Kaydet'}
+                  title={prefSaving ? t('profile.saving') : t('common.save')}
                   onPress={handleSavePreferences}
                   fullWidth
                 />
@@ -358,7 +359,7 @@ export function ProfileScreen({
 
         {/* App Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Uygulama</Text>
+          <Text style={styles.sectionTitle}>{t('profile.app_section_title')}</Text>
           <Card padding="none" variant="elevated">
             <MenuItem
               icon="translate"
@@ -376,22 +377,22 @@ export function ProfileScreen({
             <Divider />
             <MenuItem
               icon="notifications-none"
-              title="Bildirimler"
-              subtitle="Fiyat düşüşü uyarıları"
+              title={t('profile.notifications')}
+              subtitle={t('profile.notifications_subtitle')}
               onPress={() => console.log('Notifications')}
             />
             <Divider />
             <MenuItem
               icon="info-outline"
-              title="Hakkında"
-              subtitle={`Sürüm ${APP_VERSION}`}
+              title={t('profile.about')}
+              subtitle={t('profile.version_subtitle', { version: APP_VERSION })}
               onPress={handleAbout}
             />
             <Divider />
             <MenuItem
               icon="help-outline"
-              title="Nasıl kullanılır"
-              subtitle="Tanıtım turunu yeniden izle"
+              title={t('profile.how_to_use')}
+              subtitle={t('profile.replay_intro')}
               onPress={() =>
                 // Intro, root stack'te (replay modu); navigate üst navigatöre yükselir
                 (navigation as any).navigate('Intro', { replay: true })
@@ -403,7 +404,7 @@ export function ProfileScreen({
         {/* Logout */}
         <View style={styles.section}>
           <Button
-            title="Çıkış Yap"
+            title={t('profile.logout_action')}
             onPress={handleLogout}
             variant="outline"
             fullWidth
