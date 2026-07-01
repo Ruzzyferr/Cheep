@@ -37,8 +37,8 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
             return;
         }
 
-        const { name } = req.body;
-        const updatedUser = await UserService.updateUser(req.user.id, { name });
+        const { name, country_code, language } = req.body;
+        const updatedUser = await UserService.updateUser(req.user.id, { name, country_code, language });
 
         res.status(200).json({
             success: true,

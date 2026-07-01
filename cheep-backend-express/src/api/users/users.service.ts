@@ -1,28 +1,43 @@
 import { prisma } from '../../utils/prisma.client.js';
-import { notFound, conflict } from '../../utils/app-error.js';
+import { notFound, conflict, badRequest } from '../../utils/app-error.js';
+import { getCountryByCode } from '../../utils/country.js';
+
+/** Desteklenen arayüz dilleri. */
+export const SUPPORTED_LANGUAGES = ['tr', 'en', 'de', 'pl', 'sv'] as const;
 
 /**
- * Kullanıcı bilgilerini günceller
+ * Kullanıcı bilgilerini günceller (ad, ülke, dil tercihi)
  */
 export const updateUser = async (
     userId: number,
-    data: { name?: string }
+    data: { name?: string; country_code?: string; language?: string }
 ) => {
-    const user = await prisma.user.update({
+    const patch: { name?: string; country_id?: number; language?: string } = {};
+    if (data.name !== undefined) patch.name = data.name;
+    if (data.language !== undefined) {
+        if (!SUPPORTED_LANGUAGES.includes(data.language as any)) {
+            throw badRequest(`Desteklenmeyen dil: ${data.language}`);
+        }
+        patch.language = data.language;
+    }
+    if (data.country_code !== undefined) {
+        patch.country_id = (await getCountryByCode(data.country_code)).id;
+    }
+
+    return await prisma.user.update({
         where: { id: userId },
-        data: {
-            name: data.name,
-        },
+        data: patch,
         select: {
             id: true,
             email: true,
             name: true,
+            language: true,
+            country_id: true,
             created_at: true,
             updated_at: true,
+            country: { select: { code: true, currency: true } },
         },
     });
-
-    return user;
 };
 
 /**
