@@ -29,7 +29,7 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Cheep, yakınınızdaki marketlere olan mesafeyi göstermek için konumunuzu kullanır."
+          "locationWhenInUsePermission": "Cheep, sana en yakın market şubelerini ve gerçek mesafeleri göstermek için konumunu kullanır."
         }
       ],
       [

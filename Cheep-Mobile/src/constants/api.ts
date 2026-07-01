@@ -59,6 +59,7 @@ export const API_ENDPOINTS = {
   STORES: {
     ALL: '/stores',
     BY_ID: (id: number) => `/stores/${id}`,
+    NEARBY: '/stores/nearby',
   },
 
   // Categories

@@ -23,6 +23,7 @@ import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import { compareInsights, byCoverageThenScore, missingCount } from '../../utils/compareInsights';
+import { getUserLocation } from '../../utils/geo';
 import type { CompareResponse, RouteStrategy } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 
@@ -48,9 +49,11 @@ export function CompareResultsScreen({
     (async () => {
       try {
         setLoading(true);
+        const loc = await getUserLocation(); // {lat,lon} | null
         const data = await listService.compareList(listId, {
           maxStores: 3,
           includeMissingProducts: true,
+          ...(loc ? { userLocation: loc } : {}),
         });
         if (!alive) return;
         setResults(data);

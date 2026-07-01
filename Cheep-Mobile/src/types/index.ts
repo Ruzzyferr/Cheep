@@ -56,6 +56,12 @@ export interface Store {
   updated_at: string;
 }
 
+export interface NearbyStore {
+  store_id: number;
+  distanceKm: number;
+  branch: { id: number; name: string; lat: number; lon: number; address: string | null; city: string | null };
+}
+
 // ============================================
 // AFFILIATE TYPES
 // ============================================
