@@ -224,6 +224,9 @@ export const createProduct = async (data: {
     country_code?: string;
 }) => {
     const { country_code, country_id, ...rest } = data;
+    // getCountryIdByCode never returns undefined (it defaults to TR or throws),
+    // so resolvedCountryId below is always a valid id and country scoping is
+    // always applied in the where-clauses that use it.
     const resolvedCountryId = country_id ?? (await getCountryIdByCode(country_code));
 
     // Barkod varsa, aynı ülkede aynı barkodlu ürün kontrolü (ean_barcode artık ülke-scope benzersiz)
@@ -256,6 +259,9 @@ export const upsertProduct = async (data: {
     country_code?: string;
 }) => {
     const { country_code, country_id, ...rest } = data;
+    // getCountryIdByCode never returns undefined (it defaults to TR or throws),
+    // so resolvedCountryId below is always a valid id and country scoping is
+    // always applied in the where-clauses that use it.
     const resolvedCountryId = country_id ?? (await getCountryIdByCode(country_code));
 
     // Eğer barkod varsa, ona göre upsert yap (ean_barcode artık ülke-scope benzersiz)
