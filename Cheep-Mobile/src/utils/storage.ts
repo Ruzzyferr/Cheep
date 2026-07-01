@@ -31,6 +31,7 @@ const STORAGE_KEYS = {
   USER_LOCATION: 'user_location',
   USER_COUNTRY: 'user_country',
   FAVORITE_STORES: 'favorite_stores',
+  USER_LANGUAGE: 'user_language',
 } as const;
 
 // Generic storage functions
@@ -165,6 +166,17 @@ export const locationStorage = {
   async getLocation(): Promise<{ lat: number; lon: number } | null> {
     const data = await storage.getItem(STORAGE_KEYS.USER_LOCATION);
     return data ? JSON.parse(data) : null;
+  },
+};
+
+// Language functions (UI dili — ülkeden/para biriminden bağımsız kullanıcı tercihi)
+export const languageStorage = {
+  async save(lang: string): Promise<void> {
+    await storage.setItem(STORAGE_KEYS.USER_LANGUAGE, lang);
+  },
+
+  async get(): Promise<string | null> {
+    return await storage.getItem(STORAGE_KEYS.USER_LANGUAGE);
   },
 };
 
