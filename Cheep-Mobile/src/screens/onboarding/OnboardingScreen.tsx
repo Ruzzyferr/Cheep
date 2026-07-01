@@ -210,12 +210,15 @@ export function OnboardingScreen() {
 
   const currencySymbol = COUNTRY_CONFIG[country]?.symbol ?? '₺';
 
+  // Kullanıcı ülke adımında elle seçim yaptıysa geo-tespitli varsayılan onu ezmesin.
+  const manualCountryPickedRef = useRef(false);
+
   // Ülke varsayılanını konumdan tespit et (yalnızca ilk girişte, desteklenen ise).
   // getCountryCode desteklenmeyen/izin-yok durumunda null döner → mevcut değer kalır.
   useEffect(() => {
     getCountryCode()
       .then((code) => {
-        if (code) return setCountry(code);
+        if (code && !manualCountryPickedRef.current) return setCountry(code);
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -229,6 +232,7 @@ export function OnboardingScreen() {
   };
 
   const handleSelectCountry = (code: string) => {
+    manualCountryPickedRef.current = true; // geo tespiti artık bu seçimi ezmesin
     setCountry(code); // LocaleContext doğrular + saklar (para birimi/format buradan)
   };
 
