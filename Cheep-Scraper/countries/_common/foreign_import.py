@@ -4,6 +4,7 @@ Scrape → bulk-upsert. No LLM matcher: the backend merges cross-store by EAN.
 """
 import logging
 import os
+import re
 import requests
 from typing import List, Dict, Optional
 
@@ -11,6 +12,15 @@ logger = logging.getLogger(__name__)
 
 CHUNK_SIZE = 900          # backend hard limit is 1000
 ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu"}
+
+
+def _slugify(name: str) -> str:
+    """Deterministic slug for the store_sku fallback: lowercase, non-alphanumeric
+    runs collapsed to a single '-', trimmed. Never returns an empty string."""
+    slug = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    if not slug:
+        slug = f"h{abs(hash(name))}"
+    return slug
 
 
 def build_api_payloads(
@@ -25,7 +35,7 @@ def build_api_payloads(
     category can't be resolved the field is simply omitted (category is tertiary).
     """
     payloads: List[Dict] = []
-    for i, product in enumerate(products):
+    for product in products:
         name = (product.get("name") or "").strip()
         if not name:
             continue
@@ -36,7 +46,7 @@ def build_api_payloads(
         if price <= 0:
             continue
 
-        sku = product.get("sku") or product.get("store_sku") or f"{store_id}-{name[:24]}-{i}"
+        sku = product.get("sku") or product.get("store_sku") or f"{store_id}-{_slugify(name)[:48]}"
         unit = (product.get("unit") or "adet").lower()
         if unit not in ALLOWED_UNITS:
             unit = "adet"
@@ -98,7 +108,9 @@ class ForeignImporter:
                 ok = body.get("successful", body.get("success_count", len(chunk)))
                 stats["successful"] += ok
                 stats["failed"] += len(chunk) - ok
-            except requests.RequestException as e:
+            except (requests.RequestException, ValueError) as e:
+                # ValueError covers json.JSONDecodeError: an HTTP-200-but-malformed
+                # body must not abort the whole loop — isolate the failure to this chunk.
                 logger.error("Ingest failed for store %s: %s", store_id, e)
                 stats["failed"] += len(chunk)
         return stats
