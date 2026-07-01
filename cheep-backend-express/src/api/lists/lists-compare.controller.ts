@@ -28,6 +28,7 @@ export const compareList = async (req: Request, res: Response, next: NextFunctio
                 userLocation,
                 favoriteStoreIds,
                 includeMissingProducts,
+                countryId: req.country?.id,
             }
         );
 

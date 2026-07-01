@@ -15,6 +15,7 @@ interface CompareOptions {
     };
     favoriteStoreIds?: number[];     // Favori market ID'leri
     includeMissingProducts?: boolean; // Eksik ürünleri göster (default: true)
+    countryId?: number;              // Ülke scoping — sadece bu ülkedeki marketler
 }
 
 interface ProductInList {
@@ -38,11 +39,34 @@ interface ProductInList {
             store: {
                 id: number;
                 name: string;
+                country_id: number;
                 lat: number | null;
                 lon: number | null;
             };
         }>;
     };
+}
+
+/**
+ * Liste öğelerindeki store_prices'ı yalnızca verilen ülkedeki marketlere indirger.
+ * countryId verilmezse dokunmaz (geriye dönük uyum).
+ */
+export function filterStorePricesByCountry<T extends { product: { store_prices: Array<{ store: { country_id: number } }> } }>(
+    listItems: T[],
+    countryId: number | undefined
+): T[] {
+    if (!countryId) return listItems;
+    // Not: girdiyi mutasyona uğratmadan (pure) yeni bir liste döner —
+    // aksi halde çağıranın elindeki orijinal referans da süzülmüş olurdu.
+    return listItems.map(item => ({
+        ...item,
+        product: {
+            ...item.product,
+            store_prices: item.product.store_prices.filter(
+                sp => sp.store.country_id === countryId
+            ),
+        },
+    }));
 }
 
 interface StoreAllocation {
@@ -151,7 +175,10 @@ export async function compareShoppingList(
         throw notFound('Liste bulunamadı veya erişim yetkiniz yok');
     }
 
-    const listItems = list.list_items as unknown as ProductInList[];
+    const listItems = filterStorePricesByCountry(
+        list.list_items as unknown as ProductInList[],
+        options.countryId
+    );
 
     // Marka-bağımsız öğeler için muadil grup ürünlerini çek (tek sorgu)
     const muadilIds = Array.from(new Set(
@@ -162,7 +189,10 @@ export async function compareShoppingList(
     const siblingsByGroup = new Map<string, PricedProduct[]>();
     if (muadilIds.length > 0) {
         const siblings = await prisma.product.findMany({
-            where: { muadil_grup_id: { in: muadilIds } },
+            where: {
+                muadil_grup_id: { in: muadilIds },
+                ...(options.countryId ? { country_id: options.countryId } : {}),
+            },
             include: { store_prices: { include: { store: true } } },
         });
         for (const s of siblings) {
