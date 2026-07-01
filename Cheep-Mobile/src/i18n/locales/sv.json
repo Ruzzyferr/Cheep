@@ -1,0 +1,12 @@
+{
+  "common": { "continue": "Fortsätt", "skip": "Hoppa över tills vidare", "finish": "Slutför", "save": "Spara", "cancel": "Avbryt" },
+  "onboarding": {
+    "language_title": "Välj appspråk",
+    "language_subtitle": "Du kan ändra detta senare i Profil",
+    "country_title": "Var handlar du?",
+    "country_subtitle": "Vi visar bara butiker och priser i ditt land"
+  },
+  "profile": { "language": "Appspråk", "country": "Land / Butiker", "about": "Om Cheep" },
+  "countries": { "TR": "Turkiet", "CH": "Schweiz", "SE": "Sverige", "DE": "Tyskland", "PL": "Polen" },
+  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" }
+}

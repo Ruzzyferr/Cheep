@@ -1,0 +1,12 @@
+{
+  "common": { "continue": "Weiter", "skip": "Vorerst überspringen", "finish": "Fertig", "save": "Speichern", "cancel": "Abbrechen" },
+  "onboarding": {
+    "language_title": "Wähle deine App-Sprache",
+    "language_subtitle": "Du kannst dies später im Profil ändern",
+    "country_title": "Wo kaufst du ein?",
+    "country_subtitle": "Wir zeigen dir nur die Märkte und Preise in deinem Land"
+  },
+  "profile": { "language": "App-Sprache", "country": "Land / Märkte", "about": "Über Cheep" },
+  "countries": { "TR": "Türkei", "CH": "Schweiz", "SE": "Schweden", "DE": "Deutschland", "PL": "Polen" },
+  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" }
+}
