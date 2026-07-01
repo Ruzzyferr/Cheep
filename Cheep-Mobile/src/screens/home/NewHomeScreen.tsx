@@ -18,6 +18,7 @@ import { CommonActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { productService, storeService, listService, categoryService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
+import { useLocale } from '../../context/LocaleContext';
 import { CheepMascot } from '../../components/brand/CheepMascot';
 import { FadeInUp, AnimatedNumber, PressableScale, Float } from '../../components/anim';
 import { getStoreLogoAsset } from '../../utils/storeLogo';
@@ -37,6 +38,7 @@ const tl = (n: number) => '₺' + Math.round(n).toLocaleString('tr-TR');
 export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { country } = useLocale();
   const [activeList, setActiveList] = useState<ShoppingList | null>(null);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [markets, setMarkets] = useState<Store[]>([]);
@@ -329,7 +331,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
               {listStoreNames.length > 0 && (
                 <View style={styles.miniLogos}>
                   {listStoreNames.slice(0, 4).map((n, i) => (
-                    <MarketBadge key={i} name={n} size={26} />
+                    <MarketBadge key={i} name={n} size={26} country={country} />
                   ))}
                 </View>
               )}
@@ -448,7 +450,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
                 style={styles.marketChip}
                 onPress={() => navigation.navigate('StoreDetail', { storeId: s.id })}
               >
-                <MarketBadge name={s.name} size={34} />
+                <MarketBadge name={s.name} size={34} country={country} />
                 <Text style={styles.marketName} numberOfLines={1}>
                   {s.name}
                 </Text>
@@ -462,8 +464,8 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
 }
 
 // Market badge — real local logo if we have it, else a colored initial.
-function MarketBadge({ name, size = 32 }: { name: string; size?: number }) {
-  const asset = getStoreLogoAsset(name);
+function MarketBadge({ name, size = 32, country }: { name: string; size?: number; country: string }) {
+  const asset = getStoreLogoAsset(country, name);
   const key = name.toLowerCase().replace(/[^a-z0-9]/g, '');
   const tint =
     (colors.storeChips as Record<string, string>)[

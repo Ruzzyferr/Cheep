@@ -20,6 +20,7 @@ import { PriceTrendCard } from '../../components/product/PriceTrendCard';
 import { SelectListModal } from '../../components/list/SelectListModal';
 import { getStoreLogoAsset } from '../../utils/storeLogo';
 import { openExternalUrl } from '../../utils/linking';
+import { useLocale } from '../../context/LocaleContext';
 import type { PriceHistoryResponse } from '../../services/product.service';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { Product, StorePrice } from '../../types';
@@ -31,6 +32,7 @@ export function ProductDetailScreen({
   navigation,
 }: HomeStackScreenProps<'ProductDetail'>) {
   const { productId } = route.params;
+  const { country } = useLocale();
   const [product, setProduct] = useState<Product | null>(null);
   const [prices, setPrices] = useState<StorePrice[]>([]);
   const [categoryWithParent, setCategoryWithParent] = useState<Category | null>(null);
@@ -251,9 +253,9 @@ export function ProductDetailScreen({
                 <Card padding="md" style={[styles.priceCard, isCheapest && styles.cheapestCard]}>
                   <View style={styles.priceCardContent}>
                     <View style={styles.storeSection}>
-                      {getStoreLogoAsset(storePrice.store?.name) ? (
+                      {getStoreLogoAsset(country, storePrice.store?.name) ? (
                         <Image
-                          source={getStoreLogoAsset(storePrice.store?.name)}
+                          source={getStoreLogoAsset(country, storePrice.store?.name)}
                           style={styles.storeLogo}
                         />
                       ) : (

@@ -8,6 +8,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { getStoreLogoAsset } from '../../utils/storeLogo';
+import { useLocale } from '../../context/LocaleContext';
 
 interface ActiveListCardProps {
   listName: string;
@@ -30,6 +31,7 @@ export function ActiveListCard({
   storeNames = [],
   onPress,
 }: ActiveListCardProps) {
+  const { country } = useLocale();
   // Store names varsa onları kullan, yoksa storeLogos'u kullan (backward compatibility)
   const stores = storeNames.length > 0 ? storeNames : storeLogos;
   return (
@@ -55,7 +57,7 @@ export function ActiveListCard({
           <View style={styles.storeLogos}>
             {stores.slice(0, 3).map((store, index) => {
               // Eğer storeNames kullanılıyorsa, asset'ten logo yükle
-              const logoAsset = storeNames.length > 0 ? getStoreLogoAsset(store) : null;
+              const logoAsset = storeNames.length > 0 ? getStoreLogoAsset(country, store) : null;
               const isUri = storeNames.length === 0 && store && typeof store === 'string' && store.startsWith('http');
               
               return (
