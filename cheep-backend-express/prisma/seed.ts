@@ -182,7 +182,7 @@ async function main() {
     // 4. Ürünler oluştur (ALT kategorilere atanmış)
     // upsert kullanarak varsa güncelle, yoksa oluştur
     const pinarSut = await prisma.product.upsert({
-        where: { ean_barcode: '8690572000001' },
+        where: { country_id_ean_barcode: { country_id: tr.id, ean_barcode: '8690572000001' } },
         update: {
             name: 'Pınar Süt 1L',
             brand: 'Pınar',
@@ -202,7 +202,7 @@ async function main() {
     });
 
     const sutasSut = await prisma.product.upsert({
-        where: { ean_barcode: '8690504000001' },
+        where: { country_id_ean_barcode: { country_id: tr.id, ean_barcode: '8690504000001' } },
         update: {
             name: 'Sütaş Süt 1L',
             brand: 'Sütaş',
@@ -222,7 +222,7 @@ async function main() {
     });
 
     const ichimSut = await prisma.product.upsert({
-        where: { ean_barcode: '8690632000001' },
+        where: { country_id_ean_barcode: { country_id: tr.id, ean_barcode: '8690632000001' } },
         update: {
             name: 'İçim Süt 1L',
             brand: 'İçim',
@@ -242,7 +242,7 @@ async function main() {
     });
 
     const beyazPeynir = await prisma.product.upsert({
-        where: { ean_barcode: '8690572000002' },
+        where: { country_id_ean_barcode: { country_id: tr.id, ean_barcode: '8690572000002' } },
         update: {
             name: 'Pınar Beyaz Peynir 500g',
             brand: 'Pınar',
@@ -260,7 +260,7 @@ async function main() {
     });
 
     const unoBeyazEkmek = await prisma.product.upsert({
-        where: { ean_barcode: '8690506000001' },
+        where: { country_id_ean_barcode: { country_id: tr.id, ean_barcode: '8690506000001' } },
         update: {
             name: 'Uno Beyaz Ekmek',
             brand: 'Uno',
@@ -278,7 +278,7 @@ async function main() {
     });
 
     const domates = await prisma.product.upsert({
-        where: { ean_barcode: '2000000000001' },
+        where: { country_id_ean_barcode: { country_id: tr.id, ean_barcode: '2000000000001' } },
         update: {
             name: 'Domates',
             category_id: sebzeId,
@@ -294,7 +294,7 @@ async function main() {
     });
 
     const cocaCola = await prisma.product.upsert({
-        where: { ean_barcode: '5449000000996' },
+        where: { country_id_ean_barcode: { country_id: tr.id, ean_barcode: '5449000000996' } },
         update: {
             name: 'Coca Cola 1L',
             brand: 'Coca Cola',
@@ -358,32 +358,32 @@ async function main() {
 
     // 5b. Yeni ülkeler için örnek ürünler + fiyatlar (CH/SE/DE)
     const chMilch = await prisma.product.upsert({
-        where: { ean_barcode: '7600000000001' },
+        where: { country_id_ean_barcode: { country_id: ch.id, ean_barcode: '7600000000001' } },
         update: { name: 'M-Budget Milch 1L', country_id: ch.id, category_id: sutId },
         create: { name: 'M-Budget Milch 1L', brand: 'M-Budget', ean_barcode: '7600000000001', country_id: ch.id, category_id: sutId },
     });
     const chCola = await prisma.product.upsert({
-        where: { ean_barcode: '7600000000002' },
+        where: { country_id_ean_barcode: { country_id: ch.id, ean_barcode: '7600000000002' } },
         update: { name: 'Coca-Cola 1L', country_id: ch.id, category_id: icecekId },
         create: { name: 'Coca-Cola 1L', brand: 'Coca-Cola', ean_barcode: '7600000000002', country_id: ch.id, category_id: icecekId },
     });
     const deMilch = await prisma.product.upsert({
-        where: { ean_barcode: '4000000000001' },
+        where: { country_id_ean_barcode: { country_id: de.id, ean_barcode: '4000000000001' } },
         update: { name: 'Ja! Milch 1L', country_id: de.id, category_id: sutId },
         create: { name: 'Ja! Milch 1L', brand: 'Ja!', ean_barcode: '4000000000001', country_id: de.id, category_id: sutId },
     });
     const deCola = await prisma.product.upsert({
-        where: { ean_barcode: '5449000000012' },
+        where: { country_id_ean_barcode: { country_id: de.id, ean_barcode: '5449000000012' } },
         update: { name: 'Coca-Cola 1L', country_id: de.id, category_id: icecekId },
         create: { name: 'Coca-Cola 1L', brand: 'Coca-Cola', ean_barcode: '5449000000012', country_id: de.id, category_id: icecekId },
     });
     const icaMjolk = await prisma.product.upsert({
-        where: { ean_barcode: '7300000000001' },
+        where: { country_id_ean_barcode: { country_id: se.id, ean_barcode: '7300000000001' } },
         update: { name: 'ICA Mjölk 1L', country_id: se.id, category_id: sutId },
         create: { name: 'ICA Mjölk 1L', brand: 'ICA', ean_barcode: '7300000000001', country_id: se.id, category_id: sutId },
     });
     const plMleko = await prisma.product.upsert({
-        where: { ean_barcode: '5900000000001' },
+        where: { country_id_ean_barcode: { country_id: pl.id, ean_barcode: '5900000000001' } },
         update: { name: 'Łaciate Mleko 1L', country_id: pl.id, category_id: sutId },
         create: { name: 'Łaciate Mleko 1L', brand: 'Łaciate', ean_barcode: '5900000000001', country_id: pl.id, category_id: sutId },
     });
