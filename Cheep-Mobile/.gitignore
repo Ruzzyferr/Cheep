@@ -66,3 +66,5 @@ limitflow.py
 homeshot.py
 detailshot.py
 introverify.py
+verify_multicountry.py
+verify_multicountry_results.json
