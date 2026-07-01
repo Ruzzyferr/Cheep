@@ -34,6 +34,31 @@ router.get('/', StoreController.getAllStores);
 
 /**
  * @swagger
+ * /api/v1/stores/nearby:
+ *   get:
+ *     summary: Yakın market şubelerini getirir
+ *     tags: [Stores]
+ *     parameters:
+ *       - in: query
+ *         name: lat
+ *         required: true
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: lon
+ *         required: true
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Yakın şubeler başarıyla alındı
+ *       400:
+ *         description: lat ve lon gerekli ve sonlu sayı olmalı
+ */
+router.get('/nearby', StoreController.getNearbyStores);
+
+/**
+ * @swagger
  * /api/v1/stores/{id}:
  *   get:
  *     summary: ID'ye göre market getirir

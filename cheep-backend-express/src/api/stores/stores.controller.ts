@@ -1,5 +1,6 @@
 import { type Request, type Response, type NextFunction } from 'express';
 import * as StoreService from './stores.service.js';
+import * as StoreBranchService from '../../services/store-branch.service.js';
 
 export const getAllStores = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -54,6 +55,33 @@ export const deleteStore = async (req: Request, res: Response, next: NextFunctio
     try {
         await StoreService.deleteStore(parseInt(req.params.id));
         res.status(204).send();
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getNearbyStores = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const lat = Number(req.query.lat);
+        const lon = Number(req.query.lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+            res.status(400).json({ success: false, message: 'lat ve lon zorunludur' });
+            return;
+        }
+        const countryId = req.country?.id;
+        if (!countryId) {
+            res.status(200).json({ success: true, data: [] });
+            return;
+        }
+        const nearby = await StoreBranchService.getNearbyStores(countryId, { lat, lon });
+        res.status(200).json({
+            success: true,
+            data: nearby.map(n => ({
+                store_id: n.store_id,
+                distanceKm: Math.round(n.distanceKm * 10) / 10,
+                branch: n.branch,
+            })),
+        });
     } catch (error) {
         next(error);
     }
