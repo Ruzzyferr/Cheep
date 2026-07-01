@@ -60,14 +60,17 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
     };
   }, []);
 
-  // Ülkeyi çöz/sakla (konum bazlı). Mesafe gösterimi YOK — mağaza koordinatları
+  // Ülkeyi çöz/sakla (konum bazlı) — SADECE henüz saklı bir ülke yoksa (ilk-çalıştırma
+  // fallback'i). Kullanıcı onboarding/profilde bilinçli bir ülke seçtiyse geo tespiti
+  // bunu her Home ziyaretinde EZMEMELİ. Mesafe gösterimi YOK — mağaza koordinatları
   // zincir-seviyesinde placeholder olduğu için yanıltıcı olurdu.
   useEffect(() => {
-    getCountryCode()
-      .then((code) => {
-        if (code) return countryStorage.saveCountry(code);
-      })
-      .catch(() => {});
+    (async () => {
+      const existing = await countryStorage.getCountry();
+      if (existing) return; // kullanıcı zaten seçti (onboarding/profil) — geo ile ezme
+      const code = await getCountryCode();
+      if (code) await countryStorage.saveCountry(code);
+    })().catch(() => {});
   }, []);
 
   useEffect(() => {
