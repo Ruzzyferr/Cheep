@@ -13,17 +13,22 @@ import {
   Alert,
   TextInput,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import { useLocale, COUNTRY_CONFIG } from '../../context/LocaleContext';
 import { Card, Button } from '../../components/ui';
-import { listService, profileService } from '../../services';
-import { colors, typography, spacing, layout, shadows } from '../../theme';
+import { listService, profileService, userService } from '../../services';
+import { colors, typography, spacing, layout, shadows, borderRadius } from '../../theme';
 import type { ProfileStackScreenProps } from '../../navigation/types';
 import type { UserProfile } from '../../types';
 import { ONBOARDING_QUESTIONS } from '../onboarding/onboardingConfig';
+import i18n, { SUPPORTED_LANGUAGES } from '../../i18n';
+import { languageStorage } from '../../utils/storage';
 
 // ─── Preference option lists from onboarding config ───────────────────────────
 const HOUSEHOLD_OPTIONS = ONBOARDING_QUESTIONS.find((q) => q.key === 'household_size')!.options!;
@@ -38,7 +43,13 @@ export function ProfileScreen({
   navigation,
 }: ProfileStackScreenProps<'ProfileMain'>) {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
+  const { country, setCountry } = useLocale();
   const [stats, setStats] = useState({ active: 0, completed: 0, templates: 0 });
+
+  // ─── Language / Country picker state ───────────────────────────────────────
+  const [langPickerOpen, setLangPickerOpen] = useState(false);
+  const [countryPickerOpen, setCountryPickerOpen] = useState(false);
 
   // ─── Preferences state ─────────────────────────────────────────────────────
   const [prefLoading, setPrefLoading] = useState(false);
@@ -114,6 +125,30 @@ export function ProfileScreen({
 
   const handleAbout = () => {
     Alert.alert('Cheep Hakkında', `Cheep · Sürüm ${APP_VERSION}\nTürkiye marketlerinde en uygun fiyatı bul.`);
+  };
+
+  // ─── Language / Country handlers ───────────────────────────────────────────
+  const handleSelectLanguage = async (lang: string) => {
+    setLangPickerOpen(false);
+    i18n.changeLanguage(lang); // useTranslation() abonesi ekranları anında yeniden render eder
+    await languageStorage.save(lang);
+    try {
+      await userService.updatePreferences({ language: lang });
+    } catch (error) {
+      console.error('Dil tercihi /users/me üzerinden kaydedilemedi:', error);
+    }
+  };
+
+  const handleSelectCountry = async (code: string) => {
+    setCountryPickerOpen(false);
+    await setCountry(code); // LocaleContext doğrular + saklar (x-country header'ı bundan sonra bu kodu gönderir)
+    try {
+      await userService.updatePreferences({ country_code: code });
+    } catch (error) {
+      console.error('Ülke tercihi /users/me üzerinden kaydedilemedi:', error);
+    }
+    // Ülkeye özgü veri (market/fiyat) yeniden çekilsin diye ana sekmeye dön.
+    navigation.navigate('Home', { screen: 'HomeMain' });
   };
 
   const toggleMulti = (arr: string[], setArr: (v: string[]) => void, value: string) => {
@@ -326,6 +361,20 @@ export function ProfileScreen({
           <Text style={styles.sectionTitle}>Uygulama</Text>
           <Card padding="none" variant="elevated">
             <MenuItem
+              icon="translate"
+              title={t('profile.language')}
+              subtitle={t(`languages.${i18n.language}`)}
+              onPress={() => setLangPickerOpen(true)}
+            />
+            <Divider />
+            <MenuItem
+              icon="public"
+              title={t('profile.country')}
+              subtitle={t(`countries.${country}`)}
+              onPress={() => setCountryPickerOpen(true)}
+            />
+            <Divider />
+            <MenuItem
               icon="notifications-none"
               title="Bildirimler"
               subtitle="Fiyat düşüşü uyarıları"
@@ -363,6 +412,26 @@ export function ProfileScreen({
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
+
+      {/* Language picker */}
+      <OptionPickerModal
+        visible={langPickerOpen}
+        title={t('profile.language')}
+        options={SUPPORTED_LANGUAGES.map((code) => ({ value: code, label: t(`languages.${code}`) }))}
+        selectedValue={i18n.language}
+        onSelect={handleSelectLanguage}
+        onClose={() => setLangPickerOpen(false)}
+      />
+
+      {/* Country picker */}
+      <OptionPickerModal
+        visible={countryPickerOpen}
+        title={t('profile.country')}
+        options={Object.keys(COUNTRY_CONFIG).map((code) => ({ value: code, label: t(`countries.${code}`) }))}
+        selectedValue={country}
+        onSelect={handleSelectCountry}
+        onClose={() => setCountryPickerOpen(false)}
+      />
     </View>
   );
 }
@@ -442,6 +511,52 @@ function MenuItem({
 // Divider Component
 function Divider() {
   return <View style={styles.divider} />;
+}
+
+// Option Picker Modal — dil / ülke seçimi için hafif, mevcut bottom-sheet
+// desenini (SelectListModal ile aynı stil) kullanan basit liste modalı.
+function OptionPickerModal({
+  visible,
+  title,
+  options,
+  selectedValue,
+  onSelect,
+  onClose,
+}: {
+  visible: boolean;
+  title: string;
+  options: { value: string; label: string }[];
+  selectedValue: string;
+  onSelect: (value: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={styles.pickerOverlay}>
+        <View style={styles.pickerModal}>
+          <View style={styles.pickerHeader}>
+            <Text style={styles.pickerTitle}>{title}</Text>
+            <TouchableOpacity onPress={onClose} style={styles.pickerClose}>
+              <Text style={styles.pickerCloseText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          {options.map((opt) => (
+            <TouchableOpacity
+              key={opt.value}
+              style={styles.pickerRow}
+              onPress={() => onSelect(opt.value)}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.pickerRowLabel}>{opt.label}</Text>
+              {opt.value === selectedValue && (
+                <MaterialIcons name="check" size={20} color={colors.primary.main} />
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    </Modal>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -686,5 +801,63 @@ const styles = StyleSheet.create({
 
   bottomSpacing: {
     height: spacing['2xl'],
+  },
+
+  // ─── Option picker modal ────────────────────────────────────────────────────
+
+  pickerOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+
+  pickerModal: {
+    backgroundColor: colors.background.paper,
+    borderTopLeftRadius: borderRadius.xl,
+    borderTopRightRadius: borderRadius.xl,
+    maxHeight: '70%',
+    paddingBottom: layout.screenPadding,
+  },
+
+  pickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: layout.screenPadding,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+
+  pickerTitle: {
+    ...typography.styles.h4,
+    color: colors.text.primary,
+    fontWeight: '700',
+  },
+
+  pickerClose: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  pickerCloseText: {
+    fontSize: 20,
+    color: colors.text.secondary,
+  },
+
+  pickerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: layout.screenPadding,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
+  },
+
+  pickerRowLabel: {
+    ...typography.styles.body1,
+    color: colors.text.primary,
   },
 });
