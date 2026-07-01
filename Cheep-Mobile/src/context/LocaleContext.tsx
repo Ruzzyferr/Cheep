@@ -27,8 +27,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   const setCountry = async (code: string) => {
     const c = code.toUpperCase();
-    setCountryState(COUNTRY_CONFIG[c] ? c : DEFAULT_CODE);
-    await countryStorage.saveCountry(c);
+    // Sadece DOĞRULANMIŞ kodu sakla — geçersiz kod x-country header'ına sızmasın.
+    const valid = COUNTRY_CONFIG[c] ? c : DEFAULT_CODE;
+    setCountryState(valid);
+    await countryStorage.saveCountry(valid);
   };
 
   const formatMoney = (n: number) => {
