@@ -1,13 +1,230 @@
 {
-  "common": { "continue": "Fortsätt", "skip": "Hoppa över tills vidare", "finish": "Slutför", "save": "Spara", "cancel": "Avbryt" },
+  "common": {
+    "continue": "Fortsätt",
+    "skip": "Hoppa över tills vidare",
+    "finish": "Slutför",
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "error": "Fel",
+    "ok": "OK",
+    "all": "Alla",
+    "loading": "Laddar…",
+    "unit_default": "st"
+  },
   "onboarding": {
     "language_title": "Välj appspråk",
     "language_subtitle": "Du kan ändra detta senare i Profil",
     "country_title": "Var handlar du?",
     "country_subtitle": "Vi visar bara butiker och priser i ditt land",
-    "per_week": "/vecka"
+    "per_week": "/vecka",
+    "custom_placeholder": "Skriv eget…",
+    "add": "Lägg till",
+    "finish_error": "Något gick fel när profilen skulle sparas. Försök igen.",
+    "q": {
+      "household_size": {
+        "title": "Hur många personer handlar du för?",
+        "mascot": "Nu kör vi! 🐦",
+        "options": { "1": "1", "2": "2", "3-4": "3-4", "5plus": "5+" }
+      },
+      "diet": {
+        "title": "Hur äter du?",
+        "mascot": "Du gör det jättebra!",
+        "options": { "omnivore": "Allätare", "vegetarian": "Vegetarisk", "vegan": "Vegansk", "pescatarian": "Pescetarisk" }
+      },
+      "avoid": {
+        "title": "Undviker du något av det här?",
+        "mascot": "Vi filtrerar bort det åt dig 🐦",
+        "options": { "pork_gelatin": "Fläskkött & gelatin", "alcohol": "Alkoholhaltiga produkter" }
+      },
+      "allergies": {
+        "title": "Allergier/intoleranser?",
+        "mascot": "Säkerheten först!",
+        "options": { "lactose": "Laktos", "gluten": "Gluten", "peanut": "Jordnöt", "tree_nut": "Trädnötter", "none": "Inga" }
+      },
+      "weekly_budget": {
+        "title": "Din veckobudget?",
+        "mascot": "Sista frågan! 🐦"
+      }
+    }
   },
-  "profile": { "language": "Appspråk", "country": "Land / Butiker", "about": "Om Cheep" },
+  "profile": {
+    "language": "Appspråk",
+    "country": "Land / Butiker",
+    "about": "Om",
+    "about_title": "Om Cheep",
+    "about_body": "Cheep · Version {{version}}\nHitta det bästa priset.",
+    "app_section_title": "App",
+    "notifications": "Aviseringar",
+    "notifications_subtitle": "Prissänkningsvarningar",
+    "version_subtitle": "Version {{version}}",
+    "how_to_use": "Hur man använder appen",
+    "replay_intro": "Se introduktionen igen",
+    "logout_title": "Logga ut",
+    "logout_confirm": "Är du säker på att du vill logga ut?",
+    "logout_action": "Logga ut",
+    "stat_active": "Aktiva listor",
+    "stat_completed": "Avslutade",
+    "stat_templates": "Mallar",
+    "preferences_title": "Mina inställningar",
+    "pref_household_size": "Hushållsstorlek",
+    "pref_diet": "Matvanor",
+    "pref_avoid": "Undviker",
+    "pref_allergies": "Allergier / Intoleranser",
+    "add_allergy_placeholder": "Lägg till en annan allergi…",
+    "pref_weekly_budget": "Veckobudget ({{symbol}})",
+    "weekly_budget_placeholder": "t.ex. 1500",
+    "saving": "Sparar…",
+    "prefs_saved_title": "Sparat",
+    "prefs_saved_body": "Dina inställningar har uppdaterats.",
+    "prefs_save_error": "Inställningarna kunde inte sparas. Försök igen."
+  },
   "countries": { "TR": "Turkiet", "CH": "Schweiz", "SE": "Sverige", "DE": "Tyskland", "PL": "Polen" },
-  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" }
+  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },
+  "product": {
+    "no_price_info": "Ingen prisinformation",
+    "all_categories": "Alla kategorier",
+    "all_shown": "Alla produkter visas",
+    "category_empty": "Inga produkter hittades i den här kategorin",
+    "check_label": "⚠️ kontrollera etikett",
+    "diet_mismatch": "matchar inte dina matvanor",
+    "top_three_stores": "3 billigaste butikerna:",
+    "unknown_store": "Okänd butik",
+    "target_list": "Läggs till i:",
+    "price_history": {
+      "title": "Prishistorik",
+      "last_days": "Senaste {{count}} dagarna",
+      "empty": "Ingen prishistorik ännu",
+      "lowest": "Lägsta",
+      "highest": "Högsta",
+      "chart_a11y": "Prishistorikdiagram",
+      "footer": "Prisutveckling {{store}}"
+    }
+  },
+  "home": {
+    "greeting": "Hej",
+    "greeting_named": "Hej {{name}}",
+    "overline_saved": "SPARAT DENNA MÅNAD",
+    "overline_potential": "POTENTIELL BESPARING",
+    "vs_last_month": "+{{amount}} jämfört med förra månaden",
+    "hero_sub_saved": "Det här sparade du genom att välja de billigaste rutterna",
+    "hero_sub_active_list": "Fyll i din lista med den billigaste rutten för att spara detta",
+    "hero_sub_no_list": "Skapa din första lista och börja spara",
+    "overline_active_list": "AKTIV LISTA",
+    "item_count": "{{count}} varor",
+    "estimated_range": "Uppskattat {{min}}–{{max}}",
+    "view_cheapest_route": "Visa billigaste rutten",
+    "no_list_title": "Ingen lista ännu",
+    "no_list_sub": "Skapa din första inköpslista, så hittar vi den billigaste rutten.",
+    "categories_title": "Kategorier",
+    "deals_title": "Erbjudanden",
+    "view_all": "Se alla",
+    "markets_title": "Butiker vi jämför",
+    "deal_from_suffix": "",
+    "deal_from_price": "från {{price}}",
+    "lowest_price_label": "Lägsta pris",
+    "savings_percent": "{{percent}}% besparing",
+    "active_list_empty": "Lägg till produkter i din lista för att komma igång",
+    "build_cheapest_route": "Skapa billigaste rutten"
+  },
+  "list": {
+    "budget_label": "Budget:",
+    "item_count": "{{count}} varor",
+    "last_compared": "Senast jämförd: {{date}}",
+    "template_badge": "Mall",
+    "completed_badge": "Avslutad",
+    "delete_title": "Ta bort lista",
+    "delete_confirm": "Är du säker på att du vill ta bort den här listan? Detta går inte att ångra.",
+    "delete_action": "Ta bort",
+    "select_modal": {
+      "title": "Välj lista",
+      "brand_independent": "Märke spelar ingen roll (billigast)",
+      "no_active_lists": "Inga aktiva listor hittades",
+      "create_new": "Skapa ny lista",
+      "default_new_list_name": "Min inköpslista",
+      "load_error": "Något gick fel när dina listor skulle laddas",
+      "add_success_title": "Klart",
+      "add_success_body": "Produkten har lagts till i listan",
+      "add_error": "Något gick fel när produkten skulle läggas till",
+      "create_error": "Något gick fel när listan skulle skapas"
+    }
+  },
+  "deals": {
+    "title": "Erbjudanden",
+    "subtitle": "Störst besparingar mellan butiker",
+    "cheapest": "Billigast",
+    "cheapest_at": "Billigast · {{store}}",
+    "savings": "Besparing",
+    "empty_title": "Inga erbjudanden ännu",
+    "empty_description": "När produkter som säljs i flera butiker läggs till dyker de bästa besparingarna upp här",
+    "advantage_a11y": "{{name}}, {{percent}}% fördel"
+  },
+  "compare": {
+    "loading": "Beräknar rutter...",
+    "load_error": "Något gick fel när listan skulle jämföras",
+    "filters_title": "Filter",
+    "store_count_filter": "Antal butiker",
+    "store_count": { "one": "En butik", "two": "2 butiker", "three_plus": "3+ butiker" },
+    "sort_title": "Sortera efter",
+    "sort": { "recommended": "Rekommenderad", "cheapest": "Billigast", "nearest": "Närmast", "price_distance": "Pris + avstånd" },
+    "summary_title": "Sammanfattning",
+    "cheapest_full": "Billigast (hela listan)",
+    "cheapest_meta_full": "{{stores}} butiker · {{items}} varor",
+    "cheapest_meta_partial": "{{missing}} varor saknas · {{coverage}}%",
+    "savings": "Besparing",
+    "savings_vs_priciest": "{{percent}}% jämfört med dyrast",
+    "savings_single_option": "endast ett alternativ",
+    "coverage_full": "Dessa priser gäller rutter som täcker hela din lista ({{items}} varor).",
+    "coverage_partial": "Ingen rutt täcker hela listan. Priser jämförs mellan rutterna med högst täckning ({{coverage}}%).",
+    "best_route_title": "Bästa rutten",
+    "alt_routes_title": "Alternativa rutter",
+    "alt_products_title": "Alternativa produkter",
+    "instead_of": "istället för {{product}}",
+    "alt_savings": "{{amount}} besparing",
+    "list_info_title": "Listinformation",
+    "list_label": "Lista:",
+    "total_items_label": "Totalt antal varor:",
+    "recommended_route_badge": "Rekommenderad rutt",
+    "route_type": { "single": "En butik", "multi": "Flera butiker" },
+    "score": "Poäng: {{score}}/100",
+    "coverage_badge_full": "Alla produkter finns på den här rutten",
+    "coverage_badge_partial": "{{count}} produkter saknas på den här rutten",
+    "total_amount_label": "Totalt:",
+    "distance_label": "Avstånd:",
+    "within_budget": "Inom budget",
+    "over_budget": "Över budget",
+    "view_details": "Visa detaljer →"
+  },
+  "intro": {
+    "skip": "Hoppa över",
+    "next": "Nästa",
+    "done": "Klart",
+    "get_started": "Nu kör vi",
+    "scene": {
+      "milk_product": "Mjölk 1 l",
+      "cheapest_tag": "BILLIGAST",
+      "tab_home": "Hem",
+      "tab_lists": "Mina listor",
+      "tab_deals": "Erbjudanden",
+      "tab_profile": "Profil",
+      "best_route_overline": "BÄSTA RUTTEN"
+    },
+    "slides": {
+      "compare": {
+        "title": "Jag hittar det billigaste åt dig",
+        "desc": "Jag jämför samma produkt mellan butiker och visar dig den billigaste."
+      },
+      "list": {
+        "title": "Hantera din lista härifrån",
+        "desc": "Lägg till produkter i din lista. Du ser alltid hur många varor du har via märket „Mina listor”."
+      },
+      "route": {
+        "title": "Jag planerar den billigaste rutten",
+        "desc": "Är det billigare i en butik, eller uppdelat på flera? Jag räknar ut det och rekommenderar det bästa alternativet."
+      },
+      "save": {
+        "title": "Låt oss spara tillsammans",
+        "desc": "Se hur mycket du sparar varje gång du handlar. När du är redo, slutför ditt köp i den billigaste butiken!"
+      }
+    }
+  }
 }

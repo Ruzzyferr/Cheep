@@ -1,13 +1,230 @@
 {
-  "common": { "continue": "Continue", "skip": "Skip for now", "finish": "Finish", "save": "Save", "cancel": "Cancel" },
+  "common": {
+    "continue": "Continue",
+    "skip": "Skip for now",
+    "finish": "Finish",
+    "save": "Save",
+    "cancel": "Cancel",
+    "error": "Error",
+    "ok": "OK",
+    "all": "All",
+    "loading": "Loading…",
+    "unit_default": "piece"
+  },
   "onboarding": {
     "language_title": "Choose your app language",
     "language_subtitle": "You can change this later in Profile",
     "country_title": "Where do you shop?",
     "country_subtitle": "Let's show you only the stores and prices in your country",
-    "per_week": "/week"
+    "per_week": "/week",
+    "custom_placeholder": "Type your own…",
+    "add": "Add",
+    "finish_error": "Something went wrong saving your profile. Please try again.",
+    "q": {
+      "household_size": {
+        "title": "How many people do you shop for?",
+        "mascot": "Let's get started! 🐦",
+        "options": { "1": "1", "2": "2", "3-4": "3-4", "5plus": "5+" }
+      },
+      "diet": {
+        "title": "What's your diet?",
+        "mascot": "You're doing great!",
+        "options": { "omnivore": "Omnivore", "vegetarian": "Vegetarian", "vegan": "Vegan", "pescatarian": "Pescatarian" }
+      },
+      "avoid": {
+        "title": "Do you avoid any of these?",
+        "mascot": "We'll filter these out for you 🐦",
+        "options": { "pork_gelatin": "Pork & gelatin", "alcohol": "Alcoholic products" }
+      },
+      "allergies": {
+        "title": "Any allergies/intolerances?",
+        "mascot": "Safety first!",
+        "options": { "lactose": "Lactose", "gluten": "Gluten", "peanut": "Peanut", "tree_nut": "Tree nuts", "none": "None" }
+      },
+      "weekly_budget": {
+        "title": "What's your weekly budget?",
+        "mascot": "Last question! 🐦"
+      }
+    }
   },
-  "profile": { "language": "App language", "country": "Country / Stores", "about": "About Cheep" },
+  "profile": {
+    "language": "App language",
+    "country": "Country / Stores",
+    "about": "About",
+    "about_title": "About Cheep",
+    "about_body": "Cheep · Version {{version}}\nFind the best price.",
+    "app_section_title": "App",
+    "notifications": "Notifications",
+    "notifications_subtitle": "Price drop alerts",
+    "version_subtitle": "Version {{version}}",
+    "how_to_use": "How to use",
+    "replay_intro": "Replay the intro tour",
+    "logout_title": "Log Out",
+    "logout_confirm": "Are you sure you want to log out?",
+    "logout_action": "Log Out",
+    "stat_active": "Active Lists",
+    "stat_completed": "Completed",
+    "stat_templates": "Templates",
+    "preferences_title": "My Preferences",
+    "pref_household_size": "Household size",
+    "pref_diet": "Diet",
+    "pref_avoid": "Avoiding",
+    "pref_allergies": "Allergies / Intolerances",
+    "add_allergy_placeholder": "Add another allergy…",
+    "pref_weekly_budget": "Weekly budget ({{symbol}})",
+    "weekly_budget_placeholder": "e.g. 1500",
+    "saving": "Saving…",
+    "prefs_saved_title": "Saved",
+    "prefs_saved_body": "Your preferences have been updated.",
+    "prefs_save_error": "Preferences could not be saved. Please try again."
+  },
   "countries": { "TR": "Turkey", "CH": "Switzerland", "SE": "Sweden", "DE": "Germany", "PL": "Poland" },
-  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" }
+  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },
+  "product": {
+    "no_price_info": "No price info",
+    "all_categories": "All Categories",
+    "all_shown": "All products shown",
+    "category_empty": "No products found in this category",
+    "check_label": "⚠️ check label",
+    "diet_mismatch": "doesn't match your diet",
+    "top_three_stores": "Cheapest 3 stores:",
+    "unknown_store": "Unknown Store",
+    "target_list": "Adding to:",
+    "price_history": {
+      "title": "Price History",
+      "last_days": "Last {{count}} days",
+      "empty": "No price history yet",
+      "lowest": "Lowest",
+      "highest": "Highest",
+      "chart_a11y": "Price history chart",
+      "footer": "{{store}} price trend"
+    }
+  },
+  "home": {
+    "greeting": "Hello",
+    "greeting_named": "Hello {{name}}",
+    "overline_saved": "SAVED THIS MONTH",
+    "overline_potential": "POTENTIAL SAVINGS",
+    "vs_last_month": "+{{amount}} vs last month",
+    "hero_sub_saved": "You saved this by picking the cheapest routes",
+    "hero_sub_active_list": "Complete your list with the cheapest route to earn this",
+    "hero_sub_no_list": "Create your first list to start saving",
+    "overline_active_list": "ACTIVE LIST",
+    "item_count": "{{count}} items",
+    "estimated_range": "Est. {{min}}–{{max}}",
+    "view_cheapest_route": "View Cheapest Route",
+    "no_list_title": "No list yet",
+    "no_list_sub": "Create your first shopping list and we'll find the cheapest route.",
+    "categories_title": "Categories",
+    "deals_title": "Deals",
+    "view_all": "See all",
+    "markets_title": "Stores we compare",
+    "deal_from_suffix": "",
+    "deal_from_price": "from {{price}}",
+    "lowest_price_label": "Lowest Price",
+    "savings_percent": "{{percent}}% Savings",
+    "active_list_empty": "Add products to your list to get started",
+    "build_cheapest_route": "Build Cheapest Route"
+  },
+  "list": {
+    "budget_label": "Budget:",
+    "item_count": "{{count}} items",
+    "last_compared": "Last compared: {{date}}",
+    "template_badge": "Template",
+    "completed_badge": "Completed",
+    "delete_title": "Delete List",
+    "delete_confirm": "Are you sure you want to delete this list? This action cannot be undone.",
+    "delete_action": "Delete",
+    "select_modal": {
+      "title": "Select List",
+      "brand_independent": "Brand doesn't matter (cheapest)",
+      "no_active_lists": "No active lists found",
+      "create_new": "Create New List",
+      "default_new_list_name": "My Shopping List",
+      "load_error": "Something went wrong loading your lists",
+      "add_success_title": "Success",
+      "add_success_body": "Product added to the list",
+      "add_error": "Something went wrong adding the product",
+      "create_error": "Something went wrong creating the list"
+    }
+  },
+  "deals": {
+    "title": "Deals",
+    "subtitle": "Biggest savings across stores",
+    "cheapest": "Cheapest",
+    "cheapest_at": "Cheapest · {{store}}",
+    "savings": "Savings",
+    "empty_title": "No deals yet",
+    "empty_description": "As products sold in multiple stores are added, the best savings will show up here",
+    "advantage_a11y": "{{name}}, {{percent}}% advantage"
+  },
+  "compare": {
+    "loading": "Calculating routes...",
+    "load_error": "Something went wrong comparing your list",
+    "filters_title": "Filters",
+    "store_count_filter": "Number of Stores",
+    "store_count": { "one": "Single Store", "two": "2 Stores", "three_plus": "3+ Stores" },
+    "sort_title": "Sort by",
+    "sort": { "recommended": "Recommended", "cheapest": "Cheapest", "nearest": "Nearest", "price_distance": "Price + Distance" },
+    "summary_title": "Summary",
+    "cheapest_full": "Cheapest (whole list)",
+    "cheapest_meta_full": "{{stores}} stores · {{items}} items",
+    "cheapest_meta_partial": "{{missing}} items missing · {{coverage}}%",
+    "savings": "Savings",
+    "savings_vs_priciest": "{{percent}}% vs the most expensive",
+    "savings_single_option": "only one option",
+    "coverage_full": "These prices belong to routes that cover your entire list ({{items}} items).",
+    "coverage_partial": "No route covers the entire list. Prices are compared among the routes with the highest coverage ({{coverage}}%).",
+    "best_route_title": "Best Route",
+    "alt_routes_title": "Alternative Routes",
+    "alt_products_title": "Alternative Products",
+    "instead_of": "instead of {{product}}",
+    "alt_savings": "{{amount}} savings",
+    "list_info_title": "List Info",
+    "list_label": "List:",
+    "total_items_label": "Total Items:",
+    "recommended_route_badge": "Recommended Route",
+    "route_type": { "single": "Single Store", "multi": "Multiple Stores" },
+    "score": "Score: {{score}}/100",
+    "coverage_badge_full": "All products in this route",
+    "coverage_badge_partial": "{{count}} products missing from this route",
+    "total_amount_label": "Total:",
+    "distance_label": "Distance:",
+    "within_budget": "Within budget",
+    "over_budget": "Over budget",
+    "view_details": "View Details →"
+  },
+  "intro": {
+    "skip": "Skip",
+    "next": "Next",
+    "done": "Done",
+    "get_started": "Let's get started",
+    "scene": {
+      "milk_product": "Milk 1 L",
+      "cheapest_tag": "CHEAPEST",
+      "tab_home": "Home",
+      "tab_lists": "My Lists",
+      "tab_deals": "Deals",
+      "tab_profile": "Profile",
+      "best_route_overline": "BEST ROUTE"
+    },
+    "slides": {
+      "compare": {
+        "title": "I'll find the cheapest for you",
+        "desc": "I compare the same product across stores and show you the cheapest one."
+      },
+      "list": {
+        "title": "Manage your list from here",
+        "desc": "Add products to your list. You'll always see how many items you have from the “My Lists” badge."
+      },
+      "route": {
+        "title": "I'll plan the cheapest route",
+        "desc": "Is it cheaper at one store, or split across a few? I calculate it and recommend the best option."
+      },
+      "save": {
+        "title": "Let's save together",
+        "desc": "See how much you're saving on every shop. When you're ready, complete your cart at the cheapest store!"
+      }
+    }
+  }
 }

@@ -1,13 +1,230 @@
 {
-  "common": { "continue": "Devam", "skip": "Şimdilik geç", "finish": "Bitir", "save": "Kaydet", "cancel": "İptal" },
+  "common": {
+    "continue": "Devam",
+    "skip": "Şimdilik geç",
+    "finish": "Bitir",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "error": "Hata",
+    "ok": "Tamam",
+    "all": "Tümü",
+    "loading": "Yükleniyor…",
+    "unit_default": "adet"
+  },
   "onboarding": {
     "language_title": "Uygulama dilini seç",
     "language_subtitle": "Bunu daha sonra Profil'den değiştirebilirsin",
     "country_title": "Nerede alışveriş yapıyorsun?",
     "country_subtitle": "Sana sadece ülkendeki marketleri ve fiyatları gösterelim",
-    "per_week": "/hafta"
+    "per_week": "/hafta",
+    "custom_placeholder": "Sen yaz…",
+    "add": "Ekle",
+    "finish_error": "Profil kaydedilirken bir hata oluştu. Tekrar deneyin.",
+    "q": {
+      "household_size": {
+        "title": "Kaç kişiye alışveriş yapıyorsun?",
+        "mascot": "Başlayalım! 🐦",
+        "options": { "1": "1", "2": "2", "3-4": "3-4", "5plus": "5+" }
+      },
+      "diet": {
+        "title": "Beslenme tarzın?",
+        "mascot": "Harika gidiyorsun!",
+        "options": { "omnivore": "Hepçil", "vegetarian": "Vejetaryen", "vegan": "Vegan", "pescatarian": "Pesketaryen" }
+      },
+      "avoid": {
+        "title": "Şunlardan kaçınıyor musun?",
+        "mascot": "Sana göre süzeceğiz 🐦",
+        "options": { "pork_gelatin": "Domuz eti & jelatin", "alcohol": "Alkollü ürünler" }
+      },
+      "allergies": {
+        "title": "Alerjin/intoleransın?",
+        "mascot": "Güvenlik önce!",
+        "options": { "lactose": "Laktoz", "gluten": "Gluten", "peanut": "Fıstık", "tree_nut": "Kabuklu yemiş", "none": "Yok" }
+      },
+      "weekly_budget": {
+        "title": "Haftalık bütçen?",
+        "mascot": "Son soru! 🐦"
+      }
+    }
   },
-  "profile": { "language": "Uygulama dili", "country": "Ülke / Marketler", "about": "Cheep Hakkında" },
+  "profile": {
+    "language": "Uygulama dili",
+    "country": "Ülke / Marketler",
+    "about": "Hakkında",
+    "about_title": "Cheep Hakkında",
+    "about_body": "Cheep · Sürüm {{version}}\nEn uygun fiyatı bul.",
+    "app_section_title": "Uygulama",
+    "notifications": "Bildirimler",
+    "notifications_subtitle": "Fiyat düşüşü uyarıları",
+    "version_subtitle": "Sürüm {{version}}",
+    "how_to_use": "Nasıl kullanılır",
+    "replay_intro": "Tanıtım turunu yeniden izle",
+    "logout_title": "Çıkış Yap",
+    "logout_confirm": "Çıkmak istediğinize emin misiniz?",
+    "logout_action": "Çıkış Yap",
+    "stat_active": "Aktif Liste",
+    "stat_completed": "Tamamlanan",
+    "stat_templates": "Şablon",
+    "preferences_title": "Tercihlerim",
+    "pref_household_size": "Hane büyüklüğü",
+    "pref_diet": "Beslenme tarzı",
+    "pref_avoid": "Kaçınılanlar",
+    "pref_allergies": "Alerji / İntolerans",
+    "add_allergy_placeholder": "Başka alerji ekle…",
+    "pref_weekly_budget": "Haftalık bütçe ({{symbol}})",
+    "weekly_budget_placeholder": "Örn: 1500",
+    "saving": "Kaydediliyor…",
+    "prefs_saved_title": "Kaydedildi",
+    "prefs_saved_body": "Tercihleriniz güncellendi.",
+    "prefs_save_error": "Tercihler kaydedilemedi. Lütfen tekrar deneyin."
+  },
   "countries": { "TR": "Türkiye", "CH": "İsviçre", "SE": "İsveç", "DE": "Almanya", "PL": "Polonya" },
-  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" }
+  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },
+  "product": {
+    "no_price_info": "Fiyat bilgisi yok",
+    "all_categories": "Tüm Kategoriler",
+    "all_shown": "Tüm ürünler gösterildi",
+    "category_empty": "Bu kategoride ürün bulunamadı",
+    "check_label": "⚠️ etiketi kontrol et",
+    "diet_mismatch": "diyetine uymuyor",
+    "top_three_stores": "En ucuz 3 market:",
+    "unknown_store": "Bilinmeyen Market",
+    "target_list": "Eklenecek liste:",
+    "price_history": {
+      "title": "Fiyat Geçmişi",
+      "last_days": "Son {{count}} gün",
+      "empty": "Henüz fiyat geçmişi birikmedi",
+      "lowest": "En düşük",
+      "highest": "En yüksek",
+      "chart_a11y": "Fiyat geçmişi grafiği",
+      "footer": "{{store}} fiyat seyri"
+    }
+  },
+  "home": {
+    "greeting": "Merhaba",
+    "greeting_named": "Merhaba {{name}}",
+    "overline_saved": "BU AY TASARRUF",
+    "overline_potential": "POTANSİYEL TASARRUF",
+    "vs_last_month": "Geçen aya göre +{{amount}}",
+    "hero_sub_saved": "En ucuz rotaları seçerek biriktirdin",
+    "hero_sub_active_list": "Listeni en ucuz rotayla tamamla, bu kadar kazan",
+    "hero_sub_no_list": "İlk listeni oluştur, tasarrufa başla",
+    "overline_active_list": "AKTİF LİSTE",
+    "item_count": "{{count}} ürün",
+    "estimated_range": "Tahmini {{min}}–{{max}}",
+    "view_cheapest_route": "En Ucuz Rotayı Gör",
+    "no_list_title": "Henüz listen yok",
+    "no_list_sub": "İlk alışveriş listeni oluştur, en ucuz rotayı bulalım.",
+    "categories_title": "Kategoriler",
+    "deals_title": "Fırsatlar",
+    "view_all": "Tümünü incele",
+    "markets_title": "Karşılaştırdığımız marketler",
+    "deal_from_suffix": "'den",
+    "deal_from_price": "{{price}}'den",
+    "lowest_price_label": "En Düşük Fiyat",
+    "savings_percent": "%{{percent}} Tasarruf",
+    "active_list_empty": "Listeye ürün ekleyerek başlayın",
+    "build_cheapest_route": "En Ucuz Rotayı Oluştur"
+  },
+  "list": {
+    "budget_label": "Bütçe:",
+    "item_count": "{{count}} ürün",
+    "last_compared": "Son karşılaştırma: {{date}}",
+    "template_badge": "Şablon",
+    "completed_badge": "Tamamlandı",
+    "delete_title": "Listeyi Sil",
+    "delete_confirm": "Bu listeyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+    "delete_action": "Sil",
+    "select_modal": {
+      "title": "Liste Seç",
+      "brand_independent": "Marka farketmez (en ucuzu)",
+      "no_active_lists": "Aktif liste bulunamadı",
+      "create_new": "Yeni Liste Oluştur",
+      "default_new_list_name": "Alışveriş Listem",
+      "load_error": "Listeler yüklenirken bir hata oluştu",
+      "add_success_title": "Başarılı",
+      "add_success_body": "Ürün listeye eklendi",
+      "add_error": "Ürün eklenirken bir hata oluştu",
+      "create_error": "Liste oluşturulurken bir hata oluştu"
+    }
+  },
+  "deals": {
+    "title": "Fırsatlar",
+    "subtitle": "Marketler arası en yüksek tasarruflar",
+    "cheapest": "En ucuz",
+    "cheapest_at": "En ucuz · {{store}}",
+    "savings": "Tasarruf",
+    "empty_title": "Henüz fırsat yok",
+    "empty_description": "Birden fazla markette satılan ürünler eklendikçe en iyi tasarruflar burada görünecek",
+    "advantage_a11y": "{{name}}, %{{percent}} avantaj"
+  },
+  "compare": {
+    "loading": "Rotalar hesaplanıyor...",
+    "load_error": "Karşılaştırma yapılırken bir hata oluştu",
+    "filters_title": "Filtreler",
+    "store_count_filter": "Market Sayısı",
+    "store_count": { "one": "Tek Market", "two": "2 Market", "three_plus": "3+ Market" },
+    "sort_title": "Sıralama",
+    "sort": { "recommended": "Önerilen", "cheapest": "En ucuz", "nearest": "En yakın", "price_distance": "Fiyat + Konum" },
+    "summary_title": "Özet",
+    "cheapest_full": "En Ucuz (tüm liste)",
+    "cheapest_meta_full": "{{stores}} market · {{items}} ürün",
+    "cheapest_meta_partial": "{{missing}} ürün eksik · %{{coverage}}",
+    "savings": "Tasarruf",
+    "savings_vs_priciest": "en pahalıya göre %{{percent}}",
+    "savings_single_option": "tek seçenek",
+    "coverage_full": "Bu fiyatlar listenin tamamını ({{items}} ürün) kapsayan rotalara aittir.",
+    "coverage_partial": "Hiçbir rota tüm listeyi karşılamıyor. Fiyatlar en yüksek kapsamalı (%{{coverage}}) rotalar arasında karşılaştırılıyor.",
+    "best_route_title": "En İyi Rota",
+    "alt_routes_title": "Alternatif Rotalar",
+    "alt_products_title": "Alternatif Ürünler",
+    "instead_of": "{{product}} yerine",
+    "alt_savings": "{{amount}} tasarruf",
+    "list_info_title": "Liste Bilgileri",
+    "list_label": "Liste:",
+    "total_items_label": "Toplam Ürün:",
+    "recommended_route_badge": "Önerilen Rota",
+    "route_type": { "single": "Tek Market", "multi": "Çoklu Market" },
+    "score": "Skor: {{score}}/100",
+    "coverage_badge_full": "Tüm ürünler bu rotada",
+    "coverage_badge_partial": "{{count}} ürün bu rotada yok",
+    "total_amount_label": "Toplam Tutar:",
+    "distance_label": "Mesafe:",
+    "within_budget": "Bütçe dahilinde",
+    "over_budget": "Bütçe aşıyor",
+    "view_details": "Detayları Gör →"
+  },
+  "intro": {
+    "skip": "Atla",
+    "next": "İleri",
+    "done": "Tamam",
+    "get_started": "Hadi başlayalım",
+    "scene": {
+      "milk_product": "Süt 1 L",
+      "cheapest_tag": "EN UCUZ",
+      "tab_home": "Ana Sayfa",
+      "tab_lists": "Listelerim",
+      "tab_deals": "Fırsatlar",
+      "tab_profile": "Profil",
+      "best_route_overline": "EN İYİ ROTA"
+    },
+    "slides": {
+      "compare": {
+        "title": "En ucuzu ben bulurum",
+        "desc": "Aynı ürünü Migros, A101, ŞOK ve CarrefourSA’da karşılaştırır, en ucuz marketi sana gösteririm."
+      },
+      "list": {
+        "title": "Listeni buradan yönet",
+        "desc": "Ürünleri listene ekle. Kaç ürün olduğunu “Listelerim” rozetinden her an görürsün."
+      },
+      "route": {
+        "title": "En ucuz rotayı çizerim",
+        "desc": "Tek markette mi, birkaç markete bölünce mi daha ucuz? Hesaplar, en uygununu öneririm."
+      },
+      "save": {
+        "title": "Birlikte tasarruf edelim",
+        "desc": "Her alışverişte ne kadar kazandığını gör. Hazır olunca sepetini en ucuz markette tamamla!"
+      }
+    }
+  }
 }

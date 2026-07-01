@@ -1,13 +1,230 @@
 {
-  "common": { "continue": "Dalej", "skip": "Pomiń na razie", "finish": "Zakończ", "save": "Zapisz", "cancel": "Anuluj" },
+  "common": {
+    "continue": "Dalej",
+    "skip": "Pomiń na razie",
+    "finish": "Zakończ",
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "error": "Błąd",
+    "ok": "OK",
+    "all": "Wszystkie",
+    "loading": "Ładowanie…",
+    "unit_default": "szt."
+  },
   "onboarding": {
     "language_title": "Wybierz język aplikacji",
     "language_subtitle": "Możesz to później zmienić w Profilu",
     "country_title": "Gdzie robisz zakupy?",
     "country_subtitle": "Pokażemy Ci tylko sklepy i ceny w Twoim kraju",
-    "per_week": "/tydzień"
+    "per_week": "/tydzień",
+    "custom_placeholder": "Wpisz własne…",
+    "add": "Dodaj",
+    "finish_error": "Wystąpił błąd podczas zapisywania profilu. Spróbuj ponownie.",
+    "q": {
+      "household_size": {
+        "title": "Dla ilu osób robisz zakupy?",
+        "mascot": "Zaczynajmy! 🐦",
+        "options": { "1": "1", "2": "2", "3-4": "3-4", "5plus": "5+" }
+      },
+      "diet": {
+        "title": "Jaki jest Twój sposób odżywiania?",
+        "mascot": "Świetnie Ci idzie!",
+        "options": { "omnivore": "Wszystkożerne", "vegetarian": "Wegetariańskie", "vegan": "Wegańskie", "pescatarian": "Pescetariańskie" }
+      },
+      "avoid": {
+        "title": "Czy czegoś z tego unikasz?",
+        "mascot": "Odfiltrujemy to dla Ciebie 🐦",
+        "options": { "pork_gelatin": "Wieprzowina i żelatyna", "alcohol": "Produkty alkoholowe" }
+      },
+      "allergies": {
+        "title": "Alergie/nietolerancje?",
+        "mascot": "Bezpieczeństwo przede wszystkim!",
+        "options": { "lactose": "Laktoza", "gluten": "Gluten", "peanut": "Orzeszki ziemne", "tree_nut": "Orzechy", "none": "Brak" }
+      },
+      "weekly_budget": {
+        "title": "Twój tygodniowy budżet?",
+        "mascot": "Ostatnie pytanie! 🐦"
+      }
+    }
   },
-  "profile": { "language": "Język aplikacji", "country": "Kraj / Sklepy", "about": "O Cheep" },
+  "profile": {
+    "language": "Język aplikacji",
+    "country": "Kraj / Sklepy",
+    "about": "O aplikacji",
+    "about_title": "O Cheep",
+    "about_body": "Cheep · Wersja {{version}}\nZnajdź najlepszą cenę.",
+    "app_section_title": "Aplikacja",
+    "notifications": "Powiadomienia",
+    "notifications_subtitle": "Alerty o spadku ceny",
+    "version_subtitle": "Wersja {{version}}",
+    "how_to_use": "Jak korzystać",
+    "replay_intro": "Obejrzyj ponownie samouczek",
+    "logout_title": "Wyloguj się",
+    "logout_confirm": "Czy na pewno chcesz się wylogować?",
+    "logout_action": "Wyloguj się",
+    "stat_active": "Aktywne listy",
+    "stat_completed": "Ukończone",
+    "stat_templates": "Szablony",
+    "preferences_title": "Moje preferencje",
+    "pref_household_size": "Wielkość gospodarstwa domowego",
+    "pref_diet": "Sposób odżywiania",
+    "pref_avoid": "Unikane produkty",
+    "pref_allergies": "Alergie / Nietolerancje",
+    "add_allergy_placeholder": "Dodaj inną alergię…",
+    "pref_weekly_budget": "Tygodniowy budżet ({{symbol}})",
+    "weekly_budget_placeholder": "np. 1500",
+    "saving": "Zapisywanie…",
+    "prefs_saved_title": "Zapisano",
+    "prefs_saved_body": "Twoje preferencje zostały zaktualizowane.",
+    "prefs_save_error": "Nie udało się zapisać preferencji. Spróbuj ponownie."
+  },
   "countries": { "TR": "Turcja", "CH": "Szwajcaria", "SE": "Szwecja", "DE": "Niemcy", "PL": "Polska" },
-  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" }
+  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },
+  "product": {
+    "no_price_info": "Brak informacji o cenie",
+    "all_categories": "Wszystkie kategorie",
+    "all_shown": "Wyświetlono wszystkie produkty",
+    "category_empty": "Nie znaleziono produktów w tej kategorii",
+    "check_label": "⚠️ sprawdź etykietę",
+    "diet_mismatch": "nie pasuje do Twojej diety",
+    "top_three_stores": "3 najtańsze sklepy:",
+    "unknown_store": "Nieznany sklep",
+    "target_list": "Dodawane do:",
+    "price_history": {
+      "title": "Historia cen",
+      "last_days": "Ostatnie {{count}} dni",
+      "empty": "Brak jeszcze historii cen",
+      "lowest": "Najniższa",
+      "highest": "Najwyższa",
+      "chart_a11y": "Wykres historii cen",
+      "footer": "Trend cen w {{store}}"
+    }
+  },
+  "home": {
+    "greeting": "Cześć",
+    "greeting_named": "Cześć {{name}}",
+    "overline_saved": "ZAOSZCZĘDZONO W TYM MIESIĄCU",
+    "overline_potential": "POTENCJALNE OSZCZĘDNOŚCI",
+    "vs_last_month": "+{{amount}} względem zeszłego miesiąca",
+    "hero_sub_saved": "Tyle zaoszczędziłeś, wybierając najtańsze trasy",
+    "hero_sub_active_list": "Uzupełnij listę najtańszą trasą, aby to zaoszczędzić",
+    "hero_sub_no_list": "Utwórz pierwszą listę i zacznij oszczędzać",
+    "overline_active_list": "AKTYWNA LISTA",
+    "item_count": "{{count}} produktów",
+    "estimated_range": "Szacunkowo {{min}}–{{max}}",
+    "view_cheapest_route": "Zobacz najtańszą trasę",
+    "no_list_title": "Nie masz jeszcze listy",
+    "no_list_sub": "Utwórz pierwszą listę zakupów, a znajdziemy najtańszą trasę.",
+    "categories_title": "Kategorie",
+    "deals_title": "Okazje",
+    "view_all": "Zobacz wszystkie",
+    "markets_title": "Sklepy, które porównujemy",
+    "deal_from_suffix": "",
+    "deal_from_price": "od {{price}}",
+    "lowest_price_label": "Najniższa cena",
+    "savings_percent": "{{percent}}% oszczędności",
+    "active_list_empty": "Dodaj produkty do listy, aby zacząć",
+    "build_cheapest_route": "Stwórz najtańszą trasę"
+  },
+  "list": {
+    "budget_label": "Budżet:",
+    "item_count": "{{count}} produktów",
+    "last_compared": "Ostatnie porównanie: {{date}}",
+    "template_badge": "Szablon",
+    "completed_badge": "Ukończono",
+    "delete_title": "Usuń listę",
+    "delete_confirm": "Czy na pewno chcesz usunąć tę listę? Tej operacji nie można cofnąć.",
+    "delete_action": "Usuń",
+    "select_modal": {
+      "title": "Wybierz listę",
+      "brand_independent": "Marka nieważna (najtańsze)",
+      "no_active_lists": "Nie znaleziono aktywnych list",
+      "create_new": "Utwórz nową listę",
+      "default_new_list_name": "Moja lista zakupów",
+      "load_error": "Wystąpił błąd podczas wczytywania list",
+      "add_success_title": "Sukces",
+      "add_success_body": "Produkt dodany do listy",
+      "add_error": "Wystąpił błąd podczas dodawania produktu",
+      "create_error": "Wystąpił błąd podczas tworzenia listy"
+    }
+  },
+  "deals": {
+    "title": "Okazje",
+    "subtitle": "Największe oszczędności między sklepami",
+    "cheapest": "Najtańszy",
+    "cheapest_at": "Najtańszy · {{store}}",
+    "savings": "Oszczędności",
+    "empty_title": "Brak jeszcze okazji",
+    "empty_description": "Gdy przybędzie produktów sprzedawanych w kilku sklepach, najlepsze oszczędności pojawią się tutaj",
+    "advantage_a11y": "{{name}}, korzyść {{percent}}%"
+  },
+  "compare": {
+    "loading": "Obliczanie tras...",
+    "load_error": "Wystąpił błąd podczas porównywania listy",
+    "filters_title": "Filtry",
+    "store_count_filter": "Liczba sklepów",
+    "store_count": { "one": "Jeden sklep", "two": "2 sklepy", "three_plus": "3+ sklepy" },
+    "sort_title": "Sortuj według",
+    "sort": { "recommended": "Polecane", "cheapest": "Najtańsze", "nearest": "Najbliższe", "price_distance": "Cena + odległość" },
+    "summary_title": "Podsumowanie",
+    "cheapest_full": "Najtańsze (cała lista)",
+    "cheapest_meta_full": "{{stores}} sklepy · {{items}} produktów",
+    "cheapest_meta_partial": "brakuje {{missing}} produktów · {{coverage}}%",
+    "savings": "Oszczędności",
+    "savings_vs_priciest": "{{percent}}% względem najdroższej",
+    "savings_single_option": "tylko jedna opcja",
+    "coverage_full": "Te ceny dotyczą tras obejmujących całą listę ({{items}} produktów).",
+    "coverage_partial": "Żadna trasa nie obejmuje całej listy. Ceny porównywane są między trasami o najwyższym pokryciu ({{coverage}}%).",
+    "best_route_title": "Najlepsza trasa",
+    "alt_routes_title": "Alternatywne trasy",
+    "alt_products_title": "Produkty alternatywne",
+    "instead_of": "zamiast {{product}}",
+    "alt_savings": "oszczędność {{amount}}",
+    "list_info_title": "Informacje o liście",
+    "list_label": "Lista:",
+    "total_items_label": "Łącznie produktów:",
+    "recommended_route_badge": "Polecana trasa",
+    "route_type": { "single": "Jeden sklep", "multi": "Wiele sklepów" },
+    "score": "Wynik: {{score}}/100",
+    "coverage_badge_full": "Wszystkie produkty na tej trasie",
+    "coverage_badge_partial": "{{count}} produktów brakuje na tej trasie",
+    "total_amount_label": "Suma:",
+    "distance_label": "Odległość:",
+    "within_budget": "W ramach budżetu",
+    "over_budget": "Przekracza budżet",
+    "view_details": "Zobacz szczegóły →"
+  },
+  "intro": {
+    "skip": "Pomiń",
+    "next": "Dalej",
+    "done": "Gotowe",
+    "get_started": "Zaczynajmy",
+    "scene": {
+      "milk_product": "Mleko 1 l",
+      "cheapest_tag": "NAJTANIEJ",
+      "tab_home": "Start",
+      "tab_lists": "Moje listy",
+      "tab_deals": "Okazje",
+      "tab_profile": "Profil",
+      "best_route_overline": "NAJLEPSZA TRASA"
+    },
+    "slides": {
+      "compare": {
+        "title": "Znajdę dla Ciebie najniższą cenę",
+        "desc": "Porównuję ten sam produkt między sklepami i pokazuję Ci najtańszy."
+      },
+      "list": {
+        "title": "Zarządzaj listą tutaj",
+        "desc": "Dodawaj produkty do listy. Liczbę produktów zawsze zobaczysz przy odznace „Moje listy”."
+      },
+      "route": {
+        "title": "Zaplanuję najtańszą trasę",
+        "desc": "Czy taniej w jednym sklepie, czy podzielone na kilka? Obliczam i polecam najlepszą opcję."
+      },
+      "save": {
+        "title": "Oszczędzajmy razem",
+        "desc": "Zobacz, ile oszczędzasz przy każdych zakupach. Gdy będziesz gotowy, dokończ zakupy w najtańszym sklepie!"
+      }
+    }
+  }
 }

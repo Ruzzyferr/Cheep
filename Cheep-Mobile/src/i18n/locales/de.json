@@ -1,13 +1,230 @@
 {
-  "common": { "continue": "Weiter", "skip": "Vorerst überspringen", "finish": "Fertig", "save": "Speichern", "cancel": "Abbrechen" },
+  "common": {
+    "continue": "Weiter",
+    "skip": "Später",
+    "finish": "Fertig",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "error": "Fehler",
+    "ok": "OK",
+    "all": "Alle",
+    "loading": "Wird geladen…",
+    "unit_default": "Stück"
+  },
   "onboarding": {
     "language_title": "Wähle deine App-Sprache",
     "language_subtitle": "Du kannst dies später im Profil ändern",
     "country_title": "Wo kaufst du ein?",
     "country_subtitle": "Wir zeigen dir nur die Märkte und Preise in deinem Land",
-    "per_week": "/Woche"
+    "per_week": "/Woche",
+    "custom_placeholder": "Selbst eingeben…",
+    "add": "Hinzufügen",
+    "finish_error": "Beim Speichern deines Profils ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+    "q": {
+      "household_size": {
+        "title": "Für wie viele Personen kaufst du ein?",
+        "mascot": "Los geht's! 🐦",
+        "options": { "1": "1", "2": "2", "3-4": "3-4", "5plus": "5+" }
+      },
+      "diet": {
+        "title": "Wie ernährst du dich?",
+        "mascot": "Du machst das super!",
+        "options": { "omnivore": "Alles", "vegetarian": "Vegetarisch", "vegan": "Vegan", "pescatarian": "Pescetarisch" }
+      },
+      "avoid": {
+        "title": "Möchtest du etwas davon vermeiden?",
+        "mascot": "Wir filtern das für dich raus 🐦",
+        "options": { "pork_gelatin": "Schweinefleisch & Gelatine", "alcohol": "Alkoholische Produkte" }
+      },
+      "allergies": {
+        "title": "Allergien/Unverträglichkeiten?",
+        "mascot": "Sicherheit geht vor!",
+        "options": { "lactose": "Laktose", "gluten": "Gluten", "peanut": "Erdnuss", "tree_nut": "Schalenfrüchte", "none": "Keine" }
+      },
+      "weekly_budget": {
+        "title": "Dein Wochenbudget?",
+        "mascot": "Letzte Frage! 🐦"
+      }
+    }
   },
-  "profile": { "language": "App-Sprache", "country": "Land / Märkte", "about": "Über Cheep" },
+  "profile": {
+    "language": "App-Sprache",
+    "country": "Land / Märkte",
+    "about": "Über",
+    "about_title": "Über Cheep",
+    "about_body": "Cheep · Version {{version}}\nFinde den besten Preis.",
+    "app_section_title": "App",
+    "notifications": "Benachrichtigungen",
+    "notifications_subtitle": "Preissenkungs-Hinweise",
+    "version_subtitle": "Version {{version}}",
+    "how_to_use": "Bedienungsanleitung",
+    "replay_intro": "Einführungstour erneut ansehen",
+    "logout_title": "Abmelden",
+    "logout_confirm": "Möchtest du dich wirklich abmelden?",
+    "logout_action": "Abmelden",
+    "stat_active": "Aktive Listen",
+    "stat_completed": "Abgeschlossen",
+    "stat_templates": "Vorlagen",
+    "preferences_title": "Meine Präferenzen",
+    "pref_household_size": "Haushaltsgröße",
+    "pref_diet": "Ernährungsweise",
+    "pref_avoid": "Vermeidungen",
+    "pref_allergies": "Allergien / Unverträglichkeiten",
+    "add_allergy_placeholder": "Weitere Allergie hinzufügen…",
+    "pref_weekly_budget": "Wochenbudget ({{symbol}})",
+    "weekly_budget_placeholder": "z. B. 1500",
+    "saving": "Wird gespeichert…",
+    "prefs_saved_title": "Gespeichert",
+    "prefs_saved_body": "Deine Präferenzen wurden aktualisiert.",
+    "prefs_save_error": "Präferenzen konnten nicht gespeichert werden. Bitte versuche es erneut."
+  },
   "countries": { "TR": "Türkei", "CH": "Schweiz", "SE": "Schweden", "DE": "Deutschland", "PL": "Polen" },
-  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" }
+  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },
+  "product": {
+    "no_price_info": "Keine Preisangabe",
+    "all_categories": "Alle Kategorien",
+    "all_shown": "Alle Produkte angezeigt",
+    "category_empty": "Keine Produkte in dieser Kategorie gefunden",
+    "check_label": "⚠️ Etikett prüfen",
+    "diet_mismatch": "passt nicht zu deiner Ernährungsweise",
+    "top_three_stores": "3 günstigste Geschäfte:",
+    "unknown_store": "Unbekanntes Geschäft",
+    "target_list": "Wird hinzugefügt zu:",
+    "price_history": {
+      "title": "Preisverlauf",
+      "last_days": "Letzte {{count}} Tage",
+      "empty": "Noch kein Preisverlauf vorhanden",
+      "lowest": "Niedrigster",
+      "highest": "Höchster",
+      "chart_a11y": "Preisverlaufsdiagramm",
+      "footer": "Preisverlauf {{store}}"
+    }
+  },
+  "home": {
+    "greeting": "Hallo",
+    "greeting_named": "Hallo {{name}}",
+    "overline_saved": "DIESEN MONAT GESPART",
+    "overline_potential": "MÖGLICHE ERSPARNIS",
+    "vs_last_month": "+{{amount}} gegenüber letztem Monat",
+    "hero_sub_saved": "Das hast du durch die günstigsten Routen gespart",
+    "hero_sub_active_list": "Schließe deine Liste mit der günstigsten Route ab, um das zu sparen",
+    "hero_sub_no_list": "Erstelle deine erste Liste und starte mit dem Sparen",
+    "overline_active_list": "AKTIVE LISTE",
+    "item_count": "{{count}} Artikel",
+    "estimated_range": "Geschätzt {{min}}–{{max}}",
+    "view_cheapest_route": "Günstigste Route ansehen",
+    "no_list_title": "Noch keine Liste",
+    "no_list_sub": "Erstelle deine erste Einkaufsliste und wir finden die günstigste Route.",
+    "categories_title": "Kategorien",
+    "deals_title": "Angebote",
+    "view_all": "Alle ansehen",
+    "markets_title": "Geschäfte, die wir vergleichen",
+    "deal_from_suffix": "",
+    "deal_from_price": "ab {{price}}",
+    "lowest_price_label": "Niedrigster Preis",
+    "savings_percent": "{{percent}}% Ersparnis",
+    "active_list_empty": "Füge Produkte zu deiner Liste hinzu, um loszulegen",
+    "build_cheapest_route": "Günstigste Route erstellen"
+  },
+  "list": {
+    "budget_label": "Budget:",
+    "item_count": "{{count}} Artikel",
+    "last_compared": "Zuletzt verglichen: {{date}}",
+    "template_badge": "Vorlage",
+    "completed_badge": "Abgeschlossen",
+    "delete_title": "Liste löschen",
+    "delete_confirm": "Möchtest du diese Liste wirklich löschen? Dies kann nicht rückgängig gemacht werden.",
+    "delete_action": "Löschen",
+    "select_modal": {
+      "title": "Liste auswählen",
+      "brand_independent": "Marke egal (günstigste)",
+      "no_active_lists": "Keine aktive Liste gefunden",
+      "create_new": "Neue Liste erstellen",
+      "default_new_list_name": "Meine Einkaufsliste",
+      "load_error": "Beim Laden deiner Listen ist ein Fehler aufgetreten",
+      "add_success_title": "Erfolgreich",
+      "add_success_body": "Produkt zur Liste hinzugefügt",
+      "add_error": "Beim Hinzufügen des Produkts ist ein Fehler aufgetreten",
+      "create_error": "Beim Erstellen der Liste ist ein Fehler aufgetreten"
+    }
+  },
+  "deals": {
+    "title": "Angebote",
+    "subtitle": "Größte Ersparnisse zwischen Geschäften",
+    "cheapest": "Günstigster Preis",
+    "cheapest_at": "Günstigster Preis · {{store}}",
+    "savings": "Ersparnis",
+    "empty_title": "Noch keine Angebote",
+    "empty_description": "Sobald Produkte aus mehreren Geschäften hinzugefügt werden, erscheinen hier die besten Ersparnisse",
+    "advantage_a11y": "{{name}}, {{percent}}% Vorteil"
+  },
+  "compare": {
+    "loading": "Routen werden berechnet...",
+    "load_error": "Beim Vergleichen deiner Liste ist ein Fehler aufgetreten",
+    "filters_title": "Filter",
+    "store_count_filter": "Anzahl der Geschäfte",
+    "store_count": { "one": "Ein Geschäft", "two": "2 Geschäfte", "three_plus": "3+ Geschäfte" },
+    "sort_title": "Sortieren nach",
+    "sort": { "recommended": "Empfohlen", "cheapest": "Günstigste", "nearest": "Nächstgelegen", "price_distance": "Preis + Entfernung" },
+    "summary_title": "Zusammenfassung",
+    "cheapest_full": "Günstigste (ganze Liste)",
+    "cheapest_meta_full": "{{stores}} Geschäfte · {{items}} Artikel",
+    "cheapest_meta_partial": "{{missing}} Artikel fehlen · {{coverage}}%",
+    "savings": "Ersparnis",
+    "savings_vs_priciest": "{{percent}}% gegenüber dem teuersten",
+    "savings_single_option": "nur eine Option",
+    "coverage_full": "Diese Preise beziehen sich auf Routen, die deine gesamte Liste abdecken ({{items}} Artikel).",
+    "coverage_partial": "Keine Route deckt die gesamte Liste ab. Preise werden zwischen den Routen mit der höchsten Abdeckung ({{coverage}}%) verglichen.",
+    "best_route_title": "Beste Route",
+    "alt_routes_title": "Alternative Routen",
+    "alt_products_title": "Alternative Produkte",
+    "instead_of": "statt {{product}}",
+    "alt_savings": "{{amount}} Ersparnis",
+    "list_info_title": "Listeninformationen",
+    "list_label": "Liste:",
+    "total_items_label": "Artikel gesamt:",
+    "recommended_route_badge": "Empfohlene Route",
+    "route_type": { "single": "Ein Geschäft", "multi": "Mehrere Geschäfte" },
+    "score": "Punktzahl: {{score}}/100",
+    "coverage_badge_full": "Alle Produkte auf dieser Route",
+    "coverage_badge_partial": "{{count}} Produkte fehlen auf dieser Route",
+    "total_amount_label": "Gesamtbetrag:",
+    "distance_label": "Entfernung:",
+    "within_budget": "Im Budget",
+    "over_budget": "Über dem Budget",
+    "view_details": "Details ansehen →"
+  },
+  "intro": {
+    "skip": "Überspringen",
+    "next": "Weiter",
+    "done": "Fertig",
+    "get_started": "Los geht's",
+    "scene": {
+      "milk_product": "Milch 1 L",
+      "cheapest_tag": "GÜNSTIGSTE",
+      "tab_home": "Start",
+      "tab_lists": "Meine Listen",
+      "tab_deals": "Angebote",
+      "tab_profile": "Profil",
+      "best_route_overline": "BESTE ROUTE"
+    },
+    "slides": {
+      "compare": {
+        "title": "Ich finde den günstigsten Preis",
+        "desc": "Ich vergleiche dasselbe Produkt zwischen Geschäften und zeige dir das günstigste."
+      },
+      "list": {
+        "title": "Verwalte deine Liste hier",
+        "desc": "Füge Produkte zu deiner Liste hinzu. Wie viele Artikel du hast, siehst du jederzeit im Badge „Meine Listen“."
+      },
+      "route": {
+        "title": "Ich plane die günstigste Route",
+        "desc": "Ist es in einem Geschäft günstiger oder aufgeteilt auf mehrere? Ich berechne es und empfehle die beste Option."
+      },
+      "save": {
+        "title": "Lass uns gemeinsam sparen",
+        "desc": "Sieh, wie viel du bei jedem Einkauf sparst. Wenn du bereit bist, schließe deinen Einkauf im günstigsten Geschäft ab!"
+      }
+    }
+  }
 }

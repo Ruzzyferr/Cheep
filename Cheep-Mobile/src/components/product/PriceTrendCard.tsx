@@ -7,7 +7,9 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../ui/Card';
+import { useLocale } from '../../context/LocaleContext';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import type { PriceHistoryResponse } from '../../services/product.service';
 
@@ -19,11 +21,12 @@ interface PriceTrendCardProps {
 const MAX_BARS = 24;
 const CHART_HEIGHT = 72;
 
-function formatPrice(value: number): string {
-  return `₺${value.toFixed(2)}`;
-}
-
 export function PriceTrendCard({ history, loading }: PriceTrendCardProps) {
+  const { t } = useTranslation();
+  const { formatMoney } = useLocale();
+  // formatPrice is a thin alias kept local to this component so it can close
+  // over formatMoney (a hook value) — module-scope helpers can't call hooks.
+  const formatPrice = (value: number): string => formatMoney(value);
   // En çok veri noktası olan market serisini seç
   const series = useMemo(() => {
     if (!history?.series?.length) return null;
@@ -50,17 +53,19 @@ export function PriceTrendCard({ history, loading }: PriceTrendCardProps) {
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <MaterialIcons name="show-chart" size={20} color={colors.primary.main} />
-          <Text style={styles.title}>Fiyat Geçmişi</Text>
+          <Text style={styles.title}>{t('product.price_history.title')}</Text>
         </View>
-        {history?.days ? <Text style={styles.subtitle}>Son {history.days} gün</Text> : null}
+        {history?.days ? (
+          <Text style={styles.subtitle}>{t('product.price_history.last_days', { count: history.days })}</Text>
+        ) : null}
       </View>
 
       {loading ? (
-        <Text style={styles.empty}>Yükleniyor…</Text>
+        <Text style={styles.empty}>{t('common.loading')}</Text>
       ) : !series || bars.length === 0 ? (
         <View style={styles.emptyWrap}>
           <MaterialIcons name="timeline" size={28} color={colors.text.hint} />
-          <Text style={styles.empty}>Henüz fiyat geçmişi birikmedi</Text>
+          <Text style={styles.empty}>{t('product.price_history.empty')}</Text>
         </View>
       ) : (
         <>
@@ -68,18 +73,18 @@ export function PriceTrendCard({ history, loading }: PriceTrendCardProps) {
             <View style={[styles.chip, styles.chipLow]}>
               <MaterialIcons name="arrow-downward" size={14} color={colors.primary.dark} />
               <Text style={styles.chipLowText}>
-                En düşük {history?.summary.lowest != null ? formatPrice(history.summary.lowest) : '—'}
+                {t('product.price_history.lowest')} {history?.summary.lowest != null ? formatPrice(history.summary.lowest) : '—'}
               </Text>
             </View>
             <View style={[styles.chip, styles.chipHigh]}>
               <MaterialIcons name="arrow-upward" size={14} color={colors.warning.dark} />
               <Text style={styles.chipHighText}>
-                En yüksek {history?.summary.highest != null ? formatPrice(history.summary.highest) : '—'}
+                {t('product.price_history.highest')} {history?.summary.highest != null ? formatPrice(history.summary.highest) : '—'}
               </Text>
             </View>
           </View>
 
-          <View style={styles.chart} accessibilityLabel="Fiyat geçmişi grafiği">
+          <View style={styles.chart} accessibilityLabel={t('product.price_history.chart_a11y')}>
             {bars.map((bar, i) => (
               <View
                 key={i}
@@ -91,7 +96,7 @@ export function PriceTrendCard({ history, loading }: PriceTrendCardProps) {
             ))}
           </View>
 
-          <Text style={styles.footer}>{series.store.name} fiyat seyri</Text>
+          <Text style={styles.footer}>{t('product.price_history.footer', { store: series.store.name })}</Text>
         </>
       )}
     </Card>

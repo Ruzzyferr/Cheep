@@ -6,7 +6,9 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { Card } from '../ui';
+import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import type { Product } from '../../types';
 
@@ -17,7 +19,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, onPress, showStore = false }: ProductCardProps) {
-  // Get lowest price — geçersiz/boş fiyatları (NaN) ele ki ₺NaN render edilmesin.
+  const { t } = useTranslation();
+  const { formatMoney } = useLocale();
+  // Get lowest price — geçersiz/boş fiyatları (NaN) ele ki formatMoney(NaN) render edilmesin.
   const validPrices = (product.store_prices ?? [])
     .map((sp) => parseFloat(sp.price))
     .filter((p) => Number.isFinite(p));
@@ -60,13 +64,13 @@ export function ProductCard({ product, onPress, showStore = false }: ProductCard
         <View style={styles.footer}>
           {lowestPrice ? (
             <View>
-              <Text style={styles.price}>₺{lowestPrice.toFixed(2)}</Text>
+              <Text style={styles.price}>{formatMoney(lowestPrice)}</Text>
               {showStore && storeName && (
                 <Text style={styles.store}>{storeName}</Text>
               )}
             </View>
           ) : (
-            <Text style={styles.noPrice}>Fiyat bilgisi yok</Text>
+            <Text style={styles.noPrice}>{t('product.no_price_info')}</Text>
           )}
         </View>
       </View>

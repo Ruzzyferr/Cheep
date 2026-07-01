@@ -17,12 +17,14 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { productService, categoryService } from '../../services';
 import { ProductGridCard } from '../../components/product/ProductGridCard';
 import { CategoryChip } from '../../components/common/CategoryChip';
 import { SelectListModal } from '../../components/list/SelectListModal';
 import { GridSkeleton } from '../../components/ui';
 import { useCart } from '../../context/CartContext';
+import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { Product } from '../../types';
 import type { Category } from '../../services/category.service';
@@ -34,6 +36,8 @@ export function CategoryProductsScreen({
 }: HomeStackScreenProps<'CategoryProducts'>) {
   const { categoryId, categoryName } = route.params;
   const cart = useCart();
+  const { t } = useTranslation();
+  const { formatMoney } = useLocale();
 
   // Sepete eklemek için seçilen ürün (liste seçim modalını açar)
   const [addProduct, setAddProduct] = useState<Product | null>(null);
@@ -182,14 +186,14 @@ export function CategoryProductsScreen({
       .slice(0, 3);
 
     return sortedPrices.map((sp) => ({
-      storeName: sp.store?.name || 'Bilinmeyen Market',
-      price: parseFloat(sp.price).toFixed(2),
+      storeName: sp.store?.name || t('product.unknown_store'),
+      price: formatMoney(parseFloat(sp.price)),
     }));
   };
 
   const getCurrentCategoryName = () => {
     if (selectedCategory === 0) {
-      return 'Tüm Kategoriler';
+      return t('product.all_categories');
     }
     const category = categories.find((c) => c.id === selectedCategory);
     return category?.name || categoryName;
@@ -241,7 +245,7 @@ export function CategoryProductsScreen({
         </View>
         {cart.activeList && (
           <Text style={styles.cartPillCaption} numberOfLines={1}>
-            Eklenecek liste: <Text style={styles.cartPillCaptionStrong}>{cart.activeList.name}</Text>
+            {t('product.target_list')} <Text style={styles.cartPillCaptionStrong}>{cart.activeList.name}</Text>
           </Text>
         )}
 
@@ -252,7 +256,7 @@ export function CategoryProductsScreen({
           contentContainerStyle={styles.categoriesScroll}
         >
           <CategoryChip
-            label="Tüm Kategoriler"
+            label={t('product.all_categories')}
             isActive={selectedCategory === 0}
             onPress={() => {
               setSelectedCategory(0);
@@ -277,7 +281,7 @@ export function CategoryProductsScreen({
             contentContainerStyle={styles.subcategoriesScroll}
           >
             <CategoryChip
-              label="Tümü"
+              label={t('common.all')}
               isActive={selectedSubcategory === null}
               onPress={() => setSelectedSubcategory(null)}
             />
@@ -336,12 +340,12 @@ export function CategoryProductsScreen({
               <ActivityIndicator size="small" color={colors.primary.main} />
             </View>
           ) : !hasMore && products.length > 0 ? (
-            <Text style={styles.footerEnd}>Tüm ürünler gösterildi</Text>
+            <Text style={styles.footerEnd}>{t('product.all_shown')}</Text>
           ) : null
         }
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Bu kategoride ürün bulunamadı</Text>
+            <Text style={styles.emptyText}>{t('product.category_empty')}</Text>
           </View>
         }
       />
@@ -351,7 +355,7 @@ export function CategoryProductsScreen({
       <SelectListModal
         visible={!!addProduct}
         productId={addProduct?.id ?? 0}
-        unit={addProduct?.store_prices?.[0]?.unit || 'adet'}
+        unit={addProduct?.store_prices?.[0]?.unit || t('common.unit_default')}
         onClose={() => setAddProduct(null)}
         onSelect={() => {
           cart.refresh();

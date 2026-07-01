@@ -6,11 +6,13 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import type { ProductConstraint } from '../../types';
 
 interface PriceInfo {
   storeName: string;
+  /** Already formatted via formatMoney() by the caller — includes the currency symbol. */
   price: string;
 }
 
@@ -33,6 +35,7 @@ export function ProductGridCard({
   onAddToCart,
   constraint,
 }: ProductGridCardProps) {
+  const { t } = useTranslation();
   return (
     <TouchableOpacity
       style={styles.container}
@@ -64,20 +67,20 @@ export function ProductGridCard({
         {/* Constraint badges */}
         {constraint?.warnings && constraint.warnings.length > 0 && (
           <View style={styles.warningBadge}>
-            <Text style={styles.warningBadgeText}>⚠️ etiketi kontrol et</Text>
+            <Text style={styles.warningBadgeText}>{t('product.check_label')}</Text>
           </View>
         )}
         {constraint?.hidden && (
-          <Text style={styles.dietLabel}>diyetine uymuyor</Text>
+          <Text style={styles.dietLabel}>{t('product.diet_mismatch')}</Text>
         )}
 
         {/* Top 3 Prices */}
         <View style={styles.pricesContainer}>
-          <Text style={styles.pricesLabel}>En ucuz 3 market:</Text>
+          <Text style={styles.pricesLabel}>{t('product.top_three_stores')}</Text>
           <View style={styles.pricesList}>
             {topThreePrices.slice(0, 3).map((priceInfo, index) => (
               <Text key={index} style={[styles.priceItem, index > 0 && { marginTop: 2 }]} numberOfLines={1}>
-                {priceInfo.storeName}: <Text style={styles.priceValue}>₺{priceInfo.price}</Text>
+                {priceInfo.storeName}: <Text style={styles.priceValue}>{priceInfo.price}</Text>
               </Text>
             ))}
           </View>
