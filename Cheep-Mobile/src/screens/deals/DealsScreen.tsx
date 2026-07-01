@@ -13,6 +13,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { productService } from '../../services';
 import { useLocale } from '../../context/LocaleContext';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -70,7 +71,8 @@ function buildDeals(products: Product[]): Deal[] {
 }
 
 export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) {
-  const { country } = useLocale();
+  const { t } = useTranslation();
+  const { country, formatMoney } = useLocale();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -121,7 +123,7 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
       activeOpacity={0.85}
       onPress={() => openProduct(item.product.id)}
       accessibilityRole="button"
-      accessibilityLabel={`${item.product.name}, %${item.savingsPct.toFixed(0)} avantaj`}
+      accessibilityLabel={t('deals.advantage_a11y', { name: item.product.name, percent: item.savingsPct.toFixed(0) })}
     >
       <View style={styles.cardTop}>
         <View style={styles.cardInfo}>
@@ -141,16 +143,16 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
       <View style={styles.cardBottom}>
         <View>
           <Text style={styles.priceLabel}>
-            {item.cheapestStore ? `En ucuz · ${item.cheapestStore}` : 'En ucuz'}
+            {item.cheapestStore ? t('deals.cheapest_at', { store: item.cheapestStore }) : t('deals.cheapest')}
           </Text>
           <View style={styles.priceRow}>
-            <Text style={styles.cheapest}>₺{item.cheapestPrice.toFixed(2)}</Text>
-            <Text style={styles.dearest}>₺{item.dearestPrice.toFixed(2)}</Text>
+            <Text style={styles.cheapest}>{formatMoney(item.cheapestPrice)}</Text>
+            <Text style={styles.dearest}>{formatMoney(item.dearestPrice)}</Text>
           </View>
         </View>
         <View style={styles.savingsBox}>
-          <Text style={styles.savingsLabel}>Tasarruf</Text>
-          <Text style={styles.savingsValue}>₺{item.savings.toFixed(2)}</Text>
+          <Text style={styles.savingsLabel}>{t('deals.savings')}</Text>
+          <Text style={styles.savingsValue}>{formatMoney(item.savings)}</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -159,8 +161,8 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Fırsatlar</Text>
-        <Text style={styles.subtitle}>Marketler arası en yüksek tasarruflar</Text>
+        <Text style={styles.title}>{t('deals.title')}</Text>
+        <Text style={styles.subtitle}>{t('deals.subtitle')}</Text>
       </View>
 
       {loading ? (
@@ -168,8 +170,8 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
       ) : deals.length === 0 ? (
         <EmptyState
           mascot="search"
-          title="Henüz fırsat yok"
-          description="Birden fazla markette satılan ürünler eklendikçe en iyi tasarruflar burada görünecek"
+          title={t('deals.empty_title')}
+          description={t('deals.empty_description')}
         />
       ) : (
         <FlatList

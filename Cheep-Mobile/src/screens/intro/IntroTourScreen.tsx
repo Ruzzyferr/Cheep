@@ -18,7 +18,9 @@ import {
 } from 'react-native';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import { useLocale } from '../../context/LocaleContext';
 import { CheepMascot, type MascotExpression } from '../../components/brand/CheepMascot';
 import { Float } from '../../components/anim';
 import { colors, typography, spacing, borderRadius, layout } from '../../theme';
@@ -50,29 +52,31 @@ function Pointer() {
 // ── Per-slide "scene" mocks (mascot points at a real bit of UI) ──────────────
 
 function SceneCompare() {
+  const { t } = useTranslation();
+  const { formatMoney } = useLocale();
   return (
     <View style={scene.card}>
       <View style={scene.productRow}>
         <View style={scene.thumb}>
           <MaterialCommunityIcons name="bottle-soda-classic" size={22} color={colors.primary.main} />
         </View>
-        <Text style={scene.productName}>Süt 1 L</Text>
+        <Text style={scene.productName}>{t('intro.scene.milk_product')}</Text>
       </View>
       <View style={scene.priceRow}>
         <View style={scene.priceChip}>
           <Text style={scene.priceStore}>Migros</Text>
-          <Text style={scene.priceVal}>₺25</Text>
+          <Text style={scene.priceVal}>{formatMoney(25)}</Text>
         </View>
         <View style={[scene.priceChip, scene.priceBest]}>
           <Text style={[scene.priceStore, scene.priceStoreBest]}>A101</Text>
-          <Text style={[scene.priceVal, scene.priceValBest]}>₺22</Text>
+          <Text style={[scene.priceVal, scene.priceValBest]}>{formatMoney(22)}</Text>
           <View style={scene.bestTag}>
-            <Text style={scene.bestTagText}>EN UCUZ</Text>
+            <Text style={scene.bestTagText}>{t('intro.scene.cheapest_tag')}</Text>
           </View>
         </View>
         <View style={scene.priceChip}>
           <Text style={scene.priceStore}>ŞOK</Text>
-          <Text style={scene.priceVal}>₺24</Text>
+          <Text style={scene.priceVal}>{formatMoney(24)}</Text>
         </View>
       </View>
     </View>
@@ -80,11 +84,12 @@ function SceneCompare() {
 }
 
 function SceneTab() {
+  const { t } = useTranslation();
   const items: { icon: keyof typeof MaterialIcons.glyphMap; label: string; active?: boolean }[] = [
-    { icon: 'home', label: 'Ana Sayfa' },
-    { icon: 'list-alt', label: 'Listelerim', active: true },
-    { icon: 'sell', label: 'Fırsatlar' },
-    { icon: 'person', label: 'Profil' },
+    { icon: 'home', label: t('intro.scene.tab_home') },
+    { icon: 'list-alt', label: t('intro.scene.tab_lists'), active: true },
+    { icon: 'sell', label: t('intro.scene.tab_deals') },
+    { icon: 'person', label: t('intro.scene.tab_profile') },
   ];
   return (
     <View style={scene.tabBar}>
@@ -110,26 +115,30 @@ function SceneTab() {
 }
 
 function SceneRoute() {
+  const { t } = useTranslation();
+  const { formatMoney } = useLocale();
   return (
     <View style={scene.card}>
-      <Text style={scene.routeOverline}>EN İYİ ROTA</Text>
+      <Text style={scene.routeOverline}>{t('intro.scene.best_route_overline')}</Text>
       <View style={scene.routeRow}>
         <Text style={scene.routeStores}>Migros + A101</Text>
-        <Text style={scene.routePrice}>₺229</Text>
+        <Text style={scene.routePrice}>{formatMoney(229)}</Text>
       </View>
       <View style={scene.routeCta}>
         <MaterialCommunityIcons name="map-marker-path" size={16} color={colors.background.paper} />
-        <Text style={scene.routeCtaText}>En Ucuz Rotayı Gör</Text>
+        <Text style={scene.routeCtaText}>{t('home.view_cheapest_route')}</Text>
       </View>
     </View>
   );
 }
 
 function SceneSavings() {
+  const { t } = useTranslation();
+  const { formatMoney } = useLocale();
   return (
     <View style={[scene.card, scene.savingsCard]}>
-      <Text style={scene.savingsOverline}>BU AY TASARRUF</Text>
-      <Text style={scene.savingsNumber}>₺1.240</Text>
+      <Text style={scene.savingsOverline}>{t('home.overline_saved')}</Text>
+      <Text style={scene.savingsNumber}>{formatMoney(1240)}</Text>
       <View style={scene.savingsPill}>
         <MaterialIcons name="trending-up" size={14} color={colors.success.dark} />
         <Text style={scene.savingsPillText}>+%12</Text>
@@ -142,48 +151,50 @@ type Slide = {
   key: string;
   expression: MascotExpression;
   scene: React.ReactNode;
-  title: string;
-  desc: string;
+  title: string; // i18n key
+  desc: string; // i18n key
   pointer?: boolean;
 };
 
+// title/desc hold i18n KEYS — resolved via t() in the FlatList renderItem below.
 const SLIDES: Slide[] = [
   {
     key: 'compare',
     expression: 'search',
     scene: <SceneCompare />,
-    title: 'En ucuzu ben bulurum',
-    desc: 'Aynı ürünü Migros, A101, ŞOK ve CarrefourSA’da karşılaştırır, en ucuz marketi sana gösteririm.',
+    title: 'intro.slides.compare.title',
+    desc: 'intro.slides.compare.desc',
     pointer: true,
   },
   {
     key: 'list',
     expression: 'happy',
     scene: <SceneTab />,
-    title: 'Listeni buradan yönet',
-    desc: 'Ürünleri listene ekle. Kaç ürün olduğunu “Listelerim” rozetinden her an görürsün.',
+    title: 'intro.slides.list.title',
+    desc: 'intro.slides.list.desc',
     pointer: true,
   },
   {
     key: 'route',
     expression: 'happy',
     scene: <SceneRoute />,
-    title: 'En ucuz rotayı çizerim',
-    desc: 'Tek markette mi, birkaç markete bölünce mi daha ucuz? Hesaplar, en uygununu öneririm.',
+    title: 'intro.slides.route.title',
+    desc: 'intro.slides.route.desc',
     pointer: true,
   },
   {
     key: 'save',
     expression: 'celebrate',
     scene: <SceneSavings />,
-    title: 'Birlikte tasarruf edelim',
-    desc: 'Her alışverişte ne kadar kazandığını gör. Hazır olunca sepetini en ucuz markette tamamla!',
+    title: 'intro.slides.save.title',
+    desc: 'intro.slides.save.desc',
   },
 ];
 
 export function IntroTourScreen({ navigation, route }: any) {
   const replay: boolean = route?.params?.replay ?? false;
   const { markIntroSeen } = useAuth();
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [index, setIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -213,7 +224,7 @@ export function IntroTourScreen({ navigation, route }: any) {
         </View>
         {!isLast && (
           <TouchableOpacity onPress={finish} hitSlop={8} activeOpacity={0.7}>
-            <Text style={styles.skip}>Atla</Text>
+            <Text style={styles.skip}>{t('intro.skip')}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -244,8 +255,8 @@ export function IntroTourScreen({ navigation, route }: any) {
               </View>
             </View>
 
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.desc}>{item.desc}</Text>
+            <Text style={styles.title}>{t(item.title)}</Text>
+            <Text style={styles.desc}>{t(item.desc)}</Text>
           </View>
         )}
       />
@@ -262,7 +273,9 @@ export function IntroTourScreen({ navigation, route }: any) {
 
       <View style={styles.footer}>
         <TouchableOpacity style={styles.cta} onPress={next} activeOpacity={0.9}>
-          <Text style={styles.ctaText}>{isLast ? (replay ? 'Tamam' : 'Hadi başlayalım') : 'İleri'}</Text>
+          <Text style={styles.ctaText}>
+            {isLast ? (replay ? t('intro.done') : t('intro.get_started')) : t('intro.next')}
+          </Text>
           {!isLast && <MaterialIcons name="arrow-forward" size={20} color={colors.background.paper} />}
         </TouchableOpacity>
       </View>
