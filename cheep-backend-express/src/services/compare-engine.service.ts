@@ -249,7 +249,7 @@ export async function compareShoppingList(
     }
 
     // 3. Muadil ürün önerilerini bul
-    const alternatives = await findAlternativeProducts(listItems);
+    const alternatives = await findAlternativeProducts(listItems, options.countryId);
 
     // 4. Stratejileri sırala ve skorla
     const sortedStrategies = sortStrategies(strategies, options.favoriteStoreIds || []);
@@ -566,7 +566,8 @@ function calculateOptimalAllocation(
 // ============================================
 
 async function findAlternativeProducts(
-    listItems: ProductInList[]
+    listItems: ProductInList[],
+    countryId?: number
 ): Promise<CompareResult['alternatives']> {
     const alternatives: CompareResult['alternatives'] = [];
 
@@ -578,6 +579,7 @@ async function findAlternativeProducts(
             where: {
                 muadil_grup_id: item.product.muadil_grup_id,
                 id: { not: item.product.id }, // Kendisi hariç
+                ...(countryId ? { country_id: countryId } : {}),
             },
             include: {
                 store_prices: {
