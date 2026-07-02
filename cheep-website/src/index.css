@@ -1,0 +1,321 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   Cheep — "Fresh Market" design tokens (Tailwind v4 @theme)
+   Warm cream canvas · deep forest depth · mint savings · clementine deals.
+   Display = Space Grotesk · Body = Hanken Grotesk · Data = Space Mono.
+   ============================================================ */
+@theme {
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* Cream paper */
+  --color-cream: #fbfaf6;
+  --color-cream-deep: #f3f1ea;
+  --color-paper: #ffffff;
+
+  /* Forest — brand + depth (the dominant color, not an accent) */
+  --color-forest: #1f6f4a;
+  --color-forest-500: #2e9e78;
+  --color-forest-dark: #16513a;
+  --color-forest-deep: #0f3a29;
+  --color-forest-night: #0a2a1e;
+
+  /* Mint — savings / mascot / soft positive fills */
+  --color-mint: #57c99a;
+  --color-mint-500: #2e9e78;
+  --color-mint-soft: #e8f7ef;
+
+  /* Clementine — deals, warmth, the one hot accent */
+  --color-clementine: #f0682b;
+  --color-clementine-light: #f89b6f;
+  --color-clementine-dark: #c8521e;
+
+  /* Ink + neutrals */
+  --color-ink: #14211b;
+  --color-ink-soft: #5b6b62;
+  --color-ink-hint: #93a29a;
+
+  /* Lilac — secondary cool accent, used sparingly */
+  --color-lilac: #c9b8e8;
+  --color-lilac-soft: #efeaf8;
+
+  --color-line: #e7e3d8;
+
+  /* Motion */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------------------------------------------------------------- base */
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: auto; /* Lenis owns scrolling */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 18px;
+    line-height: 1.6;
+    letter-spacing: 0.1px;
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--color-ink);
+    margin: 0;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+  }
+
+  ::selection {
+    background: var(--color-clementine);
+    color: #fff;
+  }
+
+  /* Custom focus ring — accessibility floor */
+  :focus-visible {
+    outline: 3px solid var(--color-forest-500);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* Thin, on-brand scrollbar for the (non-Lenis) fallback */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-cream-deep);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-forest);
+    border-radius: 999px;
+    border: 2px solid var(--color-cream-deep);
+  }
+}
+
+/* ---------------------------------------------------------------- utilities */
+@layer utilities {
+  /* Section rhythm */
+  .container-cheep {
+    width: 100%;
+    max-width: 1240px;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 3rem);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  /* Fluid display scale */
+  .text-hero {
+    font-size: clamp(2.75rem, 9vw, 8.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.045em;
+  }
+  .text-section {
+    font-size: clamp(2rem, 5.5vw, 4.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+  }
+
+  .text-gradient-clementine {
+    background: linear-gradient(100deg, #f0682b 0%, #f89b6f 55%, #f0682b 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .text-gradient-forest {
+    background: linear-gradient(100deg, #2e9e78 0%, #57c99a 50%, #1f6f4a 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Glass surface */
+  .glass {
+    background: rgba(255, 255, 255, 0.62);
+    backdrop-filter: blur(18px) saturate(1.4);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+  }
+  .glass-dark {
+    background: rgba(15, 58, 41, 0.55);
+    backdrop-filter: blur(18px) saturate(1.3);
+    -webkit-backdrop-filter: blur(18px) saturate(1.3);
+    border: 1px solid rgba(87, 201, 154, 0.22);
+  }
+
+  .shadow-soft {
+    box-shadow:
+      0 2px 8px -2px rgba(20, 33, 27, 0.08),
+      0 12px 40px -12px rgba(20, 33, 27, 0.16);
+  }
+  .shadow-lift {
+    box-shadow:
+      0 4px 12px -4px rgba(20, 33, 27, 0.1),
+      0 24px 60px -20px rgba(20, 33, 27, 0.28);
+  }
+  .shadow-clementine {
+    box-shadow: 0 16px 40px -12px rgba(240, 104, 43, 0.5);
+  }
+
+  /* Mouse-follow spotlight card (bento) */
+  .spotlight-card {
+    position: relative;
+    overflow: hidden;
+  }
+  .spotlight-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      340px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(240, 104, 43, 0.22),
+      transparent 62%
+    );
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  .spotlight-card:hover::before {
+    opacity: 1;
+  }
+
+  /* Legal / long-form prose */
+  .prose-cheep {
+    color: var(--color-ink-soft);
+    font-size: 1.02rem;
+    line-height: 1.75;
+  }
+  .prose-cheep h2 {
+    font-size: 1.6rem;
+    color: var(--color-ink);
+    margin: 2.4rem 0 0.8rem;
+  }
+  .prose-cheep h3 {
+    font-size: 1.2rem;
+    color: var(--color-ink);
+    margin: 1.6rem 0 0.5rem;
+  }
+  .prose-cheep p {
+    margin: 0 0 1rem;
+  }
+  .prose-cheep ul {
+    margin: 0 0 1.2rem;
+    padding-left: 1.2rem;
+    list-style: none;
+  }
+  .prose-cheep li {
+    position: relative;
+    margin-bottom: 0.5rem;
+    padding-left: 1.2rem;
+  }
+  .prose-cheep li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--color-mint-500);
+  }
+  .prose-cheep a {
+    color: var(--color-forest);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .prose-cheep strong {
+    color: var(--color-ink);
+    font-weight: 700;
+  }
+
+  .grain {
+    position: relative;
+  }
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+  }
+}
+
+/* ---------------------------------------------------------------- keyframes */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes shine {
+  from {
+    background-position: 200% center;
+  }
+  to {
+    background-position: -200% center;
+  }
+}
+@keyframes blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.1);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+.animate-marquee {
+  animation: marquee 32s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
