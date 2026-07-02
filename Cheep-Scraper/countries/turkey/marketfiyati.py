@@ -29,13 +29,13 @@ logger = logging.getLogger("marketfiyati")
 API_BASE = "https://api.marketfiyati.org.tr/api/v2"
 SITEMAP_INDEX = "https://marketfiyati.org.tr/sitemaps/sitemap.xml"
 GEO = {"latitude": 39.925, "longitude": 32.866, "distance": 900000}
-MAX_RETRIES = 4
+MAX_RETRIES = 2                    # bloklu istek hızla pes etsin (sağlık-kapısı halleder)
 CHUNK_SIZE = 900
-WORKERS = 2                        # eşzamanlı istek — WAF-dostu (düşük tutuldu)
-REQUEST_PACE = 0.25               # her istek sonrası worker beklemesi
-CHUNK = 500                        # sağlık-kapısı + ara-ingest granülü
-MAX_PASSES = 8                     # bloklanan ID'ler için tekrar geçiş sayısı
-BLOCK_WAIT = 240                   # API bloklu iken bekleme (sn)
+WORKERS = 3                        # eşzamanlı istek
+REQUEST_PACE = 0.15               # her istek sonrası worker beklemesi
+CHUNK = 100                        # küçük → bloğu hızlı yakala, sağlık-kapısı sık devreye girsin
+MAX_PASSES = 10                    # bloklanan ID'ler için tekrar geçiş sayısı
+BLOCK_WAIT = 120                   # API bloklu iken bekleme (sn) — sık yeniden dene
 EMPTY = "__EMPTY__"                # ürün bulunamadı (hata değil) işareti
 
 STORE_MAP: Dict[str, int] = {
@@ -256,9 +256,11 @@ def _load_done(path: str) -> set:
 
 
 def run(api_url: str, api_key: Optional[str], limit: int = 0, dry_run: bool = False,
-        resume_file: str = "mf_done.txt"):
+        resume_file: str = "mf_done.txt", start: int = 0, end: int = 0):
     session = _session()
     ids = fetch_all_ids(session)
+    if start or end:
+        ids = ids[start:(end or len(ids))]   # paralel çalıştırma için dilim
     if limit:
         ids = ids[:limit]
     done_ids = _load_done(resume_file)
@@ -321,9 +323,12 @@ def main():
     ap.add_argument("--api-url", default=os.getenv("CHEEP_API_URL", "http://localhost:3000/api/v1"))
     ap.add_argument("--api-key", default=os.getenv("INGEST_API_KEY"))
     ap.add_argument("--limit", type=int, default=0, help="test için ilk N id")
+    ap.add_argument("--start", type=int, default=0, help="dilim başlangıç indeksi (paralel)")
+    ap.add_argument("--end", type=int, default=0, help="dilim bitiş indeksi (paralel)")
+    ap.add_argument("--resume-file", default="mf_done.txt")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
-    run(args.api_url, args.api_key, args.limit, args.dry_run)
+    run(args.api_url, args.api_key, args.limit, args.dry_run, args.resume_file, args.start, args.end)
 
 
 if __name__ == "__main__":
