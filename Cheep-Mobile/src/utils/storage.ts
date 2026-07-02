@@ -32,6 +32,7 @@ const STORAGE_KEYS = {
   USER_COUNTRY: 'user_country',
   FAVORITE_STORES: 'favorite_stores',
   USER_LANGUAGE: 'user_language',
+  LOCATION_CONSENT: 'kvkk_location_consent', // KVKK açık rıza: 'granted' | 'denied' | (yok=belirsiz)
 } as const;
 
 // Generic storage functions
@@ -166,6 +167,22 @@ export const locationStorage = {
   async getLocation(): Promise<{ lat: number; lon: number } | null> {
     const data = await storage.getItem(STORAGE_KEYS.USER_LOCATION);
     return data ? JSON.parse(data) : null;
+  },
+};
+
+// KVKK — konum işleme açık rızası (m.5/m.10). Aydınlatmadan AYRI, opt-in, iptal
+// edilebilir. Değer: 'granted' | 'denied' | null (henüz karar verilmedi).
+export type LocationConsent = 'granted' | 'denied' | null;
+export const consentStorage = {
+  async getLocationConsent(): Promise<LocationConsent> {
+    const v = await storage.getItem(STORAGE_KEYS.LOCATION_CONSENT);
+    return v === 'granted' || v === 'denied' ? v : null;
+  },
+  async setLocationConsent(v: 'granted' | 'denied'): Promise<void> {
+    await storage.setItem(STORAGE_KEYS.LOCATION_CONSENT, v);
+  },
+  async clearLocationConsent(): Promise<void> {
+    await storage.removeItem(STORAGE_KEYS.LOCATION_CONSENT);
   },
 };
 

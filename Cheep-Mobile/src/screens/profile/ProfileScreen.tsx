@@ -28,7 +28,8 @@ import type { ProfileStackScreenProps } from '../../navigation/types';
 import type { UserProfile } from '../../types';
 import { ONBOARDING_QUESTIONS } from '../onboarding/onboardingConfig';
 import i18n, { SUPPORTED_LANGUAGES } from '../../i18n';
-import { languageStorage } from '../../utils/storage';
+import { languageStorage, type LocationConsent } from '../../utils/storage';
+import { getLocationConsent, ensureLocationConsent, revokeLocationConsent } from '../../utils/consent';
 
 // ─── Preference option lists from onboarding config ───────────────────────────
 const HOUSEHOLD_OPTIONS = ONBOARDING_QUESTIONS.find((q) => q.key === 'household_size')!.options!;
@@ -62,6 +63,9 @@ export function ProfileScreen({
   const [weeklyBudget, setWeeklyBudget] = useState<string>('');
   const [customAllergy, setCustomAllergy] = useState('');
 
+  // ─── KVKK konum açık-rıza durumu ───────────────────────────────────────────
+  const [locConsent, setLocConsent] = useState<LocationConsent>(null);
+
   // ─── Load profile + stats on focus ─────────────────────────────────────────
   useFocusEffect(
     useCallback(() => {
@@ -82,6 +86,12 @@ export function ProfileScreen({
         } catch {
           /* keep zeros */
         }
+      })();
+
+      // KVKK konum rıza durumunu yükle
+      (async () => {
+        const c = await getLocationConsent();
+        if (alive) setLocConsent(c);
       })();
 
       // Load preferences
@@ -111,6 +121,18 @@ export function ProfileScreen({
   );
 
   // ─── Handlers ───────────────────────────────────────────────────────────────
+  // KVKK: konum açık-rızasını aç/geri al (ilgili kişi hakkı — ayarlardan yönetim).
+  const handleToggleLocationConsent = useCallback(async () => {
+    const current = await getLocationConsent();
+    if (current === 'granted') {
+      await revokeLocationConsent();
+      setLocConsent('denied');
+    } else {
+      const ok = await ensureLocationConsent();
+      setLocConsent(ok ? 'granted' : 'denied');
+    }
+  }, []);
+
   const handleLogout = () => {
     Alert.alert(t('profile.logout_title'), t('profile.logout_confirm'), [
       { text: t('common.cancel'), style: 'cancel' },
@@ -397,6 +419,17 @@ export function ProfileScreen({
                 // Intro, root stack'te (replay modu); navigate üst navigatöre yükselir
                 (navigation as any).navigate('Intro', { replay: true })
               }
+            />
+            <Divider />
+            <MenuItem
+              icon="location-on"
+              title="Konum izni (KVKK)"
+              subtitle={
+                locConsent === 'granted'
+                  ? 'Açık · en yakın market için yaklaşık konum işlenir'
+                  : 'Kapalı · konum işlenmiyor'
+              }
+              onPress={handleToggleLocationConsent}
             />
           </Card>
         </View>

@@ -5,6 +5,7 @@
 
 import * as Location from 'expo-location';
 import { locationStorage } from './storage';
+import { ensureLocationConsent, hasLocationConsent } from './consent';
 
 export interface Coords {
   lat: number;
@@ -47,6 +48,11 @@ export function formatDistance(km: number): string {
  */
 export async function getUserLocation(): Promise<Coords | null> {
   try {
+    // KVKK: OS izninden ÖNCE açık rıza. Rıza yoksa konumu HİÇ isteme; cache'e düş.
+    const consented = await ensureLocationConsent();
+    if (!consented) {
+      return await locationStorage.getLocation();
+    }
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
       return await locationStorage.getLocation();
@@ -68,6 +74,10 @@ export async function getUserLocation(): Promise<Coords | null> {
  */
 export async function getCountryCode(): Promise<string | null> {
   try {
+    // Pasif ülke tespiti — SESSİZ: yalnızca daha önce açık rıza verildiyse konuma
+    // bak, aksi halde istem gösterme (kullanıcı ülkeyi elle seçer). Rıza istemi,
+    // kullanıcı aktif bir konum özelliğini (getUserLocation) kullandığında çıkar.
+    if (!(await hasLocationConsent())) return null;
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') return null;
     const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
