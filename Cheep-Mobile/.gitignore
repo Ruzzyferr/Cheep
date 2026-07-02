@@ -68,3 +68,7 @@ detailshot.py
 introverify.py
 verify_multicountry.py
 verify_multicountry_results.json
+
+# Upload keystore + signing secrets — NEVER commit
+android/key.properties
+android/app/cheep-upload.keystore
