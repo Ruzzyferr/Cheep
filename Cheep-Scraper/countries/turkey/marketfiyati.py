@@ -29,10 +29,14 @@ logger = logging.getLogger("marketfiyati")
 API_BASE = "https://api.marketfiyati.org.tr/api/v2"
 SITEMAP_INDEX = "https://marketfiyati.org.tr/sitemaps/sitemap.xml"
 GEO = {"latitude": 39.925, "longitude": 32.866, "distance": 900000}
-MAX_RETRIES = 5
+MAX_RETRIES = 4
 CHUNK_SIZE = 900
-WORKERS = 6                        # eşzamanlı searchByIdentity isteği (WAF-dostu)
-INGEST_BATCH = 2500                # kaç ürün toplanınca ara-ingest yapılır
+WORKERS = 2                        # eşzamanlı istek — WAF-dostu (düşük tutuldu)
+REQUEST_PACE = 0.25               # her istek sonrası worker beklemesi
+CHUNK = 500                        # sağlık-kapısı + ara-ingest granülü
+MAX_PASSES = 8                     # bloklanan ID'ler için tekrar geçiş sayısı
+BLOCK_WAIT = 240                   # API bloklu iken bekleme (sn)
+EMPTY = "__EMPTY__"                # ürün bulunamadı (hata değil) işareti
 
 STORE_MAP: Dict[str, int] = {
     "migros": 1, "carrefour": 2, "a101": 3, "sok": 4,
@@ -137,10 +141,11 @@ def fetch_all_ids(session: requests.Session) -> List[str]:
     return ids
 
 
-def fetch_product(session: requests.Session, pid: str) -> Optional[dict]:
-    """Bir ürünü id ile çeker (searchByIdentity — facet DEĞİL, WAF bloklamaz)."""
+def fetch_product(session: requests.Session, pid: str):
+    """Bir ürünü id ile çeker (searchByIdentity — facet DEĞİL). Döner:
+    dict (veri) | EMPTY (bulunamadı, hata değil) | None (istek başarısız/bloklu)."""
     body = {"identity": pid, "identityType": "id", **GEO}
-    delay = 1.0
+    delay = 1.5
     for attempt in range(MAX_RETRIES):
         try:
             r = session.post(f"{API_BASE}/searchByIdentity", json=body, timeout=20)
@@ -148,11 +153,17 @@ def fetch_product(session: requests.Session, pid: str) -> Optional[dict]:
                 raise requests.RequestException(f"HTTP {r.status_code}")
             r.raise_for_status()
             content = r.json().get("content") or []
-            return content[0] if content else None
+            time.sleep(REQUEST_PACE)
+            return content[0] if content else EMPTY
         except (requests.RequestException, ValueError):
             if attempt < MAX_RETRIES - 1:
                 time.sleep(delay); delay *= 1.8
     return None
+
+
+def health_ok(session: requests.Session) -> bool:
+    """API yanıt veriyor mu (bilinen bir id ile)."""
+    return fetch_product(session, "0002") is not None
 
 
 def _unit_from(refined: str) -> str:
@@ -237,43 +248,71 @@ def ingest(payloads: List[Dict], api_url: str, api_key: Optional[str]) -> Dict:
     return stats
 
 
-def run(api_url: str, api_key: Optional[str], limit: int = 0, dry_run: bool = False):
+def _load_done(path: str) -> set:
+    if not path or not os.path.exists(path):
+        return set()
+    with open(path, encoding="utf-8") as f:
+        return set(line.strip() for line in f if line.strip())
+
+
+def run(api_url: str, api_key: Optional[str], limit: int = 0, dry_run: bool = False,
+        resume_file: str = "mf_done.txt"):
     session = _session()
     ids = fetch_all_ids(session)
     if limit:
         ids = ids[:limit]
-    logger.info("TOPLAM ID: %d — %d worker, %d'lik ara-ingest", len(ids), WORKERS, INGEST_BATCH)
+    done_ids = _load_done(resume_file)
+    logger.info("TOPLAM ID: %d (işlenmiş=%d) — %d worker, %d'lik chunk, %d geçiş",
+                len(ids), len(done_ids), WORKERS, CHUNK, MAX_PASSES)
 
     grand_prod = 0
     grand_ing = {"total": 0, "successful": 0, "failed": 0}
-    batch: Dict[str, dict] = {}
-    done = 0
+    done_fp = open(resume_file, "a", encoding="utf-8") if resume_file else None
 
-    def flush():
-        nonlocal batch, grand_prod
-        if not batch:
-            return
-        payloads = build_price_payloads(batch)
-        grand_prod += len(batch)
-        if not dry_run:
-            st = ingest(payloads, api_url, api_key)
-            for k in grand_ing:
-                grand_ing[k] += st[k]
-        logger.info("ara-ingest: ürün=%d payload=%d | işlenen=%d/%d | toplam_ürün=%d",
-                    len(batch), len(payloads), done, len(ids), grand_prod)
-        batch = {}
-
-    with ThreadPoolExecutor(max_workers=WORKERS) as ex:
-        futures = {ex.submit(fetch_product, session, pid): pid for pid in ids}
-        for fut in as_completed(futures):
-            done += 1
-            item = fut.result()
-            if item and item.get("id"):
-                batch[str(item["id"])] = item
-            if len(batch) >= INGEST_BATCH:
-                flush()
-    flush()
-    logger.info("BİTTİ — toplam ürün=%d, INGEST=%s", grand_prod, grand_ing)
+    for pas in range(1, MAX_PASSES + 1):
+        todo = [i for i in ids if i not in done_ids]
+        if not todo:
+            break
+        logger.info("=== GEÇİŞ %d — kalan id=%d ===", pas, len(todo))
+        for c in range(0, len(todo), CHUNK):
+            chunk = todo[c:c + CHUNK]
+            # sağlık kapısı: API bloklu ise bekle
+            waited = 0
+            while not health_ok(session):
+                waited += 1
+                logger.info("API bloklu — %d sn bekleniyor (chunk %d/%d, geçiş %d)",
+                            BLOCK_WAIT, c // CHUNK + 1, (len(todo) + CHUNK - 1) // CHUNK, pas)
+                time.sleep(BLOCK_WAIT)
+                if waited >= 15:   # ~1 saat blok → bu geçişi bırak
+                    logger.warning("uzun blok — geçiş sonlandırılıyor"); break
+            batch: Dict[str, dict] = {}
+            with ThreadPoolExecutor(max_workers=WORKERS) as ex:
+                futs = {ex.submit(fetch_product, session, pid): pid for pid in chunk}
+                for fut in as_completed(futs):
+                    pid = futs[fut]
+                    res = fut.result()
+                    if res is None:
+                        continue                      # istek başarısız → sonraki geçişte tekrar
+                    done_ids.add(pid)
+                    if done_fp:
+                        done_fp.write(pid + "\n")
+                    if res is not EMPTY and res.get("id"):
+                        batch[str(res["id"])] = res
+                if done_fp:
+                    done_fp.flush()
+            if batch:
+                payloads = build_price_payloads(batch)
+                grand_prod += len(batch)
+                if not dry_run:
+                    st = ingest(payloads, api_url, api_key)
+                    for k in grand_ing:
+                        grand_ing[k] += st[k]
+                logger.info("ara-ingest: ürün=%d payload=%d | işlenmiş=%d/%d | toplam_ürün=%d",
+                            len(batch), len(payloads), len(done_ids), len(ids), grand_prod)
+    if done_fp:
+        done_fp.close()
+    logger.info("BİTTİ — toplam ürün=%d, işlenmiş id=%d/%d, INGEST=%s",
+                grand_prod, len(done_ids), len(ids), grand_ing)
 
 
 def main():
