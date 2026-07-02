@@ -21,6 +21,24 @@ export function Terms() {
         <li>Hesabını dilediğin an <a href="/delete">silebilirsin</a>.</li>
       </ul>
 
+      <h2>Marka adları ve fikri mülkiyet</h2>
+      <ul>
+        <li>
+          Uygulamada geçen tüm market ve ürün marka adları ile logoları, ilgili sahiplerinin
+          tescilli markalarıdır. Bu adlar yalnızca <strong>hangi markete ait fiyatın gösterildiğini
+          belirtmek</strong> için, atıf amacıyla kullanılır (dürüst kullanım).
+        </li>
+        <li>
+          Cheep, adı geçen marketlerle <strong>resmi bir ortaklık, bağlantı veya iş birliği içinde
+          değildir</strong> ve onlar tarafından desteklenmez.
+        </li>
+        <li>
+          Fiyat bilgileri herkese açık kaynaklardan derlenir. Herhangi bir marka sahibi
+          içeriğiyle ilgili talepte bulunmak isterse <a href="mailto:destek@cheep.live">destek@cheep.live</a>
+          üzerinden bize ulaşabilir; haklı taleplere hızla yanıt veririz.
+        </li>
+      </ul>
+
       <h2>Sorumluluk sınırı</h2>
       <p>
         Cheep, fiyat bilgilerinin eksiksizliği veya güncelliği konusunda garanti vermez; bu

@@ -58,7 +58,15 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-cream/10 pt-8 text-sm text-cream/50 md:flex-row">
+        <p className="mt-14 border-t border-cream/10 pt-8 text-xs leading-relaxed text-cream/45">
+          Tüm marka adları ve logoları ilgili sahiplerinin tescilli markalarıdır. Cheep bu
+          marketlerle resmi bir ortaklık veya iş birliği içinde değildir; marka adları yalnızca
+          hangi markete ait fiyatın gösterildiğini belirtmek için kullanılır. Fiyatlar
+          herkese açık kaynaklardan derlenir, bilgilendirme amaçlıdır ve kasadaki güncel
+          fiyattan farklı olabilir.
+        </p>
+
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 text-sm text-cream/50 md:flex-row">
           <p>© 2026 Cheep. Tüm hakları saklıdır.</p>
           <p className="font-mono text-xs">Türkiye’de sevgiyle yapıldı 🇹🇷</p>
         </div>

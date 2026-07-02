@@ -8,7 +8,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { colors, spacing, borderRadius, typography } from '../../theme';
-import { getStoreLogoAsset } from '../../utils/storeLogo';
+import { getStoreLogoAsset, getStoreTint, getStoreInitial } from '../../utils/storeLogo';
 import { useLocale } from '../../context/LocaleContext';
 
 interface ActiveListCardProps {
@@ -69,8 +69,8 @@ export function ActiveListCard({
                   ) : isUri ? (
                     <Image source={{ uri: store }} style={styles.logo} />
                   ) : (
-                    <View style={styles.logoPlaceholder}>
-                      <MaterialIcons name="store" size={16} color={colors.text.secondary} />
+                    <View style={[styles.logoPlaceholder, { backgroundColor: getStoreTint(String(store)) }]}>
+                      <Text style={styles.logoInitial}>{getStoreInitial(String(store))}</Text>
                     </View>
                   )}
                 </View>
@@ -191,6 +191,12 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  logoInitial: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 13,
   },
 
   moreLogos: {

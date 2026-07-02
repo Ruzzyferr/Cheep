@@ -18,7 +18,7 @@ import { productService, categoryService, affiliateService } from '../../service
 import { Card, Button } from '../../components/ui';
 import { PriceTrendCard } from '../../components/product/PriceTrendCard';
 import { SelectListModal } from '../../components/list/SelectListModal';
-import { getStoreLogoAsset } from '../../utils/storeLogo';
+import { getStoreTint, getStoreInitial } from '../../utils/storeLogo';
 import { openExternalUrl } from '../../utils/linking';
 import { useLocale } from '../../context/LocaleContext';
 import type { PriceHistoryResponse } from '../../services/product.service';
@@ -253,16 +253,16 @@ export function ProductDetailScreen({
                 <Card padding="md" style={[styles.priceCard, isCheapest && styles.cheapestCard]}>
                   <View style={styles.priceCardContent}>
                     <View style={styles.storeSection}>
-                      {getStoreLogoAsset(country, storePrice.store?.name) ? (
-                        <Image
-                          source={getStoreLogoAsset(country, storePrice.store?.name)}
-                          style={styles.storeLogo}
-                        />
-                      ) : (
-                        <View style={styles.storeLogoPlaceholder}>
-                          <MaterialIcons name="storefront" size={22} color={colors.primary.main} />
-                        </View>
-                      )}
+                      <View
+                        style={[
+                          styles.storeLogoPlaceholder,
+                          { backgroundColor: getStoreTint(storePrice.store?.name) },
+                        ]}
+                      >
+                        <Text style={styles.storeLogoInitial}>
+                          {getStoreInitial(storePrice.store?.name)}
+                        </Text>
+                      </View>
                       <View style={styles.storeInfo}>
                         <Text style={styles.storeName}>
                           {storePrice.store?.name || 'Market'}
@@ -633,6 +633,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.input,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+
+  storeLogoInitial: {
+    color: '#fff',
+    fontFamily: 'SpaceGrotesk_700Bold',
+    fontSize: 22,
+    fontWeight: '700',
   },
 
   storeInfo: {

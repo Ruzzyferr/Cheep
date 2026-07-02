@@ -1,32 +1,39 @@
 /**
- * 🏪 Store Logo Utility
- * Market logolarını ülkeye göre assets klasöründen yükler.
- * Ülkeler arası fallback YOK — yanlış ülkenin logosu asla gösterilmez.
+ * 🏪 Store Badge Utility
+ *
+ * Telifli market logoları KULLANILMAZ. Marka adları yalnızca atıf amacıyla
+ * (hangi markete ait fiyat gösteriliyor) metin/renk rozetiyle belirtilir — bu
+ * hukuki riski (logo telifi + marka tecavüzü) en aza indirir.
+ *
+ * `getStoreLogoAsset` geriye dönük uyumluluk için korunur ama daima null döner;
+ * böylece tüm çağrı yerleri renkli baş-harf rozeti fallback'ine düşer. İleride
+ * LİSANSLI bir logo eklenirse buraya konabilir.
  */
+import { colors } from '../theme';
 
-const normalize = (s: string) => s.toLowerCase().trim().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
-
-const LOGOS: Record<string, Record<string, any>> = {
-  TR: {
-    migros: require('../../assets/images/TurkiyeCompanies/M-Migros.png'),
-    carrefour: require('../../assets/images/TurkiyeCompanies/carrefour.webp'),
-    carrefoursa: require('../../assets/images/TurkiyeCompanies/carrefour.webp'),
-  },
-  CH: {}, SE: {}, DE: {}, PL: {}, // add requires as logo assets land
-};
-
-export function getStoreLogoAsset(country: string | null | undefined, storeName: string | null | undefined): any {
-  if (!storeName) return null;
-  const map = LOGOS[(country || '').toUpperCase()] ?? {};
-  const n = normalize(storeName);
-  if (map[n]) return map[n];
-  for (const [key, asset] of Object.entries(map)) {
-    if (n.includes(key) || key.includes(n)) return asset;
-  }
+/** Lisanslı logo yok → her zaman null (çağrı yerleri renkli rozete düşer). */
+export function getStoreLogoAsset(_country?: string | null, _storeName?: string | null): any {
   return null;
 }
 
-export function getStoreLogoSource(country: string | null | undefined, storeName: string | null | undefined): { source: any } | null {
-  const asset = getStoreLogoAsset(country, storeName);
-  return asset ? { source: asset } : null;
+export function getStoreLogoSource(_country?: string | null, _storeName?: string | null): { source: any } | null {
+  return null;
+}
+
+/** Markanın rozet arka-plan rengi (marka renk paleti; eşleşme yoksa forest). */
+export function getStoreTint(storeName?: string | null): string {
+  const n = (storeName || '').toLowerCase();
+  const map = colors.storeChips as Record<string, string>;
+  if (n.includes('bim')) return map.bim;
+  if (n.includes('migros')) return map.migros;
+  if (n.includes('a101')) return map.a101;
+  if (n.includes('şok') || n.includes('sok')) return map.sok;
+  if (n.includes('carrefour')) return map.carrefoursa;
+  return colors.primary.main;
+}
+
+/** Rozet etiketi — markanın baş harfi. */
+export function getStoreInitial(storeName?: string | null): string {
+  const s = (storeName || '').trim();
+  return s ? s.charAt(0).toUpperCase() : '?';
 }
