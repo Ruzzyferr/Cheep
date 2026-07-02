@@ -171,11 +171,24 @@ export class ProductMatcher {
         const ean = data.ean_barcode?.trim() || undefined;
         const resolvedCountryId =
             data.country_id ?? (await getCountryIdByCode(data.country_code));
+        // Payload'dan gelen kategori (marketfiyati üst-kategori id'si vb.)
+        const rawCat = data.category_id != null ? Number(data.category_id) : NaN;
+        const providedCategoryId = Number.isInteger(rawCat) ? rawCat : null;
+
         if (ean && resolvedCountryId) {
             const existingByEan = await prisma.product.findFirst({
                 where: { ean_barcode: ean, country_id: resolvedCountryId },
             });
             if (existingByEan) {
+                // Kategori backfill: mevcut ürünün kategorisi boşsa ve payload sağladıysa
+                // güncelle (kategorili re-ingest, eski kayıtları da kategoriler).
+                if (providedCategoryId !== null && existingByEan.category_id == null) {
+                    const updated = await prisma.product.update({
+                        where: { id: existingByEan.id },
+                        data: { category_id: providedCategoryId },
+                    });
+                    return { product: updated, isNew: false };
+                }
                 return { product: existingByEan, isNew: false };
             }
             // Bulunamadıysa oluştur — YARIŞ-GÜVENLİ. Aynı ürünün birden çok mağaza
@@ -192,6 +205,7 @@ export class ProductMatcher {
                         brand: data.brand,
                         country_id: resolvedCountryId,
                         ean_barcode: ean,
+                        category_id: providedCategoryId,
                     },
                 });
                 return { product: created, isNew: true };

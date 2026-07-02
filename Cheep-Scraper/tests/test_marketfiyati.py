@@ -5,13 +5,17 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from countries.turkey.marketfiyati import build_price_payloads, _unit_from, STORE_MAP
+from countries.turkey.marketfiyati import (
+    build_price_payloads, _unit_from, _category_id, STORE_MAP,
+)
 
 
-def _product(pid, depots, title="Test Ürün 500 Gr", brand="TestBrand", refined="500 GR"):
+def _product(pid, depots, title="Test Ürün 500 Gr", brand="TestBrand", refined="500 GR",
+             main_category="", menu_category=""):
     return {
         "id": pid, "title": title, "brand": brand, "refinedVolumeOrWeight": refined,
         "imageUrl": "https://cdn.marketfiyati.org.tr/carrefourimages/x.png",  # ATLANMALI (telif)
+        "main_category": main_category, "menu_category": menu_category,
         "productDepotInfoList": depots,
     }
 
@@ -78,3 +82,26 @@ def test_brand_and_name_forwarded():
 def test_empty_or_short_name_skipped():
     products = {"1": _product("1", [{"marketAdi": "bim", "price": 20.0}], title="")}
     assert build_price_payloads(products) == []
+
+
+def test_category_classification():
+    """main_category → Cheep üst kategori id (deterministik)."""
+    assert _category_id("Çikolata", "Atıştırmalık ve Tatlı", "Ülker Çikolata") == 85
+    assert _category_id("Süt", "Süt Ürünleri ve Kahvaltılık", "Pınar Süt 1 L") == 1
+    assert _category_id("Çamaşır Temizlik Ürünleri", "Temizlik", "Omo Deterjan") == 105
+    assert _category_id("Beyaz Et", "Et, Tavuk ve Balık", "Tavuk Göğüs") == 20
+    assert _category_id("Su", "İçecek", "Erikli Su 5 L") == 52
+    assert _category_id("Bebek ve Hasta Bezi", "", "Prima Bebek Bezi") == 171
+    assert _category_id("Kağıt Peçete ve Mendiller", "", "Selpak Peçete") == 355
+    # main/menu boş → ad üzerinden
+    assert _category_id("", "", "Yumurta 10'lu") == 74
+    # hiç eşleşme → Diğer(246)
+    assert _category_id("Bilinmeyen", "", "Zzz Qqq") == 246
+
+
+def test_payload_carries_category_id():
+    products = {"3": _product("3", [{"marketAdi": "migros", "price": 20.0}],
+                              title="Sütaş Yoğurt", main_category="Yoğurt",
+                              menu_category="Süt Ürünleri ve Kahvaltılık")}
+    p = build_price_payloads(products)[0]
+    assert p["category_id"] == 1  # Süt Ürünleri

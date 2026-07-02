@@ -47,6 +47,55 @@ STORE_MAP: Dict[str, int] = {
 
 ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu"}
 
+# marketfiyati kategorisini → Cheep ÜST kategori id'sine deterministik map.
+# (Cheep taksonomisi prod'dan: 1 Süt Ürünleri, 12 Meyve&Sebze, 20 Et/Tavuk/Balık,
+#  30 Temel Gıda, 52 İçecek, 63 Fırın&Pastane, 74 Kahvaltılık, 85 Atıştırmalık,
+#  94 Dondurma, 98 Hazır Yemek&Donuk, 105 Temizlik, 126 Kişisel Bakım,
+#  171 Bebek, 176 Pet Shop, 355 Kağıt&Hijyen, 246 Diğer)
+# Sıra ÖNEMLİ: özel kurallar genel olanlardan önce (ilk eşleşen kazanır).
+CATEGORY_RULES = [
+    (176, ["kedi", "köpek", "evcil", "pet ", "akvaryum", "kuş yemi", "tasma"]),
+    (171, ["bebek", "hasta bez", "çocuk bez", "biberon", "devam süt", "bebek mama"]),
+    (355, ["kağıt", "peçete", "mendil", "tuvalet kağ", "kağıt havlu", "ıslak mendil", "hijyen"]),
+    (105, ["deterjan", "temizli", "çamaşır", "bulaşık", "yüzey", "çamaşır su",
+           "kireç", "oda sprey", "cam temiz", "yumuşatıcı", "çöp poş"]),
+    (126, ["şampuan", "saç bak", "saç ", "diş macun", "diş fırç", "sabun", "duş jel",
+           "deodorant", "tıraş", "parfüm", "kolonya", " ped", "hijyenik ped",
+           "makyaj", "kozmet", "cilt", "kişisel bak", "el krem", "güneş krem", "sağlık ürün"]),
+    (20, ["tavuk", "kırmızı et", "beyaz et", "kıyma", " dana", " kuzu", "sucuk",
+          "salam", "sosis", "pastırma", "şarküteri", "sakatat", "hindi", "kanat",
+          "köfte", " balık", "ton balığı", "deniz ürün", "et ürün"]),
+    (1, ["süt ürün", " süt", "yoğurt", "peynir", "ayran", "kaymak", "tereyağı",
+         "kefir", "labne", "krema", "margarin", "kaşar"]),
+    (74, ["kahvalt", " bal ", "reçel", "zeytin", "pekmez", "tahin", "helva", "yumurta"]),
+    (63, ["ekmek", "fırın", "pastane", "unlu mamul", "poğaça", "simit", "yufka",
+          "baklava", "kadayıf", "börek", "pide"]),
+    (94, ["dondurma"]),
+    (85, ["çikolata", "bisküvi", "cips", "kraker", "gofret", "şekerleme", "kuruyem",
+          "sakız", " kek", "wafer", "atıştır", "tatlı", "çubuk", "fındık", "fıstık",
+          "leblebi", "gevrek", "bar "]),
+    (52, ["su", "içece", "kola", " çay", "kahve", "meyve su", "gazoz", "soda",
+          "maden su", "enerji içece", "nescafe", "limonata", "şalgam"]),
+    (98, ["hazır yemek", "donuk", "dondurul", "pizza", "hazır gıda karış"]),
+    (12, ["meyve", "sebze", "manav"]),
+    (30, ["makarna", "pirinç", "bakliyat", " un ", "şeker", " tuz", "salça", "sos",
+          "ketçap", "mayonez", " yağ", "baharat", "konserve", "bulgur", "mercimek",
+          "nohut", "sirke", "irmik", "nişasta", "mantı", "erişte", "çorba", "harç"]),
+]
+
+
+def _category_id(main_cat: str, menu_cat: str, name: str):
+    """Cheep üst kategori id (main_category → menu_category → ürün adı sırasıyla).
+    Hiçbiri eşleşmezse 246 (Diğer)."""
+    for text in (main_cat, menu_cat, name):
+        t = (text or "").lower()
+        if not t:
+            continue
+        for cid, keys in CATEGORY_RULES:
+            if any(k in t for k in keys):
+                return cid
+    return 246  # Diğer
+
 # Türk market kataloğunu geniş kapsayan arama terimleri (kategori + yaygın ürün).
 KEYWORDS: List[str] = [
     # Süt & kahvaltılık
@@ -226,6 +275,8 @@ def build_price_payloads(products: Dict[str, dict]) -> List[Dict]:
         ean = f"mf-{pid}"
         brand = (item.get("brand") or "").strip() or None
         unit = _unit_from(item.get("refinedVolumeOrWeight") or "")
+        category_id = _category_id(item.get("main_category") or "",
+                                   item.get("menu_category") or "", name)
 
         # chain başına tek fiyat (en düşük temsili)
         by_chain: Dict[str, float] = {}
@@ -253,6 +304,7 @@ def build_price_payloads(products: Dict[str, dict]) -> List[Dict]:
                 "confidence_score": 1.0,
                 "name": name[:255],
                 "ean_barcode": ean,
+                "category_id": category_id,
             }
             if brand:
                 payload["brand"] = brand[:100]
