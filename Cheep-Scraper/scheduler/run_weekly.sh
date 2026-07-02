@@ -8,4 +8,15 @@ cd "$APP_DIR"
 mkdir -p logs
 STAMP="$(date +%Y%m%d_%H%M%S)"
 if [ -f .env ]; then set -a; . ./.env; set +a; fi
-exec python3 -m countries._common.run_all_countries >> "logs/weekly-${STAMP}.log" 2>&1
+LOG="logs/weekly-${STAMP}.log"
+API="${CHEEP_API_URL:-http://localhost:3000/api/v1}"
+
+# TÜRKİYE: resmi devlet API'si marketfiyati.org.tr (TÜBİTAK BİLGEM) — SCRAPING DEĞİL.
+# Hukuki risk yok: kamuya açık, yönetmelikle paylaşıma açılmış veri.
+echo "=== TR marketfiyati $(date) ===" >> "$LOG"
+python3 countries/turkey/marketfiyati.py --api-url "$API" >> "$LOG" 2>&1 \
+  || echo "UYARI: marketfiyati TR başarısız" >> "$LOG"
+
+# Yabancı ülkeler (CH/SE/DE/PL)
+echo "=== yabancı ülkeler $(date) ===" >> "$LOG"
+python3 -m countries._common.run_all_countries >> "$LOG" 2>&1
