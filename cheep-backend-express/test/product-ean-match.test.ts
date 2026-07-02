@@ -44,36 +44,43 @@ describe('findOrCreateProduct EAN-first (country-scoped)', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
-  it('same EAN + different country → does NOT match, atomically upserts a new product', async () => {
+  it('same EAN + different country → does NOT match, creates a new product (country-scoped)', async () => {
     // EAN lookup is country-scoped → miss for CH even though DE has it.
     findFirst.mockResolvedValue(null); // EAN miss
-    // EAN present + not found → atomic upsert on the composite unique (race-safe).
-    upsert.mockResolvedValueOnce({ id: 101, name: 'Migros Milch 1L', country_id: 2, ean_barcode: '4008400404127' });
+    create.mockResolvedValueOnce({ id: 101, name: 'Migros Milch 1L', country_id: 2, ean_barcode: '4008400404127' });
     const { product, isNew } = await productMatcher.findOrCreateProduct({
       name: 'Migros Milch 1L', ean_barcode: '4008400404127', country_code: 'CH',
     });
     expect(isNew).toBe(true);
     expect(product.country_id).toBe(2);
-    expect(create).not.toHaveBeenCalled();
     // EAN lookup must be scoped by country_id.
     const eanCall = findFirst.mock.calls.find(c => c[0]?.where?.ean_barcode);
     expect(eanCall?.[0].where.country_id).toBe(2);
-    // upsert keyed on the composite unique, persisting ean + country.
-    const up = upsert.mock.calls[0][0];
-    expect(up.where.country_id_ean_barcode).toEqual({ country_id: 2, ean_barcode: '4008400404127' });
-    expect(up.create.ean_barcode).toBe('4008400404127');
-    expect(up.create.country_id).toBe(2);
+    // create persists ean + country.
+    expect(create.mock.calls[0][0].data.ean_barcode).toBe('4008400404127');
+    expect(create.mock.calls[0][0].data.country_id).toBe(2);
   });
 
-  it('persists ean_barcode via atomic upsert', async () => {
+  it('race-safe: on unique-violation (P2002) it returns the concurrently-created product', async () => {
+    // EAN miss on first lookup, but a parallel request creates it before our create.
+    findFirst
+      .mockResolvedValueOnce(null) // initial EAN lookup → miss
+      .mockResolvedValueOnce({ id: 55, name: 'Sütaş Kaşar', country_id: 1, ean_barcode: 'mf-389' }); // re-fetch after P2002
+    create.mockRejectedValueOnce(Object.assign(new Error('unique'), { code: 'P2002' }));
+    const { product, isNew } = await productMatcher.findOrCreateProduct({
+      name: 'Sütaş Kaşar', ean_barcode: 'mf-389', country_id: 1,
+    });
+    expect(isNew).toBe(false);
+    expect(product.id).toBe(55);
+  });
+
+  it('persists ean_barcode on create', async () => {
     findFirst.mockResolvedValue(null);
-    upsert.mockResolvedValueOnce({ id: 7, name: 'ICA Mjölk', country_id: 3, ean_barcode: '7300000000001' });
+    create.mockResolvedValueOnce({ id: 7, name: 'ICA Mjölk', country_id: 3, ean_barcode: '7300000000001' });
     await productMatcher.findOrCreateProduct({
       name: 'ICA Mjölk 1L', ean_barcode: '7300000000001', country_code: 'SE',
     });
-    const up = upsert.mock.calls[0][0];
-    expect(up.create.ean_barcode).toBe('7300000000001');
-    expect(up.where.country_id_ean_barcode.ean_barcode).toBe('7300000000001');
+    expect(create.mock.calls[0][0].data.ean_barcode).toBe('7300000000001');
   });
 
   it('no EAN → falls back to fingerprint path (EAN lookup not attempted)', async () => {

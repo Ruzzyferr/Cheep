@@ -178,27 +178,32 @@ export class ProductMatcher {
             if (existingByEan) {
                 return { product: existingByEan, isNew: false };
             }
-            // Bulunamadıysa ATOMİK upsert. Aynı ürünün birden çok mağaza fiyatı aynı
-            // ean_barcode'u taşır (ör. marketfiyati.org.tr'de bir ürün 6 zincirde);
-            // tek chunk'ta paralel gelince "önce-bul-sonra-oluştur" yarışı ikinci+
-            // kayıtları @@unique([country_id,ean_barcode])'e çarpıp düşürüyordu.
-            // Composite unique üzerinde upsert bu yarışı tamamen ortadan kaldırır.
-            const product = await prisma.product.upsert({
-                where: {
-                    country_id_ean_barcode: {
+            // Bulunamadıysa oluştur — YARIŞ-GÜVENLİ. Aynı ürünün birden çok mağaza
+            // fiyatı aynı ean_barcode'u taşır (ör. marketfiyati.org.tr'de bir ürün 6
+            // zincirde); tek bulk-upsert chunk'ında paralel gelince "önce-bul-sonra-
+            // oluştur" ikinci+ kayıtları @@unique([country_id,ean_barcode])'e çarpar.
+            // Prisma.upsert atomik DEĞİLDİR (SELECT+INSERT) — bu yarışı çözmez. Doğru
+            // desen: create dene, unique-ihlalinde (P2002) rakibin oluşturduğu ürünü
+            // yeniden sorgula ve onu döndür.
+            try {
+                const created = await prisma.product.create({
+                    data: {
+                        name: data.name,
+                        brand: data.brand,
                         country_id: resolvedCountryId,
                         ean_barcode: ean,
                     },
-                },
-                update: {},
-                create: {
-                    name: data.name,
-                    brand: data.brand,
-                    country_id: resolvedCountryId,
-                    ean_barcode: ean,
-                },
-            });
-            return { product, isNew: true };
+                });
+                return { product: created, isNew: true };
+            } catch (err) {
+                if ((err as { code?: string })?.code === 'P2002') {
+                    const raced = await prisma.product.findFirst({
+                        where: { ean_barcode: ean, country_id: resolvedCountryId },
+                    });
+                    if (raced) return { product: raced, isNew: false };
+                }
+                throw err;
+            }
         }
 
         const providedMuadil = data.muadil_grup_id?.trim();
