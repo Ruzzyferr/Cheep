@@ -26,18 +26,18 @@ export function Compare() {
 
       <div className="container-cheep relative grid grid-cols-1 items-center gap-14 lg:grid-cols-2">
         <Reveal className="max-w-xl">
-          <p className="eyebrow mb-5 text-mint">Gerçek veri · her hafta güncel</p>
+          <p className="eyebrow mb-5 text-mint">Resmi veri · her hafta güncel</p>
           <h2 className="text-section text-cream">
             Aynı ürün, <span className="text-gradient-clementine">her markette farklı fiyat.</span>
           </h2>
           <p className="mt-6 text-lg text-cream/70">
-            Bir kutu süt için marketten markete %10–15 fark ödeyebilirsin. Cheep, tam
-            olarak aynı ürünü barkodundan eşleştirir ve en ucuzunu saniyede önüne koyar —
+            Bir kutu süt için marketten markete %10–15 fark ödeyebilirsin. Cheep, aynı ürünün
+            zincirlerdeki fiyatını yan yana koyar ve en ucuzunu saniyede önüne getirir —
             tahmin yok, gezmek yok.
           </p>
           <div className="mt-8 flex items-center gap-3 font-mono text-sm text-mint">
             <span className="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-mint" />
-            Barkod eşleştirmeli · 5 ülke · 18.000+ ürün
+            Türkiye’de T.C. Ticaret Bakanlığı resmi verisi · her hafta güncel
           </div>
         </Reveal>
 
