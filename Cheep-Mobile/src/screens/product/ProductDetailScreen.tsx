@@ -311,6 +311,18 @@ export function ProductDetailScreen({
           </Card>
         )}
 
+        {/* Yasal: kaynak + bilgilendirme amaçlı disclaimer (6502 / Reklam Kurulu uyumu) */}
+        {prices.length > 0 && (
+          <View style={styles.disclaimerBox}>
+            <MaterialIcons name="info-outline" size={14} color={colors.text.hint} />
+            <Text style={styles.disclaimerText}>
+              Fiyatlar herkese açık resmi kaynaklardan derlenir ve bilgilendirme amaçlıdır;
+              anlık olarak değişebilir. Bağlayıcı olan, marketin kendi kanalındaki güncel
+              fiyattır. Karşılaştırma yalnızca listelenen marketler arasındadır.
+            </Text>
+          </View>
+        )}
+
         {/* Affiliate: en ucuz markette al */}
         {priceStats?.cheapest?.store?.id ? (
           <Button
@@ -640,6 +652,24 @@ const styles = StyleSheet.create({
     fontFamily: 'SpaceGrotesk_700Bold',
     fontSize: 22,
     fontWeight: '700',
+  },
+
+  disclaimerBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    marginTop: 14,
+    marginHorizontal: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: colors.background.input,
+    borderRadius: borderRadius.md,
+  },
+  disclaimerText: {
+    flex: 1,
+    fontSize: 11,
+    lineHeight: 15,
+    color: colors.text.secondary,
   },
 
   storeInfo: {
