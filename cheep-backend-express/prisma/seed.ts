@@ -107,6 +107,24 @@ async function main() {
         },
     });
 
+    // TR ek zincirler (marketfiyati.org.tr resmi API'sinde bulunanlar) — logo YOK (marka/telif)
+    const bim = await prisma.store.upsert({
+        where: { id: 5 },
+        update: {},
+        create: { id: 5, name: 'BİM', logo_url: null, address: 'Türkiye geneli', country_id: tr.id },
+    });
+    const tarimKredi = await prisma.store.upsert({
+        where: { id: 6 },
+        update: {},
+        create: { id: 6, name: 'Tarım Kredi Market', logo_url: null, address: 'Türkiye geneli', country_id: tr.id },
+    });
+    const hakmar = await prisma.store.upsert({
+        where: { id: 7 },
+        update: {},
+        create: { id: 7, name: 'Hakmar', logo_url: null, address: 'Türkiye geneli', country_id: tr.id },
+    });
+    void bim; void tarimKredi; void hakmar;
+
     // CH 10–19
     const migrosCh = await prisma.store.upsert({ where: { id: 10 }, update: {}, create: { id: 10, name: 'Migros', logo_url: null, address: 'Zürich', country_id: ch.id } });
     const coopCh = await prisma.store.upsert({ where: { id: 11 }, update: {}, create: { id: 11, name: 'Coop', logo_url: null, address: 'Bern', country_id: ch.id } });

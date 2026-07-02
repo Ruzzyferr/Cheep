@@ -178,6 +178,27 @@ export class ProductMatcher {
             if (existingByEan) {
                 return { product: existingByEan, isNew: false };
             }
+            // Bulunamadıysa ATOMİK upsert. Aynı ürünün birden çok mağaza fiyatı aynı
+            // ean_barcode'u taşır (ör. marketfiyati.org.tr'de bir ürün 6 zincirde);
+            // tek chunk'ta paralel gelince "önce-bul-sonra-oluştur" yarışı ikinci+
+            // kayıtları @@unique([country_id,ean_barcode])'e çarpıp düşürüyordu.
+            // Composite unique üzerinde upsert bu yarışı tamamen ortadan kaldırır.
+            const product = await prisma.product.upsert({
+                where: {
+                    country_id_ean_barcode: {
+                        country_id: resolvedCountryId,
+                        ean_barcode: ean,
+                    },
+                },
+                update: {},
+                create: {
+                    name: data.name,
+                    brand: data.brand,
+                    country_id: resolvedCountryId,
+                    ean_barcode: ean,
+                },
+            });
+            return { product, isNew: true };
         }
 
         const providedMuadil = data.muadil_grup_id?.trim();

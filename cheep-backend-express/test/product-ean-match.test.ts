@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const findFirst = vi.fn();
 const create = vi.fn();
+const upsert = vi.fn();
 const findMany = vi.fn();
 const update = vi.fn();
 vi.mock('../src/utils/prisma.client.js', () => ({
@@ -9,6 +10,7 @@ vi.mock('../src/utils/prisma.client.js', () => ({
     product: {
       findFirst: (...a: any[]) => findFirst(...a),
       create: (...a: any[]) => create(...a),
+      upsert: (...a: any[]) => upsert(...a),
       findMany: (...a: any[]) => findMany(...a),
       update: (...a: any[]) => update(...a),
       findUnique: vi.fn(),
@@ -25,6 +27,7 @@ import { productMatcher } from '../src/api/products/product-matcher.service.js';
 beforeEach(() => {
   findFirst.mockReset();
   create.mockReset();
+  upsert.mockReset();
   findMany.mockReset();
   update.mockReset();
 });
@@ -41,30 +44,36 @@ describe('findOrCreateProduct EAN-first (country-scoped)', () => {
     expect(create).not.toHaveBeenCalled();
   });
 
-  it('same EAN + different country → does NOT match, creates a new product', async () => {
+  it('same EAN + different country → does NOT match, atomically upserts a new product', async () => {
     // EAN lookup is country-scoped → miss for CH even though DE has it.
-    findFirst.mockResolvedValue(null); // EAN miss + fingerprint miss
-    findMany.mockResolvedValueOnce([]); // no fuzzy candidates
-    create.mockResolvedValueOnce({ id: 101, name: 'Migros Milch 1L', country_id: 2, ean_barcode: '4008400404127' });
+    findFirst.mockResolvedValue(null); // EAN miss
+    // EAN present + not found → atomic upsert on the composite unique (race-safe).
+    upsert.mockResolvedValueOnce({ id: 101, name: 'Migros Milch 1L', country_id: 2, ean_barcode: '4008400404127' });
     const { product, isNew } = await productMatcher.findOrCreateProduct({
       name: 'Migros Milch 1L', ean_barcode: '4008400404127', country_code: 'CH',
     });
     expect(isNew).toBe(true);
     expect(product.country_id).toBe(2);
+    expect(create).not.toHaveBeenCalled();
     // EAN lookup must be scoped by country_id.
     const eanCall = findFirst.mock.calls.find(c => c[0]?.where?.ean_barcode);
     expect(eanCall?.[0].where.country_id).toBe(2);
+    // upsert keyed on the composite unique, persisting ean + country.
+    const up = upsert.mock.calls[0][0];
+    expect(up.where.country_id_ean_barcode).toEqual({ country_id: 2, ean_barcode: '4008400404127' });
+    expect(up.create.ean_barcode).toBe('4008400404127');
+    expect(up.create.country_id).toBe(2);
   });
 
-  it('persists ean_barcode on create', async () => {
+  it('persists ean_barcode via atomic upsert', async () => {
     findFirst.mockResolvedValue(null);
-    findMany.mockResolvedValueOnce([]);
-    create.mockResolvedValueOnce({ id: 7, name: 'ICA Mjölk', country_id: 3, ean_barcode: '7300000000001' });
+    upsert.mockResolvedValueOnce({ id: 7, name: 'ICA Mjölk', country_id: 3, ean_barcode: '7300000000001' });
     await productMatcher.findOrCreateProduct({
       name: 'ICA Mjölk 1L', ean_barcode: '7300000000001', country_code: 'SE',
     });
-    const createArg = create.mock.calls[0][0];
-    expect(createArg.data.ean_barcode).toBe('7300000000001');
+    const up = upsert.mock.calls[0][0];
+    expect(up.create.ean_barcode).toBe('7300000000001');
+    expect(up.where.country_id_ean_barcode.ean_barcode).toBe('7300000000001');
   });
 
   it('no EAN → falls back to fingerprint path (EAN lookup not attempted)', async () => {
