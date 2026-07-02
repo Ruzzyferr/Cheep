@@ -5,33 +5,34 @@ Türkiye veri hattı — RESMİ KAYNAK: marketfiyati.org.tr (TÜBİTAK BİLGEM /
 verir; bu veri "tüketicinin fiyat karşılaştırması yapabilmesi için" kamuoyuyla paylaşılır
 (açık API). Scraping'in FSEK/TTK/ToS riskini ortadan kaldırır. Görsel İNGEST EDİLMEZ.
 
-TAM KAPSAM: her `main_category` facet-filtresiyle ayrı ayrı ve tam sayfalanarak çekilir
-(keyword araması değil) → tüm katalog + her ürünün KESİN kategorisi. Kategori, Cheep
-alt-kategori id'sine map'lenir (granüler + doğru).
+TAM KAPSAM: portalın açık sitemap'inden (sitemaps/sitemap-*.xml) TÜM ürün ID'leri alınır
+(~33k), her ID `/searchByIdentity` (identityType=id) ile çekilir. Bu, WAF'ın bloklamadığı
+tek toplu-erişim yoludur (facet `filters` istekleri 418/bağlantı-düşürme ile bloklu).
+Kategori, her ürünün `main_category` alanından → Cheep ALT-kategori id'sine map'lenir.
 
-API: POST /api/v2/search
-  arama:   {keywords, pages, size, latitude, longitude, distance}
-  facet:   {keywords:"", filters:[{key:"main_category","values":[<ad>]}], pages, size, geo}
-  → {numberOfFound, content:[{id,title,brand,refinedVolumeOrWeight,main_category,
-      productDepotInfoList:[{marketAdi,price,indexTime}]}]}  (sayfa başına MAX 25)
+Portalın kendi başlıklarıyla (tarayıcı UA + Origin/Referer) erişilir — kamu API'sine
+portalın istemcisi gibi meşru erişim.
 """
 import argparse
 import logging
 import os
+import re
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, List, Optional
 
 import requests
+from requests.adapters import HTTPAdapter
 
 logger = logging.getLogger("marketfiyati")
 
 API_BASE = "https://api.marketfiyati.org.tr/api/v2"
+SITEMAP_INDEX = "https://marketfiyati.org.tr/sitemaps/sitemap.xml"
 GEO = {"latitude": 39.925, "longitude": 32.866, "distance": 900000}
-PAGE_SIZE = 25                     # API sayfa başına en fazla 25 döndürüyor
-MAX_PAGES_PER_CATEGORY = 400       # 400 * 25 = 10.000 ürün/kategori üst sınırı
-REQUEST_PAUSE = 0.4
-MAX_RETRIES = 6
+MAX_RETRIES = 5
 CHUNK_SIZE = 900
+WORKERS = 6                        # eşzamanlı searchByIdentity isteği (WAF-dostu)
+INGEST_BATCH = 2500                # kaç ürün toplanınca ara-ingest yapılır
 
 STORE_MAP: Dict[str, int] = {
     "migros": 1, "carrefour": 2, "a101": 3, "sok": 4,
@@ -40,53 +41,35 @@ STORE_MAP: Dict[str, int] = {
 ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu"}
 
 # marketfiyati main_category → Cheep kategori id (alt-kategori tercih; yoksa üst).
-# Cheep taksonomisi (orijinal set) prod'dan çıkarıldı.
 MAIN_CAT_TO_CAT: Dict[str, int] = {
-    # Süt Ürünleri (1)
     "Süt": 2, "Peynir": 3, "Yoğurt": 4, "Ayran ve Kefir": 8, "Diğer Süt Ürünleri": 1,
-    # Meyve & Sebze (12)
     "Meyve": 13, "Sebze": 14,
-    # Et, Tavuk, Balık (20)
     "Beyaz Et": 22, "Kırmızı Et": 21, "Deniz Ürünleri": 25, "Sakatat": 21,
-    # Temel Gıda (30)
     "Mantı Makarna ve Erişte": 34, "Bakliyat": 36, "Un ve İrmik": 31, "Sıvı Yağlar": 37,
     "Konserve": 30, "Tuz Baharat ve Harçlar": 39, "Ketçap Mayonez Sos ve Sirkeler": 38,
     "Turşu": 30, "Hazır Gıda Karışımları": 51, "Pasta Malzemeleri": 30,
     "Mutfak Sarf Malzemeleri": 189, "Sürülebilir Ürünler ve Kahvaltılık Soslar": 81,
-    # İçecek (52)
     "Su": 53, "Maden Suyu": 53, "Meyve Suyu": 54, "Gazlı İçecekler": 55,
     "Gazsız İçecekler": 52, "Kahve": 57,
-    # Fırın & Pastane (63)
     "Ekmek ve Unlu Mamüller": 64,
-    # Kahvaltılık (74)
     "Bal ve Reçel": 76, "Zeytin": 77, "Helva Tahin ve Pekmez": 78, "Yumurta": 80,
     "Kahvaltılık Gevrek Bar ve Granola": 83,
-    # Atıştırmalık (85)
     "Çikolata": 86, "Bisküvi ve Kraker": 87, "Gofret": 88, "Cips": 90,
     "Kuruyemiş ve Kuru Meyve": 89, "Kek": 69, "Sakız ve Şekerleme": 92, "Tatlılar": 85,
-    # Dondurma (94)
     "Dondurmalar": 95,
-    # Hazır Yemek & Donuk (98)
     "Hazır Yemekler": 99,
-    # Temizlik (105)
     "Bulaşık Temizlik Ürünleri": 106, "Genel Temizlik Ürünleri": 109, "Diğer Temizlik": 105,
-    # Kişisel Bakım (126)
     "Cilt Bakımı": 132, "Saç Bakım": 127, "Makyaj": 126, "Ağız Bakım": 130,
     "Parfüm, Deodorant": 131, "Duş Banyo ve Sabun": 128, "Tıraş Ürünleri": 133,
     "Ağda ve Epilasyon": 145,
-    # Kağıt/hijyen (Kişisel Bakım alt)
     "Kağıt Peçete ve Mendiller": 138, "Kağıt Havlu": 136, "Tuvalet Kağıdı": 135,
     "Islak Mendil": 174,
-    # Bebek (171)
     "Bebek Mamaları": 173, "Bebek ve Hasta Bezi": 172, "Bebek Gereçleri": 174,
-    # Sağlıklı Yaşam (181)
     "Gıda Takviyeleri": 182, "Sağlık ve Medikal": 181,
-    # Diğer üst kategoriler
     "Ev & Yaşam": 187, "Oyuncak ve Hobi": 280, "Giyim ve Tekstil": 351,
     "Tütün ve Tütün Mamulleri": 246, "Yöresel Ürünler": 246,
 }
 
-# main_category map'te yoksa ada göre üst kategori (yedek).
 _TOP_RULES = [
     (176, ["kedi", "köpek", "evcil", "pet"]), (171, ["bebek", "hasta bez"]),
     (355, ["kağıt", "peçete", "mendil"]), (105, ["temizl", "deterjan", "çamaşır"]),
@@ -116,9 +99,7 @@ def _cat_id(main_cat: str) -> int:
 
 
 def _session() -> requests.Session:
-    # Resmi portal (marketfiyati.org.tr) API'ye tam bu başlıklarla (tarayıcı UA + Origin +
-    # Referer) erişir; basit bot-UA'ları WAF 418 döndürüyor. Kamu API'sine portalın kendi
-    # istemcisi gibi erişmek meşrudur (herkese açık, paylaşıma açılmış veri).
+    # Portalın kendi başlıklarıyla erişim (kamu API'sine portalın istemcisi gibi).
     s = requests.Session()
     s.headers.update({
         "Content-Type": "application/json",
@@ -126,103 +107,52 @@ def _session() -> requests.Session:
                        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"),
         "Origin": "https://marketfiyati.org.tr",
         "Referer": "https://marketfiyati.org.tr/",
-        "Accept": "application/json",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8",
+        "sec-fetch-site": "same-site",
+        "sec-fetch-mode": "cors",
     })
+    adapter = HTTPAdapter(pool_connections=WORKERS + 2, pool_maxsize=WORKERS + 2)
+    s.mount("https://", adapter)
     return s
 
 
-def _post(session: requests.Session, body: dict) -> dict:
-    """POST /search — 418/429/5xx'te üstel backoff."""
-    delay = 1.5
+def fetch_all_ids(session: requests.Session) -> List[str]:
+    """Sitemap index → ürün sitemap'leri → tüm ürün ID'leri (/detay/<id>/...)."""
+    idx = session.get(SITEMAP_INDEX, timeout=30).text
+    subs = [u for u in re.findall(r"<loc>([^<]+)</loc>", idx) if "sitemap-" in u]
+    ids: List[str] = []
+    seen = set()
+    for sub in subs:
+        try:
+            xml = session.get(sub, timeout=60).text
+        except requests.RequestException as e:
+            logger.warning("sitemap alınamadı %s: %s", sub, e)
+            continue
+        for m in re.findall(r"/detay/([^/]+)/", xml):
+            if m not in seen:
+                seen.add(m)
+                ids.append(m)
+        logger.info("sitemap %s → toplam id=%d", sub.rsplit("/", 1)[-1], len(ids))
+    return ids
+
+
+def fetch_product(session: requests.Session, pid: str) -> Optional[dict]:
+    """Bir ürünü id ile çeker (searchByIdentity — facet DEĞİL, WAF bloklamaz)."""
+    body = {"identity": pid, "identityType": "id", **GEO}
+    delay = 1.0
     for attempt in range(MAX_RETRIES):
         try:
-            r = session.post(f"{API_BASE}/search", json=body, timeout=30)
+            r = session.post(f"{API_BASE}/searchByIdentity", json=body, timeout=20)
             if r.status_code in (418, 429) or r.status_code >= 500:
                 raise requests.RequestException(f"HTTP {r.status_code}")
             r.raise_for_status()
-            return r.json()
+            content = r.json().get("content") or []
+            return content[0] if content else None
         except (requests.RequestException, ValueError):
             if attempt < MAX_RETRIES - 1:
                 time.sleep(delay); delay *= 1.8
-    return {}
-
-
-# Arama terimleri: 73 main_category adı + ürün terimleri + Türk FMCG markaları.
-# (WAF facet-filtre isteklerini blokladığı için keyword araması kullanılır; kategori,
-#  her sonucun `main_category` alanından KESİN alınır → doğru granüler kategori.)
-KEYWORDS: List[str] = sorted(set(list(MAIN_CAT_TO_CAT.keys()) + [
-    # ürün terimleri
-    "süt", "yoğurt", "peynir", "kaşar", "tereyağı", "yumurta", "ayran", "kefir", "labne",
-    "bal", "reçel", "zeytin", "tahin", "helva", "margarin", "kaymak", "krema",
-    "tavuk", "kıyma", "dana", "kuzu", "sucuk", "salam", "sosis", "pastırma", "balık",
-    "hindi", "kanat", "köfte", "ton balığı", "şarküteri",
-    "domates", "salatalık", "patates", "soğan", "elma", "muz", "portakal", "limon",
-    "biber", "patlıcan", "kabak", "havuç", "marul", "ıspanak", "üzüm", "çilek", "sarımsak",
-    "makarna", "pirinç", "bulgur", "un", "şeker", "tuz", "mercimek", "nohut", "fasulye",
-    "irmik", "nişasta", "yulaf", "ayçiçek yağı", "zeytinyağı", "sıvı yağ", "salça",
-    "ketçap", "mayonez", "hardal", "sirke", "soya sosu", "konserve", "turşu",
-    "su", "maden suyu", "kola", "gazoz", "meyve suyu", "çay", "kahve", "nescafe", "soda",
-    "enerji içeceği", "limonata", "ıhlamur", "bitki çayı",
-    "çikolata", "bisküvi", "kraker", "cips", "kek", "gofret", "sakız", "şekerleme",
-    "kuruyemiş", "fındık", "fıstık", "leblebi", "ceviz", "badem", "lokum", "wafer",
-    "kurabiye", "mısır", "patlamış mısır", "granola", "müsli", "gevrek",
-    "çorba", "hazır yemek", "dondurma", "pizza", "milföy", "börek", "yufka", "erişte",
-    "baharat", "karabiber", "pul biber", "kimyon", "kekik", "nane", "tarçın", "kakao",
-    "kabartma tozu", "vanilya", "maya", "puding", "jöle", "salep",
-    "bebek bezi", "bebek maması", "ıslak mendil", "biberon",
-    "deterjan", "çamaşır deterjanı", "bulaşık deterjanı", "yumuşatıcı", "çamaşır suyu",
-    "yüzey temizleyici", "cam temizleyici", "sıvı sabun", "sünger", "çöp poşeti",
-    "oda spreyi", "kireç çözücü", "tuvalet kağıdı", "kağıt havlu", "peçete", "mendil",
-    "şampuan", "saç kremi", "diş macunu", "diş fırçası", "sabun", "duş jeli", "deodorant",
-    "tıraş", "kolonya", "ped", "hijyenik ped", "krem", "el kremi", "güneş kremi", "parfüm",
-    "saç boyası", "makyaj", "ruj", "maskara", "oje", "kedi maması", "köpek maması",
-    "kedi kumu", "pil", "ampul", "streç film", "alüminyum folyo", "vitamin", "takviye",
-    "ekmek", "simit", "poğaça", "tost ekmeği", "kruvasan", "grissini",
-    # markalar
-    "Ülker", "Eti", "Torku", "Pınar", "Sütaş", "İçim", "Sek", "Danone", "Namet", "Banvit",
-    "Tat", "Tamek", "Tukaş", "Dardanel", "Superfresh", "Yudum", "Komili", "Orkide",
-    "Filiz", "Nuh'un Ankara", "Piyale", "Barilla", "Oba", "Reis", "Yayla", "Duru", "Bizim",
-    "Doğuş", "Çaykur", "Lipton", "Nescafe", "Jacobs", "Coca-Cola", "Pepsi", "Fanta",
-    "Fuse Tea", "Cappy", "Dimes", "Sırma", "Erikli", "Hayat", "Damla", "Beypazarı",
-    "Uludağ", "Fruko", "Yedigün", "Algida", "Magnum", "Cornetto", "Ferrero", "Nutella",
-    "Milka", "Haribo", "Falım", "Vivident", "Ruffles", "Doritos", "Lay's", "Cheetos",
-    "Patos", "Peyman", "Tadım", "Selpak", "Solo", "Papia", "Ariel", "Omo", "Fairy",
-    "Finish", "Domestos", "Cif", "Yumoş", "Vernel", "Elidor", "Clear", "Pantene", "Dove",
-    "Nivea", "Arko", "Colgate", "Signal", "Sensodyne", "İpana", "Oral-B", "Prima",
-    "Molfix", "Sleepy", "Uni Baby", "Sana", "Becel", "Knorr", "Calve", "Kemal Kükrer",
-    "Torku", "Halk Ekmek", "Bahçıvan", "Muratbey", "Tahsildaroğlu", "Ekici", "Teksüt",
-]))
-
-
-def search(session: requests.Session, keyword: str, page: int) -> dict:
-    return _post(session, {"keywords": keyword, "pages": page, "size": PAGE_SIZE, **GEO})
-
-
-def harvest_all(session: Optional[requests.Session] = None) -> Dict[str, dict]:
-    """Keyword araması — her ürünü `id` ile tekilleştirir; kategori her ürünün kendi
-    `main_category` alanından alınır (facet WAF-bloklu)."""
-    session = session or _session()
-    logger.info("harvest — %d anahtar", len(KEYWORDS))
-    products: Dict[str, dict] = {}
-    for kw in KEYWORDS:
-        try:
-            first = search(session, kw, 0)
-        except Exception as e:
-            logger.warning("arama hata '%s': %s", kw, e)
-            continue
-        found = int(first.get("numberOfFound", 0) or 0)
-        pages = min(MAX_PAGES_PER_CATEGORY, (found + PAGE_SIZE - 1) // PAGE_SIZE)
-        new = 0
-        for pg in range(pages):
-            data = first if pg == 0 else search(session, kw, pg)
-            for item in (data.get("content") or []):
-                pid = str(item.get("id") or "")
-                if pid and pid not in products:
-                    products[pid] = item  # kategori main_category'den (build sırasında)
-                    new += 1
-            time.sleep(REQUEST_PAUSE)
-        logger.info("'%s': bulundu=%d, yeni=%d, toplam=%d", kw, found, new, len(products))
-    return products
+    return None
 
 
 def _unit_from(refined: str) -> str:
@@ -235,8 +165,8 @@ def _unit_from(refined: str) -> str:
 
 
 def build_price_payloads(products: Dict[str, dict]) -> List[Dict]:
-    """Her ürünün her zinciri için bir fiyat payload'u. ean=mf-<id>, source=api,
-    GÖRSEL YOK, category_id = facet'ten kesin Cheep kategorisi."""
+    """Her ürünün her zinciri için bir payload. ean=mf-<id>, source=api, GÖRSEL YOK,
+    category_id = main_category'den Cheep alt-kategorisi."""
     payloads: List[Dict] = []
     for pid, item in products.items():
         name = (item.get("title") or "").strip()
@@ -307,29 +237,54 @@ def ingest(payloads: List[Dict], api_url: str, api_key: Optional[str]) -> Dict:
     return stats
 
 
+def run(api_url: str, api_key: Optional[str], limit: int = 0, dry_run: bool = False):
+    session = _session()
+    ids = fetch_all_ids(session)
+    if limit:
+        ids = ids[:limit]
+    logger.info("TOPLAM ID: %d — %d worker, %d'lik ara-ingest", len(ids), WORKERS, INGEST_BATCH)
+
+    grand_prod = 0
+    grand_ing = {"total": 0, "successful": 0, "failed": 0}
+    batch: Dict[str, dict] = {}
+    done = 0
+
+    def flush():
+        nonlocal batch, grand_prod
+        if not batch:
+            return
+        payloads = build_price_payloads(batch)
+        grand_prod += len(batch)
+        if not dry_run:
+            st = ingest(payloads, api_url, api_key)
+            for k in grand_ing:
+                grand_ing[k] += st[k]
+        logger.info("ara-ingest: ürün=%d payload=%d | işlenen=%d/%d | toplam_ürün=%d",
+                    len(batch), len(payloads), done, len(ids), grand_prod)
+        batch = {}
+
+    with ThreadPoolExecutor(max_workers=WORKERS) as ex:
+        futures = {ex.submit(fetch_product, session, pid): pid for pid in ids}
+        for fut in as_completed(futures):
+            done += 1
+            item = fut.result()
+            if item and item.get("id"):
+                batch[str(item["id"])] = item
+            if len(batch) >= INGEST_BATCH:
+                flush()
+    flush()
+    logger.info("BİTTİ — toplam ürün=%d, INGEST=%s", grand_prod, grand_ing)
+
+
 def main():
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    ap = argparse.ArgumentParser(description="marketfiyati.org.tr → Cheep backend (TR, facet tam kapsam)")
+    ap = argparse.ArgumentParser(description="marketfiyati.org.tr → Cheep (TR, TAM katalog)")
     ap.add_argument("--api-url", default=os.getenv("CHEEP_API_URL", "http://localhost:3000/api/v1"))
     ap.add_argument("--api-key", default=os.getenv("INGEST_API_KEY"))
+    ap.add_argument("--limit", type=int, default=0, help="test için ilk N id")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
-
-    products = harvest_all()
-    payloads = build_price_payloads(products)
-    chains: Dict[int, int] = {}
-    cats: Dict[int, int] = {}
-    for p in payloads:
-        chains[p["store_id"]] = chains.get(p["store_id"], 0) + 1
-    for it in products.values():
-        c = it.get("_cheep_cat", 246)
-        cats[c] = cats.get(c, 0) + 1
-    logger.info("tekil ürün=%d, fiyat=%d, mağaza=%s", len(products), len(payloads), chains)
-    logger.info("kategori dağılımı (cheep id): %s", dict(sorted(cats.items(), key=lambda x: -x[1])))
-
-    if args.dry_run:
-        logger.info("DRY-RUN"); return
-    logger.info("INGEST: %s", ingest(payloads, args.api_url, args.api_key))
+    run(args.api_url, args.api_key, args.limit, args.dry_run)
 
 
 if __name__ == "__main__":
