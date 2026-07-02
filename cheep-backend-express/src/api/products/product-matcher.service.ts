@@ -180,9 +180,11 @@ export class ProductMatcher {
                 where: { ean_barcode: ean, country_id: resolvedCountryId },
             });
             if (existingByEan) {
-                // Kategori backfill: mevcut ürünün kategorisi boşsa ve payload sağladıysa
-                // güncelle (kategorili re-ingest, eski kayıtları da kategoriler).
-                if (providedCategoryId !== null && existingByEan.category_id == null) {
+                // Kategori (re-)ata: payload bir kategori sağladıysa VE mevcut ürününki
+                // farklıysa güncelle. marketfiyati resmi kaynağı kategoride otoritedir;
+                // bu, üst-kategoriden alt-kategoriye rafine etmeyi (ve düzeltmeyi) sağlar.
+                // Kategori taşımayan kaynaklar (yabancı scraper'lar) null gönderir → dokunmaz.
+                if (providedCategoryId !== null && existingByEan.category_id !== providedCategoryId) {
                     const updated = await prisma.product.update({
                         where: { id: existingByEan.id },
                         data: { category_id: providedCategoryId },

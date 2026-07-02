@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from countries.turkey.marketfiyati import (
-    build_price_payloads, _unit_from, _category_id, STORE_MAP,
+    build_price_payloads, _unit_from, _cat_id, STORE_MAP,
 )
 
 
@@ -84,24 +84,24 @@ def test_empty_or_short_name_skipped():
     assert build_price_payloads(products) == []
 
 
-def test_category_classification():
-    """main_category → Cheep üst kategori id (deterministik)."""
-    assert _category_id("Çikolata", "Atıştırmalık ve Tatlı", "Ülker Çikolata") == 85
-    assert _category_id("Süt", "Süt Ürünleri ve Kahvaltılık", "Pınar Süt 1 L") == 1
-    assert _category_id("Çamaşır Temizlik Ürünleri", "Temizlik", "Omo Deterjan") == 105
-    assert _category_id("Beyaz Et", "Et, Tavuk ve Balık", "Tavuk Göğüs") == 20
-    assert _category_id("Su", "İçecek", "Erikli Su 5 L") == 52
-    assert _category_id("Bebek ve Hasta Bezi", "", "Prima Bebek Bezi") == 171
-    assert _category_id("Kağıt Peçete ve Mendiller", "", "Selpak Peçete") == 355
-    # main/menu boş → ad üzerinden
-    assert _category_id("", "", "Yumurta 10'lu") == 74
+def test_category_mapping_to_subcategories():
+    """main_category → Cheep ALT-kategori id (granüler, deterministik)."""
+    assert _cat_id("Çikolata") == 86          # Atıştırmalık › Çikolata
+    assert _cat_id("Süt") == 2                 # Süt Ürünleri › Süt
+    assert _cat_id("Peynir") == 3              # Süt Ürünleri › Peynir
+    assert _cat_id("Beyaz Et") == 22           # Et › Tavuk
+    assert _cat_id("Su") == 53                 # İçecek › Su
+    assert _cat_id("Bebek ve Hasta Bezi") == 172
+    assert _cat_id("Kağıt Peçete ve Mendiller") == 138
+    assert _cat_id("Cips") == 90
+    # map'te yok → ada göre üst kategori yedeği
+    assert _cat_id("Süt Bazlı Bir Şey") == 1   # 'süt' → Süt Ürünleri (üst)
     # hiç eşleşme → Diğer(246)
-    assert _category_id("Bilinmeyen", "", "Zzz Qqq") == 246
+    assert _cat_id("Zzz Qqq Bilinmeyen") == 246
 
 
-def test_payload_carries_category_id():
+def test_payload_carries_subcategory_id():
     products = {"3": _product("3", [{"marketAdi": "migros", "price": 20.0}],
-                              title="Sütaş Yoğurt", main_category="Yoğurt",
-                              menu_category="Süt Ürünleri ve Kahvaltılık")}
+                              title="Sütaş Yoğurt", main_category="Yoğurt")}
     p = build_price_payloads(products)[0]
-    assert p["category_id"] == 1  # Süt Ürünleri
+    assert p["category_id"] == 4  # Süt Ürünleri › Yoğurt
