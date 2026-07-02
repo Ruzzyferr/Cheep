@@ -160,6 +160,10 @@ export function ProductDetailScreen({
     );
   }
 
+  // "mf-..." bizim resmi-API çapraz-mağaza anahtarımızdır (gerçek EAN değil) —
+  // kullanıcıya "Barkod" olarak GÖSTERİLMEZ. Yalnızca gerçek barkodlar gösterilir.
+  const showRealBarcode = !!product.ean_barcode && !product.ean_barcode.startsWith('mf-');
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
@@ -363,11 +367,11 @@ export function ProductDetailScreen({
         </View>
 
         {/* Product Details */}
-        {(product.ean_barcode || product.category || categoryWithParent) && (
+        {(showRealBarcode || product.category || categoryWithParent) && (
           <View style={styles.detailsSection}>
             <Text style={styles.sectionTitle}>Ürün Bilgileri</Text>
             <Card padding="md" variant="outlined">
-              {product.ean_barcode && (
+              {showRealBarcode && (
                 <View style={styles.detailRow}>
                   <MaterialIcons name="qr-code" size={20} color={colors.text.secondary} />
                   <Text style={styles.detailLabel}>Barkod:</Text>
