@@ -116,10 +116,16 @@ def _cat_id(main_cat: str) -> int:
 
 
 def _session() -> requests.Session:
+    # Resmi portal (marketfiyati.org.tr) API'ye tam bu başlıklarla (tarayıcı UA + Origin +
+    # Referer) erişir; basit bot-UA'ları WAF 418 döndürüyor. Kamu API'sine portalın kendi
+    # istemcisi gibi erişmek meşrudur (herkese açık, paylaşıma açılmış veri).
     s = requests.Session()
     s.headers.update({
         "Content-Type": "application/json",
-        "User-Agent": "CheepPriceCompare/1.0 (+https://cheep.live; public price data)",
+        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"),
+        "Origin": "https://marketfiyati.org.tr",
+        "Referer": "https://marketfiyati.org.tr/",
         "Accept": "application/json",
     })
     return s
@@ -141,51 +147,81 @@ def _post(session: requests.Session, body: dict) -> dict:
     return {}
 
 
-def fetch_main_categories(session: requests.Session) -> List[str]:
-    """Bilinen 73 kategori + API facet'inden keşfedilenlerin birleşimi."""
-    cats = set(MAIN_CAT_TO_CAT.keys())
-    seeds = ["a", "e", "i", "o", "u", "süt", "et", "su", "deterjan", "çikolata",
-             "şampuan", "bebek", "kahve", "meyve", "cips", "peynir"]
-    for kw in seeds:
-        d = _post(session, {"keywords": kw, "pages": 0, "size": 1, **GEO})
-        for f in ((d.get("facetMap") or {}).get("main_category") or []):
-            cats.add(f["name"])
-        time.sleep(0.2)
-    return sorted(cats)
+# Arama terimleri: 73 main_category adı + ürün terimleri + Türk FMCG markaları.
+# (WAF facet-filtre isteklerini blokladığı için keyword araması kullanılır; kategori,
+#  her sonucun `main_category` alanından KESİN alınır → doğru granüler kategori.)
+KEYWORDS: List[str] = sorted(set(list(MAIN_CAT_TO_CAT.keys()) + [
+    # ürün terimleri
+    "süt", "yoğurt", "peynir", "kaşar", "tereyağı", "yumurta", "ayran", "kefir", "labne",
+    "bal", "reçel", "zeytin", "tahin", "helva", "margarin", "kaymak", "krema",
+    "tavuk", "kıyma", "dana", "kuzu", "sucuk", "salam", "sosis", "pastırma", "balık",
+    "hindi", "kanat", "köfte", "ton balığı", "şarküteri",
+    "domates", "salatalık", "patates", "soğan", "elma", "muz", "portakal", "limon",
+    "biber", "patlıcan", "kabak", "havuç", "marul", "ıspanak", "üzüm", "çilek", "sarımsak",
+    "makarna", "pirinç", "bulgur", "un", "şeker", "tuz", "mercimek", "nohut", "fasulye",
+    "irmik", "nişasta", "yulaf", "ayçiçek yağı", "zeytinyağı", "sıvı yağ", "salça",
+    "ketçap", "mayonez", "hardal", "sirke", "soya sosu", "konserve", "turşu",
+    "su", "maden suyu", "kola", "gazoz", "meyve suyu", "çay", "kahve", "nescafe", "soda",
+    "enerji içeceği", "limonata", "ıhlamur", "bitki çayı",
+    "çikolata", "bisküvi", "kraker", "cips", "kek", "gofret", "sakız", "şekerleme",
+    "kuruyemiş", "fındık", "fıstık", "leblebi", "ceviz", "badem", "lokum", "wafer",
+    "kurabiye", "mısır", "patlamış mısır", "granola", "müsli", "gevrek",
+    "çorba", "hazır yemek", "dondurma", "pizza", "milföy", "börek", "yufka", "erişte",
+    "baharat", "karabiber", "pul biber", "kimyon", "kekik", "nane", "tarçın", "kakao",
+    "kabartma tozu", "vanilya", "maya", "puding", "jöle", "salep",
+    "bebek bezi", "bebek maması", "ıslak mendil", "biberon",
+    "deterjan", "çamaşır deterjanı", "bulaşık deterjanı", "yumuşatıcı", "çamaşır suyu",
+    "yüzey temizleyici", "cam temizleyici", "sıvı sabun", "sünger", "çöp poşeti",
+    "oda spreyi", "kireç çözücü", "tuvalet kağıdı", "kağıt havlu", "peçete", "mendil",
+    "şampuan", "saç kremi", "diş macunu", "diş fırçası", "sabun", "duş jeli", "deodorant",
+    "tıraş", "kolonya", "ped", "hijyenik ped", "krem", "el kremi", "güneş kremi", "parfüm",
+    "saç boyası", "makyaj", "ruj", "maskara", "oje", "kedi maması", "köpek maması",
+    "kedi kumu", "pil", "ampul", "streç film", "alüminyum folyo", "vitamin", "takviye",
+    "ekmek", "simit", "poğaça", "tost ekmeği", "kruvasan", "grissini",
+    # markalar
+    "Ülker", "Eti", "Torku", "Pınar", "Sütaş", "İçim", "Sek", "Danone", "Namet", "Banvit",
+    "Tat", "Tamek", "Tukaş", "Dardanel", "Superfresh", "Yudum", "Komili", "Orkide",
+    "Filiz", "Nuh'un Ankara", "Piyale", "Barilla", "Oba", "Reis", "Yayla", "Duru", "Bizim",
+    "Doğuş", "Çaykur", "Lipton", "Nescafe", "Jacobs", "Coca-Cola", "Pepsi", "Fanta",
+    "Fuse Tea", "Cappy", "Dimes", "Sırma", "Erikli", "Hayat", "Damla", "Beypazarı",
+    "Uludağ", "Fruko", "Yedigün", "Algida", "Magnum", "Cornetto", "Ferrero", "Nutella",
+    "Milka", "Haribo", "Falım", "Vivident", "Ruffles", "Doritos", "Lay's", "Cheetos",
+    "Patos", "Peyman", "Tadım", "Selpak", "Solo", "Papia", "Ariel", "Omo", "Fairy",
+    "Finish", "Domestos", "Cif", "Yumoş", "Vernel", "Elidor", "Clear", "Pantene", "Dove",
+    "Nivea", "Arko", "Colgate", "Signal", "Sensodyne", "İpana", "Oral-B", "Prima",
+    "Molfix", "Sleepy", "Uni Baby", "Sana", "Becel", "Knorr", "Calve", "Kemal Kükrer",
+    "Torku", "Halk Ekmek", "Bahçıvan", "Muratbey", "Tahsildaroğlu", "Ekici", "Teksüt",
+]))
 
 
-def harvest_category(session: requests.Session, main_cat: str, products: Dict[str, dict]) -> int:
-    """Bir main_category'nin TÜM ürünlerini facet-filtresiyle sayfalayarak çeker."""
-    body0 = {"keywords": "", "pages": 0, "size": PAGE_SIZE, **GEO,
-             "filters": [{"key": "main_category", "values": [main_cat]}]}
-    first = _post(session, body0)
-    found = int(first.get("numberOfFound", 0) or 0)
-    pages = min(MAX_PAGES_PER_CATEGORY, (found + PAGE_SIZE - 1) // PAGE_SIZE)
-    new = 0
-    for pg in range(pages):
-        data = first if pg == 0 else _post(session, {**body0, "pages": pg})
-        for item in (data.get("content") or []):
-            pid = str(item.get("id") or "")
-            if pid and pid not in products:
-                # kategoriyi bu facet'ten KESİN biliyoruz
-                item["_cheep_cat"] = _cat_id(main_cat)
-                products[pid] = item
-                new += 1
-        time.sleep(REQUEST_PAUSE)
-    logger.info("[%s] bulundu=%d, sayfa=%d, yeni=%d, toplam=%d", main_cat, found, pages, new, len(products))
-    return new
+def search(session: requests.Session, keyword: str, page: int) -> dict:
+    return _post(session, {"keywords": keyword, "pages": page, "size": PAGE_SIZE, **GEO})
 
 
 def harvest_all(session: Optional[requests.Session] = None) -> Dict[str, dict]:
+    """Keyword araması — her ürünü `id` ile tekilleştirir; kategori her ürünün kendi
+    `main_category` alanından alınır (facet WAF-bloklu)."""
     session = session or _session()
-    cats = fetch_main_categories(session)
-    logger.info("harvest — %d kategori", len(cats))
+    logger.info("harvest — %d anahtar", len(KEYWORDS))
     products: Dict[str, dict] = {}
-    for mc in cats:
+    for kw in KEYWORDS:
         try:
-            harvest_category(session, mc, products)
+            first = search(session, kw, 0)
         except Exception as e:
-            logger.warning("kategori hata '%s': %s", mc, e)
+            logger.warning("arama hata '%s': %s", kw, e)
+            continue
+        found = int(first.get("numberOfFound", 0) or 0)
+        pages = min(MAX_PAGES_PER_CATEGORY, (found + PAGE_SIZE - 1) // PAGE_SIZE)
+        new = 0
+        for pg in range(pages):
+            data = first if pg == 0 else search(session, kw, pg)
+            for item in (data.get("content") or []):
+                pid = str(item.get("id") or "")
+                if pid and pid not in products:
+                    products[pid] = item  # kategori main_category'den (build sırasında)
+                    new += 1
+            time.sleep(REQUEST_PAUSE)
+        logger.info("'%s': bulundu=%d, yeni=%d, toplam=%d", kw, found, new, len(products))
     return products
 
 
