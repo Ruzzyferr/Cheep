@@ -45,6 +45,8 @@ export function Hero() {
 
   return (
     <section id="top" ref={root} className="relative min-h-[100svh] overflow-hidden">
+      {/* CSS fallback behind the canvas — WebGL takılırsa siyah değil bu görünür */}
+      <div className="absolute inset-0 bg-gradient-to-br from-cream via-mint-soft/60 to-clementine/10" />
       <HeroCanvas className="!absolute inset-0" />
       {/* legibility wash — only a soft bottom fade into the ticker */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-cream" />

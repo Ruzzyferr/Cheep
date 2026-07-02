@@ -1,10 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-gsap.registerPlugin(ScrollTrigger)
-
-/** Counts from 0 → `to` when scrolled into view (once). Turkish number format. */
+/** Counts 0 → `to` when scrolled into view (IntersectionObserver). Turkish format. */
 export function CountUp({
   to,
   duration = 2,
@@ -23,30 +20,40 @@ export function CountUp({
   const ref = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
-    const el = ref.current!
+    const el = ref.current
+    if (!el) return
     const fmt = (v: number) =>
       prefix +
       v.toLocaleString('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) +
       suffix
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduce) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       el.textContent = fmt(to)
       return
     }
-    const obj = { v: 0 }
-    const anim = gsap.to(obj, {
-      v: to,
-      duration,
-      ease: 'power2.out',
-      scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-      onUpdate: () => {
-        el.textContent = fmt(obj.v)
+
+    let done = false
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && !done) {
+            done = true
+            const obj = { v: 0 }
+            gsap.to(obj, {
+              v: to,
+              duration,
+              ease: 'power2.out',
+              onUpdate: () => {
+                el.textContent = fmt(obj.v)
+              },
+            })
+            io.disconnect()
+          }
+        }
       },
-    })
-    return () => {
-      anim.scrollTrigger?.kill()
-      anim.kill()
-    }
+      { threshold: 0.4 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
   }, [to, duration, decimals, prefix, suffix])
 
   return (
