@@ -1,0 +1,7 @@
+# İç servis — TLS yok (edge Caddy hallediyor). SPA fallback: tüm yollar index.html'e.
+:80 {
+	root * /srv
+	encode gzip
+	try_files {path} /index.html
+	file_server
+}

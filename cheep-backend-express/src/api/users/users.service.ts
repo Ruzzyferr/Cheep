@@ -1,5 +1,6 @@
+import bcrypt from 'bcryptjs';
 import { prisma } from '../../utils/prisma.client.js';
-import { notFound, conflict, badRequest } from '../../utils/app-error.js';
+import { AppError, notFound, conflict, badRequest } from '../../utils/app-error.js';
 import { getCountryByCode } from '../../utils/country.js';
 
 /** Desteklenen arayüz dilleri. */
@@ -38,6 +39,39 @@ export const updateUser = async (
             country: { select: { code: true, currency: true } },
         },
     });
+};
+
+/**
+ * Hesabı ve TÜM ilişkili verileri kalıcı olarak siler (giriş yapmış kullanıcı yolu).
+ *
+ * User'ın tüm alt kayıtları (listeler, favori marketler, fiyat feedback'leri,
+ * sohbet thread'leri, profil, affiliate tıklamaları) şemada `onDelete: Cascade`
+ * olduğundan tek `user.delete` çağrısı hepsini temizler. Refresh token'lar ayrı
+ * tabloda değil (`token_version`) — satır silinince tüm oturumlar geçersiz olur.
+ * KVKK/GDPR "silme hakkı" ve Google Play hesap-silme zorunluluğunu karşılar.
+ */
+export const deleteUser = async (userId: number) => {
+    await prisma.user.delete({ where: { id: userId } });
+    return { success: true };
+};
+
+/**
+ * Hesabı e-posta + şifre doğrulayarak siler (uygulamasız web formu yolu:
+ * cheep.live/delete). Uygulamayı kaldırmış kullanıcıların da verilerini
+ * silebilmesi için. Bilinmeyen e-posta ve yanlış şifre AYNI 401'i döner
+ * (hesap sıralama/enumeration'ı önlemek için).
+ */
+export const deleteAccountByCredentials = async (email: string, pass: string) => {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+        throw new AppError('Geçersiz e-posta veya şifre.', 401);
+    }
+    const ok = await bcrypt.compare(pass, user.password_hash);
+    if (!ok) {
+        throw new AppError('Geçersiz e-posta veya şifre.', 401);
+    }
+    await prisma.user.delete({ where: { id: user.id } });
+    return { success: true };
 };
 
 /**

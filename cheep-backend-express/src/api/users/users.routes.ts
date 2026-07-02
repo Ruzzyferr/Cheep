@@ -82,6 +82,50 @@ router.get('/me', authenticate, UserController.getMe);
  */
 router.put('/me', authenticate, UserController.updateProfile);
 
+/**
+ * @swagger
+ * /api/v1/users/me:
+ *   delete:
+ *     summary: Giriş yapmış kullanıcının hesabını ve tüm verilerini kalıcı olarak siler
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Hesap ve tüm ilişkili veriler silindi
+ *       401:
+ *         description: Yetkisiz erişim
+ */
+router.delete('/me', authenticate, UserController.deleteMe);
+
+/**
+ * @swagger
+ * /api/v1/users/account-deletion:
+ *   post:
+ *     summary: Uygulamasız hesap silme (web formu). E-posta + şifre ile doğrular ve siler.
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Hesap ve tüm ilişkili veriler silindi
+ *       400:
+ *         description: E-posta veya şifre eksik
+ *       401:
+ *         description: Geçersiz e-posta veya şifre
+ */
+router.post('/account-deletion', UserController.requestAccountDeletion);
+
 // ============================================
 // FAVORITE STORES
 // ============================================

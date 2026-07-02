@@ -1,0 +1,19 @@
+# Cheep — edge reverse proxy + otomatik HTTPS (Let's Encrypt)
+#   cheep.live       → website container (Vite SPA; /privacy /delete /terms SPA rotaları)
+#   api.cheep.live   → backend:3000 (API)
+# SSL sertifikaları ilk açılışta otomatik alınır/yenilenir. Alan adları droplet'e
+# (129.212.193.203) çözülmeli ve 80/443 açık olmalı.
+
+{
+	email denemelerdeyiz14@gmail.com
+}
+
+cheep.live {
+	encode gzip
+	reverse_proxy website:80
+}
+
+api.cheep.live {
+	encode gzip
+	reverse_proxy backend:3000
+}

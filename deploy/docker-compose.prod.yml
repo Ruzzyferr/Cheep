@@ -31,8 +31,37 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # 3000 host'a açık kalır: eski (HTTP) APK'lar kırılmasın diye geçiş döneminde.
+    # HTTPS geçişi tamamen oturunca kapatılabilir (Caddy zaten backend:3000'e iç ağdan erişir).
     ports:
       - "3000:3000"
 
+  # Tanıtım sitesi (cheep.live) — Vite SPA build'i, kendi Caddy'siyle iç ağda :80'de servis edilir.
+  website:
+    build:
+      context: ../cheep-website
+    restart: always
+    expose:
+      - "80"
+
+  # Edge Caddy — tek TLS/Let's Encrypt noktası.
+  #   cheep.live       → website:80 (SPA)
+  #   api.cheep.live   → backend:3000 (API)
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    depends_on:
+      - backend
+      - website
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
 volumes:
   cheep_pgdata:
+  caddy_data:
+  caddy_config:
