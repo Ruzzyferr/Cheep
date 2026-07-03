@@ -23,9 +23,18 @@ export function nearestBranchPerStore(branches: BranchLite[], user: { lat: numbe
   return Array.from(best.values()).sort((x, y) => x.distanceKm - y.distanceKm);
 }
 
-export function resolveNearestBranchCoords(branches: BranchLite[], user: { lat: number; lon: number }): Map<number, { lat: number; lon: number }> {
+export function resolveNearestBranchCoords(
+  branches: BranchLite[],
+  user: { lat: number; lon: number },
+  maxKm = Infinity,
+): Map<number, { lat: number; lon: number }> {
   const out = new Map<number, { lat: number; lon: number }>();
-  for (const { store_id, branch } of nearestBranchPerStore(branches, user)) {
+  for (const { store_id, branch, distanceKm } of nearestBranchPerStore(branches, user)) {
+    // Yalnızca kullanıcıya GERÇEKTEN yakın bir şube varsa mesafe göster. Şube verimiz
+    // henüz seyrek (çoğu İstanbul); uzaktaki bir kullanıcıya "en yakın 350 km" göstermek
+    // yanıltıcıdır — o durumda mesafeyi bilinmiyor bırakırız (arayüz gizler). Veri
+    // zenginleştikçe daha çok kullanıcı gerçek mesafe görür.
+    if (distanceKm > maxKm) continue;
     out.set(store_id, { lat: branch.lat, lon: branch.lon });
   }
   return out;
@@ -51,11 +60,16 @@ export async function getNearbyStores(
   return [];
 }
 
-/** DB: nearest branch coords per given store within a country (for compare distance). */
+/** En yakın şubenin geçerli sayılacağı azami mesafe (km). Bunun ötesinde "yakın şubemiz
+ *  yok" kabul edilir ve mesafe gösterilmez. Metropol içi (ör. İstanbul iki yaka) kapsar. */
+export const MAX_BRANCH_DISTANCE_KM = 60;
+
+/** DB: nearest branch coords per given store within a country (for compare distance).
+ *  Yalnızca kullanıcıya MAX_BRANCH_DISTANCE_KM içindeki şubeler döner. */
 export async function nearestBranchCoordsForStores(storeIds: number[], countryId: number, user: { lat: number; lon: number }) {
   const rows = await prisma.storeBranch.findMany({
     where: { country_id: countryId, store_id: { in: storeIds } },
     select: { id: true, store_id: true, name: true, lat: true, lon: true, address: true, city: true },
   });
-  return resolveNearestBranchCoords(rows as BranchLite[], user);
+  return resolveNearestBranchCoords(rows as BranchLite[], user, MAX_BRANCH_DISTANCE_KM);
 }
