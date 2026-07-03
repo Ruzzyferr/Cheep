@@ -447,14 +447,30 @@ async function calculateMultiStoreStrategies(
                 options,
                 itemOptions
             );
-            
+
             if (strategy) {
                 strategies.push(strategy);
             }
         }
     }
 
-    return strategies;
+    // TEKİLLEŞTİR: bir kombinasyondaki bazı marketler hiçbir üründe en ucuz olmayınca
+    // boş allocation olarak filtreleniyor (bkz. nonEmptyAllocations). Böylece farklı
+    // kombinasyonlar AYNI efektif market kümesine çöker (ör. {BİM,Migros,A101} → A101
+    // hiç kazanamaz → {BİM,Migros}); tek markete çökenler de single_store ile birebir
+    // aynıdır. Efektif kümeye göre tekilleştir; <2 markete çökenleri ele (single_store
+    // zaten üretiyor). Aynı küme → aynı dağıtım/fiyat olduğundan ilk görülen tutulur.
+    const seen = new Set<string>();
+    const deduped: RouteStrategy[] = [];
+    for (const s of strategies) {
+        if (s.stores.length < 2) continue;            // tek markete çöktü → single_store kopyası
+        const key = s.stores.map(a => a.store.id).sort((x, y) => x - y).join('-');
+        if (seen.has(key)) continue;
+        seen.add(key);
+        deduped.push(s);
+    }
+
+    return deduped;
 }
 
 /**
