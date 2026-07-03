@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from countries.turkey import mf_state as st
 from countries.turkey.marketfiyati import (
     _session, fetch_all_ids, fetch_product, health_ok, EMPTY,
-    build_price_payloads, ingest,
+    build_price_payloads, ingest, build_branch_payloads, ingest_branches,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -92,6 +92,7 @@ def run(raw_dir, api_url, api_key, category_map="category_map.json",
     consec_block = 0
     last_prune = 0.0
     pending = {}
+    seen_branches: set = set()   # daemon ömrü boyunca gönderilen şube ref'leri (tekrar POST yok)
 
     def do_ingest():
         nonlocal pending
@@ -102,7 +103,12 @@ def run(raw_dir, api_url, api_key, category_map="category_map.json",
         payloads = build_price_payloads(pending)
         if payloads:
             ingest(payloads, api_url, api_key)
-        logger.info("ingest: ürün=%d payload=%d | durum=%s", len(pending), len(payloads), st.counts(conn))
+        # Aynı üründen ŞUBELERİ de çıkar → store_branches sürekli tazelenir (mesafe için).
+        branch_payloads = build_branch_payloads(pending, seen_branches)
+        if branch_payloads:
+            ingest_branches(branch_payloads, api_url, api_key)
+        logger.info("ingest: ürün=%d payload=%d yeni_şube=%d | durum=%s",
+                    len(pending), len(payloads), len(branch_payloads), st.counts(conn))
         pending = {}
 
     while True:

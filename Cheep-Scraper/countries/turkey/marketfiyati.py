@@ -50,6 +50,7 @@ SITEMAP_INDEX = "https://marketfiyati.org.tr/sitemaps/sitemap.xml"
 GEO = {"latitude": 39.925, "longitude": 32.866, "distance": 900000}
 MAX_RETRIES = 2                    # bloklu istek hızla pes etsin (sağlık-kapısı halleder)
 CHUNK_SIZE = 900
+BRANCH_CHUNK = 500                 # şube upsert chunk'ı (backend limiti 2000)
 WORKERS = 3                        # eşzamanlı istek
 REQUEST_PACE = 0.15               # her istek sonrası worker beklemesi
 CHUNK = 100                        # küçük → bloğu hızlı yakala, sağlık-kapısı sık devreye girsin
@@ -271,6 +272,71 @@ def ingest(payloads: List[Dict], api_url: str, api_key: Optional[str]) -> Dict:
     return stats
 
 
+def build_branch_payloads(products: Dict[str, dict], seen: set) -> List[Dict]:
+    """Ürün depo listelerinden BENZERSİZ şubeleri çıkarır. Her depo depotId + lat/lon
+    taşır (devlet API'si veriyor); external_ref='mf:<depotId>' ile tekilleştirilir.
+    `seen` bu koşuda gönderilmiş ref'leri tutar → aynı şube tekrar tekrar POST edilmez.
+    Böylece compare-engine'in "en yakın şube" mesafesi gerçek veriyle çalışır."""
+    out: List[Dict] = []
+    for item in products.values():
+        for depot in (item.get("productDepotInfoList") or []):
+            market = (depot.get("marketAdi") or "").strip().lower()
+            if market not in STORE_MAP:
+                continue
+            depot_id = (depot.get("depotId") or "").strip()
+            if not depot_id:
+                continue
+            ref = f"mf:{depot_id}"
+            if ref in seen:
+                continue
+            try:
+                lat = float(depot.get("latitude"))
+                lon = float(depot.get("longitude"))
+            except (TypeError, ValueError):
+                continue
+            # (0,0) ya da aralık dışı → geçersiz konum, atla
+            if (lat == 0 and lon == 0) or not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+                continue
+            seen.add(ref)
+            out.append({
+                "store_id": STORE_MAP[market],
+                "external_ref": ref,
+                "name": (depot.get("depotName") or depot_id)[:300],
+                "lat": lat,
+                "lon": lon,
+            })
+    return out
+
+
+def ingest_branches(payloads: List[Dict], api_url: str, api_key: Optional[str]) -> Dict:
+    """Şubeleri /store-branches/bulk-upsert'e gönderir (fiyat ingest'iyle aynı auth)."""
+    stats = {"total": 0, "successful": 0, "failed": 0}
+    if not payloads:
+        return stats
+    api_url = api_url.rstrip("/")
+    headers = {"x-country": "TR"}
+    key = api_key or os.getenv("INGEST_API_KEY")
+    if key:
+        headers["x-api-key"] = key
+    for i in range(0, len(payloads), BRANCH_CHUNK):
+        chunk = payloads[i:i + BRANCH_CHUNK]
+        stats["total"] += len(chunk)
+        try:
+            resp = requests.post(f"{api_url}/store-branches/bulk-upsert",
+                                 json={"branches": chunk}, headers=headers, timeout=120)
+            if not resp.ok:
+                logger.error("branch ingest HTTP %s: %s", resp.status_code, resp.text[:200])
+                stats["failed"] += len(chunk); continue
+            body = resp.json() if resp.content else {}
+            ok = body.get("successful", len(chunk))
+            stats["successful"] += ok
+            stats["failed"] += len(chunk) - ok
+        except (requests.RequestException, ValueError) as e:
+            logger.error("branch ingest hata: %s", e)
+            stats["failed"] += len(chunk)
+    return stats
+
+
 def _load_done(path: str) -> set:
     if not path or not os.path.exists(path):
         return set()
@@ -292,6 +358,8 @@ def run(api_url: str, api_key: Optional[str], limit: int = 0, dry_run: bool = Fa
 
     grand_prod = 0
     grand_ing = {"total": 0, "successful": 0, "failed": 0}
+    grand_branch = {"total": 0, "successful": 0, "failed": 0}
+    seen_branches: set = set()   # bu koşuda gönderilen şube ref'leri (tekrar POST yok)
     done_fp = open(resume_file, "a", encoding="utf-8") if resume_file else None
 
     for pas in range(1, MAX_PASSES + 1):
@@ -328,16 +396,24 @@ def run(api_url: str, api_key: Optional[str], limit: int = 0, dry_run: bool = Fa
             if batch:
                 payloads = build_price_payloads(batch)
                 grand_prod += len(batch)
+                # Aynı taramadan ŞUBELERİ de çıkar → store_branches sürekli tazelenir,
+                # mesafe için ayrı bir koşuya gerek kalmaz.
+                branch_payloads = build_branch_payloads(batch, seen_branches)
                 if not dry_run:
                     st = ingest(payloads, api_url, api_key)
                     for k in grand_ing:
                         grand_ing[k] += st[k]
-                logger.info("ara-ingest: ürün=%d payload=%d | işlenmiş=%d/%d | toplam_ürün=%d",
-                            len(batch), len(payloads), len(done_ids), len(ids), grand_prod)
+                    if branch_payloads:
+                        bst = ingest_branches(branch_payloads, api_url, api_key)
+                        for k in grand_branch:
+                            grand_branch[k] += bst[k]
+                logger.info("ara-ingest: ürün=%d payload=%d yeni_şube=%d | işlenmiş=%d/%d | toplam_ürün=%d şube=%d",
+                            len(batch), len(payloads), len(branch_payloads),
+                            len(done_ids), len(ids), grand_prod, grand_branch["successful"])
     if done_fp:
         done_fp.close()
-    logger.info("BİTTİ — toplam ürün=%d, işlenmiş id=%d/%d, INGEST=%s",
-                grand_prod, len(done_ids), len(ids), grand_ing)
+    logger.info("BİTTİ — toplam ürün=%d, işlenmiş id=%d/%d, INGEST=%s, ŞUBE=%s",
+                grand_prod, len(done_ids), len(ids), grand_ing, grand_branch)
 
 
 def main():
