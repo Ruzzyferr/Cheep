@@ -138,6 +138,7 @@ export function PriceDifferenceScreen({
                   unit={item.store_prices?.[0]?.unit || 'adet'}
                   storeName={storeName}
                   imageUrl={item.image_url || undefined}
+                  categoryName={item.category?.name}
                   discountPercent={discountPercent > 0 ? discountPercent : undefined}
                   onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
                 />

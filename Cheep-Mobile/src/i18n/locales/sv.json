@@ -128,6 +128,7 @@
   },
   "list": {
     "budget_label": "Budget:",
+    "added_to": "Tillagd i {{list}}",
     "item_count": "{{count}} varor",
     "last_compared": "Senast jämförd: {{date}}",
     "template_badge": "Mall",

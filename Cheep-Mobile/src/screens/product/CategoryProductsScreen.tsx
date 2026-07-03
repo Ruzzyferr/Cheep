@@ -18,12 +18,12 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { productService, categoryService } from '../../services';
+import { productService, categoryService, listService } from '../../services';
 import { ProductGridCard } from '../../components/product/ProductGridCard';
 import { CategoryChip } from '../../components/common/CategoryChip';
-import { SelectListModal } from '../../components/list/SelectListModal';
 import { GridSkeleton } from '../../components/ui';
 import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
 import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { Product } from '../../types';
@@ -36,11 +36,9 @@ export function CategoryProductsScreen({
 }: HomeStackScreenProps<'CategoryProducts'>) {
   const { categoryId, categoryName } = route.params;
   const cart = useCart();
+  const toast = useToast();
   const { t } = useTranslation();
   const { formatMoney } = useLocale();
-
-  // Sepete eklemek için seçilen ürün (liste seçim modalını açar)
-  const [addProduct, setAddProduct] = useState<Product | null>(null);
 
   const [selectedCategory, setSelectedCategory] = useState<number>(categoryId);
   const [selectedSubcategory, setSelectedSubcategory] = useState<number | null>(null);
@@ -199,11 +197,26 @@ export function CategoryProductsScreen({
     return category?.name || categoryName;
   };
 
-  // Sepete ekle: hangi listeye eklediğini kullanıcı görsün diye liste seçim
-  // modalını aç (listeler ve ürün sayıları görünür). Sessizce "aktif listeye"
-  // eklemek yerine kullanıcı bilinçli seçim yapar.
-  const handleAddToCart = (product: Product) => {
-    setAddProduct(product);
+  // Hızlı ekle: aktif listeye DOĞRUDAN ekle (her seferinde liste sormaz). Aktif
+  // liste yoksa varsayılan bir tane oluşturup ona ekler. Hafif toast ile bildirir.
+  // Farklı bir listeye eklemek isteyen kullanıcı ürün detayından seçebilir.
+  const handleAddToCart = async (product: Product) => {
+    const unit = product.store_prices?.[0]?.unit || t('common.unit_default');
+    try {
+      let listId = cart.activeList?.id;
+      let listName = cart.activeList?.name;
+      if (!listId) {
+        const newList = await listService.createList({ name: t('list.select_modal.default_new_list_name') });
+        listId = newList.id;
+        listName = newList.name;
+      }
+      await listService.addItem(listId, { product_id: product.id, quantity: 1, unit });
+      await cart.refresh();
+      toast.show(t('list.added_to', { list: listName }));
+    } catch (error) {
+      console.error('Quick add error:', error);
+      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+    }
   };
 
   const goToActiveList = () => {
@@ -350,17 +363,6 @@ export function CategoryProductsScreen({
         }
       />
       )}
-
-      {/* Liste seçim modalı — eklenecek listeyi kullanıcı seçer */}
-      <SelectListModal
-        visible={!!addProduct}
-        productId={addProduct?.id ?? 0}
-        unit={addProduct?.store_prices?.[0]?.unit || t('common.unit_default')}
-        onClose={() => setAddProduct(null)}
-        onSelect={() => {
-          cart.refresh();
-        }}
-      />
     </View>
   );
 }

@@ -17,6 +17,7 @@ import { ListsNavigator } from './ListsNavigator';
 import { DealsNavigator } from './DealsNavigator';
 import { ProfileNavigator } from './ProfileNavigator';
 import { CartProvider, useCart } from '../context/CartContext';
+import { ToastProvider } from '../context/ToastContext';
 import { colors, spacing, shadows } from '../theme';
 import type { TabParamList, RootStackParamList } from './types';
 
@@ -25,7 +26,9 @@ const Tab = createBottomTabNavigator<TabParamList>();
 export function TabNavigator() {
   return (
     <CartProvider>
-      <TabNavigatorInner />
+      <ToastProvider>
+        <TabNavigatorInner />
+      </ToastProvider>
     </CartProvider>
   );
 }

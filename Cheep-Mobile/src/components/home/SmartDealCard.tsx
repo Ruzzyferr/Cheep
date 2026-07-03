@@ -4,10 +4,10 @@
  */
 
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { colors, typography, spacing, borderRadius } from '../../theme';
+import { ProductThumb } from '../product/ProductThumb';
 
 interface SmartDealCardProps {
   productName: string;
@@ -16,6 +16,7 @@ interface SmartDealCardProps {
   unit: string;
   storeName: string;
   imageUrl?: string;
+  categoryName?: string;
   discountPercent?: number;
   onPress: () => void;
 }
@@ -25,6 +26,7 @@ export function SmartDealCard({
   price,
   unit,
   storeName,
+  categoryName,
   imageUrl,
   discountPercent,
   onPress,
@@ -33,13 +35,7 @@ export function SmartDealCard({
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.95}>
       <View style={styles.imageContainer}>
-        {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={styles.image} />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <MaterialIcons name="inventory-2" size={32} color={colors.text.hint} />
-          </View>
-        )}
+        <ProductThumb imageUrl={imageUrl} categoryName={categoryName} iconSize={36} />
         {discountPercent !== undefined && (
           <View style={styles.discountBadge}>
             <Text style={styles.discountText}>-{discountPercent}%</Text>

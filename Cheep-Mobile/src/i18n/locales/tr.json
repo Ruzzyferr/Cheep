@@ -128,6 +128,7 @@
   },
   "list": {
     "budget_label": "Bütçe:",
+    "added_to": "{{list}} listesine eklendi",
     "item_count": "{{count}} ürün",
     "last_compared": "Son karşılaştırma: {{date}}",
     "template_badge": "Şablon",

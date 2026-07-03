@@ -7,7 +7,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   ScrollView,
   Alert,
@@ -15,6 +14,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
 import { Card, Button } from '../../components/ui';
+import { ProductThumb } from '../../components/product/ProductThumb';
 import { StoreChip } from '../../components/store/StoreChip';
 import { listService, affiliateService } from '../../services';
 import { openExternalUrl } from '../../utils/linking';
@@ -270,11 +270,7 @@ function ProductRow({ productAllocation }: { productAllocation: ProductAllocatio
       <View style={styles.productRow}>
         {/* Thumbnail — ürünü gözle tanımak market sırasını takip etmeyi kolaylaştırır */}
         <View style={styles.thumb}>
-          {product.image_url ? (
-            <Image source={{ uri: product.image_url }} style={styles.thumbImage} />
-          ) : (
-            <MaterialIcons name="inventory-2" size={20} color={colors.text.hint} />
-          )}
+          <ProductThumb imageUrl={product.image_url} iconSize={22} />
         </View>
         <View style={styles.productInfo}>
           <Text style={styles.productName} numberOfLines={2}>

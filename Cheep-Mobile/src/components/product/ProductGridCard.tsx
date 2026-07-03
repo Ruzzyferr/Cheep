@@ -4,10 +4,11 @@
  */
 
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { colors, typography, spacing, borderRadius } from '../../theme';
+import { ProductThumb } from './ProductThumb';
 import type { ProductConstraint } from '../../types';
 
 interface PriceInfo {
@@ -42,39 +43,36 @@ export function ProductGridCard({
       onPress={onPress}
       activeOpacity={0.7}
     >
-      {/* Product Image */}
+      {/* Product Image — görsel yoksa kategori-ikonlu placeholder */}
       <View style={styles.imageContainer}>
-        {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={styles.image} />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <MaterialIcons name="inventory-2" size={28} color={colors.text.hint} />
-          </View>
-        )}
-      </View>
+        <ProductThumb imageUrl={imageUrl} categoryName={categoryName} iconSize={40} />
 
-      {/* Product Info */}
-      <View style={styles.content}>
-        {categoryName && (
-          <Text style={styles.categoryLabel} numberOfLines={1}>
-            {categoryName}
-          </Text>
-        )}
-        <Text style={styles.productName} numberOfLines={2}>
-          {productName}
-        </Text>
-
-        {/* Constraint badges */}
+        {/* Constraint rozetleri görselin ÜSTÜNDE (overlay) — dikey akışı bozmaz,
+            böylece aşağıdaki fiyat bloğu her kartta aynı hizada sabit kalır. */}
         {constraint?.warnings && constraint.warnings.length > 0 && (
           <View style={styles.warningBadge}>
             <Text style={styles.warningBadgeText}>{t('product.check_label')}</Text>
           </View>
         )}
         {constraint?.hidden && (
-          <Text style={styles.dietLabel}>{t('product.diet_mismatch')}</Text>
+          <View style={styles.dietBadge}>
+            <Text style={styles.dietBadgeText}>{t('product.diet_mismatch')}</Text>
+          </View>
         )}
+      </View>
 
-        {/* Top 3 Prices */}
+      {/* Product Info */}
+      <View style={styles.content}>
+        {/* Kategori satırı her kartta rezerve (boş olsa da) → adlar hep aynı Y'de başlar */}
+        <Text style={styles.categoryLabel} numberOfLines={1}>
+          {categoryName || ' '}
+        </Text>
+        {/* Ürün adı tam 2 satır yüksekliği → 1 satırlık adlar da 2 satır yer kaplar */}
+        <Text style={styles.productName} numberOfLines={2}>
+          {productName}
+        </Text>
+
+        {/* Top 3 Prices — sabit konum */}
         <View style={styles.pricesContainer}>
           <Text style={styles.pricesLabel}>{t('product.top_three_stores')}</Text>
           <View style={styles.pricesList}>
@@ -119,23 +117,9 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     overflow: 'hidden',
     backgroundColor: colors.background.card,
-    padding: spacing.xs,
     marginBottom: spacing.sm,
+    position: 'relative',
   },
-
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-  },
-
-  placeholderImage: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
 
   content: {
     flex: 1,
@@ -144,6 +128,8 @@ const styles = StyleSheet.create({
   categoryLabel: {
     ...typography.styles.caption,
     fontSize: 12,
+    lineHeight: 14,
+    height: 14,               // sabit → boş kategori de aynı yer kaplar
     color: colors.text.secondary,
     marginBottom: 2,
   },
@@ -151,6 +137,8 @@ const styles = StyleSheet.create({
   productName: {
     ...typography.styles.body2,
     fontWeight: '600',
+    lineHeight: 18,
+    height: 36,               // tam 2 satır → tüm kartlarda eşit yükseklik
     color: colors.text.primary,
     marginBottom: spacing.sm,
   },
@@ -183,12 +171,13 @@ const styles = StyleSheet.create({
   },
 
   warningBadge: {
-    alignSelf: 'flex-start',
+    position: 'absolute',
+    top: spacing.xs,
+    right: spacing.xs,
     backgroundColor: colors.warning.bg,
     borderRadius: 4,
     paddingHorizontal: 5,
     paddingVertical: 2,
-    marginBottom: 4,
   },
 
   warningBadgeText: {
@@ -198,11 +187,22 @@ const styles = StyleSheet.create({
     color: colors.warning.dark,
   },
 
-  dietLabel: {
+  dietBadge: {
+    position: 'absolute',
+    bottom: spacing.xs,
+    left: spacing.xs,
+    right: spacing.xs,
+    backgroundColor: 'rgba(20,33,27,0.72)',
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+  },
+
+  dietBadgeText: {
     ...typography.styles.caption,
     fontSize: 10,
-    color: colors.text.hint,
-    marginBottom: 4,
+    fontWeight: '600',
+    color: '#fff',
     fontStyle: 'italic',
   },
 

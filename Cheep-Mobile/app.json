@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cheep",
     "slug": "cheep-mobile",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
@@ -16,6 +16,7 @@
       "bundleIdentifier": "com.cheep.mobile"
     },
     "android": {
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundColor": "#1F6F4A"

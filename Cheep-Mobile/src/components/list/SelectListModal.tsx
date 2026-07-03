@@ -13,8 +13,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  Switch,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
 import { Card, Button } from '../ui';
@@ -41,11 +41,11 @@ export function SelectListModal({
 }: SelectListModalProps) {
   const { t } = useTranslation();
   const { formatMoney } = useLocale();
+  const insets = useSafeAreaInsets();
   const effectiveUnit = unit ?? t('common.unit_default');
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState<number | null>(null);
-  const [brandIndependent, setBrandIndependent] = useState(false);
 
   useEffect(() => {
     if (!visible) return;
@@ -78,7 +78,6 @@ export function SelectListModal({
         product_id: productId,
         quantity,
         unit: effectiveUnit,
-        brand_independent: brandIndependent,
       });
       Alert.alert(t('list.select_modal.add_success_title'), t('list.select_modal.add_success_body'), [
         {
@@ -101,7 +100,7 @@ export function SelectListModal({
     try {
       setAdding(-1);
       const newList = await listService.createList({ name: t('list.select_modal.default_new_list_name') });
-      await listService.addItem(newList.id, { product_id: productId, quantity, unit: effectiveUnit, brand_independent: brandIndependent });
+      await listService.addItem(newList.id, { product_id: productId, quantity, unit: effectiveUnit });
       onSelect(newList.id);
       onClose();
     } catch (error) {
@@ -120,7 +119,7 @@ export function SelectListModal({
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.modal}>
+        <View style={[styles.modal, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
           <View style={styles.header}>
             <Text style={styles.title}>{t('list.select_modal.title')}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
@@ -134,11 +133,6 @@ export function SelectListModal({
             </View>
           ) : (
             <>
-              <View style={styles.toggleRow}>
-                <Text style={styles.toggleLabel}>{t('list.select_modal.brand_independent')}</Text>
-                <Switch value={brandIndependent} onValueChange={setBrandIndependent} />
-              </View>
-
               <FlatList
                 data={lists}
                 keyExtractor={(item) => item.id.toString()}
@@ -206,7 +200,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     maxHeight: '80%',
-    paddingBottom: layout.screenPadding,
+    // paddingBottom safe-area ile dinamik veriliyor (nav bar arkasında kalmasın)
   },
 
   header: {
@@ -296,21 +290,6 @@ const styles = StyleSheet.create({
     padding: layout.screenPadding,
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
-  },
-
-  toggleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    paddingHorizontal: layout.screenPadding,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-
-  toggleLabel: {
-    ...typography.styles.body1,
-    color: colors.text.primary,
   },
 });
 

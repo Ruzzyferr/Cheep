@@ -23,6 +23,7 @@ import { useLocale } from '../../context/LocaleContext';
 import { CheepMascot } from '../../components/brand/CheepMascot';
 import { FadeInUp, AnimatedNumber, PressableScale, Float } from '../../components/anim';
 import { getStoreLogoAsset } from '../../utils/storeLogo';
+import { ProductThumb } from '../../components/product/ProductThumb';
 import { getCountryCode } from '../../utils/geo';
 import { countryStorage } from '../../utils/storage';
 import { getCategoryIcon, categoryHomeRank } from '../../utils/categoryIcon';
@@ -419,11 +420,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
                   onPress={() => navigation.navigate('ProductDetail', { productId: p.id })}
                 >
                   <View style={styles.dealImageWrap}>
-                    {p.image_url ? (
-                      <Image source={{ uri: p.image_url }} style={styles.dealImage} />
-                    ) : (
-                      <MaterialIcons name="inventory-2" size={28} color={colors.text.hint} />
-                    )}
+                    <ProductThumb imageUrl={p.image_url} categoryName={p.category?.name} iconSize={32} />
                     {disc > 0 && (
                       <View style={styles.dealBadge}>
                         <Text style={styles.dealBadgeText}>-%{disc}</Text>

@@ -7,7 +7,6 @@ import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   FlatList,
   Alert,
@@ -17,6 +16,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { listService } from '../../services';
+import { ProductThumb } from '../../components/product/ProductThumb';
 import { useCart } from '../../context/CartContext';
 import { useLocale } from '../../context/LocaleContext';
 import { Button, Card, ListSkeleton } from '../../components/ui';
@@ -227,11 +227,7 @@ function ListItemCard({
       <Card padding="md" style={styles.itemCard}>
         <View style={styles.itemContent}>
           <View style={styles.itemThumb}>
-            {product.image_url ? (
-              <Image source={{ uri: product.image_url }} style={styles.itemThumbImg} />
-            ) : (
-              <MaterialIcons name="inventory-2" size={20} color={colors.text.hint} />
-            )}
+            <ProductThumb imageUrl={product.image_url} categoryName={product.category?.name} iconSize={22} />
           </View>
           <View style={styles.itemInfo}>
             <Text style={styles.productName} numberOfLines={2}>

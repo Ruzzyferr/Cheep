@@ -4,10 +4,10 @@
  */
 
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { View, Text, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../ui';
+import { ProductThumb } from './ProductThumb';
 import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import type { Product } from '../../types';
@@ -31,15 +31,9 @@ export function ProductCard({ product, onPress, showStore = false }: ProductCard
 
   return (
     <Card onPress={onPress} padding="sm" style={styles.card}>
-      {/* Product Image */}
+      {/* Product Image — görsel yoksa kategori-ikonlu placeholder */}
       <View style={styles.imageContainer}>
-        {product.image_url ? (
-          <Image source={{ uri: product.image_url }} style={styles.image} />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <MaterialIcons name="inventory-2" size={32} color={colors.text.hint} />
-          </View>
-        )}
+        <ProductThumb imageUrl={product.image_url} categoryName={product.category?.name} iconSize={40} />
       </View>
 
       {/* Product Info */}
@@ -90,23 +84,8 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.md,
     overflow: 'hidden',
     backgroundColor: colors.background.card,
-    padding: spacing.sm,
     marginBottom: spacing.sm,
   },
-
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-  },
-
-  placeholderImage: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
 
   info: {
     flex: 1,

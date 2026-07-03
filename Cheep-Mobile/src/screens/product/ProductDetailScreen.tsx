@@ -9,7 +9,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Image,
   ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
@@ -17,6 +16,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { productService, categoryService, affiliateService } from '../../services';
 import { Card, Button } from '../../components/ui';
 import { PriceTrendCard } from '../../components/product/PriceTrendCard';
+import { ProductThumb } from '../../components/product/ProductThumb';
 import { SelectListModal } from '../../components/list/SelectListModal';
 import { getStoreTint, getStoreInitial } from '../../utils/storeLogo';
 import { openExternalUrl } from '../../utils/linking';
@@ -167,15 +167,9 @@ export function ProductDetailScreen({
   return (
     <View style={styles.container}>
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-        {/* Product Image */}
+        {/* Product Image — görsel yoksa kategori-ikonlu placeholder */}
         <View style={styles.imageContainer}>
-          {product.image_url ? (
-            <Image source={{ uri: product.image_url }} style={styles.image} />
-          ) : (
-            <View style={styles.placeholderImage}>
-              <MaterialIcons name="inventory-2" size={48} color={colors.text.hint} />
-            </View>
-          )}
+          <ProductThumb imageUrl={product.image_url} categoryName={product.category?.name} iconSize={56} />
         </View>
 
       {/* Product Info */}

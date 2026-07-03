@@ -128,6 +128,7 @@
   },
   "list": {
     "budget_label": "Budget:",
+    "added_to": "Added to {{list}}",
     "item_count": "{{count}} items",
     "last_compared": "Last compared: {{date}}",
     "template_badge": "Template",
