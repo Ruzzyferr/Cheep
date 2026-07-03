@@ -95,11 +95,18 @@ def main():
     ap.add_argument("--api-url", default=os.getenv("CHEEP_API_URL", "http://localhost:3000/api/v1"))
     ap.add_argument("--api-key", default=os.getenv("INGEST_API_KEY"))
     ap.add_argument("--dry-run", action="store_true")
+    # Düğüm-noktası (node) marketleri düşük bellekle çeker. --ways ile way/bina
+    # poligonları da dahil edilir; bunun için düğüm konum indeksi gerekir ki 1.9GB
+    # RAM'e sığmaz → DİSK tabanlı indeks (sparse_file_array) kullanılır.
+    ap.add_argument("--ways", action="store_true", help="way/bina poligonlarını da dahil et (disk indeksi)")
     a = ap.parse_args()
 
     h = BranchHandler()
-    logger.info("PBF taranıyor: %s", a.pbf)
-    h.apply_file(a.pbf, locations=True)   # locations=True → way düğüm koordinatları
+    logger.info("PBF taranıyor: %s (ways=%s)", a.pbf, a.ways)
+    if a.ways:
+        h.apply_file(a.pbf, locations=True, idx="sparse_file_array,/tmp/osm_loc.idx")
+    else:
+        h.apply_file(a.pbf)   # yalnızca node'lar — indekssiz, hızlı, düşük bellek
     logger.info("bulunan şube=%d", len(h.out))
 
     # zincir dağılımı
