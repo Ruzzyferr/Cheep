@@ -27,7 +27,7 @@ export function Hero() {
           '-=0.3',
         )
         .from('.hero-sub', { y: 24, opacity: 0, duration: 0.7 }, '-=0.5')
-        .from('.hero-cta', { y: 20, opacity: 0, duration: 0.6, stagger: 0.1 }, '-=0.4')
+        .from('.hero-ctas', { y: 20, opacity: 0, duration: 0.6 }, '-=0.4')
         .from('.hero-bird', { scale: 0.6, opacity: 0, duration: 1, ease: 'back.out(1.7)' }, '-=0.9')
         .from('.hero-ticker', { y: 30, opacity: 0, duration: 0.7 }, '-=0.6')
 
@@ -73,17 +73,17 @@ export function Hero() {
             uygun sepete taşır. Her hafta güncellenen gerçek fiyatlarla, hiç düşünmeden tasarruf et.
           </p>
 
-          <div className="mt-9 flex flex-wrap items-center gap-4">
+          <div className="hero-ctas mt-9 flex flex-wrap items-center gap-4">
             <a
               href="#download"
-              className="hero-cta group inline-flex items-center gap-2 rounded-full bg-clementine px-7 py-4 text-base font-semibold text-white shadow-clementine transition-transform duration-300 hover:-translate-y-0.5"
+              className="group inline-flex items-center gap-2 rounded-full border border-transparent bg-clementine px-7 py-4 text-base font-semibold text-white shadow-clementine transition-transform duration-300 hover:-translate-y-0.5"
             >
               Uygulamayı indir
               <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
             </a>
             <a
               href="#how"
-              className="hero-cta inline-flex items-center gap-2 rounded-full border border-forest/25 bg-paper/70 px-7 py-4 text-base font-semibold text-forest-deep backdrop-blur transition-colors hover:bg-mint-soft"
+              className="inline-flex items-center gap-2 rounded-full border border-forest/25 bg-paper/70 px-7 py-4 text-base font-semibold text-forest-deep backdrop-blur transition-colors hover:bg-mint-soft"
             >
               Nasıl çalışır?
             </a>
