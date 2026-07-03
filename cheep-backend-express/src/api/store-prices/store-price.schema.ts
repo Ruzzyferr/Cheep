@@ -20,7 +20,9 @@ export const upsertStorePriceSchema = Joi.object({
     name: Joi.string().min(2).max(255).required(),
     brand: Joi.string().max(100).optional().allow(null, ''),
     ean_barcode: Joi.string().max(50).optional().allow(null, ''),
-    image_url: Joi.string().uri({ allowRelative: false }).optional().allow(null, '').empty(''),
+    // Sadece sınırlı string — katı .uri() bir bozuk URL'de TÜM bulk chunk'ı reddediyordu.
+    // Görsel URL'si kaynakta (marketfiyati CDN) zaten encode ediliyor; burada hoşgörülü ol.
+    image_url: Joi.string().max(1000).optional().allow(null, '').empty(''),
     category_id: Joi.number().integer().optional().allow(null), // Integer olarak kabul et
 });
 

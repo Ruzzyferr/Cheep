@@ -20,11 +20,30 @@ import re
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, List, Optional
+from urllib.parse import quote, urlsplit, urlunsplit
 
 import requests
 from requests.adapters import HTTPAdapter
 
 logger = logging.getLogger("marketfiyati")
+
+
+def _clean_image_url(u: str) -> Optional[str]:
+    """Devlet CDN görsel URL'sini güvenli hale getir: yol/sorgu içindeki boşluk ve
+    non-ASCII karakterleri %xx encode et. Böylece hem geçerli bir URI olur (backend
+    doğrulaması reddetmez) hem de RN Image gerçekten yükleyebilir. Geçersizse None."""
+    u = (u or "").strip()
+    if not u:
+        return None
+    try:
+        p = urlsplit(u)
+        if p.scheme not in ("http", "https") or not p.netloc:
+            return None
+        path = quote(p.path, safe="/%:@&=+$,;~()!*'-._")
+        query = quote(p.query, safe="=&%:@/+$,;~()!*'-._")
+        return urlunsplit((p.scheme, p.netloc, path, query, ""))
+    except Exception:
+        return None
 
 API_BASE = "https://api.marketfiyati.org.tr/api/v2"
 SITEMAP_INDEX = "https://marketfiyati.org.tr/sitemaps/sitemap.xml"
@@ -188,9 +207,7 @@ def build_price_payloads(products: Dict[str, dict]) -> List[Dict]:
         brand = (item.get("brand") or "").strip() or None
         unit = _unit_from(item.get("refinedVolumeOrWeight") or "")
         category_id = item.get("_cheep_cat") or _cat_id(item.get("main_category") or "")
-        image_url = (item.get("imageUrl") or "").strip() or None
-        if image_url and not image_url.startswith("http"):
-            image_url = None                         # geçersiz URI backend'de chunk'ı reddetmesin
+        image_url = _clean_image_url(item.get("imageUrl") or "")
 
         by_chain: Dict[str, float] = {}
         for depot in (item.get("productDepotInfoList") or []):
