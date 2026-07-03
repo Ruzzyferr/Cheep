@@ -55,17 +55,20 @@ def overpass_query(regex: str):
         f'nwr["shop"~"{SHOP}"]["brand"~"{regex}",i](area.tr);'
         'out center tags;'
     )
+    # Overpass IP başına slot ile hız-sınırlar; sık sorguda 429/504 (HTML) döner.
+    # Bu yüzden mirror başına birkaç deneme + UZUN geri-çekilme (rate-limit dakikalarla
+    # açılır). Her mirror'ı sırayla dener; JSON gelmezse bekleyip tekrar dener.
     for mirror in OVERPASS_MIRRORS:
-        for attempt in range(2):
+        for attempt in range(3):
             try:
                 r = requests.post(mirror, data={"data": q}, timeout=210)
                 ctype = r.headers.get("content-type", "")
                 if r.ok and ctype.startswith("application/json"):
                     return r.json().get("elements", [])
-                logger.warning("mirror %s HTTP %s (%s)", mirror, r.status_code, ctype[:30])
+                logger.warning("mirror %s HTTP %s (%s) — %d. deneme", mirror, r.status_code, ctype[:20], attempt + 1)
             except (requests.RequestException, ValueError) as e:
-                logger.warning("mirror %s hata: %s", mirror, e)
-            time.sleep(6)
+                logger.warning("mirror %s hata: %s", mirror, str(e)[:80])
+            time.sleep(20 * (attempt + 1))   # 20s, 40s, 60s
     logger.error("tüm mirror'lar başarısız (regex=%s)", regex)
     return []
 
@@ -107,24 +110,26 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
 
-    all_payloads = []
     seen = set()
+    grand = {"total": 0, "successful": 0, "failed": 0}
     for store_id, label, regex in CHAINS:
         els = overpass_query(regex)
         pays = build_payloads(els, store_id)
         fresh = [p for p in pays if p["external_ref"] not in seen]
         for p in fresh:
             seen.add(p["external_ref"])
-        logger.info("%-12s osm=%d yeni_şube=%d", label, len(els), len(fresh))
-        all_payloads.extend(fresh)
+        # Zincir başına HEMEN yükle: ilerleme görünür olur ve kısmi başarı korunur
+        # (bir zincir mirror'da takılırsa öncekiler zaten kaydedilmiş olur).
+        if fresh and not a.dry_run:
+            st = ingest_branches(fresh, a.api_url, a.api_key)
+            for k in grand:
+                grand[k] += st[k]
+            logger.info("%-12s osm=%d yüklendi=%d (ingest=%s)", label, len(els), len(fresh), st)
+        else:
+            logger.info("%-12s osm=%d yeni_şube=%d", label, len(els), len(fresh))
         time.sleep(4)
 
-    logger.info("TOPLAM şube=%d", len(all_payloads))
-    if a.dry_run:
-        logger.info("dry-run — ingest atlandı")
-        return
-    st = ingest_branches(all_payloads, a.api_url, a.api_key)
-    logger.info("INGEST: %s", st)
+    logger.info("TOPLAM ingest=%s", grand)
 
 
 if __name__ == "__main__":
