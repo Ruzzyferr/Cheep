@@ -180,14 +180,21 @@ export class ProductMatcher {
                 where: { ean_barcode: ean, country_id: resolvedCountryId },
             });
             if (existingByEan) {
-                // Kategori (re-)ata: payload bir kategori sağladıysa VE mevcut ürününki
-                // farklıysa güncelle. marketfiyati resmi kaynağı kategoride otoritedir;
-                // bu, üst-kategoriden alt-kategoriye rafine etmeyi (ve düzeltmeyi) sağlar.
-                // Kategori taşımayan kaynaklar (yabancı scraper'lar) null gönderir → dokunmaz.
+                // Kaynak (marketfiyati) otoriter alanları rafine edebilir: kategori ve
+                // görsel. Payload sağladıysa VE mevcut ürününki farklıysa güncelle
+                // (üst→alt kategori rafinesi + görsel backfill). Kategori/görsel taşımayan
+                // kaynaklar (yabancı scraper'lar) null gönderir → o alana dokunulmaz.
+                const patch: { category_id?: number; image_url?: string } = {};
                 if (providedCategoryId !== null && existingByEan.category_id !== providedCategoryId) {
+                    patch.category_id = providedCategoryId;
+                }
+                if (data.image_url && existingByEan.image_url !== data.image_url) {
+                    patch.image_url = data.image_url;
+                }
+                if (Object.keys(patch).length > 0) {
                     const updated = await prisma.product.update({
                         where: { id: existingByEan.id },
-                        data: { category_id: providedCategoryId },
+                        data: patch,
                     });
                     return { product: updated, isNew: false };
                 }
@@ -208,6 +215,7 @@ export class ProductMatcher {
                         country_id: resolvedCountryId,
                         ean_barcode: ean,
                         category_id: providedCategoryId,
+                        image_url: data.image_url ?? undefined,
                     },
                 });
                 return { product: created, isNew: true };

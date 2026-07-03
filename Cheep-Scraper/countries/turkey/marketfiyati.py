@@ -176,8 +176,9 @@ def _unit_from(refined: str) -> str:
 
 
 def build_price_payloads(products: Dict[str, dict]) -> List[Dict]:
-    """Her ürünün her zinciri için bir payload. ean=mf-<id>, source=api, GÖRSEL YOK,
-    category_id = main_category'den Cheep alt-kategorisi."""
+    """Her ürünün her zinciri için bir payload. ean=mf-<id>, source=api,
+    category_id = main_category'den Cheep alt-kategorisi. Görsel varsa devletin
+    resmi CDN'inden (cdn.marketfiyati.org.tr) image_url olarak taşınır."""
     payloads: List[Dict] = []
     for pid, item in products.items():
         name = (item.get("title") or "").strip()
@@ -187,6 +188,9 @@ def build_price_payloads(products: Dict[str, dict]) -> List[Dict]:
         brand = (item.get("brand") or "").strip() or None
         unit = _unit_from(item.get("refinedVolumeOrWeight") or "")
         category_id = item.get("_cheep_cat") or _cat_id(item.get("main_category") or "")
+        image_url = (item.get("imageUrl") or "").strip() or None
+        if image_url and not image_url.startswith("http"):
+            image_url = None                         # geçersiz URI backend'de chunk'ı reddetmesin
 
         by_chain: Dict[str, float] = {}
         for depot in (item.get("productDepotInfoList") or []):
@@ -216,6 +220,8 @@ def build_price_payloads(products: Dict[str, dict]) -> List[Dict]:
             }
             if brand:
                 payload["brand"] = brand[:100]
+            if image_url:
+                payload["image_url"] = image_url
             payloads.append(payload)
     return payloads
 
