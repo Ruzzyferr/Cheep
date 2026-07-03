@@ -45,13 +45,14 @@ SHOP = "supermarket|convenience|department_store"
 
 
 def overpass_query(regex: str):
+    # NOT: yalnızca `brand` etiketiyle eşleştiriyoruz. `name` regex'i tüm ülke
+    # üzerinde indekssiz olduğundan sorguyu ağırlaştırıp mirror'ları zaman aşımına
+    # (HTML hata) düşürüyordu. `brand` indeksli → hızlı ve güvenilir; büyük TR
+    # zincirlerinde brand etiketlemesi güçlü (ör. A101 ~2900 şube).
     q = (
         '[out:json][timeout:180];'
         'area["ISO3166-1"="TR"][admin_level=2]->.tr;'
-        '('
         f'nwr["shop"~"{SHOP}"]["brand"~"{regex}",i](area.tr);'
-        f'nwr["shop"~"{SHOP}"]["name"~"{regex}",i](area.tr);'
-        ');'
         'out center tags;'
     )
     for mirror in OVERPASS_MIRRORS:
