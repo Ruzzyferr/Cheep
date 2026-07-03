@@ -126,6 +126,27 @@ export const upsertStorePrice = async (data: UpsertData, countryId?: number) => 
 };
 
 // ++ PERFORMANS İYİLEŞTİRMESİ YAPILAN FONKSİYON ++
+/**
+ * Bayat fiyat süpürmesi — kaldırılan ürünleri/fiyatları temizler.
+ * Kaynak (marketfiyati) artık vermeyen fiyatlar tazelenmez → last_updated_at eskir.
+ * ttlDays'ten eski 'api' fiyatları silinir; fiyatsız kalan mf- ürünleri de silinir.
+ * ttlDays, rotasyon periyodundan (fiyatlı=7g) yeterince büyük olmalı (varsayılan 21g)
+ * ki geçici stok-dışı ürünler yanlışlıkla silinmesin.
+ */
+export const pruneStalePrices = async (countryId?: number, ttlDays: number = 21) => {
+    const cutoff = new Date(Date.now() - ttlDays * 86400 * 1000);
+    const priceWhere: any = { source: 'api', last_updated_at: { lt: cutoff } };
+    if (countryId) priceWhere.product = { country_id: countryId };
+    const delPrices = await prisma.storePrice.deleteMany({ where: priceWhere });
+
+    const prodWhere: any = { ean_barcode: { startsWith: 'mf-' }, store_prices: { none: {} } };
+    if (countryId) prodWhere.country_id = countryId;
+    const delProducts = await prisma.product.deleteMany({ where: prodWhere });
+
+    logger.info(`[StorePriceService] prune: ${delPrices.count} bayat fiyat, ${delProducts.count} öksüz ürün silindi (ttl=${ttlDays}g)`);
+    return { deleted_prices: delPrices.count, deleted_products: delProducts.count, ttl_days: ttlDays };
+};
+
 export const bulkUpsertStorePrices = async (prices: UpsertData[], countryId?: number) => {
     const upsertPromises = prices.map(priceData => upsertStorePrice(priceData, countryId));
     const outcomes = await Promise.allSettled(upsertPromises);

@@ -42,3 +42,14 @@ update-*.ps1
 products_data/
 Database/
 multi-import/
+# marketfiyati fetch runtime verisi (ASLA commit edilmez — kod değil, veri)
+mf_raw/
+mf_raw_weekly/
+mf_empty*.txt
+mf_done*.txt
+mf_state.db
+mf_state.db-*
+taxonomy*.json
+category_map.json
+*.tgz
+shots/

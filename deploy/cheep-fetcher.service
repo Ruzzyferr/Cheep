@@ -1,0 +1,28 @@
+[Unit]
+# Cheep TÜRKİYE sürdürülebilir fetch daemon'ı — resmi devlet API'si marketfiyati.org.tr.
+# 7/24 nazik çalışır: yeni ürünleri çeker, fiyatları haftalık, boşları aylık rotasyonla
+# tazeler. AIMD rate-shaping ile WAF ban'ına girmez. Durum SQLite'ta kalıcı (asla wipe).
+Description=Cheep marketfiyati fetch daemon (sürdürülebilir, tek-sunucu)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/cheep/Cheep-Scraper
+# Sırlar deploy .env'inden (INGEST_API_KEY); repoya asla girmez
+EnvironmentFile=/opt/cheep/deploy/.env
+Environment=CHEEP_API_URL=http://localhost:3000/api/v1
+ExecStart=/opt/cheep/Cheep-Scraper/venv/bin/python countries/turkey/mf_daemon.py \
+  --raw-dir /opt/cheep/Cheep-Scraper/mf_raw \
+  --category-map /opt/cheep/Cheep-Scraper/category_map.json \
+  --priced-ttl 604800 --empty-ttl 2592000 --batch 200 --ingest-every 150
+Restart=always
+RestartSec=30
+# Nazik: tek çekirdek yükü, düşük öncelik
+Nice=10
+IOSchedulingClass=idle
+StandardOutput=append:/opt/cheep/Cheep-Scraper/logs/fetcher.log
+StandardError=append:/opt/cheep/Cheep-Scraper/logs/fetcher.log
+
+[Install]
+WantedBy=multi-user.target

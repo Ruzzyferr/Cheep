@@ -170,6 +170,23 @@ router.post(
 
 /**
  * @swagger
+ * /api/v1/store-prices/prune-stale:
+ *   post:
+ *     summary: Bayat (kaldırılmış) fiyat/ürün süpürmesi
+ *     tags: [StorePrices]
+ *     description: |
+ *       ttl_days'ten (varsayılan 21) uzun süredir tazelenmemiş 'api' kaynaklı
+ *       fiyatları ve fiyatsız kalan mf- ürünlerini siler. Kaynak artık vermeyen
+ *       (kaldırılan) ürünler böyle temizlenir. Ingest-key korumalı.
+ */
+router.post(
+    '/prune-stale',
+    requireIngestKey,
+    StorePriceController.pruneStalePrices
+);
+
+/**
+ * @swagger
  * /api/v1/store-prices/import-with-llm:
  *   post:
  *     summary: LLM ile ürün import (Market bazlı optimize edilmiş)

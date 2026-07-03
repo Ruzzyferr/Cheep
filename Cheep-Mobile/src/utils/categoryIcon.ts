@@ -15,24 +15,37 @@ function norm(s: string): string {
   return (s || '').toLocaleLowerCase('tr-TR').trim();
 }
 
-// Exact taxonomy → icon (parent categories from the TR catalog).
+// Exact taxonomy → icon. Keys are the DEVLET (marketfiyati) üst-kategori adları
+// (menu_category), normalize edilmiş (tr-lower). Eski isimler de geriye-dönük tutulur.
 const EXACT: Record<string, string> = {
+  // Devletin gerçek üst kategorileri:
+  'süt ürünleri ve kahvaltılık': 'cheese',
+  'et, tavuk ve balık': 'food-steak',
+  'meyve ve sebze': 'fruit-watermelon',
+  'temel gıda': 'rice',
+  'fırın ve pastane': 'bread-slice',
+  'içecek': 'bottle-soda-classic',
+  'i̇çecek': 'bottle-soda-classic',
+  'atıştırmalık ve tatlı': 'cookie',
+  'dondurma': 'ice-cream',
+  'hazır yemek ve donuk': 'fridge-outline',
+  'temizlik ve kişisel bakım ürünleri': 'spray-bottle',
+  'bebek': 'baby-carriage',
+  'ev, pet ve yaşam': 'sofa-single',
+  'sağlık ve kozmetik': 'pill',
+  'diğer ürünler': 'dots-horizontal',
+  // Eski taksonomi (geriye-dönük uyum):
   'süt ürünleri': 'cheese',
   'meyve & sebze': 'fruit-watermelon',
   'et, tavuk, balık': 'food-steak',
-  'temel gıda': 'rice',
-  'i̇çecek': 'bottle-soda-classic',
-  'içecek': 'bottle-soda-classic',
   'fırın & pastane': 'bread-slice',
   'kahvaltılık': 'egg-fried',
   'atıştırmalık': 'cookie',
-  'dondurma': 'ice-cream',
   'hazır yemek & donuk': 'fridge-outline',
   'donuk & hazır yemek': 'fridge-outline',
   'temizlik': 'spray-bottle',
   'kişisel bakım': 'lotion',
   'kişisel bakım & kozmetik': 'lipstick',
-  'bebek': 'baby-carriage',
   'pet shop': 'paw',
   'sağlıklı yaşam': 'heart-pulse',
   'sağlık & takviye': 'pill',
@@ -91,20 +104,21 @@ export function getCategoryIcon(categoryName: string | null | undefined): string
  * grocery app). Unknown categories keep their original relative order at the end.
  */
 const HOME_PRIORITY = [
-  'meyve & sebze',
-  'süt ürünleri',
-  'et, tavuk, balık',
+  'meyve ve sebze',
+  'süt ürünleri ve kahvaltılık',
+  'et, tavuk ve balık',
   'temel gıda',
-  'i̇çecek',
+  'fırın ve pastane',
   'içecek',
-  'kahvaltılık',
-  'fırın & pastane',
-  'atıştırmalık',
-  'temizlik',
+  'i̇çecek',
+  'atıştırmalık ve tatlı',
+  'temizlik ve kişisel bakım ürünleri',
   'dondurma',
-  'kağıt & hijyen',
-  'kişisel bakım',
+  'hazır yemek ve donuk',
   'bebek',
+  'sağlık ve kozmetik',
+  'ev, pet ve yaşam',
+  'diğer ürünler',
 ];
 
 export function categoryHomeRank(categoryName: string | null | undefined): number {

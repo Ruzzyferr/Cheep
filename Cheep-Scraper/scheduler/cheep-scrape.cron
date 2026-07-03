@@ -1,4 +1,4 @@
-# Cheep foreign scrape — night between Sunday and Monday.
-# 02:00 UTC Monday (~03:00 CET, ~05:00 İstanbul). Countries stagger +30m internally.
-# Install: crontab -l | cat - scheduler/cheep-scrape.cron | crontab -   (edit paths first)
-0 2 * * 1 CHEEP_SCRAPER_DIR=/opt/cheep-scraper CHEEP_API_URL=http://localhost:3000/api/v1 /opt/cheep-scraper/scheduler/run_weekly.sh
+# Cheep TÜRKİYE haftalık katalog yenileme — PAZAR günü, gün boyu.
+# 03:00 sunucu saati Pazar; fetch WAF rate-limit yüzünden gün içine yayılır.
+# Kur: crontab -l | grep -v run_weekly.sh | cat - scheduler/cheep-scrape.cron | crontab -
+0 3 * * 0 CHEEP_SCRAPER_DIR=/opt/cheep/Cheep-Scraper CHEEP_API_URL=http://localhost:3000/api/v1 /opt/cheep/Cheep-Scraper/scheduler/run_weekly.sh

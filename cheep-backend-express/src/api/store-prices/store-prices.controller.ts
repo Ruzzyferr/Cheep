@@ -23,3 +23,15 @@ export const bulkUpsertStorePrices = async (req: Request, res: Response, next: N
         next(error);
     }
 };
+
+// Bayat fiyat/ürün süpürmesi (kaldırılan ürünleri temizler). Ingest-key korumalı.
+export const pruneStalePrices = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const countryId = req.country?.id;
+        const ttlDays = Number(req.body?.ttl_days) > 0 ? Number(req.body.ttl_days) : 21;
+        const result = await StorePriceService.pruneStalePrices(countryId, ttlDays);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
