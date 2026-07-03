@@ -13,8 +13,7 @@ TRUNCATE TABLE
 -- Devlette olmayan zinciri kaldır (Hakmar = 7); 6 ulusal zincir kalır
 DELETE FROM stores WHERE id = 7;
 
--- 6 devlet zinciri garanti (STORE_MAP ile aynı id'ler). Ada göre günceller,
--- logo_url/website_url gibi mevcut alanları KORUR.
+-- 6 devlet zinciri garanti (STORE_MAP ile aynı id'ler). Ada göre günceller.
 INSERT INTO stores (id, name, country_id, created_at, updated_at) VALUES
   (1, 'Migros',              (SELECT id FROM countries WHERE code='TR'), now(), now()),
   (2, 'CarrefourSA',         (SELECT id FROM countries WHERE code='TR'), now(), now()),
@@ -23,6 +22,11 @@ INSERT INTO stores (id, name, country_id, created_at, updated_at) VALUES
   (5, 'BİM',                 (SELECT id FROM countries WHERE code='TR'), now(), now()),
   (6, 'Tarım Kredi Market',  (SELECT id FROM countries WHERE code='TR'), now(), now())
 ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, updated_at = now();
+
+-- HUKUKİ: telifli market logolarını KULLANMIYORUZ (uygulama renkli rozet gösterir).
+-- Eski kayıtlardan kalma logo_url'leri temizle ki hiçbir istemci (mobil/web) amblem basmasın.
+UPDATE stores SET logo_url = NULL
+ WHERE country_id = (SELECT id FROM countries WHERE code='TR') AND logo_url IS NOT NULL;
 
 -- stores id sayacını en büyük id'ye çek (yeni market gerekmez ama tutarlı olsun)
 SELECT setval(pg_get_serial_sequence('stores','id'),
