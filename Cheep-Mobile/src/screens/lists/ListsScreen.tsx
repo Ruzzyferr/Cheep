@@ -213,6 +213,7 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
         <ListSkeleton count={4} />
       ) : (
         <FlatList
+          style={styles.list}
           data={lists}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
@@ -301,6 +302,11 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: colors.primary.main,
     fontWeight: '600',
+  },
+
+  // Kaydırma alanı ekranın kalan yüksekliğine sabitlensin (yoksa uzun listede kırpılır).
+  list: {
+    flex: 1,
   },
 
   listContent: {

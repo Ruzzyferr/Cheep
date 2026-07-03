@@ -51,7 +51,7 @@ export function CompareResultsScreen({
         setLoading(true);
         const loc = await getUserLocation(); // {lat,lon} | null
         const data = await listService.compareList(listId, {
-          maxStores: 3,
+          maxStores: 4,
           includeMissingProducts: true,
           ...(loc ? { userLocation: loc } : {}),
         });
@@ -88,6 +88,10 @@ export function CompareResultsScreen({
 
   const { strategies } = results;
 
+  // Gerçek şube mesafesi olan rota var mı? (store_branches boşken tüm mesafeler 0 =
+  // bilinmiyor.) Yoksa mesafe satırlarını ve mesafe sıralamalarını gizleriz.
+  const hasRealDistance = strategies.some((s) => s.totalDistance > 0);
+
   // Kapsama-bilinçli özet: fiyatlar yalnızca AYNI ürünleri kapsayan rotalar
   // arasında karşılaştırılabilir (eksik ürünlü ucuz rota yanıltıcıdır).
   const insights = compareInsights(strategies);
@@ -107,25 +111,26 @@ export function CompareResultsScreen({
     }
   }
 
-  // Sıralama
+  // Sıralama — TÜM sıralamalar önce KAPSAMAYA göre gruplar. Fiyat/mesafe yalnızca aynı
+  // ürünleri kapsayan rotalar arasında karşılaştırılabilir: yoksa 16 ürünü eksik olduğu
+  // için "ucuz" görünen yarım bir sepet, tam sepetin önüne geçer (yanıltıcı). Bu yüzden
+  // ikincil anahtar (fiyat/mesafe) yalnızca aynı kapsama kademesi içinde uygulanır.
+  const coverage = (s: RouteStrategy) => s.coveragePercentage ?? 0;
   filteredStrategies.sort((a, b) => {
+    if (coverage(a) !== coverage(b)) return coverage(b) - coverage(a);
     switch (sortOption) {
       case 'price':
         return a.totalPrice - b.totalPrice;
       case 'distance':
         return a.totalDistance - b.totalDistance;
-      case 'price_distance':
-        // Önce fiyata göre, sonra mesafeye göre
+      case 'price_distance': {
         const priceDiff = a.totalPrice - b.totalPrice;
-        if (Math.abs(priceDiff) < 10) { // 10 TL'den az fark varsa mesafeye bak
-          return a.totalDistance - b.totalDistance;
-        }
+        if (Math.abs(priceDiff) < 10) return a.totalDistance - b.totalDistance;
         return priceDiff;
+      }
       case 'score':
       default:
-        // "Önerilen": önce en eksiksiz sepet, sonra en yüksek skor. Daha ucuz
-        // ama eksik bir rota, tam bir sepetin önüne ASLA geçmesin.
-        return byCoverageThenScore(a, b);
+        return (b.score ?? 0) - (a.score ?? 0);
     }
   });
 
@@ -181,8 +186,14 @@ export function CompareResultsScreen({
             {([
               { value: 'score' as SortOption, label: t('compare.sort.recommended') },
               { value: 'price' as SortOption, label: t('compare.sort.cheapest') },
-              { value: 'distance' as SortOption, label: t('compare.sort.nearest') },
-              { value: 'price_distance' as SortOption, label: t('compare.sort.price_distance') },
+              // Mesafe sıralamaları yalnızca GERÇEK şube mesafesi olan rota varsa gösterilir
+              // (şube konum verisi gelene kadar sahte mesafe göstermeyiz).
+              ...(hasRealDistance
+                ? [
+                    { value: 'distance' as SortOption, label: t('compare.sort.nearest') },
+                    { value: 'price_distance' as SortOption, label: t('compare.sort.price_distance') },
+                  ]
+                : []),
             ]).map((option) => (
               <TouchableOpacity
                 key={option.value}

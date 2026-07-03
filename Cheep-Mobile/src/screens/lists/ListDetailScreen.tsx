@@ -158,6 +158,7 @@ export function ListDetailScreen({
 
       {/* Items List */}
       <FlatList
+        style={styles.list}
         data={items}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
@@ -315,6 +316,13 @@ const styles = StyleSheet.create({
     ...typography.styles.body2,
     color: colors.text.primary,
     fontWeight: '600',
+  },
+
+  // FlatList'in kendi görünüm alanı (viewport) ekranın kalan yüksekliğine SABİTLENMELİ;
+  // yoksa liste içerik yüksekliğine büyür, parent onu kırpar ve kaydırma çalışmaz
+  // (kullanıcı 3-4. üründen sonrasını göremez). flex:1 bunu düzeltir.
+  list: {
+    flex: 1,
   },
 
   listContent: {

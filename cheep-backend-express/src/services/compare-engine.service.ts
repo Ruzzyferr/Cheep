@@ -236,9 +236,14 @@ export async function compareShoppingList(
         itemOptions.set(item.id, resolveItemStoreOptions(representative, item.brand_independent, siblings));
     }
 
-    // Kullanıcı konumu ve ülke belirtilmişse, mağaza koordinatlarını en yakın şube ile değiştir
-    // (StoreOption.store nesneleri her stratejinin mesafe hesabına aktığı için, burada
-    // değiştirmek hem tekli hem çoklu mağaza rotalarını kapsar.)
+    // MESAFE = yalnızca GERÇEK şube verisinden. stores.lat/lon her zincir için tek bir
+    // temsili nokta (gerçek şube değil; ör. hepsi İzmir'de) ve çoğu NULL. Bu sahte temel
+    // koordinatlardan mesafe hesaplarsak İstanbul'daki kullanıcıya "300 km / 1000 km" gibi
+    // saçma değerler çıkar. Bu yüzden temel koordinatları YOK sayıp konumu SIFIRLIYORUZ;
+    // bir mağazaya konum ancak store_branches'taki gerçek en-yakın şube verebilir.
+    // store_branches doldurulduğunda mesafeler otomatik olarak geri gelir.
+    itemOptions.forEach(m => m.forEach(opt => { opt.store.lat = null; opt.store.lon = null; }));
+
     if (options.userLocation && options.countryId) {
         const ids = new Set<number>();
         itemOptions.forEach(m => m.forEach(opt => ids.add(opt.store_id)));
@@ -358,11 +363,12 @@ async function calculateSingleStoreStrategies(
             (allocation.products.length / listItems.length) * 100
         );
 
-        // Mesafe hesapla
-        const distance = options.userLocation
+        // Mesafe hesapla — yalnızca gerçek şube koordinatı varsa. Koordinat yoksa (sahte
+        // temel koordinatlar yukarıda sıfırlandı) mesafe "bilinmiyor" (0) → arayüz gizler.
+        const distance = options.userLocation && store.lat != null && store.lon != null
             ? RouteOptimizer.calculateDistance(options.userLocation, {
-                  lat: store.lat || 0,
-                  lon: store.lon || 0,
+                  lat: store.lat,
+                  lon: store.lon,
               })
             : 0;
 
@@ -390,7 +396,19 @@ async function calculateSingleStoreStrategies(
         strategies.push(strategy);
     }
 
-    return strategies;
+    // Tek-market rotalarında gürültüyü kes: listenin yalnızca 1-2 ürününü taşıyan bir
+    // marketi "rota" gibi göstermek anlamsız. En çok kapsayan ilk birkaç marketi tut
+    // (favori marketler kapsama düşük olsa da korunur). Böylece "1 market" filtresi
+    // ana zincirleri gösterir, uzun kuyruğu değil.
+    const TOP_SINGLE = 4;
+    strategies.sort((a, b) =>
+        b.coveragePercentage - a.coveragePercentage || a.totalPrice - b.totalPrice
+    );
+    const favored = strategies.filter(s => s.hasFavoriteStores);
+    const top = strategies.slice(0, TOP_SINGLE);
+    const kept = new Map<number, RouteStrategy>();
+    for (const s of [...top, ...favored]) kept.set(s.stores[0].store.id, s);
+    return Array.from(kept.values());
 }
 
 // ============================================
@@ -404,8 +422,6 @@ async function calculateMultiStoreStrategies(
     options: CompareOptions,
     itemOptions: Map<number, Map<number, StoreOption>>
 ): Promise<RouteStrategy[]> {
-    const strategies: RouteStrategy[] = [];
-
     // Tüm benzersiz marketleri bul
     const storeMap = new Map<number, any>();
     listItems.forEach(item => {
@@ -435,35 +451,32 @@ async function calculateMultiStoreStrategies(
             .slice(0, MAX_CANDIDATE_STORES);
     }
 
-    // 2'li, 3'lü kombinasyonlar için
-    for (let storeCount = 2; storeCount <= Math.min(maxStores, allStores.length); storeCount++) {
-        const combinations = generateCombinations(allStores, storeCount);
-
-        for (const storeCombination of combinations) {
-            const strategy = calculateOptimalAllocation(
-                listItems,
-                storeCombination,
-                budget,
-                options,
-                itemOptions
-            );
-
-            if (strategy) {
-                strategies.push(strategy);
-            }
+    // CURATED çıktı: her market SAYISI (k) için TEK EN İYİ rotayı üret.
+    // Katalog verimizin ~%83'ü tek-marketli olduğundan (özel markalar, markete-özel
+    // ürünler) bir listenin tüm ürünleri çoğu zaman tek bir markette bulunmaz. Tüm
+    // C(n,k) kombinasyonlarını dökmek (onlarca anlamsız düşük-kapsamalı rota) yerine,
+    // her k için "en çok kapsayan, eşitlikte en ucuz" kombinasyonu seçeriz:
+    //   1 market en iyisi (single_store zaten üretir) → 2 market → 3 market → ...
+    // Böylece kullanıcı "durak sayısı ↔ kapsama/fiyat" ödünleşimini net görür ve her
+    // filtre (2, 3+) gerçek/anlamlı bir rota gösterir.
+    const bestByK: RouteStrategy[] = [];
+    for (let k = 2; k <= Math.min(maxStores, allStores.length); k++) {
+        let best: RouteStrategy | null = null;
+        for (const combo of generateCombinations(allStores, k)) {
+            const strategy = calculateOptimalAllocation(listItems, combo, budget, options, itemOptions);
+            if (!strategy) continue;
+            if (strategy.stores.length < 2) continue;   // tek markete çöktü → single_store kopyası
+            if (!best || isBetterRoute(strategy, best)) best = strategy;
         }
+        if (best) bestByK.push(best);
     }
 
-    // TEKİLLEŞTİR: bir kombinasyondaki bazı marketler hiçbir üründe en ucuz olmayınca
-    // boş allocation olarak filtreleniyor (bkz. nonEmptyAllocations). Böylece farklı
-    // kombinasyonlar AYNI efektif market kümesine çöker (ör. {BİM,Migros,A101} → A101
-    // hiç kazanamaz → {BİM,Migros}); tek markete çökenler de single_store ile birebir
-    // aynıdır. Efektif kümeye göre tekilleştir; <2 markete çökenleri ele (single_store
-    // zaten üretiyor). Aynı küme → aynı dağıtım/fiyat olduğundan ilk görülen tutulur.
+    // TEKİLLEŞTİR: bir k-en-iyisi, fazladan market hiçbir üründe kazanamayınca daha
+    // düşük k'nın efektif kümesine çökebilir (ör. en iyi 4'lü aslında 3 markete iner
+    // ve zaten 3-en-iyisiyle aynıdır). Efektif market kümesine göre tekilleştir.
     const seen = new Set<string>();
     const deduped: RouteStrategy[] = [];
-    for (const s of strategies) {
-        if (s.stores.length < 2) continue;            // tek markete çöktü → single_store kopyası
+    for (const s of bestByK) {
         const key = s.stores.map(a => a.store.id).sort((x, y) => x - y).join('-');
         if (seen.has(key)) continue;
         seen.add(key);
@@ -471,6 +484,18 @@ async function calculateMultiStoreStrategies(
     }
 
     return deduped;
+}
+
+/** Daha iyi rota mı? Önce kapsama (yüksek iyi), eşitlikte fiyat (düşük iyi),
+ *  sonra market sayısı (az iyi). Çoklu-market adaylarını seçerken kullanılır. */
+function isBetterRoute(a: RouteStrategy, b: RouteStrategy): boolean {
+    if (a.coveragePercentage !== b.coveragePercentage) {
+        return a.coveragePercentage > b.coveragePercentage;
+    }
+    if (Math.abs(a.totalPrice - b.totalPrice) > 0.001) {
+        return a.totalPrice < b.totalPrice;
+    }
+    return a.stores.length < b.stores.length;
 }
 
 /**
