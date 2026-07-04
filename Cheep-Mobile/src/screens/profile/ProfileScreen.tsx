@@ -47,7 +47,7 @@ export function ProfileScreen({
   const { t } = useTranslation();
   const { country, setCountry } = useLocale();
   const currencySymbol = COUNTRY_CONFIG[country]?.symbol ?? COUNTRY_CONFIG.TR.symbol;
-  const [stats, setStats] = useState({ active: 0, completed: 0, templates: 0 });
+  const [stats, setStats] = useState({ active: 0, lists: 0, items: 0 });
 
   // ─── Language / Country picker state ───────────────────────────────────────
   const [langPickerOpen, setLangPickerOpen] = useState(false);
@@ -73,15 +73,12 @@ export function ProfileScreen({
 
       (async () => {
         try {
-          const [all, templates] = await Promise.all([
-            listService.getLists('all'),
-            listService.getTemplates(),
-          ]);
+          const all = await listService.getLists();
           if (!alive) return;
           setStats({
-            active: all.filter((l) => l.status === 'active' && !l.is_template).length,
-            completed: all.filter((l) => (l.status as string) === 'completed').length,
-            templates: templates.length,
+            active: all.filter((l) => l.status === 'active').length,
+            lists: all.length,
+            items: all.reduce((sum, l) => sum + (l.list_items?.length ?? 0), 0),
           });
         } catch {
           /* keep zeros */
@@ -228,8 +225,8 @@ export function ProfileScreen({
         {/* Stats strip */}
         <View style={styles.statsRow}>
           <StatTile icon="playlist-add-check" value={stats.active} label={t('profile.stat_active')} />
-          <StatTile icon="history" value={stats.completed} label={t('profile.stat_completed')} />
-          <StatTile icon="bookmark-border" value={stats.templates} label={t('profile.stat_templates')} />
+          <StatTile icon="format-list-bulleted" value={stats.lists} label={t('profile.stat_lists')} />
+          <StatTile icon="shopping-basket" value={stats.items} label={t('profile.stat_items')} />
         </View>
 
         {/* ──────────── Tercihlerim ──────────── */}

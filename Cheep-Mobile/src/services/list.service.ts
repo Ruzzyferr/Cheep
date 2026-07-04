@@ -140,57 +140,5 @@ export const listService = {
     );
     return res.data.data!;
   },
-
-  /**
-   * Use selected route - Mark list as completed
-   */
-  async useRoute(listId: number): Promise<void> {
-    await apiClient.post<ApiResponse<void>>(
-      API_ENDPOINTS.LISTS.USE_ROUTE(listId)
-    );
-  },
-
-  /**
-   * Get templates
-   */
-  async getTemplates(): Promise<ShoppingList[]> {
-    const response = await apiClient.get<ApiResponse<ShoppingList[]>>(
-      API_ENDPOINTS.LISTS.TEMPLATES
-    );
-    return response.data.data || [];
-  },
-
-  /**
-   * Create from template
-   */
-  async createFromTemplate(templateId: number, name?: string): Promise<ShoppingList> {
-    const response = await apiClient.post<ApiResponse<ShoppingList>>(
-      API_ENDPOINTS.LISTS.FROM_TEMPLATE(templateId),
-      { name }
-    );
-    return response.data.data!;
-  },
-
-  /**
-   * Import completed list to existing
-   */
-  async importToExisting(completedId: number, targetListId: number): Promise<any> {
-    const response = await apiClient.post<ApiResponse<any>>(
-      API_ENDPOINTS.LISTS.IMPORT_TO_EXISTING(completedId),
-      { targetListId }
-    );
-    return response.data.data;
-  },
-
-  /**
-   * Create new from completed list
-   */
-  async createNewFromCompleted(completedId: number, oldActiveListId?: number): Promise<ShoppingList> {
-    const response = await apiClient.post<ApiResponse<ShoppingList>>(
-      API_ENDPOINTS.LISTS.CREATE_NEW(completedId),
-      { oldActiveListId }
-    );
-    return response.data.data!;
-  },
 };
 
