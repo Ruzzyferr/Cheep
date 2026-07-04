@@ -9,6 +9,7 @@ import {
     updateListSchema,
     addListItemSchema,
     updateListItemSchema,
+    importSchema,
 } from '../../schema/list.schema.js';
 import { compareListSchema } from '../../schema/compare.schema.js';
 import { compareLimiter } from '../../middleware/rate-limit.middleware.js';
@@ -334,6 +335,45 @@ router.post('/:id/activate', authenticate, validateIdParam('id'), ListController
  *         description: Liste bulunamadı
  */
 router.post('/:id/clone', authenticate, validateIdParam('id'), ListController.cloneList);
+
+/**
+ * @swagger
+ * /api/v1/lists/{id}/import:
+ *   post:
+ *     summary: Başka listeden aktar (merge/replace)
+ *     tags: [Lists]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - sourceId
+ *               - mode
+ *             properties:
+ *               sourceId:
+ *                 type: integer
+ *               mode:
+ *                 type: string
+ *                 enum: [merge, replace]
+ *     responses:
+ *       200:
+ *         description: Ürünler aktarıldı
+ *       401:
+ *         description: Yetkisiz erişim
+ *       404:
+ *         description: Liste bulunamadı veya geçersiz kaynak
+ */
+router.post('/:id/import', authenticate, validateIdParam('id'), validate(importSchema), ListController.importFromList);
 
 // ============================================
 // TEMPLATES

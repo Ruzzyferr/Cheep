@@ -23,7 +23,7 @@ vi.mock('../src/utils/prisma.client.js', () => ({
   },
 }));
 
-import { createList, activateList, cloneList } from '../src/api/lists/lists.service.js';
+import { createList, activateList, cloneList, importFromList } from '../src/api/lists/lists.service.js';
 
 beforeEach(() => { updateMany.mockReset(); create.mockReset(); findFirst.mockReset(); update.mockReset(); $transaction.mockClear(); });
 
@@ -83,5 +83,41 @@ describe('cloneList', () => {
       data: [expect.objectContaining({ list_id: 99, product_id: 10, quantity: 2, unit: 'adet', brand_independent: true })],
     }));
     expect(res).toBeTruthy();
+  });
+});
+
+describe('importFromList', () => {
+  const srcItems = [{ product_id: 10, quantity: 1, unit: 'adet', brand_independent: false },
+                    { product_id: 11, quantity: 3, unit: 'kg', brand_independent: true }];
+  it('merge: skipDuplicates ile ekler, brand_independent korunur', async () => {
+    findFirst
+      .mockResolvedValueOnce({ id: 2, user_id: 1 })                       // target
+      .mockResolvedValueOnce({ id: 5, user_id: 1, list_items: srcItems }); // source
+    const createMany = vi.fn().mockResolvedValue({ count: 2 });
+    const deleteMany = vi.fn();
+    const txFindFirst = vi.fn().mockResolvedValue({ id: 2, list_items: srcItems });
+    $transaction.mockImplementationOnce(async (fn: any) => fn({ list: { findFirst: txFindFirst }, listItem: { createMany, deleteMany } }));
+    const res = await importFromList(2, 5, 'merge', 1);
+    expect(deleteMany).not.toHaveBeenCalled();
+    expect(createMany).toHaveBeenCalledWith(expect.objectContaining({
+      skipDuplicates: true,
+      data: expect.arrayContaining([expect.objectContaining({ list_id: 2, product_id: 11, brand_independent: true })]),
+    }));
+    expect(res).toBeTruthy();
+  });
+  it('replace: önce siler sonra kopyalar', async () => {
+    findFirst
+      .mockResolvedValueOnce({ id: 2, user_id: 1 })
+      .mockResolvedValueOnce({ id: 5, user_id: 1, list_items: srcItems });
+    const createMany = vi.fn().mockResolvedValue({ count: 2 });
+    const deleteMany = vi.fn().mockResolvedValue({ count: 4 });
+    const txFindFirst = vi.fn().mockResolvedValue({ id: 2, list_items: srcItems });
+    $transaction.mockImplementationOnce(async (fn: any) => fn({ list: { findFirst: txFindFirst }, listItem: { createMany, deleteMany } }));
+    await importFromList(2, 5, 'replace', 1);
+    expect(deleteMany).toHaveBeenCalledWith({ where: { list_id: 2 } });
+    expect(createMany).toHaveBeenCalled();
+  });
+  it('kaynak=hedef ise null', async () => {
+    expect(await importFromList(2, 2, 'merge', 1)).toBeNull();
   });
 });

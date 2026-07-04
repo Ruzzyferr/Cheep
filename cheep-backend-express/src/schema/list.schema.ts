@@ -47,3 +47,8 @@ export const updateListItemSchema = Joi.object({
         .optional(),
     brand_independent: Joi.boolean().optional(),
 }).min(1);
+
+export const importSchema = Joi.object({
+    sourceId: Joi.number().integer().positive().required(),
+    mode: Joi.string().valid('merge', 'replace').required(),
+});

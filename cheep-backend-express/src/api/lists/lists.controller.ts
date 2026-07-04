@@ -114,6 +114,28 @@ export const cloneList = async (req: Request, res: Response, next: NextFunction)
 };
 
 /**
+ * Başka listeden aktar (merge/replace)
+ */
+export const importFromList = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ success: false, message: 'Unauthorized' });
+            return;
+        }
+
+        const { sourceId, mode } = req.body;
+        const result = await ListService.importFromList(Number(req.params.id), sourceId, mode, req.user.id);
+        if (!result) {
+            res.status(404).json({ success: false, message: 'Liste bulunamadı veya geçersiz kaynak' });
+            return;
+        }
+        res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Liste güncelle
  */
 export const updateList = async (req: Request, res: Response, next: NextFunction) => {

@@ -211,6 +211,37 @@ export const cloneList = async (listId: number, userId: number) => {
 };
 
 /**
+ * Başka listeden aktar (merge/replace). brand_independent korunur.
+ * Guard: sourceId !== targetId, ikisi de kullanıcıya ait; değilse null.
+ */
+export const importFromList = async (
+    targetId: number, sourceId: number, mode: 'merge' | 'replace', userId: number,
+) => {
+    if (targetId === sourceId) return null;
+    const target = await prisma.list.findFirst({ where: { id: targetId, user_id: userId } });
+    if (!target) return null;
+    const source = await prisma.list.findFirst({
+        where: { id: sourceId, user_id: userId }, include: { list_items: true },
+    });
+    if (!source) return null;
+    return await prisma.$transaction(async (tx) => {
+        if (mode === 'replace') {
+            await tx.listItem.deleteMany({ where: { list_id: targetId } });
+        }
+        if (source.list_items.length > 0) {
+            await tx.listItem.createMany({
+                data: source.list_items.map((it) => ({
+                    list_id: targetId, product_id: it.product_id,
+                    quantity: it.quantity, unit: it.unit, brand_independent: it.brand_independent,
+                })),
+                skipDuplicates: mode === 'merge',
+            });
+        }
+        return await tx.list.findFirst({ where: { id: targetId }, include: { list_items: true } });
+    });
+};
+
+/**
  * Liste güncelle
  */
 export const updateList = async (
