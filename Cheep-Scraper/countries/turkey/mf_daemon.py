@@ -77,7 +77,7 @@ def _load_cat_map(path):
 def run(raw_dir, api_url, api_key, category_map="category_map.json",
         priced_ttl=7 * 86400, empty_ttl=30 * 86400, sitemap_refresh=86400,
         batch=200, ingest_every=150, idle_sleep=300, once=False,
-        prune_ttl_days=21, prune_interval=86400):
+        prune_ttl_days=21, prune_interval=86400, min_delay=30.0):
     os.makedirs(raw_dir, exist_ok=True)
     conn = st.connect()
     added = st.bootstrap_from_files(conn, raw_dir, ["mf_empty.txt", "mf_empty_local.txt"])
@@ -87,7 +87,12 @@ def run(raw_dir, api_url, api_key, category_map="category_map.json",
 
     session = _session()
     main_to_id, other_id = _load_cat_map(category_map)
-    pacer = Pacer()
+    # Hız tavanı: fetch'ler arası min gecikme = min_delay sn. Böylece daemon devlet
+    # API'sine yüklenmeyip nazik, sabit bir hızda çeker (varsayılan 30s → ~120 ürün/saat
+    # → tüm katalog ~5-6 günde bir tam tur). Bu, senkron "dalga"yı önler (tüm ürünler
+    # aynı anda bayatlayıp API'yi dövmek yerine haftaya yayılır) ve rate-limit bloklarını
+    # neredeyse sıfırlar. Blokta yine de min_delay'in üstüne çıkar (AIMD), başarıda tabana döner.
+    pacer = Pacer(init=min_delay, lo=min_delay, hi=max(min_delay * 4, 120.0))
     sitemap_ids, sitemap_ts = fetch_all_ids(session), time.time()
     consec_block = 0
     last_prune = 0.0
@@ -178,10 +183,13 @@ def main():
     ap.add_argument("--batch", type=int, default=200)
     ap.add_argument("--ingest-every", type=int, default=150)
     ap.add_argument("--prune-ttl-days", type=int, default=21, help="bu kadar gün tazelenmeyen fiyat/ürün silinir")
+    ap.add_argument("--min-delay", type=float, default=30.0,
+                    help="fetch'ler arası min gecikme (sn). Hız tavanı: 30s≈120 ürün/saat≈tüm katalog ~5-6 günde. API bloklarını önlemek için nazik tutulur.")
     ap.add_argument("--once", action="store_true", help="tek parti çalış, çık (test)")
     a = ap.parse_args()
     run(a.raw_dir, a.api_url, a.api_key, a.category_map, a.priced_ttl, a.empty_ttl,
-        batch=a.batch, ingest_every=a.ingest_every, once=a.once, prune_ttl_days=a.prune_ttl_days)
+        batch=a.batch, ingest_every=a.ingest_every, once=a.once, prune_ttl_days=a.prune_ttl_days,
+        min_delay=a.min_delay)
 
 
 if __name__ == "__main__":
