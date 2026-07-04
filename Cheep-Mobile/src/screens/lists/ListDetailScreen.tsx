@@ -92,11 +92,10 @@ export function ListDetailScreen({
     navigation.navigate('CompareResults', { listId: list.id });
   };
 
-  // Task 10'da hedefi BU liste olan Lists-stack Search akışına bağlanır.
-  // Şimdilik mevcut arama ekranını açar (aktif listeye ekler).
+  // Hedefi BU liste olan arama akışı (Lists stack içinde kalır; aktif olmasa da ekler).
   const handleAddProducts = () => {
-    const parent = navigation.getParent();
-    if (parent) parent.navigate('Home', { screen: 'Search' });
+    if (!list) return;
+    navigation.navigate('Search', { targetListId: list.id, targetListName: list.name });
   };
 
   const handleSetActive = async () => {

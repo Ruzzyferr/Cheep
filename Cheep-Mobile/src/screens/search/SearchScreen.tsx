@@ -13,12 +13,18 @@ import { useLocale } from '../../context/LocaleContext';
 import { getRecentSearches, addRecentSearch } from '../../utils/recentSearches';
 import { colors, typography, spacing, layout } from '../../theme';
 import type { Product } from '../../types';
-import type { HomeStackScreenProps } from '../../navigation/types';
+import type { HomeStackScreenProps, ListsStackScreenProps } from '../../navigation/types';
 
-export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
+// Aynı bileşen hem Home hem Lists stack'inde kayıtlı (Ürün Ekle akışı kullanıcıyı
+// Listeler sekmesinde tutar). İki stack'in Search route param'ı özdeş.
+type SearchScreenProps = HomeStackScreenProps<'Search'> | ListsStackScreenProps<'Search'>;
+
+export function SearchScreen({ navigation, route }: SearchScreenProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { activeList, refresh } = useCart();
+  const targetListId = route.params?.targetListId;
+  const targetListName = route.params?.targetListName;
   const toast = useToast();
   const { formatMoney } = useLocale();
   const [query, setQuery] = useState('');
@@ -67,9 +73,11 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
     if (addedIds.has(product.id)) return;
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      let listId = activeList?.id;
-      let listName = activeList?.name;
+      // Hedef liste verildiyse (Ürün Ekle akışı) ona ekle; yoksa aktif listeye.
+      let listId = targetListId ?? activeList?.id;
+      let listName = targetListName ?? activeList?.name;
       if (!listId) {
+        // Ne hedef ne aktif liste var — güvenli davran: yeni (aktif) liste oluştur.
         if (!creatingListRef.current) {
           creatingListRef.current = listService
             .createList({ name: t('list.select_modal.default_new_list_name') })
@@ -85,7 +93,7 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
     } catch {
       // sessizce geç — kullanıcı tekrar deneyebilir
     }
-  }, [activeList, refresh, addedIds, t, query, toast]);
+  }, [targetListId, targetListName, activeList, refresh, addedIds, t, query, toast]);
 
   const runRecent = (term: string) => setQuery(term);
 
@@ -108,6 +116,14 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
           />
         </View>
       </View>
+
+      {targetListId != null && (
+        <View style={styles.targetStrip}>
+          <Text style={styles.targetStripText} numberOfLines={1}>
+            {t('search.adding_to_list', { name: targetListName ?? '' })}
+          </Text>
+        </View>
+      )}
 
       {query.trim().length === 0 ? (
         <View style={styles.empty}>
@@ -146,7 +162,7 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
                 imageUrl={item.image_url || undefined}
                 topThreePrices={getTopThreePrices(item)}
                 constraint={item.constraint}
-                onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
+                onPress={() => (navigation as any).navigate('ProductDetail', { productId: item.id })}
                 onAddToCart={() => handleAdd(item)}
               />
             </View>
@@ -164,6 +180,8 @@ const styles = StyleSheet.create({
   back: { paddingHorizontal: spacing.xs },
   backText: { fontSize: 34, lineHeight: 34, color: colors.text.primary },
   searchBarWrap: { flex: 1 },
+  targetStrip: { backgroundColor: colors.primary[50], paddingHorizontal: spacing.lg, paddingVertical: spacing.sm, marginBottom: spacing.sm },
+  targetStripText: { ...typography.styles.body2, color: colors.primary.main, fontWeight: '600' },
   list: { flex: 1 },
   gridContainer: { padding: layout.screenPadding },
   row: { justifyContent: 'space-between', marginBottom: spacing.md },
