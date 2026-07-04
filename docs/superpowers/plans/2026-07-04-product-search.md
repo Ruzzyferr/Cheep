@@ -236,14 +236,17 @@ ile değiştir:
 ```ts
     // 🔎 Akıllı arama: cheep_normalize (unaccent + Türkçe İ/ı) üzerinden trigram.
     // - Çok kelime: her token normalize edilmiş isimde substring olmalı (AND) → sıra bağımsız değil.
-    // - Yazım hatası: whole-query similarity > 0.25 (VE substring) OR ile fuzzy yakalanır.
+    // - Yazım hatası: word_similarity(sorgu, ad) — kısa sorguyu uzun ad İÇİNDEKİ en iyi
+    //   kelime/parçaya karşı ölçer. NOT: whole-string similarity() burada ÇALIŞMAZ; kısa
+    //   typo uzun çok-kelimeli ürün adına karşı ~0.09 verir (Task 2 bulgusu). word_similarity
+    //   yönü ÖNEMLİ: ilk argüman sorgu, ikinci hedef.
     // - Barkod: yalnızca sayısal sorguda prefix eşleşmesi.
     let searchOrder: Prisma.Sql = Prisma.empty;
     if (search) {
         const nq = normalizeSearchInput(search);
         const tokens = tokenizeSearch(search);
 
-        // Token-AND: her token cheep_normalize(p.name) içinde geçmeli.
+        // Token-AND: her token cheep_normalize(p.name) içinde geçmeli (substring, tam parça).
         const tokenAnd = tokens.length > 0
             ? Prisma.join(
                 tokens.map(tok => Prisma.sql`cheep_normalize(p.name) LIKE '%' || cheep_normalize(${tok}) || '%'`),
@@ -257,15 +260,15 @@ ile değiştir:
 
         whereClause = Prisma.sql`${whereClause} AND (
             (${tokenAnd})
-            OR similarity(cheep_normalize(p.name), cheep_normalize(${nq})) > 0.25
+            OR word_similarity(cheep_normalize(${nq}), cheep_normalize(p.name)) > 0.35
             OR cheep_normalize(coalesce(p.brand, '')) LIKE '%' || cheep_normalize(${nq}) || '%'
             ${barcodeClause}
         )`;
 
-        // Alaka sıralaması: önce prefix eşleşmesi, sonra similarity.
+        // Alaka sıralaması: önce prefix eşleşmesi, sonra word_similarity.
         searchOrder = Prisma.sql`
             (cheep_normalize(p.name) LIKE cheep_normalize(${nq}) || '%')::int DESC,
-            similarity(cheep_normalize(p.name), cheep_normalize(${nq})) DESC,
+            word_similarity(cheep_normalize(${nq}), cheep_normalize(p.name)) DESC,
         `;
     }
 ```
