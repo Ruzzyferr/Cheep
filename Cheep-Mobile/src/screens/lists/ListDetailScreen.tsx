@@ -22,6 +22,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
@@ -29,6 +30,7 @@ import { ProductThumb } from '../../components/product/ProductThumb';
 import { ListActionsSheet } from '../../components/list/ListActionsSheet';
 import { SelectSourceListModal } from '../../components/list/SelectSourceListModal';
 import { ImportModeModal } from '../../components/list/ImportModeModal';
+import { NameInputModal } from '../../components/list/NameInputModal';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import { useLocale } from '../../context/LocaleContext';
@@ -51,7 +53,12 @@ export function ListDetailScreen({
   const [showSource, setShowSource] = useState(false);
   const [showImportMode, setShowImportMode] = useState(false);
   const [pendingSourceId, setPendingSourceId] = useState<number | null>(null);
+  const [nameModal, setNameModal] = useState<null | 'clone' | 'rename'>(null);
   const insets = useSafeAreaInsets();
+  // Alt tab-bar position:absolute (float) → ekran onun altına uzanır. Alt aksiyon
+  // çubuğunu ve liste boşluğunu tab-bar YÜKSEKLİĞİNCE yukarı almazsak butonlar
+  // tab-bar'ın arkasında kalır. Bu hook safe-area dahil gerçek yüksekliği verir.
+  const tabBarHeight = useBottomTabBarHeight();
   const cart = useCart();
   const toast = useToast();
   const { formatMoney } = useLocale();
@@ -99,10 +106,16 @@ export function ListDetailScreen({
     navigation.navigate('CompareResults', { listId: list.id });
   };
 
-  // Hedefi BU liste olan arama akışı (Lists stack içinde kalır; aktif olmasa da ekler).
+  // "Ürün Ekle" → doğrudan KATEGORİLER sayfası (arama değil), hedefi BU liste.
+  // Lists stack içinde kalır; liste aktif olmasa da o listeye ekler.
   const handleAddProducts = () => {
     if (!list) return;
-    navigation.navigate('Search', { targetListId: list.id, targetListName: list.name });
+    navigation.navigate('CategoryProducts', {
+      categoryId: 0,
+      categoryName: t('product.all_categories'),
+      targetListId: list.id,
+      targetListName: list.name,
+    });
   };
 
   const handleSetActive = async () => {
@@ -115,11 +128,24 @@ export function ListDetailScreen({
     }
   };
 
-  const handleClone = async () => {
+  // Klonla ve Yeniden Adlandır aynı isim-modalını paylaşır (mode ile ayrılır).
+  const submitName = async (name: string) => {
     if (!list) return;
+    const mode = nameModal;
+    setNameModal(null);
     try {
-      await listService.clone(list.id);
-      toast.show(t('list.clone_done'));
+      if (mode === 'clone') {
+        const clone = await listService.clone(list.id);
+        // clone endpoint "(Kopya)" verir; kullanıcının seçtiği adı uygula.
+        if (name && name !== clone.name) {
+          await listService.updateList(clone.id, { name });
+        }
+        toast.show(t('list.clone_done'));
+      } else if (mode === 'rename') {
+        await listService.updateList(list.id, { name });
+        await loadList();
+        cart.refresh();
+      }
     } catch {
       Alert.alert(t('common.error'), t('common.something_went_wrong'));
     }
@@ -295,9 +321,9 @@ export function ListDetailScreen({
         )}
         contentContainerStyle={[
           styles.listContent,
-          // Alt sabit çubuğu (72 tab + ~48 buton + padding) aşan boşluk;
-          // yoksa son kalemler çubuğun altında kalır.
-          items.length > 0 && { paddingBottom: insets.bottom + 140 },
+          // Son kalemler hem alt aksiyon çubuğunun hem tab-bar'ın altında kalmasın:
+          // tab-bar yüksekliği + aksiyon çubuğu yüksekliği (~76) kadar boşluk bırak.
+          items.length > 0 && { paddingBottom: tabBarHeight + 92 },
         ]}
         ListEmptyComponent={
           <EmptyState
@@ -310,9 +336,9 @@ export function ListDetailScreen({
         }
       />
 
-      {/* Bottom sticky bar: two equal buttons */}
+      {/* Bottom sticky bar: two equal buttons — tab-bar'ın ÜSTÜNE yerleşir (arkasında kalmaz) */}
       {items.length > 0 && (
-        <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.md }]}>
+        <View style={[styles.actions, { bottom: tabBarHeight }]}>
           <View style={styles.actionRow}>
             <Button
               title={t('list.add_products')}
@@ -334,9 +360,20 @@ export function ListDetailScreen({
         isActive={isActive}
         onClose={() => setShowActionsSheet(false)}
         onSetActive={handleSetActive}
-        onClone={handleClone}
+        onRename={() => openAfterDismiss(() => setNameModal('rename'))}
+        onClone={() => openAfterDismiss(() => setNameModal('clone'))}
         onImport={() => openAfterDismiss(() => setShowSource(true))}
         onDelete={handleDeleteList}
+      />
+
+      <NameInputModal
+        visible={nameModal !== null}
+        title={nameModal === 'clone' ? t('list.clone_title') : t('list.rename_title')}
+        label={t('list.name_label')}
+        confirmLabel={nameModal === 'clone' ? t('list.clone') : t('list.rename_save')}
+        initialValue={nameModal === 'clone' ? `${list.name} (Kopya)` : list.name}
+        onClose={() => setNameModal(null)}
+        onSubmit={submitName}
       />
 
       <SelectSourceListModal

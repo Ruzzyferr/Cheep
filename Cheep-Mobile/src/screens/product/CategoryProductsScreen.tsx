@@ -28,13 +28,23 @@ import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { Product } from '../../types';
 import type { Category } from '../../services/category.service';
-import type { HomeStackScreenProps } from '../../navigation/types';
+import type { HomeStackScreenProps, ListsStackScreenProps } from '../../navigation/types';
+
+// Aynı bileşen hem Home hem Lists stack'inde kayıtlı (liste detayından "Ürün Ekle"
+// akışı kullanıcıyı Listeler sekmesinde tutar). İki stack'in param'ı özdeş.
+type CategoryProductsProps =
+  | HomeStackScreenProps<'CategoryProducts'>
+  | ListsStackScreenProps<'CategoryProducts'>;
 
 export function CategoryProductsScreen({
   navigation,
   route,
-}: HomeStackScreenProps<'CategoryProducts'>) {
+}: CategoryProductsProps) {
   const { categoryId, categoryName } = route.params;
+  // Hedef liste verildiyse (liste detayından "Ürün Ekle") ekleme O listeye gider;
+  // yoksa aktif listeye. Böylece aktif olmayan bir listeye de ürün eklenebilir.
+  const targetListId = route.params.targetListId;
+  const targetListName = route.params.targetListName;
   const cart = useCart();
   const toast = useToast();
   const { t } = useTranslation();
@@ -203,8 +213,9 @@ export function CategoryProductsScreen({
   const handleAddToCart = async (product: Product) => {
     const unit = product.store_prices?.[0]?.unit || t('common.unit_default');
     try {
-      let listId = cart.activeList?.id;
-      let listName = cart.activeList?.name;
+      // Hedef liste öncelikli (liste detayından geldiyse); yoksa aktif liste.
+      let listId = targetListId ?? cart.activeList?.id;
+      let listName = targetListName ?? cart.activeList?.name;
       if (!listId) {
         const newList = await listService.createList({ name: t('list.select_modal.default_new_list_name') });
         listId = newList.id;
@@ -245,30 +256,34 @@ export function CategoryProductsScreen({
           </TouchableOpacity>
           <Text style={styles.headerTitle} numberOfLines={1}>{getCurrentCategoryName()}</Text>
 
-          {/* Arama: kategori gezmek yerine doğrudan ürün ara (ana ekrandaki
-              büyüteçle aynı Search ekranına gider). */}
+          {/* Arama: kategori gezmek yerine doğrudan ürün ara. Hedef liste varsa
+              onu da taşı (arama sonuçları da o listeye eklensin). */}
           <TouchableOpacity
             style={styles.searchButton}
-            onPress={() => navigation.navigate('Search')}
+            onPress={() => (navigation as any).navigate('Search', targetListId ? { targetListId, targetListName } : undefined)}
             activeOpacity={0.7}
           >
             <MaterialIcons name="search" size={22} color={colors.text.primary} />
           </TouchableOpacity>
 
-          {/* Aktif liste göstergesi: hangi listeye eklediğini ve kaç ürün
-              olduğunu gösterir; dokununca listeyi açar. */}
-          <TouchableOpacity style={styles.cartPill} onPress={goToActiveList} activeOpacity={0.7}>
-            <MaterialIcons name="shopping-cart" size={18} color={colors.primary.main} />
-            {cart.count > 0 && (
-              <View style={styles.cartPillBadge}>
-                <Text style={styles.cartPillBadgeText}>{cart.count}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          {/* Sepet: hedef liste modunda gizli (o listeye ekliyoruz); aktif liste
+              modunda kaç ürün eklendiğini gösterir, dokununca listeyi açar. */}
+          {!targetListId && (
+            <TouchableOpacity style={styles.cartPill} onPress={goToActiveList} activeOpacity={0.7}>
+              <MaterialIcons name="shopping-cart" size={18} color={colors.primary.main} />
+              {cart.count > 0 && (
+                <View style={styles.cartPillBadge}>
+                  <Text style={styles.cartPillBadgeText}>{cart.count}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
         </View>
-        {cart.activeList && (
+        {/* Hangi listeye eklendiği: hedef liste öncelikli, yoksa aktif liste. */}
+        {(targetListName || cart.activeList) && (
           <Text style={styles.cartPillCaption} numberOfLines={1}>
-            {t('product.target_list')} <Text style={styles.cartPillCaptionStrong}>{cart.activeList.name}</Text>
+            {t('product.target_list')}{' '}
+            <Text style={styles.cartPillCaptionStrong}>{targetListName ?? cart.activeList?.name}</Text>
           </Text>
         )}
 
@@ -349,7 +364,7 @@ export function CategoryProductsScreen({
                 imageUrl={item.image_url || undefined}
                 topThreePrices={topThreePrices}
                 constraint={item.constraint}
-                onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
+                onPress={() => (navigation as any).navigate('ProductDetail', { productId: item.id })}
                 onAddToCart={() => handleAddToCart(item)}
               />
             </View>

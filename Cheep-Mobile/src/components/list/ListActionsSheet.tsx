@@ -22,6 +22,7 @@ interface ListActionsSheetProps {
   isActive: boolean;
   onClose: () => void;
   onSetActive: () => void;
+  onRename: () => void;
   onClone: () => void;
   onImport: () => void;
   onDelete: () => void;
@@ -32,6 +33,7 @@ export function ListActionsSheet({
   isActive,
   onClose,
   onSetActive,
+  onRename,
   onClone,
   onImport,
   onDelete,
@@ -75,6 +77,11 @@ export function ListActionsSheet({
               onPress={() => run(onSetActive)}
             />
           )}
+          <ActionRow
+            icon="edit"
+            label={t('list.rename')}
+            onPress={() => run(onRename)}
+          />
           <ActionRow
             icon="content-copy"
             label={t('list.clone')}

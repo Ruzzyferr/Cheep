@@ -61,7 +61,7 @@ export type HomeStackParamList = {
   HomeMain: undefined;
   StoreDetail: { storeId: number };
   ProductDetail: { productId: number };
-  CategoryProducts: { categoryId: number; categoryName: string };
+  CategoryProducts: { categoryId: number; categoryName: string; targetListId?: number; targetListName?: string };
   Search: { targetListId?: number; targetListName?: string } | undefined;
   PriceDifferenceList: undefined;
 };
@@ -81,6 +81,7 @@ export type ListsStackParamList = {
   CreateList: undefined;
   ListDetail: { listId: number };
   ProductDetail: { productId: number };
+  CategoryProducts: { categoryId: number; categoryName: string; targetListId?: number; targetListName?: string };
   Search: { targetListId?: number; targetListName?: string } | undefined;
   CompareResults: { listId: number };
   // NOT: `strategy` tam bir nesne olarak param'da taşınır (serileştirilebilir
