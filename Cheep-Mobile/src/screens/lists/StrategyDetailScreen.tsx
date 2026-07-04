@@ -12,11 +12,10 @@ import {
   Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { CommonActions } from '@react-navigation/native';
 import { Card, Button } from '../../components/ui';
 import { ProductThumb } from '../../components/product/ProductThumb';
 import { StoreChip } from '../../components/store/StoreChip';
-import { listService, affiliateService } from '../../services';
+import { affiliateService } from '../../services';
 import { openExternalUrl } from '../../utils/linking';
 import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
@@ -33,7 +32,6 @@ const num = (v: unknown): number => {
 
 export function StrategyDetailScreen({
   route,
-  navigation,
 }: ListsStackScreenProps<'StrategyDetail'>) {
   const { strategy, listId } = route.params;
   const { formatMoney } = useLocale();
@@ -145,36 +143,6 @@ export function StrategyDetailScreen({
 
         <View style={styles.bottomSpacing} />
       </ScrollView>
-
-      {/* Action Button */}
-      <View style={styles.actions}>
-        <Button
-          title="Bu Rotayı Kullan"
-          onPress={async () => {
-            try {
-              await listService.useRoute(listId);
-              Alert.alert('Başarılı', 'Liste tamamlandı ve geçmiş listelere taşındı', [
-                {
-                  text: 'Tamam',
-                  onPress: () => {
-                    // Lists ekranına dön
-                    navigation.dispatch(
-                      CommonActions.navigate({
-                        name: 'Lists',
-                      })
-                    );
-                  },
-                },
-              ]);
-            } catch (error: any) {
-              console.error('Use route error:', error);
-              Alert.alert('Hata', 'Rota kullanılırken bir hata oluştu');
-            }
-          }}
-          fullWidth
-          icon={<MaterialIcons name="shopping-cart" size={18} color={colors.background.paper} style={styles.buttonIcon} />}
-        />
-      </View>
     </View>
   );
 }
@@ -547,18 +515,6 @@ const styles = StyleSheet.create({
   missingQuantity: {
     ...typography.styles.body2,
     color: colors.text.secondary,
-  },
-
-  actions: {
-    padding: layout.screenPadding,
-    backgroundColor: colors.background.paper,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-  },
-
-  buttonIcon: {
-    fontSize: 18,
-    marginRight: spacing.xs,
   },
 
   bottomSpacing: {
