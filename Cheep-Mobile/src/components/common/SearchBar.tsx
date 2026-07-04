@@ -14,6 +14,7 @@ interface SearchBarProps {
   placeholder?: string;
   onSubmit?: () => void;
   onClear?: () => void;
+  autoFocus?: boolean;
 }
 
 export function SearchBar({
@@ -22,6 +23,7 @@ export function SearchBar({
   placeholder = 'Ürün ara...',
   onSubmit,
   onClear,
+  autoFocus,
 }: SearchBarProps) {
   return (
     <View style={styles.container}>
@@ -34,6 +36,7 @@ export function SearchBar({
         placeholderTextColor={colors.text.hint}
         returnKeyType="search"
         onSubmitEditing={onSubmit}
+        autoFocus={autoFocus}
       />
       {value.length > 0 && (
         <TouchableOpacity style={styles.clearButton} onPress={onClear}>

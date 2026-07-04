@@ -23,6 +23,7 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
   const [recent, setRecent] = useState<string[]>([]);
   const [addedIds, setAddedIds] = useState<Set<number>>(new Set());
   const reqId = useRef(0);
+  const creatingListRef = useRef<Promise<number> | null>(null);
 
   useEffect(() => { getRecentSearches().then(setRecent); }, []);
 
@@ -52,16 +53,21 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       let listId = activeList?.id;
       if (!listId) {
-        const created = await listService.createList({ name: t('list.select_modal.default_new_list_name') });
-        listId = created.id;
+        if (!creatingListRef.current) {
+          creatingListRef.current = listService
+            .createList({ name: t('list.select_modal.default_new_list_name') })
+            .then((l) => l.id);
+        }
+        listId = await creatingListRef.current;
       }
       await listService.addItem(listId, { product_id: product.id });
       setAddedIds(prev => new Set(prev).add(product.id));
       await refresh();
+      if (query.trim()) addRecentSearch(query);
     } catch {
       // sessizce geç — kullanıcı tekrar deneyebilir
     }
-  }, [activeList, refresh, addedIds, t]);
+  }, [activeList, refresh, addedIds, t, query]);
 
   const runRecent = (term: string) => setQuery(term);
 
@@ -80,6 +86,7 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
             placeholder={t('search.placeholder')}
             onSubmit={onSubmit}
             onClear={() => setQuery('')}
+            autoFocus
           />
         </View>
       </View>

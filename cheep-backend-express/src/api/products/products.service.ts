@@ -89,14 +89,14 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
     //   yönü ÖNEMLİ: ilk argüman sorgu, ikinci hedef.
     // - Barkod: yalnızca sayısal sorguda prefix eşleşmesi.
     let searchOrder: Prisma.Sql = Prisma.empty;
-    if (search) {
-        const nq = normalizeSearchInput(search);
+    const nq = normalizeSearchInput(search ?? '');
+    if (search && nq) {
         const tokens = tokenizeSearch(search);
 
-        // Token-AND: her token cheep_normalize(p.name) içinde geçmeli (substring, tam parça).
+        // Token-AND: her token cheep_normalize(p.name) VEYA cheep_normalize(p.brand) içinde geçmeli (substring, tam parça).
         const tokenAnd = tokens.length > 0
             ? Prisma.join(
-                tokens.map(tok => Prisma.sql`cheep_normalize(p.name) LIKE '%' || cheep_normalize(${tok}) || '%'`),
+                tokens.map(tok => Prisma.sql`(cheep_normalize(p.name) LIKE '%' || cheep_normalize(${tok}) || '%' OR cheep_normalize(coalesce(p.brand, '')) LIKE '%' || cheep_normalize(${tok}) || '%')`),
                 ' AND '
               )
             : Prisma.sql`TRUE`;
