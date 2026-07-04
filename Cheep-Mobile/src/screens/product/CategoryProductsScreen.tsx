@@ -245,6 +245,16 @@ export function CategoryProductsScreen({
           </TouchableOpacity>
           <Text style={styles.headerTitle} numberOfLines={1}>{getCurrentCategoryName()}</Text>
 
+          {/* Arama: kategori gezmek yerine doğrudan ürün ara (ana ekrandaki
+              büyüteçle aynı Search ekranına gider). */}
+          <TouchableOpacity
+            style={styles.searchButton}
+            onPress={() => navigation.navigate('Search')}
+            activeOpacity={0.7}
+          >
+            <MaterialIcons name="search" size={22} color={colors.text.primary} />
+          </TouchableOpacity>
+
           {/* Aktif liste göstergesi: hangi listeye eklediğini ve kaç ürün
               olduğunu gösterir; dokununca listeyi açar. */}
           <TouchableOpacity style={styles.cartPill} onPress={goToActiveList} activeOpacity={0.7}>
@@ -400,6 +410,15 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: '600',
     letterSpacing: -0.2,
+  },
+
+  searchButton: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.xs,
   },
 
   cartPill: {
