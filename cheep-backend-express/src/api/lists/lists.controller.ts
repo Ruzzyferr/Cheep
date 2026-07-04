@@ -15,9 +15,8 @@ export const getMyLists = async (req: Request, res: Response, next: NextFunction
             return;
         }
 
-        const { status } = req.query; // active, completed, all
-        const lists = await ListService.getUserLists(req.user.id, status as string);
-        
+        const lists = await ListService.getUserLists(req.user.id);
+
         res.status(200).json({
             success: true,
             data: lists,
@@ -66,6 +65,28 @@ export const createList = async (req: Request, res: Response, next: NextFunction
             data: list,
             message: 'Liste başarıyla oluşturuldu',
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Listeyi aktif yap
+ */
+export const activateList = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ success: false, message: 'Unauthorized' });
+            return;
+        }
+
+        const listId = Number(req.params.id);
+        const result = await ListService.activateList(listId, req.user.id);
+        if (!result) {
+            res.status(404).json({ success: false, message: 'Liste bulunamadı' });
+            return;
+        }
+        res.status(200).json({ success: true, data: result });
     } catch (error) {
         next(error);
     }

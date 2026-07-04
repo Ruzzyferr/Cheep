@@ -287,6 +287,30 @@ router.delete('/:id', authenticate, validateIdParam('id'), ListController.delete
  */
 router.get('/:id/statistics', authenticate, validateIdParam('id'), ListController.getListStatistics);
 
+/**
+ * @swagger
+ * /api/v1/lists/{id}/activate:
+ *   post:
+ *     summary: Listeyi aktif yap (diğerleri pasife çekilir)
+ *     tags: [Lists]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Liste aktif yapıldı
+ *       401:
+ *         description: Yetkisiz erişim
+ *       404:
+ *         description: Liste bulunamadı
+ */
+router.post('/:id/activate', authenticate, validateIdParam('id'), ListController.activateList);
+
 // ============================================
 // TEMPLATES
 // ============================================

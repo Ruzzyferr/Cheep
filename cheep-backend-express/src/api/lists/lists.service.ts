@@ -7,18 +7,11 @@ import { notFound } from '../../utils/app-error.js';
 // ============================================
 
 /**
- * Kullanıcının tüm listelerini getir (status filter ile)
+ * Kullanıcının tüm listelerini getir (aktif önce, sonra updated_at desc)
  */
-export const getUserLists = async (userId: number, status?: string) => {
-    const where: any = { user_id: userId };
-    
-    // Status filter (active, completed, ya da hepsi)
-    if (status && status !== 'all') {
-        where.status = status;
-    }
-    
+export const getUserLists = async (userId: number) => {
     const lists = await prisma.list.findMany({
-        where,
+        where: { user_id: userId },
         include: {
             list_items: {
                 include: {
@@ -38,9 +31,8 @@ export const getUserLists = async (userId: number, status?: string) => {
                 },
             },
         },
-        orderBy: {
-            updated_at: 'desc',
-        },
+        // status: 'active' < 'inactive' alfabetik → 'active' önce gelir
+        orderBy: [{ status: 'asc' }, { updated_at: 'desc' }],
     });
 
     // 🔥 SIRA: Her listenin elemanlarını market sayısına göre sırala
@@ -135,44 +127,60 @@ export const getListById = async (listId: number, userId: number) => {
 };
 
 /**
- * Yeni liste oluştur
+ * Yeni liste oluştur (aktif); kullanıcının diğer listeleri pasife çekilir.
  */
 export const createList = async (
     userId: number,
     data: {
         name: string;
-        is_template?: boolean;
-        budget?: number | string;
+        budget?: number | string | null;
     }
 ) => {
-    // 🔥 KURAL: Aynı anda sadece 1 aktif liste olabilir
-    // "mevcut aktifleri completed yap + yeni listeyi oluştur" atomik olmalı (race condition).
+    // 🔥 KURAL: Aynı anda sadece 1 aktif liste olabilir.
+    // "mevcut aktifleri inactive yap + yeni listeyi oluştur" atomik olmalı (race condition).
     return await prisma.$transaction(async (tx) => {
-        if (!data.is_template) {
-            await tx.list.updateMany({
-                where: {
-                    user_id: userId,
-                    status: 'active',
-                },
-                data: {
-                    status: 'completed',
-                    completed_at: new Date(),
-                },
-            });
-        }
+        await tx.list.updateMany({
+            where: {
+                user_id: userId,
+                status: 'active',
+            },
+            data: {
+                status: 'inactive',
+            },
+        });
 
         return await tx.list.create({
             data: {
                 user_id: userId,
                 name: data.name,
-                is_template: data.is_template || false,
-                budget: data.budget ? new Decimal(data.budget) : null,
+                budget: data.budget != null ? new Decimal(data.budget) : null,
                 status: 'active', // Yeni liste her zaman active olarak oluşturulur
             },
             include: {
                 list_items: true,
             },
         });
+    });
+};
+
+/**
+ * Listeyi aktif yap; kullanıcının diğer listeleri pasife çekilir.
+ * Sahiplik doğrulanır; yoksa null.
+ */
+export const activateList = async (listId: number, userId: number) => {
+    const owned = await prisma.list.findFirst({ where: { id: listId, user_id: userId } });
+    if (!owned) return null;
+    return await prisma.$transaction(async (tx) => {
+        await tx.list.updateMany({
+            where: {
+                user_id: userId,
+                status: 'active',
+            },
+            data: {
+                status: 'inactive',
+            },
+        });
+        return await tx.list.update({ where: { id: listId }, data: { status: 'active' } });
     });
 };
 
