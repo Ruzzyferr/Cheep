@@ -107,7 +107,7 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
 
         whereClause = Prisma.sql`${whereClause} AND (
             (${tokenAnd})
-            OR word_similarity(cheep_normalize(${nq}), cheep_normalize(p.name)) > 0.35
+            OR cheep_normalize(${nq}) <% cheep_normalize(p.name)
             OR cheep_normalize(coalesce(p.brand, '')) LIKE '%' || cheep_normalize(${nq}) || '%'
             ${barcodeClause}
         )`;
@@ -119,30 +119,43 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
         `;
     }
 
-    const products = await prisma.$queryRaw<any[]>`
-        SELECT 
-            p.*,
-            COUNT(sp.id) as store_count,
-            MIN(sp.price::numeric) as min_price
-        FROM "products" p
-        LEFT JOIN "store_prices" sp ON p.id = sp.product_id
-        ${whereClause}
-        GROUP BY p.id
-        ORDER BY
-            ${searchOrder}
-            store_count DESC,
-            min_price ASC,
-            p.created_at DESC
-        LIMIT ${limit}
-        OFFSET ${offset}
-    `;
+    // 🔎 `<%` operatörü GIN trigram index'lerini kullanabilir (bare word_similarity()
+    // fonksiyonu kullanamaz), ama pg_trgm.word_similarity_threshold GUC'una bağlıdır
+    // (varsayılan 0.6, yazım hataları için çok katı). Aynı bağlantıda SET LOCAL ile
+    // 0.35'e düşürüyoruz — bu yüzden her iki raw sorgu da tek bir transaction içinde.
+    const [products, totalRows] = await prisma.$transaction(async (tx) => {
+        if (search && nq) {
+            // SET LOCAL transaction-scoped'tur; değer sabit (kullanıcı girdisi değil).
+            await tx.$executeRawUnsafe('SET LOCAL pg_trgm.word_similarity_threshold = 0.35');
+        }
 
-    // total, listeleme ile AYNI filtreden türetilir (whereClause) — sapma olmaz.
-    const totalRows = await prisma.$queryRaw<Array<{ count: bigint }>>`
-        SELECT COUNT(*)::bigint as count
-        FROM "products" p
-        ${whereClause}
-    `;
+        const products = await tx.$queryRaw<any[]>`
+            SELECT
+                p.*,
+                COUNT(sp.id) as store_count,
+                MIN(sp.price::numeric) as min_price
+            FROM "products" p
+            LEFT JOIN "store_prices" sp ON p.id = sp.product_id
+            ${whereClause}
+            GROUP BY p.id
+            ORDER BY
+                ${searchOrder}
+                store_count DESC,
+                min_price ASC,
+                p.created_at DESC
+            LIMIT ${limit}
+            OFFSET ${offset}
+        `;
+
+        // total, listeleme ile AYNI filtreden türetilir (whereClause) — sapma olmaz.
+        const totalRows = await tx.$queryRaw<Array<{ count: bigint }>>`
+            SELECT COUNT(*)::bigint as count
+            FROM "products" p
+            ${whereClause}
+        `;
+
+        return [products, totalRows];
+    });
     const total = Number(totalRows[0]?.count ?? 0);
 
     // Eğer ürün yoksa boş array döndür
