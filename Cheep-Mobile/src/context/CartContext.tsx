@@ -23,10 +23,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     try {
-      const lists = await listService.getLists('active');
-      // İlk şablon-olmayan aktif liste = kullanıcının üzerinde çalıştığı liste.
-      const active = lists.find((l) => !l.is_template) ?? lists[0] ?? null;
-      setActiveList(active);
+      const lists = await listService.getLists();
+      // Aktif liste = status==='active' olan tek liste.
+      setActiveList(lists.find((l) => l.status === 'active') ?? null);
     } catch {
       // sessizce geç — rozet kritik değil
     }

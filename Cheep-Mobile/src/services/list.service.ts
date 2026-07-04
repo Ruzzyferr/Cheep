@@ -107,6 +107,41 @@ export const listService = {
   },
 
   /**
+   * Activate a list (unified model — sets this list active, others inactive)
+   */
+  async activate(id: number): Promise<ShoppingList> {
+    const res = await apiClient.post<ApiResponse<ShoppingList>>(
+      API_ENDPOINTS.LISTS.ACTIVATE(id)
+    );
+    return res.data.data!;
+  },
+
+  /**
+   * Clone a list (creates an inactive copy, preserves brand_independent)
+   */
+  async clone(id: number): Promise<ShoppingList> {
+    const res = await apiClient.post<ApiResponse<ShoppingList>>(
+      API_ENDPOINTS.LISTS.CLONE(id)
+    );
+    return res.data.data!;
+  },
+
+  /**
+   * Import items from another list into this one (merge or replace)
+   */
+  async importFromList(
+    id: number,
+    sourceId: number,
+    mode: 'merge' | 'replace'
+  ): Promise<ShoppingList> {
+    const res = await apiClient.post<ApiResponse<ShoppingList>>(
+      API_ENDPOINTS.LISTS.IMPORT(id),
+      { sourceId, mode }
+    );
+    return res.data.data!;
+  },
+
+  /**
    * Use selected route - Mark list as completed
    */
   async useRoute(listId: number): Promise<void> {

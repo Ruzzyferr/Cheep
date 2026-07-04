@@ -88,6 +88,11 @@ export const API_ENDPOINTS = {
     // Compare
     COMPARE: (id: number) => `/lists/${id}/compare`,
     USE_ROUTE: (id: number) => `/lists/${id}/use-route`,
+
+    // Lifecycle (unified list model)
+    ACTIVATE: (id: number) => `/lists/${id}/activate`,
+    CLONE: (id: number) => `/lists/${id}/clone`,
+    IMPORT: (id: number) => `/lists/${id}/import`,
     
     // Templates
     TEMPLATES: '/lists/templates/all',

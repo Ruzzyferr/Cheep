@@ -145,9 +145,9 @@ export interface ShoppingList {
   id: number;
   user_id: number;
   name: string;
-  is_template: boolean;
+  is_template?: boolean; // legacy — kolon durur ama okunmaz/yazılmaz
   budget: string | null; // Decimal as string
-  status: 'active' | 'completed';
+  status: 'active' | 'inactive';
   completed_at: string | null;
   last_compared_at: string | null;
   created_at: string;

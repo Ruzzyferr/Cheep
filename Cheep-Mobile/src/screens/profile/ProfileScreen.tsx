@@ -80,7 +80,7 @@ export function ProfileScreen({
           if (!alive) return;
           setStats({
             active: all.filter((l) => l.status === 'active' && !l.is_template).length,
-            completed: all.filter((l) => l.status === 'completed').length,
+            completed: all.filter((l) => (l.status as string) === 'completed').length,
             templates: templates.length,
           });
         } catch {

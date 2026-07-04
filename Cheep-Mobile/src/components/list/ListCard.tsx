@@ -23,7 +23,8 @@ export function ListCard({ list, onPress, onDelete }: ListCardProps) {
   const { formatMoney, formatDate } = useLocale();
   const itemCount = list.list_items?.length || 0;
   const budget = list.budget ? parseFloat(list.budget) : null;
-  const isCompleted = list.status === 'completed';
+  // Legacy 'completed' durumu birleşik modelde yok; Task 7'de kart yeniden tasarlanacak.
+  const isCompleted = (list.status as string) === 'completed';
 
   const handleDelete = (e: any) => {
     e.stopPropagation();
