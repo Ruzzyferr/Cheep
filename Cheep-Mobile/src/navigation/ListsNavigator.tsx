@@ -9,6 +9,7 @@ import { ListsScreen } from '../screens/lists/ListsScreen';
 import { ListDetailScreen } from '../screens/lists/ListDetailScreen';
 import { CompareResultsScreen } from '../screens/lists/CompareResultsScreen';
 import { StrategyDetailScreen } from '../screens/lists/StrategyDetailScreen';
+import { ProductDetailScreen } from '../screens/product/ProductDetailScreen';
 import { SearchScreen } from '../screens/search/SearchScreen';
 import { colors, typography } from '../theme';
 import type { ListsStackParamList } from './types';
@@ -40,6 +41,11 @@ export function ListsNavigator() {
         name="ListDetail"
         component={ListDetailScreen}
         options={{ title: 'Liste Detayı' }}
+      />
+      <Stack.Screen
+        name="ProductDetail"
+        component={ProductDetailScreen}
+        options={{ title: 'Ürün Detayı' }}
       />
       <Stack.Screen
         name="Search"

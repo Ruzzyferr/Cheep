@@ -80,6 +80,7 @@ export type ListsStackParamList = {
   ListsMain: { openCreateModal?: boolean } | undefined;
   CreateList: undefined;
   ListDetail: { listId: number };
+  ProductDetail: { productId: number };
   Search: { targetListId?: number; targetListName?: string } | undefined;
   CompareResults: { listId: number };
   // NOT: `strategy` tam bir nesne olarak param'da taşınır (serileştirilebilir
