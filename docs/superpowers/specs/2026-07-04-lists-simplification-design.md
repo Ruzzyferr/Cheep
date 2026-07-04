@@ -130,6 +130,50 @@ temizlenir.
   `list.import_mode.title/merge/replace`, `search.adding_to_list`, vb.
 - Eski `completed`/`template` anahtarları kalır (kullanılmaz, zararsız).
 
+## 3.6 UI/UX yerleşimi (önemli — sade & düzgün)
+
+**İlke:** Her ekranda **tek net birincil aksiyon**; ikincil aksiyonlar erişilebilir
+ama kalabalık yapmaz. Mevcut tema token'ları kullanılır (`spacing`, `borderRadius`,
+`Button` varyantları). Dokunma hedefi **≥44px**. Renk/gölge = mevcut tasarım
+sistemi. `frontend-design` ilkeleri uygulanır.
+
+### `ListsScreen` (liste listesi)
+- Tek `FlatList`, kart aralığı `spacing.md`. Aktif kart: sol üstte **"✓ Aktif"**
+  rozeti (mevcut `badge` stili, `colors.primary`). Diğer kartlarda rozet yok.
+- Aktif liste **en üstte** (backend sıralaması). "+" başlıkta durur.
+
+### `ListDetailScreen` — aksiyon hiyerarşisi (kalabalık YOK)
+1. **Başlık kartı:** liste adı + (aktifse) küçük **"✓ Aktif"** chip. Sağ üstte tek
+   **⋮ (overflow)** ikon-butonu.
+2. **⋮ menüsü** (basit alt-sheet modal — mevcut modal deseni): sırayla
+   **Aktif liste yap** (yalnız aktif değilse) · **Klonla** · **Başka listeden aktar** ·
+   **Sil** (kırmızı). Az kullanılan aksiyonlar burada toplanır → ekran sade kalır.
+3. **Aktif değilse** başlık altında ince, tek satır bilgi şeridi:
+   "Bu liste aktif değil" + sağda küçük **"Aktif Yap"** (outline, ≤36px yükseklik)
+   → keşfedilebilirlik için (menüye ek olarak). Aktifse şerit yok.
+4. **Kalemler** `FlatList` (scrollable, bounded).
+5. **Alt sabit çubuk** (kalem varsa): iki buton yan yana, eşit —
+   **"Ürün Ekle"** (outline/secondary) + **"Rotaları Göster"** (primary, dolu).
+   Kaydırma bunların altına girmesin (`paddingBottom`).
+6. **Boş liste:** ortada `EmptyState` + tek **"Ürün Ekle"** aksiyonu.
+
+> Böylece detay ekranında görünür yalnızca: başlık + (opsiyonel) aktif şeridi +
+> kalemler + 2 alt buton. Klonla/Aktar/Aktif-yap/Sil ⋮ menüsünde. Sade, dengeli.
+
+### Modaller (tutarlı stil)
+- **SelectSourceListModal** ve **ImportModeModal**: mevcut `SelectListModal` /
+  `CreateListModal` görsel dilini izler (alt-sheet, `borderRadius.xl`, safe-area
+  padding, `Button` bileşenleri). ImportModeModal iki büyük, net seçenek kartı:
+  başlık + tek satır açıklama, ≥44px, aralarında `spacing.md`.
+- **"'X' listesine ekleniyor" şeridi** (Search, hedef-liste modunda): üstte ince,
+  `colors.primary[50]` zemin, tek satır, kapat/geri ile çıkılır.
+
+### Buton boyut/yerleşim kuralları
+- Alt sabit çubuk: `padding: layout.screenPadding`, üst ince ayraç, `background.paper`.
+- Yan yana iki buton: her biri `flex:1`, aralarında `spacing.sm`.
+- İkon-butonlar (⋮, +): 40×40, `borderRadius.md`, ortalı.
+- Metin butonları tek satır, kısaltma yok; sığmıyorsa etiket kısaltılır, buton büyümez.
+
 ## 4. Kapsam dışı
 - Şablon özelliğini korumak (kaldırıldı).
 - Rota "tamamlama"/geçmiş kavramı (kaldırıldı).
