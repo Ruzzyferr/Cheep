@@ -18,6 +18,7 @@ export const compareList = async (req: Request, res: Response, next: NextFunctio
             userLocation,
             favoriteStoreIds,
             includeMissingProducts,
+            radiusKm,
         } = req.body;
 
         const result = await CompareEngine.compareShoppingList(
@@ -28,6 +29,7 @@ export const compareList = async (req: Request, res: Response, next: NextFunctio
                 userLocation,
                 favoriteStoreIds,
                 includeMissingProducts,
+                radiusKm,
                 countryId: req.country?.id,
             }
         );

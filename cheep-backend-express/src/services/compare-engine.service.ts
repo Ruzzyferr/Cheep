@@ -17,6 +17,7 @@ interface CompareOptions {
     favoriteStoreIds?: number[];     // Favori market ID'leri
     includeMissingProducts?: boolean; // Eksik ürünleri göster (default: true)
     countryId?: number;              // Ülke scoping — sadece bu ülkedeki marketler
+    radiusKm?: number;               // Yalnızca bu yarıçaptaki (km) şubesi olan marketleri rotaya al
 }
 
 interface ProductInList {
@@ -145,6 +146,10 @@ interface CompareResult {
         closestOption: RouteStrategy | null;
         maxSavings: number;
     };
+    // Konum + yarıçap filtresi UYGULANDI mı? (uygulandıysa ve strategies boşsa,
+    // arayüz "yakında market yok" durumunu gösterir — "liste boş"tan ayırt etmek için.)
+    nearbyFilterApplied: boolean;
+    radiusKm: number | null;
 }
 
 // ============================================
@@ -244,14 +249,31 @@ export async function compareShoppingList(
     // store_branches doldurulduğunda mesafeler otomatik olarak geri gelir.
     itemOptions.forEach(m => m.forEach(opt => { opt.store.lat = null; opt.store.lon = null; }));
 
+    // Konum + yarıçap filtresi: kullanıcı konumu varsa, en yakın şubesi seçilen
+    // yarıçap (radiusKm) içinde OLAN marketlere GERÇEK konum ver; yarıçap dışındaki
+    // marketleri rota adaylarından TAMAMEN çıkar (kimse market alışverişi için
+    // 3+ km gitmez). radiusKm verilmezse eski davranış: yalnızca mesafe göster/gizle.
+    let nearbyFilterApplied = false;
     if (options.userLocation && options.countryId) {
         const ids = new Set<number>();
         itemOptions.forEach(m => m.forEach(opt => ids.add(opt.store_id)));
-        const branchCoords = await nearestBranchCoordsForStores([...ids], options.countryId, options.userLocation);
+        const branchCoords = await nearestBranchCoordsForStores(
+            [...ids], options.countryId, options.userLocation, options.radiusKm
+        );
         itemOptions.forEach(m => m.forEach(opt => {
             const b = branchCoords.get(opt.store_id);
             if (b) { opt.store.lat = b.lat; opt.store.lon = b.lon; }
         }));
+
+        // Yarıçap belirtilmişse: yalnızca yarıçap içinde şubesi olan marketleri tut.
+        if (options.radiusKm != null) {
+            nearbyFilterApplied = true;
+            itemOptions.forEach(m => {
+                for (const storeId of [...m.keys()]) {
+                    if (!branchCoords.has(storeId)) m.delete(storeId);
+                }
+            });
+        }
     }
 
     // 2. Tüm stratejileri hesapla
@@ -295,6 +317,8 @@ export async function compareShoppingList(
         strategies: sortedStrategies,
         alternatives,
         summary,
+        nearbyFilterApplied,
+        radiusKm: options.radiusKm ?? null,
     };
 }
 
@@ -832,6 +856,18 @@ function sortStrategies(
  * Özet bilgileri oluştur
  */
 function generateSummary(strategies: RouteStrategy[]): CompareResult['summary'] {
+    // Yakında market yoksa (yarıçap filtresi) strateji listesi boş olabilir — reduce'un
+    // undefined döndürmesini önlemek için erken boş özet dön.
+    if (strategies.length === 0) {
+        return {
+            bestSingleStore: null,
+            bestMultiStore: null,
+            cheapestOption: null,
+            closestOption: null,
+            maxSavings: 0,
+        };
+    }
+
     const singleStoreStrategies = strategies.filter(s => s.type === 'single_store');
     const multiStoreStrategies = strategies.filter(s => s.type === 'multi_store');
 

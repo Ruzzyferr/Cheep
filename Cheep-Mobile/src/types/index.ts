@@ -192,6 +192,7 @@ export interface CompareRequest {
   };
   favoriteStoreIds?: number[];
   includeMissingProducts?: boolean;
+  radiusKm?: number;
 }
 
 export interface RouteStrategy {
@@ -253,6 +254,9 @@ export interface CompareResponse {
   strategies: RouteStrategy[];
   alternatives: AlternativeProduct[];
   summary: CompareSummary;
+  // Konum + yarıçap filtresi uygulandı mı? (uygulandı + strategies boş → yakında market yok)
+  nearbyFilterApplied?: boolean;
+  radiusKm?: number | null;
 }
 
 export interface AlternativeProduct {

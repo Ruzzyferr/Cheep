@@ -11,5 +11,8 @@ export const compareListSchema = Joi.object({
     }).optional().allow(null),
     favoriteStoreIds: Joi.array().items(Joi.number().integer()).optional().allow(null),
     includeMissingProducts: Joi.boolean().default(true),
+    // Rota yarıçapı (km): yalnızca bu mesafedeki şubesi olan marketler rotaya girer.
+    // Yürüme ~1.5, araba ~3, geniş ~5. Verilmezse filtre uygulanmaz.
+    radiusKm: Joi.number().min(0.5).max(50).optional().allow(null),
 });
 

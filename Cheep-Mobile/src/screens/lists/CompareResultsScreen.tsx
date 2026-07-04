@@ -23,12 +23,17 @@ import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import { compareInsights, byCoverageThenScore, missingCount } from '../../utils/compareInsights';
-import { getUserLocation } from '../../utils/geo';
+import { getUserLocation, type Coords } from '../../utils/geo';
 import type { CompareResponse, RouteStrategy } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 
 type StoreCountFilter = 'all' | '1' | '2' | '3+';
 type SortOption = 'score' | 'price' | 'distance' | 'price_distance';
+
+// Rota yarıçapı seçenekleri: kimse market alışverişi için uzağa gitmez. Kullanıcı
+// hangi mesafedeki marketleri görmek istediğini seçer (yürüme / araba / geniş).
+const RADIUS_OPTIONS = [1.5, 3, 5] as const;
+const DEFAULT_RADIUS_KM = 3;
 
 export function CompareResultsScreen({
   route,
@@ -41,19 +46,36 @@ export function CompareResultsScreen({
   const [loading, setLoading] = useState(true);
   const [storeCountFilter, setStoreCountFilter] = useState<StoreCountFilter>('all');
   const [sortOption, setSortOption] = useState<SortOption>('score');
+  const [radiusKm, setRadiusKm] = useState<number>(DEFAULT_RADIUS_KM);
+  // undefined = konum henüz çözülmedi, null = izin yok/konum yok, Coords = var
+  const [loc, setLoc] = useState<Coords | null | undefined>(undefined);
   const insets = useSafeAreaInsets();
 
+  // Konumu bir kez çöz (yarıçap değişince GPS'i tekrar sorma).
   useEffect(() => {
+    let alive = true;
+    (async () => {
+      const l = await getUserLocation(); // {lat,lon} | null
+      if (alive) setLoc(l);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // Konum çözülünce ya da yarıçap değişince yeniden karşılaştır.
+  useEffect(() => {
+    if (loc === undefined) return; // konum çözülene kadar bekle
     let alive = true;
 
     (async () => {
       try {
         setLoading(true);
-        const loc = await getUserLocation(); // {lat,lon} | null
         const data = await listService.compareList(listId, {
           maxStores: 4,
           includeMissingProducts: true,
-          ...(loc ? { userLocation: loc } : {}),
+          // Konum varsa yarıçap filtresini gönder; yoksa filtreleme yapma (tümünü göster).
+          ...(loc ? { userLocation: loc, radiusKm } : {}),
         });
         if (!alive) return;
         setResults(data);
@@ -71,9 +93,11 @@ export function CompareResultsScreen({
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listId]);
+  }, [listId, radiusKm, loc]);
 
-  if (loading) {
+  // İlk yükleme: sonuç yokken tam ekran spinner. Yarıçap değişiminde eski sonuçlar
+  // ekranda kalır (seçici kaybolmasın), üstte ince bir gösterge çıkar.
+  if (loading && !results) {
     return (
       <View style={styles.loading}>
         <ActivityIndicator size="large" color={colors.primary.main} />
@@ -85,6 +109,11 @@ export function CompareResultsScreen({
   if (!results) {
     return null;
   }
+
+  const hasLocation = loc != null;
+  // Konum var, yarıçap filtresi uygulandı ama yakında market yok → boş durum.
+  const noNearbyStores =
+    hasLocation && !!results.nearbyFilterApplied && results.strategies.length === 0;
 
   const { strategies } = results;
 
@@ -146,6 +175,43 @@ export function CompareResultsScreen({
       {/* Filters */}
       <View style={styles.filtersSection}>
         <Text style={styles.sectionTitle}>{t('compare.filters_title')}</Text>
+
+        {/* Yarıçap Filtresi — yalnızca konum varsa. Kimse market için uzağa gitmez;
+            kullanıcı yürüme/araba/geniş mesafeyi seçer, dışındaki marketler gizlenir. */}
+        {hasLocation && (
+          <View style={styles.filterGroup}>
+            <View style={styles.filterLabelRow}>
+              <Text style={styles.filterLabel}>{t('compare.radius_filter')}</Text>
+              {loading && (
+                <ActivityIndicator size="small" color={colors.primary.main} />
+              )}
+            </View>
+            <View style={styles.filterButtons}>
+              {RADIUS_OPTIONS.map((km) => (
+                <TouchableOpacity
+                  key={km}
+                  style={[
+                    styles.filterButton,
+                    radiusKm === km && styles.filterButtonActive,
+                  ]}
+                  onPress={() => setRadiusKm(km)}
+                  disabled={loading}
+                >
+                  <Text
+                    style={[
+                      styles.filterButtonText,
+                      radiusKm === km && styles.filterButtonTextActive,
+                    ]}
+                  >
+                    {t(`compare.radius.${km === 1.5 ? 'walk' : km === 3 ? 'car' : 'wide'}`, {
+                      km,
+                    })}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
 
         {/* Market Sayısı Filtresi */}
         <View style={styles.filterGroup}>
@@ -217,6 +283,22 @@ export function CompareResultsScreen({
         </View>
       </View>
 
+      {noNearbyStores ? (
+        <View style={styles.section}>
+          <View style={styles.emptyNearby}>
+            <MaterialIcons
+              name="location-off"
+              size={44}
+              color={colors.text.secondary}
+            />
+            <Text style={styles.emptyNearbyTitle}>{t('compare.no_nearby_title')}</Text>
+            <Text style={styles.emptyNearbyText}>
+              {t('compare.no_nearby_text', { km: radiusKm })}
+            </Text>
+          </View>
+        </View>
+      ) : (
+      <>
       {/* Summary */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('compare.summary_title')}</Text>
@@ -348,6 +430,8 @@ export function CompareResultsScreen({
           )}
         </Card>
       </View>
+      </>
+      )}
 
     </ScrollView>
   );
@@ -501,6 +585,33 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     marginBottom: spacing.sm,
     fontWeight: '600',
+  },
+
+  filterLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
+
+  emptyNearby: {
+    alignItems: 'center',
+    paddingVertical: spacing.xl,
+    paddingHorizontal: spacing.lg,
+    gap: spacing.sm,
+  },
+
+  emptyNearbyTitle: {
+    ...typography.styles.h4,
+    color: colors.text.primary,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+
+  emptyNearbyText: {
+    ...typography.styles.body2,
+    color: colors.text.secondary,
+    textAlign: 'center',
   },
 
   filterButtons: {

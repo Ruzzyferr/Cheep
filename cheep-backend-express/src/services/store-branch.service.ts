@@ -65,11 +65,19 @@ export async function getNearbyStores(
 export const MAX_BRANCH_DISTANCE_KM = 60;
 
 /** DB: nearest branch coords per given store within a country (for compare distance).
- *  Yalnızca kullanıcıya MAX_BRANCH_DISTANCE_KM içindeki şubeler döner. */
-export async function nearestBranchCoordsForStores(storeIds: number[], countryId: number, user: { lat: number; lon: number }) {
+ *  Yalnızca kullanıcıya azami mesafedeki şubeler döner. radiusKm verilirse o kullanılır
+ *  (kullanıcının seçtiği yürüme/araba yarıçapı), yoksa MAX_BRANCH_DISTANCE_KM (mesafeyi
+ *  gösterme eşiği). radiusKm ile çağrı hem konum verir hem de o marketin rotaya alınıp
+ *  alınmayacağını belirler — bu yüzden değeri döndürülen map'te olan mağazalar "yakın"dır. */
+export async function nearestBranchCoordsForStores(
+  storeIds: number[],
+  countryId: number,
+  user: { lat: number; lon: number },
+  radiusKm?: number,
+) {
   const rows = await prisma.storeBranch.findMany({
     where: { country_id: countryId, store_id: { in: storeIds } },
     select: { id: true, store_id: true, name: true, lat: true, lon: true, address: true, city: true },
   });
-  return resolveNearestBranchCoords(rows as BranchLite[], user, MAX_BRANCH_DISTANCE_KM);
+  return resolveNearestBranchCoords(rows as BranchLite[], user, radiusKm ?? MAX_BRANCH_DISTANCE_KM);
 }
