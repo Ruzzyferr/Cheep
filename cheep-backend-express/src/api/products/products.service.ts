@@ -2,6 +2,7 @@ import { prisma } from '../../utils/prisma.client.js';
 import { Prisma } from '@prisma/client';
 import { getCountryIdByCode } from '../../utils/country.js';
 import { notFound, conflict } from '../../utils/app-error.js';
+import { normalizeSearchInput, tokenizeSearch, isBarcodeQuery } from './product-search.util.js';
 
 interface GetAllProductsParams {
     category_id?: number;
@@ -58,13 +59,9 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
         };
     }
 
-    if (search) {
-        where.OR = [
-            { name: { contains: search, mode: 'insensitive' } },
-            { brand: { contains: search, mode: 'insensitive' } },
-            { ean_barcode: { contains: search } },
-        ];
-    }
+    // NOT: asıl arama aşağıdaki raw SQL'de trigram ile yapılır (bu Prisma `where`
+    // yalnızca kategori/marka/ülke listeleme filtreleri için kullanılır; search'i
+    // buradan çıkarıyoruz ki iki farklı arama mantığı çakışmasın).
 
     // 🔥 DATABASE SEVİYESİNDE SIRALAMA: Market sayısına göre (çoktan aza)
     // Raw SQL ile store_prices count'una göre sıralama
@@ -84,14 +81,44 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
         whereClause = Prisma.sql`${whereClause} AND p.brand ILIKE ${'%' + brand + '%'}`;
     }
 
+    // 🔎 Akıllı arama: cheep_normalize (unaccent + Türkçe İ/ı) üzerinden trigram.
+    // - Çok kelime: her token normalize edilmiş isimde substring olmalı (AND) → sıra bağımsız değil.
+    // - Yazım hatası: word_similarity(sorgu, ad) — kısa sorguyu uzun ad İÇİNDEKİ en iyi
+    //   kelime/parçaya karşı ölçer. NOT: whole-string similarity() burada ÇALIŞMAZ; kısa
+    //   typo uzun çok-kelimeli ürün adına karşı ~0.09 verir (Task 2 bulgusu). word_similarity
+    //   yönü ÖNEMLİ: ilk argüman sorgu, ikinci hedef.
+    // - Barkod: yalnızca sayısal sorguda prefix eşleşmesi.
+    let searchOrder: Prisma.Sql = Prisma.empty;
     if (search) {
+        const nq = normalizeSearchInput(search);
+        const tokens = tokenizeSearch(search);
+
+        // Token-AND: her token cheep_normalize(p.name) içinde geçmeli (substring, tam parça).
+        const tokenAnd = tokens.length > 0
+            ? Prisma.join(
+                tokens.map(tok => Prisma.sql`cheep_normalize(p.name) LIKE '%' || cheep_normalize(${tok}) || '%'`),
+                ' AND '
+              )
+            : Prisma.sql`TRUE`;
+
+        const barcodeClause = isBarcodeQuery(search)
+            ? Prisma.sql`OR p.ean_barcode LIKE ${nq + '%'}`
+            : Prisma.empty;
+
         whereClause = Prisma.sql`${whereClause} AND (
-            p.name ILIKE ${'%' + search + '%'} OR
-            p.brand ILIKE ${'%' + search + '%'} OR
-            p.ean_barcode LIKE ${'%' + search + '%'}
+            (${tokenAnd})
+            OR word_similarity(cheep_normalize(${nq}), cheep_normalize(p.name)) > 0.35
+            OR cheep_normalize(coalesce(p.brand, '')) LIKE '%' || cheep_normalize(${nq}) || '%'
+            ${barcodeClause}
         )`;
+
+        // Alaka sıralaması: önce prefix eşleşmesi, sonra word_similarity.
+        searchOrder = Prisma.sql`
+            (cheep_normalize(p.name) LIKE cheep_normalize(${nq}) || '%')::int DESC,
+            word_similarity(cheep_normalize(${nq}), cheep_normalize(p.name)) DESC,
+        `;
     }
-    
+
     const products = await prisma.$queryRaw<any[]>`
         SELECT 
             p.*,
@@ -101,10 +128,11 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
         LEFT JOIN "store_prices" sp ON p.id = sp.product_id
         ${whereClause}
         GROUP BY p.id
-        ORDER BY 
-            store_count DESC,  -- Önce market sayısına göre (çoktan aza)
-            min_price ASC,     -- Sonra en ucuz fiyata göre (azdan çoka)
-            p.created_at DESC  -- Son olarak yeni ürünler
+        ORDER BY
+            ${searchOrder}
+            store_count DESC,
+            min_price ASC,
+            p.created_at DESC
         LIMIT ${limit}
         OFFSET ${offset}
     `;
