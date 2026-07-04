@@ -26,6 +26,8 @@ import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
 import { ProductThumb } from '../../components/product/ProductThumb';
 import { ListActionsSheet } from '../../components/list/ListActionsSheet';
+import { SelectSourceListModal } from '../../components/list/SelectSourceListModal';
+import { ImportModeModal } from '../../components/list/ImportModeModal';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import { useLocale } from '../../context/LocaleContext';
@@ -45,6 +47,9 @@ export function ListDetailScreen({
   const [list, setList] = useState<ShoppingList | null>(null);
   const [loading, setLoading] = useState(true);
   const [showActionsSheet, setShowActionsSheet] = useState(false);
+  const [showSource, setShowSource] = useState(false);
+  const [showImportMode, setShowImportMode] = useState(false);
+  const [pendingSourceId, setPendingSourceId] = useState<number | null>(null);
   const insets = useSafeAreaInsets();
   const cart = useCart();
   const toast = useToast();
@@ -112,6 +117,28 @@ export function ListDetailScreen({
       toast.show(t('list.clone_done'));
     } catch {
       Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+    }
+  };
+
+  // Import akışı: ⋮ "Başka listeden aktar" → kaynak seç → mod seç → içe aktar.
+  const handleSelectSource = (sourceId: number) => {
+    setPendingSourceId(sourceId);
+    setShowSource(false);
+    setShowImportMode(true);
+  };
+
+  const handleImport = async (mode: 'merge' | 'replace') => {
+    setShowImportMode(false);
+    if (!list || pendingSourceId == null) return;
+    try {
+      await listService.importFromList(list.id, pendingSourceId, mode);
+      toast.show(t('list.import_done'));
+      await loadList();
+      cart.refresh();
+    } catch {
+      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+    } finally {
+      setPendingSourceId(null);
     }
   };
 
@@ -281,8 +308,21 @@ export function ListDetailScreen({
         onClose={() => setShowActionsSheet(false)}
         onSetActive={handleSetActive}
         onClone={handleClone}
-        onImport={() => { /* Task 9: import akışı burada bağlanır */ }}
+        onImport={() => setShowSource(true)}
         onDelete={handleDeleteList}
+      />
+
+      <SelectSourceListModal
+        visible={showSource}
+        currentListId={list.id}
+        onClose={() => setShowSource(false)}
+        onSelect={handleSelectSource}
+      />
+
+      <ImportModeModal
+        visible={showImportMode}
+        onClose={() => { setShowImportMode(false); setPendingSourceId(null); }}
+        onChoose={handleImport}
       />
     </View>
   );
