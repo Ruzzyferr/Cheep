@@ -29,28 +29,30 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
   // Yazdıkça arama — 250ms debounce + stale istek koruması.
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 1) { setResults([]); setLoading(false); return; }
+    if (q.length < 1) { reqId.current++; setResults([]); setLoading(false); return; }
     setLoading(true);
     const myId = ++reqId.current;
+    let cancelled = false;
     const timer = setTimeout(async () => {
       try {
         const data = await productService.getProducts({ search: q, limit: 30 });
-        if (myId === reqId.current) setResults(data);
+        if (!cancelled && myId === reqId.current) setResults(data);
       } catch {
-        if (myId === reqId.current) setResults([]);
+        if (!cancelled && myId === reqId.current) setResults([]);
       } finally {
-        if (myId === reqId.current) setLoading(false);
+        if (!cancelled && myId === reqId.current) setLoading(false);
       }
     }, 250);
-    return () => clearTimeout(timer);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [query]);
 
   const handleAdd = useCallback(async (product: Product) => {
+    if (addedIds.has(product.id)) return;
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       let listId = activeList?.id;
       if (!listId) {
-        const created = await listService.createList({ name: 'Alışveriş Listem' });
+        const created = await listService.createList({ name: t('list.select_modal.default_new_list_name') });
         listId = created.id;
       }
       await listService.addItem(listId, { product_id: product.id });
@@ -59,7 +61,7 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
     } catch {
       // sessizce geç — kullanıcı tekrar deneyebilir
     }
-  }, [activeList, refresh]);
+  }, [activeList, refresh, addedIds, t]);
 
   const runRecent = (term: string) => setQuery(term);
 

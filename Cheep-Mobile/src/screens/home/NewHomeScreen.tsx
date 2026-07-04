@@ -258,6 +258,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
   };
   const goLists = () => navigation.dispatch(CommonActions.navigate({ name: 'Lists' }));
   const goSearch = () => navigation.navigate('Search');
+  const goAllProducts = () => navigation.navigate('CategoryProducts', { categoryId: 0, categoryName: t('product.all_categories') });
 
   return (
     <View style={styles.container}>
@@ -367,7 +368,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         <FadeInUp delay={170}>
           <View style={styles.sectionHead}>
             <Text style={styles.sectionTitle}>{t('home.categories_title')}</Text>
-            <TouchableOpacity onPress={goSearch}>
+            <TouchableOpacity onPress={goAllProducts}>
               <Text style={styles.link}>{t('common.all')}</Text>
             </TouchableOpacity>
           </View>
