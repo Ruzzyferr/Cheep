@@ -34,7 +34,7 @@ import { NameInputModal } from '../../components/list/NameInputModal';
 import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import { useLocale } from '../../context/LocaleContext';
-import { Button, Card, ListSkeleton } from '../../components/ui';
+import { Button, ListSkeleton } from '../../components/ui';
 import { EmptyState } from '../../components/common/EmptyState';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
@@ -319,6 +319,7 @@ export function ListDetailScreen({
             onToggleBrandIndependent={handleToggleBrandIndependent}
           />
         )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={[
           styles.listContent,
           // Son kalemler hem alt aksiyon çubuğunun hem tab-bar'ın altında kalmasın:
@@ -405,39 +406,42 @@ function ListItemCard({
   const product = item.product;
   if (!product) return null;
 
+  // Alt satır: marka bağımsızsa marka gösterilmez, sadece adet; aksi halde "Marka · adet".
+  const subtitle =
+    product.brand && !item.brand_independent
+      ? `${product.brand} · ${item.quantity} ${item.unit}`
+      : `${item.quantity} ${item.unit}`;
+
   return (
     <TouchableOpacity
       onLongPress={() => onToggleBrandIndependent(item)}
-      activeOpacity={0.8}
+      activeOpacity={0.7}
       accessibilityLabel="Marka tercihini değiştirmek için uzun basın"
+      style={styles.itemRow}
     >
-      <Card padding="md" style={styles.itemCard}>
-        <View style={styles.itemContent}>
-          <View style={styles.itemThumb}>
-            <ProductThumb imageUrl={product.image_url} categoryName={product.category?.name} iconSize={22} />
-          </View>
-          <View style={styles.itemInfo}>
-            <Text style={styles.productName} numberOfLines={2}>
-              {product.name}
-            </Text>
-            {product.brand && !item.brand_independent && (
-              <Text style={styles.productBrand}>{product.brand}</Text>
-            )}
-            {item.brand_independent && (
-              <Text style={styles.brandFreeBadge}>🏷️ marka farketmez</Text>
-            )}
-            <Text style={styles.quantity}>
-              {item.quantity} {item.unit}
-            </Text>
-          </View>
-          <Button
-            title="Sil"
-            onPress={() => onDelete(item.id)}
-            variant="text"
-            size="small"
-          />
+      <View style={styles.itemThumb}>
+        <ProductThumb imageUrl={product.image_url} categoryName={product.category?.name} iconSize={18} />
+      </View>
+      <View style={styles.itemInfo}>
+        <View style={styles.itemNameRow}>
+          <Text style={styles.productName} numberOfLines={1}>
+            {product.name}
+          </Text>
+          {item.brand_independent && <Text style={styles.brandFreeBadge}> 🏷️</Text>}
         </View>
-      </Card>
+        <Text style={styles.itemSub} numberOfLines={1}>
+          {subtitle}
+        </Text>
+      </View>
+      <TouchableOpacity
+        onPress={() => onDelete(item.id)}
+        hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        accessibilityRole="button"
+        accessibilityLabel="Sil"
+        style={styles.deleteBtn}
+      >
+        <MaterialIcons name="delete-outline" size={22} color={colors.error.main} />
+      </TouchableOpacity>
     </TouchableOpacity>
   );
 }
@@ -456,23 +460,17 @@ const styles = StyleSheet.create({
 
   header: {
     backgroundColor: colors.background.paper,
-    padding: layout.screenPadding,
-    paddingTop: spacing.xl,
+    paddingHorizontal: layout.screenPadding,
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
-    borderWidth: 1,
-    borderColor: colors.border.main,
-    borderRadius: borderRadius.lg,
-    margin: spacing.md,
-    marginBottom: spacing.sm,
-    ...shadows.md,
   },
 
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
 
   nameWrap: {
@@ -483,7 +481,7 @@ const styles = StyleSheet.create({
   },
 
   listName: {
-    ...typography.styles.h3,
+    ...typography.styles.h4,
     color: colors.text.primary,
     flexShrink: 1,
     fontWeight: '700',
@@ -521,7 +519,7 @@ const styles = StyleSheet.create({
   },
 
   itemCount: {
-    ...typography.styles.body1,
+    ...typography.styles.body2,
     color: colors.text.secondary,
   },
 
@@ -568,19 +566,21 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
 
-  itemCard: {
-    marginBottom: spacing.xs,
+  // Ultra-kompakt ürün satırı: kart yok, satırlar arası ince ayraç (separator).
+  itemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
   },
 
-  itemContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  separator: {
+    height: 1,
+    backgroundColor: colors.border.light,
   },
 
   itemThumb: {
-    width: 44,
-    height: 44,
+    width: 36,
+    height: 36,
     borderRadius: borderRadius.sm,
     backgroundColor: colors.background.default,
     alignItems: 'center',
@@ -589,36 +589,40 @@ const styles = StyleSheet.create({
     marginRight: spacing.md,
   },
 
-  itemThumbImg: { width: '100%', height: '100%', resizeMode: 'contain' },
-
   itemInfo: {
     flex: 1,
-    marginRight: spacing.md,
+    marginRight: spacing.sm,
+  },
+
+  itemNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 
   productName: {
-    ...typography.styles.body1,
+    ...typography.styles.body2,
     color: colors.text.primary,
-    fontWeight: '500',
-    marginBottom: spacing.xs,
+    fontWeight: '600',
+    flexShrink: 1,
   },
 
-  productBrand: {
+  itemSub: {
     ...typography.styles.caption,
     color: colors.text.secondary,
-    marginBottom: spacing.xs,
-  },
-
-  quantity: {
-    ...typography.styles.body2,
-    color: colors.text.hint,
+    marginTop: 2,
   },
 
   brandFreeBadge: {
     ...typography.styles.caption,
     color: colors.primary.main,
     fontWeight: '600',
-    marginBottom: spacing.xs,
+  },
+
+  deleteBtn: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   actions: {
