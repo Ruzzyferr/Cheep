@@ -159,6 +159,13 @@
     "empty_description": "När produkter som säljs i flera butiker läggs till dyker de bästa besparingarna upp här",
     "advantage_a11y": "{{name}}, {{percent}}% fördel"
   },
+  "search": {
+    "placeholder": "Sök produkter…",
+    "recent": "Senaste sökningar",
+    "no_results": "Inga produkter hittades för \"{{q}}\"",
+    "added": "Tillagd i din lista",
+    "hint": "Börja skriva produkten du söker"
+  },
   "compare": {
     "loading": "Beräknar rutter...",
     "load_error": "Något gick fel när listan skulle jämföras",

@@ -62,7 +62,7 @@ export type HomeStackParamList = {
   StoreDetail: { storeId: number };
   ProductDetail: { productId: number };
   CategoryProducts: { categoryId: number; categoryName: string };
-  SearchResults: { query: string };
+  Search: undefined;
   PriceDifferenceList: undefined;
 };
 

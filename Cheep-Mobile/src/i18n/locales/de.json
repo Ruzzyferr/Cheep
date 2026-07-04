@@ -159,6 +159,13 @@
     "empty_description": "Sobald Produkte aus mehreren Geschäften hinzugefügt werden, erscheinen hier die besten Ersparnisse",
     "advantage_a11y": "{{name}}, {{percent}}% Vorteil"
   },
+  "search": {
+    "placeholder": "Produkte suchen…",
+    "recent": "Letzte Suchen",
+    "no_results": "Keine Produkte für \"{{q}}\" gefunden",
+    "added": "Zur Liste hinzugefügt",
+    "hint": "Tippe das gesuchte Produkt ein"
+  },
   "compare": {
     "loading": "Routen werden berechnet...",
     "load_error": "Beim Vergleichen deiner Liste ist ein Fehler aufgetreten",

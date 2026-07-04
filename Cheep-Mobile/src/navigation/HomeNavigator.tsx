@@ -10,6 +10,7 @@ import { ProductDetailScreen } from '../screens/product/ProductDetailScreen';
 import { StoreDetailScreen } from '../screens/store/StoreDetailScreen';
 import { CategoryProductsScreen } from '../screens/product/CategoryProductsScreen';
 import { PriceDifferenceScreen } from '../screens/product/PriceDifferenceScreen';
+import { SearchScreen } from '../screens/search/SearchScreen';
 import { colors, typography } from '../theme';
 import type { HomeStackParamList } from './types';
 
@@ -48,6 +49,11 @@ export function HomeNavigator() {
       <Stack.Screen
         name="CategoryProducts"
         component={CategoryProductsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Search"
+        component={SearchScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

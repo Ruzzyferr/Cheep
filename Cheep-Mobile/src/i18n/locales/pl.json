@@ -159,6 +159,13 @@
     "empty_description": "Gdy przybędzie produktów sprzedawanych w kilku sklepach, najlepsze oszczędności pojawią się tutaj",
     "advantage_a11y": "{{name}}, korzyść {{percent}}%"
   },
+  "search": {
+    "placeholder": "Szukaj produktów…",
+    "recent": "Ostatnie wyszukiwania",
+    "no_results": "Nie znaleziono produktów dla \"{{q}}\"",
+    "added": "Dodano do listy",
+    "hint": "Zacznij wpisywać szukany produkt"
+  },
   "compare": {
     "loading": "Obliczanie tras...",
     "load_error": "Wystąpił błąd podczas porównywania listy",

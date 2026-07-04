@@ -159,6 +159,13 @@
     "empty_description": "Birden fazla markette satılan ürünler eklendikçe en iyi tasarruflar burada görünecek",
     "advantage_a11y": "{{name}}, %{{percent}} avantaj"
   },
+  "search": {
+    "placeholder": "Ürün ara…",
+    "recent": "Son aramalar",
+    "no_results": "\"{{q}}\" için ürün bulunamadı",
+    "added": "Listene eklendi",
+    "hint": "Aradığın ürünü yazmaya başla"
+  },
   "compare": {
     "loading": "Rotalar hesaplanıyor...",
     "load_error": "Karşılaştırma yapılırken bir hata oluştu",

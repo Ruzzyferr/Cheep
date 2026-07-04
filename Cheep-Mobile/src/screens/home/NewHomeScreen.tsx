@@ -257,8 +257,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
     );
   };
   const goLists = () => navigation.dispatch(CommonActions.navigate({ name: 'Lists' }));
-  const goSearch = () =>
-    navigation.navigate('CategoryProducts', { categoryId: 0, categoryName: t('product.all_categories') });
+  const goSearch = () => navigation.navigate('Search');
 
   return (
     <View style={styles.container}>

@@ -159,6 +159,13 @@
     "empty_description": "As products sold in multiple stores are added, the best savings will show up here",
     "advantage_a11y": "{{name}}, {{percent}}% advantage"
   },
+  "search": {
+    "placeholder": "Search products…",
+    "recent": "Recent searches",
+    "no_results": "No products found for \"{{q}}\"",
+    "added": "Added to your list",
+    "hint": "Start typing the product you want"
+  },
   "compare": {
     "loading": "Calculating routes...",
     "load_error": "Something went wrong comparing your list",
