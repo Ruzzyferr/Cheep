@@ -147,6 +147,23 @@
       "add_success_body": "Produkt dodany do listy",
       "add_error": "Wystąpił błąd podczas dodawania produktu",
       "create_error": "Wystąpił błąd podczas tworzenia listy"
+    },
+    "set_active": "Ustaw jako aktywną",
+    "active_badge": "Aktywna",
+    "not_active_hint": "Ta lista nie jest aktywna",
+    "add_products": "Dodaj produkty",
+    "clone": "Duplikuj",
+    "clone_done": "Lista zduplikowana",
+    "import_from_list": "Importuj z innej listy",
+    "import_source_title": "Z której listy importować?",
+    "import_done": "Zaimportowano produkty",
+    "menu_title": "Działania na liście",
+    "import_mode": {
+      "title": "Jak zaimportować?",
+      "merge_title": "Dodaj tylko brakujące produkty",
+      "merge_desc": "Produkty, których nie ma na tej liście, zostaną dodane; istniejące pozostaną bez zmian.",
+      "replace_title": "Zastąp tą listą",
+      "replace_desc": "Produkty z tej listy zostaną usunięte i zastąpione produktami wybranej listy."
     }
   },
   "deals": {
@@ -164,7 +181,8 @@
     "recent": "Ostatnie wyszukiwania",
     "no_results": "Nie znaleziono produktów dla \"{{q}}\"",
     "added": "Dodano do listy",
-    "hint": "Zacznij wpisywać szukany produkt"
+    "hint": "Zacznij wpisywać szukany produkt",
+    "adding_to_list": "Dodawanie do '{{name}}'"
   },
   "compare": {
     "loading": "Obliczanie tras...",

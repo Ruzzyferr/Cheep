@@ -147,6 +147,23 @@
       "add_success_body": "Ürün listeye eklendi",
       "add_error": "Ürün eklenirken bir hata oluştu",
       "create_error": "Liste oluşturulurken bir hata oluştu"
+    },
+    "set_active": "Aktif liste yap",
+    "active_badge": "Aktif",
+    "not_active_hint": "Bu liste aktif değil",
+    "add_products": "Ürün Ekle",
+    "clone": "Klonla",
+    "clone_done": "Liste kopyalandı",
+    "import_from_list": "Başka listeden aktar",
+    "import_source_title": "Hangi listeden aktarılsın?",
+    "import_done": "Ürünler aktarıldı",
+    "menu_title": "Liste işlemleri",
+    "import_mode": {
+      "title": "Nasıl aktaralım?",
+      "merge_title": "Sadece eksik ürünleri ekle",
+      "merge_desc": "Bu listede olmayan ürünler eklenir; mevcutlar değişmez.",
+      "replace_title": "Tüm listeyi bununla değiştir",
+      "replace_desc": "Bu listenin ürünleri silinip seçtiğin listenin ürünleri konur."
     }
   },
   "deals": {
@@ -164,7 +181,8 @@
     "recent": "Son aramalar",
     "no_results": "\"{{q}}\" için ürün bulunamadı",
     "added": "Listene eklendi",
-    "hint": "Aradığın ürünü yazmaya başla"
+    "hint": "Aradığın ürünü yazmaya başla",
+    "adding_to_list": "'{{name}}' listesine ekleniyor"
   },
   "compare": {
     "loading": "Rotalar hesaplanıyor...",

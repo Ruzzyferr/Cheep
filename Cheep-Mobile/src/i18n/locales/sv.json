@@ -147,6 +147,23 @@
       "add_success_body": "Produkten har lagts till i listan",
       "add_error": "Något gick fel när produkten skulle läggas till",
       "create_error": "Något gick fel när listan skulle skapas"
+    },
+    "set_active": "Ange som aktiv",
+    "active_badge": "Aktiv",
+    "not_active_hint": "Den här listan är inte aktiv",
+    "add_products": "Lägg till produkter",
+    "clone": "Duplicera",
+    "clone_done": "Listan duplicerades",
+    "import_from_list": "Importera från en annan lista",
+    "import_source_title": "Från vilken lista ska vi importera?",
+    "import_done": "Produkter importerade",
+    "menu_title": "Liståtgärder",
+    "import_mode": {
+      "title": "Hur ska vi importera?",
+      "merge_title": "Lägg bara till produkter som saknas",
+      "merge_desc": "Produkter som inte redan finns i listan läggs till; befintliga påverkas inte.",
+      "replace_title": "Ersätt med den här listan",
+      "replace_desc": "Produkterna i den här listan tas bort och ersätts med den valda listans produkter."
     }
   },
   "deals": {
@@ -164,7 +181,8 @@
     "recent": "Senaste sökningar",
     "no_results": "Inga produkter hittades för \"{{q}}\"",
     "added": "Tillagd i din lista",
-    "hint": "Börja skriva produkten du söker"
+    "hint": "Börja skriva produkten du söker",
+    "adding_to_list": "Lägger till i '{{name}}'"
   },
   "compare": {
     "loading": "Beräknar rutter...",

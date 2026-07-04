@@ -147,6 +147,23 @@
       "add_success_body": "Produkt zur Liste hinzugefügt",
       "add_error": "Beim Hinzufügen des Produkts ist ein Fehler aufgetreten",
       "create_error": "Beim Erstellen der Liste ist ein Fehler aufgetreten"
+    },
+    "set_active": "Als aktiv festlegen",
+    "active_badge": "Aktiv",
+    "not_active_hint": "Diese Liste ist nicht aktiv",
+    "add_products": "Produkte hinzufügen",
+    "clone": "Duplizieren",
+    "clone_done": "Liste dupliziert",
+    "import_from_list": "Aus anderer Liste importieren",
+    "import_source_title": "Aus welcher Liste importieren?",
+    "import_done": "Produkte importiert",
+    "menu_title": "Listenaktionen",
+    "import_mode": {
+      "title": "Wie sollen wir importieren?",
+      "merge_title": "Nur fehlende Produkte hinzufügen",
+      "merge_desc": "Produkte, die noch nicht in dieser Liste sind, werden hinzugefügt; vorhandene bleiben unverändert.",
+      "replace_title": "Durch diese Liste ersetzen",
+      "replace_desc": "Die Produkte dieser Liste werden gelöscht und durch die Produkte der gewählten Liste ersetzt."
     }
   },
   "deals": {
@@ -164,7 +181,8 @@
     "recent": "Letzte Suchen",
     "no_results": "Keine Produkte für \"{{q}}\" gefunden",
     "added": "Zur Liste hinzugefügt",
-    "hint": "Tippe das gesuchte Produkt ein"
+    "hint": "Tippe das gesuchte Produkt ein",
+    "adding_to_list": "Wird zu '{{name}}' hinzugefügt"
   },
   "compare": {
     "loading": "Routen werden berechnet...",

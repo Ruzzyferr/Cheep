@@ -147,6 +147,23 @@
       "add_success_body": "Product added to the list",
       "add_error": "Something went wrong adding the product",
       "create_error": "Something went wrong creating the list"
+    },
+    "set_active": "Set as active",
+    "active_badge": "Active",
+    "not_active_hint": "This list isn't active",
+    "add_products": "Add products",
+    "clone": "Duplicate",
+    "clone_done": "List duplicated",
+    "import_from_list": "Import from another list",
+    "import_source_title": "Which list to import from?",
+    "import_done": "Items imported",
+    "menu_title": "List actions",
+    "import_mode": {
+      "title": "How should we import?",
+      "merge_title": "Add only missing items",
+      "merge_desc": "Items not already in this list are added; existing ones stay unchanged.",
+      "replace_title": "Replace with this list",
+      "replace_desc": "This list's items are removed and replaced with the selected list's items."
     }
   },
   "deals": {
@@ -164,7 +181,8 @@
     "recent": "Recent searches",
     "no_results": "No products found for \"{{q}}\"",
     "added": "Added to your list",
-    "hint": "Start typing the product you want"
+    "hint": "Start typing the product you want",
+    "adding_to_list": "Adding to '{{name}}'"
   },
   "compare": {
     "loading": "Calculating routes...",
