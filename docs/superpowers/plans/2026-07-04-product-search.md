@@ -350,9 +350,11 @@ git commit -m "feat(search): trigram+unaccent relevance-ranked product search qu
 
 - [ ] **Step 1: Write the implementation**
 
+Uygulamanın MEVCUT `storage` util'ini (expo-secure-store tabanlı, `src/utils/storage.ts`) kullan — AsyncStorage EKLEME (app onu hiç kullanmıyor, yeni native bağımlılık gereksiz). `storage.getItem/setItem` API'sini kullan.
+
 ```ts
 // Cheep-Mobile/src/utils/recentSearches.ts
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storage } from './storage';
 
 const KEY = 'recent_searches';
 const MAX = 5;
@@ -360,7 +362,7 @@ const MAX = 5;
 /** Son aramalar, en yeni ilk (en fazla 5). */
 export async function getRecentSearches(): Promise<string[]> {
   try {
-    const raw = await AsyncStorage.getItem(KEY);
+    const raw = await storage.getItem(KEY);
     const arr = raw ? (JSON.parse(raw) as unknown) : [];
     return Array.isArray(arr) ? (arr as string[]).slice(0, MAX) : [];
   } catch {
@@ -376,17 +378,14 @@ export async function addRecentSearch(q: string): Promise<void> {
     const prev = await getRecentSearches();
     const deduped = prev.filter(p => p.toLowerCase() !== term.toLowerCase());
     const next = [term, ...deduped].slice(0, MAX);
-    await AsyncStorage.setItem(KEY, JSON.stringify(next));
+    await storage.setItem(KEY, JSON.stringify(next));
   } catch {
     // sessizce geç — son aramalar kritik değil
   }
 }
 ```
 
-- [ ] **Step 2: Verify AsyncStorage is a dependency**
-
-Run: `cd Cheep-Mobile && node -e "console.log(require('./package.json').dependencies['@react-native-async-storage/async-storage'] || 'MISSING')"`
-Expected: bir sürüm yazdırır (MISSING değil). MISSING ise: `npx expo install @react-native-async-storage/async-storage`.
+- [ ] **Step 2: (kaldırıldı — mevcut storage util kullanılıyor, yeni bağımlılık yok)**
 
 - [ ] **Step 3: Typecheck**
 
