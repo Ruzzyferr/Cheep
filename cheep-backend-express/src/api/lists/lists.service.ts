@@ -185,6 +185,32 @@ export const activateList = async (listId: number, userId: number) => {
 };
 
 /**
+ * Listeyi klonla: kalemleri (brand_independent dahil) kopyalayan yeni PASİF liste.
+ * Ad "{name} (Kopya)". Sahiplik yoksa null.
+ */
+export const cloneList = async (listId: number, userId: number) => {
+    const src = await prisma.list.findFirst({
+        where: { id: listId, user_id: userId },
+        include: { list_items: true },
+    });
+    if (!src) return null;
+    return await prisma.$transaction(async (tx) => {
+        const clone = await tx.list.create({
+            data: { user_id: userId, name: `${src.name} (Kopya)`, budget: src.budget, status: 'inactive' },
+        });
+        if (src.list_items.length > 0) {
+            await tx.listItem.createMany({
+                data: src.list_items.map((it) => ({
+                    list_id: clone.id, product_id: it.product_id,
+                    quantity: it.quantity, unit: it.unit, brand_independent: it.brand_independent,
+                })),
+            });
+        }
+        return clone;
+    });
+};
+
+/**
  * Liste güncelle
  */
 export const updateList = async (

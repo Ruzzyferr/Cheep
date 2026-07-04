@@ -311,6 +311,30 @@ router.get('/:id/statistics', authenticate, validateIdParam('id'), ListControlle
  */
 router.post('/:id/activate', authenticate, validateIdParam('id'), ListController.activateList);
 
+/**
+ * @swagger
+ * /api/v1/lists/{id}/clone:
+ *   post:
+ *     summary: Listeyi klonla (yeni pasif liste, kalemler kopyalanır)
+ *     tags: [Lists]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       201:
+ *         description: Liste klonlandı
+ *       401:
+ *         description: Yetkisiz erişim
+ *       404:
+ *         description: Liste bulunamadı
+ */
+router.post('/:id/clone', authenticate, validateIdParam('id'), ListController.cloneList);
+
 // ============================================
 // TEMPLATES
 // ============================================

@@ -23,7 +23,7 @@ vi.mock('../src/utils/prisma.client.js', () => ({
   },
 }));
 
-import { createList, activateList } from '../src/api/lists/lists.service.js';
+import { createList, activateList, cloneList } from '../src/api/lists/lists.service.js';
 
 beforeEach(() => { updateMany.mockReset(); create.mockReset(); findFirst.mockReset(); update.mockReset(); $transaction.mockClear(); });
 
@@ -61,5 +61,27 @@ describe('activateList', () => {
     const res = await activateList(9, 2);
     expect(res).toBeNull();
     expect(update).not.toHaveBeenCalled();
+  });
+});
+
+describe('cloneList', () => {
+  it('kalemleri brand_independent ile kopyalar, klon pasif', async () => {
+    findFirst.mockResolvedValue({
+      id: 3, user_id: 1, name: 'Haftalık', budget: null,
+      list_items: [{ product_id: 10, quantity: 2, unit: 'adet', brand_independent: true }],
+    });
+    const created = { id: 99 };
+    const txCreate = vi.fn().mockResolvedValue(created);
+    const txCreateMany = vi.fn().mockResolvedValue({ count: 1 });
+    $transaction.mockImplementationOnce(async (fn: any) =>
+      fn({ list: { create: txCreate }, listItem: { createMany: txCreateMany } }));
+    const res = await cloneList(3, 1);
+    expect(txCreate).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ user_id: 1, name: 'Haftalık (Kopya)', status: 'inactive' }),
+    }));
+    expect(txCreateMany).toHaveBeenCalledWith(expect.objectContaining({
+      data: [expect.objectContaining({ list_id: 99, product_id: 10, quantity: 2, unit: 'adet', brand_independent: true })],
+    }));
+    expect(res).toBeTruthy();
   });
 });

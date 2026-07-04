@@ -93,6 +93,27 @@ export const activateList = async (req: Request, res: Response, next: NextFuncti
 };
 
 /**
+ * Listeyi klonla (yeni pasif liste)
+ */
+export const cloneList = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ success: false, message: 'Unauthorized' });
+            return;
+        }
+
+        const result = await ListService.cloneList(Number(req.params.id), req.user.id);
+        if (!result) {
+            res.status(404).json({ success: false, message: 'Liste bulunamadı' });
+            return;
+        }
+        res.status(201).json({ success: true, data: result });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Liste güncelle
  */
 export const updateList = async (req: Request, res: Response, next: NextFunction) => {
