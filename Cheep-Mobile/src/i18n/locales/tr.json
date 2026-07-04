@@ -164,7 +164,10 @@
       "merge_desc": "Bu listede olmayan ürünler eklenir; mevcutlar değişmez.",
       "replace_title": "Tüm listeyi bununla değiştir",
       "replace_desc": "Bu listenin ürünleri silinip seçtiğin listenin ürünleri konur."
-    }
+    },
+    "detail_empty_title": "Liste boş",
+    "detail_empty_desc": "Bu listeye henüz ürün eklenmemiş",
+    "import_no_source": "Aktarılacak başka liste yok"
   },
   "deals": {
     "title": "Fırsatlar",

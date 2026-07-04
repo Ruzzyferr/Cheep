@@ -164,7 +164,10 @@
       "merge_desc": "Produkty, których nie ma na tej liście, zostaną dodane; istniejące pozostaną bez zmian.",
       "replace_title": "Zastąp tą listą",
       "replace_desc": "Produkty z tej listy zostaną usunięte i zastąpione produktami wybranej listy."
-    }
+    },
+    "detail_empty_title": "Lista jest pusta",
+    "detail_empty_desc": "Brak produktów na tej liście",
+    "import_no_source": "Brak innej listy do zaimportowania"
   },
   "deals": {
     "title": "Okazje",

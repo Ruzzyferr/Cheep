@@ -164,7 +164,10 @@
       "merge_desc": "Items not already in this list are added; existing ones stay unchanged.",
       "replace_title": "Replace with this list",
       "replace_desc": "This list's items are removed and replaced with the selected list's items."
-    }
+    },
+    "detail_empty_title": "List is empty",
+    "detail_empty_desc": "No products in this list yet",
+    "import_no_source": "No other list to import from"
   },
   "deals": {
     "title": "Deals",

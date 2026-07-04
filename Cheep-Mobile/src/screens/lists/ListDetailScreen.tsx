@@ -1,6 +1,13 @@
 /**
  * 📋 List Detail Screen
- * Shopping list items and actions
+ * Shopping list items and actions.
+ *
+ * Layout (approved):
+ *   header card: name + (if active) "✓ Aktif" chip + ⋮ overflow (40×40)
+ *   (if NOT active) thin strip: "Bu liste aktif değil"  [Aktif Yap]
+ *   items FlatList (flex:1, scrolls — ALL items reachable)
+ *   bottom sticky bar: [ Ürün Ekle (outline) ] [ Rotaları Göster (primary) ]
+ *   ⋮ menu (bottom-sheet): Aktif liste yap · Klonla · Başka listeden aktar · Sil
  */
 
 import React, { useState, useCallback } from 'react';
@@ -15,9 +22,12 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
 import { ProductThumb } from '../../components/product/ProductThumb';
+import { ListActionsSheet } from '../../components/list/ListActionsSheet';
 import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
 import { useLocale } from '../../context/LocaleContext';
 import { Button, Card, ListSkeleton } from '../../components/ui';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -31,10 +41,13 @@ export function ListDetailScreen({
   navigation,
 }: ListsStackScreenProps<'ListDetail'>) {
   const { listId } = route.params;
+  const { t } = useTranslation();
   const [list, setList] = useState<ShoppingList | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showActionsSheet, setShowActionsSheet] = useState(false);
   const insets = useSafeAreaInsets();
   const cart = useCart();
+  const toast = useToast();
   const { formatMoney } = useLocale();
 
   // Reload list when screen comes into focus (e.g., after adding a product)
@@ -53,7 +66,7 @@ export function ListDetailScreen({
       cart.refresh(); // sepet rozetini güncel tut (ekleme/silme sonrası)
     } catch (error) {
       console.error('Load list error:', error);
-      Alert.alert('Hata', 'Liste yüklenirken bir hata oluştu');
+      Alert.alert(t('common.error'), t('list.select_modal.load_error'));
       navigation.goBack();
     } finally {
       setLoading(false);
@@ -65,7 +78,7 @@ export function ListDetailScreen({
       await listService.updateItem(item.id, { brand_independent: !item.brand_independent });
       await loadList();
     } catch {
-      Alert.alert('Hata', 'Marka tercihi güncellenirken bir hata oluştu');
+      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
     }
   };
 
@@ -74,23 +87,51 @@ export function ListDetailScreen({
     navigation.navigate('CompareResults', { listId: list.id });
   };
 
+  // Task 10'da hedefi BU liste olan Lists-stack Search akışına bağlanır.
+  // Şimdilik mevcut arama ekranını açar (aktif listeye ekler).
+  const handleAddProducts = () => {
+    const parent = navigation.getParent();
+    if (parent) parent.navigate('Home', { screen: 'Search' });
+  };
+
+  const handleSetActive = async () => {
+    if (!list) return;
+    try {
+      await listService.activate(list.id);
+      await loadList();
+      cart.refresh();
+    } catch {
+      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+    }
+  };
+
+  const handleClone = async () => {
+    if (!list) return;
+    try {
+      await listService.clone(list.id);
+      toast.show(t('list.clone_done'));
+    } catch {
+      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+    }
+  };
+
   const handleDeleteItem = async (itemId: number) => {
     if (!list) return;
-    
+
     Alert.alert(
       'Ürünü Sil',
       'Bu ürünü listeden kaldırmak istediğinize emin misiniz?',
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Sil',
+          text: t('list.delete_action'),
           style: 'destructive',
           onPress: async () => {
             try {
               await listService.deleteItem(list.id, itemId);
               await loadList();
             } catch {
-              Alert.alert('Hata', 'Ürün silinirken bir hata oluştu');
+              Alert.alert(t('common.error'), t('list.select_modal.add_error'));
             }
           },
         },
@@ -102,19 +143,19 @@ export function ListDetailScreen({
     if (!list) return;
 
     Alert.alert(
-      'Listeyi Sil',
-      'Bu listeyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+      t('list.delete_title'),
+      t('list.delete_confirm'),
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Sil',
+          text: t('list.delete_action'),
           style: 'destructive',
           onPress: async () => {
             try {
               await listService.deleteList(list.id);
               navigation.goBack();
             } catch {
-              Alert.alert('Hata', 'Liste silinirken bir hata oluştu');
+              Alert.alert(t('common.error'), t('list.select_modal.add_error'));
             }
           },
         },
@@ -135,26 +176,56 @@ export function ListDetailScreen({
   }
 
   const items = list.list_items || [];
+  const isActive = list.status === 'active';
 
   return (
     <View style={styles.container}>
       {/* Header Info */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.listName}>{list.name}</Text>
-          <TouchableOpacity onPress={handleDeleteList} style={styles.deleteButton}>
-            <MaterialIcons name="delete-outline" size={22} color={colors.text.secondary} />
+          <View style={styles.nameWrap}>
+            <Text style={styles.listName} numberOfLines={1}>{list.name}</Text>
+            {isActive && (
+              <View style={styles.activeChip}>
+                <MaterialIcons name="check" size={13} color={colors.primary.main} />
+                <Text style={styles.activeChipText}>{t('list.active_badge')}</Text>
+              </View>
+            )}
+          </View>
+          <TouchableOpacity
+            onPress={() => setShowActionsSheet(true)}
+            style={styles.overflowButton}
+            accessibilityRole="button"
+            accessibilityLabel={t('list.menu_title')}
+          >
+            <MaterialIcons name="more-vert" size={24} color={colors.text.secondary} />
           </TouchableOpacity>
         </View>
         <View style={styles.headerInfo}>
-          <Text style={styles.itemCount}>{items.length} ürün</Text>
+          <Text style={styles.itemCount}>{t('list.item_count', { count: items.length })}</Text>
           {list.budget && (
             <Text style={styles.budget}>
-              Bütçe: {formatMoney(parseFloat(list.budget))}
+              {t('list.budget_label')} {formatMoney(parseFloat(list.budget))}
             </Text>
           )}
         </View>
       </View>
+
+      {/* Not-active info strip */}
+      {!isActive && (
+        <View style={styles.activeStrip}>
+          <Text style={styles.activeStripText} numberOfLines={1}>
+            {t('list.not_active_hint')}
+          </Text>
+          <Button
+            title={t('list.set_active')}
+            onPress={handleSetActive}
+            variant="outline"
+            size="small"
+            style={styles.activeStripBtn}
+          />
+        </View>
+      )}
 
       {/* Items List */}
       <FlatList
@@ -170,38 +241,49 @@ export function ListDetailScreen({
         )}
         contentContainerStyle={[
           styles.listContent,
-          items.length > 0 && { paddingBottom: 120 } // Space for button at bottom (72 tab bar + 48 button + padding)
+          // Alt sabit çubuğu (72 tab + ~48 buton + padding) aşan boşluk;
+          // yoksa son kalemler çubuğun altında kalır.
+          items.length > 0 && { paddingBottom: insets.bottom + 140 },
         ]}
         ListEmptyComponent={
           <EmptyState
             mascot="search"
-            title="Liste boş"
-            description="Bu listeye henüz ürün eklenmemiş"
-            actionLabel="Ürün Ekle"
-            onAction={() => {
-              // Navigate to Home tab to browse all products
-              const parent = navigation.getParent();
-              if (parent) {
-                parent.navigate('Home', {
-                  screen: 'HomeMain',
-                });
-              }
-            }}
+            title={t('list.detail_empty_title')}
+            description={t('list.detail_empty_desc')}
+            actionLabel={t('list.add_products')}
+            onAction={handleAddProducts}
           />
         }
       />
 
-      {/* Actions */}
+      {/* Bottom sticky bar: two equal buttons */}
       {items.length > 0 && (
-        <View style={[styles.actions, { bottom: insets.bottom + 72 }]}>
-          <Button
-            title="Rotaları Göster"
-            onPress={handleCompare}
-            fullWidth
-            icon={<MaterialIcons name="alt-route" size={18} color={colors.background.paper} style={styles.buttonIcon} />}
-          />
+        <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.md }]}>
+          <View style={styles.actionRow}>
+            <Button
+              title={t('list.add_products')}
+              onPress={handleAddProducts}
+              variant="outline"
+              style={styles.actionBtn}
+            />
+            <Button
+              title="Rotaları Göster"
+              onPress={handleCompare}
+              style={styles.actionBtn}
+            />
+          </View>
         </View>
       )}
+
+      <ListActionsSheet
+        visible={showActionsSheet}
+        isActive={isActive}
+        onClose={() => setShowActionsSheet(false)}
+        onSetActive={handleSetActive}
+        onClone={handleClone}
+        onImport={() => { /* Task 9: import akışı burada bağlanır */ }}
+        onDelete={handleDeleteList}
+      />
     </View>
   );
 }
@@ -289,17 +371,44 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
 
+  nameWrap: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: spacing.sm,
+  },
+
   listName: {
     ...typography.styles.h3,
     color: colors.text.primary,
-    flex: 1,
+    flexShrink: 1,
     fontWeight: '700',
     letterSpacing: -0.3,
   },
 
-  deleteButton: {
-    padding: spacing.xs,
-    marginLeft: spacing.md,
+  activeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    marginLeft: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary[50],
+  },
+
+  activeChipText: {
+    ...typography.styles.caption,
+    color: colors.primary.main,
+    fontWeight: '700',
+  },
+
+  overflowButton: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   headerInfo: {
@@ -316,6 +425,31 @@ const styles = StyleSheet.create({
     ...typography.styles.body2,
     color: colors.text.primary,
     fontWeight: '600',
+  },
+
+  activeStrip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.background.paper,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+
+  activeStripText: {
+    ...typography.styles.body2,
+    color: colors.text.secondary,
+    flexShrink: 1,
+    marginRight: spacing.sm,
+  },
+
+  activeStripBtn: {
+    paddingHorizontal: spacing.md,
   },
 
   // FlatList'in kendi görünüm alanı (viewport) ekranın kalan yüksekliğine SABİTLENMELİ;
@@ -395,8 +529,12 @@ const styles = StyleSheet.create({
     ...shadows.md,
   },
 
-  buttonIcon: {
-    marginRight: spacing.xs,
+  actionRow: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+
+  actionBtn: {
+    flex: 1,
   },
 });
-

@@ -164,7 +164,10 @@
       "merge_desc": "Produkter som inte redan finns i listan läggs till; befintliga påverkas inte.",
       "replace_title": "Ersätt med den här listan",
       "replace_desc": "Produkterna i den här listan tas bort och ersätts med den valda listans produkter."
-    }
+    },
+    "detail_empty_title": "Listan är tom",
+    "detail_empty_desc": "Inga produkter i listan än",
+    "import_no_source": "Ingen annan lista att importera från"
   },
   "deals": {
     "title": "Erbjudanden",
