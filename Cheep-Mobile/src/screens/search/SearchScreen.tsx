@@ -5,11 +5,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 import { SearchBar } from '../../components/common/SearchBar';
-import { SearchResultRow } from '../../components/search/SearchResultRow';
+import { ProductGridCard } from '../../components/product/ProductGridCard';
 import { productService, listService } from '../../services';
 import { useCart } from '../../context/CartContext';
+import { useToast } from '../../context/ToastContext';
+import { useLocale } from '../../context/LocaleContext';
 import { getRecentSearches, addRecentSearch } from '../../utils/recentSearches';
-import { colors, typography, spacing } from '../../theme';
+import { colors, typography, spacing, layout } from '../../theme';
 import type { Product } from '../../types';
 import type { HomeStackScreenProps } from '../../navigation/types';
 
@@ -17,6 +19,8 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { activeList, refresh } = useCart();
+  const toast = useToast();
+  const { formatMoney } = useLocale();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -47,27 +51,41 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
     return () => { cancelled = true; clearTimeout(timer); };
   }, [query]);
 
+  // Kartın en ucuz 3 marketini formatlı fiyatlarla döndür (ProductGridCard için).
+  const getTopThreePrices = (product: Product) => {
+    if (!product.store_prices || product.store_prices.length === 0) return [];
+    return [...product.store_prices]
+      .sort((a, b) => parseFloat(a.price) - parseFloat(b.price))
+      .slice(0, 3)
+      .map((sp) => ({
+        storeName: sp.store?.name || t('product.unknown_store'),
+        price: formatMoney(parseFloat(sp.price)),
+      }));
+  };
+
   const handleAdd = useCallback(async (product: Product) => {
     if (addedIds.has(product.id)) return;
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       let listId = activeList?.id;
+      let listName = activeList?.name;
       if (!listId) {
         if (!creatingListRef.current) {
           creatingListRef.current = listService
             .createList({ name: t('list.select_modal.default_new_list_name') })
-            .then((l) => l.id);
+            .then((l) => { listName = l.name; return l.id; });
         }
         listId = await creatingListRef.current;
       }
       await listService.addItem(listId, { product_id: product.id });
       setAddedIds(prev => new Set(prev).add(product.id));
       await refresh();
+      toast.show(t('list.added_to', { list: listName ?? activeList?.name ?? '' }));
       if (query.trim()) addRecentSearch(query);
     } catch {
       // sessizce geç — kullanıcı tekrar deneyebilir
     }
-  }, [activeList, refresh, addedIds, t, query]);
+  }, [activeList, refresh, addedIds, t, query, toast]);
 
   const runRecent = (term: string) => setQuery(term);
 
@@ -116,17 +134,24 @@ export function SearchScreen({ navigation }: HomeStackScreenProps<'Search'>) {
         <FlatList
           style={styles.list}
           data={results}
+          numColumns={2}
           keyExtractor={(item) => item.id.toString()}
           keyboardShouldPersistTaps="handled"
+          columnWrapperStyle={styles.row}
           renderItem={({ item }) => (
-            <SearchResultRow
-              product={item}
-              added={addedIds.has(item.id)}
-              onAdd={() => handleAdd(item)}
-              onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
-            />
+            <View style={styles.gridItem}>
+              <ProductGridCard
+                productName={item.name}
+                categoryName={item.category?.name}
+                imageUrl={item.image_url || undefined}
+                topThreePrices={getTopThreePrices(item)}
+                constraint={item.constraint}
+                onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
+                onAddToCart={() => handleAdd(item)}
+              />
+            </View>
           )}
-          contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+          contentContainerStyle={[styles.gridContainer, { paddingBottom: insets.bottom + 24 }]}
         />
       )}
     </View>
@@ -140,6 +165,9 @@ const styles = StyleSheet.create({
   backText: { fontSize: 34, lineHeight: 34, color: colors.text.primary },
   searchBarWrap: { flex: 1 },
   list: { flex: 1 },
+  gridContainer: { padding: layout.screenPadding },
+  row: { justifyContent: 'space-between', marginBottom: spacing.md },
+  gridItem: { width: '48%' },
   empty: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
   emptyLabel: { ...typography.styles.body2, color: colors.text.secondary, fontWeight: '600', marginBottom: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
