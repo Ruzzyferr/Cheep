@@ -1,5 +1,4 @@
-// Cheep-Mobile/src/utils/recentSearches.ts
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storage } from './storage';
 
 const KEY = 'recent_searches';
 const MAX = 5;
@@ -7,7 +6,7 @@ const MAX = 5;
 /** Son aramalar, en yeni ilk (en fazla 5). */
 export async function getRecentSearches(): Promise<string[]> {
   try {
-    const raw = await AsyncStorage.getItem(KEY);
+    const raw = await storage.getItem(KEY);
     const arr = raw ? (JSON.parse(raw) as unknown) : [];
     return Array.isArray(arr) ? (arr as string[]).slice(0, MAX) : [];
   } catch {
@@ -23,7 +22,7 @@ export async function addRecentSearch(q: string): Promise<void> {
     const prev = await getRecentSearches();
     const deduped = prev.filter(p => p.toLowerCase() !== term.toLowerCase());
     const next = [term, ...deduped].slice(0, MAX);
-    await AsyncStorage.setItem(KEY, JSON.stringify(next));
+    await storage.setItem(KEY, JSON.stringify(next));
   } catch {
     // sessizce geç — son aramalar kritik değil
   }
