@@ -23,8 +23,6 @@ export function ListCard({ list, onPress, onDelete }: ListCardProps) {
   const { formatMoney, formatDate } = useLocale();
   const itemCount = list.list_items?.length || 0;
   const budget = list.budget ? parseFloat(list.budget) : null;
-  // Legacy 'completed' durumu birleşik modelde yok; Task 7'de kart yeniden tasarlanacak.
-  const isCompleted = (list.status as string) === 'completed';
 
   const handleDelete = (e: any) => {
     e.stopPropagation();
@@ -49,14 +47,9 @@ export function ListCard({ list, onPress, onDelete }: ListCardProps) {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.name}>{list.name}</Text>
-          {list.is_template && (
+          {list.status === 'active' && (
             <View style={styles.badge}>
-              <Text style={styles.badgeText}>{t('list.template_badge')}</Text>
-            </View>
-          )}
-          {isCompleted && (
-            <View style={[styles.badge, styles.completedBadge]}>
-              <Text style={styles.badgeText}>{t('list.completed_badge')}</Text>
+              <Text style={styles.badgeText}>{t('list.active_badge')}</Text>
             </View>
           )}
         </View>
@@ -81,11 +74,6 @@ export function ListCard({ list, onPress, onDelete }: ListCardProps) {
         <Text style={styles.date}>
           {formatDate(list.updated_at)}
         </Text>
-        {isCompleted && list.last_compared_at && (
-          <Text style={styles.compareDate}>
-            {t('list.last_compared', { date: formatDate(list.last_compared_at) })}
-          </Text>
-        )}
       </View>
     </Card>
   );
@@ -134,10 +122,6 @@ const styles = StyleSheet.create({
     marginRight: spacing.xs,
   },
 
-  completedBadge: {
-    backgroundColor: colors.success.main,
-  },
-
   badgeText: {
     ...typography.styles.caption,
     color: colors.background.paper,
@@ -177,11 +161,6 @@ const styles = StyleSheet.create({
   date: {
     ...typography.styles.caption,
     color: colors.text.hint,
-  },
-
-  compareDate: {
-    ...typography.styles.caption,
-    color: colors.success.main,
   },
 });
 

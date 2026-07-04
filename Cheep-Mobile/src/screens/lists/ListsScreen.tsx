@@ -3,7 +3,7 @@
  * Shopping lists management
  */
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -26,18 +26,10 @@ import type { ShoppingList } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 
 export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsMain'>) {
-  const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'templates'>('active');
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
-
-  // handleCreateList stale `lists` üzerinden kapanmasın diye en güncel listeyi
-  // ref'te tutarız (gecikmeli setTimeout çağrısı doğru veriyi görür).
-  const listsRef = useRef<ShoppingList[]>([]);
-  useEffect(() => {
-    listsRef.current = lists;
-  }, [lists]);
 
   // Reload lists when screen comes into focus
   useFocusEffect(
@@ -64,20 +56,13 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
         if (timer) clearTimeout(timer);
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeTab, route.params?.openCreateModal])
+    }, [route.params?.openCreateModal])
   );
 
   const loadLists = async () => {
     try {
       setLoading(true);
-      let data: ShoppingList[];
-      
-      if (activeTab === 'templates') {
-        data = await listService.getTemplates();
-      } else {
-        data = await listService.getLists(activeTab);
-      }
-      
+      const data = await listService.getLists();
       setLists(data);
     } catch (error) {
       console.error('Load lists error:', error);
@@ -92,25 +77,8 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
     setRefreshing(false);
   };
 
-  const handleCreateList = async () => {
-    // Aktif liste var mı kontrol et — gecikmeli çağrılarda stale state'ten
-    // kaçınmak için ref'teki en güncel listeyi kullan.
-    const activeLists = listsRef.current.filter((l) => l.status === 'active' && !l.is_template);
-    if (activeLists.length > 0) {
-      Alert.alert(
-        'Aktif Liste Mevcut',
-        'Hali hazırda aktif listeniz var. Yeni liste oluşturmak isterseniz eski liste otomatik olarak tamamlanacaktır. Devam etmek istiyor musunuz?',
-        [
-          { text: 'İptal', style: 'cancel' },
-          {
-            text: 'Devam Et',
-            onPress: () => setShowCreateModal(true),
-          },
-        ]
-      );
-    } else {
-      setShowCreateModal(true);
-    }
+  const handleCreateList = () => {
+    setShowCreateModal(true);
   };
 
   const handleCreateSuccess = () => {
@@ -126,39 +94,16 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
     }
   };
 
-  const renderEmptyState = () => {
-    const emptyStates = {
-      active: {
-        icon: 'playlist-add-check' as const,
-        mascot: 'search' as const,
-        title: 'Henüz liste yok',
-        description: 'İlk alışveriş listeni oluştur, en uygun marketi anında bulalım.',
-        actionLabel: 'Liste Oluştur' as const,
-      },
-      completed: {
-        icon: 'history' as const,
-        title: 'Tamamlanmış liste yok',
-        description: 'Karşılaştırdığınız listeler burada görünecek.',
-      },
-      templates: {
-        icon: 'bookmark-border' as const,
-        title: 'Şablon liste yok',
-        description: 'Sık kullandığınız listeleri şablon olarak kaydedin.',
-      },
-    };
-
-    const state = emptyStates[activeTab];
-    const hasAction = 'actionLabel' in state && state.actionLabel;
-    return (
-      <EmptyState
-        icon={state.icon}
-        {...('mascot' in state ? { mascot: state.mascot } : {})}
-        title={state.title}
-        description={state.description}
-        {...(hasAction && { actionLabel: state.actionLabel, onAction: handleCreateList })}
-      />
-    );
-  };
+  const renderEmptyState = () => (
+    <EmptyState
+      icon="playlist-add-check"
+      mascot="search"
+      title="Henüz liste yok"
+      description="İlk alışveriş listeni oluştur, en uygun marketi anında bulalım."
+      actionLabel="Liste Oluştur"
+      onAction={handleCreateList}
+    />
+  );
 
   return (
     <View style={styles.container}>
@@ -171,40 +116,6 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <MaterialIcons name="add" size={28} color={colors.primary.main} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Tabs */}
-      <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'active' && styles.activeTab]}
-          onPress={() => setActiveTab('active')}
-        >
-          <Text
-            style={[styles.tabText, activeTab === 'active' && styles.activeTabText]}
-          >
-            Aktif
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'completed' && styles.activeTab]}
-          onPress={() => setActiveTab('completed')}
-        >
-          <Text
-            style={[styles.tabText, activeTab === 'completed' && styles.activeTabText]}
-          >
-            Tamamlanan
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'templates' && styles.activeTab]}
-          onPress={() => setActiveTab('templates')}
-        >
-          <Text
-            style={[styles.tabText, activeTab === 'templates' && styles.activeTabText]}
-          >
-            Şablonlar
-          </Text>
         </TouchableOpacity>
       </View>
 
@@ -240,7 +151,6 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
         visible={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSuccess={handleCreateSuccess}
-        hasActiveList={lists.some((l) => l.status === 'active' && !l.is_template)}
       />
     </View>
   );
@@ -272,36 +182,6 @@ const styles = StyleSheet.create({
 
   headerAddButton: {
     padding: spacing.xs,
-  },
-
-  tabs: {
-    flexDirection: 'row',
-    backgroundColor: colors.background.paper,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-
-  tab: {
-    flex: 1,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: colors.transparent,
-  },
-
-  activeTab: {
-    borderBottomColor: colors.primary.main,
-  },
-
-  tabText: {
-    ...typography.styles.body2,
-    color: colors.text.secondary,
-    fontWeight: '500',
-  },
-
-  activeTabText: {
-    color: colors.primary.main,
-    fontWeight: '600',
   },
 
   // Kaydırma alanı ekranın kalan yüksekliğine sabitlensin (yoksa uzun listede kırpılır).
