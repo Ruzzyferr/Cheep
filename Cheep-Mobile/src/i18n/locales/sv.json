@@ -6,6 +6,7 @@
     "save": "Spara",
     "cancel": "Avbryt",
     "error": "Fel",
+    "something_went_wrong": "Något gick fel",
     "ok": "OK",
     "all": "Alla",
     "loading": "Laddar…",
@@ -163,11 +164,22 @@
       "merge_title": "Lägg bara till produkter som saknas",
       "merge_desc": "Produkter som inte redan finns i listan läggs till; befintliga påverkas inte.",
       "replace_title": "Ersätt med den här listan",
-      "replace_desc": "Produkterna i den här listan tas bort och ersätts med den valda listans produkter."
+      "replace_desc": "Produkterna i den här listan tas bort och ersätts med den valda listans produkter.",
+      "replace_confirm_title": "Ersätta hela listan?",
+      "replace_confirm_body": "De nuvarande produkterna i listan tas bort och ersätts med den valda listans produkter. Detta går inte att ångra.",
+      "replace_confirm_action": "Ersätt"
     },
     "detail_empty_title": "Listan är tom",
     "detail_empty_desc": "Inga produkter i listan än",
-    "import_no_source": "Ingen annan lista att importera från"
+    "import_no_source": "Ingen annan lista att importera från",
+    "show_routes": "Visa rutter",
+    "delete_item_title": "Ta bort produkt",
+    "delete_item_confirm": "Är du säker på att du vill ta bort den här produkten från listan?",
+    "screen_title": "Mina listor",
+    "empty_title": "Inga listor än",
+    "empty_desc": "Skapa din första inköpslista så hittar vi genast den bästa butiken.",
+    "create_action": "Skapa lista",
+    "delete_error": "Något gick fel när listan skulle tas bort"
   },
   "deals": {
     "title": "Erbjudanden",

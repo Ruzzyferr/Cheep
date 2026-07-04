@@ -18,6 +18,7 @@ import {
   FlatList,
   Alert,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -55,6 +56,12 @@ export function ListDetailScreen({
   const toast = useToast();
   const { formatMoney } = useLocale();
 
+  // iOS: bir Modal kapanırken diğerini AYNI tick'te açmak iOS tarafından yutulabilir.
+  // Kapanma animasyonu bittikten sonra aç (Android'de bir sonraki frame yeterli).
+  const openAfterDismiss = (fn: () => void) => {
+    setTimeout(fn, Platform.OS === 'ios' ? 350 : 0);
+  };
+
   // Reload list when screen comes into focus (e.g., after adding a product)
   useFocusEffect(
     useCallback(() => {
@@ -83,7 +90,7 @@ export function ListDetailScreen({
       await listService.updateItem(item.id, { brand_independent: !item.brand_independent });
       await loadList();
     } catch {
-      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+      Alert.alert(t('common.error'), t('common.something_went_wrong'));
     }
   };
 
@@ -103,9 +110,8 @@ export function ListDetailScreen({
     try {
       await listService.activate(list.id);
       await loadList();
-      cart.refresh();
     } catch {
-      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+      Alert.alert(t('common.error'), t('common.something_went_wrong'));
     }
   };
 
@@ -115,38 +121,59 @@ export function ListDetailScreen({
       await listService.clone(list.id);
       toast.show(t('list.clone_done'));
     } catch {
-      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+      Alert.alert(t('common.error'), t('common.something_went_wrong'));
     }
   };
 
   // Import akışı: ⋮ "Başka listeden aktar" → kaynak seç → mod seç → içe aktar.
+  // Kaynak modalını kapatıp mod modalını AYNI tick'te açma (iOS yutabilir); sıraya al.
   const handleSelectSource = (sourceId: number) => {
     setPendingSourceId(sourceId);
     setShowSource(false);
-    setShowImportMode(true);
+    openAfterDismiss(() => setShowImportMode(true));
   };
 
-  const handleImport = async (mode: 'merge' | 'replace') => {
-    setShowImportMode(false);
+  const runImport = async (mode: 'merge' | 'replace') => {
     if (!list || pendingSourceId == null) return;
     try {
       await listService.importFromList(list.id, pendingSourceId, mode);
       toast.show(t('list.import_done'));
       await loadList();
-      cart.refresh();
     } catch {
-      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+      Alert.alert(t('common.error'), t('common.something_went_wrong'));
     } finally {
       setPendingSourceId(null);
     }
+  };
+
+  const handleImport = (mode: 'merge' | 'replace') => {
+    setShowImportMode(false);
+    if (!list || pendingSourceId == null) return;
+    // "Değiştir" tüm listeyi silip yeniden yazar; yıkıcı olduğu için önce onayla.
+    if (mode === 'replace') {
+      Alert.alert(
+        t('list.import_mode.replace_confirm_title'),
+        t('list.import_mode.replace_confirm_body'),
+        [
+          { text: t('common.cancel'), style: 'cancel', onPress: () => setPendingSourceId(null) },
+          {
+            text: t('list.import_mode.replace_confirm_action'),
+            style: 'destructive',
+            onPress: () => { void runImport('replace'); },
+          },
+        ]
+      );
+      return;
+    }
+    void runImport(mode);
   };
 
   const handleDeleteItem = async (itemId: number) => {
     if (!list) return;
 
     Alert.alert(
-      'Ürünü Sil',
-      'Bu ürünü listeden kaldırmak istediğinize emin misiniz?',
+      t('list.delete_item_title'),
+      t('list.delete_item_confirm'),
       [
         { text: t('common.cancel'), style: 'cancel' },
         {
@@ -157,7 +184,7 @@ export function ListDetailScreen({
               await listService.deleteItem(list.id, itemId);
               await loadList();
             } catch {
-              Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+              Alert.alert(t('common.error'), t('common.something_went_wrong'));
             }
           },
         },
@@ -181,7 +208,7 @@ export function ListDetailScreen({
               await listService.deleteList(list.id);
               navigation.goBack();
             } catch {
-              Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+              Alert.alert(t('common.error'), t('common.something_went_wrong'));
             }
           },
         },
@@ -221,6 +248,7 @@ export function ListDetailScreen({
           <TouchableOpacity
             onPress={() => setShowActionsSheet(true)}
             style={styles.overflowButton}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             accessibilityRole="button"
             accessibilityLabel={t('list.menu_title')}
           >
@@ -293,7 +321,7 @@ export function ListDetailScreen({
               style={styles.actionBtn}
             />
             <Button
-              title="Rotaları Göster"
+              title={t('list.show_routes')}
               onPress={handleCompare}
               style={styles.actionBtn}
             />
@@ -307,7 +335,7 @@ export function ListDetailScreen({
         onClose={() => setShowActionsSheet(false)}
         onSetActive={handleSetActive}
         onClone={handleClone}
-        onImport={() => setShowSource(true)}
+        onImport={() => openAfterDismiss(() => setShowSource(true))}
         onDelete={handleDeleteList}
       />
 

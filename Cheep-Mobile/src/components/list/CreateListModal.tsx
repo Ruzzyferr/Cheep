@@ -26,14 +26,12 @@ interface CreateListModalProps {
   visible: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  hasActiveList?: boolean;
 }
 
 export function CreateListModal({
   visible,
   onClose,
   onSuccess,
-  hasActiveList = false,
 }: CreateListModalProps) {
   const [name, setName] = useState('');
   const [budget, setBudget] = useState('');
@@ -128,15 +126,6 @@ export function CreateListModal({
               keyboardShouldPersistTaps="handled"
               nestedScrollEnabled
             >
-              {hasActiveList && (
-                <View style={styles.warningBox}>
-                  <MaterialIcons name="info-outline" size={20} color={colors.warning.dark} />
-                  <Text style={styles.warningText}>
-                    Aktif listeniz var. Yeni liste oluşturulduğunda eski liste otomatik olarak tamamlanacaktır.
-                  </Text>
-                </View>
-              )}
-
               <View style={styles.inputSection}>
                 <Input
                   label="Liste Adı"
@@ -301,26 +290,6 @@ const styles = StyleSheet.create({
   createButton: {
     flex: 1,
     marginLeft: spacing.sm,
-  },
-
-  warningBox: {
-    flexDirection: 'row',
-    backgroundColor: colors.warning.bg,
-    padding: spacing.md,
-    borderRadius: borderRadius.lg,
-    marginBottom: spacing.lg,
-    alignItems: 'flex-start',
-    borderWidth: 1,
-    borderColor: colors.warning.light,
-  },
-
-  warningText: {
-    ...typography.styles.body2,
-    color: colors.warning.dark,
-    lineHeight: 20,
-    flex: 1,
-    marginLeft: spacing.sm,
-    fontSize: 13,
   },
 });
 

@@ -6,6 +6,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "error": "Error",
+    "something_went_wrong": "Something went wrong",
     "ok": "OK",
     "all": "All",
     "loading": "Loading…",
@@ -163,11 +164,22 @@
       "merge_title": "Add only missing items",
       "merge_desc": "Items not already in this list are added; existing ones stay unchanged.",
       "replace_title": "Replace with this list",
-      "replace_desc": "This list's items are removed and replaced with the selected list's items."
+      "replace_desc": "This list's items are removed and replaced with the selected list's items.",
+      "replace_confirm_title": "Replace the whole list?",
+      "replace_confirm_body": "The current products in this list will be removed and replaced with the selected list's products. This action cannot be undone.",
+      "replace_confirm_action": "Replace"
     },
     "detail_empty_title": "List is empty",
     "detail_empty_desc": "No products in this list yet",
-    "import_no_source": "No other list to import from"
+    "import_no_source": "No other list to import from",
+    "show_routes": "Show Routes",
+    "delete_item_title": "Delete Product",
+    "delete_item_confirm": "Are you sure you want to remove this product from the list?",
+    "screen_title": "My Lists",
+    "empty_title": "No lists yet",
+    "empty_desc": "Create your first shopping list and we'll instantly find the best store.",
+    "create_action": "Create List",
+    "delete_error": "Something went wrong deleting the list"
   },
   "deals": {
     "title": "Deals",

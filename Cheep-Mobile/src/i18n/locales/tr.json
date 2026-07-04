@@ -6,6 +6,7 @@
     "save": "Kaydet",
     "cancel": "İptal",
     "error": "Hata",
+    "something_went_wrong": "Bir şeyler ters gitti",
     "ok": "Tamam",
     "all": "Tümü",
     "loading": "Yükleniyor…",
@@ -163,11 +164,22 @@
       "merge_title": "Sadece eksik ürünleri ekle",
       "merge_desc": "Bu listede olmayan ürünler eklenir; mevcutlar değişmez.",
       "replace_title": "Tüm listeyi bununla değiştir",
-      "replace_desc": "Bu listenin ürünleri silinip seçtiğin listenin ürünleri konur."
+      "replace_desc": "Bu listenin ürünleri silinip seçtiğin listenin ürünleri konur.",
+      "replace_confirm_title": "Tüm listeyi değiştir?",
+      "replace_confirm_body": "Bu listedeki mevcut ürünler silinip seçtiğin listenin ürünleriyle değiştirilecek. Bu işlem geri alınamaz.",
+      "replace_confirm_action": "Değiştir"
     },
     "detail_empty_title": "Liste boş",
     "detail_empty_desc": "Bu listeye henüz ürün eklenmemiş",
-    "import_no_source": "Aktarılacak başka liste yok"
+    "import_no_source": "Aktarılacak başka liste yok",
+    "show_routes": "Rotaları Göster",
+    "delete_item_title": "Ürünü Sil",
+    "delete_item_confirm": "Bu ürünü listeden kaldırmak istediğinize emin misiniz?",
+    "screen_title": "Listelerim",
+    "empty_title": "Henüz liste yok",
+    "empty_desc": "İlk alışveriş listeni oluştur, en uygun marketi anında bulalım.",
+    "create_action": "Liste Oluştur",
+    "delete_error": "Liste silinirken bir hata oluştu"
   },
   "deals": {
     "title": "Fırsatlar",

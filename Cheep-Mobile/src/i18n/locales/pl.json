@@ -6,6 +6,7 @@
     "save": "Zapisz",
     "cancel": "Anuluj",
     "error": "Błąd",
+    "something_went_wrong": "Coś poszło nie tak",
     "ok": "OK",
     "all": "Wszystkie",
     "loading": "Ładowanie…",
@@ -163,11 +164,22 @@
       "merge_title": "Dodaj tylko brakujące produkty",
       "merge_desc": "Produkty, których nie ma na tej liście, zostaną dodane; istniejące pozostaną bez zmian.",
       "replace_title": "Zastąp tą listą",
-      "replace_desc": "Produkty z tej listy zostaną usunięte i zastąpione produktami wybranej listy."
+      "replace_desc": "Produkty z tej listy zostaną usunięte i zastąpione produktami wybranej listy.",
+      "replace_confirm_title": "Zastąpić całą listę?",
+      "replace_confirm_body": "Obecne produkty na tej liście zostaną usunięte i zastąpione produktami wybranej listy. Tej operacji nie można cofnąć.",
+      "replace_confirm_action": "Zastąp"
     },
     "detail_empty_title": "Lista jest pusta",
     "detail_empty_desc": "Brak produktów na tej liście",
-    "import_no_source": "Brak innej listy do zaimportowania"
+    "import_no_source": "Brak innej listy do zaimportowania",
+    "show_routes": "Pokaż trasy",
+    "delete_item_title": "Usuń produkt",
+    "delete_item_confirm": "Czy na pewno chcesz usunąć ten produkt z listy?",
+    "screen_title": "Moje listy",
+    "empty_title": "Brak list",
+    "empty_desc": "Utwórz swoją pierwszą listę zakupów, a od razu znajdziemy najlepszy sklep.",
+    "create_action": "Utwórz listę",
+    "delete_error": "Wystąpił błąd podczas usuwania listy"
   },
   "deals": {
     "title": "Okazje",

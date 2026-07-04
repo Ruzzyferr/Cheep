@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
 import { ListCard } from '../../components/list/ListCard';
 import { EmptyState } from '../../components/common/EmptyState';
@@ -26,6 +27,7 @@ import type { ShoppingList } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 
 export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsMain'>) {
+  const { t } = useTranslation();
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -90,7 +92,7 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
       await listService.deleteList(listId);
       await loadLists();
     } catch {
-      Alert.alert('Hata', 'Liste silinirken bir hata oluştu');
+      Alert.alert(t('common.error'), t('list.delete_error'));
     }
   };
 
@@ -98,9 +100,9 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
     <EmptyState
       icon="playlist-add-check"
       mascot="search"
-      title="Henüz liste yok"
-      description="İlk alışveriş listeni oluştur, en uygun marketi anında bulalım."
-      actionLabel="Liste Oluştur"
+      title={t('list.empty_title')}
+      description={t('list.empty_desc')}
+      actionLabel={t('list.create_action')}
       onAction={handleCreateList}
     />
   );
@@ -109,7 +111,7 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Listelerim</Text>
+        <Text style={styles.title}>{t('list.screen_title')}</Text>
         <TouchableOpacity
           style={styles.headerAddButton}
           onPress={handleCreateList}

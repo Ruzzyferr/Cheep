@@ -73,11 +73,18 @@ export function SelectSourceListModal({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View style={[styles.modal, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
+      <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={onClose}>
+        <TouchableOpacity
+          activeOpacity={1}
+          style={[styles.modal, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}
+        >
           <View style={styles.header}>
             <Text style={styles.title}>{t('list.import_source_title')}</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeButton}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -122,8 +129,8 @@ export function SelectSourceListModal({
               }
             />
           )}
-        </View>
-      </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
     </Modal>
   );
 }
