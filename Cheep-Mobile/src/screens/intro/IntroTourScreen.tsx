@@ -238,7 +238,9 @@ export function IntroTourScreen({ navigation, route }: any) {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         bounces={false}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: true })}
+        // scrollX noktaların `width`'ini (dotWidth) sürüyor; native animated modülü
+        // `width`'i desteklemez → JS driver kullan (sayfalama takibi için performans yeterli).
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
         scrollEventThrottle={16}
         onViewableItemsChanged={onViewRef.current}
         viewabilityConfig={viewConfigRef.current}

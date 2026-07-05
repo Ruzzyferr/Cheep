@@ -111,6 +111,14 @@ export function CategoryProductsScreen({
   };
 
   const loadSubcategories = async () => {
+    // "Tüm Kategoriler" (id=0) bir gerçek kategori değil → alt kategorisi yok.
+    // getSubcategories(0) backend'de 400 "Geçersiz 'id' parametresi" döner; hiç
+    // isteme, doğrudan boşalt (aksi halde dev'de LogBox hatası + gereksiz istek).
+    if (selectedCategory === 0) {
+      setSubcategories([]);
+      setSelectedSubcategory(null);
+      return;
+    }
     try {
       const subs = await categoryService.getSubcategories(selectedCategory);
       setSubcategories(subs);

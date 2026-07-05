@@ -322,9 +322,10 @@ export function ListDetailScreen({
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         contentContainerStyle={[
           styles.listContent,
-          // Son kalemler hem alt aksiyon çubuğunun hem tab-bar'ın altında kalmasın:
-          // tab-bar yüksekliği + aksiyon çubuğu yüksekliği (~76) kadar boşluk bırak.
-          items.length > 0 && { paddingBottom: tabBarHeight + 92 },
+          // Son kalemler hem alt aksiyon çubuğunun hem tab-bar'ın altında kalmasın.
+          // Tab-bar ekranın altından `insets.bottom + tabBarHeight` kadar yer kaplar
+          // (float; bottom:insets.bottom) → aynı boşluğu + aksiyon çubuğu (~92) bırak.
+          items.length > 0 && { paddingBottom: insets.bottom + tabBarHeight + 92 },
         ]}
         ListEmptyComponent={
           <EmptyState
@@ -337,9 +338,14 @@ export function ListDetailScreen({
         }
       />
 
-      {/* Bottom sticky bar: two equal buttons — tab-bar'ın ÜSTÜNE yerleşir (arkasında kalmaz) */}
+      {/* Bottom sticky bar: two equal buttons — tab-bar'ın ÜSTÜNE yerleşir (arkasında kalmaz).
+          Tab-bar float'tır (position:absolute, bottom:insets.bottom, height:72) → ekranın
+          altından gerçek kapladığı yer = insets.bottom + tabBarHeight. useBottomTabBarHeight()
+          yalnızca explicit height'i (72) verir, insets'i İÇERMEZ; bu yüzden ikisini toplarız.
+          Sadece tabBarHeight ile kaldırırsak jest çubuğu payı (insets.bottom) kadarı — cihaza
+          göre değişen miktarda (ör. S24 Ultra) — tab-bar arkasında kalır. */}
       {items.length > 0 && (
-        <View style={[styles.actions, { bottom: tabBarHeight }]}>
+        <View style={[styles.actions, { bottom: insets.bottom + tabBarHeight }]}>
           <View style={styles.actionRow}>
             <Button
               title={t('list.add_products')}
