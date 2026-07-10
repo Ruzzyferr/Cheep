@@ -1,7 +1,7 @@
 """Thin category mapping + product validation shared by foreign country scrapers."""
 from typing import Dict, List, Optional, Union
 
-ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu"}
+ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu", "szt", "opak"}
 
 
 def canonical_category(raw: Optional[str], category_map: Dict[str, str]) -> Optional[str]:
