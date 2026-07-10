@@ -75,36 +75,44 @@ class OffEnricher:
         )
         self.db.commit()
 
-    def _search(self, terms: str) -> List[Dict]:
+    def _search(self, terms: str) -> Optional[List[Dict]]:
+        """OFF arama sonucu (liste) döner; geçici hata (ağ kopması, 5xx, bozuk
+        gövde) durumunda None döner — None ASLA cache'e yazılmamalı çünkü
+        gerçek bir MISS kanıtı değil, sadece sorgu tamamlanamadı demektir."""
         gap = REQUEST_GAP_S - (time.time() - self._last_call)
         if self._own_session and gap > 0:
             time.sleep(gap)
         self._last_call = time.time()
-        resp = self.session.get(
-            f"https://{self.cc}.openfoodfacts.org/cgi/search.pl",
-            params={
-                "action": "process", "search_terms": terms, "search_simple": 1,
-                "json": 1, "page_size": 10,
-                "fields": "code,product_name,brands,quantity",
-            },
-            headers={"User-Agent": USER_AGENT},
-            timeout=30,
-        )
-        if not resp.ok:
-            return []
         try:
+            resp = self.session.get(
+                f"https://{self.cc}.openfoodfacts.org/cgi/search.pl",
+                params={
+                    "action": "process", "search_terms": terms, "search_simple": 1,
+                    "json": 1, "page_size": 10,
+                    "fields": "code,product_name,brands,quantity",
+                },
+                headers={"User-Agent": USER_AGENT},
+                timeout=30,
+            )
+            if not resp.ok:
+                return None  # 5xx/4xx — sunucu hatası MISS kanıtı değildir
             return resp.json().get("products", []) or []
+        except requests.RequestException:
+            return None  # ağ hatası — geçici, cache'e yazma
         except (ValueError, json.JSONDecodeError):
-            return []
+            return None  # bozuk gövde — outage'dan ayırt edilemez, cache'e yazma
 
-    def _candidates(self, name: str, brand: str) -> List[Dict]:
+    def _candidates(self, name: str, brand: str) -> Optional[List[Dict]]:
         want_brand = _tokens(brand)
         want_name = _tokens(name)
         want_qty = _base_amount(name)
         if not want_brand or want_qty is None:
             return []  # marka veya miktar yoksa kanıt kurulamaz — hiç arama yapma
+        results = self._search(f"{brand} {name}")
+        if results is None:
+            return None  # geçici hata — üst katman cache'e yazmamalı
         out = []
-        for cand in self._search(f"{brand} {name}"):
+        for cand in results:
             code = str(cand.get("code") or "").strip()
             if not re.fullmatch(r"\d{8,14}", code):
                 continue
@@ -122,7 +130,7 @@ class OffEnricher:
         return sorted(set(out))
 
     def enrich(self, products: List[Dict]) -> Dict:
-        stats = {"looked_up": 0, "cache_hits": 0, "enriched": 0, "ambiguous": 0, "misses": 0}
+        stats = {"looked_up": 0, "cache_hits": 0, "enriched": 0, "ambiguous": 0, "misses": 0, "errors": 0}
         for p in products:
             if p.get("barcode"):
                 continue
@@ -139,6 +147,9 @@ class OffEnricher:
                 continue
             stats["looked_up"] += 1
             codes = self._candidates(name, brand)
+            if codes is None:
+                stats["errors"] += 1  # geçici hata — cache'e yazma, bir sonrakine geç
+                continue
             if len(codes) == 1:
                 p["barcode"] = codes[0]
                 self._cache_put(key, codes[0])

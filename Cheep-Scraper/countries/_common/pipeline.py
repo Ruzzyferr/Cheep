@@ -43,7 +43,10 @@ async def run_country_pipeline(config_path: str, api_url: str = "http://localhos
         with open(r["output_file"], "r", encoding="utf-8") as f:
             products = json.load(f)
         if enricher is not None:
-            enricher.enrich(products)
+            try:
+                enricher.enrich(products)
+            except Exception as e:
+                logger.error("OFF enrichment failed for %s — importing without enrichment: %s", r["market"], e)
         stats = importer.import_products(products, store_id=r["store_id"], category_map=category_map, default_unit=default_unit)
         logger.info("%s %s: scraped=%s imported=%s failed=%s",
                     country_code, r["market"], r["product_count"], stats["successful"], stats["failed"])
