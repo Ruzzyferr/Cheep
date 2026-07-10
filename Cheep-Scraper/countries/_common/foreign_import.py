@@ -56,6 +56,15 @@ def build_api_payloads(
             # Türkçe fallback yabancı ülke satırına sızmasın (spec: sıfır 'adet' PL'de)
             unit = default_unit
 
+        # Fiyat her zaman PAKET başına (raf fiyatı). g/ml/cl asla fiyat birimi olamaz;
+        # kg/l ancak paket tam 1 kg/1 l ise fiyat birimiyle çakışır. Aksi halde paket
+        # birimi (szt/adet) gönder — yoksa uygulama 200g tereyağını 'zł/kg' gibi gösterir.
+        qty = product.get("quantity")
+        if unit in ("g", "ml", "cl"):
+            unit = default_unit
+        elif unit in ("kg", "l") and qty is not None and float(qty) != 1.0:
+            unit = default_unit
+
         payload: Dict = {
             "store_id": int(store_id),
             "store_sku": str(sku),
