@@ -44,20 +44,25 @@ export const deleteThread = async (threadId: number, userId: number) => {
 // SYSTEM PROMPT BUILDER (exported for testability)
 // ============================================
 
-export function buildSystemPrompt(profile: any, currency: string = 'TRY'): string {
+const LANGUAGE_NAMES: Record<string, string> = {
+  tr: 'Turkish', en: 'English', de: 'German', pl: 'Polish', sv: 'Swedish',
+};
+
+export function buildSystemPrompt(profile: any, currency: string = 'TRY', language: string = 'tr'): string {
+  const langName = LANGUAGE_NAMES[language] ?? 'Turkish';
   const lines = [
-    'Sen Cheep akıllı alışveriş asistanısın. Türkçe, sıcak ve yargılamadan konuş; tasarrufu olumlu çerçevele.',
-    'Kullanıcının listelerine/ürünlere/fiyatlara araçlarla eriş. Liste değiştirmeden önce gerekirse kısa sorular sor (ör. "listende zaten var, bir tane daha mı?").',
-    'Markasız/jenerik ürün istenirse add_items_to_list ile brandIndependent=true geç; marka belirtilirse false.',
-    `Bugün: ${new Date().toISOString().slice(0, 10)}.`,
+    `You are Cheep, a smart shopping assistant. ALWAYS reply in ${langName} — every message, regardless of the language the user writes in. Be warm and non-judgmental; frame saving money positively.`,
+    'Access the user\'s lists/products/prices via tools. Before modifying a list, ask a short clarifying question if needed (e.g. "it\'s already on your list — add another?").',
+    'If the user asks for a generic/brandless product, pass brandIndependent=true to add_items_to_list; if a brand is named, pass false.',
+    `Today: ${new Date().toISOString().slice(0, 10)}.`,
   ];
   if (profile) {
-    lines.push('Kullanıcı profili (önerileri buna göre uyarla, sert kısıtları ASLA ihlal etme):');
-    if (profile.diet) lines.push(`- Beslenme: ${profile.diet}`);
-    if (profile.avoid?.length) lines.push(`- Kaçındıkları: ${profile.avoid.join(', ')}`);
-    if (profile.allergies?.length) lines.push(`- Alerjiler: ${profile.allergies.join(', ')} (asla önerme)`);
-    if (profile.household_size) lines.push(`- Hane: ${profile.household_size} kişi`);
-    if (profile.weekly_budget) lines.push(`- Haftalık bütçe: ${profile.weekly_budget} ${currency}`);
+    lines.push('User profile (adapt suggestions; NEVER violate hard constraints):');
+    if (profile.diet) lines.push(`- Diet: ${profile.diet}`);
+    if (profile.avoid?.length) lines.push(`- Avoids: ${profile.avoid.join(', ')}`);
+    if (profile.allergies?.length) lines.push(`- Allergies: ${profile.allergies.join(', ')} (never suggest)`);
+    if (profile.household_size) lines.push(`- Household: ${profile.household_size}`);
+    if (profile.weekly_budget) lines.push(`- Weekly budget: ${profile.weekly_budget} ${currency}`);
   }
   return lines.join('\n');
 }
@@ -80,7 +85,7 @@ export const sendMessage = async (userId: number, threadId: number, content: str
     prisma.chatMessage.count({
       where: { role: 'user', thread: { user_id: userId }, created_at: { gte: dayStart } },
     }),
-    prisma.user.findUnique({ where: { id: userId }, select: { is_premium: true } }),
+    prisma.user.findUnique({ where: { id: userId }, select: { is_premium: true, language: true } }),
   ]);
   const verdict = checkDailyLimit(todayCount, limitUser?.is_premium ?? false);
   if (!verdict.allowed) {
@@ -88,7 +93,7 @@ export const sendMessage = async (userId: number, threadId: number, content: str
   }
 
   const session = createChatSession({
-    systemInstruction: buildSystemPrompt(profile, currency),
+    systemInstruction: buildSystemPrompt(profile, currency, limitUser?.language ?? 'tr'),
     history: history.map(m => ({
       role: m.role === 'user' ? 'user' as const : 'model' as const,
       parts: [{ text: m.content }],
