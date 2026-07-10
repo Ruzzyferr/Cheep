@@ -79,6 +79,7 @@ export const upsertStorePrice = async (data: UpsertData, countryId?: number) => 
                 store_sku,
                 price: newPrice,
                 unit,
+                raw_name: productData.name,
                 last_updated_at: new Date(),
             },
         });
@@ -106,6 +107,7 @@ export const upsertStorePrice = async (data: UpsertData, countryId?: number) => 
             store_sku,
             price: newPrice,
             unit,
+            raw_name: productData.name,
             source,
             confidence_score,
         },
@@ -113,6 +115,7 @@ export const upsertStorePrice = async (data: UpsertData, countryId?: number) => 
             product_id: product.id,
             price: newPrice,
             unit,
+            raw_name: productData.name,
             last_updated_at: new Date(),
         },
     });

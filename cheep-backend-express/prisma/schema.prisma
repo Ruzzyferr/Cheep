@@ -220,6 +220,7 @@ model StorePrice {
   store_sku        String?
   price            Decimal  @db.Decimal(10, 2) // 10 basamak, 2 ondalık
   unit             String   @default("adet") // kg, adet, lt, g, ml vb.
+  raw_name         String? // Zincirin orijinal ürün adı (audit: birleşme doğrulama)
   last_updated_at  DateTime @default(now())
   source           String   @default("scrape") // scrape, api, user
   confidence_score Float    @default(1.0) // 0-1 arası güven skoru

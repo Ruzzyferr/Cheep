@@ -12,7 +12,7 @@ export const upsertStorePriceSchema = Joi.object({
         'any.required': 'store_sku zorunludur'
     }),
     price: Joi.alternatives().try(Joi.number().positive(), Joi.string().pattern(/^\d+(\.\d{1,2})?$/)).required(),
-    unit: Joi.string().valid('adet', 'kg', 'g', 'l', 'ml', 'cl', 'paket', 'kutu').default('adet'),
+    unit: Joi.string().valid('adet', 'kg', 'g', 'l', 'ml', 'cl', 'paket', 'kutu', 'szt', 'opak').default('adet'),
     source: Joi.string().valid('scrape', 'api', 'user').default('scrape'),
     confidence_score: Joi.number().min(0).max(1).default(1.0),
 
