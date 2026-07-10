@@ -11,7 +11,7 @@ from typing import List, Dict, Optional
 logger = logging.getLogger(__name__)
 
 CHUNK_SIZE = 900          # backend hard limit is 1000
-ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu"}
+ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu", "szt", "opak"}
 
 
 def _slugify(name: str) -> str:
@@ -27,12 +27,14 @@ def build_api_payloads(
     products: List[Dict],
     store_id: int,
     category_map: Optional[Dict[str, str]] = None,
+    default_unit: str = "adet",
 ) -> List[Dict]:
     """Map scraped product dicts to backend bulk-upsert payloads.
 
     Forwards the scraped `barcode` to the backend field `ean_barcode`.
     `category_map` (raw category string -> canonical name) is optional; when a
     category can't be resolved the field is simply omitted (category is tertiary).
+    `default_unit` can be per-country (e.g., "szt" for Poland).
     """
     payloads: List[Dict] = []
     for product in products:
@@ -47,9 +49,12 @@ def build_api_payloads(
             continue
 
         sku = product.get("sku") or product.get("store_sku") or f"{store_id}-{_slugify(name)[:48]}"
-        unit = (product.get("unit") or "adet").lower()
+        unit = (product.get("unit") or default_unit).lower()
         if unit not in ALLOWED_UNITS:
-            unit = "adet"
+            unit = default_unit
+        if unit == "adet" and default_unit != "adet":
+            # Türkçe fallback yabancı ülke satırına sızmasın (spec: sıfır 'adet' PL'de)
+            unit = default_unit
 
         payload: Dict = {
             "store_id": int(store_id),
@@ -108,8 +113,9 @@ class ForeignImporter:
         products: List[Dict],
         store_id: int,
         category_map: Optional[Dict[str, str]] = None,
+        default_unit: str = "adet",
     ) -> Dict:
-        payloads = build_api_payloads(products, store_id, category_map)
+        payloads = build_api_payloads(products, store_id, category_map, default_unit)
         stats = {"total": 0, "successful": 0, "failed": 0}
         for i in range(0, len(payloads), CHUNK_SIZE):
             chunk = payloads[i:i + CHUNK_SIZE]

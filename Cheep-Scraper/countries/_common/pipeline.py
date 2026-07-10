@@ -27,6 +27,7 @@ async def run_country_pipeline(config_path: str, api_url: str = "http://localhos
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
     country_code = config["country_code"]
+    default_unit = config.get("default_unit", "adet")
     category_map = _load_category_map(country_dir)
 
     runner = CountryScraperRunner(str(config_path))
@@ -37,7 +38,7 @@ async def run_country_pipeline(config_path: str, api_url: str = "http://localhos
     for r in scrape_results:
         with open(r["output_file"], "r", encoding="utf-8") as f:
             products = json.load(f)
-        stats = importer.import_products(products, store_id=r["store_id"], category_map=category_map)
+        stats = importer.import_products(products, store_id=r["store_id"], category_map=category_map, default_unit=default_unit)
         logger.info("%s %s: scraped=%s imported=%s failed=%s",
                     country_code, r["market"], r["product_count"], stats["successful"], stats["failed"])
         summary["markets"].append({"market": r["market"], **stats})

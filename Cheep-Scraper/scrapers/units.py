@@ -21,12 +21,16 @@ _UNIT_MAP = {
     "paket": "paket", "pk": "paket",
     "kutu": "kutu",
     "rulo": "rulo",
+    "szt": "szt", "szt.": "szt", "sztuk": "szt", "sztuki": "szt", "sztuka": "szt",
+    "opak": "opak", "opak.": "opak", "opakowanie": "opak", "opakowania": "opak",
+    "litr": "l", "litry": "l", "litrów": "l",
 }
 
 # Unit tokens for regex, longest first so 'gram' wins over 'g', 'litre' over 'lt'/'l'.
 _UNIT_TOKENS = [
     "kilogram", "mililitre", "milliliter", "kilo", "litre", "liter",
     "gram", "grams", "kg", "gr", "lt", "ml", "cl", "cc", "lit",
+    "opakowanie", "opakowania", "sztuki", "sztuka", "sztuk", "litrów", "litry", "litr", "opak", "szt",
     "adet", "paket", "rulo", "g", "l",
 ]
 _UNIT_ALT = "|".join(_UNIT_TOKENS)
@@ -163,8 +167,8 @@ def compute_unit_price(
         base_qty, base_unit = q, u
     elif u == "cl":
         base_qty, base_unit = q / Decimal(100), "l"
-    else:  # adet, paket, kutu, rulo, ...
-        base_qty, base_unit = q, "adet"
+    else:  # adet, szt, paket, kutu, opak, rulo, ...
+        base_qty, base_unit = q, u if u in ("adet", "szt") else "adet"
 
     if base_qty <= 0:
         return (None, None)
