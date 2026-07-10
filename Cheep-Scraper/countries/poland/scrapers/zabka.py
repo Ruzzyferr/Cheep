@@ -208,7 +208,9 @@ class ZabkaScraper(BaseScraper):
             resp.raise_for_status()
         except Exception as e:
             raise NotImplementedError(f"PL Żabka: homepage fetch failed: {e}")
-        return self.parse(resp.text)
+        # Server omits charset declaration -> requests defaults to ISO-8859-1
+        # and Polish characters become mojibake, breaking parse(). Decode as UTF-8.
+        return self.parse(resp.content.decode("utf-8", errors="replace"))
 
     def fetch_product_detail(self, product_url: str) -> dict:
         return {}

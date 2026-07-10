@@ -2,6 +2,7 @@ import importlib.util
 import sys
 from pathlib import Path
 import pytest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -78,5 +79,40 @@ def test_zabka_parses_fixture():
     products = ZabkaScraper.parse(raw)
     assert_valid_products(products)
     assert len(products) > 0
+    assert all(p.country_code == "PL" for p in products)
+    assert all(p.store == "Żabka" for p in products)
+
+
+@pytest.mark.skipif(_ZABKA_FIXTURE is None,
+                    reason="no Żabka fixture (site unreachable at build time)")
+def test_zabka_charset_handling_regression():
+    """Verify fetch_products() correctly handles server with no charset.
+
+    Regression test for: zabka.pl serves Content-Type: text/html without charset
+    declaration, causing requests to default to ISO-8859-1. Polish characters
+    become mojibake when read as .text, breaking parse(). fetch_products()
+    must decode .content as UTF-8 instead.
+    """
+    ZabkaScraper = _load_pl_scraper_module("zabka").ZabkaScraper
+
+    # Read the fixture as raw bytes
+    fixture_bytes = (_ZABKA_FIXTURE).read_bytes()
+
+    # Create a mock response that simulates the mojibake scenario:
+    # .content is the correct UTF-8 bytes
+    # .text is the broken ISO-8859-1 mojibake decode (what requests would do)
+    mock_response = mock.Mock()
+    mock_response.content = fixture_bytes
+    mock_response.text = fixture_bytes.decode("iso-8859-1", errors="replace")
+    mock_response.raise_for_status = mock.Mock()
+
+    # Patch requests.get to return our mock response
+    with mock.patch("requests.get", return_value=mock_response):
+        scraper = ZabkaScraper()
+        products = scraper.fetch_products()
+
+    # Verify the fix works: parse succeeded with UTF-8 decode
+    assert len(products) > 0, "fetch_products() should parse > 0 products from fixture"
+    assert_valid_products(products)
     assert all(p.country_code == "PL" for p in products)
     assert all(p.store == "Żabka" for p in products)
