@@ -940,7 +940,9 @@ git add Cheep-Scraper/countries/_common/off_enrich.py Cheep-Scraper/countries/_c
 git commit -m "feat(scraper): Open Food Facts EAN enrichment with strict single-candidate rule"
 ```
 
----### Task 8: Match-review + merge-audit CLI (backend)
+---
+
+### Task 8: Match-review + merge-audit CLI (backend)
 
 The human gate: review pending `MatchProposal`s and audit every multi-store merge with per-chain `raw_name`s.
 
