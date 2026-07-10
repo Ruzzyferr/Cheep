@@ -1,7 +1,7 @@
 import logger from '../../utils/logger.js';
 import { prisma } from '../../utils/prisma.client.js';
 import { Decimal } from '@prisma/client/runtime/library';
-import {productMatcher} from "../products/product-matcher.service.js";
+import {productMatcher, isStrictCountry} from "../products/product-matcher.service.js";
 import { badRequest } from '../../utils/app-error.js';
 
 // ++ YENİ: Ürün ve fiyat bilgilerini bir arada içeren tip tanımı
@@ -148,8 +148,29 @@ export const pruneStalePrices = async (countryId?: number, ttlDays: number = 21)
     if (countryId) prodWhere.country_id = countryId;
     const delProducts = await prisma.product.deleteMany({ where: prodWhere });
 
-    logger.info(`[StorePriceService] prune: ${delPrices.count} bayat fiyat, ${delProducts.count} öksüz ürün silindi (ttl=${ttlDays}g)`);
-    return { deleted_prices: delPrices.count, deleted_products: delProducts.count, ttl_days: ttlDays };
+    // PL/CH/SE/DE gibi "strict" (sıfır-hata) ülkelerde scraper ürünlerinin
+    // ean_barcode'u NULL'dur (mf- konvansiyonu sadece TR/marketfiyati içindir).
+    // Bu ürünlerin fiyatları TTL ile silinince öksüz kalırlar ama yukarıdaki
+    // mf- temizliği onları yakalamaz → browse/search'e boş fiyat dizisiyle
+    // sızarlar. Sadece strict ülkelerde (ve sadece countryId verildiğinde)
+    // null-EAN öksüzleri de sil. TR'de null-EAN kullanıcı/LLM ürünleri
+    // dokunulmaz kalmalı, bu yüzden non-strict ülkelerde bu dal çalışmaz.
+    // NOT: Product silme cascade ile ListItem'ları da siler — mf- temizliğiyle
+    // aynı kabul edilen trade-off.
+    let delOrphanProducts = { count: 0 };
+    if (countryId && (await isStrictCountry(countryId))) {
+        delOrphanProducts = await prisma.product.deleteMany({
+            where: { country_id: countryId, ean_barcode: null, store_prices: { none: {} } },
+        });
+    }
+
+    logger.info(`[StorePriceService] prune: ${delPrices.count} bayat fiyat, ${delProducts.count} öksüz ürün (mf-), ${delOrphanProducts.count} öksüz ürün (null-EAN, strict) silindi (ttl=${ttlDays}g)`);
+    return {
+        deleted_prices: delPrices.count,
+        deleted_products: delProducts.count,
+        deleted_orphan_products: delOrphanProducts.count,
+        ttl_days: ttlDays,
+    };
 };
 
 export const bulkUpsertStorePrices = async (prices: UpsertData[], countryId?: number) => {
