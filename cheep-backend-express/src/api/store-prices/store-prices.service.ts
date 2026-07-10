@@ -18,6 +18,7 @@ interface UpsertData {
     brand?: string;
     image_url?: string;
     category_id?: number | string | null; // Hem string hem number kabul et
+    category_slug?: string;
     ean_barcode?: string;
     muadil_grup_id?: string;
     country_id?: number;

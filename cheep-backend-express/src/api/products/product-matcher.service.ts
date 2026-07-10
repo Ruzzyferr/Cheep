@@ -31,6 +31,18 @@ export async function isStrictCountry(countryId?: number): Promise<boolean> {
     return (await getStrictCountryIds()).has(countryId);
 }
 
+// category_slug → Category.id çözümü. Yabancı scraper'lar (PL vb.) numeric
+// category_id bilmez, kendi kanonik slug'larını gönderir (bkz. category_map.json).
+const categorySlugCache = new Map<string, number | null>();
+async function resolveCategorySlug(slug?: string): Promise<number | null> {
+    if (!slug) return null;
+    if (categorySlugCache.has(slug)) return categorySlugCache.get(slug)!;
+    const cat = await prisma.category.findUnique({ where: { slug } });
+    const id = cat?.id ?? null;
+    categorySlugCache.set(slug, id);
+    return id;
+}
+
 // ============================================
 // 1. TEXT NORMALIZATION
 // ============================================
@@ -189,6 +201,7 @@ export class ProductMatcher {
         quantity?: number;
         unit?: string;
         category_id?: number | string | null;
+        category_slug?: string;
         image_url?: string;
         muadil_grup_id?: string | null;
         country_id?: number;
@@ -203,6 +216,8 @@ export class ProductMatcher {
         // Payload'dan gelen kategori (marketfiyati üst-kategori id'si vb.)
         const rawCat = data.category_id != null ? Number(data.category_id) : NaN;
         const providedCategoryId = Number.isInteger(rawCat) ? rawCat : null;
+        // Yabancı scraper'lar numeric category_id yerine kanonik slug gönderir.
+        const slugCategoryId = providedCategoryId ?? (await resolveCategorySlug(data.category_slug));
 
         if (ean && resolvedCountryId) {
             const existingByEan = await prisma.product.findFirst({
@@ -216,6 +231,9 @@ export class ProductMatcher {
                 const patch: { category_id?: number; image_url?: string } = {};
                 if (providedCategoryId !== null && existingByEan.category_id !== providedCategoryId) {
                     patch.category_id = providedCategoryId;
+                }
+                if (slugCategoryId !== null && existingByEan.category_id == null) {
+                    patch.category_id = slugCategoryId;
                 }
                 if (data.image_url && existingByEan.image_url !== data.image_url) {
                     patch.image_url = data.image_url;
@@ -243,7 +261,7 @@ export class ProductMatcher {
                         brand: data.brand,
                         country_id: resolvedCountryId,
                         ean_barcode: ean,
-                        category_id: providedCategoryId,
+                        category_id: slugCategoryId,
                         image_url: data.image_url ?? undefined,
                     },
                 });
@@ -334,7 +352,7 @@ export class ProductMatcher {
             data: {
                 name: data.name,
                 brand: data.brand,
-                category_id: categoryId,
+                category_id: slugCategoryId ?? categoryId,
                 country_id: countryId,
                 image_url: data.image_url,
                 ean_barcode: ean,

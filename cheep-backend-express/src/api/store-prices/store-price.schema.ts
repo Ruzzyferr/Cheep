@@ -24,6 +24,7 @@ export const upsertStorePriceSchema = Joi.object({
     // Görsel URL'si kaynakta (marketfiyati CDN) zaten encode ediliyor; burada hoşgörülü ol.
     image_url: Joi.string().max(1000).optional().allow(null, '').empty(''),
     category_id: Joi.number().integer().optional().allow(null), // Integer olarak kabul et
+    category_slug: Joi.string().max(120).optional(),
 });
 
 export const bulkUpsertStorePricesSchema = Joi.object({
