@@ -51,5 +51,6 @@ mf_state.db
 mf_state.db-*
 taxonomy*.json
 category_map.json
+countries/*/off_cache.sqlite
 *.tgz
 shots/
