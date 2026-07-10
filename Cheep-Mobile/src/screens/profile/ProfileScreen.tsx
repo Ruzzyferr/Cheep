@@ -30,6 +30,7 @@ import { ONBOARDING_QUESTIONS } from '../onboarding/onboardingConfig';
 import i18n, { SUPPORTED_LANGUAGES } from '../../i18n';
 import { languageStorage, type LocationConsent } from '../../utils/storage';
 import { getLocationConsent, ensureLocationConsent, revokeLocationConsent } from '../../utils/consent';
+import { SUPPORTED_COUNTRY_CODES } from '../../utils/geo';
 
 // ─── Preference option lists from onboarding config ───────────────────────────
 const HOUSEHOLD_OPTIONS = ONBOARDING_QUESTIONS.find((q) => q.key === 'household_size')!.options!;
@@ -458,7 +459,9 @@ export function ProfileScreen({
       <OptionPickerModal
         visible={countryPickerOpen}
         title={t('profile.country')}
-        options={Object.keys(COUNTRY_CONFIG).map((code) => ({ value: code, label: t(`countries.${code}`) }))}
+        options={Object.keys(COUNTRY_CONFIG)
+          .filter((code) => (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(code))
+          .map((code) => ({ value: code, label: t(`countries.${code}`) }))}
         selectedValue={country}
         onSelect={handleSelectCountry}
         onClose={() => setCountryPickerOpen(false)}

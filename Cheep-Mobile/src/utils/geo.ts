@@ -17,7 +17,7 @@ export interface Coords {
  * bir tespit için null döner → çağıran taraf default'a (TR) düşer, geçersiz kod
  * asla x-country header'ına sızmaz. (LocaleContext'i import ETME — döngü riski.)
  */
-export const SUPPORTED_COUNTRY_CODES = ['TR', 'CH', 'SE', 'DE', 'PL'] as const;
+export const SUPPORTED_COUNTRY_CODES = ['TR', 'PL'] as const;
 
 function toRad(deg: number): number {
   return (deg * Math.PI) / 180;
@@ -87,6 +87,28 @@ export async function getCountryCode(): Promise<string | null> {
     });
     const iso = places[0]?.isoCountryCode?.toUpperCase();
     // Yalnızca desteklenen ülke ise döndür; değilse null → çağıran default'a düşer.
+    return iso && (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(iso) ? iso : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * AKTİF ülke tespiti — onboarding ülke adımı için: açık rıza istemini gösterir,
+ * sonra OS izni ister. Reddedilirse null → manuel seçici devrede kalır.
+ */
+export async function getCountryCodeInteractive(): Promise<string | null> {
+  try {
+    const consented = await ensureLocationConsent();
+    if (!consented) return null;
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') return null;
+    const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
+    const places = await Location.reverseGeocodeAsync({
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude,
+    });
+    const iso = places[0]?.isoCountryCode?.toUpperCase();
     return iso && (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(iso) ? iso : null;
   } catch {
     return null;

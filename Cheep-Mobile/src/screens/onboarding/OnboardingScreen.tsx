@@ -28,7 +28,7 @@ import { colors, typography, spacing, borderRadius, layout } from '../../theme';
 import { ONBOARDING_QUESTIONS } from './onboardingConfig';
 import i18n, { SUPPORTED_LANGUAGES } from '../../i18n';
 import { languageStorage } from '../../utils/storage';
-import { getCountryCode } from '../../utils/geo';
+import { getCountryCodeInteractive, SUPPORTED_COUNTRY_CODES } from '../../utils/geo';
 import type { UserProfile } from '../../types';
 
 // Prepended locale steps (language + country) that precede ONBOARDING_QUESTIONS.
@@ -215,9 +215,9 @@ export function OnboardingScreen() {
   const manualCountryPickedRef = useRef(false);
 
   // Ülke varsayılanını konumdan tespit et (yalnızca ilk girişte, desteklenen ise).
-  // getCountryCode desteklenmeyen/izin-yok durumunda null döner → mevcut değer kalır.
+  // getCountryCodeInteractive desteklenmeyen/izin-yok durumunda null döner → mevcut değer kalır.
   useEffect(() => {
-    getCountryCode()
+    getCountryCodeInteractive()
       .then((code) => {
         if (code && !manualCountryPickedRef.current) return setCountry(code);
       })
@@ -402,10 +402,12 @@ export function OnboardingScreen() {
     value: code,
     label: t(`languages.${code}`),
   }));
-  const countryOptions = Object.keys(COUNTRY_CONFIG).map((code) => ({
-    value: code,
-    label: t(`countries.${code}`),
-  }));
+  const countryOptions = Object.keys(COUNTRY_CONFIG)
+    .filter((code) => (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(code))
+    .map((code) => ({
+      value: code,
+      label: t(`countries.${code}`),
+    }));
   // question.options stores i18n KEYS (see onboardingConfig.ts) — resolve them here.
   const questionOptions = question?.options?.map((opt) => ({
     value: opt.value,
