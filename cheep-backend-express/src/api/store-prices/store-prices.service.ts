@@ -132,14 +132,15 @@ export const upsertStorePrice = async (data: UpsertData, countryId?: number) => 
 // ++ PERFORMANS İYİLEŞTİRMESİ YAPILAN FONKSİYON ++
 /**
  * Bayat fiyat süpürmesi — kaldırılan ürünleri/fiyatları temizler.
- * Kaynak (marketfiyati) artık vermeyen fiyatlar tazelenmez → last_updated_at eskir.
- * ttlDays'ten eski 'api' fiyatları silinir; fiyatsız kalan mf- ürünleri de silinir.
+ * Kaynak (marketfiyati 'api' + yabancı ülke scraper'ları 'scrape') artık
+ * vermeyen fiyatlar tazelenmez → last_updated_at eskir.
+ * ttlDays'ten eski 'api'/'scrape' fiyatları silinir; fiyatsız kalan mf- ürünleri de silinir.
  * ttlDays, rotasyon periyodundan (fiyatlı=7g) yeterince büyük olmalı (varsayılan 21g)
  * ki geçici stok-dışı ürünler yanlışlıkla silinmesin.
  */
 export const pruneStalePrices = async (countryId?: number, ttlDays: number = 21) => {
     const cutoff = new Date(Date.now() - ttlDays * 86400 * 1000);
-    const priceWhere: any = { source: 'api', last_updated_at: { lt: cutoff } };
+    const priceWhere: any = { source: { in: ['api', 'scrape'] }, last_updated_at: { lt: cutoff } };
     if (countryId) priceWhere.product = { country_id: countryId };
     const delPrices = await prisma.storePrice.deleteMany({ where: priceWhere });
 
