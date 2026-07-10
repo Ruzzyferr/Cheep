@@ -152,27 +152,36 @@ export const pruneStalePrices = async (countryId?: number, ttlDays: number = 21)
 };
 
 export const bulkUpsertStorePrices = async (prices: UpsertData[], countryId?: number) => {
-    const upsertPromises = prices.map(priceData => upsertStorePrice(priceData, countryId));
-    const outcomes = await Promise.allSettled(upsertPromises);
+    // SIRALI işlenir (concurrent DEĞİL). Sebep: aynı chunk içinde aynı gerçek
+    // ürünün iki farklı store_sku ile gelmesi mümkün (ör. Auchan aynı sütü
+    // "Mleko UHT 3,2% Auchan 1l" ve "Mleko UHT 3.2%  Auchan 1 l" olarak iki
+    // ayrı satırda listeler). EAN yolunun aksine (product.create P2002 ile
+    // korunur, bkz. product-matcher.service.ts), fingerprint/muadil_grup_id
+    // üzerinde UNIQUE constraint YOK — bu yüzden findOrCreateProduct'ın
+    // "önce bul, bulamazsan oluştur" adımı yarışa açık: paralel çağrılırsa
+    // ikinci çağrı birincinin henüz commit etmediği ürünü göremez ve aynı
+    // fingerprint için DUPLICATE product oluşturur (pilotta doğrulandı:
+    // product 20411 & 20414, ikisi de auchan-mleko-uht@1000ml%3.2, store 41).
+    // Haftalık batch ingest'te (~1-2k satır/chunk) gecikme önemsiz;
+    // doğruluk paralellikten daha değerli.
+    const results: Array<{ success: true; data: unknown } | { success: false; error: string; data: UpsertData }> = [];
+    for (let index = 0; index < prices.length; index++) {
+        const priceData = prices[index];
+        try {
+            const data = await upsertStorePrice(priceData, countryId);
+            results.push({ success: true, data });
+        } catch (err) {
+            const reason = err as Error;
+            logger.error(`[StorePriceService] Hata: Ürün #${index + 1} (${priceData?.name}) işlenemedi. Sebep: ${reason.message}`);
+            results.push({
+                success: false,
+                error: reason.message || 'Unknown error',
+                data: priceData,
+            });
+        }
+    }
 
     logger.info('[StorePriceService] Bulk upsert tamamlandı. Sonuçlar işleniyor...');
-
-    // ... (geri kalan hata yönetimi kısmı aynı kalabilir)
-    const results = outcomes.map((outcome, index) => {
-        if (outcome.status === 'fulfilled') {
-            return { success: true, data: outcome.value };
-        }
-
-        const reason = outcome.reason as Error;
-        logger.error(`[StorePriceService] Hata: Ürün #${index + 1} (${prices[index]?.name}) işlenemedi. Sebep: ${reason.message}`);
-
-        return {
-            success: false,
-            error: reason.message || 'Unknown error',
-            data: prices[index]
-        };
-    });
-
     logger.info(`[StorePriceService] İşlem özeti: Başarılı`);
 
     return {
