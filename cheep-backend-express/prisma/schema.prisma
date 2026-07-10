@@ -381,3 +381,26 @@ model UserProfile {
 
   @@map("user_profiles")
 }
+
+// ============================================
+// EŞLEŞTİRME TEKLİF KUYRUĞU (sıfır-hata ülkeleri)
+// ============================================
+// Strict ülkelerde (PL) fuzzy/LLM eşleşmeleri OTOMATİK BİRLEŞMEZ; buraya
+// teklif olarak düşer. CLI (scripts/match-review.ts) onaylarsa mergeProducts
+// çalışır. product_id = yeni (birleşmemiş) ürün, candidate_product_id = aday.
+model MatchProposal {
+  id                   Int      @id @default(autoincrement())
+  country_id           Int
+  product_id           Int
+  candidate_product_id Int
+  similarity           Float
+  evidence             String   // 'fuzzy' | 'llm'
+  status               String   @default("pending") // pending | approved | rejected
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  @@unique([product_id, candidate_product_id])
+  @@index([status])
+  @@index([country_id])
+  @@map("match_proposals")
+}

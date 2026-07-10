@@ -11,6 +11,26 @@ import { extractGramaj } from '../../services/brand-independent-pricing.js';
  * Barkod olmayan ürünleri eşleştirmek için çeşitli algoritmalar kullanır
  */
 
+// Sıfır-hata ülkeleri: fuzzy benzerlik ASLA otomatik birleşmez, MatchProposal yazılır.
+const STRICT_CODES = (process.env.STRICT_MATCH_COUNTRY_CODES ?? 'PL')
+    .split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+
+let strictIdsCache: Set<number> | null = null;
+export function __setStrictCountryIdsForTest(ids: Set<number>) { strictIdsCache = ids; }
+
+async function getStrictCountryIds(): Promise<Set<number>> {
+    if (!strictIdsCache) {
+        const ids = await Promise.all(STRICT_CODES.map(c => getCountryIdByCode(c)));
+        strictIdsCache = new Set(ids.filter((x): x is number => typeof x === 'number'));
+    }
+    return strictIdsCache;
+}
+
+export async function isStrictCountry(countryId?: number): Promise<boolean> {
+    if (typeof countryId !== 'number') return false;
+    return (await getStrictCountryIds()).has(countryId);
+}
+
 // ============================================
 // 1. TEXT NORMALIZATION
 // ============================================
@@ -283,7 +303,9 @@ export class ProductMatcher {
         const bestMatch = candidates.find(
             c => c.similarity >= 0.85 && extractGramaj(c.name) === incomingGramaj
         );
-        if (bestMatch) {
+
+        const strict = await isStrictCountry(resolvedCountryId);
+        if (bestMatch && !strict) {
             const product = await prisma.product.findUnique({
                 where: { id: bestMatch.id },
             });
@@ -319,6 +341,25 @@ export class ProductMatcher {
                 muadil_grup_id: muadilToPersist && muadilToPersist.length > 0 ? muadilToPersist : undefined,
             },
         });
+
+        // Strict ülke: birleşmedik ama güçlü aday(lar) var → inceleme teklifi yaz.
+        // Teklif yazımı ingest'i asla düşürmemeli (best-effort).
+        if (strict && resolvedCountryId) {
+            for (const c of candidates.filter(c => c.similarity >= 0.70).slice(0, 3)) {
+                try {
+                    await prisma.matchProposal.create({
+                        data: {
+                            country_id: resolvedCountryId,
+                            product_id: newProduct.id,
+                            candidate_product_id: c.id,
+                            similarity: c.similarity,
+                            evidence: 'fuzzy',
+                            status: 'pending',
+                        },
+                    });
+                } catch { /* @@unique çakışması vb. — sessiz geç */ }
+            }
+        }
 
         return { product: newProduct, isNew: true };
     }
