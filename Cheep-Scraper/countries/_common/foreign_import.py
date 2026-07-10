@@ -73,6 +73,11 @@ def build_api_payloads(
         image_url = product.get("image_url")
         if image_url and _is_clean_absolute_url(str(image_url)):
             payload["image_url"] = str(image_url)
+        raw_cat = (product.get("raw_category") or product.get("category") or "").strip()
+        if category_map and raw_cat:
+            slug = category_map.get(raw_cat)
+            if slug:
+                payload["category_slug"] = slug
         payloads.append(payload)
     return payloads
 
