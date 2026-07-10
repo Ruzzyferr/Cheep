@@ -12,6 +12,12 @@
     "loading": "Yükleniyor…",
     "unit_default": "adet"
   },
+  "consent": {
+    "location_title": "Konumun işlensin mi? (KVKK açık rıza)",
+    "location_message": "Cheep, yalnızca sana en yakın market şubelerini ve gerçek mesafeleri göstermek için yaklaşık konumunu işler. Konumun cihazında kalır, arka planda toplanmaz ve üçüncü kişilerle paylaşılmaz.\n\nBu hizmetin zorunlu şartı DEĞİLDİR; reddetsen de Cheep’i kullanmaya devam edebilirsin. Rızanı istediğin an Profil › Gizlilik’ten geri alabilirsin.",
+    "location_decline": "Hayır, teşekkürler",
+    "location_accept": "Evet, açık rıza veriyorum"
+  },
   "onboarding": {
     "language_title": "Uygulama dilini seç",
     "language_subtitle": "Bunu daha sonra Profil'den değiştirebilirsin",

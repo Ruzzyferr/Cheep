@@ -12,6 +12,12 @@
     "loading": "Ładowanie…",
     "unit_default": "szt."
   },
+  "consent": {
+    "location_title": "Czy przetwarzać Twoją lokalizację? (zgoda na przetwarzanie danych)",
+    "location_message": "Cheep wykorzystuje Twoją przybliżoną lokalizację wyłącznie po to, by pokazać Ci najbliższe sklepy i rzeczywiste odległości. Twoja lokalizacja pozostaje na urządzeniu, nie jest zbierana w tle ani udostępniana osobom trzecim.\n\nNie jest to warunek konieczny korzystania z usługi — możesz nadal korzystać z Cheep, nawet jeśli odmówisz. Zgodę możesz wycofać w dowolnym momencie w Profil › Prywatność.",
+    "location_decline": "Nie, dziękuję",
+    "location_accept": "Tak, wyrażam zgodę"
+  },
   "onboarding": {
     "language_title": "Wybierz język aplikacji",
     "language_subtitle": "Możesz to później zmienić w Profilu",

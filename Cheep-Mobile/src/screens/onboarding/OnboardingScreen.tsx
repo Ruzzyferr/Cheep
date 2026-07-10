@@ -213,17 +213,23 @@ export function OnboardingScreen() {
 
   // Kullanıcı ülke adımında elle seçim yaptıysa geo-tespitli varsayılan onu ezmesin.
   const manualCountryPickedRef = useRef(false);
+  // Geo tespiti yalnızca BİR KEZ denensin — ülke adımına tekrar girilse de tekrar sormasın.
+  const geoAttemptedRef = useRef(false);
 
-  // Ülke varsayılanını konumdan tespit et (yalnızca ilk girişte, desteklenen ise).
-  // getCountryCodeInteractive desteklenmeyen/izin-yok durumunda null döner → mevcut değer kalır.
+  // Ülke varsayılanını konumdan tespit et — SADECE kullanıcı ülke adımına (step 1)
+  // ulaştığında, mount anında DEĞİL. Aksi halde KVKK konum-rıza istemi henüz dil bile
+  // seçilmemişken (step 0) devreye girer. getCountryCodeInteractive desteklenmeyen/
+  // izin-yok durumunda null döner → mevcut değer kalır.
   useEffect(() => {
+    if (!isCountryStep || geoAttemptedRef.current) return;
+    geoAttemptedRef.current = true;
     getCountryCodeInteractive()
       .then((code) => {
         if (code && !manualCountryPickedRef.current) return setCountry(code);
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isCountryStep]);
 
   // ── Locale selection handlers ─────────────────────────────────────────────
   const handleSelectLanguage = (lang: string) => {

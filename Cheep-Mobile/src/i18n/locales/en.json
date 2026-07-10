@@ -12,6 +12,12 @@
     "loading": "Loading…",
     "unit_default": "piece"
   },
+  "consent": {
+    "location_title": "Process your location? (privacy consent)",
+    "location_message": "Cheep only uses your approximate location to show you the nearest store branches and real distances. Your location stays on your device, isn't collected in the background, and isn't shared with third parties.\n\nThis is NOT required to use the service; you can keep using Cheep even if you decline. You can withdraw your consent anytime from Profile › Privacy.",
+    "location_decline": "No, thanks",
+    "location_accept": "Yes, I consent"
+  },
   "onboarding": {
     "language_title": "Choose your app language",
     "language_subtitle": "You can change this later in Profile",

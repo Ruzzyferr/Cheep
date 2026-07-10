@@ -12,6 +12,12 @@
     "loading": "Laddar…",
     "unit_default": "st"
   },
+  "consent": {
+    "location_title": "Ska din plats behandlas? (samtycke till platsdelning)",
+    "location_message": "Cheep använder endast din ungefärliga plats för att visa dig de närmaste butikerna och verkliga avstånd. Din plats stannar på din enhet, samlas inte in i bakgrunden och delas inte med tredje part.\n\nDetta är INTE ett krav för att använda tjänsten; du kan fortsätta använda Cheep även om du tackar nej. Du kan när som helst återkalla ditt samtycke under Profil › Integritet.",
+    "location_decline": "Nej tack",
+    "location_accept": "Ja, jag samtycker"
+  },
   "onboarding": {
     "language_title": "Välj appspråk",
     "language_subtitle": "Du kan ändra detta senare i Profil",

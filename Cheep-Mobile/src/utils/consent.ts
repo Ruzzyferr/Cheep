@@ -6,6 +6,7 @@
  * iptal edilebilir bir açık rıza alınır. Rıza cihazda saklanır.
  */
 import { Alert } from 'react-native';
+import i18n from '../i18n';
 import { consentStorage, type LocationConsent } from './storage';
 
 /** Kayıtlı rıza durumu (SORMADAN). */
@@ -30,15 +31,11 @@ export async function ensureLocationConsent(): Promise<boolean> {
 
   return new Promise<boolean>((resolve) => {
     Alert.alert(
-      'Konumun işlensin mi? (KVKK açık rıza)',
-      'Cheep, yalnızca sana en yakın market şubelerini ve gerçek mesafeleri göstermek için ' +
-        'yaklaşık konumunu işler. Konumun cihazında kalır, arka planda toplanmaz ve üçüncü ' +
-        'kişilerle paylaşılmaz.\n\n' +
-        'Bu hizmetin zorunlu şartı DEĞİLDİR; reddetsen de Cheep’i kullanmaya devam edebilirsin. ' +
-        'Rızanı istediğin an Profil › Gizlilik’ten geri alabilirsin.',
+      i18n.t('consent.location_title'),
+      i18n.t('consent.location_message'),
       [
         {
-          text: 'Hayır, teşekkürler',
+          text: i18n.t('consent.location_decline'),
           style: 'cancel',
           onPress: async () => {
             await consentStorage.setLocationConsent('denied');
@@ -46,7 +43,7 @@ export async function ensureLocationConsent(): Promise<boolean> {
           },
         },
         {
-          text: 'Evet, açık rıza veriyorum',
+          text: i18n.t('consent.location_accept'),
           onPress: async () => {
             await consentStorage.setLocationConsent('granted');
             resolve(true);

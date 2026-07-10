@@ -12,6 +12,12 @@
     "loading": "Wird geladen…",
     "unit_default": "Stück"
   },
+  "consent": {
+    "location_title": "Standort verarbeiten? (Datenschutz-Einwilligung)",
+    "location_message": "Cheep verarbeitet deinen ungefähren Standort ausschließlich, um dir die nächstgelegenen Filialen und echte Entfernungen anzuzeigen. Dein Standort bleibt auf deinem Gerät, wird nicht im Hintergrund gesammelt und nicht an Dritte weitergegeben.\n\nDies ist KEINE Voraussetzung für die Nutzung des Dienstes; du kannst Cheep auch bei Ablehnung weiter nutzen. Du kannst deine Einwilligung jederzeit unter Profil › Datenschutz widerrufen.",
+    "location_decline": "Nein, danke",
+    "location_accept": "Ja, ich stimme zu"
+  },
   "onboarding": {
     "language_title": "Wähle deine App-Sprache",
     "language_subtitle": "Du kannst dies später im Profil ändern",
