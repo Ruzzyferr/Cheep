@@ -156,6 +156,24 @@ function normalizeProductName(name: string): string {
     return cleanProductText(name);
 }
 
+// Yüzde/yağ oranı token'ı: "3,2%" / "3.2 %" (sayı sonra %) VE Türkçe "%3,5"
+// (% önce sayı) biçimlerini yakalar. Ondalık virgül noktaya çevrilir, gereksiz
+// ".0" kırpılır (böylece "2%" ile "2.0%" aynı token'a düşer). Birden fazla %
+// varsa ilki kullanılır. extractGramaj'dan AYRI tutulur: o fonksiyon
+// brand-independent-pricing ile paylaşılıyor, bu yüzden dokunulmaz.
+function extractPercent(name: string): string | null {
+    const pattern = /(?:(\d+(?:[.,]\d+)?)\s*%|%\s*(\d+(?:[.,]\d+)?))/;
+    const match = pattern.exec(name);
+    if (!match) return null;
+
+    const raw = match[1] ?? match[2];
+    let normalized = raw.replace(',', '.');
+    if (normalized.includes('.')) {
+        normalized = normalized.replace(/0+$/, '').replace(/\.$/, '');
+    }
+    return normalized;
+}
+
 export function generateProductFingerprint(data: {
     name: string;
     brand?: string;
@@ -167,13 +185,26 @@ export function generateProductFingerprint(data: {
     // Gramaj farkı olan ürünler ASLA birleşmesin diye boyut token'ı eklenir.
     const gramaj = extractGramaj(data.name); // örn. "1000ml", "500g", "10adet" ya da null
 
-    if (!cleaned) return gramaj ? `@${gramaj}` : '';
+    // STRICT: yağ oranı/yüzde de fingerprint'e dahil edilir. cleanProductText
+    // TÜM rakamları temizlediği için "Mleko UHT 3,2%" ve "Mleko UHT 1,5%" aksi
+    // halde aynı fingerprint'e düşer (Polonya pilotunda 4 ingest satırı bunun
+    // yüzünden store_prices unique constraint'ine çarptı). % farkı olan ürünler
+    // ASLA birleşmesin diye yüzde token'ı eklenir. Fingerprint'i geriye dönük
+    // uyumlu tutmak için % YOKSA format hiç değişmez (mevcut TR muadil_grup_id
+    // eşleşmeleri bozulmasın).
+    const percent = extractPercent(data.name); // örn. "3.2" ya da null
+
+    if (!cleaned) {
+        const suffix = gramaj ? `@${gramaj}` : '';
+        return percent ? `${suffix}%${percent}` : suffix;
+    }
 
     const uniqueWords = Array.from(new Set(cleaned.split(' ').filter(Boolean)));
     uniqueWords.sort();
 
     const base = uniqueWords.join('-');
-    return gramaj ? `${base}@${gramaj}` : base;
+    const withGramaj = gramaj ? `${base}@${gramaj}` : base;
+    return percent ? `${withGramaj}%${percent}` : withGramaj;
 }
 
 // Benzerlik algoritmaları artık ../../utils/similarity.ts içinde (DRY + test edilebilir).
