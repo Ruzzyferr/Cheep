@@ -43,6 +43,10 @@ CHAINS = [
 
 SHOP = "supermarket|convenience|department_store"
 
+# Bazı Overpass mirror'ları (ör. overpass-api.de) varsayılan python-requests
+# User-Agent'ini HTTP 406 ile reddediyor — tanımlı bir UA şart (OSM etiği de bunu ister).
+USER_AGENT = "cheep-scraper/1.0 (+https://cheep.live)"
+
 
 def overpass_query(regex: str):
     # NOT: yalnızca `brand` etiketiyle eşleştiriyoruz. `name` regex'i tüm ülke
@@ -61,7 +65,8 @@ def overpass_query(regex: str):
     for mirror in OVERPASS_MIRRORS:
         for attempt in range(3):
             try:
-                r = requests.post(mirror, data={"data": q}, timeout=210)
+                r = requests.post(mirror, data={"data": q}, timeout=210,
+                                  headers={"User-Agent": USER_AGENT})
                 ctype = r.headers.get("content-type", "")
                 if r.ok and ctype.startswith("application/json"):
                     return r.json().get("elements", [])
