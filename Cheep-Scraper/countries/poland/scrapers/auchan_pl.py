@@ -109,16 +109,64 @@ found a plain, unauthenticated path to the real thing:
   back with zero products entirely (e.g. the v6 endpoint itself becomes
   unreachable) — this scraper can never regress below its original ~99
   product baseline.
-- **Domain scope**: unlike Lidl PL (an online general-merchandise shop
-  wearing a grocery skin — see lidl_pl.py's `category_allow_prefixes` note),
-  Auchan is a real hypermarket: all 11 departments above are genuine
-  sections of a physical supermarket (yes, including office supplies, auto
-  care, and pet supplies — real aisles, not a separate durable-goods
-  storefront), so no ingest-time domain/category filter is added here. See
-  the task-19 report for the department-level product-count breakdown a
-  future category-mapping pass can use to decide finer-grained inclusion
-  (e.g. whether "Auto-Moto"/"Artykuły biurowe i szkolne" belong in a
-  grocery price app at all).
+- **Domain scope (Phase 2)**: unlike Lidl PL (an online general-merchandise
+  shop wearing a grocery skin — see lidl_pl.py's `category_allow_prefixes`
+  note), Auchan is a real hypermarket: all 11 departments above are genuine
+  sections of a physical supermarket, so no ingest-time domain/category
+  filter was added in Phase 2. See the task-19 report for the
+  department-level product-count breakdown.
+
+Phase 3 (2026-07-11, task 20) — grocery-domain filter + category mapping.
+Inspecting the actual department taxonomy (`v1/categories` fetched with
+`categoryDepth` unset, i.e. the FULL ~3,700-node tree, not just the 11
+top-level departments) and real product names within each branch (not just
+label text) found 3 of the 11 departments are, in whole or in the
+overwhelming part, durable general-merchandise — never groceries — despite
+being real physical aisles of the store:
+- `Auto-Moto` (120 products) — 100% car-care (wiper fluid, tire cleaner, air
+  fresheners, AdBlue). Denied entirely.
+- `Artykuły biurowe i szkolne` (238 products) — 100% office/school supplies
+  (binders, pens, hole punches). Denied entirely.
+- `Artykuły dla domu` (765 products) — kitchenware, furniture, lighting,
+  garden tools, computer/GSM accessories, DIY, sport equipment; a small
+  minority (protein bars/supplements under its "Sport" subtree, cling
+  film/baking paper under "Kuchnia") are food-adjacent, but the department
+  as a whole is durable general merchandise. Denied entirely (the small
+  food-adjacent minority is an acceptable loss vs. the risk of importing
+  furniture/electronics/garden tools as "groceries").
+- Within `Dziecko i Mama` (baby/mom — otherwise kept: baby food, diapers,
+  wipes, baby toiletries, baby laundry detergent, postpartum care are real
+  grocery-adjacent consumables), the `Zabawki` (toys) subtree — LEGO alone
+  is 184 products, the single largest leaf category in the *entire* catalog
+  — is denied; the rest of the department is kept.
+
+These are wired as `category_deny_prefixes` on the Auchan market entry in
+`countries/poland/config.json` (deny-list, not allow-list: unlike Lidl PL,
+most of Auchan's catalog genuinely is grocery, so enumerating everything
+IN scope would be far more error-prone than the 4 short branches OUT of
+scope). The filter matches `raw_category` breadcrumb prefixes — which is
+why `raw_category` was changed (see `_build_product()` above) from the
+deepest `categoryPath` segment alone to the full `"/"`-joined breadcrumb:
+a single leaf name is legitimately reused across departments (e.g.
+"Pieczenie" = deli pâté under "Artykuły spożywcze" OR bakeware under
+"Artykuły dla domu"; "Odżywki białkowe" = a dairy high-protein drink under
+"Artykuły spożywcze" OR a sports-supplement protein powder under "Artykuły
+dla domu/Sport") — only the full per-product breadcrumb disambiguates
+which one a given product actually is; a global leaf-name allow/deny table
+would get both wrong in one direction or the other.
+
+`countries/poland/category_map.json` carries ~200 `"prefix:"` entries
+(department/mid-level breadcrumb prefixes, longest-prefix-wins) mapping the
+kept catalog into `cheep-backend-express/src/config/standard-categories.ts`
+canonical subcategory slugs — see task-20 report for the full design
+rationale, including the deliberate choice to leave inherently-unmappable
+buckets (no canonical slug fits, e.g. "Kuchnie Świata" world-cuisine
+mixed-type products, or plant-based meat/dairy alternatives) unmapped
+rather than force a wrong classification, and to use the generic `diger`
+("Other") canonical slug for `Alkohole` (wine/spirits/beer have no
+dedicated canonical category in this Turkish-market-first taxonomy at all,
+but are unambiguously real grocery-store merchandise, so `diger` is a
+correct — not wrong — classification, not a cop-out).
 
 Pure `parse()`/`parse_v6()` are fixture-testable (no network); `fetch_products()`
 is live and hits the v1/v6 endpoints directly via `requests` (no browser
@@ -229,7 +277,18 @@ class AuchanPLScraper(BaseScraper):
           storefront's product cards don't expose it) -> left None,
           honestly.
         - sku: `retailerProductId` (falls back to `productId`/`name`).
-        - category: last entry of `categoryPath` (deepest category).
+        - category: the FULL `categoryPath` breadcrumb, `"/"`-joined (e.g.
+          `"Artykuły spożywcze/Owoce, warzywa i zioła/Owoce/Brzoskwinie"`) —
+          NOT just the deepest segment. Changed 2026-07-11 (task 20, see
+          module docstring's Phase 3 note): the deepest-segment-only value
+          used through Phase 2 can't drive prefix-based grocery-domain
+          filtering/category-mapping (Lidl-style `category_deny_prefixes` /
+          `category_map.json` `"prefix:"` keys) because a single leaf name
+          (e.g. "Pieczenie") is legitimately reused under multiple,
+          semantically different departments (deli pâté under "Artykuły
+          spożywcze", bakeware under "Artykuły dla domu") — only the full
+          per-product breadcrumb disambiguates which one a given product
+          actually is.
         - image: `image.src`.
         """
         name = item.get("name")
@@ -260,7 +319,7 @@ class AuchanPLScraper(BaseScraper):
         unit_price, unit_price_unit = compute_unit_price(price, qty, unit)
 
         category_path = item.get("categoryPath") or []
-        raw_category = category_path[-1] if category_path else None
+        raw_category = "/".join(category_path) if category_path else None
 
         image_url = (item.get("image") or {}).get("src")
 

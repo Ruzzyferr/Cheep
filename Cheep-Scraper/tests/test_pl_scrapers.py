@@ -94,19 +94,20 @@ def test_auchan_pl_parses_v6_fixture():
     assert peaches.price == Decimal("2.98"), "promoPrice must win over price"
     assert peaches.original_price == Decimal("4.50")
     assert peaches.quantity == 0.5 and peaches.unit == "kg", "catchweight.typicalQuantity, not packSizeDescription"
-    assert peaches.raw_category == "Brzoskwinie"
+    assert peaches.raw_category == "Artykuły spożywcze/Owoce, warzywa i zioła/Owoce/Brzoskwinie", \
+        "raw_category is the FULL '/'-joined categoryPath breadcrumb (task 20), not just the deepest segment"
 
     kiwi = by_sku["00034052"]
     assert kiwi.price == Decimal("1.98")
     assert kiwi.original_price is None
     assert kiwi.quantity == 1.0 and kiwi.unit == "adet", "no packSizeDescription -> parser default"
-    assert kiwi.raw_category == "Kiwi"
+    assert kiwi.raw_category == "Artykuły spożywcze/Owoce, warzywa i zioła/Owoce/Kiwi"
 
     banany = by_sku["00034041"]
     assert banany.price == Decimal("6.98")
     assert banany.original_price is None
     assert banany.quantity == 1.0 and banany.unit == "kg"
-    assert banany.raw_category == "Banany"
+    assert banany.raw_category == "Artykuły spożywcze/Owoce, warzywa i zioła/Owoce/Banany"
 
 
 def test_auchan_pl_parse_v6_dedupes_within_response():
@@ -128,6 +129,34 @@ def test_auchan_pl_parse_v6_dedupes_within_response():
     })
     products = AuchanPLScraper.parse_v6(raw)
     assert len(products) == 1
+
+
+def test_auchan_pl_build_product_raw_category_is_full_joined_breadcrumb():
+    """Task 20: raw_category must be the FULL categoryPath breadcrumb,
+    '/'-joined, not just the deepest segment — this is what lets
+    config.json's category_deny_prefixes / category_map.json's "prefix:"
+    keys work for Auchan (a single leaf name is legitimately reused across
+    different departments, e.g. "Pieczenie" = deli pate under 'Artykuły
+    spożywcze' OR bakeware under 'Artykuły dla domu' — only the full
+    breadcrumb disambiguates which one a given product is)."""
+    AuchanPLScraper = _load_pl_scraper_module("auchan_pl").AuchanPLScraper
+    item = {
+        "productId": "p1", "retailerProductId": "sku1", "name": "Deli pate",
+        "price": {"amount": "5.00", "currency": "PLN"},
+        "categoryPath": ["Artykuły spożywcze", "Wędliny", "Pasztety i pasztetowe", "Pieczenie"],
+    }
+    prod = AuchanPLScraper._build_product(item, "p1")
+    assert prod.raw_category == "Artykuły spożywcze/Wędliny/Pasztety i pasztetowe/Pieczenie"
+
+    # single-segment categoryPath -> that one segment, no leading/trailing "/"
+    item2 = dict(item, categoryPath=["Auto-Moto"])
+    assert AuchanPLScraper._build_product(item2, "p2").raw_category == "Auto-Moto"
+
+    # missing/empty categoryPath -> None (unchanged from before, honest default)
+    item3 = dict(item, categoryPath=[])
+    assert AuchanPLScraper._build_product(item3, "p3").raw_category is None
+    item4 = {k: v for k, v in item.items() if k != "categoryPath"}
+    assert AuchanPLScraper._build_product(item4, "p4").raw_category is None
 
 
 def test_auchan_pl_parse_v6_malformed_input_returns_empty():
