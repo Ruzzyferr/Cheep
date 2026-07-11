@@ -1,0 +1,62 @@
+{
+  "assortment_id": "68ac36fcb2726d954e5222e4",
+  "categories": [
+    {
+      "id": "db6dddc4dc098575cf529eae",
+      "name": "Strefa kibica",
+      "slug": "strefa-kibica-2",
+      "subcategories": []
+    },
+    {
+      "id": "4f2eea6ce970b8289f36c607",
+      "name": "Woda i napoje",
+      "slug": "woda-i-napoje-21",
+      "subcategories": [
+        {
+          "id": "450b8f407eced454621ec0cc",
+          "name": "Napoje gazowane",
+          "slug": "napoje-gazowane-22",
+          "subcategories": []
+        },
+        {
+          "id": "37f18f014c5dea35b88a8c48",
+          "name": "Napoje niegazowane",
+          "slug": "napoje-niegazowane-23",
+          "subcategories": []
+        }
+      ]
+    },
+    {
+      "id": "3cc36e595fc82df05ae649ed",
+      "name": "Piwa",
+      "slug": "piwa-31",
+      "subcategories": [
+        {
+          "id": "87ecaa9766d611aec99ccdf8",
+          "name": "Kraftowe",
+          "slug": "kraftowe-32",
+          "subcategories": []
+        },
+        {
+          "id": "464f024dd42e89deffafead9",
+          "name": "Jasne butelka",
+          "slug": "jasne-butelka-33",
+          "subcategories": []
+        }
+      ]
+    },
+    {
+      "id": "cfe97f13c82129161614f950",
+      "name": "Nabiał",
+      "slug": "nabia-81",
+      "subcategories": [
+        {
+          "id": "18eb11f88f094289c7752036",
+          "name": "Mleko i zamienniki",
+          "slug": "mleko-i-zamienniki-82",
+          "subcategories": []
+        }
+      ]
+    }
+  ]
+}

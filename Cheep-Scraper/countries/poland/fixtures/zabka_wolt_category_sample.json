@@ -1,0 +1,131 @@
+{
+  "category": {
+    "id": "18eb11f88f094289c7752036",
+    "name": "Mleko i zamienniki",
+    "slug": "mleko-i-zamienniki-82"
+  },
+  "metadata": {"next_page_token": null, "page": 1},
+  "items": [
+    {
+      "id": "44f289f4bcdfc41d57ea8bb4",
+      "name": "Piątnica mleko but. 2 % bez laktozy 1 l",
+      "barcode_gtin": "5901939002019",
+      "price": 759,
+      "unit_info": "1 l",
+      "unit_price": {"base": 1, "price": 759, "unit": "litre"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/68aed20383a9e2e9a3cf2880"}],
+      "restrictions": []
+    },
+    {
+      "id": "0e000303684574705cab68b3",
+      "name": "Łaciate mleko UHT 2% 1 l",
+      "barcode_gtin": "5900820000042",
+      "price": 419,
+      "unit_info": "1 l",
+      "unit_price": {"base": 1, "price": 419, "unit": "litre"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/68aed20383a9e2e9a3cf2884"}],
+      "restrictions": []
+    },
+    {
+      "id": "dcc308ba7f05340f852a7624",
+      "name": "Mleko polskie spożywcze 3,2% 1 l",
+      "barcode_gtin": "5900512850016",
+      "price": 519,
+      "unit_info": "1 l",
+      "unit_price": {"base": 1, "price": 519, "unit": "litre"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/68aed21b5650c92c6dc900df"}],
+      "restrictions": []
+    },
+    {
+      "id": "66ccf8f462a1bdd1d2e5ecb5",
+      "name": "Alpro Napój Migdałowy z witaminami 1 l",
+      "barcode_gtin": "5411188110835",
+      "price": 1519,
+      "unit_info": "1 l",
+      "unit_price": {"base": 1, "price": 1519, "unit": "litre"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/68aed21d5650c92c6dc900e8"}],
+      "restrictions": []
+    },
+    {
+      "id": "13a072fd7c592e9ccd72d8db",
+      "name": "Inka napój owsiany 1 l",
+      "barcode_gtin": "5901154049387",
+      "price": 1189,
+      "unit_info": "1 l",
+      "unit_price": {"base": 1, "price": 1189, "unit": "litre"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/68aed2ee96fbe9c58f98129f"}],
+      "restrictions": []
+    },
+    {
+      "id": "4afd0cce31acfe41bc9f52f2",
+      "name": "Guacamole naturalne, 200 g",
+      "barcode_gtin": "8436009509206",
+      "price": 1199,
+      "unit_info": null,
+      "unit_price": null,
+      "original_price": null,
+      "images": [],
+      "restrictions": []
+    },
+    {
+      "id": "1219a6e88e82757ff348a3b4",
+      "name": "Baton proteinowy crisp orzech-karmel Go On 50 g",
+      "barcode_gtin": "5900617041685",
+      "price": 549,
+      "unit_info": "50 g",
+      "unit_price": {"base": 1, "price": 10980, "unit": "kilogram"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/example-goon"}],
+      "restrictions": []
+    },
+    {
+      "id": "2bc96d817e3233cbe862e6e5",
+      "name": "Wódka Finlandia 500 ml 40%",
+      "barcode_gtin": "6412709021271",
+      "price": 5299,
+      "unit_info": "500 ml",
+      "unit_price": {"base": 1, "price": 10598, "unit": "litre"},
+      "original_price": null,
+      "images": [],
+      "restrictions": [{"type": "alcohol", "age_limit": 18}]
+    },
+    {
+      "id": "ea72bf5a8b4dfc91c3fd8173",
+      "name": "Gorąco Polecam Kanapka z serem 130 g",
+      "barcode_gtin": null,
+      "price": 999,
+      "unit_info": "130 g",
+      "unit_price": {"base": 1, "price": 7685, "unit": "kilogram"},
+      "original_price": null,
+      "images": [{"url": "https://wolt-menu-images-cdn.wolt.com/menu-images/example-kanapka.jpg"}],
+      "restrictions": []
+    },
+    {
+      "id": "snickers-2x75g-test-id",
+      "name": "Baton z nadzieniem i orzeszkami ziemnymi w karmelu i czekoladzie Snickers 2x 75 g",
+      "barcode_gtin": "5900951310973",
+      "price": 649,
+      "unit_info": "75 g",
+      "unit_price": {"base": 1, "price": 8653, "unit": "kilogram"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/68aed1cb96fbe9c58f981211"}],
+      "restrictions": []
+    },
+    {
+      "id": "discounted-item-test-id",
+      "name": "Jogurt naturalny testowy 400 g",
+      "barcode_gtin": "5900000000012",
+      "price": 399,
+      "unit_info": "400 g",
+      "unit_price": {"base": 1, "price": 997, "unit": "kilogram"},
+      "original_price": 499,
+      "images": [],
+      "restrictions": []
+    }
+  ]
+}

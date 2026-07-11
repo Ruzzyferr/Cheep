@@ -1,0 +1,142 @@
+{
+  "category": {
+    "id": "60ed70e913f6cc6ab964fa99",
+    "name": "Sery żółte",
+    "slug": "sery-zolte-49"
+  },
+  "metadata": {"next_page_token": null, "page": 1},
+  "items": [
+    {
+      "id": "1a48b1667d817727c8bd018d",
+      "name": "Carrefour Targ Świeżości Ser salami 150 g",
+      "barcode_gtin": "5905784329147",
+      "price": 600,
+      "unit_info": "150 g",
+      "unit_price": {"base": 1, "price": 4000, "unit": "kilogram"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/carrefour-ser-salami"}],
+      "restrictions": []
+    },
+    {
+      "id": "a278e488fbf7ead991d90a1e",
+      "name": "Carrefour Targ Świeżości Ser szwajcarski rodzinny 150 g",
+      "barcode_gtin": "5905784329079",
+      "price": 600,
+      "unit_info": "150 g",
+      "unit_price": {"base": 1, "price": 4000, "unit": "kilogram"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/carrefour-ser-szwajcar"}],
+      "restrictions": []
+    },
+    {
+      "id": "1ccd63c2bc6e42125eed14ac",
+      "name": "Carrefour Targ Świeżości Ser tylżycki 180 g",
+      "barcode_gtin": "2020228700009",
+      "price": 700,
+      "unit_info": "210 g",
+      "unit_price": {"base": 1, "price": 3333, "unit": "kilogram"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/carrefour-tylzycki"}],
+      "restrictions": []
+    },
+    {
+      "id": "9ebea1c8e371a6db13d1bdf0",
+      "name": "Carrefour Targ Świeżości Ser typu szwajcarskiego 116 g",
+      "barcode_gtin": "2030269600008",
+      "price": 700,
+      "unit_info": "116 g",
+      "unit_price": {"base": 1, "price": 6034, "unit": "kilogram"},
+      "original_price": null,
+      "images": [],
+      "restrictions": []
+    },
+    {
+      "id": "77d1abfad616ff80b432f366",
+      "name": "Ser Salami plastry 180 g",
+      "barcode_gtin": "2030612100001",
+      "price": 700,
+      "unit_info": "210 g",
+      "unit_price": {"base": 1, "price": 3333, "unit": "kilogram"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/carrefour-salami-plastry"}],
+      "restrictions": []
+    },
+    {
+      "id": "c5718de6b300f033896ced0b",
+      "name": "Ser salami z pomidorami i bazylią, plastry 150 g",
+      "barcode_gtin": "5905784329062",
+      "price": 600,
+      "unit_info": "150 g",
+      "unit_price": {"base": 1, "price": 4000, "unit": "kilogram"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/carrefour-salami-pomidor"}],
+      "restrictions": []
+    },
+    {
+      "id": "9aab8651d837f422757dcc2c",
+      "name": "Simpl XXL Ser edamski plastry 1 kg",
+      "barcode_gtin": "5905784328997",
+      "price": 2389,
+      "unit_info": null,
+      "unit_price": null,
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/carrefour-edamski-xxl"}],
+      "restrictions": []
+    },
+    {
+      "id": "243ec9d3e7531458ab00f6d3",
+      "name": "Polska Gościna Wielkopolski ser smażony z kminkiem 300 g",
+      "barcode_gtin": "5905784304410",
+      "price": 689,
+      "unit_info": null,
+      "unit_price": null,
+      "original_price": null,
+      "images": [],
+      "restrictions": []
+    },
+    {
+      "id": "carrefour-nobarcode-test-id",
+      "name": "Ser testowy bez kodu kreskowego 200 g",
+      "barcode_gtin": null,
+      "price": 555,
+      "unit_info": "200 g",
+      "unit_price": {"base": 1, "price": 2775, "unit": "kilogram"},
+      "original_price": null,
+      "images": [],
+      "restrictions": []
+    },
+    {
+      "id": "carrefour-multipack-test-id",
+      "name": "Serek wiejski testowy 2x 150 g",
+      "barcode_gtin": "5900000000029",
+      "price": 799,
+      "unit_info": "150 g",
+      "unit_price": {"base": 1, "price": 5327, "unit": "kilogram"},
+      "original_price": null,
+      "images": [{"url": "https://imageproxy.wolt.com/assets/carrefour-serek-2pack"}],
+      "restrictions": []
+    },
+    {
+      "id": "carrefour-discounted-test-id",
+      "name": "Masło ekstra testowe 200 g",
+      "barcode_gtin": "5900000000036",
+      "price": 499,
+      "unit_info": "200 g",
+      "unit_price": {"base": 1, "price": 2495, "unit": "kilogram"},
+      "original_price": 649,
+      "images": [],
+      "restrictions": []
+    },
+    {
+      "id": "carrefour-wine-test-id",
+      "name": "Wino czerwone wytrawne testowe 750 ml",
+      "barcode_gtin": "5900000000043",
+      "price": 2999,
+      "unit_info": "750 ml",
+      "unit_price": {"base": 1, "price": 3999, "unit": "litre"},
+      "original_price": null,
+      "images": [],
+      "restrictions": [{"type": "alcohol", "age_limit": 18}]
+    }
+  ]
+}

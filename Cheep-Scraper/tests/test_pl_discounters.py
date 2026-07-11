@@ -50,7 +50,6 @@ _BIEDRONKA_NAV_FIXTURE = _first_fixture("biedronka_nav_sample.html")
 _BIEDRONKA_PAGINATION_FIXTURE = _first_fixture("biedronka_pagination_sample.html")
 _LIDL_PL_FIXTURE = _first_fixture("lidl_pl_sample.json", "lidl_pl_sample.html")
 _LIDL_PL_API_FIXTURE = _first_fixture("lidl_pl_api_sample.json")
-_ZABKA_FIXTURE = _first_fixture("zabka_sample.html", "zabka_sample.json")
 
 
 @pytest.mark.skipif(_BIEDRONKA_FIXTURE is None,
@@ -360,48 +359,13 @@ def test_lidl_pl_fetch_products_paginates_and_isolates_term_errors():
     assert len(products) == 3
 
 
-@pytest.mark.skipif(_ZABKA_FIXTURE is None,
-                    reason="no Żabka fixture (site unreachable at build time)")
-def test_zabka_parses_fixture():
-    ZabkaScraper = _load_pl_scraper_module("zabka").ZabkaScraper
-    raw = load_fixture(PL_DIR, _ZABKA_FIXTURE.name)
-    products = ZabkaScraper.parse(raw)
-    assert_valid_products(products)
-    assert len(products) > 0
-    assert all(p.country_code == "PL" for p in products)
-    assert all(p.store == "Żabka" for p in products)
 
-
-@pytest.mark.skipif(_ZABKA_FIXTURE is None,
-                    reason="no Żabka fixture (site unreachable at build time)")
-def test_zabka_charset_handling_regression():
-    """Verify fetch_products() correctly handles server with no charset.
-
-    Regression test for: zabka.pl serves Content-Type: text/html without charset
-    declaration, causing requests to default to ISO-8859-1. Polish characters
-    become mojibake when read as .text, breaking parse(). fetch_products()
-    must decode .content as UTF-8 instead.
-    """
-    ZabkaScraper = _load_pl_scraper_module("zabka").ZabkaScraper
-
-    # Read the fixture as raw bytes
-    fixture_bytes = (_ZABKA_FIXTURE).read_bytes()
-
-    # Create a mock response that simulates the mojibake scenario:
-    # .content is the correct UTF-8 bytes
-    # .text is the broken ISO-8859-1 mojibake decode (what requests would do)
-    mock_response = mock.Mock()
-    mock_response.content = fixture_bytes
-    mock_response.text = fixture_bytes.decode("iso-8859-1", errors="replace")
-    mock_response.raise_for_status = mock.Mock()
-
-    # Patch requests.get to return our mock response
-    with mock.patch("requests.get", return_value=mock_response):
-        scraper = ZabkaScraper()
-        products = scraper.fetch_products()
-
-    # Verify the fix works: parse succeeded with UTF-8 decode
-    assert len(products) > 0, "fetch_products() should parse > 0 products from fixture"
-    assert_valid_products(products)
-    assert all(p.country_code == "PL" for p in products)
-    assert all(p.store == "Żabka" for p in products)
+# NOTE: Żabka's tests moved to tests/test_pl_zabka_wolt.py — task 24
+# (2026-07-11) replaced the old zabka.pl homepage-carousel scraper (8
+# curated tiles, no barcode) with a full-catalog crawl of Wolt's "Żabka
+# Jush" dark-store consumer API (2,128+ SKUs, ~98.5% with EAN). The old
+# `parse()`/homepage-fetch tests that lived here (test_zabka_parses_fixture,
+# test_zabka_charset_handling_regression) tested behavior that no longer
+# exists; see test_pl_zabka_wolt.py for the current coverage
+# (parse_category_items/extract_next_page_token/flatten_leaf_categories/
+# fetch_products).

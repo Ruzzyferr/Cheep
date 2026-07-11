@@ -1,0 +1,49 @@
+{
+  "assortment_id": "6627c174c6a9f15a76c3f186",
+  "categories": [
+    {
+      "id": "aa11bb22cc33dd44ee55ff66",
+      "name": "Produkty tygodnia",
+      "slug": "produkty-tygodnia-11",
+      "subcategories": []
+    },
+    {
+      "id": "31aa31bb31cc31dd31ee31ff",
+      "name": "Owoce i warzywa",
+      "slug": "owoce-i-warzywa-31",
+      "subcategories": [
+        {
+          "id": "32aa32bb32cc32dd32ee32ff",
+          "name": "Owoce",
+          "slug": "owoce-32",
+          "subcategories": []
+        },
+        {
+          "id": "33aa33bb33cc33dd33ee33ff",
+          "name": "Warzywa",
+          "slug": "warzywa-33",
+          "subcategories": []
+        }
+      ]
+    },
+    {
+      "id": "38aa38bb38cc38dd38ee38ff",
+      "name": "Nabiał",
+      "slug": "nabia-38",
+      "subcategories": [
+        {
+          "id": "49aa49bb49cc49dd49ee49ff",
+          "name": "Sery żółte",
+          "slug": "sery-zolte-49",
+          "subcategories": []
+        },
+        {
+          "id": "50aa50bb50cc50dd50ee50ff",
+          "name": "Twarogi",
+          "slug": "twarogi-50",
+          "subcategories": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,111 +1,82 @@
-"""Carrefour (Poland) scraper — anchor, currently blocked.
+"""Carrefour (Poland) scraper — Wolt hypermarket consumer API.
 
-Recon (2026-07-02): `requests.get("https://www.carrefour.pl/", ...)` returns
-403; the body is a Cloudflare WAF challenge page titled "Attention Required!
-| Cloudflare" ("Sorry, you have been blocked... This website is using a
-security service to protect itself from online attacks."). Driving a real
-headless Chromium session via Playwright hit the identical Cloudflare
-interstitial (same title, same "blocked" page), reproduced on reload — no
-network response for the page or any XHR/fetch carried product JSON. This is
-a genuine edge/WAF-level bot-check, not a one-off fluke. No product
-JSON/HTML was retrievable, so no fixture was captured and none is
-fabricated here.
+Thin subclass of the shared `WoltVenueScraper` (see `wolt_base.py` for the full
+endpoint model, item schema, quantity-parsing caveat, and hardening notes).
 
-`parse()` is written defensively against the JSON shape Carrefour's regional
-storefront product-listing APIs commonly expose (name/price/unit/EAN
-fields), mirroring the DE Kaufland / SE Willys dual-path pattern — but it is
-UNVERIFIED against a real Carrefour PL payload (no live sample was
-reachable). Treat it as a starting point to correct once recon succeeds
-(e.g. via a residential proxy or anti-bot service), not as confirmed-working
-code. `fetch_products()` intentionally raises `NotImplementedError` so
-nothing pretends to work end-to-end while blocked.
+REWRITE (2026-07-11, task 24). The previous direct-site scraper was Cloudflare
+blocked: recon 2026-07-02 found `requests.get("https://www.carrefour.pl/")` = 403
+with a Cloudflare WAF challenge page, reproduced under headless Playwright — no
+product JSON reachable, so the old `fetch_products()` raised NotImplementedError.
+Task-24 recon found Carrefour's real online catalog is fully reachable on Wolt:
+Carrefour runs its hypermarkets as storefront venues on Wolt's unauthenticated,
+plain-JSON `consumer-api.wolt.com` — no Cloudflare, no auth, no Playwright.
+
+The pinned venue is **Carrefour Jerozolimskie** (a full central-Warsaw
+hypermarket, NOT a small "Carrefour Express"-style dark store), slug
+`carrefour-jerozolimskie`, discovered via `POST /v1/pages/search
+{"q":"carrefour","target":"venues"}` from central Warsaw during recon. Its
+assortment tree exposes 35 top-level / 319 leaf categories; the grocery leaves
+sampled (dairy) returned ~100% `barcode_gtin` (EAN) coverage and full
+`page_token` pagination — the same schema Żabka rides on. If the pinned slug
+ever 404s, `fetch_products()` falls back to re-discovering a live Carrefour
+venue via the brand roll-up `GET /v1/pages/venue-list/carrefour-all` (then a
+`carrefour` venue search).
+
+One-store pricing scope: this is a single Warsaw hypermarket venue's prices, not
+a synthesized national catalog — the same one-store snapshot model as the other
+PL chains (`VENUE_SLUG` / `VENUE_LIST_URL` are module constants for easy
+re-pinning). No `category_deny_prefixes`-style domain filtering is applied here;
+add it in config.json if the non-grocery departments (Moda/clothing, Artykuły
+domowe/homeware, Artykuły biurowe/office) should be excluded from ingest, the
+same mechanism Auchan PL uses.
+
+Class name (`CarrefourPLScraper`) and `fetch_products()` signature are unchanged
+so the config.json runner keeps working.
 """
 import importlib.util
-import json
 import sys
-from decimal import Decimal
 from pathlib import Path
-from typing import List
 
-_REPO_ROOT = Path(__file__).resolve().parents[3]  # .../Cheep-Scraper
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
+_HERE = Path(__file__).resolve().parent
 
 
-def _load_repo_root_module(name: str, relpath: str):
-    """Load a repo-root module by absolute file path (see auchan_pl.py's
-    identical helper for why: this file's own directory is also named
-    `scrapers`, which collides with the repo-root package of the same name
-    once a test harness puts this directory earlier on sys.path)."""
-    key = f"_cheep_root_{name}"
+def _load_sibling_module(name: str):
+    """Load a sibling scraper module (wolt_base.py) by absolute file path — see
+    zabka.py's identical helper for why (this file is loaded via
+    spec_from_file_location, so `import wolt_base` can't be relied on)."""
+    key = f"_cheep_pl_scraper_{name}"
     if key in sys.modules:
         return sys.modules[key]
-    spec = importlib.util.spec_from_file_location(key, _REPO_ROOT / relpath)
+    spec = importlib.util.spec_from_file_location(key, _HERE / f"{name}.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules[key] = mod
     spec.loader.exec_module(mod)
     return mod
 
 
-_base_scraper = _load_repo_root_module("base_scraper", "scrapers/base_scraper.py")
-_units = _load_repo_root_module("units", "scrapers/units.py")
-BaseScraper = _base_scraper.BaseScraper
-Product = _base_scraper.Product
-parse_quantity_and_unit = _units.parse_quantity_and_unit
-compute_unit_price = _units.compute_unit_price
+_wolt_base = _load_sibling_module("wolt_base")
+WoltVenueScraper = _wolt_base.WoltVenueScraper
+# Re-exported for parity with zabka.py (module-scope access to the endpoint bases).
+ASSORTMENT_BASE = _wolt_base.ASSORTMENT_BASE
+CONSUMER_API_BASE = _wolt_base.CONSUMER_API_BASE
+VENUE_LIST_URL = f"{_wolt_base.VENUE_LIST_BASE}/carrefour-all"
+
+# Pinned venue + probe coordinate (see module docstring). Change VENUE_SLUG to
+# re-pin to a different Carrefour venue/city.
+VENUE_SLUG = "carrefour-jerozolimskie"
+VENUE_LAT = _wolt_base.DEFAULT_WARSAW_LAT
+VENUE_LON = _wolt_base.DEFAULT_WARSAW_LON
 
 
-class CarrefourPLScraper(BaseScraper):
+class CarrefourPLScraper(WoltVenueScraper):
+    STORE_NAME = "Carrefour"
+
     def __init__(self):
-        super().__init__(store_name="Carrefour")
-
-    @staticmethod
-    def parse(raw_text: str) -> List[Product]:
-        """Best-effort parse of a Carrefour PL product listing payload (JSON
-        array or `{"products": [...]}` envelope). UNVERIFIED — no live
-        Carrefour PL fixture was obtainable (see module docstring); field
-        names are a reasonable guess pending real recon, not a confirmed
-        contract. Polish prices use a comma decimal and often a trailing
-        "zł" (e.g. "3,49 zł"), handled by parse_price below.
-        """
-        data = json.loads(raw_text)
-        items = data.get("products", data) if isinstance(data, dict) else data
-        products: List[Product] = []
-        for item in items or []:
-            name = item.get("name") or item.get("title")
-            price_raw = item.get("price") or item.get("displayPrice")
-            if not name or price_raw in (None, ""):
-                continue
-            price = Decimal(str(price_raw).replace("zł", "").replace(",", ".").strip())
-            qty, unit = parse_quantity_and_unit(item.get("unit") or item.get("quantity") or item.get("packaging"))
-            unit_price, unit_price_unit = compute_unit_price(price, qty, unit)
-            products.append(Product(
-                name=str(name).strip(),
-                price=price,
-                store="Carrefour",
-                brand=item.get("brand"),
-                barcode=item.get("ean") or item.get("gtin"),
-                sku=str(item.get("id") or item.get("sku") or name)[:64],
-                raw_category=item.get("category"),
-                unit=unit,
-                quantity=qty,
-                unit_price=unit_price,
-                unit_price_unit=unit_price_unit,
-                image_url=item.get("image"),
-                country_code="PL",
-            ))
-        return products
-
-    def fetch_products(self) -> List[Product]:
-        raise NotImplementedError(
-            "PL Carrefour: site unreachable at build time (403 / Cloudflare WAF challenge "
-            "on both requests and Playwright headless Chromium) — see config.json note"
-        )
-
-    def fetch_product_detail(self, product_url: str) -> dict:
-        return {}
-
-    def parse_price(self, price_str: str) -> Decimal:
-        return Decimal(
-            str(price_str).replace("zł", "").replace(",", ".").strip()
+        super().__init__(
+            store_name="Carrefour",
+            venue_slug=VENUE_SLUG,
+            venue_list_url=VENUE_LIST_URL,
+            search_term="carrefour",
+            lat=VENUE_LAT,
+            lon=VENUE_LON,
         )
