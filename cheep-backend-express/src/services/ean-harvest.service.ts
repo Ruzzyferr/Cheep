@@ -357,30 +357,51 @@ const CONNECTIVE_WORDS = new Set<string>([
  * Tokenize a name into its significant tokens: fold diacritics + lowercase
  * (baseNormalize), split on non-alphanumeric — crucially KEEPING digits inside
  * tokens intact (unlike generateProductFingerprint, which strips all digits
- * before hashing) — then drop brand tokens and pure connectives.
+ * before hashing) — then drop brand tokens and pure connectives. Returns a
+ * LIST (not a Set) so duplicate occurrences of a token are preserved for the
+ * multiset comparison in strictNameMatch.
  */
-function significantTokens(name: string, brandTokens: ReadonlySet<string>): Set<string> {
+function significantTokens(name: string, brandTokens: ReadonlySet<string>): string[] {
     const folded = baseNormalize(name); // lowercase, diacritics folded, punctuation -> space
     const tokens = folded.split(' ').filter(Boolean);
-    const out = new Set<string>();
+    const out: string[] = [];
     for (const t of tokens) {
         if (brandTokens.has(t)) continue;
         if (CONNECTIVE_WORDS.has(t)) continue;
-        out.add(t);
+        out.push(t);
     }
     return out;
 }
 
+/** token -> occurrence count, built from a significant-token LIST. */
+function tokenCounts(tokens: readonly string[]): Map<string, number> {
+    const counts = new Map<string, number>();
+    for (const t of tokens) counts.set(t, (counts.get(t) ?? 0) + 1);
+    return counts;
+}
+
+/** true iff both count-maps have identical keys AND identical counts per key. */
+function multisetsEqual(a: ReadonlyMap<string, number>, b: ReadonlyMap<string, number>): boolean {
+    if (a.size !== b.size) return false;
+    for (const [token, count] of a) {
+        if (b.get(token) !== count) return false;
+    }
+    return true;
+}
+
 /**
  * STRICT unsupervised guard: true only if nameA and nameB reduce to EXACTLY the
- * same set of significant tokens (order-independent — so brand-first vs
- * brand-last word-order variants still match) once brand words and pure
- * connectives are removed. ANY extra or differing token (a promo-pack gram
- * suffix, a different flour "typ", a different pack count, a different age
- * range, "2w1" vs "3w1", a leftover "2" from "2 500 g") makes the sets unequal
- * and the match is REJECTED. This is a precision-over-recall guard: it may
- * reject legitimate spelling variants/typos (e.g. "Kechup" vs "Ketchup") — that
- * is an ACCEPTABLE safe under-merge, never an over-merge.
+ * same MULTISET of significant tokens (order-independent — so brand-first vs
+ * brand-last word-order variants still match — but COUNT-aware, so a
+ * duplicated token cannot slip through a set-equality check) once brand words
+ * and pure connectives are removed. ANY extra, differing, or differently-
+ * repeated token (a promo-pack gram suffix, a different flour "typ", a
+ * different pack count, a different age range, "2w1" vs "3w1", a leftover "2"
+ * from "2 500 g", or a name that simply repeats a token like "100 g 100 g")
+ * makes the multisets unequal and the match is REJECTED. This is a
+ * precision-over-recall guard: it may reject legitimate spelling
+ * variants/typos (e.g. "Kechup" vs "Ketchup") — that is an ACCEPTABLE safe
+ * under-merge, never an over-merge.
  */
 export function strictNameMatch(nameA: string, nameB: string, brand?: string): boolean {
     const brandTokens = new Set<string>();
@@ -388,15 +409,11 @@ export function strictNameMatch(nameA: string, nameB: string, brand?: string): b
         for (const t of baseNormalize(brand).split(' ').filter(Boolean)) brandTokens.add(t);
     }
 
-    const setA = significantTokens(nameA, brandTokens);
-    const setB = significantTokens(nameB, brandTokens);
+    const tokensA = significantTokens(nameA, brandTokens);
+    const tokensB = significantTokens(nameB, brandTokens);
 
-    if (setA.size === 0 || setB.size === 0) return false; // defensive: never match on nothing
-    if (setA.size !== setB.size) return false;
-    for (const t of setA) {
-        if (!setB.has(t)) return false;
-    }
-    return true;
+    if (tokensA.length === 0 || tokensB.length === 0) return false; // defensive: never match on nothing
+    return multisetsEqual(tokenCounts(tokensA), tokenCounts(tokensB));
 }
 
 // ---------------------------------------------------------------------------

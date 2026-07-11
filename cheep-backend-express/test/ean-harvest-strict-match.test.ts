@@ -115,6 +115,19 @@ describe('strictNameMatch: known-good word-order pairs (must ALL accept)', () =>
   });
 });
 
+describe('strictNameMatch: multiset (count-aware) token equality', () => {
+  it('rejects a duplicated token that a set-based comparison would let slip through', () => {
+    // Reviewer-found false accept: as SETS, {produkt,100,g} == {produkt,100,g},
+    // but nameA repeats "100 g" — the token COUNTS differ (100:x2,g:x2 vs
+    // 100:x1,g:x1) so this MUST be rejected under multiset equality.
+    expect(strictNameMatch('Produkt 100 g 100 g', 'Produkt 100 g')).toBe(false);
+  });
+
+  it('rejects differing token composition even with overlapping token sets', () => {
+    expect(strictNameMatch('X 2 x 100 g', 'X 100 g 100 g')).toBe(false);
+  });
+});
+
 describe('strictNameMatch: additional guards', () => {
   it('rejects when brand is omitted and brand tokens differ significant sets', () => {
     // Without a brand hint, the brand token itself becomes a significant
