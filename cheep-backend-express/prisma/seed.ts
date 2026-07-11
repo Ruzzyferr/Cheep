@@ -336,39 +336,39 @@ async function main() {
         skipDuplicates: true, // Aynı store_id + product_id varsa atla
         data: [
             // Pınar Süt fiyatları
-            { store_id: migros.id, product_id: pinarSut.id, price: 45.50, unit: 'adet', source: 'scrape' },
-            { store_id: carrefour.id, product_id: pinarSut.id, price: 44.90, unit: 'adet', source: 'scrape' },
-            { store_id: a101.id, product_id: pinarSut.id, price: 42.95, unit: 'adet', source: 'scrape' },
-            { store_id: sok.id, product_id: pinarSut.id, price: 43.50, unit: 'adet', source: 'scrape' },
+            { store_id: migros.id, product_id: pinarSut.id, price: 45.50, unit: 'adet', source: 'seed' },
+            { store_id: carrefour.id, product_id: pinarSut.id, price: 44.90, unit: 'adet', source: 'seed' },
+            { store_id: a101.id, product_id: pinarSut.id, price: 42.95, unit: 'adet', source: 'seed' },
+            { store_id: sok.id, product_id: pinarSut.id, price: 43.50, unit: 'adet', source: 'seed' },
 
             // Sütaş Süt fiyatları
-            { store_id: migros.id, product_id: sutasSut.id, price: 44.90, unit: 'adet', source: 'scrape' },
-            { store_id: carrefour.id, product_id: sutasSut.id, price: 43.50, unit: 'adet', source: 'scrape' },
-            { store_id: a101.id, product_id: sutasSut.id, price: 41.95, unit: 'adet', source: 'scrape' },
+            { store_id: migros.id, product_id: sutasSut.id, price: 44.90, unit: 'adet', source: 'seed' },
+            { store_id: carrefour.id, product_id: sutasSut.id, price: 43.50, unit: 'adet', source: 'seed' },
+            { store_id: a101.id, product_id: sutasSut.id, price: 41.95, unit: 'adet', source: 'seed' },
 
             // İçim Süt fiyatları
-            { store_id: migros.id, product_id: ichimSut.id, price: 46.50, unit: 'adet', source: 'scrape' },
-            { store_id: sok.id, product_id: ichimSut.id, price: 44.50, unit: 'adet', source: 'scrape' },
+            { store_id: migros.id, product_id: ichimSut.id, price: 46.50, unit: 'adet', source: 'seed' },
+            { store_id: sok.id, product_id: ichimSut.id, price: 44.50, unit: 'adet', source: 'seed' },
 
             // Beyaz Peynir fiyatları
-            { store_id: migros.id, product_id: beyazPeynir.id, price: 125.50, unit: 'adet', source: 'scrape' },
-            { store_id: carrefour.id, product_id: beyazPeynir.id, price: 119.90, unit: 'adet', source: 'scrape' },
+            { store_id: migros.id, product_id: beyazPeynir.id, price: 125.50, unit: 'adet', source: 'seed' },
+            { store_id: carrefour.id, product_id: beyazPeynir.id, price: 119.90, unit: 'adet', source: 'seed' },
 
             // Ekmek fiyatları
-            { store_id: migros.id, product_id: unoBeyazEkmek.id, price: 8.50, unit: 'adet', source: 'scrape' },
-            { store_id: carrefour.id, product_id: unoBeyazEkmek.id, price: 8.00, unit: 'adet', source: 'scrape' },
-            { store_id: a101.id, product_id: unoBeyazEkmek.id, price: 7.50, unit: 'adet', source: 'scrape' },
-            { store_id: sok.id, product_id: unoBeyazEkmek.id, price: 7.75, unit: 'adet', source: 'scrape' },
+            { store_id: migros.id, product_id: unoBeyazEkmek.id, price: 8.50, unit: 'adet', source: 'seed' },
+            { store_id: carrefour.id, product_id: unoBeyazEkmek.id, price: 8.00, unit: 'adet', source: 'seed' },
+            { store_id: a101.id, product_id: unoBeyazEkmek.id, price: 7.50, unit: 'adet', source: 'seed' },
+            { store_id: sok.id, product_id: unoBeyazEkmek.id, price: 7.75, unit: 'adet', source: 'seed' },
 
             // Domates fiyatları
-            { store_id: migros.id, product_id: domates.id, price: 32.50, unit: 'kg', source: 'scrape' },
-            { store_id: carrefour.id, product_id: domates.id, price: 29.90, unit: 'kg', source: 'scrape' },
-            { store_id: a101.id, product_id: domates.id, price: 28.50, unit: 'kg', source: 'scrape' },
+            { store_id: migros.id, product_id: domates.id, price: 32.50, unit: 'kg', source: 'seed' },
+            { store_id: carrefour.id, product_id: domates.id, price: 29.90, unit: 'kg', source: 'seed' },
+            { store_id: a101.id, product_id: domates.id, price: 28.50, unit: 'kg', source: 'seed' },
 
             // Coca Cola fiyatları
-            { store_id: migros.id, product_id: cocaCola.id, price: 35.50, unit: 'adet', source: 'scrape' },
-            { store_id: carrefour.id, product_id: cocaCola.id, price: 33.90, unit: 'adet', source: 'scrape' },
-            { store_id: sok.id, product_id: cocaCola.id, price: 32.95, unit: 'adet', source: 'scrape' },
+            { store_id: migros.id, product_id: cocaCola.id, price: 35.50, unit: 'adet', source: 'seed' },
+            { store_id: carrefour.id, product_id: cocaCola.id, price: 33.90, unit: 'adet', source: 'seed' },
+            { store_id: sok.id, product_id: cocaCola.id, price: 32.95, unit: 'adet', source: 'seed' },
         ],
     });
 

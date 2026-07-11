@@ -186,6 +186,23 @@ touch different systems.
 - [ ] Post-deploy smoke: repeat the compare-engine check from this task's local verification
       (create a list with a few real PL products, `POST /lists/:id/compare` with a Warsaw
       location) against prod and confirm distances resolve from real branches, not `null`.
+- [ ] **One-time cleanup — old TR demo rows seeded with `source: 'scrape'`.** `prisma/seed.ts`'s
+      TR demo `StorePrice` rows now use `source: 'seed'` (this branch), matching CH/SE/DE/PL, so
+      they're never swept by the 21-day scrape-prune. But any **existing prod DB** seeded before
+      this fix still has TR demo rows with `source: 'scrape'`, which the prune expansion will
+      delete after 21d and leave the TR demo products priceless. Run once, post-deploy, against
+      prod: review then delete any TR demo products left with no prices (non-`mf-` EAN, i.e. not
+      a marketfiyati-imported row):
+      ```sql
+      SELECT p.id, p.name, p.ean_barcode FROM products p
+        JOIN countries c ON c.id = p.country_id
+        WHERE c.code = 'TR' AND p.ean_barcode NOT LIKE 'mf-%'
+          AND NOT EXISTS (SELECT 1 FROM store_prices sp WHERE sp.product_id = p.id);
+      -- after reviewing the list above:
+      DELETE FROM products p USING countries c
+        WHERE c.id = p.country_id AND c.code = 'TR' AND p.ean_barcode NOT LIKE 'mf-%'
+          AND NOT EXISTS (SELECT 1 FROM store_prices sp WHERE sp.product_id = p.id);
+      ```
 
 ## 6. Rollback / kill-switch
 
