@@ -1,6 +1,7 @@
 import importlib.util
 import json
 import sys
+from decimal import Decimal
 from pathlib import Path
 import pytest
 from unittest import mock
@@ -48,6 +49,7 @@ _BIEDRONKA_SITEMAP_FIXTURE = _first_fixture("biedronka_sitemap_sample.xml")
 _BIEDRONKA_NAV_FIXTURE = _first_fixture("biedronka_nav_sample.html")
 _BIEDRONKA_PAGINATION_FIXTURE = _first_fixture("biedronka_pagination_sample.html")
 _LIDL_PL_FIXTURE = _first_fixture("lidl_pl_sample.json", "lidl_pl_sample.html")
+_LIDL_PL_API_FIXTURE = _first_fixture("lidl_pl_api_sample.json")
 _ZABKA_FIXTURE = _first_fixture("zabka_sample.html", "zabka_sample.json")
 
 
@@ -221,6 +223,141 @@ def test_lidl_pl_parses_fixture():
     assert len(products) > 0
     assert all(p.country_code == "PL" for p in products)
     assert all(p.store == "Lidl" for p in products)
+
+
+@pytest.mark.skipif(_LIDL_PL_API_FIXTURE is None,
+                    reason="no Lidl PL API fixture (site unreachable at build time)")
+def test_lidl_pl_api_parses_fixture():
+    """`/q/api/search` JSON parsing: 6 real captured items, one with
+    price=None (must be skipped), the rest kept with correct price/
+    original_price/quantity/category/brand/product_url."""
+    mod = _load_pl_scraper_module("lidl_pl")
+    LidlPLScraper = mod.LidlPLScraper
+    raw = load_fixture(PL_DIR, _LIDL_PL_API_FIXTURE.name)
+    products = LidlPLScraper.parse_api_search(raw)
+    assert_valid_products(products)
+    assert all(p.country_code == "PL" for p in products)
+    assert all(p.store == "Lidl" for p in products)
+    assert all(p.barcode is None for p in products)
+
+    by_sku = {p.sku: p for p in products}
+    assert len(products) == 5, "the price=None item (10035883) must be skipped"
+    assert "10035883" not in by_sku
+
+    melon = by_sku["10035884"]
+    assert melon.price == Decimal("4.89")
+    assert melon.original_price == Decimal("8.99")
+    assert melon.quantity == 1.0 and melon.unit == "kg"
+    # raw_category field is just "Food" -> falls back to keyfacts.wonCategoryPrimary
+    assert melon.raw_category.startswith("Światy potrzeb/")
+    assert melon.product_url == f"{mod.BASE}/p/melony-zolte-luzem/p10035884"
+
+    makaron = by_sku["10035737"]
+    # packaging "2 x 100 g 100 g = 2,00" -> cleaned to "2 x 100 g" -> 200 g total
+    assert makaron.quantity == 200.0 and makaron.unit == "g"
+    assert makaron.original_price is None, "oldPrice 0.0 means 'not discounted'"
+    assert makaron.brand == "VITASIA"
+
+    spieniacz = by_sku["100401586"]
+    # NonFood: the flat `category` field is already a specific breadcrumb,
+    # NOT the generic "Food"/"NonFood" placeholder -> used as-is.
+    assert spieniacz.raw_category.startswith("Kategorie/")
+    assert spieniacz.brand == "SILVERCREST®"
+
+    bosch = by_sku["100366676"]
+    assert bosch.original_price == Decimal("1399.0")
+
+
+@pytest.mark.parametrize("text,expected", [
+    ("1 kg * cena przed obniżką: 1 kg = 8,99", "1 kg"),
+    ("2 x 100 g 100 g = 2,00", "2 x 100 g"),
+    ("250 g różne rodzaje 100 g = 4,20", "250 g różne rodzaje"),
+    ("500 g", "500 g"),
+    (None, None),
+    ("", None),
+])
+def test_lidl_pl_clean_packaging_text_strips_reference_clause(text, expected):
+    """The trailing pre-promo reference clause (e.g. "* cena przed
+    obniżką: 1 kg = 8,99", or a bare trailing "<unit> = <price>") must be
+    stripped so the shared quantity parser (which reads the LAST
+    size-shaped token) doesn't mistake the reference unit for the real
+    package size."""
+    mod = _load_pl_scraper_module("lidl_pl")
+    assert mod._clean_packaging_text(text) == expected
+
+
+@pytest.mark.skipif(_LIDL_PL_API_FIXTURE is None,
+                    reason="no Lidl PL API fixture (site unreachable at build time)")
+def test_lidl_pl_extract_search_meta_reads_pagination_fields():
+    mod = _load_pl_scraper_module("lidl_pl")
+    LidlPLScraper = mod.LidlPLScraper
+    raw = load_fixture(PL_DIR, _LIDL_PL_API_FIXTURE.name)
+    offset, fetchsize, num_found = LidlPLScraper._extract_search_meta(raw)
+    assert (offset, fetchsize, num_found) == (0, 36, 59)
+
+
+def test_lidl_pl_extract_search_meta_defaults_on_malformed_input():
+    mod = _load_pl_scraper_module("lidl_pl")
+    LidlPLScraper = mod.LidlPLScraper
+    assert LidlPLScraper._extract_search_meta("not json") == (0, 0, 0)
+    assert LidlPLScraper._extract_search_meta("[]") == (0, 0, 0)
+    assert LidlPLScraper._extract_search_meta("{}") == (0, 0, 0)
+
+
+def test_lidl_pl_fetch_products_paginates_and_isolates_term_errors():
+    """fetch_products() against a mocked `/q/api/search` (no network, no
+    real discovery) must: follow `offset` while `offset+fetchsize <
+    numFound`, stop once exhausted, dedupe by sku across terms/categories,
+    and continue past a term whose fetch raises."""
+    mod = _load_pl_scraper_module("lidl_pl")
+    LidlPLScraper = mod.LidlPLScraper
+
+    def _wrapper(erp, name, price):
+        return {
+            "resultClass": "product",
+            "gridbox": {"data": {
+                "erpNumber": erp, "fullTitle": name, "category": "Food",
+                "price": {"price": price},
+            }},
+        }
+
+    def _page(items, offset, fetchsize, num_found):
+        return json.dumps({
+            "items": items, "offset": offset, "fetchsize": fetchsize, "numFound": num_found,
+        })
+
+    page1 = _page([_wrapper("1", "Produkt A", "3.50"), _wrapper("2", "Produkt B", "4.20")],
+                  offset=0, fetchsize=2, num_found=3)
+    page2 = _page([_wrapper("3", "Produkt C", "2.10")], offset=2, fetchsize=2, num_found=3)
+    other_term_dup = _page([_wrapper("1", "Produkt A", "3.50")], offset=0, fetchsize=36, num_found=1)
+
+    def fake_get(url, headers, timeout):
+        class Resp:
+            def raise_for_status(self):
+                pass
+        resp = Resp()
+        if "q=dobry" in url and "offset=2" in url:
+            resp.content = page2.encode("utf-8")
+        elif "q=dobry" in url:
+            resp.content = page1.encode("utf-8")
+        elif "q=zepsuty" in url:
+            raise RuntimeError("simulated network failure")
+        elif "q=inny" in url:
+            resp.content = other_term_dup.encode("utf-8")
+        else:
+            raise AssertionError(f"unexpected url {url}")
+        return resp
+
+    scraper = LidlPLScraper()
+    scraper.delay_between_requests = 0  # keep the test fast
+    with mock.patch("requests.get", side_effect=fake_get):
+        products = scraper.fetch_products(
+            terms=["dobry", "zepsuty", "inny"], categories=[],
+        )
+
+    skus = sorted(p.sku for p in products)
+    assert skus == ["1", "2", "3"], "expected page-2 product + dedup across terms"
+    assert len(products) == 3
 
 
 @pytest.mark.skipif(_ZABKA_FIXTURE is None,

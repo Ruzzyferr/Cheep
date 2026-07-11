@@ -1,0 +1,2149 @@
+{
+  "type": "search",
+  "version": "v2.0.0",
+  "engine": "ldt-searcher",
+  "xPayload": {
+    "keywordResults": {
+      "num_items_found": 14
+    }
+  },
+  "id": "eacc22a2-f8a1-4d59-b23d-1e395af5ed1c",
+  "q": "mleko",
+  "locale": "pl_PL",
+  "assortment": "PL",
+  "resultType": "search",
+  "masterQuery": "mleko",
+  "numFound": 59,
+  "offset": 0,
+  "fetchsize": 36,
+  "maxfetchsize": 1000,
+  "items": [
+    {
+      "resultClass": "product",
+      "type": "product",
+      "code": "10035884",
+      "label": "",
+      "url": "",
+      "xPayload": {
+        "metaData": {
+          "relevancyScore": "RAtvciV8fFDMvG+Eiyfb3s+dkMu6idAfKQwc0Ju8pP6imNdDAQRXQqygJAw=",
+          "keywordScore": "wYxzfilaUs1bURFleG7RgVtMax1apBSQMQB2p6nHzqabrvD4ta2Liv2sSwc=",
+          "semanticScore": "KO0Dk0NL7Iu0/1aCnzlf+Qmnxx7UF4rWfwU8aFhh+jUTWECzNIhbP9DxkFc=",
+          "keywordScoreRaw": "VGKUzdxi8R4ikkteGXa4qXGsnyIDVsDD9YMJnuECHwICC4eWZHWV4SL4Z4M=",
+          "ratingScore": "dsoRRsl5qMV3q1SQAsRd74HsvOGMx4MON8mR69DhEtM44TFRixxx5XzGyL0=",
+          "freshnessScore": "ovbiUHObuSRdfLQHGQliXqg3fSooJdpP5vgg49g3du2y6qfshJeIfQ4oI3s=",
+          "searchHubImpressions": "SvfNv4Gq96MfJha/pgwS9MO4VI7D7HzKX6S4hxRRTfbKDw/u0DgzIV4EfXo=",
+          "searchHubClicks": "GfAfG74202+HI8CtY/3/FR2u7ec7k3CpxDoFOqVg3sXJHA6HdAZzYKMxhYk=",
+          "searchHubCarts": "Nco98wcvF21lSHt1a7ymkFu03jwLu48hW0zWzquFZq9nm0rzekyGqpaU7JM=",
+          "businessRuleFactor": "WobIj8tKEz//mNwMilSnbwhbOu1/ItDf2pnyFZ8vM1OHlZUm+FzxmT/6q2s="
+        }
+      },
+      "gridbox": {
+        "country": "PL",
+        "sequence": 1783548077474052,
+        "data": {
+          "ageRestriction": false,
+          "awards": [],
+          "brand": {
+            "showBrand": false
+          },
+          "canonicalPath": "/p/melony-zolte-luzem/p10035884",
+          "canonicalUrl": "/p/melony-zolte-luzem/p10035884",
+          "category": "Food",
+          "cutoutimageV2": [],
+          "dealOfDay": {
+            "active": false
+          },
+          "designTheme": "default",
+          "disclaimers": [
+            {
+              "id": "code_10035884_9f000e2d",
+              "type": "CODE",
+              "value": "Basic"
+            },
+            {
+              "id": "code_10035884_c054d3c8",
+              "type": "CODE",
+              "value": "StrikePrice_LowestPrice30days"
+            }
+          ],
+          "displayFreeDelivery": false,
+          "energyLabels": [],
+          "erpNumber": "10035884",
+          "flashSales": false,
+          "fullTitle": "Melony żółte, luzem",
+          "gs1Attributes": [],
+          "havingPrice": true,
+          "havingThreesixty": false,
+          "havingVideos": false,
+          "highlightedSeals": 0,
+          "ians": [
+            "80550"
+          ],
+          "image": "https://imgproxy-retcat.assets.schwarz/flOwETd0Yf3OL3FoYLJXxz8E5Ximerw2CZ0z_HHESA8/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50LzZFNTY2NEE3RUMxQkVBREM0NjQ3QzRDRE/VDNEJCMzg0OURBNjJBMzg1M0FBNTdEN0VEMUIxODE1Qjc1NkY2QUUucG5n.png",
+          "image_V1": {
+            "image": "https://imgproxy-retcat.assets.schwarz/flOwETd0Yf3OL3FoYLJXxz8E5Ximerw2CZ0z_HHESA8/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50LzZFNTY2NEE3RUMxQkVBREM0NjQ3QzRDRE/VDNEJCMzg0OURBNjJBMzg1M0FBNTdEN0VEMUIxODE1Qjc1NkY2QUUucG5n.png",
+            "accessibility": "Cały żółty melon i plaster melona."
+          },
+          "isLidlGiftCard": false,
+          "isUsedProduct": false,
+          "itemId": 10035884,
+          "imageList": [
+            "https://imgproxy-retcat.assets.schwarz/flOwETd0Yf3OL3FoYLJXxz8E5Ximerw2CZ0z_HHESA8/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50LzZFNTY2NEE3RUMxQkVBREM0NjQ3QzRDRE/VDNEJCMzg0OURBNjJBMzg1M0FBNTdEN0VEMUIxODE1Qjc1NkY2QUUucG5n.png"
+          ],
+          "imageList_V1": [
+            {
+              "image": "https://imgproxy-retcat.assets.schwarz/flOwETd0Yf3OL3FoYLJXxz8E5Ximerw2CZ0z_HHESA8/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50LzZFNTY2NEE3RUMxQkVBREM0NjQ3QzRDRE/VDNEJCMzg0OURBNjJBMzg1M0FBNTdEN0VEMUIxODE1Qjc1NkY2QUUucG5n.png",
+              "accessibility": "Cały żółty melon i plaster melona."
+            }
+          ],
+          "keyfacts": {
+            "analyticsCategory": "Food",
+            "fullTitle": "Melony żółte, luzem",
+            "moreDetails": "Więcej szczegółów",
+            "title": "Melony żółte, luzem",
+            "wonCategoryPrimary": "Światy potrzeb/Żywność i żywność w pobliżu/Owoce i warzywa/Owoce",
+            "wonCategoryPrimaryPath": "0/17/1710/171010"
+          },
+          "lidlPlus": [],
+          "multipack": false,
+          "online": false,
+          "preventSelling": false,
+          "price": {
+            "currencyCode": "PLN",
+            "currencyCodeSecond": "",
+            "currencySymbol": "zł",
+            "currencySymbolSecond": "",
+            "discount": {
+              "deletedPrice": 8.99,
+              "discountHasStar": false,
+              "discountText": "45% taniej",
+              "fromRecommendedPrice": false,
+              "hideBargainHint": false,
+              "bargainHintEnabled": false,
+              "bargainHintText": "Megaokazja",
+              "percentageDiscount": 45,
+              "showDiscount": true,
+              "showFrom": false,
+              "showPercentage": true,
+              "showUpTo": false,
+              "suffix": "*"
+            },
+            "displayedCurrency": "zł",
+            "hasStar": false,
+            "hasVat": false,
+            "oldPrice": 8.99,
+            "packaging": {
+              "text": "1 kg * cena przed obniżką: 1 kg = 8,99"
+            },
+            "price": 4.89,
+            "priceTheme": "white_red",
+            "specialTaxes": [],
+            "variantsHaveDifferentPrices": false
+          },
+          "productId": 10035884,
+          "productType": "RETAIL",
+          "productOrigin": "progress_event",
+          "quickAddToCart": false,
+          "regionsPrices": {},
+          "ribbons": [],
+          "renderedTs": 1783548077,
+          "seals": [],
+          "stockAvailability": {
+            "availabilityIndicator": 0,
+            "badgeInfo": {
+              "badges": [
+                {
+                  "text": "tylko w sklepach stacjonarnych 09.07. - 11.07.",
+                  "type": "IN_STORE_TODAY_DATE_RANGE"
+                }
+              ]
+            },
+            "badgeInfoV2": [
+              {
+                "badges": [
+                  {
+                    "text": "tylko w sklepach stacjonarnych 09.07. - 11.07.",
+                    "type": "IN_STORE_TODAY_DATE_RANGE"
+                  }
+                ],
+                "validFrom": 1783548000,
+                "validUntil": 1783807199
+              }
+            ],
+            "onlineAvailable": false,
+            "orderableQuantities": [],
+            "minOrderableQuantity": 1
+          },
+          "store": true,
+          "storeStartDate": 1783548000,
+          "storeEndDate": 1783807199,
+          "title": "Melony żółte, luzem",
+          "timezoneId": "Europe/Warsaw",
+          "zones": {}
+        },
+        "productId": 10035884,
+        "meta": {
+          "categoryPaths": [],
+          "campaignPaths": [
+            [
+              {
+                "id": "10009219",
+                "name": "Najlepsze okazje",
+                "url": "/c/najlepsze-okazje/a10009219",
+                "hiddenCategory": false
+              }
+            ],
+            [
+              {
+                "id": "10009508",
+                "name": "Ryneczek Lidla",
+                "url": "/c/ryneczek-lidla/a10009508",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "fullTitle": "Melony żółte, luzem",
+          "retailLists": [
+            [
+              {
+                "id": 10567,
+                "productSortIndex": 10000
+              }
+            ]
+          ],
+          "lists": [
+            10567
+          ],
+          "wonCategoryBreadcrumbs": [
+            [
+              {
+                "id": "10068374",
+                "name": "Żywność i napoje",
+                "url": "/c/zywnosc-i-napoje/s10068374",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10071012",
+                "name": "Owoce i warzywa",
+                "url": "/h/owoce-i-warzywa/h10071012",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10095592",
+                "name": "Owoce",
+                "url": "/h/owoce/h10095592",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "worldOfNeeds": [
+            {
+              "code": "171010",
+              "isMain": true,
+              "name": "Owoce",
+              "parent": "1710",
+              "superCategories": [
+                {
+                  "code": "1710",
+                  "name": "Owoce i warzywa",
+                  "parent": "17"
+                },
+                {
+                  "code": "17",
+                  "name": "Żywność i żywność w pobliżu",
+                  "parent": "0"
+                },
+                {
+                  "code": "0",
+                  "name": "Światy potrzeb",
+                  "parent": ""
+                }
+              ]
+            }
+          ],
+          "preview": false
+        },
+        "action": "UPDATE",
+        "language": "pl",
+        "eventType": "GRIDBOX",
+        "id": "10035884"
+      },
+      "tracking": {
+        "position": 23,
+        "xPayload": {
+          "searchTrackingMasterId": "Product.10035884",
+          "searchTrackingTitle": "Melony+%C5%BC%C3%B3%C5%82te%2C+luzem",
+          "searchTrackingPageSize": 36,
+          "searchTrackingPage": 1,
+          "searchTrackingEvent": "click",
+          "list": "search",
+          "searchTrackingId": "Product.10035884",
+          "searchTrackingQuery": "mleko",
+          "searchTrackingOrigPos": 1,
+          "searchTrackingPos": 23,
+          "searchTrackingOrigPageSize": 36,
+          "searchTrackingChannel": "PL",
+          "category": "Food"
+        }
+      }
+    },
+    {
+      "resultClass": "product",
+      "type": "product",
+      "code": "10035737",
+      "label": "",
+      "url": "",
+      "xPayload": {
+        "metaData": {
+          "relevancyScore": "3U29Ml9sJ4Aj2ZKmQJiV61Vlu3IXSzX0mT0KWjq6eU8zYNpe6YcEsDKrfkY=",
+          "keywordScore": "MOdPorerzkcuUPmy76FJJxJP65YHsEHgFVCkLt+8s+a45sCW6BhZS3yIo1I=",
+          "semanticScore": "mnXoXgjjr8hejI/WqRoY/qYd8iM43Qfjg9fkqW+sjPvD6Zx6pCdh3ser+qk=",
+          "keywordScoreRaw": "MeSLTDpbZcyDVGUb2lanUNUQh68EX8Ftxwrb02q7GowprKLBrw/JJVvjssM=",
+          "ratingScore": "s0Y2pYOiOCviuQ4K5ZyHgjTf+E+iuzGNo1H3oWiId3biO/TG01GF4iwjlEE=",
+          "freshnessScore": "rHF7oJwoV7up7OVRVPEjUypJSEDpCAGh+RkLUiFefMlcq+oK6Oo+SXCfLLU=",
+          "searchHubImpressions": "+bDT6P65zpMn+UV3sBMwbRxbAvu4VUTPo9hF4xIq6mBmaHHwg2nI/fBkeRg=",
+          "searchHubClicks": "htWkLxTifwmYjLy50izBUgWKAcFzBLW4EnNmNEgULtuE1MPktze4EItKPjU=",
+          "searchHubCarts": "m7xldf+oUxKnIZ60eI+EHBgxeDEUA6jkuOF5IQkcA+D5XnbAGc6ixExOt0Y=",
+          "businessRuleFactor": "xXjQLHy7IHc0Qh3mxFAZtjY+IO/TP8711nJ23SlEBZ3U7C9Lk5RZzmASEM4="
+        }
+      },
+      "gridbox": {
+        "country": "PL",
+        "sequence": 1783721572739163,
+        "data": {
+          "ageRestriction": false,
+          "awards": [],
+          "brand": {
+            "name": "VITASIA",
+            "url": "/q/search?q=vitasia",
+            "showBrand": true
+          },
+          "canonicalPath": "/p/vitasia-makaron-w-stylu-azjatyckim-xxl/p10035737",
+          "canonicalUrl": "/p/vitasia-makaron-w-stylu-azjatyckim-xxl/p10035737",
+          "category": "Food",
+          "cutoutimageV2": [],
+          "dealOfDay": {
+            "active": false
+          },
+          "designTheme": "default",
+          "disclaimers": [
+            {
+              "id": "code_10035737_38421bf4",
+              "type": "CODE",
+              "value": "Basic"
+            },
+            {
+              "id": "code_10035737_1dc6dc28",
+              "type": "CODE",
+              "value": "StrikePrice_LowestPrice30days"
+            }
+          ],
+          "displayFreeDelivery": false,
+          "energyLabels": [],
+          "erpNumber": "10035737",
+          "flashSales": false,
+          "fullTitle": "VITASIA Makaron w stylu azjatyckim, XXL",
+          "gs1Attributes": [],
+          "havingPrice": true,
+          "havingThreesixty": false,
+          "havingVideos": false,
+          "highlightedSeals": 0,
+          "ians": [
+            "210069"
+          ],
+          "image": "https://imgproxy-retcat.assets.schwarz/cKq8pEzZ2ahufVJyB5rYpGPjd--nk4rmGit4KCL_T_c/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50LzAxQ0IwNUVBMDFDRkY0QjgzNTdEREFFQ0/E3OTBDRjA0MTFENjM4MkI5Njg4NkQ0OTVGM0MyRkQxNTQwN0FGRTUucG5n.png",
+          "image_V1": {
+            "image": "https://imgproxy-retcat.assets.schwarz/cKq8pEzZ2ahufVJyB5rYpGPjd--nk4rmGit4KCL_T_c/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50LzAxQ0IwNUVBMDFDRkY0QjgzNTdEREFFQ0/E3OTBDRjA0MTFENjM4MkI5Njg4NkQ0OTVGM0MyRkQxNTQwN0FGRTUucG5n.png",
+            "accessibility": "Szklane makaron Vitasia w stylu chińskim, gotowe w ok. 6 minut."
+          },
+          "isLidlGiftCard": false,
+          "isUsedProduct": false,
+          "itemId": 10035737,
+          "imageList": [
+            "https://imgproxy-retcat.assets.schwarz/cKq8pEzZ2ahufVJyB5rYpGPjd--nk4rmGit4KCL_T_c/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50LzAxQ0IwNUVBMDFDRkY0QjgzNTdEREFFQ0/E3OTBDRjA0MTFENjM4MkI5Njg4NkQ0OTVGM0MyRkQxNTQwN0FGRTUucG5n.png"
+          ],
+          "imageList_V1": [
+            {
+              "image": "https://imgproxy-retcat.assets.schwarz/cKq8pEzZ2ahufVJyB5rYpGPjd--nk4rmGit4KCL_T_c/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50LzAxQ0IwNUVBMDFDRkY0QjgzNTdEREFFQ0/E3OTBDRjA0MTFENjM4MkI5Njg4NkQ0OTVGM0MyRkQxNTQwN0FGRTUucG5n.png",
+              "accessibility": "Szklane makaron Vitasia w stylu chińskim, gotowe w ok. 6 minut."
+            }
+          ],
+          "keyfacts": {
+            "analyticsCategory": "Food",
+            "fullTitle": "VITASIA Makaron w stylu azjatyckim, XXL",
+            "moreDetails": "Więcej szczegółów",
+            "title": "Makaron w stylu azjatyckim, XXL",
+            "wonCategoryPrimary": "Światy potrzeb/Żywność i żywność w pobliżu/Zapasy żywności/Ryż, makaron i rośliny strączkowe",
+            "wonCategoryPrimaryPath": "0/17/1741/174110"
+          },
+          "lidlPlus": [],
+          "multipack": false,
+          "online": false,
+          "preventSelling": false,
+          "price": {
+            "currencyCode": "PLN",
+            "currencyCodeSecond": "",
+            "currencySymbol": "zł",
+            "currencySymbolSecond": "",
+            "discount": {
+              "discountHasStar": false,
+              "discountText": "Aż 2 x 100 g",
+              "fromRecommendedPrice": false,
+              "showDiscount": false,
+              "showFrom": false,
+              "showPercentage": false,
+              "showUpTo": false
+            },
+            "displayedCurrency": "zł",
+            "hasStar": false,
+            "hasVat": false,
+            "oldPrice": 0.0,
+            "packaging": {
+              "text": "2 x 100 g 100 g = 2,00"
+            },
+            "price": 3.99,
+            "priceTheme": "white_red",
+            "specialTaxes": [],
+            "variantsHaveDifferentPrices": false
+          },
+          "productId": 10035737,
+          "productType": "RETAIL",
+          "productOrigin": "progress_event",
+          "quickAddToCart": false,
+          "regionsPrices": {},
+          "ribbons": [],
+          "renderedTs": 1783721572,
+          "seals": [],
+          "stockAvailability": {
+            "availabilityIndicator": 0,
+            "badgeInfo": {
+              "badges": [
+                {
+                  "text": "tylko w sklepach stacjonarnych",
+                  "type": "IN_STORE_FROM_DATE_PAST"
+                }
+              ]
+            },
+            "badgeInfoV2": [
+              {
+                "badges": [
+                  {
+                    "text": "tylko w sklepach stacjonarnych",
+                    "type": "IN_STORE_FROM_DATE_PAST"
+                  }
+                ],
+                "validFrom": 1783288800
+              }
+            ],
+            "onlineAvailable": false,
+            "orderableQuantities": [],
+            "minOrderableQuantity": 1
+          },
+          "store": true,
+          "storeStartDate": 1783288800,
+          "title": "Makaron w stylu azjatyckim, XXL",
+          "timezoneId": "Europe/Warsaw",
+          "zones": {}
+        },
+        "productId": 10035737,
+        "meta": {
+          "categoryPaths": [],
+          "campaignPaths": [],
+          "fullTitle": "VITASIA Makaron w stylu azjatyckim, XXL",
+          "retailLists": [
+            [
+              {
+                "id": 10552,
+                "productSortIndex": 5
+              }
+            ]
+          ],
+          "lists": [
+            10552
+          ],
+          "wonCategoryBreadcrumbs": [
+            [
+              {
+                "id": "10068374",
+                "name": "Żywność i napoje",
+                "url": "/c/zywnosc-i-napoje/s10068374",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10096095",
+                "name": "Spiżarnia",
+                "url": "/h/spizarnia/h10096095",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10096096",
+                "name": "Ryż, makaron i strączki",
+                "url": "/h/ryze-makarony-i-straczki/h10096096",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "worldOfNeeds": [
+            {
+              "code": "174110",
+              "isMain": true,
+              "name": "Ryż, makaron i rośliny strączkowe",
+              "parent": "1741",
+              "superCategories": [
+                {
+                  "code": "1741",
+                  "name": "Zapasy żywności",
+                  "parent": "17"
+                },
+                {
+                  "code": "17",
+                  "name": "Żywność i żywność w pobliżu",
+                  "parent": "0"
+                },
+                {
+                  "code": "0",
+                  "name": "Światy potrzeb",
+                  "parent": ""
+                }
+              ]
+            }
+          ],
+          "preview": false
+        },
+        "action": "UPDATE",
+        "language": "pl",
+        "eventType": "GRIDBOX",
+        "id": "10035737"
+      },
+      "tracking": {
+        "position": 35,
+        "xPayload": {
+          "searchTrackingMasterId": "Product.10035737",
+          "searchTrackingTitle": "Makaron+w+stylu+azjatyckim%2C+XXL",
+          "searchTrackingPageSize": 36,
+          "searchTrackingPage": 1,
+          "searchTrackingEvent": "click",
+          "list": "search",
+          "searchTrackingId": "Product.10035737",
+          "searchTrackingQuery": "mleko",
+          "searchTrackingOrigPos": 1,
+          "searchTrackingPos": 35,
+          "searchTrackingOrigPageSize": 36,
+          "searchTrackingChannel": "PL",
+          "category": "Food"
+        }
+      }
+    },
+    {
+      "resultClass": "product",
+      "type": "product",
+      "code": "10035883",
+      "label": "",
+      "url": "",
+      "xPayload": {
+        "metaData": {
+          "relevancyScore": "iBh9pmtkd7VvwmWnCoqZiI0wKjZBAzdfnJlcyE3OEQC6S3LCd1DEy62KII0=",
+          "keywordScore": "9LSQOWPrB5UxZX9VOepO5hA47K/vwJpdMGQEHUIMqpCssh6c+jklPhD+qXE=",
+          "semanticScore": "XQA80Ttfb13rGOtwnMo0Mc9zPZwPznyD1TpMjdZ+J49glHQrHeqq7VgmSBM=",
+          "keywordScoreRaw": "9de8+vIpvTliogLduXyqdbqxoEfkKhZYrWJV+qTx6j6faUl9TviyzKaLCl4=",
+          "ratingScore": "RByk7eby9szNuAQb9xk62+B/i8udHlEhWQ3m0ek4X4XdLgqNPDIo1+AscCI=",
+          "freshnessScore": "+bgLq+otMN76O9XSJ9DjBcwqnqF5dEYmgEgj+GTG+mT7mFguKgQjIw4H3wA=",
+          "searchHubImpressions": "SD/+updyT1ZNAHxsTMqAqJs5TDSsQ6sI1U3HS0yurqS9TEz/HuAKs9jfZoo=",
+          "searchHubClicks": "ubVL1otZGaz7Zw1UJNfKZ8ZCjS4m16RuAqPfjhZJJMXP1wpmgzyS35rJrKU=",
+          "searchHubCarts": "7dpAcPedsAhWbjtjTTNhd+dgjLOE8ItA0MhqARNkbczW1ShQHLgAwJXnzF0=",
+          "businessRuleFactor": "peYF/17LJ06wwF4hk8FGqFxZzZBzNjS/eQBRfiCJHLv0VwEmuQ64GctPO/M="
+        }
+      },
+      "gridbox": {
+        "country": "PL",
+        "sequence": 1783548093513942,
+        "data": {
+          "ageRestriction": false,
+          "awards": [],
+          "brand": {
+            "showBrand": false
+          },
+          "canonicalPath": "/p/melony-galia-luzem/p10035883",
+          "canonicalUrl": "/p/melony-galia-luzem/p10035883",
+          "category": "Food",
+          "cutoutimageV2": [],
+          "dealOfDay": {
+            "active": false
+          },
+          "designTheme": "default",
+          "disclaimers": [
+            {
+              "id": "code_10035883_738b37c1",
+              "type": "CODE",
+              "value": "Basic"
+            }
+          ],
+          "displayFreeDelivery": false,
+          "energyLabels": [],
+          "erpNumber": "10035883",
+          "flashSales": false,
+          "fullTitle": "Melony Galia, luzem",
+          "gs1Attributes": [],
+          "havingPrice": true,
+          "havingThreesixty": false,
+          "havingVideos": false,
+          "highlightedSeals": 0,
+          "ians": [
+            "80545"
+          ],
+          "image": "https://imgproxy-retcat.assets.schwarz/6qzk6GPGkvpwJ86azr6aNMo0fks1DR3Mdq9Yv2F-KCg/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50L0NFNjU4RjEzNTdGMkMwM0FFQzRDRjU5Qj/k4QzkyNkExQkJGQkFGNDkwMjk2QzE0Q0ZFRURBMDlFMzVCMEREMzIucG5n.png",
+          "image_V1": {
+            "image": "https://imgproxy-retcat.assets.schwarz/6qzk6GPGkvpwJ86azr6aNMo0fks1DR3Mdq9Yv2F-KCg/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50L0NFNjU4RjEzNTdGMkMwM0FFQzRDRjU5Qj/k4QzkyNkExQkJGQkFGNDkwMjk2QzE0Q0ZFRURBMDlFMzVCMEREMzIucG5n.png",
+            "accessibility": "Cały i pokrojony melon miodowy na białym tle z linijką."
+          },
+          "isLidlGiftCard": false,
+          "isUsedProduct": false,
+          "itemId": 10035883,
+          "imageList": [
+            "https://imgproxy-retcat.assets.schwarz/6qzk6GPGkvpwJ86azr6aNMo0fks1DR3Mdq9Yv2F-KCg/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50L0NFNjU4RjEzNTdGMkMwM0FFQzRDRjU5Qj/k4QzkyNkExQkJGQkFGNDkwMjk2QzE0Q0ZFRURBMDlFMzVCMEREMzIucG5n.png"
+          ],
+          "imageList_V1": [
+            {
+              "image": "https://imgproxy-retcat.assets.schwarz/6qzk6GPGkvpwJ86azr6aNMo0fks1DR3Mdq9Yv2F-KCg/sm:1/exar:1:ce/w:427/h:320/cz/M6Ly9wcm9kLWNhd/GFsb2ctbWVkaWEvaW50L0NFNjU4RjEzNTdGMkMwM0FFQzRDRjU5Qj/k4QzkyNkExQkJGQkFGNDkwMjk2QzE0Q0ZFRURBMDlFMzVCMEREMzIucG5n.png",
+              "accessibility": "Cały i pokrojony melon miodowy na białym tle z linijką."
+            }
+          ],
+          "keyfacts": {
+            "analyticsCategory": "Food",
+            "fullTitle": "Melony Galia, luzem",
+            "moreDetails": "Więcej szczegółów",
+            "title": "Melony Galia, luzem",
+            "wonCategoryPrimary": "Światy potrzeb/Żywność i żywność w pobliżu/Owoce i warzywa/Owoce",
+            "wonCategoryPrimaryPath": "0/17/1710/171010"
+          },
+          "lidlPlus": [
+            {
+              "price": {
+                "basePrice": {
+                  "prefix": false,
+                  "text": "Limit: 3 kg na kupon. Szczegóły promocji dostępne w aplikacji Lidl Plus."
+                },
+                "discount": {
+                  "deletedPrice": 12.99,
+                  "discountHasStar": false,
+                  "discountText": "61% taniej",
+                  "fromNormalPriceForLidlPlus": false,
+                  "fromRecommendedPrice": false,
+                  "hideBargainHint": false,
+                  "bargainHintEnabled": false,
+                  "bargainHintText": "Megaokazja",
+                  "showDiscount": true,
+                  "showFrom": false,
+                  "showPercentage": true,
+                  "showUpTo": false,
+                  "suffix": "*"
+                },
+                "displayedCurrency": "zł",
+                "hasStar": false,
+                "hasVat": false,
+                "oldPrice": 12.99,
+                "packaging": {
+                  "text": "1 kg * cena przed obniżką/ cena poza promocją: 1 kg = 12,99"
+                },
+                "price": 4.99,
+                "priceTheme": "white_yellow",
+                "specialTaxes": []
+              },
+              "lidlPlusText": "Zeskanuj aplikację",
+              "highlightText": "61% taniej"
+            }
+          ],
+          "multipack": false,
+          "online": false,
+          "preventSelling": false,
+          "price": {
+            "currencyCode": "PLN",
+            "currencyCodeSecond": "",
+            "currencySymbol": "zł",
+            "currencySymbolSecond": "",
+            "displayedCurrency": "zł",
+            "hasStar": false,
+            "hasVat": false,
+            "specialTaxes": [],
+            "variantsHaveDifferentPrices": false
+          },
+          "productId": 10035883,
+          "productType": "RETAIL",
+          "productOrigin": "progress_event",
+          "quickAddToCart": false,
+          "regionsPrices": {},
+          "ribbons": [
+            {
+              "type": "SPECIAL_DESCRIPTION",
+              "text": "Aktywuj kupon i zeskanuj aplikację",
+              "theme": "blue"
+            }
+          ],
+          "renderedTs": 1783548093,
+          "seals": [],
+          "stockAvailability": {
+            "availabilityIndicator": 0,
+            "badgeInfo": {
+              "badges": [
+                {
+                  "text": "tylko w sklepach stacjonarnych 09.07. - 11.07.",
+                  "type": "IN_STORE_TODAY_DATE_RANGE"
+                }
+              ]
+            },
+            "badgeInfoV2": [
+              {
+                "badges": [
+                  {
+                    "text": "tylko w sklepach stacjonarnych 09.07. - 11.07.",
+                    "type": "IN_STORE_TODAY_DATE_RANGE"
+                  }
+                ],
+                "validFrom": 1783548000,
+                "validUntil": 1783807199
+              }
+            ],
+            "onlineAvailable": false,
+            "orderableQuantities": [],
+            "minOrderableQuantity": 1
+          },
+          "store": true,
+          "storeStartDate": 1783548000,
+          "storeEndDate": 1783807199,
+          "title": "Melony Galia, luzem",
+          "timezoneId": "Europe/Warsaw",
+          "zones": {}
+        },
+        "productId": 10035883,
+        "meta": {
+          "categoryPaths": [],
+          "campaignPaths": [
+            [
+              {
+                "id": "10009219",
+                "name": "Najlepsze okazje",
+                "url": "/c/najlepsze-okazje/a10009219",
+                "hiddenCategory": false
+              }
+            ],
+            [
+              {
+                "id": "10009220",
+                "name": "Lidl Plus",
+                "url": "/c/lidl-plus/a10009220",
+                "hiddenCategory": false
+              }
+            ],
+            [
+              {
+                "id": "10009508",
+                "name": "Ryneczek Lidla",
+                "url": "/c/ryneczek-lidla/a10009508",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "fullTitle": "Melony Galia, luzem",
+          "retailLists": [
+            [
+              {
+                "id": 10567,
+                "productSortIndex": 20015
+              }
+            ]
+          ],
+          "lists": [
+            10567
+          ],
+          "wonCategoryBreadcrumbs": [
+            [
+              {
+                "id": "10068374",
+                "name": "Żywność i napoje",
+                "url": "/c/zywnosc-i-napoje/s10068374",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10071012",
+                "name": "Owoce i warzywa",
+                "url": "/h/owoce-i-warzywa/h10071012",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10095592",
+                "name": "Owoce",
+                "url": "/h/owoce/h10095592",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "worldOfNeeds": [
+            {
+              "code": "171010",
+              "isMain": true,
+              "name": "Owoce",
+              "parent": "1710",
+              "superCategories": [
+                {
+                  "code": "1710",
+                  "name": "Owoce i warzywa",
+                  "parent": "17"
+                },
+                {
+                  "code": "17",
+                  "name": "Żywność i żywność w pobliżu",
+                  "parent": "0"
+                },
+                {
+                  "code": "0",
+                  "name": "Światy potrzeb",
+                  "parent": ""
+                }
+              ]
+            }
+          ],
+          "preview": false
+        },
+        "action": "UPDATE",
+        "language": "pl",
+        "eventType": "GRIDBOX",
+        "id": "10035883"
+      },
+      "tracking": {
+        "position": 20,
+        "xPayload": {
+          "searchTrackingMasterId": "Product.10035883",
+          "searchTrackingTitle": "Melony+Galia%2C+luzem",
+          "searchTrackingPageSize": 36,
+          "searchTrackingPage": 1,
+          "searchTrackingEvent": "click",
+          "list": "search",
+          "searchTrackingId": "Product.10035883",
+          "searchTrackingQuery": "mleko",
+          "searchTrackingOrigPos": 1,
+          "searchTrackingPos": 20,
+          "searchTrackingOrigPageSize": 36,
+          "searchTrackingChannel": "PL",
+          "category": "Food"
+        }
+      }
+    },
+    {
+      "resultClass": "product",
+      "type": "product",
+      "code": "100401586",
+      "label": "",
+      "url": "",
+      "xPayload": {
+        "metaData": {
+          "relevancyScore": "4T6gCvwRAYLLQ/kP//HHomP/YuBNcw+hYIGPjpjSGxPRScQ5uVs2i5tC9ok=",
+          "keywordScore": "cnSIW2IAwMH1vrBRqDbhNrosOf/jLy42M1Dh7OZV0JOBSASB1E6kvz3n4qw=",
+          "semanticScore": "QPBt7FHR/57IiF1Mzi1Ag9YAfP6g7GmaEIXwxhrDU3QOHA3rWWxavqIeTBY=",
+          "keywordScoreRaw": "hNNMsItQl2PqRKR1HcGKMCcdcJikf4vGyDwYNWwz9SHr0GEykahl6e7ikl4=",
+          "ratingScore": "yTUshOGnlKk8Hu+01a2wz43RqtYbNb2FvZwgdHMNd+sYcRZAmDnze84VWa8=",
+          "freshnessScore": "IVT1E4ownYQQ4xoYsogfuHMG++BsTUUDgXi+6/m6MFCFlRbbgy7gRYtCofY=",
+          "searchHubImpressions": "9yzOhKc8FVp51nJIymli4HxQKTgWLjJAZjULsjyz8BxA7RroMOeZG/LgGz4=",
+          "searchHubClicks": "7eYn71cnd8kna2TFGUCLU2OVFWHwN2GFO4ZWuopXdOIu2YDVpgDrpCFrxuQ=",
+          "searchHubCarts": "lcYTrLLLvXXCwn3MM5OOogzc4SjdS6b0Bjw+4/KfFpPNV2Axal9/zp4l/yE=",
+          "businessRuleFactor": "DDJ/ybWC6GBBxgQJMlYb+yJnMrroIrWQsqVaT9qfLpWvJYieoQ0qMU2mE8g="
+        }
+      },
+      "gridbox": {
+        "country": "PL",
+        "sequence": 1783682109759041,
+        "data": {
+          "ageRestriction": false,
+          "awards": [],
+          "brand": {
+            "logo": "https://www.lidl.pl/assets/gcpbf79ffdf385e472b898f12072d9e605c.png",
+            "name": "SILVERCREST®",
+            "url": "/q/search?q=silvercrest",
+            "id": "SILV",
+            "showBrand": true
+          },
+          "canonicalPath": "/p/silvercrest-spieniacz-do-mleka-500-w/p100401586",
+          "canonicalUrl": "/p/silvercrest-spieniacz-do-mleka-500-w/p100401586",
+          "category": "Kategorie/Dom & Kuchnia/Małe AGD & Kuchnia/Kawa & więcej/Akcesoria do kawy/Spieniacze do mleka",
+          "categorySecondaryPath": "0/20/2010/201020/20102013/201020132",
+          "cutoutimageV2": [],
+          "dealOfDay": {
+            "active": false
+          },
+          "designTheme": "default",
+          "disclaimers": [
+            {
+              "id": "code_100401586_8a633e97",
+              "type": "CODE",
+              "value": "Basic"
+            }
+          ],
+          "displayFreeDelivery": false,
+          "energyLabels": [],
+          "erpNumber": "100401586",
+          "flashSales": false,
+          "fullTitle": "SILVERCREST® Spieniacz do mleka, 500 W",
+          "gs1Attributes": [],
+          "havingPrice": true,
+          "havingThreesixty": false,
+          "havingVideos": false,
+          "highlightedSeals": 0,
+          "ians": [
+            "526862"
+          ],
+          "image": "https://www.lidl.pl/assets/gcpaa8b9b8f4db448d1935eae79a2a26d3c.jpg",
+          "image_V1": {
+            "image": "https://www.lidl.pl/assets/gcpaa8b9b8f4db448d1935eae79a2a26d3c.jpg",
+            "accessibility": "Srebrny spieniacz do mleka z czarnym uchwytem i przyciskami sterującymi."
+          },
+          "isLidlGiftCard": false,
+          "isUsedProduct": false,
+          "imageList": [
+            "https://www.lidl.pl/assets/gcpaa8b9b8f4db448d1935eae79a2a26d3c.jpg",
+            "https://www.lidl.pl/assets/gcpe398f9dd62334840a8904d3a42140fec.jpg",
+            "https://www.lidl.pl/assets/gcpf55844ec60fa4c7fbc245b31293168b2.jpg"
+          ],
+          "imageList_V1": [
+            {
+              "image": "https://www.lidl.pl/assets/gcpaa8b9b8f4db448d1935eae79a2a26d3c.jpg",
+              "accessibility": "Srebrny spieniacz do mleka z czarnym uchwytem i przyciskami sterującymi."
+            },
+            {
+              "image": "https://www.lidl.pl/assets/gcpe398f9dd62334840a8904d3a42140fec.jpg",
+              "accessibility": "Spieniacz do mleka nalewający spienione mleko do szklanki z kawą na drewnianym blacie."
+            },
+            {
+              "image": "https://www.lidl.pl/assets/gcpf55844ec60fa4c7fbc245b31293168b2.jpg",
+              "accessibility": "Spieniacz do mleka ze stali nierdzewnej z czarnym uchwytem i przyciskami wyboru funkcji."
+            }
+          ],
+          "keyfacts": {
+            "analyticsCategory": "Kategorie/Dom & Kuchnia/Małe AGD & Kuchnia/Kawa & więcej/Akcesoria do kawy/Spieniacze do mleka",
+            "fullTitle": "SILVERCREST® Spieniacz do mleka, 500 W",
+            "moreDetails": "Więcej szczegółów",
+            "supplementalDescription": "<p><strong>Moc</strong>: ok. 500 W<br /><strong>Pojemność spieniania</strong>: maks. 150 ml<br /><strong>Pojemność podgrzewania</strong>: maks. 650 ml</p>",
+            "title": "Spieniacz do mleka, 500 W",
+            "wonCategoryPrimary": "Światy potrzeb/Kuchnia i gospodarstwo domowe/Gotowanie i pieczenie",
+            "wonCategoryPrimaryPath": "0/11/1112"
+          },
+          "lidlPlus": [],
+          "multipack": false,
+          "online": true,
+          "preventSelling": false,
+          "price": {
+            "currencyCode": "PLN",
+            "currencyCodeSecond": "",
+            "currencySymbol": "zł",
+            "currencySymbolSecond": "",
+            "displayedCurrency": "zł",
+            "hasStar": false,
+            "hasVat": true,
+            "price": 89.9,
+            "specialTaxes": [],
+            "variantsHaveDifferentPrices": false
+          },
+          "productId": 100401586,
+          "productType": "FLAT",
+          "productOrigin": "progress_event",
+          "quickAddToCart": false,
+          "ratings": {
+            "average": 4.4,
+            "count": 69,
+            "recommendedNo": 9,
+            "recommendedYes": 56,
+            "sizePercentage": 0,
+            "topRated": false
+          },
+          "regionsPrices": {},
+          "ribbons": [],
+          "renderedTs": 1783682109,
+          "seals": [],
+          "stockAvailability": {
+            "availabilityIndicator": 3,
+            "badgeInfo": {
+              "badges": [
+                {
+                  "text": "Kup online",
+                  "type": "AVAILABLE_ONLINE"
+                }
+              ]
+            },
+            "badgeInfoV2": [
+              {
+                "badges": [
+                  {
+                    "text": "Kup online",
+                    "type": "AVAILABLE_ONLINE"
+                  }
+                ],
+                "validFrom": 1777240800,
+                "validUntil": 1777759199
+              },
+              {
+                "badges": [
+                  {
+                    "text": "Kup online",
+                    "type": "AVAILABLE_ONLINE"
+                  }
+                ]
+              }
+            ],
+            "onlineAvailable": true,
+            "orderableQuantities": [
+              {
+                "value": 1
+              },
+              {
+                "value": 2
+              },
+              {
+                "value": 3
+              },
+              {
+                "value": 4
+              },
+              {
+                "value": 5
+              },
+              {
+                "value": 6
+              },
+              {
+                "value": 7
+              },
+              {
+                "value": 8
+              },
+              {
+                "value": 9
+              },
+              {
+                "value": 10
+              }
+            ],
+            "minOrderableQuantity": 1
+          },
+          "store": false,
+          "storeEndDate": 1777759199,
+          "title": "Spieniacz do mleka, 500 W",
+          "timezoneId": "Europe/Warsaw",
+          "zones": {}
+        },
+        "productId": 100401586,
+        "meta": {
+          "sapProductCategory": {
+            "code": "201020132",
+            "name": "Spieniacze do mleka",
+            "pathCode": "0/20/2010/201020/20102013/201020132",
+            "pathName": "Kategorie/Dom & Kuchnia/Małe AGD & Kuchnia/Kawa & więcej/Akcesoria do kawy/Spieniacze do mleka"
+          },
+          "categoryPaths": [
+            [
+              {
+                "id": "10000997",
+                "name": "Kuchnia",
+                "url": "/h/kuchnia/h10000997",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003058",
+                "name": "Małe AGD",
+                "url": "/h/male-agd/h10003058",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003055",
+                "name": "Ekspresy do kawy i akcesoria",
+                "url": "/h/ekspresy-do-kawy-i-akcesoria/h10003055",
+                "hiddenCategory": false
+              }
+            ],
+            [
+              {
+                "id": "10000997",
+                "name": "Kuchnia",
+                "url": "/h/kuchnia/h10000997",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003058",
+                "name": "Małe AGD",
+                "url": "/h/male-agd/h10003058",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003055",
+                "name": "Ekspresy do kawy i akcesoria",
+                "url": "/h/ekspresy-do-kawy-i-akcesoria/h10003055",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10002297",
+                "name": "Spieniacze do mleka",
+                "url": "/h/spieniacze-do-mleka/h10002297",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "campaignPaths": [
+            [
+              {
+                "id": "10087608",
+                "name": "Kawa jak z kawiarni - w domowym zaciszu",
+                "url": "/c/kawa-jak-z-kawiarni-w-domowym-zaciszu/a10087608",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "fullTitle": "SILVERCREST® Spieniacz do mleka, 500 W",
+          "ean": "4054599223575",
+          "gs1": {
+            "segment": {
+              "code": "72000000",
+              "label": "AGD",
+              "family": {
+                "code": "72020000",
+                "label": "Małe AGD",
+                "clazz": {
+                  "code": "72020200",
+                  "label": "Urządzenia do przygotowania żywności/ napojów",
+                  "brick": {
+                    "code": "10002011",
+                    "label": "Urządzenia do przygotowywania gorących napojów",
+                    "attributeGS1": []
+                  }
+                }
+              }
+            }
+          },
+          "shopCategories": {
+            "shopCategory": [
+              {
+                "code": "201020132",
+                "name": "Spieniacze do mleka",
+                "parent": "20102013",
+                "superCategories": {
+                  "category": [
+                    {
+                      "code": "20102013",
+                      "name": "Akcesoria do kawy",
+                      "parent": "201020"
+                    },
+                    {
+                      "code": "201020",
+                      "name": "Kawa & więcej",
+                      "parent": "2010"
+                    },
+                    {
+                      "code": "2010",
+                      "name": "Małe AGD & Kuchnia",
+                      "parent": "20"
+                    },
+                    {
+                      "code": "20",
+                      "name": "Dom & Kuchnia",
+                      "parent": "0"
+                    },
+                    {
+                      "code": "0",
+                      "name": "Kategorie",
+                      "parent": ""
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "wonCategoryBreadcrumbs": [
+            [
+              {
+                "id": "10067764",
+                "name": "Kuchnia i gospodarstwo domowe",
+                "url": "/c/kuchnia-sprzatanie-i-organizacja/s10067764",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10067522",
+                "name": "Sprzęty i akcesoria kuchenne ",
+                "url": "/h/sprzety-i-akcesoria-kuchenne/h10067522",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003058",
+                "name": "Małe AGD",
+                "url": "/h/male-agd/h10003058",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003055",
+                "name": "Ekspresy do kawy i akcesoria",
+                "url": "/h/ekspresy-do-kawy-i-akcesoria/h10003055",
+                "hiddenCategory": false
+              }
+            ],
+            [
+              {
+                "id": "10067764",
+                "name": "Kuchnia i gospodarstwo domowe",
+                "url": "/c/kuchnia-sprzatanie-i-organizacja/s10067764",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10067522",
+                "name": "Sprzęty i akcesoria kuchenne ",
+                "url": "/h/sprzety-i-akcesoria-kuchenne/h10067522",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003058",
+                "name": "Małe AGD",
+                "url": "/h/male-agd/h10003058",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003055",
+                "name": "Ekspresy do kawy i akcesoria",
+                "url": "/h/ekspresy-do-kawy-i-akcesoria/h10003055",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10002297",
+                "name": "Spieniacze do mleka",
+                "url": "/h/spieniacze-do-mleka/h10002297",
+                "hiddenCategory": false
+              }
+            ],
+            [
+              {
+                "id": "10067764",
+                "name": "Kuchnia i gospodarstwo domowe",
+                "url": "/c/kuchnia-sprzatanie-i-organizacja/s10067764",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10067523",
+                "name": "Gotowanie i pieczenie",
+                "url": "/h/gotowanie-i-pieczenie/h10067523",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "worldOfNeeds": [
+            {
+              "code": "1112",
+              "isMain": true,
+              "name": "Gotowanie i pieczenie",
+              "parent": "11",
+              "superCategories": [
+                {
+                  "code": "11",
+                  "name": "Kuchnia i gospodarstwo domowe",
+                  "parent": "0"
+                },
+                {
+                  "code": "0",
+                  "name": "Światy potrzeb",
+                  "parent": ""
+                }
+              ]
+            }
+          ],
+          "preview": false
+        },
+        "action": "UPDATE",
+        "language": "pl",
+        "eventType": "GRIDBOX",
+        "id": "100401586"
+      },
+      "tracking": {
+        "position": 1,
+        "xPayload": {
+          "searchTrackingMasterId": "Product.100401586",
+          "searchTrackingTitle": "Spieniacz+do+mleka%2C+500+W",
+          "searchTrackingPageSize": 36,
+          "searchTrackingPage": 1,
+          "searchTrackingEvent": "click",
+          "list": "search",
+          "searchTrackingId": "Product.100401586",
+          "searchTrackingQuery": "mleko",
+          "searchTrackingOrigPos": 1,
+          "searchTrackingPos": 1,
+          "searchTrackingOrigPageSize": 36,
+          "searchTrackingChannel": "PL",
+          "category": "Kategorie/Dom & Kuchnia/Małe AGD & Kuchnia/Kawa & więcej/Akcesoria do kawy/Spieniacze do mleka"
+        }
+      }
+    },
+    {
+      "resultClass": "product",
+      "type": "product",
+      "code": "100320149001",
+      "label": "",
+      "url": "",
+      "xPayload": {
+        "metaData": {
+          "relevancyScore": "NlssGOllpyPFR7ybqcN1a6J5LvJRliXxOwMaSb+0zfYxB1p58xrhvtmw56g=",
+          "keywordScore": "GdFrvZ563atepsVYOW1ZFcRveu5ozXcAlzONI1MkhJJK1ieAJ/4Pwi1cH3U=",
+          "semanticScore": "CDql2BZVMI+Gw5HStFurDov3NvwUgm2aaj2JwTATjVbzzJnphJB/9Sqv0yE=",
+          "keywordScoreRaw": "A33N58HDFIXa+4KyKVF8qAwVcok/N4ZH6gdQ0Rpeg9E/0xdDQXtj6zKHz+s=",
+          "ratingScore": "gVj89tTi2Ziep6PxiyJWJ+Smp5LusPCpjpbWS3V/SH3xZxy6uIUeMKQLhuw=",
+          "freshnessScore": "zvsNIRUTbox7qQN0XDYJo9AXiG4y/EovvLUn4IU9CJzeUfhQoy1kpfOTf8o=",
+          "searchHubImpressions": "I9wt9LwlJrSLlbqXbsADMMQkgdrqk7jYgXLRo5XsZ83l+tCdYLNAC1iwoT0=",
+          "searchHubClicks": "8dkvsI2WKexu5R2wHfPhVIv0Clx9Etuzgho1uFzkYtUfTd9VlCJH8KaBlmQ=",
+          "searchHubCarts": "e3UPDnvvpJ4GB4ac6IL5/8CBZdQCGsxOLk2Fq6l2mIRHzOQ5GaX5SAE4Gog=",
+          "businessRuleFactor": "ISsG2qB8gLWke5lu2rVEFsSn/OQTtVh+xs6sUYkKAlDS0aBbhOBp3x77Ctw="
+        }
+      },
+      "gridbox": {
+        "country": "PL",
+        "sequence": 1783330505421325,
+        "data": {
+          "attributesCode": "(P_FARBE|weiß)",
+          "awards": [],
+          "brand": {
+            "logo": "https://www.lidl.pl/assets/e8b8e29a5ebe2c28ced1a0f00ca5d2c1.jpeg",
+            "name": "AMICA",
+            "url": "/q/search?q=amica",
+            "id": "AMIC"
+          },
+          "canonicalPath": "/p/amica-lodowka-z-zamrazarka-kgcl-386-160/p100320149001",
+          "canonicalUrl": "/p/amica-lodowka-z-zamrazarka-kgcl-386-160/p100320149001",
+          "category": "Kategorie/Dom & Kuchnia/AGD duże/Lodówki & zamrażarki/Lodówko-zamrażarki",
+          "categorySecondaryPath": "0/20/2015/201511/20151111",
+          "dealOfDay": {
+            "active": false
+          },
+          "designTheme": "default",
+          "disclaimers": [
+            {
+              "id": "code_100320149_6329e6f7",
+              "type": "CODE",
+              "value": "Basic"
+            }
+          ],
+          "displayFreeDelivery": false,
+          "energyLabels": [
+            {
+              "classCode": "E_NEW",
+              "colorCode": "o_new",
+              "fiche": "https://www.lidl.pl/assets/gcpc68bac48660748d68414d48da1fd0f34.pdf",
+              "havingDifferentFiche": false,
+              "logo": "https://www.lidl.pl/assets/gcp39817eac5cdf485eab67a8327a36a4b9.pdf",
+              "logoAltText": "Etykieta energetyczna: Amica KGCL 386, klasa E, 210 kWh/rok.",
+              "titles": []
+            }
+          ],
+          "erpNumber": "100320149001",
+          "flashSales": false,
+          "fullTitle": "AMICA Lodówka z zamrażarką KGCL 386 160 (Biały)",
+          "havingPrice": true,
+          "havingThreesixty": false,
+          "havingVideos": false,
+          "highlightedSeals": 0,
+          "ians": [
+            "100320149"
+          ],
+          "image": "https://www.lidl.pl/assets/5ccb6cb2220d333f7bcf3c470a5d4fc7.jpeg",
+          "image_V1": {
+            "image": "https://www.lidl.pl/assets/5ccb6cb2220d333f7bcf3c470a5d4fc7.jpeg",
+            "accessibility": "Biała lodówka Amica z dwoma drzwiami"
+          },
+          "isLidlGiftCard": false,
+          "isUsedProduct": false,
+          "imageList": [
+            "https://www.lidl.pl/assets/5ccb6cb2220d333f7bcf3c470a5d4fc7.jpeg",
+            "https://www.lidl.pl/assets/23d0e62b418fa8981e931b95cd1b4d34.jpeg",
+            "https://www.lidl.pl/assets/a1f6b0fc64896621ad0bb7b031460381.jpeg"
+          ],
+          "imageList_V1": [
+            {
+              "image": "https://www.lidl.pl/assets/5ccb6cb2220d333f7bcf3c470a5d4fc7.jpeg",
+              "accessibility": "Biała lodówka Amica z dwoma drzwiami"
+            },
+            {
+              "image": "https://www.lidl.pl/assets/23d0e62b418fa8981e931b95cd1b4d34.jpeg",
+              "accessibility": "Biała lodówka Amica z zamrażarką na dole."
+            },
+            {
+              "image": "https://www.lidl.pl/assets/a1f6b0fc64896621ad0bb7b031460381.jpeg",
+              "accessibility": "Biała lodówka z otwartymi drzwiami, wypełniona warzywami, owocami, serem i butelkami wody."
+            }
+          ],
+          "keyfacts": {
+            "analyticsCategory": "Kategorie/Dom & Kuchnia/AGD duże/Lodówki & zamrażarki/Lodówko-zamrażarki",
+            "fullTitle": "AMICA Lodówka z zamrażarką KGCL 386 160 (Biały)",
+            "supplementalDescription": "<p><strong>Chłodzenie + Zamrażanie:</strong> ok. 153 + 74&nbsp;litr&oacute;w<br /> <strong>Wymiary:</strong> ok. 159,3 x 54,0 x 55,0 cm</p>",
+            "title": "AMICA Lodówka z zamrażarką KGCL 386 160 (Biały)",
+            "wonCategoryPrimary": "Światy potrzeb/Kuchnia i gospodarstwo domowe/Urządzenia kuchenne",
+            "wonCategoryPrimaryPath": "0/11/1111"
+          },
+          "multipack": false,
+          "parentId": "100320149",
+          "preventSelling": false,
+          "price": {
+            "currencyCode": "PLN",
+            "currencyCodeSecond": "",
+            "currencySymbol": "zł",
+            "currencySymbolSecond": "",
+            "displayedCurrency": "zł",
+            "hasStar": false,
+            "hasVat": true,
+            "price": 1198.01,
+            "specialTaxes": []
+          },
+          "productId": 100320149,
+          "productType": "VARIANT",
+          "productOrigin": "progress_event",
+          "ratings": {
+            "average": 4.7,
+            "count": 34,
+            "recommendedNo": 1,
+            "recommendedYes": 32,
+            "sizePercentage": 0,
+            "topRated": false
+          },
+          "regionsPrices": {},
+          "ribbons": [],
+          "renderedTs": 1783330505,
+          "seals": [],
+          "stockAvailability": {
+            "availabilityIndicator": 3,
+            "badgeInfo": {
+              "badges": [
+                {
+                  "text": "Kup online",
+                  "type": "AVAILABLE_ONLINE"
+                }
+              ]
+            },
+            "badgeInfoV2": [
+              {
+                "badges": [
+                  {
+                    "text": "Kup online",
+                    "type": "AVAILABLE_ONLINE"
+                  }
+                ]
+              }
+            ],
+            "onlineAvailable": true,
+            "orderableQuantities": [
+              {
+                "value": 1
+              },
+              {
+                "value": 2
+              },
+              {
+                "value": 3
+              },
+              {
+                "value": 4
+              },
+              {
+                "value": 5
+              },
+              {
+                "value": 6
+              }
+            ],
+            "minOrderableQuantity": 1
+          },
+          "title": "Lodówka z zamrażarką KGCL 386 160 (Biały)",
+          "variantId": 100320149001,
+          "timezoneId": "Europe/Warsaw"
+        },
+        "productId": 100320149001,
+        "meta": {
+          "sapProductCategory": {
+            "code": "20151111",
+            "name": "Lodówko-zamrażarki",
+            "pathCode": "0/20/2015/201511/20151111",
+            "pathName": "Kategorie/Dom & Kuchnia/AGD duże/Lodówki & zamrażarki/Lodówko-zamrażarki"
+          },
+          "categoryPaths": [
+            [
+              {
+                "id": "10000997",
+                "name": "Kuchnia",
+                "url": "/h/kuchnia/h10000997",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003057",
+                "name": "Duże AGD",
+                "url": "/h/duze-agd/h10003057",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10002934",
+                "name": "Lodówki i zamrażarki",
+                "url": "/h/lodowki-i-zamrazarki/h10002934",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10001297",
+                "name": "Chłodziarki",
+                "url": "/h/chlodziarki/h10001297",
+                "hiddenCategory": false
+              }
+            ],
+            [
+              {
+                "id": "10000997",
+                "name": "Kuchnia",
+                "url": "/h/kuchnia/h10000997",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003057",
+                "name": "Duże AGD",
+                "url": "/h/duze-agd/h10003057",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10002934",
+                "name": "Lodówki i zamrażarki",
+                "url": "/h/lodowki-i-zamrazarki/h10002934",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10001786",
+                "name": "Lodówki",
+                "url": "/h/lodowki/h10001786",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "campaignPaths": [],
+          "fullTitle": "AMICA Lodówka z zamrażarką KGCL 386 160 (Biały)",
+          "ean": "5906006913526",
+          "gs1": {
+            "segment": {
+              "code": "72000000",
+              "label": "AGD",
+              "family": {
+                "code": "72010000",
+                "label": "Duże AGD",
+                "clazz": {
+                  "code": "72010200",
+                  "label": "Urządzenia do chłodzenia/ zamrażania",
+                  "brick": {
+                    "code": "10003695",
+                    "label": "Lodówko-zamrażarki",
+                    "attributeGS1": [
+                      {
+                        "code": "20001525",
+                        "label": "Fridge Freezer Configuration",
+                        "attributeUnitGS1": [],
+                        "attributeValueGS1": [
+                          {
+                            "label": "unidentified",
+                            "code": "30002518"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "shopCategories": {
+            "shopCategory": [
+              {
+                "code": "20151111",
+                "name": "Lodówko-zamrażarki",
+                "parent": "201511",
+                "superCategories": {
+                  "category": [
+                    {
+                      "code": "201511",
+                      "name": "Lodówki & zamrażarki",
+                      "parent": "2015"
+                    },
+                    {
+                      "code": "2015",
+                      "name": "AGD duże",
+                      "parent": "20"
+                    },
+                    {
+                      "code": "20",
+                      "name": "Dom & Kuchnia",
+                      "parent": "0"
+                    },
+                    {
+                      "code": "0",
+                      "name": "Kategorie",
+                      "parent": ""
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "wonCategoryBreadcrumbs": [
+            [
+              {
+                "id": "10067764",
+                "name": "Kuchnia i gospodarstwo domowe",
+                "url": "/c/kuchnia-sprzatanie-i-organizacja/s10067764",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10067522",
+                "name": "Sprzęty i akcesoria kuchenne ",
+                "url": "/h/sprzety-i-akcesoria-kuchenne/h10067522",
+                "hiddenCategory": false
+              }
+            ],
+            [
+              {
+                "id": "10067764",
+                "name": "Kuchnia i gospodarstwo domowe",
+                "url": "/c/kuchnia-sprzatanie-i-organizacja/s10067764",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10067522",
+                "name": "Sprzęty i akcesoria kuchenne ",
+                "url": "/h/sprzety-i-akcesoria-kuchenne/h10067522",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003057",
+                "name": "Duże AGD",
+                "url": "/h/duze-agd/h10003057",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10002934",
+                "name": "Lodówki i zamrażarki",
+                "url": "/h/lodowki-i-zamrazarki/h10002934",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10001786",
+                "name": "Lodówki",
+                "url": "/h/lodowki/h10001786",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "worldOfNeeds": [
+            {
+              "code": "1111",
+              "isMain": true,
+              "name": "Urządzenia kuchenne",
+              "parent": "11",
+              "superCategories": [
+                {
+                  "code": "11",
+                  "name": "Kuchnia i gospodarstwo domowe",
+                  "parent": "0"
+                },
+                {
+                  "code": "0",
+                  "name": "Światy potrzeb",
+                  "parent": ""
+                }
+              ]
+            }
+          ],
+          "preview": false
+        },
+        "action": "UPDATE",
+        "language": "pl",
+        "eventType": "GRIDBOX",
+        "id": "100320149001"
+      },
+      "tracking": {
+        "position": 14,
+        "xPayload": {
+          "searchTrackingMasterId": "Product.100320149001",
+          "searchTrackingTitle": "AMICA+Lod%C3%B3wka+z+zamra%C5%BCark%C4%85+KGCL+386+160+%28Bia%C5%82y%29",
+          "searchTrackingPageSize": 36,
+          "searchTrackingPage": 1,
+          "searchTrackingEvent": "click",
+          "list": "search",
+          "searchTrackingId": "Product.100320149001",
+          "searchTrackingQuery": "mleko",
+          "searchTrackingOrigPos": 1,
+          "searchTrackingPos": 14,
+          "searchTrackingOrigPageSize": 36,
+          "searchTrackingChannel": "PL",
+          "category": "Kategorie/Dom & Kuchnia/AGD duże/Lodówki & zamrażarki/Lodówko-zamrażarki"
+        }
+      }
+    },
+    {
+      "resultClass": "product",
+      "type": "product",
+      "code": "100366676",
+      "label": "",
+      "url": "",
+      "xPayload": {
+        "metaData": {
+          "relevancyScore": "KpBPamJF1nZNMneH2guNWwh42I/EARXECgk99Wf5UgcI6YqUoqR9OQa9wGE=",
+          "keywordScore": "V8+xMpZcmaSwJ1hC0Y/vM8C2mge2R9SJBhVu6idCs800CNcR7IKzS9k/JFk=",
+          "semanticScore": "O9TsmEfxOdV3GLrHaNeaSAv3pGv09tzAttGoFyj9cyahsKIhDoMisA/OveE=",
+          "keywordScoreRaw": "TXLpNjNMeksxLlN48CmSUvvJvTzaPITGAesHA7guTDfQpEASHpT5lDqZln8=",
+          "ratingScore": "wSXQ5qK4yHTqR54h54P4Mv4Wt/DZtb2QgUnMRyxyA5gCcONzDScXwCJmM0U=",
+          "freshnessScore": "BA2yrG8HRR5Q3184D5vYa2UY0hfTq+jfK7lKWRI1d+RgA+sUJPQoe9MrD0s=",
+          "searchHubImpressions": "UbEx8OYtp0pz9By+5Mh4xu97l7URQIoi2FxLy3IUl5eDhnoXSyX3MJKPRUI=",
+          "searchHubClicks": "OQEoy6NihD0IKRi6X3/e3WVfJN9FtOuFtP89HGGe75R6VTKZQ1pbTEy5PKc=",
+          "searchHubCarts": "WxpLb/4GDfm7T4fDXbE+zHtCWDeKxHpMMMh6rVUSs1Rv6a+GhH1adJLL+Ws=",
+          "businessRuleFactor": "WOFm2WO5ueIl6dFv3UqHq2lwuac7u6OYQtAglMvcLeDDp3A79XDrf7TFlL4="
+        }
+      },
+      "gridbox": {
+        "country": "PL",
+        "sequence": 1783548033785138,
+        "data": {
+          "ageRestriction": false,
+          "awards": [],
+          "brand": {
+            "logo": "https://www.lidl.pl/assets/27d0f644b43873866c190f898558f12e.jpeg",
+            "name": "BOSCH",
+            "url": "/q/search?q=bosch",
+            "id": "BOSC",
+            "showBrand": true
+          },
+          "canonicalPath": "/p/bosch-ekspres-do-kawy-verocup-tie20109-1300-w/p100366676",
+          "canonicalUrl": "/p/bosch-ekspres-do-kawy-verocup-tie20109-1300-w/p100366676",
+          "category": "Kategorie/Dom & Kuchnia/Małe AGD & Kuchnia/Kawa & więcej/Ekspresy automatyczne",
+          "categorySecondaryPath": "0/20/2010/201020/20102011",
+          "cutoutimageV2": [],
+          "dealOfDay": {
+            "active": false
+          },
+          "designTheme": "default",
+          "disclaimers": [
+            {
+              "id": "code_100366676_a340c8b6",
+              "type": "CODE",
+              "value": "Basic"
+            },
+            {
+              "id": "code_100366676_e6961ed9",
+              "type": "CODE",
+              "value": "StrikePrice_LowestPrice30days"
+            }
+          ],
+          "displayFreeDelivery": true,
+          "energyLabels": [],
+          "erpNumber": "100366676",
+          "flashSales": false,
+          "fullTitle": "BOSCH Ekspres do kawy VeroCup TIE20109, 1300 W",
+          "gs1Attributes": [],
+          "havingPrice": true,
+          "havingThreesixty": false,
+          "havingVideos": false,
+          "highlightedSeals": 0,
+          "ians": [
+            "427069",
+            "454704",
+            "467890",
+            "469884",
+            "487706"
+          ],
+          "image": "https://www.lidl.pl/assets/gcp3161748f083a44f4a36c6b5c43d725af.jpeg",
+          "image_V1": {
+            "image": "https://www.lidl.pl/assets/gcp3161748f083a44f4a36c6b5c43d725af.jpeg",
+            "accessibility": "Czarny ekspres do kawy Bosch VeroCafe z filiżanką espresso."
+          },
+          "isLidlGiftCard": false,
+          "isUsedProduct": false,
+          "imageList": [
+            "https://www.lidl.pl/assets/gcp3161748f083a44f4a36c6b5c43d725af.jpeg",
+            "https://www.lidl.pl/assets/gcpf06be04d9a9d4491a1f825586772b312.jpeg",
+            "https://www.lidl.pl/assets/gcpb45914d617bf499eaf5fa3706b839c82.jpeg"
+          ],
+          "imageList_V1": [
+            {
+              "image": "https://www.lidl.pl/assets/gcp3161748f083a44f4a36c6b5c43d725af.jpeg",
+              "accessibility": "Czarny ekspres do kawy Bosch VeroCafe z filiżanką espresso."
+            },
+            {
+              "image": "https://www.lidl.pl/assets/gcpf06be04d9a9d4491a1f825586772b312.jpeg",
+              "accessibility": "Czarny ekspres do kawy Bosch VeroCafe z przyciskami do espresso, kawy, cappuccino, latte macchiato i mleka."
+            },
+            {
+              "image": "https://www.lidl.pl/assets/gcpb45914d617bf499eaf5fa3706b839c82.jpeg",
+              "accessibility": "Czarny ekspres do kawy Bosch VeroCafe z przyciskami do espresso, kawy, cappuccino, latte macchiato i mleka."
+            }
+          ],
+          "keyfacts": {
+            "analyticsCategory": "Kategorie/Dom & Kuchnia/Małe AGD & Kuchnia/Kawa & więcej/Ekspresy automatyczne",
+            "description": "<p><span style=\"color: #0050aa;\">✓</span> Zawsze dobra jakość kawy dzięki optymalnemu przygotowaniu<br /> <span style=\"color: #0050aa;\">✓</span> Łatwy w użyciu wyświetlacz Easy Select<br /> <span style=\"color: #0050aa;\">✓</span> Łatwe czyszczenie i odkamienianie dzięki funkcji Calc&#39;n Clean&nbsp; &nbsp;</p>",
+            "fullTitle": "BOSCH Ekspres do kawy VeroCup TIE20109, 1300 W",
+            "moreDetails": "Więcej szczegółów",
+            "supplementalDescription": "<p><strong>Moc:</strong> 1300 W / 15 barów<br /> <strong>Pojemność zbiornika na wodę:</strong> 1,4 l</p>",
+            "title": "Ekspres do kawy VeroCup TIE20109, 1300 W",
+            "wonCategoryPrimary": "Światy potrzeb/Kuchnia i gospodarstwo domowe/Urządzenia kuchenne",
+            "wonCategoryPrimaryPath": "0/11/1111"
+          },
+          "lidlPlus": [],
+          "mouseoverImage": "https://www.lidl.pl/assets/gcp6afde67b07554351b0fd799016389d8e.jpeg",
+          "mouseoverImage_V1": {
+            "image": "https://www.lidl.pl/assets/gcp6afde67b07554351b0fd799016389d8e.jpeg",
+            "accessibility": "Część czerwonego ekspresu do kawy jest wkładana do czarnego ekspresu do kawy."
+          },
+          "multipack": false,
+          "online": true,
+          "preventSelling": false,
+          "price": {
+            "currencyCode": "PLN",
+            "currencyCodeSecond": "",
+            "currencySymbol": "zł",
+            "currencySymbolSecond": "",
+            "discount": {
+              "deletedPrice": 1399.0,
+              "discountHasStar": false,
+              "fromRecommendedPrice": false,
+              "hideBargainHint": false,
+              "bargainHintEnabled": false,
+              "bargainHintText": "Megaokazja",
+              "percentageDiscount": 7,
+              "showDiscount": true,
+              "showFrom": false,
+              "showPercentage": false,
+              "showUpTo": false
+            },
+            "displayedCurrency": "zł",
+            "hasStar": false,
+            "hasVat": true,
+            "oldPrice": 1399.0,
+            "price": 1299.0,
+            "specialTaxes": [],
+            "variantsHaveDifferentPrices": false
+          },
+          "productId": 100366676,
+          "productType": "FLAT",
+          "productOrigin": "progress_event",
+          "quickAddToCart": false,
+          "ratings": {
+            "average": 4.3,
+            "count": 79,
+            "recommendedNo": 10,
+            "recommendedYes": 66,
+            "sizePercentage": 0,
+            "topRated": false
+          },
+          "regionsPrices": {},
+          "ribbons": [],
+          "renderedTs": 1783548033,
+          "seals": [],
+          "stockAvailability": {
+            "availabilityIndicator": 3,
+            "badgeInfo": {
+              "badges": [
+                {
+                  "text": "także w sklepach stacjonarnych od 16.07. - 23.07.",
+                  "type": "ALSO_IN_STORE_FROM_FUTURE_DATE_RANGE"
+                },
+                {
+                  "text": "Kup online",
+                  "type": "AVAILABLE_ONLINE"
+                }
+              ]
+            },
+            "badgeInfoV2": [
+              {
+                "badges": [
+                  {
+                    "text": "także w sklepach stacjonarnych od 16.07. - 23.07.",
+                    "type": "ALSO_IN_STORE_FROM_FUTURE_DATE_RANGE"
+                  },
+                  {
+                    "text": "Kup online",
+                    "type": "AVAILABLE_ONLINE"
+                  }
+                ],
+                "validFrom": 1784152800,
+                "validUntil": 1784843999
+              },
+              {
+                "badges": [
+                  {
+                    "text": "Kup online",
+                    "type": "AVAILABLE_ONLINE"
+                  }
+                ]
+              }
+            ],
+            "onlineAvailable": true,
+            "orderableQuantities": [
+              {
+                "value": 1
+              },
+              {
+                "value": 2
+              },
+              {
+                "value": 3
+              },
+              {
+                "value": 4
+              },
+              {
+                "value": 5
+              },
+              {
+                "value": 6
+              },
+              {
+                "value": 7
+              },
+              {
+                "value": 8
+              },
+              {
+                "value": 9
+              },
+              {
+                "value": 10
+              }
+            ],
+            "minOrderableQuantity": 1
+          },
+          "store": false,
+          "storeStartDate": 1784152800,
+          "storeEndDate": 1784843999,
+          "title": "Ekspres do kawy VeroCup TIE20109, 1300 W",
+          "timezoneId": "Europe/Warsaw",
+          "zones": {}
+        },
+        "productId": 100366676,
+        "meta": {
+          "sapProductCategory": {
+            "code": "20102011",
+            "name": "Ekspresy automatyczne",
+            "pathCode": "0/20/2010/201020/20102011",
+            "pathName": "Kategorie/Dom & Kuchnia/Małe AGD & Kuchnia/Kawa & więcej/Ekspresy automatyczne"
+          },
+          "categoryPaths": [
+            [
+              {
+                "id": "10000997",
+                "name": "Kuchnia",
+                "url": "/h/kuchnia/h10000997",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003058",
+                "name": "Małe AGD",
+                "url": "/h/male-agd/h10003058",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003055",
+                "name": "Ekspresy do kawy i akcesoria",
+                "url": "/h/ekspresy-do-kawy-i-akcesoria/h10003055",
+                "hiddenCategory": false
+              }
+            ],
+            [
+              {
+                "id": "10000997",
+                "name": "Kuchnia",
+                "url": "/h/kuchnia/h10000997",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003058",
+                "name": "Małe AGD",
+                "url": "/h/male-agd/h10003058",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003055",
+                "name": "Ekspresy do kawy i akcesoria",
+                "url": "/h/ekspresy-do-kawy-i-akcesoria/h10003055",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10001117",
+                "name": "Automatyczne ekspresy do kawy",
+                "url": "/h/automatyczne-ekspresy-do-kawy/h10001117",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "campaignPaths": [],
+          "fullTitle": "BOSCH Ekspres do kawy VeroCup TIE20109, 1300 W",
+          "ean": "4242005360291",
+          "gs1": {
+            "segment": {
+              "code": "72000000",
+              "label": "AGD",
+              "family": {
+                "code": "72020000",
+                "label": "Małe AGD",
+                "clazz": {
+                  "code": "72020200",
+                  "label": "Urządzenia do przygotowania żywności/ napojów",
+                  "brick": {
+                    "code": "10002011",
+                    "label": "Urządzenia do przygotowywania gorących napojów",
+                    "attributeGS1": []
+                  }
+                }
+              }
+            }
+          },
+          "shopCategories": {
+            "shopCategory": [
+              {
+                "code": "20102011",
+                "name": "Ekspresy automatyczne",
+                "parent": "201020",
+                "superCategories": {
+                  "category": [
+                    {
+                      "code": "201020",
+                      "name": "Kawa & więcej",
+                      "parent": "2010"
+                    },
+                    {
+                      "code": "2010",
+                      "name": "Małe AGD & Kuchnia",
+                      "parent": "20"
+                    },
+                    {
+                      "code": "20",
+                      "name": "Dom & Kuchnia",
+                      "parent": "0"
+                    },
+                    {
+                      "code": "0",
+                      "name": "Kategorie",
+                      "parent": ""
+                    }
+                  ]
+                }
+              }
+            ]
+          },
+          "wonCategoryBreadcrumbs": [
+            [
+              {
+                "id": "10067764",
+                "name": "Kuchnia i gospodarstwo domowe",
+                "url": "/c/kuchnia-sprzatanie-i-organizacja/s10067764",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10067522",
+                "name": "Sprzęty i akcesoria kuchenne ",
+                "url": "/h/sprzety-i-akcesoria-kuchenne/h10067522",
+                "hiddenCategory": false
+              }
+            ],
+            [
+              {
+                "id": "10067764",
+                "name": "Kuchnia i gospodarstwo domowe",
+                "url": "/c/kuchnia-sprzatanie-i-organizacja/s10067764",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10067522",
+                "name": "Sprzęty i akcesoria kuchenne ",
+                "url": "/h/sprzety-i-akcesoria-kuchenne/h10067522",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003058",
+                "name": "Małe AGD",
+                "url": "/h/male-agd/h10003058",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003055",
+                "name": "Ekspresy do kawy i akcesoria",
+                "url": "/h/ekspresy-do-kawy-i-akcesoria/h10003055",
+                "hiddenCategory": false
+              }
+            ],
+            [
+              {
+                "id": "10067764",
+                "name": "Kuchnia i gospodarstwo domowe",
+                "url": "/c/kuchnia-sprzatanie-i-organizacja/s10067764",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10067522",
+                "name": "Sprzęty i akcesoria kuchenne ",
+                "url": "/h/sprzety-i-akcesoria-kuchenne/h10067522",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003058",
+                "name": "Małe AGD",
+                "url": "/h/male-agd/h10003058",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10003055",
+                "name": "Ekspresy do kawy i akcesoria",
+                "url": "/h/ekspresy-do-kawy-i-akcesoria/h10003055",
+                "hiddenCategory": false
+              },
+              {
+                "id": "10001117",
+                "name": "Automatyczne ekspresy do kawy",
+                "url": "/h/automatyczne-ekspresy-do-kawy/h10001117",
+                "hiddenCategory": false
+              }
+            ]
+          ],
+          "worldOfNeeds": [
+            {
+              "code": "1111",
+              "isMain": true,
+              "name": "Urządzenia kuchenne",
+              "parent": "11",
+              "superCategories": [
+                {
+                  "code": "11",
+                  "name": "Kuchnia i gospodarstwo domowe",
+                  "parent": "0"
+                },
+                {
+                  "code": "0",
+                  "name": "Światy potrzeb",
+                  "parent": ""
+                }
+              ]
+            }
+          ],
+          "preview": false
+        },
+        "action": "UPDATE",
+        "language": "pl",
+        "eventType": "GRIDBOX",
+        "id": "100366676"
+      },
+      "tracking": {
+        "position": 13,
+        "xPayload": {
+          "searchTrackingMasterId": "Product.100366676",
+          "searchTrackingTitle": "Ekspres+do+kawy+VeroCup+TIE20109%2C+1300+W",
+          "searchTrackingPageSize": 36,
+          "searchTrackingPage": 1,
+          "searchTrackingEvent": "click",
+          "list": "search",
+          "searchTrackingId": "Product.100366676",
+          "searchTrackingQuery": "mleko",
+          "searchTrackingOrigPos": 1,
+          "searchTrackingPos": 13,
+          "searchTrackingOrigPageSize": 36,
+          "searchTrackingChannel": "PL",
+          "category": "Kategorie/Dom & Kuchnia/Małe AGD & Kuchnia/Kawa & więcej/Ekspresy automatyczne"
+        }
+      }
+    }
+  ]
+}
