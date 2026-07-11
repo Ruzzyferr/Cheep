@@ -187,6 +187,27 @@ router.post(
 
 /**
  * @swagger
+ * /api/v1/store-prices/harvest-ean:
+ *   post:
+ *     summary: EAN-siz ürünlere EAN-taşıyan zincirlerden barkod devral (STRICT, unsupervised)
+ *     tags: [StorePrices]
+ *     description: |
+ *       EAN'i olmayan zincirlerin (Auchan, Biedronka) ürünlerini, aynı marka +
+ *       aynı isim-parmak izi + AYNI gramaj taşıyan EAN'li bir üründen (Carrefour,
+ *       Żabka) barkod devralarak birleştirir. İNSAN DENETİMİ YOK — bu yüzden
+ *       daima strict:true ile çalışır: (brand+fingerprint+gramaj) anahtarı
+ *       tutsa bile, iki ismin anlamlı token kümeleri BİREBİR eşit değilse
+ *       (promo paket, farklı un tipi, farklı paket adedi, farklı yaş aralığı,
+ *       "2w1" vs "3w1" gibi varyant farkları) atama YAPILMAZ. Ingest-key korumalı.
+ */
+router.post(
+    '/harvest-ean',
+    requireIngestKey,
+    StorePriceController.harvestEanPrices
+);
+
+/**
+ * @swagger
  * /api/v1/store-prices/import-with-llm:
  *   post:
  *     summary: LLM ile ürün import (Market bazlı optimize edilmiş)

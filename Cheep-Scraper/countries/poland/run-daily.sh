@@ -49,4 +49,9 @@ echo "=== PL daily run $(date -Iseconds): gün $DOW -> $MARKETS ==="
 python -m countries._common.pipeline countries/poland/config.json --api-url "$API" --markets "$MARKETS"
 # Temizlik: yalnızca koşu BAŞARILIYSA (set -e yukarıda düşürür)
 curl -fsS -X POST "$API/store-prices/prune-stale" -H "x-api-key: ${INGEST_API_KEY}" -H "x-country: PL" || echo "prune atlandı"
+# Strict unsupervised EAN harvest: yeni taranan EAN-siz ürünler (Auchan/Biedronka)
+# EAN-taşıyan zincirlerden (Carrefour/Żabka) otomatik barkod devralır. Sadece
+# koşu BAŞARILIYSA çalışır (aynı set -e mantığı). Denetim yok; guard zaten
+# strict:true (bkz. ean-harvest.service.ts strictNameMatch).
+curl -fsS -X POST "$API/store-prices/harvest-ean" -H "x-api-key: ${INGEST_API_KEY}" -H "x-country: PL" || echo "harvest atlandı"
 echo "=== done $(date -Iseconds) ==="

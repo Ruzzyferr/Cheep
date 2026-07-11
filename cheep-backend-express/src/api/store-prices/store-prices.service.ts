@@ -3,6 +3,7 @@ import { prisma } from '../../utils/prisma.client.js';
 import { Decimal } from '@prisma/client/runtime/library';
 import {productMatcher, isStrictCountry} from "../products/product-matcher.service.js";
 import { badRequest } from '../../utils/app-error.js';
+import { harvestEan } from '../../services/ean-harvest.service.js';
 
 // ++ YENİ: Ürün ve fiyat bilgilerini bir arada içeren tip tanımı
 interface UpsertData {
@@ -171,6 +172,17 @@ export const pruneStalePrices = async (countryId?: number, ttlDays: number = 21)
         deleted_orphan_products: delOrphanProducts.count,
         ttl_days: ttlDays,
     };
+};
+
+// STRICT unsupervised EAN harvest for one country (nightly pipeline hook).
+// No human audit runs against this — strict: true is non-negotiable here.
+// See src/services/ean-harvest.service.ts for the zero-error guard.
+export const harvestEanForCountry = async (countryCode: string) => {
+    const result = await harvestEan(countryCode, { apply: true, strict: true });
+    logger.info(
+        `[StorePriceService] EAN harvest (${countryCode}, strict): candidates=${result.candidates} assigned=${result.assigned} merged=${result.merged} ambiguous=${result.ambiguous} rejectedByStrict=${result.rejectedByStrict}`,
+    );
+    return result;
 };
 
 export const bulkUpsertStorePrices = async (prices: UpsertData[], countryId?: number) => {

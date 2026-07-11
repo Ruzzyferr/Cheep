@@ -35,3 +35,19 @@ export const pruneStalePrices = async (req: Request, res: Response, next: NextFu
         next(error);
     }
 };
+
+// EAN-siz ürünlere (Auchan/Biedronka gibi) EAN-taşıyan zincirlerden barkod
+// devralır — STRICT unsupervised mod (insan denetimi yok). Ingest-key korumalı.
+export const harvestEanPrices = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const countryCode = req.country?.code;
+        if (!countryCode) {
+            res.status(400).json({ error: 'x-country header is required' });
+            return;
+        }
+        const result = await StorePriceService.harvestEanForCountry(countryCode);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
+    }
+};
