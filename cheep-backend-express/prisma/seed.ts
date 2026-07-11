@@ -400,11 +400,8 @@ async function main() {
         update: { name: 'ICA Mjölk 1L', country_id: se.id, category_id: sutId },
         create: { name: 'ICA Mjölk 1L', brand: 'ICA', ean_barcode: '7300000000001', country_id: se.id, category_id: sutId },
     });
-    const plMleko = await prisma.product.upsert({
-        where: { country_id_ean_barcode: { country_id: pl.id, ean_barcode: '5900000000001' } },
-        update: { name: 'Łaciate Mleko 1L', country_id: pl.id, category_id: sutId },
-        create: { name: 'Łaciate Mleko 1L', brand: 'Łaciate', ean_barcode: '5900000000001', country_id: pl.id, category_id: sutId },
-    });
+    // NOT: PL artık gerçek katalog (scrape) ile dolduruluyor — sahte demo ürünü
+    // (Łaciate Mleko, ean 5900000000001) kaldırıldı ki prod kataloğuna sızmasın.
 
     await prisma.storePrice.createMany({
         skipDuplicates: true,
@@ -422,13 +419,10 @@ async function main() {
             // SE — ICA / Willys
             { store_id: ica.id, product_id: icaMjolk.id, price: 12.90, unit: 'adet', source: 'seed' },
             { store_id: willys.id, product_id: icaMjolk.id, price: 11.50, unit: 'adet', source: 'seed' },
-            // PL — Carrefour / Auchan
-            { store_id: carrefourPl.id, product_id: plMleko.id, price: 3.49, unit: 'adet', source: 'seed' },
-            { store_id: auchan.id, product_id: plMleko.id, price: 3.29, unit: 'adet', source: 'seed' },
         ],
     });
 
-    console.log('✅ Yeni ülkeler için örnek ürün/fiyatlar oluşturuldu (CH/SE/DE/PL)');
+    console.log('✅ Yeni ülkeler için örnek ürün/fiyatlar oluşturuldu (CH/SE/DE)');
 
     // 6. Test kullanıcısı için favori marketler ekle
     await prisma.userFavoriteStore.createMany({
