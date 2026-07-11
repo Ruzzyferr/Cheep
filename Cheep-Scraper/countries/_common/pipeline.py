@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List, Optional, Tuple
 
 from countries._common.runner import CountryScraperRunner
 from countries._common.foreign_import import ForeignImporter
@@ -20,6 +20,49 @@ def _load_category_map(country_dir: Path) -> Dict[str, str]:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     return {}
+
+
+def filter_products_by_category_domain(
+    products: List[Dict],
+    allow_prefixes: Optional[List[str]] = None,
+    deny_prefixes: Optional[List[str]] = None,
+) -> Tuple[List[Dict], Dict[str, int]]:
+    """Grocery-domain ingest filter, applied before enrichment/import.
+
+    Cheep is a grocery app: a market's full catalog can include durable
+    general-merchandise (clothing/tools/garden/electronics/furniture) that
+    must never be ingested. `allow_prefixes`/`deny_prefixes` are lists of
+    raw_category breadcrumb prefixes (plain `str.startswith` match, no
+    "prefix:" marker — that marker is only used inside category_map.json's
+    slug-resolution keys).
+
+    Semantics:
+    - A product with NO raw_category (e.g. Żabka, which has no category
+      field at all) is always KEPT — there is nothing to filter on.
+    - deny takes precedence: a product matching any deny prefix is dropped.
+    - when an allow list is configured, a product must match at least one
+      allow prefix to be kept (checked only when it didn't already match a
+      deny prefix).
+    - with neither list configured, every product is kept unchanged.
+    """
+    if not allow_prefixes and not deny_prefixes:
+        return list(products), {"kept": len(products), "dropped": 0}
+
+    kept: List[Dict] = []
+    dropped = 0
+    for product in products:
+        raw_cat = product.get("raw_category") or product.get("category")
+        if not raw_cat:
+            kept.append(product)
+            continue
+        if deny_prefixes and any(raw_cat.startswith(p) for p in deny_prefixes):
+            dropped += 1
+            continue
+        if allow_prefixes and not any(raw_cat.startswith(p) for p in allow_prefixes):
+            dropped += 1
+            continue
+        kept.append(product)
+    return kept, {"kept": len(kept), "dropped": dropped}
 
 
 def should_import(market: str, new_count: int, prev_counts: Dict, min_ratio: float = 0.6) -> bool:
@@ -39,6 +82,7 @@ async def run_country_pipeline(config_path: str, api_url: str = "http://localhos
     country_code = config["country_code"]
     default_unit = config.get("default_unit", "adet")
     category_map = _load_category_map(country_dir)
+    market_configs = {m["name"]: m for m in config.get("markets", [])}
 
     runner = CountryScraperRunner(str(config_path))
     scrape_results = await runner.run_all()
@@ -61,6 +105,16 @@ async def run_country_pipeline(config_path: str, api_url: str = "http://localhos
                          country_code, r["market"], len(products), prev_counts.get(r["market"]))
             summary["markets"].append({"market": r["market"], "skipped": "count_collapse"})
             continue
+
+        mconf = market_configs.get(r["market"], {})
+        allow_prefixes = mconf.get("category_allow_prefixes")
+        deny_prefixes = mconf.get("category_deny_prefixes")
+        if allow_prefixes or deny_prefixes:
+            products, filter_stats = filter_products_by_category_domain(
+                products, allow_prefixes, deny_prefixes,
+            )
+            logger.info("%s %s: category domain filter kept=%s dropped=%s",
+                        country_code, r["market"], filter_stats["kept"], filter_stats["dropped"])
 
         if enricher is not None:
             try:

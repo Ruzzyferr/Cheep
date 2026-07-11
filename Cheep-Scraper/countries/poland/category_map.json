@@ -265,5 +265,21 @@
   "Żele i peelingi": "dus-jeli",
   "Żelki": "jelibon",
   "Żwirek": "pet-aksesuar",
-  "Akcesoria do prania": "temizlik-malzemeleri"
+  "Akcesoria do prania": "temizlik-malzemeleri",
+
+  "Kategorie/Produkty spożywcze i środki czystości/Produkty pielęgnacyjne dla dzieci/Pieluchy i pantsy Lupilu": "bebek-bezi",
+
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Gotowe posiłki": "hazir-yemek",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Mięso i drób/Kiełbasy i wędliny": "sarkuteri",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Mięso i drób/Wieprzowina": "kirmizi-et",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Mrożonki (Mrożona żywność)/Lody": "dondurma-alt",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Mrożonki (Mrożona żywność)/Ryby i owoce morza mrożone": "balik",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Oleje, przyprawy i sosy/Oleje i smary": "yag",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Owoce i warzywa/Owoce": "meyve",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Owoce i warzywa/Warzywa": "sebze",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Ryby i owoce morza": "balik",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Ser, nabiał i jaja/Ser": "peynir",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Słodycze i przekąski/Pikantne przekąski": "cips",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Słodycze i przekąski/Suszone owoce i orzechy": "kuruyemiş",
+  "prefix:Światy potrzeb/Żywność i żywność w pobliżu/Zapasy żywności/Ryż, makaron i rośliny strączkowe": "temel-gida"
 }

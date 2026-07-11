@@ -14,6 +14,25 @@ CHUNK_SIZE = 900          # backend hard limit is 1000
 ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu", "szt", "opak"}
 
 
+def _resolve_prefix_slug(raw_cat: str, category_map: Dict[str, str]) -> Optional[str]:
+    """Longest-prefix-wins lookup over `category_map` entries keyed
+    `"prefix:<breadcrumb-prefix>"`. Used as a fallback when an exact
+    `category_map[raw_cat]` lookup misses — lets one entry cover an entire
+    breadcrumb subtree (e.g. thousands of Lidl PL category paths) instead of
+    requiring one exact key per leaf. Returns None when no prefix key
+    matches."""
+    best_prefix = ""
+    best_slug: Optional[str] = None
+    for key, slug in category_map.items():
+        if not key.startswith("prefix:"):
+            continue
+        prefix = key[len("prefix:"):]
+        if prefix and raw_cat.startswith(prefix) and len(prefix) > len(best_prefix):
+            best_prefix = prefix
+            best_slug = slug
+    return best_slug
+
+
 def _slugify(name: str) -> str:
     """Deterministic slug for the store_sku fallback: lowercase, non-alphanumeric
     runs collapsed to a single '-', trimmed. Never returns an empty string."""
@@ -84,7 +103,7 @@ def build_api_payloads(
             payload["image_url"] = str(image_url)
         raw_cat = (product.get("raw_category") or product.get("category") or "").strip()
         if category_map and raw_cat:
-            slug = category_map.get(raw_cat)
+            slug = category_map.get(raw_cat) or _resolve_prefix_slug(raw_cat, category_map)
             if slug:
                 payload["category_slug"] = slug
         payloads.append(payload)
