@@ -79,7 +79,7 @@ const REPLACEMENT_MAP: Record<string, string> = {
     'icin': '',
 };
 
-function baseNormalize(text: string): string {
+export function baseNormalize(text: string): string {
     return text
         .toLowerCase()
         .trim()
@@ -118,7 +118,7 @@ function applyReplacements(text: string): string {
     return output.trim();
 }
 
-function cleanProductText(name: string, brand?: string): string {
+export function cleanProductText(name: string, brand?: string): string {
     let text = name;
 
     if (brand) {

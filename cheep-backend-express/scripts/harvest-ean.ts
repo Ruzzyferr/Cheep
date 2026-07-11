@@ -1,0 +1,407 @@
+/**
+ * EAN harvest — borrow real barcodes from EAN-bearing chains onto no-EAN chains.
+ *
+ * PROBLEM: Some Poland chains (Auchan store 41, Biedronka store 44) carry NO
+ * EAN, so they can never cross-store-match. But Carrefour (40) and Żabka (47),
+ * sourced from Wolt, carry real EANs. When a no-EAN product is UNAMBIGUOUSLY the
+ * same item as an EAN-bearing one (same brand + same normalized name + EXACT same
+ * size), we borrow that EAN so the no-EAN chain joins the comparable set.
+ *
+ * ZERO-ERROR MANDATE: a WRONG barcode causes a wrong cross-store merge — the
+ * worst possible failure. When in ANY doubt, assign NOTHING. Guards:
+ *   - brand must be PRESENT and (fold-normalized) EQUAL on both sides;
+ *   - size (extractGramaj) must be PRESENT and EXACTLY equal — 500g never borrows
+ *     a 700g EAN (size is baked into the fingerprint AND checked explicitly);
+ *   - the no-EAN name must have >= 2 meaningful tokens (skip generic 1-word names);
+ *   - if 2+ DIFFERENT EANs map to the same key → the key is AMBIGUOUS → assign
+ *     nothing for it, ever.
+ *
+ * This mirrors the OFF bulk enricher (Cheep-Scraper/countries/_common/off_bulk.py)
+ * but the EAN source is OUR OWN catalog, which has far better PL coverage than OFF.
+ * It reuses the SAME normalization the matcher uses (generateProductFingerprint /
+ * baseNormalize / cleanProductText / extractGramaj) so a harvested EAN reconciles
+ * exactly the way an ingest-time EAN match would.
+ *
+ * Assigning an EAN that already exists on another product IS the merge signal:
+ * because @@unique([country_id, ean_barcode]) allows only one product per EAN per
+ * country, the borrowed EAN's owner already exists, so every assignment is a
+ * MERGE. We keep the product with more store_prices as the merge target, move the
+ * other's prices onto it (productMatcher.mergeProducts), then ensure the survivor
+ * carries the EAN.
+ *
+ * DRY-RUN by default. Pass --apply to write. Usage:
+ *   npx tsx scripts/harvest-ean.ts            # dry-run over PL
+ *   npx tsx scripts/harvest-ean.ts --apply    # actually write + merge
+ *   npx tsx scripts/harvest-ean.ts --country=PL --apply
+ */
+import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { prisma } from '../src/utils/prisma.client.js';
+import {
+    productMatcher,
+    generateProductFingerprint,
+    baseNormalize,
+    cleanProductText,
+} from '../src/api/products/product-matcher.service.js';
+import { extractGramaj } from '../src/services/brand-independent-pricing.js';
+
+export interface HarvestProduct {
+    id: number;
+    name: string;
+    brand: string | null;
+    ean_barcode: string | null;
+    store_prices: { store_id: number }[];
+}
+
+export interface ProductKey {
+    key: string;
+    foldBrand: string;
+    gramaj: string;
+    fingerprint: string;
+}
+
+export interface EanIndex {
+    /** key -> the single EAN it unambiguously maps to */
+    eanByKey: Map<string, string>;
+    /** keys that 2+ DIFFERENT EANs map to — never assign for these */
+    ambiguous: Set<string>;
+    stats: { sources: number; uniqueKeys: number; ambiguousKeys: number };
+}
+
+export interface Assignment {
+    product: HarvestProduct;
+    ean: string;
+    key: string;
+}
+
+/** A real, borrowable barcode: present and NOT an 'mf-' synthetic fingerprint. */
+export function realEan(p: { ean_barcode?: string | null }): string | null {
+    const e = (p.ean_barcode ?? '').trim();
+    if (!e) return null;
+    if (e.toLowerCase().startsWith('mf-')) return null;
+    return e;
+}
+
+/**
+ * Match key = generateProductFingerprint (the SAME signal the matcher merges on):
+ * sorted meaningful name-token set + EXACT size (@gramaj) + fat-%. Returns null
+ * (→ never matched) unless the size is present and the name has >= 2 meaningful
+ * tokens. With `requireBrand`, the brand COLUMN must be present too.
+ *
+ * Why the key is NOT a separate brand||fingerprint tuple: the fingerprint already
+ * embeds brand tokens — from the brand column when present, else from the NAME.
+ * Wolt-sourced EAN-bearing products (Carrefour/Żabka) leave the brand column NULL
+ * and carry the brand IN the name ("Piątnica Jogurt naturalny 330 g"), whereas the
+ * no-EAN chains (Auchan/Biedronka) populate the brand column. Because a borrower's
+ * fingerprint ALWAYS contains its brand token (its column is required and gets
+ * prepended into the name before normalization), only a source whose NAME contains
+ * that SAME brand token can produce an equal fingerprint. So "same brand" is
+ * enforced structurally by exact fingerprint equality — never borrowing across
+ * brands — while still unlocking the ~10k EAN sources whose brand lives in the name.
+ */
+export function computeKey(
+    p: { name: string; brand?: string | null },
+    opts: { requireBrand?: boolean } = {},
+): ProductKey | null {
+    const brand = (p.brand ?? '').trim();
+    const foldBrand = brand ? baseNormalize(brand) : '';
+    if (opts.requireBrand && !foldBrand) return null; // borrower MUST carry a brand
+
+    const gramaj = extractGramaj(p.name);
+    if (!gramaj) return null; // size MUST be present & parseable
+
+    // Meaningful name tokens (brand NOT prepended) — reuse the matcher's cleaner.
+    const nameTokens = cleanProductText(p.name).split(' ').filter(Boolean);
+    if (nameTokens.length < 2) return null; // too short / generic
+
+    const fingerprint = generateProductFingerprint({ name: p.name, brand: brand || undefined });
+    if (!fingerprint) return null;
+
+    return { key: fingerprint, foldBrand, gramaj, fingerprint };
+}
+
+/**
+ * Build the (brand,name,size) -> EAN index over EAN-bearing products. A key that
+ * 2+ DIFFERENT real EANs map to is flagged AMBIGUOUS and never yields an EAN.
+ */
+export function buildEanIndex(products: HarvestProduct[]): EanIndex {
+    const eansByKey = new Map<string, Set<string>>();
+    let sources = 0;
+    for (const p of products) {
+        const ean = realEan(p);
+        if (!ean) continue;
+        const k = computeKey(p);
+        if (!k) continue;
+        sources++;
+        let set = eansByKey.get(k.key);
+        if (!set) {
+            set = new Set();
+            eansByKey.set(k.key, set);
+        }
+        set.add(ean);
+    }
+
+    const eanByKey = new Map<string, string>();
+    const ambiguous = new Set<string>();
+    for (const [key, eans] of eansByKey) {
+        if (eans.size === 1) eanByKey.set(key, eans.values().next().value as string);
+        else ambiguous.add(key); // 2+ distinct EANs on one key → zero-error skip
+    }
+
+    return {
+        eanByKey,
+        ambiguous,
+        stats: { sources, uniqueKeys: eanByKey.size, ambiguousKeys: ambiguous.size },
+    };
+}
+
+/**
+ * For each NO-EAN product, resolve its key against the index. Exactly-one
+ * unambiguous EAN → assignment. Ambiguous key → counted skip, no assignment.
+ */
+export function planAssignments(
+    noEanProducts: HarvestProduct[],
+    index: EanIndex,
+): { assignments: Assignment[]; ambiguousSkips: number; candidates: number } {
+    const assignments: Assignment[] = [];
+    let ambiguousSkips = 0;
+    let candidates = 0;
+
+    for (const p of noEanProducts) {
+        if (realEan(p)) continue; // only no-EAN products borrow
+        // Borrower side: brand column REQUIRED (its brand token anchors the match).
+        const k = computeKey(p, { requireBrand: true });
+        if (!k) continue; // failed a guard — skip silently
+        candidates++;
+        if (index.ambiguous.has(k.key)) {
+            ambiguousSkips++;
+            continue;
+        }
+        const ean = index.eanByKey.get(k.key);
+        if (!ean) continue; // miss
+        assignments.push({ product: p, ean, key: k.key });
+    }
+
+    return { assignments, ambiguousSkips, candidates };
+}
+
+function priceCount(p: HarvestProduct): number {
+    return p.store_prices?.length ?? 0;
+}
+
+export interface ApplyStats {
+    assigned: number; // plain assigns (no existing owner — defensive, rare)
+    merged: number; // assignments resolved via a merge
+    skipped: number; // constraint violation / error — logged & skipped
+}
+
+/**
+ * Execute assignments. Because @@unique([country_id, ean_barcode]) permits only
+ * one product per EAN, the borrowed EAN's owner already exists → the assignment
+ * is a MERGE: keep the product with more store_prices as target, move the other's
+ * prices onto it, then make sure the survivor carries the EAN. ownerByEan is
+ * mutated so several no-EAN products borrowing the SAME EAN fold into one survivor.
+ * In dryRun mode NOTHING is written.
+ */
+export async function applyAssignments(
+    assignments: Assignment[],
+    ownerByEan: Map<string, HarvestProduct>,
+    opts: { dryRun: boolean; auditLog?: string },
+): Promise<ApplyStats> {
+    const stats: ApplyStats = { assigned: 0, merged: 0, skipped: 0 };
+
+    for (const a of assignments) {
+        const p = a.product;
+        const owner = ownerByEan.get(a.ean);
+
+        try {
+            if (!owner || owner.id === p.id) {
+                // No existing owner (defensive; should not happen since the EAN
+                // came from an owned product) → plain assign.
+                if (!opts.dryRun) {
+                    await prisma.product.update({
+                        where: { id: p.id },
+                        data: { ean_barcode: a.ean },
+                    });
+                }
+                ownerByEan.set(a.ean, { ...p, ean_barcode: a.ean });
+                stats.assigned++;
+                audit(opts, 'ASSIGN', a, p, owner);
+                continue;
+            }
+
+            // Merge: the product with MORE store_prices survives as target.
+            const target = priceCount(owner) >= priceCount(p) ? owner : p;
+            const source = target === owner ? p : owner;
+
+            if (!opts.dryRun) {
+                await productMatcher.mergeProducts(source.id, target.id);
+                // If the survivor is the (formerly) no-EAN product, the owner that
+                // held the EAN was just deleted → the EAN is free → set it now.
+                if (target.id !== owner.id) {
+                    await prisma.product.update({
+                        where: { id: target.id },
+                        data: { ean_barcode: a.ean },
+                    });
+                }
+            }
+
+            // Survivor becomes the new owner, carrying both sides' prices.
+            const survivor: HarvestProduct = {
+                ...target,
+                ean_barcode: a.ean,
+                store_prices: [...(owner.store_prices ?? []), ...(p.store_prices ?? [])],
+            };
+            ownerByEan.set(a.ean, survivor);
+            stats.merged++;
+            audit(opts, 'MERGE', a, p, owner);
+        } catch (err) {
+            // A constraint violation or any error → skip & log, never abort the run.
+            stats.skipped++;
+            const msg = err instanceof Error ? err.message : String(err);
+            audit(opts, 'SKIP', a, p, owner, msg);
+        }
+    }
+
+    return stats;
+}
+
+function audit(
+    opts: { dryRun: boolean; auditLog?: string },
+    kind: 'ASSIGN' | 'MERGE' | 'SKIP',
+    a: Assignment,
+    noEan: HarvestProduct,
+    owner: HarvestProduct | undefined,
+    extra?: string,
+): void {
+    if (!opts.auditLog) return;
+    const line =
+        [
+            new Date().toISOString(),
+            opts.dryRun ? 'DRY' : 'APPLY',
+            kind,
+            `ean=${a.ean}`,
+            `noEan#${noEan.id}="${noEan.name}"`,
+            `borrowFrom#${owner?.id ?? '-'}="${owner?.name ?? '-'}"`,
+            extra ? `err=${extra}` : '',
+        ]
+            .filter(Boolean)
+            .join('\t') + '\n';
+    appendFileSync(opts.auditLog, line);
+}
+
+// ---------------------------------------------------------------------------
+// CLI
+// ---------------------------------------------------------------------------
+
+// Store labels for the PL pilot (for reporting attribution only).
+const STORE_LABELS: Record<number, string> = { 40: 'Carrefour', 41: 'Auchan', 44: 'Biedronka', 47: 'Żabka' };
+
+async function main() {
+    const argv = process.argv.slice(2);
+    const apply = argv.includes('--apply');
+    const countryArg = argv.find((a) => a.startsWith('--country='));
+    const countryCode = (countryArg ? countryArg.split('=')[1] : 'PL').toUpperCase();
+    const dryRun = !apply;
+
+    const country = await prisma.country.findUnique({ where: { code: countryCode } });
+    if (!country) throw new Error(`Unknown country code: ${countryCode}`);
+
+    const __dirname = dirname(fileURLToPath(import.meta.url));
+    const auditDir = resolve(__dirname, '../.harvest-logs');
+    mkdirSync(auditDir, { recursive: true });
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const auditLog = resolve(auditDir, `harvest-ean-${countryCode}-${dryRun ? 'dryrun' : 'apply'}-${stamp}.log`);
+    writeFileSync(auditLog, `# EAN harvest ${dryRun ? 'DRY-RUN' : 'APPLY'} ${countryCode} ${stamp}\n`);
+
+    console.log(`\n=== EAN harvest — ${countryCode} (${dryRun ? 'DRY-RUN' : 'APPLY'}) ===`);
+    console.log('Loading products…');
+
+    const all = (await prisma.product.findMany({
+        where: { country_id: country.id },
+        select: {
+            id: true,
+            name: true,
+            brand: true,
+            ean_barcode: true,
+            store_prices: { select: { store_id: true } },
+        },
+    })) as HarvestProduct[];
+
+    const withEan = all.filter((p) => realEan(p));
+    const noEan = all.filter((p) => !realEan(p));
+    console.log(`  total=${all.length}  ean-bearing=${withEan.length}  no-ean=${noEan.length}`);
+
+    const index = buildEanIndex(withEan);
+    console.log(
+        `Index: sources=${index.stats.sources}  uniqueKeys=${index.stats.uniqueKeys}  ambiguousKeys=${index.stats.ambiguousKeys}`,
+    );
+
+    const { assignments, ambiguousSkips, candidates } = planAssignments(noEan, index);
+
+    // ownerByEan: the single existing product that currently holds each EAN.
+    const ownerByEan = new Map<string, HarvestProduct>();
+    for (const p of withEan) {
+        const e = realEan(p)!;
+        if (!ownerByEan.has(e)) ownerByEan.set(e, p);
+    }
+
+    const wouldMerge = assignments.filter((a) => {
+        const owner = ownerByEan.get(a.ean);
+        return owner && owner.id !== a.product.id;
+    }).length;
+
+    // Store attribution of the no-EAN products that would get an EAN.
+    const byStore = new Map<number, number>();
+    for (const a of assignments) {
+        const seen = new Set<number>();
+        for (const sp of a.product.store_prices ?? []) {
+            if (seen.has(sp.store_id)) continue;
+            seen.add(sp.store_id);
+            byStore.set(sp.store_id, (byStore.get(sp.store_id) ?? 0) + 1);
+        }
+    }
+
+    console.log('\n--- PLAN ---');
+    console.log(`candidates (no-EAN with a well-formed key): ${candidates}`);
+    console.log(`unambiguous assignments:                    ${assignments.length}`);
+    console.log(`ambiguous skips:                            ${ambiguousSkips}`);
+    console.log(`would-be merges:                            ${wouldMerge}`);
+    console.log('assignments by store:');
+    for (const [sid, n] of [...byStore.entries()].sort((a, b) => b[1] - a[1])) {
+        console.log(`  ${STORE_LABELS[sid] ?? `store ${sid}`} (${sid}): ${n}`);
+    }
+
+    console.log('\n--- 25 SAMPLE ASSIGNMENTS (no-EAN name → borrowed-from name → EAN) ---');
+    for (const a of assignments.slice(0, 25)) {
+        const owner = ownerByEan.get(a.ean);
+        console.log(`  "${a.product.name}"  →  "${owner?.name ?? '?'}"  →  ${a.ean}`);
+    }
+
+    const stats = await applyAssignments(assignments, ownerByEan, { dryRun, auditLog });
+
+    console.log('\n--- RESULT ---');
+    if (dryRun) {
+        console.log('DRY-RUN — nothing written. Re-run with --apply to execute.');
+    } else {
+        console.log(`assigned=${stats.assigned}  merged=${stats.merged}  skipped=${stats.skipped}`);
+    }
+    console.log(`Audit log: ${auditLog}`);
+}
+
+// Only run the CLI when executed directly (not when imported by tests).
+const isDirectRun =
+    typeof process.argv[1] === 'string' &&
+    import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isDirectRun) {
+    main()
+        .catch((err) => {
+            console.error('❌ EAN harvest failed:', err);
+            process.exitCode = 1;
+        })
+        .finally(async () => {
+            await prisma.$disconnect();
+        });
+}

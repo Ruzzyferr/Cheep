@@ -40,3 +40,4 @@ coverage/
 # OS dosyaları
 Thumbs.db
 .DS_Store
+.harvest-logs/
