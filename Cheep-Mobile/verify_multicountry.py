@@ -197,6 +197,12 @@ def _api_get(session, path, headers=None):
     return r
 
 
+def _api_delete(session, path, headers=None):
+    import requests
+    r = session.delete(f"{API_BASE_URL}{path}", headers=headers or {}, timeout=30)
+    return r
+
+
 def run_pl_pilot_api_checks():
     import requests
     import time
@@ -213,6 +219,7 @@ def run_pl_pilot_api_checks():
         print(f"[{status}] {name}: {detail}")
 
     session = requests.Session()
+    token = None  # will be set after registration, used in teardown
 
     # --- register a throwaway PL test user -----------------------------------------
     email = f"pl-pilot-verify-{int(time.time())}@example.com"
@@ -315,6 +322,17 @@ def run_pl_pilot_api_checks():
 
     with open(os.path.join(SCRIPT_DIR, "verify_pl_pilot_results.json"), "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
+
+    # --- teardown: delete the throwaway test user ------------------------------------
+    if token:
+        try:
+            del_resp = _api_delete(session, "/users/me", headers={"x-country": "PL", "Authorization": f"Bearer {token}"})
+            if del_resp.status_code in (200, 204):
+                print(f"[TEARDOWN] deleted throwaway test user {email}")
+            else:
+                print(f"[WARNING] teardown: failed to delete user {email}: HTTP {del_resp.status_code}")
+        except Exception as e:
+            print(f"[WARNING] teardown: exception deleting user {email}: {str(e)[:100]}")
 
     return results
 
