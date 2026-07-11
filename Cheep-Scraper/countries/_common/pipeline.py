@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import os
+import sys
 from pathlib import Path
 from typing import Dict
 
@@ -77,6 +78,24 @@ async def run_country_pipeline(config_path: str, api_url: str = "http://localhos
     return summary
 
 
+def summary_is_healthy(summary: Dict) -> bool:
+    """Pure decision function: should the caller treat this pipeline run as
+    successful enough to gate downstream actions (e.g. weekly prune) on?
+
+    A run is healthy only if there is at least one market entry and every
+    market entry both avoided count-collapse (no `skipped`) and had zero
+    failed imports."""
+    markets = summary.get("markets") or []
+    if not markets:
+        return False
+    for market in markets:
+        if market.get("skipped"):
+            return False
+        if market.get("failed", 0) > 0:
+            return False
+    return True
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser()
@@ -84,7 +103,18 @@ def main():
     parser.add_argument("--api-url", default=os.getenv("CHEEP_API_URL", "http://localhost:3000/api/v1"))
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-    asyncio.run(run_country_pipeline(args.config, args.api_url))
+    summary = asyncio.run(run_country_pipeline(args.config, args.api_url))
+    if not summary_is_healthy(summary):
+        bad = [
+            m for m in (summary.get("markets") or [])
+            if m.get("skipped") or m.get("failed", 0) > 0
+        ]
+        logger.error(
+            "%s: run unhealthy (skipped/failed markets: %s) — refusing to exit 0, "
+            "downstream prune must not run",
+            summary.get("country"), bad or "no markets scraped",
+        )
+        sys.exit(1)
 
 
 if __name__ == "__main__":
