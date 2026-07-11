@@ -113,8 +113,9 @@ touch different systems.
 ## 5. Backend deploy (DigitalOcean droplet, per `deploy/README.md`)
 
 - [ ] **`INGEST_API_KEY` — do not carry the local pilot key to prod.** The value used during
-      this pilot (`INGEST_API_KEY=local-pilot-key` in the *local dev* `cheep-backend-express/.env`)
-      is throwaway and lives only on this machine. Production uses **`deploy/.env`** on the
+      this pilot (`INGEST_API_KEY=<lokal .env'deki geçici anahtar>` in the *local dev*
+      `cheep-backend-express/.env`) is a throwaway placeholder and lives only on this machine —
+      the real value is intentionally not written down here. Production uses **`deploy/.env`** on the
       droplet (created once from `deploy/.env.production.example`, which ships with a
       `DEGISTIR_scraper_paylasilan_anahtar` placeholder — "DEGISTIR" = "CHANGE THIS"). Generate a
       real random key, set it in `deploy/.env` on the droplet, and use the **same** value in
