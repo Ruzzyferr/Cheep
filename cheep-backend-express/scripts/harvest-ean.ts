@@ -34,7 +34,7 @@
  *   npx tsx scripts/harvest-ean.ts --apply    # actually write + merge
  *   npx tsx scripts/harvest-ean.ts --country=PL --apply
  */
-import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { prisma } from '../src/utils/prisma.client.js';
@@ -186,6 +186,46 @@ export function planAssignments(
     return { assignments, ambiguousSkips, candidates };
 }
 
+export interface Exclusion {
+    /** borrowed EANs to never assign */
+    eans: Set<string>;
+    /** no-EAN product ids to never touch */
+    productIds: Set<number>;
+}
+
+/** Load an exclusion file: JSON { eans: string[], product_ids: number[] }. */
+export function loadExclusion(path: string): Exclusion {
+    const raw = JSON.parse(readFileSync(path, 'utf8')) as {
+        eans?: unknown[];
+        product_ids?: unknown[];
+    };
+    return {
+        eans: new Set((raw.eans ?? []).map((e) => String(e).trim())),
+        productIds: new Set((raw.product_ids ?? []).map((id) => Number(id))),
+    };
+}
+
+/**
+ * Drop any assignment whose borrowed EAN is in `eans` OR whose no-EAN product id
+ * is in `product_ids`. An excluded assignment yields NO write and NO merge — it is
+ * simply removed from the plan (and logged as EXCLUDED by the caller).
+ */
+export function filterExcluded(
+    assignments: Assignment[],
+    exclusion: Exclusion,
+): { kept: Assignment[]; excluded: Assignment[] } {
+    const kept: Assignment[] = [];
+    const excluded: Assignment[] = [];
+    for (const a of assignments) {
+        if (exclusion.eans.has(a.ean) || exclusion.productIds.has(a.product.id)) {
+            excluded.push(a);
+        } else {
+            kept.push(a);
+        }
+    }
+    return { kept, excluded };
+}
+
 function priceCount(p: HarvestProduct): number {
     return p.store_prices?.length ?? 0;
 }
@@ -269,7 +309,7 @@ export async function applyAssignments(
 
 function audit(
     opts: { dryRun: boolean; auditLog?: string },
-    kind: 'ASSIGN' | 'MERGE' | 'SKIP',
+    kind: 'ASSIGN' | 'MERGE' | 'SKIP' | 'EXCLUDED',
     a: Assignment,
     noEan: HarvestProduct,
     owner: HarvestProduct | undefined,
@@ -305,6 +345,25 @@ async function main() {
     const countryCode = (countryArg ? countryArg.split('=')[1] : 'PL').toUpperCase();
     const dryRun = !apply;
 
+    // --exclude-file <path>  OR  --exclude-file=<path>: audited-wrong assignments
+    // to skip (by borrowed EAN or by no-EAN product id). Skipped = no assignment,
+    // no merge, logged as EXCLUDED.
+    const exclIdx = argv.indexOf('--exclude-file');
+    const exclEq = argv.find((a) => a.startsWith('--exclude-file='));
+    const excludePath = exclEq
+        ? exclEq.split('=').slice(1).join('=')
+        : exclIdx >= 0
+          ? argv[exclIdx + 1]
+          : undefined;
+    const exclusion: Exclusion = excludePath
+        ? loadExclusion(excludePath)
+        : { eans: new Set(), productIds: new Set() };
+    if (excludePath) {
+        console.log(
+            `Exclusion file: ${excludePath}  (eans=${exclusion.eans.size}, product_ids=${exclusion.productIds.size})`,
+        );
+    }
+
     const country = await prisma.country.findUnique({ where: { code: countryCode } });
     if (!country) throw new Error(`Unknown country code: ${countryCode}`);
 
@@ -338,13 +397,22 @@ async function main() {
         `Index: sources=${index.stats.sources}  uniqueKeys=${index.stats.uniqueKeys}  ambiguousKeys=${index.stats.ambiguousKeys}`,
     );
 
-    const { assignments, ambiguousSkips, candidates } = planAssignments(noEan, index);
+    const planned = planAssignments(noEan, index);
+    const { ambiguousSkips, candidates } = planned;
+
+    // Drop audited-wrong assignments (by borrowed EAN or no-EAN product id).
+    const { kept: assignments, excluded } = filterExcluded(planned.assignments, exclusion);
 
     // ownerByEan: the single existing product that currently holds each EAN.
     const ownerByEan = new Map<string, HarvestProduct>();
     for (const p of withEan) {
         const e = realEan(p)!;
         if (!ownerByEan.has(e)) ownerByEan.set(e, p);
+    }
+
+    // Log every excluded assignment for auditability.
+    for (const a of excluded) {
+        audit({ dryRun, auditLog }, 'EXCLUDED', a, a.product, ownerByEan.get(a.ean));
     }
 
     const wouldMerge = assignments.filter((a) => {
@@ -365,7 +433,8 @@ async function main() {
 
     console.log('\n--- PLAN ---');
     console.log(`candidates (no-EAN with a well-formed key): ${candidates}`);
-    console.log(`unambiguous assignments:                    ${assignments.length}`);
+    console.log(`unambiguous assignments (after exclusions):  ${assignments.length}`);
+    console.log(`excluded (audited-wrong):                   ${excluded.length}`);
     console.log(`ambiguous skips:                            ${ambiguousSkips}`);
     console.log(`would-be merges:                            ${wouldMerge}`);
     console.log('assignments by store:');
@@ -385,7 +454,9 @@ async function main() {
     if (dryRun) {
         console.log('DRY-RUN — nothing written. Re-run with --apply to execute.');
     } else {
-        console.log(`assigned=${stats.assigned}  merged=${stats.merged}  skipped=${stats.skipped}`);
+        console.log(
+            `assigned=${stats.assigned}  merged=${stats.merged}  skipped=${stats.skipped}  excluded=${excluded.length}`,
+        );
     }
     console.log(`Audit log: ${auditLog}`);
 }

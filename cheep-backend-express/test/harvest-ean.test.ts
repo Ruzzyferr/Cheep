@@ -13,7 +13,7 @@ vi.mock('../src/api/products/product-matcher.service.js', async (importOriginal)
   return { ...actual, productMatcher: { mergeProducts: mergeMock } };
 });
 
-const { buildEanIndex, planAssignments, computeKey, applyAssignments } = await import(
+const { buildEanIndex, planAssignments, computeKey, applyAssignments, filterExcluded } = await import(
   '../scripts/harvest-ean.js'
 );
 
@@ -131,6 +131,39 @@ describe('harvest-ean: planAssignments', () => {
     const { assignments, ambiguousSkips } = planAssignments([target], ambIndex);
     expect(assignments).toHaveLength(0);
     expect(ambiguousSkips).toBe(1);
+  });
+});
+
+describe('harvest-ean: filterExcluded', () => {
+  const a1 = { product: prod({ id: 100 }), ean: '111', key: 'k1' };
+  const a2 = { product: prod({ id: 200 }), ean: '222', key: 'k2' };
+  const a3 = { product: prod({ id: 300 }), ean: '333', key: 'k3' };
+
+  it('excludes by borrowed EAN', () => {
+    const { kept, excluded } = filterExcluded([a1, a2, a3], {
+      eans: new Set(['222']),
+      productIds: new Set<number>(),
+    });
+    expect(excluded.map((a) => a.ean)).toEqual(['222']);
+    expect(kept.map((a) => a.product.id)).toEqual([100, 300]);
+  });
+
+  it('excludes by no-EAN product id', () => {
+    const { kept, excluded } = filterExcluded([a1, a2, a3], {
+      eans: new Set<string>(),
+      productIds: new Set([300]),
+    });
+    expect(excluded.map((a) => a.product.id)).toEqual([300]);
+    expect(kept.map((a) => a.product.id)).toEqual([100, 200]);
+  });
+
+  it('excludes on EITHER match and keeps the rest', () => {
+    const { kept, excluded } = filterExcluded([a1, a2, a3], {
+      eans: new Set(['111']),
+      productIds: new Set([300]),
+    });
+    expect(excluded).toHaveLength(2);
+    expect(kept.map((a) => a.product.id)).toEqual([200]);
   });
 });
 
