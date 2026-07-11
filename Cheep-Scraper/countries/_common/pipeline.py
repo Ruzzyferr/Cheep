@@ -65,6 +65,19 @@ def filter_products_by_category_domain(
     return kept, {"kept": len(kept), "dropped": dropped}
 
 
+def resolve_enrich_mode(config: Dict) -> Optional[str]:
+    """Pure decision: which OFF EAN-enrichment path (if any) does this
+    country config want? "bulk" (local dataset index, off_bulk.py) takes
+    priority over the legacy "api" (per-product live search, off_enrich.py)
+    path if a config were ever to set both — configs should set only one
+    (Poland's config.json sets off_bulk and no longer sets off_enrich)."""
+    if config.get("off_bulk"):
+        return "bulk"
+    if config.get("off_enrich"):
+        return "api"
+    return None
+
+
 def should_import(market: str, new_count: int, prev_counts: Dict, min_ratio: float = 0.6) -> bool:
     """Ürün sayısı önceki başarılı koşuya göre çökmüşse (site yapısı değişti /
     engellendi) import ETME — eski-ama-doğru veri, boşaltılmış katalogdan iyidir."""
@@ -91,10 +104,16 @@ async def run_country_pipeline(config_path: str, api_url: str = "http://localhos
     prev_counts = json.loads(counts_path.read_text(encoding="utf-8")) if counts_path.exists() else {}
 
     importer = ForeignImporter(api_url, country_code=country_code, api_key=os.getenv("INGEST_API_KEY"))
-    enricher = None
-    if config.get("off_enrich"):
+    enrich_mode = resolve_enrich_mode(config)
+    enrich_fn = None
+    if enrich_mode == "bulk":
+        from countries._common.off_bulk import ensure_pl_index, enrich_from_index
+        off_bulk_sqlite = ensure_pl_index(country_dir)
+        enrich_fn = lambda products: enrich_from_index(products, off_bulk_sqlite)
+    elif enrich_mode == "api":
         from countries._common.off_enrich import OffEnricher
         enricher = OffEnricher(country_code, str(country_dir / "off_cache.sqlite"))
+        enrich_fn = enricher.enrich
     summary = {"country": country_code, "markets": []}
     for r in scrape_results:
         with open(r["output_file"], "r", encoding="utf-8") as f:
@@ -116,9 +135,9 @@ async def run_country_pipeline(config_path: str, api_url: str = "http://localhos
             logger.info("%s %s: category domain filter kept=%s dropped=%s",
                         country_code, r["market"], filter_stats["kept"], filter_stats["dropped"])
 
-        if enricher is not None:
+        if enrich_fn is not None:
             try:
-                enricher.enrich(products)
+                enrich_fn(products)
             except Exception as e:
                 logger.error("OFF enrichment failed for %s — importing without enrichment: %s", r["market"], e)
         stats = importer.import_products(products, store_id=r["store_id"], category_map=category_map, default_unit=default_unit)

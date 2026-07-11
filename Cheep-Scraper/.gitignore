@@ -54,3 +54,11 @@ category_map.json
 countries/*/off_cache.sqlite
 *.tgz
 shots/
+
+# off_bulk.py: downloaded Open Food Facts full-dataset dump + the local
+# SQLite EAN index built from it. Both are large, reproducible (re-derived
+# from a public OFF URL / from the dump by build_pl_index) and NOT code —
+# never committed. (*.sqlite/*.sqlite3 already covered by the repo root
+# .gitignore; listed here too so intent is explicit next to off_cache.)
+countries/*/off_bulk_data/
+countries/*/off_bulk_index.sqlite

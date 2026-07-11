@@ -2,6 +2,7 @@ from countries._common.pipeline import (
     should_import,
     summary_is_healthy,
     filter_products_by_category_domain,
+    resolve_enrich_mode,
 )
 
 
@@ -90,6 +91,25 @@ def test_deny_takes_precedence_over_allow():
     )
     assert kept == []
     assert stats == {"kept": 0, "dropped": 1}
+
+
+def test_resolve_enrich_mode_bulk():
+    assert resolve_enrich_mode({"off_bulk": True}) == "bulk"
+
+
+def test_resolve_enrich_mode_api():
+    assert resolve_enrich_mode({"off_enrich": True}) == "api"
+
+
+def test_resolve_enrich_mode_none_when_neither_set():
+    assert resolve_enrich_mode({}) is None
+
+
+def test_resolve_enrich_mode_bulk_takes_priority_over_api():
+    """Configs should only ever set one of the two flags (off_bulk REPLACES
+    off_enrich, it doesn't layer on top of it) — but if both were ever set,
+    bulk (the local, non-rate-limited path) must win."""
+    assert resolve_enrich_mode({"off_bulk": True, "off_enrich": True}) == "bulk"
 
 
 def test_products_without_raw_category_are_always_kept():
