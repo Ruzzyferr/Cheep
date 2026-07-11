@@ -508,9 +508,19 @@ export class ProductMatcher {
     }
 
     /**
-     * Manuel olarak ürünleri birleştir
+     * Manuel olarak ürünleri birleştir.
+     *
+     * `setTargetEan` (opsiyonel): aynı transaction içinde target'a bir EAN
+     * yazar — çağıran taraf (EAN-harvest apply path) merge + barkod-set'i TEK
+     * transaction'da atomik yapmak için kullanır (aksi halde merge commit olup
+     * barkod-set ayrı bir çağrıda patlarsa barkod hiçbir ürüne bağlı kalmaz).
+     * KRİTİK SIRALAMA: source şu an bu EAN'i taşıyor olabilir, bu yüzden
+     * target'a EAN'i source SİLİNDİKTEN SONRA yazıyoruz — aksi halde iki satır
+     * anlık olarak aynı EAN'i taşır ve @@unique([country_id, ean_barcode])
+     * ihlal edilir. Parametre verilmezse (mevcut çağıranlar: match-review
+     * approve vb.) davranış birebir eskisi gibi kalır.
      */
-    async mergeProducts(sourceProductId: number, targetProductId: number) {
+    async mergeProducts(sourceProductId: number, targetProductId: number, setTargetEan?: string) {
         // Çoklu yazma + delete atomik olmalı: yarıda kalırsa veri tutarsız kalır.
         await prisma.$transaction(async (tx) => {
             // Source product'ın tüm fiyatlarını target'a taşı
@@ -529,6 +539,14 @@ export class ProductMatcher {
             await tx.product.delete({
                 where: { id: sourceProductId },
             });
+
+            // Source silindikten SONRA target'a EAN'i yaz (unique çakışmasını önler).
+            if (setTargetEan) {
+                await tx.product.update({
+                    where: { id: targetProductId },
+                    data: { ean_barcode: setTargetEan },
+                });
+            }
         });
 
         return { success: true };

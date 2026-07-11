@@ -199,11 +199,11 @@ describe('harvest-ean: applyAssignments merge path', () => {
       { dryRun: false },
     );
 
-    // noEan has more prices → owner merged into noEan, then noEan gets the EAN.
-    expect(mergeMock).toHaveBeenCalledWith(1, 2);
-    expect(prismaMock.product.update).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: 2 }, data: { ean_barcode: '5900000000001' } }),
-    );
+    // noEan has more prices → owner merged into noEan, then noEan gets the EAN
+    // set ATOMICALLY inside mergeProducts's own transaction (setTargetEan) —
+    // the apply path no longer does a separate post-merge product.update.
+    expect(mergeMock).toHaveBeenCalledWith(1, 2, '5900000000001');
+    expect(prismaMock.product.update).not.toHaveBeenCalled();
   });
 
   it('dry-run performs no writes', async () => {

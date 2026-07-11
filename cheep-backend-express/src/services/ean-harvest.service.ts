@@ -280,14 +280,16 @@ export async function applyAssignments(
             const source = target === owner ? p : owner;
 
             if (!opts.dryRun) {
-                await productMatcher.mergeProducts(source.id, target.id);
                 // If the survivor is the (formerly) no-EAN product, the owner that
-                // held the EAN was just deleted → the EAN is free → set it now.
+                // held the EAN is deleted by the merge → the EAN must be (re)set on
+                // the survivor. mergeProducts does this INSIDE its own transaction
+                // (setTargetEan) so the merge + barcode-set are atomic: if the EAN
+                // write failed as a separate post-merge call, a committed merge
+                // could leave the barcode orphaned on no product.
                 if (target.id !== owner.id) {
-                    await prisma.product.update({
-                        where: { id: target.id },
-                        data: { ean_barcode: a.ean },
-                    });
+                    await productMatcher.mergeProducts(source.id, target.id, a.ean);
+                } else {
+                    await productMatcher.mergeProducts(source.id, target.id);
                 }
             }
 
