@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Zdrowa żywność",
+    "categoryId": "2563ba1c-0fc4-44f4-b4ec-f5d50202a293",
+    "productCount": 0,
+    "breadcrumbs": [],
+    "retailerCategoryId": "3177",
+    "childCategories": []
+  },
+  {
+    "name": "Artykuły spożywcze",
+    "categoryId": "e51e31a6-433c-49ce-8080-0d9e9c15e4d9",
+    "productCount": 0,
+    "breadcrumbs": [],
+    "retailerCategoryId": "2091",
+    "childCategories": []
+  },
+  {
+    "name": "Kawa, Herbata i kakao",
+    "categoryId": "ba1edfa7-6bbd-4772-a2aa-18ed7848b50f",
+    "productCount": 0,
+    "breadcrumbs": [],
+    "retailerCategoryId": "4324",
+    "childCategories": []
+  },
+  {
+    "name": "Alkohole",
+    "categoryId": "73606815-f662-4da9-ab37-bbf3d127afc2",
+    "productCount": 0,
+    "breadcrumbs": [],
+    "retailerCategoryId": "3639",
+    "childCategories": []
+  }
+]

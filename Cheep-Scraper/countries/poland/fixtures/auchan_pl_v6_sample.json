@@ -1,0 +1,207 @@
+{
+  "productGroups": [
+    {
+      "type": "on_offer",
+      "name": "fop.headertitle.onoffer",
+      "decoratedProducts": [
+        {
+          "productId": "4498d3dd-ddd9-45e0-a959-838e004e280f",
+          "retailerProductId": "00142167",
+          "type": "CATCHWEIGHT",
+          "name": "Brzoskwinie Owoce  Auchan na wagę ok. 500g",
+          "brand": "Owoce  Auchan",
+          "packSizeDescription": "400g - 99999g",
+          "seller": {
+            "id": "1db2a849-3755-436d-9d4b-f5c09c7498e9",
+            "name": "Auchan Polska Sp. z o.o."
+          },
+          "price": {
+            "amount": "4.50",
+            "currency": "PLN"
+          },
+          "unitPrice": {
+            "price": {
+              "amount": "8.99",
+              "currency": "PLN"
+            },
+            "unit": "fop.price.per.kg",
+            "unitName": "PER_1KG"
+          },
+          "referencePrice": {
+            "price": {
+              "amount": "3.95",
+              "currency": "PLN"
+            },
+            "type": "FRESH"
+          },
+          "available": true,
+          "isVerifiedPurchase": false,
+          "quantityInBasket": 0,
+          "maxQuantityReached": false,
+          "promotions": [
+            {
+              "promoId": "3fcec2f6-0d02-430b-a9d4-9fadd1d95270",
+              "retailerPromotionId": "PC0000002982725139400014216700005950000000000001_202607090833",
+              "description": "25% taniej",
+              "type": "OFFER",
+              "presentationMode": "DEFAULT",
+              "limitReached": false
+            }
+          ],
+          "promoPrice": {
+            "amount": "2.98",
+            "currency": "PLN"
+          },
+          "promoUnitPrice": {
+            "price": {
+              "amount": "5.95",
+              "currency": "PLN"
+            },
+            "unit": "fop.price.per.kg",
+            "unitName": "PER_1KG"
+          },
+          "image": {
+            "src": "https://zakupy.auchan.pl/images-v3/91f3b8f0-9eaa-434b-8554-b0f1db433c99/fc34d4b9-5754-4e90-81a7-5c54d3b3f4ea/300x300.jpg",
+            "description": "Trzy świeże brzoskwinie z puszystą skórką w odcieniach żółci, pomarańczy i czerwieni. Jedna brzoskwinia ma zielony liść."
+          },
+          "catchweight": {
+            "minQuantity": {
+              "value": "400",
+              "uom": "G"
+            },
+            "typicalQuantity": {
+              "value": "0.5",
+              "uom": "KG"
+            },
+            "maxQuantity": {
+              "value": "99999",
+              "uom": "G"
+            }
+          },
+          "timeRestricted": false,
+          "isInShoppingList": false,
+          "isInCurrentCatalog": true,
+          "alcohol": false,
+          "categoryPath": [
+            "Artykuły spożywcze",
+            "Owoce, warzywa i zioła",
+            "Owoce",
+            "Brzoskwinie"
+          ],
+          "isNew": false
+        }
+      ],
+      "otherProductIds": []
+    },
+    {
+      "type": "ungrouped",
+      "name": "fop.headertitle.other",
+      "decoratedProducts": [
+        {
+          "productId": "8a9e1ada-ff65-4996-b49f-6186426ed765",
+          "retailerProductId": "00034052",
+          "type": "REGULAR",
+          "name": "Kiwi Owoce  Auchan sztuka",
+          "brand": "Owoce  Auchan",
+          "seller": {
+            "id": "1db2a849-3755-436d-9d4b-f5c09c7498e9",
+            "name": "Auchan Polska Sp. z o.o."
+          },
+          "price": {
+            "amount": "1.98",
+            "currency": "PLN"
+          },
+          "unitPrice": {
+            "price": {
+              "amount": "1.98",
+              "currency": "PLN"
+            },
+            "unit": "fop.price.per.each",
+            "unitName": "EACH"
+          },
+          "available": true,
+          "isVerifiedPurchase": false,
+          "quantityInBasket": 0,
+          "maxQuantityReached": false,
+          "image": {
+            "src": "https://zakupy.auchan.pl/images-v3/91f3b8f0-9eaa-434b-8554-b0f1db433c99/02c4e346-dba2-4639-9d70-2ece2805ae20/300x300.jpg",
+            "description": "Owoc kiwi z brązową, włochatą skórką na białym tle."
+          },
+          "timeRestricted": false,
+          "isInShoppingList": false,
+          "isInCurrentCatalog": true,
+          "alcohol": false,
+          "categoryPath": [
+            "Artykuły spożywcze",
+            "Owoce, warzywa i zioła",
+            "Owoce",
+            "Kiwi"
+          ],
+          "isNew": false
+        },
+        {
+          "productId": "d6f34376-6a75-4335-83ba-ac4f7478bb71",
+          "retailerProductId": "00034041",
+          "type": "CATCHWEIGHT",
+          "name": "Banany Premium Owoce  Auchan na wagę kiść 4-6 szt ok. 1 kg",
+          "brand": "Owoce  Auchan",
+          "packSizeDescription": "950g - 99999g",
+          "seller": {
+            "id": "1db2a849-3755-436d-9d4b-f5c09c7498e9",
+            "name": "Auchan Polska Sp. z o.o."
+          },
+          "price": {
+            "amount": "6.98",
+            "currency": "PLN"
+          },
+          "unitPrice": {
+            "price": {
+              "amount": "6.98",
+              "currency": "PLN"
+            },
+            "unit": "fop.price.per.kg",
+            "unitName": "PER_1KG"
+          },
+          "available": true,
+          "isVerifiedPurchase": false,
+          "quantityInBasket": 0,
+          "maxQuantityReached": false,
+          "image": {
+            "src": "https://zakupy.auchan.pl/images-v3/91f3b8f0-9eaa-434b-8554-b0f1db433c99/9dee73a8-5610-425a-a759-89bd5ddeb611/300x300.jpg",
+            "description": "Kiść pięciu dojrzałych, żółtych bananów na białym tle."
+          },
+          "catchweight": {
+            "minQuantity": {
+              "value": "950",
+              "uom": "G"
+            },
+            "typicalQuantity": {
+              "value": "1",
+              "uom": "KG"
+            },
+            "maxQuantity": {
+              "value": "99999",
+              "uom": "G"
+            }
+          },
+          "timeRestricted": false,
+          "isInShoppingList": false,
+          "isInCurrentCatalog": true,
+          "alcohol": false,
+          "categoryPath": [
+            "Artykuły spożywcze",
+            "Owoce, warzywa i zioła",
+            "Owoce",
+            "Banany"
+          ],
+          "isNew": false
+        }
+      ],
+      "otherProductIds": []
+    }
+  ],
+  "metadata": {
+    "nextPageToken": "ae2e0aee-60c4-4760-9c1d-c97199443e6a"
+  },
+  "missedPromotions": []
+}

@@ -1,6 +1,9 @@
 import importlib.util
 import sys
+from decimal import Decimal
 from pathlib import Path
+from unittest import mock
+
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -43,6 +46,8 @@ def _first_fixture(*names):
 
 _CARREFOUR_FIXTURE = _first_fixture("carrefour_pl_sample.json", "carrefour_pl_sample.html")
 _AUCHAN_FIXTURE = _first_fixture("auchan_pl_sample.json", "auchan_pl_sample.html")
+_AUCHAN_V6_FIXTURE = _first_fixture("auchan_pl_v6_sample.json")
+_AUCHAN_CATEGORIES_FIXTURE = _first_fixture("auchan_pl_categories_sample.json")
 
 
 @pytest.mark.skipif(_CARREFOUR_FIXTURE is None,
@@ -65,3 +70,231 @@ def test_auchan_pl_parses_fixture():
     assert_valid_products(products)
     assert all(p.country_code == "PL" for p in products)
     assert all(p.store == "Auchan" for p in products)
+
+
+@pytest.mark.skipif(_AUCHAN_V6_FIXTURE is None,
+                    reason="no Auchan PL v6 fixture (site unreachable at build time)")
+def test_auchan_pl_parses_v6_fixture():
+    """`v6/product-pages` catalogue-crawl parsing: 3 real captured items
+    (1 on_offer CATCHWEIGHT with an active promo, 1 REGULAR with no
+    packSizeDescription at all, 1 CATCHWEIGHT with no promo) — same field
+    shape as the v5 endpoint's nested `product` object, just flat."""
+    AuchanPLScraper = _load_pl_scraper_module("auchan_pl").AuchanPLScraper
+    raw = load_fixture(PL_DIR, _AUCHAN_V6_FIXTURE.name)
+    products = AuchanPLScraper.parse_v6(raw)
+    assert_valid_products(products)
+    assert len(products) == 3
+    assert all(p.country_code == "PL" for p in products)
+    assert all(p.store == "Auchan" for p in products)
+    assert all(p.barcode is None for p in products)
+
+    by_sku = {p.sku: p for p in products}
+
+    peaches = by_sku["00142167"]
+    assert peaches.price == Decimal("2.98"), "promoPrice must win over price"
+    assert peaches.original_price == Decimal("4.50")
+    assert peaches.quantity == 0.5 and peaches.unit == "kg", "catchweight.typicalQuantity, not packSizeDescription"
+    assert peaches.raw_category == "Brzoskwinie"
+
+    kiwi = by_sku["00034052"]
+    assert kiwi.price == Decimal("1.98")
+    assert kiwi.original_price is None
+    assert kiwi.quantity == 1.0 and kiwi.unit == "adet", "no packSizeDescription -> parser default"
+    assert kiwi.raw_category == "Kiwi"
+
+    banany = by_sku["00034041"]
+    assert banany.price == Decimal("6.98")
+    assert banany.original_price is None
+    assert banany.quantity == 1.0 and banany.unit == "kg"
+    assert banany.raw_category == "Banany"
+
+
+def test_auchan_pl_parse_v6_dedupes_within_response():
+    """A product id repeated across groups (e.g. on_offer + ungrouped) in
+    the SAME response must only be emitted once (first occurrence wins)."""
+    AuchanPLScraper = _load_pl_scraper_module("auchan_pl").AuchanPLScraper
+    item = {
+        "productId": "p1", "retailerProductId": "sku1", "type": "REGULAR",
+        "name": "Produkt testowy", "brand": "TestBrand",
+        "price": {"amount": "3.50", "currency": "PLN"},
+        "categoryPath": ["Dział", "Kategoria", "Produkt testowy"],
+    }
+    raw = __import__("json").dumps({
+        "productGroups": [
+            {"type": "on_offer", "decoratedProducts": [item]},
+            {"type": "ungrouped", "decoratedProducts": [item]},
+        ],
+        "metadata": {},
+    })
+    products = AuchanPLScraper.parse_v6(raw)
+    assert len(products) == 1
+
+
+def test_auchan_pl_parse_v6_malformed_input_returns_empty():
+    AuchanPLScraper = _load_pl_scraper_module("auchan_pl").AuchanPLScraper
+    assert AuchanPLScraper.parse_v6("not json") == []
+    assert AuchanPLScraper.parse_v6("[]") == []
+    assert AuchanPLScraper.parse_v6("{}") == []
+
+
+@pytest.mark.skipif(_AUCHAN_CATEGORIES_FIXTURE is None,
+                    reason="no Auchan PL categories fixture (site unreachable at build time)")
+def test_auchan_pl_extract_department_ids_reads_taxonomy_fixture():
+    AuchanPLScraper = _load_pl_scraper_module("auchan_pl").AuchanPLScraper
+    raw = load_fixture(PL_DIR, _AUCHAN_CATEGORIES_FIXTURE.name)
+    depts = AuchanPLScraper._extract_department_ids(raw)
+    assert ("Artykuły spożywcze", "2091") in depts
+    assert ("Alkohole", "3639") in depts
+    assert len(depts) == 4
+
+
+def test_auchan_pl_extract_department_ids_malformed_input_returns_empty():
+    AuchanPLScraper = _load_pl_scraper_module("auchan_pl").AuchanPLScraper
+    assert AuchanPLScraper._extract_department_ids("not json") == []
+    assert AuchanPLScraper._extract_department_ids("{}") == []
+    assert AuchanPLScraper._extract_department_ids("[]") == []
+
+
+@pytest.mark.skipif(_AUCHAN_V6_FIXTURE is None,
+                    reason="no Auchan PL v6 fixture (site unreachable at build time)")
+def test_auchan_pl_extract_next_page_token_reads_fixture():
+    AuchanPLScraper = _load_pl_scraper_module("auchan_pl").AuchanPLScraper
+    raw = load_fixture(PL_DIR, _AUCHAN_V6_FIXTURE.name)
+    token = AuchanPLScraper._extract_next_page_token(raw)
+    assert token == "ae2e0aee-60c4-4760-9c1d-c97199443e6a"
+
+
+def test_auchan_pl_extract_next_page_token_defaults_on_last_page_or_malformed():
+    AuchanPLScraper = _load_pl_scraper_module("auchan_pl").AuchanPLScraper
+    assert AuchanPLScraper._extract_next_page_token('{"metadata": {}}') is None
+    assert AuchanPLScraper._extract_next_page_token('{"metadata": {"nextPageToken": null}}') is None
+    assert AuchanPLScraper._extract_next_page_token("not json") is None
+    assert AuchanPLScraper._extract_next_page_token("[]") is None
+
+
+def test_auchan_pl_discover_department_ids_falls_back_on_empty_response():
+    AuchanPLScraper = _load_pl_scraper_module("auchan_pl")
+    mod = AuchanPLScraper
+    scraper = mod.AuchanPLScraper()
+    depts = scraper.discover_department_ids(fetch=lambda url: None)
+    assert depts == mod.FALLBACK_DEPARTMENT_IDS
+
+
+def test_auchan_pl_discover_department_ids_falls_back_on_exception():
+    mod = _load_pl_scraper_module("auchan_pl")
+    scraper = mod.AuchanPLScraper()
+
+    def _boom(url):
+        raise RuntimeError("simulated network failure")
+
+    depts = scraper.discover_department_ids(fetch=_boom)
+    assert depts == mod.FALLBACK_DEPARTMENT_IDS
+
+
+def test_auchan_pl_fetch_products_paginates_and_isolates_department_errors():
+    """fetch_products() against an injected department_ids list (no
+    network, no discovery) must: follow pageToken until it's absent, dedupe
+    by sku across departments/pages, and continue past a department whose
+    fetch raises."""
+    import json as _json
+
+    mod = _load_pl_scraper_module("auchan_pl")
+    AuchanPLScraper = mod.AuchanPLScraper
+
+    def _item(sku, name, price, product_id=None):
+        return {
+            "productId": product_id or f"pid-{sku}", "retailerProductId": sku, "type": "REGULAR",
+            "name": name, "brand": "TestBrand",
+            "price": {"amount": price, "currency": "PLN"},
+            "categoryPath": ["Dział", "Kategoria", name],
+        }
+
+    page1 = _json.dumps({
+        "productGroups": [{"type": "ungrouped", "decoratedProducts": [
+            _item("1", "Produkt A", "3.50"), _item("2", "Produkt B", "4.20"),
+        ]}],
+        "metadata": {"nextPageToken": "tok-2"},
+    })
+    page2 = _json.dumps({
+        "productGroups": [{"type": "ungrouped", "decoratedProducts": [
+            _item("3", "Produkt C", "2.10"),
+        ]}],
+        "metadata": {},
+    })
+    other_dept_dup = _json.dumps({
+        "productGroups": [{"type": "ungrouped", "decoratedProducts": [
+            _item("1", "Produkt A", "3.50"),  # same sku as dept-a page1 -> deduped
+        ]}],
+        "metadata": {},
+    })
+
+    class FakeResponse:
+        def __init__(self, text):
+            self.content = text.encode("utf-8")
+
+        def raise_for_status(self):
+            pass
+
+    class FakeSession:
+        def get(self, url, headers, timeout):
+            if "retailerCategoryId=broken" in url:
+                raise RuntimeError("simulated network failure")
+            if "retailerCategoryId=dept-a" in url and "pageToken=tok-2" in url:
+                return FakeResponse(page2)
+            if "retailerCategoryId=dept-a" in url:
+                return FakeResponse(page1)
+            if "retailerCategoryId=dept-b" in url:
+                return FakeResponse(other_dept_dup)
+            raise AssertionError(f"unexpected url {url}")
+
+    scraper = AuchanPLScraper()
+    scraper.delay_between_requests = 0  # keep the test fast
+    with mock.patch("requests.Session", return_value=FakeSession()):
+        products = scraper.fetch_products(department_ids=[
+            ("Broken", "broken"),
+            ("Dept A", "dept-a"),
+            ("Dept B", "dept-b"),
+        ])
+
+    skus = sorted(p.sku for p in products)
+    assert skus == ["1", "2", "3"], "expected page-2 product + dedup across departments"
+    assert len(products) == 3
+
+
+def test_auchan_pl_fetch_products_falls_back_to_v5_when_crawl_empty():
+    """If every department in the v6 crawl comes back empty, fetch_products()
+    must fall back to the Phase-1 curated v5 homepage listing rather than
+    returning nothing."""
+    mod = _load_pl_scraper_module("auchan_pl")
+    AuchanPLScraper = mod.AuchanPLScraper
+
+    empty_v6 = __import__("json").dumps({"productGroups": [], "metadata": {}})
+    v5_payload = __import__("json").dumps({
+        "productGroups": [{"products": [{"productId": "p1", "product": {
+            "productId": "p1", "retailerProductId": "v5sku", "name": "Fallback Produkt",
+            "price": {"amount": "9.99", "currency": "PLN"},
+            "categoryPath": ["Dział", "Fallback Produkt"],
+        }}]}],
+    })
+
+    class FakeResponse:
+        def __init__(self, text):
+            self.text = text
+            self.content = text.encode("utf-8")
+
+        def raise_for_status(self):
+            pass
+
+    class FakeSession:
+        def get(self, url, headers=None, params=None, timeout=None):
+            if "v5/product-pages" in url:
+                return FakeResponse(v5_payload)
+            return FakeResponse(empty_v6)
+
+    scraper = AuchanPLScraper()
+    scraper.delay_between_requests = 0
+    with mock.patch("requests.Session", return_value=FakeSession()):
+        products = scraper.fetch_products(department_ids=[("Dept A", "dept-a")])
+
+    assert len(products) == 1
+    assert products[0].sku == "v5sku"
