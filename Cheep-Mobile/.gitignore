@@ -66,8 +66,9 @@ limitflow.py
 homeshot.py
 detailshot.py
 introverify.py
-verify_multicountry.py
+# verify_multicountry.py is a committed e2e test (task-14, PL launch) — do NOT ignore it.
 verify_multicountry_results.json
+verify_pl_pilot_results.json
 
 # Upload keystore + signing secrets — NEVER commit
 android/key.properties
