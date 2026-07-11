@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+Trimmed sample of a real zakupy.biedronka.pl sitemap child document
+(https://zakupy.biedronka.pl/sitemap_0.xml, captured live 2026-07-11).
+The real file has ~2600 <loc> entries; this fixture keeps a small,
+representative subset covering every kind of entry the discovery
+pipeline (_extract_sitemap_locs -> _filter_category_urls ->
+_reduce_to_leaves) needs to handle correctly:
+  - product detail pages (end in a numeric-id ".html" -- must be dropped)
+  - real nested category-tree pages under known department roots
+    (must be kept, and only the deepest/leaf ones survive reduction)
+  - department root pages that also have crawlable children (must be
+    dropped by leaf-reduction since their child is also present)
+  - one-off marketing/merchandising "bucket" pages, e.g. "promocje-*"
+    and numbered "strefa-fit-1" style pages, which share the sitemap
+    but are not real categories (must be dropped by the department-
+    prefix filter)
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url><loc>https://zakupy.biedronka.pl/mlekovita-mlekovita-mleko-uht-32-tluszczu-wypasione-1-l-0000000036.html</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/nescaf%C3%A9-nescaf%C3%A9-classic-kawa-rozpuszczalna-200-g-0000000006.html</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/nabial/</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/nabial/mleko/</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/nabial/sery/</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/nabial/sery/sery-zolte/</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/mieso/</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/mieso/wedliny/</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/mieso/wedliny/wedliny-w-plastrach/</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/napoje/woda/</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/promocje-nabial/</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/strefa-fit-1/</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/bestsellery-2/</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/home</loc></url>
+    <url><loc>https://zakupy.biedronka.pl/regulaminy/</loc></url>
+</urlset>

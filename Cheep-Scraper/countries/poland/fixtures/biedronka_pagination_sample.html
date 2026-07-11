@@ -1,0 +1,19 @@
+<!--
+Trimmed excerpt of a real zakupy.biedronka.pl category-listing page
+(https://zakupy.biedronka.pl/napoje/, captured live 2026-07-11) keeping
+only the two markers _extract_pagination_info() reads: the visible
+total-item count and the product grid's own "is there another page"
+flag. On this real page (74 items, 32 per page) page 1 has a further
+page -> data-has-next="true". This complements the has-next="false"
+case already covered by biedronka_sample.html (a 10-of-10 single-page
+category), so both branches of the pagination loop are fixture-tested
+without a network call.
+-->
+<div class="refinement-actions__row refinement-actions__row--mobile">
+<span class="refinements__total-items">74 produkty</span>
+</div>
+<div class="search-result-content">
+<ul class="product-grid js-infinite-scroll-grid tiles-container"
+data-size="32.0" data-has-next="true">
+</ul>
+</div>

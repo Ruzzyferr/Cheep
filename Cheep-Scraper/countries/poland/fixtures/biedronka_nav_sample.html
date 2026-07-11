@@ -1,0 +1,34 @@
+<!--
+Trimmed sample of the zakupy.biedronka.pl homepage nav menu (captured
+live from https://zakupy.biedronka.pl/, 2026-07-11), used only as the
+category-discovery fallback path when the sitemap is unreachable. The
+real homepage nav has ~120 category-shaped hrefs but only reaches ~2
+levels deep (no "earl-grey-tea"-style leaves) -- strictly shallower
+than the sitemap, hence the fallback ordering in discover_category_urls.
+This fixture keeps a handful of real department/subcategory links plus
+a few non-category hrefs (blog, cart, external) that the nav-link
+filter must exclude.
+-->
+<html lang="pl">
+<body>
+<nav class="header-nav">
+  <ul>
+    <li><a href="/nabial/">Nabiał i jaja</a>
+      <ul>
+        <li><a href="/nabial/mleko/">Mleko</a></li>
+        <li><a href="/nabial/sery/">Sery</a></li>
+      </ul>
+    </li>
+    <li><a href="/mieso/">Mięso i wędliny</a>
+      <ul>
+        <li><a href="/mieso/wedliny/">Wędliny</a></li>
+      </ul>
+    </li>
+    <li><a href="/napoje/">Napoje</a></li>
+    <li><a href="/blog/">Blog</a></li>
+    <li><a href="/cart">Koszyk</a></li>
+    <li><a href="https://www.facebook.com/biedronka">Facebook</a></li>
+  </ul>
+</nav>
+</body>
+</html>
