@@ -8,6 +8,9 @@ export interface BranchInput {
 const DIACRITICS: Record<string, string> = {
   'ı':'i','İ':'i','ş':'s','Ş':'s','ğ':'g','Ğ':'g','ç':'c','Ç':'c','ö':'o','Ö':'o','ü':'u','Ü':'u',
   'å':'a','ä':'a','é':'e','ł':'l','ń':'n','ś':'s','ż':'z','ź':'z','ą':'a','ę':'e','ó':'o','à':'a','â':'a','ê':'e',
+  // Uppercase counterparts — the char-map runs before .toLowerCase(), so without these,
+  // capitalized brand tags (e.g. OSM brand="Żabka") fall through unmapped.
+  'Å':'a','Ä':'a','É':'e','Ł':'l','Ń':'n','Ś':'s','Ż':'z','Ź':'z','Ą':'a','Ę':'e','Ó':'o','À':'a','Â':'a','Ê':'e',
 };
 export function normalizeName(s: string): string {
   return (s || '').split('').map(c => DIACRITICS[c] ?? c).join('').toLowerCase().trim().replace(/\s+/g, ' ');

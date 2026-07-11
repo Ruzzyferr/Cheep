@@ -21,6 +21,9 @@ export const BRAND_ALIASES: Record<string, ChainAlias[]> = {
   ],
   PL: [
     { store_id: 40, chain: 'Carrefour', aliases: ['carrefour', 'carrefour express', 'carrefour market'] },
-    { store_id: 41, chain: 'Auchan', aliases: ['auchan', 'auchan supermarket'] },
+    { store_id: 41, chain: 'Auchan', aliases: ['auchan', 'auchan supermarket', 'auchan hipermarket'] },
+    { store_id: 44, chain: 'Biedronka', aliases: ['biedronka'] },
+    { store_id: 45, chain: 'Lidl', aliases: ['lidl'] },
+    { store_id: 47, chain: 'Żabka', aliases: ['zabka', 'żabka', 'zabka nano', 'żabka nano'] },
   ],
 };

@@ -27,6 +27,13 @@ describe('overpass parse/match', () => {
     expect(matchChain({ brand: 'Carrefour Express' }, BRAND_ALIASES.PL)?.store_id).toBe(40);
   });
 
+  it('matchChain matches PL chains (Żabka/Biedronka/Lidl) by brand, diacritic-insensitive', () => {
+    const zabkaEl = { tags: { shop: 'convenience', brand: 'Żabka', name: 'Żabka Warszawa Złota 44' } };
+    expect(matchChain(zabkaEl.tags, BRAND_ALIASES.PL)?.store_id).toBe(47);
+    expect(matchChain({ shop: 'supermarket', brand: 'Biedronka' }, BRAND_ALIASES.PL)?.store_id).toBe(44);
+    expect(matchChain({ shop: 'supermarket', brand: 'Lidl' }, BRAND_ALIASES.PL)?.store_id).toBe(45);
+  });
+
   it('parseOverpassElements yields branches for matches only, using node coords or way center', () => {
     const out = parseOverpassElements(fixture, BRAND_ALIASES.TR);
     expect(out).toHaveLength(2);

@@ -135,11 +135,11 @@ async function main() {
     const rewe = await prisma.store.upsert({ where: { id: 30 }, update: {}, create: { id: 30, name: 'REWE', logo_url: null, address: 'Köln', country_id: de.id } });
     const kaufland = await prisma.store.upsert({ where: { id: 31 }, update: {}, create: { id: 31, name: 'Kaufland', logo_url: null, address: 'Berlin', country_id: de.id } });
     // PL 40–49
-    const carrefourPl = await prisma.store.upsert({ where: { id: 40 }, update: {}, create: { id: 40, name: 'Carrefour', logo_url: null, address: 'Warszawa', country_id: pl.id } });
-    const auchan = await prisma.store.upsert({ where: { id: 41 }, update: {}, create: { id: 41, name: 'Auchan', logo_url: null, address: 'Kraków', country_id: pl.id } });
-    const biedronka = await prisma.store.upsert({ where: { id: 44 }, update: {}, create: { id: 44, name: 'Biedronka', logo_url: null, address: 'Warszawa', country_id: pl.id } });
-    const lidlPl = await prisma.store.upsert({ where: { id: 45 }, update: {}, create: { id: 45, name: 'Lidl', logo_url: null, address: 'Warszawa', country_id: pl.id } });
-    const zabka = await prisma.store.upsert({ where: { id: 47 }, update: {}, create: { id: 47, name: 'Żabka', logo_url: null, address: 'Warszawa', country_id: pl.id } });
+    const carrefourPl = await prisma.store.upsert({ where: { id: 40 }, update: { lat: 52.2297, lon: 21.0122 }, create: { id: 40, name: 'Carrefour', logo_url: null, address: 'Warszawa', lat: 52.2297, lon: 21.0122, country_id: pl.id } });
+    const auchan = await prisma.store.upsert({ where: { id: 41 }, update: { lat: 50.0647, lon: 19.9450 }, create: { id: 41, name: 'Auchan', logo_url: null, address: 'Kraków', lat: 50.0647, lon: 19.9450, country_id: pl.id } });
+    const biedronka = await prisma.store.upsert({ where: { id: 44 }, update: { lat: 52.2297, lon: 21.0122 }, create: { id: 44, name: 'Biedronka', logo_url: null, address: 'Warszawa', lat: 52.2297, lon: 21.0122, country_id: pl.id } });
+    const lidlPl = await prisma.store.upsert({ where: { id: 45 }, update: { lat: 52.2297, lon: 21.0122 }, create: { id: 45, name: 'Lidl', logo_url: null, address: 'Warszawa', lat: 52.2297, lon: 21.0122, country_id: pl.id } });
+    const zabka = await prisma.store.upsert({ where: { id: 47 }, update: { lat: 52.2297, lon: 21.0122 }, create: { id: 47, name: 'Żabka', logo_url: null, address: 'Warszawa', lat: 52.2297, lon: 21.0122, country_id: pl.id } });
 
     console.log('✅ Marketler oluşturuldu');
 
