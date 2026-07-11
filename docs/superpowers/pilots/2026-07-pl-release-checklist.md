@@ -165,10 +165,22 @@ touch different systems.
       note this also re-registers a throwaway user against prod, so use a prod-safe/disposable
       email).
 - [ ] **PL scraper timer:** `systemctl enable --now cheep-fetcher-pl.timer` on the droplet
-      (unit files already in `deploy/cheep-fetcher-pl.{service,timer}`; fires weekly Sundays
-      03:00 + up to 30 min randomized delay). Confirm with `systemctl list-timers | grep pl` and
-      check `Cheep-Scraper/logs/fetcher-pl.log` after the first run (or trigger manually once
-      with `systemctl start cheep-fetcher-pl.service` to avoid waiting a week for first data).
+      (unit files already in `deploy/cheep-fetcher-pl.{service,timer}`; fires **daily** 03:00 +
+      up to 30 min randomized delay, `ExecStart=run-daily.sh`). `run-daily.sh` runs a
+      **chain-rotation** — each night it picks a subset of PL's enabled markets by weekday
+      (`date +%u`) via `pipeline.py`'s `--markets` flag, instead of scraping all 4 chains every
+      night: Mon/Thu Auchan, Tue/Fri Biedronka, Wed/Sat Lidl+Żabka, Sun rest (no scrape, exits 0).
+      This spreads Auchan's ~22.5k-product/58-request and Biedronka's ~1.5k-product/244-category
+      crawls across the week (each chain refreshed ~2x/week) instead of hammering every chain in
+      one nightly run — same idea as Turkey's continuous self-refresh, adapted to PL's
+      per-chain full-catalog scrapers. `run-weekly.sh` (all enabled markets, one run) still
+      exists unchanged for manual full refreshes — it's just no longer what the timer calls;
+      invoke it by hand (`bash countries/poland/run-weekly.sh`) when you need every chain
+      refreshed immediately (e.g. right after this launch, or after a config change). Confirm
+      the timer with `systemctl list-timers | grep pl` and check
+      `Cheep-Scraper/logs/fetcher-pl.log` after the first run (or trigger manually once with
+      `systemctl start cheep-fetcher-pl.service` to see that night's rotation instead of waiting
+      for 03:00).
 - [ ] **One-time OSM branch import against prod** — populates `store_branches` (real
       lat/lon per physical store, used by the compare engine for real distances instead of the
       single chain-level fallback point):
@@ -179,7 +191,7 @@ touch different systems.
       ```
       This is a **manual, one-time** run per `osm_branches.py`'s own docstring ("Ucretsiz, tek
       kosu... Aylik tekrar calistirilabilir" — free, one-off run, can be re-run monthly). It is
-      **not** wired into the weekly `cheep-fetcher-pl.timer` — schedule a separate monthly cron
+      **not** wired into the daily `cheep-fetcher-pl.timer` — schedule a separate monthly cron
       (or systemd timer) if branch freshness matters, otherwise re-run it by hand occasionally.
       Local dev already has PL `store_branches` populated (13,422 rows, mostly Żabka/Biedronka
       OSM points) — prod starts from zero until this is run.

@@ -1,5 +1,5 @@
 [Unit]
-Description=Cheep Polonya haftalık scrape+ingest (4 zincir, OFF enrichment)
+Description=Cheep Polonya günlük scrape+ingest (chain-rotation, 4 zincir, OFF enrichment)
 After=network-online.target docker.service
 Wants=network-online.target
 
@@ -8,7 +8,7 @@ Type=oneshot
 WorkingDirectory=/opt/cheep/Cheep-Scraper
 EnvironmentFile=/opt/cheep/deploy/.env
 Environment=CHEEP_API_URL=http://localhost:3000/api/v1
-ExecStart=/bin/bash countries/poland/run-weekly.sh
+ExecStart=/bin/bash countries/poland/run-daily.sh
 Nice=10
 IOSchedulingClass=idle
 StandardOutput=append:/opt/cheep/Cheep-Scraper/logs/fetcher-pl.log

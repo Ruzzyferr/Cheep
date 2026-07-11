@@ -87,7 +87,41 @@ def should_import(market: str, new_count: int, prev_counts: Dict, min_ratio: flo
     return new_count >= prev * min_ratio
 
 
-async def run_country_pipeline(config_path: str, api_url: str = "http://localhost:3000/api/v1") -> Dict:
+def select_markets(config_markets: List[Dict], names: Optional[List[str]] = None) -> List[Dict]:
+    """Pure decision: which of a country's configured markets should this
+    pipeline invocation scrape? Backs the `--markets` CLI flag used for
+    chain-rotation scheduling (spread a large catalog's refresh across the
+    week instead of scraping every enabled market every night).
+
+    - names is None -> every enabled market, config order (current/full-run
+      behavior, e.g. run-weekly.sh's manual full refresh).
+    - names is a list -> only those markets, returned in the given order.
+      Each name MUST name a market that both exists in config_markets AND
+      has enabled=True, or this raises ValueError -- an unknown or disabled
+      name must hard-error, never silently fall back to running everything
+      (or fewer markets than the caller asked for).
+    - Never returns a disabled market, named or not.
+    """
+    enabled_by_name = {m["name"]: m for m in config_markets if m.get("enabled", False)}
+    if names is None:
+        return [m for m in config_markets if m.get("enabled", False)]
+    selected: List[Dict] = []
+    for name in names:
+        market = enabled_by_name.get(name)
+        if market is None:
+            raise ValueError(
+                f"unknown or disabled market {name!r} -- enabled markets are: "
+                f"{sorted(enabled_by_name)}"
+            )
+        selected.append(market)
+    return selected
+
+
+async def run_country_pipeline(
+    config_path: str,
+    api_url: str = "http://localhost:3000/api/v1",
+    markets: Optional[List[str]] = None,
+) -> Dict:
     config_path = Path(config_path)
     country_dir = config_path.parent
     with open(config_path, "r", encoding="utf-8") as f:
@@ -96,8 +130,10 @@ async def run_country_pipeline(config_path: str, api_url: str = "http://localhos
     default_unit = config.get("default_unit", "adet")
     category_map = _load_category_map(country_dir)
     market_configs = {m["name"]: m for m in config.get("markets", [])}
+    selected_markets = select_markets(config.get("markets", []), markets)
 
     runner = CountryScraperRunner(str(config_path))
+    runner.config["markets"] = selected_markets
     scrape_results = await runner.run_all()
 
     counts_path = country_dir / "output" / "last_good_counts.json"
@@ -174,9 +210,21 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("config", help="path to a country config.json")
     parser.add_argument("--api-url", default=os.getenv("CHEEP_API_URL", "http://localhost:3000/api/v1"))
+    parser.add_argument(
+        "--markets", default=None,
+        help="comma-separated market names to run this invocation (e.g. "
+             "'Lidl,Żabka'). Default: every enabled market. Used for "
+             "chain-rotation scheduling -- an unknown or disabled name is a "
+             "hard error, this never silently falls back to running everything.",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-    summary = asyncio.run(run_country_pipeline(args.config, args.api_url))
+    market_names = [m.strip() for m in args.markets.split(",")] if args.markets else None
+    try:
+        summary = asyncio.run(run_country_pipeline(args.config, args.api_url, markets=market_names))
+    except ValueError as e:
+        logger.error("%s", e)
+        sys.exit(1)
     if not summary_is_healthy(summary):
         bad = [
             m for m in (summary.get("markets") or [])

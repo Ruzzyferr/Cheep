@@ -1,8 +1,8 @@
 [Unit]
-Description=Cheep PL haftalık pipeline zamanlayıcısı (Pazar 03:00)
+Description=Cheep PL günlük pipeline zamanlayıcısı (chain-rotation, her gece 03:00)
 
 [Timer]
-OnCalendar=Sun *-*-* 03:00:00
+OnCalendar=*-*-* 03:00:00
 Persistent=true
 RandomizedDelaySec=1800
 
