@@ -3,7 +3,7 @@
  * Shopping route comparison results
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -58,9 +58,22 @@ export function CompareResultsScreen({
   // backend filtre uygulamaz → kullanıcı tüm marketleri görür (boş ekran yerine).
   const filterByDistance = anchor ? shouldFilterByDistance(anchor, country) : false;
 
+  // İlk çözümleme tamamlandı mı? Effect, çapa null olduğu sürece bekler.
+  const anchorReady = anchor != null;
+
+  // Çapa nesnesi HER tazelemede yeniden yaratılıyor (resolvedAt: Date.now()), bu
+  // yüzden referansına bağlanmak yanlış: kullanıcı uygulamayı arka plana alıp geri
+  // açtığında konum hiç değişmemişken compare'i baştan çağırır (boş ağ isteği +
+  // spinner çakması). Yalnızca gerçekten önemli olan DEĞERLERE bağlan.
+  const userLocation = useMemo(
+    () => (filterByDistance && anchor?.coords ? anchor.coords : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filterByDistance, anchor?.coords?.lat, anchor?.coords?.lon],
+  );
+
   // Çapa çözülünce ya da yarıçap değişince yeniden karşılaştır.
   useEffect(() => {
-    if (!anchor) return; // çapa çözülene kadar bekle
+    if (!anchorReady) return; // çapa çözülene kadar bekle
     let alive = true;
 
     (async () => {
@@ -69,9 +82,7 @@ export function CompareResultsScreen({
         const data = await listService.compareList(listId, {
           maxStores: 4,
           includeMissingProducts: true,
-          ...(filterByDistance && anchor.coords
-            ? { userLocation: anchor.coords, radiusKm }
-            : {}),
+          ...(userLocation ? { userLocation, radiusKm } : {}),
         });
         if (!alive) return;
         setResults(data);
@@ -88,8 +99,11 @@ export function CompareResultsScreen({
     return () => {
       alive = false;
     };
+    // navigation ve t kasıtlı olarak dışarıda bırakıldı: ikisi de her render'da
+    // kararlı referanslardır (React Navigation / i18next), efekti tetiklemeleri
+    // gerekmez — asıl konu olan çapa artık DEĞERİ (userLocation) üzerinden izleniyor.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listId, radiusKm, anchor, filterByDistance]);
+  }, [listId, radiusKm, anchorReady, userLocation]);
 
   // İlk yükleme: sonuç yokken tam ekran spinner. Yarıçap değişiminde eski sonuçlar
   // ekranda kalır (seçici kaybolmasın), üstte ince bir gösterge çıkar.
