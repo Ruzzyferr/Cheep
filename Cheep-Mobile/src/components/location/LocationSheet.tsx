@@ -114,6 +114,16 @@ export function LocationSheet({ visible, onClose }: Props) {
   const anchorModeRef = useRef(anchor?.mode);
   anchorModeRef.current = anchor?.mode;
 
+  // Kullanıcı mod butonlarından BİRİNE dokundu mu? GPS fix'i saniyeler
+  // sürebilir: sheet çapa çözülmeden açılabilir, kullanıcı "Sabit adres"e
+  // dokunup adres yazmaya başlayabilir. Çapa 'auto' olarak indiğinde aşağıdaki
+  // tohumlama efekti (anchorResolvedRef) selectedMode'u GERİ ALIP kullanıcının
+  // az önce başlattığı etkileşimi altından çeker. Bu ref true olduğunda o efekt
+  // devre dışı kalır — kullanıcının kendi seçimi asla ezilmez. Yalnızca sheet'in
+  // AÇILIŞ geçişinde sıfırlanır (aşağıdaki reset efekti), böylece bir sonraki
+  // taze açılış yine normal tohumlanır.
+  const modeTouchedRef = useRef(false);
+
   useEffect(() => {
     const wasVisible = wasVisibleRef.current;
     wasVisibleRef.current = visible;
@@ -131,6 +141,10 @@ export function LocationSheet({ visible, onClose }: Props) {
     setFlow({ kind: 'none' });
     setConfirming(false);
     setPinningCountry(null);
+    // Taze açılış: kullanıcının önceki oturumdan kalma bir mod dokunuşu bu
+    // yeni oturumu ETKİLEMEMELİ — aşağıdaki tohumlama efekti yeniden normal
+    // çalışsın.
+    modeTouchedRef.current = false;
   }, [visible]);
 
   // Sheet, çapa daha ÇÖZÜLMEDEN (anchor === null) açılabilir: soğuk açılışta
@@ -145,11 +159,15 @@ export function LocationSheet({ visible, onClose }: Props) {
   // searchState, flow, confirming, pinningCountry) sıfırlanmıyor. Sheet'in kendi
   // pin()/unpin() yazması anchor'ı null'dan çıkarmaz (zaten çözülmüştür), o yüzden
   // bu efekt o yazma sırasında KOŞMAZ ve onClose() yarışını yeniden açmaz.
+  //
+  // modeTouchedRef KONTROLÜ: kullanıcı çapa çözülmeden ÖNCE bir mod butonuna
+  // dokunduysa (bkz. modeTouchedRef tanımı), bu geç gelen tohumlama artık
+  // kullanıcının kendi seçimini geçersiz kılmamalı — o yüzden burada bailout.
   const anchorResolvedRef = useRef(anchor != null);
   useEffect(() => {
     const wasResolved = anchorResolvedRef.current;
     anchorResolvedRef.current = anchor != null;
-    if (!visible || wasResolved || anchor == null) return;
+    if (!visible || wasResolved || anchor == null || modeTouchedRef.current) return;
     setSelectedMode(anchor.mode);
   }, [visible, anchor]);
 
@@ -170,6 +188,9 @@ export function LocationSheet({ visible, onClose }: Props) {
 
   const handleUseAuto = useCallback(async () => {
     if (busy) return; // aynı anda ikinci bir yazma başlatma
+    // Kullanıcı BİZZAT "Otomatik" modunu seçti — geç gelen tohumlama efekti
+    // (anchorResolvedRef) bu seçimi artık ezmemeli (bkz. modeTouchedRef tanımı).
+    modeTouchedRef.current = true;
     const epoch = epochRef.current;
     try {
       await unpin();
@@ -389,7 +410,12 @@ export function LocationSheet({ visible, onClose }: Props) {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modeBtn, selectedMode === 'pinned' && styles.modeBtnActive]}
-                onPress={() => setSelectedMode('pinned')}
+                onPress={() => {
+                  // Kullanıcı BİZZAT "Sabit adres" modunu seçti — geç gelen
+                  // tohumlama efekti bu seçimi artık ezmemeli (bkz. modeTouchedRef).
+                  modeTouchedRef.current = true;
+                  setSelectedMode('pinned');
+                }}
                 disabled={busy}
                 activeOpacity={0.8}
               >
