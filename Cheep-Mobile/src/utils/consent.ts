@@ -14,11 +14,6 @@ export async function getLocationConsent(): Promise<LocationConsent> {
   return consentStorage.getLocationConsent();
 }
 
-/** Rıza verildi mi (SORMADAN) — pasif kontroller için. */
-export async function hasLocationConsent(): Promise<boolean> {
-  return (await consentStorage.getLocationConsent()) === 'granted';
-}
-
 /**
  * KVKK açık-rıza istemini HER ZAMAN gösterir, seçimi saklar ve sonucu döndürür.
  * Kullanıcının açık talebiyle çağrılır (Profil'deki konum satırı) — bu yüzden
