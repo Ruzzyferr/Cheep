@@ -162,14 +162,17 @@ export function LocationSheet({ visible, onClose }: Props) {
       // ayrı, genel bir mesaj gösteriyoruz.
       if (epochRef.current === epoch) setSearchState({ kind: 'error' });
     } finally {
-      // searching yalnızca bu bileşenin kendi spinner bayrağı (setSearchState
-      // gibi İÇERİK taşımıyor) — epoch uyuşmasa bile temizlenmesi güvenlidir,
-      // hatta zorunludur: aksi halde spinner sonsuza dek asılı kalabilirdi.
-      // (Pratikte searching zaten kendi kendini yönetiyor çünkü yeni bir arama
-      // handleSearch'ün en başında senkron olarak true'ya çekiyor; yine de aynı
-      // ilkeyi burada da uyguluyoruz — bkz. handleConfirmNoBranches'teki
-      // confirming notu.)
-      setSearching(false);
+      // KURAL: bayat bir çağrı, YÜKLENIYOR bayrakları dahil hiçbir state'i
+      // daha yeni bir epoch'un üzerine YAZAMAZ. searching de istisna değil —
+      // epoch değiştiyse bu artık başka bir arama (ya da sheet kapanıp yeniden
+      // açılmış) demektir ve o session'ın kendi searching bayrağı zaten var;
+      // burada koşulsuz false yazarsak GÜNCEL aramanın spinner'ını erken
+      // kapatmış oluruz. Bir aramanın sonsuza dek asılı kalmaması ise reset
+      // effect'in garantisi: sheet her yeniden açılışta searching'i sıfırlar
+      // (bkz. dosya başı) ve handleSearch busy'yken (checking/confirming
+      // sürerken) epoch'u hiç artırmaz — dolayısıyla temizlenmeyi bekleyen bir
+      // "öksüz" epoch hiç oluşmaz.
+      if (epochRef.current === epoch) setSearching(false);
     }
   }, [query, searching, busy]);
 
@@ -241,20 +244,23 @@ export function LocationSheet({ visible, onClose }: Props) {
       // yine de açık ve kapatılabilir kalır; genel hata mesajını gösteriyoruz.
       if (epochRef.current === epoch) setFlow({ kind: 'error' });
     } finally {
-      // confirming'i KOŞULSUZ indiriyoruz. Bu, setFlow gibi İÇERİK yazan bir
-      // çağrı değil — bu bileşenin kendi yerel meşgul (spinner) bayrağı;
-      // paylaşılan bir UI state'i değil. Eskiden epoch uyuşmazlığında
-      // (örn. handleSearch klavyeden meşgulken bile tetiklenip epoch'u
-      // artırdığında) bu satır hiç çalışmıyordu ve confirming sonsuza dek
-      // true'da asılı kalıyordu → busy de sonsuza dek true kalıyor, mod
-      // seçici/arama/adaylar/geri linki sheet kapatılıp açılana kadar
-      // sessizce kilitli kalıyordu. Artık TextInput da handleSearch da
-      // busy'yken arama başlatamıyor (bkz. handleSearch), dolayısıyla bu yol
-      // zaten kapalı; yine de bir spinner bayrağının epoch kontrolüne bağlı
-      // kalması ilke olarak yanlıştı — kendi spinner'ını temizlemek HER ZAMAN
-      // güvenlidir, çünkü hiçbir İÇERİK yazmaz. (onClose() ve her setFlow
-      // çağrısı hâlâ epoch'a bağlı — onlar İÇERİK/eylem taşır, bkz. yukarısı.)
-      setConfirming(false);
+      // confirming'i epoch uyuşuyorsa indiriyoruz — KOŞULSUZ DEĞİL. KURAL:
+      // bayat bir çağrının finally'si, yükleniyor bayrakları dahil hiçbir
+      // state'i daha yeni bir epoch'un üzerine YAZAMAZ. Önceki (hatalı)
+      // düzeltme "kendi spinner'ını temizlemek her zaman güvenlidir" diye
+      // varsayıyordu; review bunun somut kırılma senaryosunu gösterdi: sheet
+      // kapanıp yeniden açılınca (epoch E1→E2) reset effect confirming'i
+      // false'a çeker ama bayat pin(A) promise'i canlı kalır (RN Modal
+      // unmount etmez); kullanıcı E2'de tekrar Continue'a basıp pin(B)'yi
+      // başlatır (confirming=true); bayat pin(A) sonuçlanıp finally'si
+      // KOŞULSUZ çalışsaydı E2'nin confirming=true'sunu false'a çekip busy'yi
+      // erken indirir, pin(B) hâlâ sürerken mod seçici/Continue/geri linkini
+      // yeniden etkinleştirip ikinci bir eşzamanlı yazmaya izin verirdi.
+      // Bir bayrağın sonsuza dek asılı kalmaması reset effect'in garantisi:
+      // sheet her yeniden açılışta confirming'i sıfırlar (bkz. dosya başı) ve
+      // handleSearch busy'yken (confirming sürerken) epoch'u hiç artırmaz —
+      // dolayısıyla temizlenmeyi bekleyen bir "öksüz" epoch hiç oluşmaz.
+      if (epochRef.current === epoch) setConfirming(false);
     }
   }, [flow, confirming, pin, onClose]);
 
