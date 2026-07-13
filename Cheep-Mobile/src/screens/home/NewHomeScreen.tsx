@@ -24,8 +24,6 @@ import { CheepMascot } from '../../components/brand/CheepMascot';
 import { FadeInUp, AnimatedNumber, PressableScale, Float } from '../../components/anim';
 import { getStoreLogoAsset } from '../../utils/storeLogo';
 import { ProductThumb } from '../../components/product/ProductThumb';
-import { getCountryCode } from '../../utils/geo';
-import { countryStorage } from '../../utils/storage';
 import { getCategoryIcon, categoryHomeRank } from '../../utils/categoryIcon';
 import { compareInsights, byCoverageThenScore } from '../../utils/compareInsights';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
@@ -59,19 +57,6 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
     return () => {
       aliveRef.current = false;
     };
-  }, []);
-
-  // Ülkeyi çöz/sakla (konum bazlı) — SADECE henüz saklı bir ülke yoksa (ilk-çalıştırma
-  // fallback'i). Kullanıcı onboarding/profilde bilinçli bir ülke seçtiyse geo tespiti
-  // bunu her Home ziyaretinde EZMEMELİ. Mesafe gösterimi YOK — mağaza koordinatları
-  // zincir-seviyesinde placeholder olduğu için yanıltıcı olurdu.
-  useEffect(() => {
-    (async () => {
-      const existing = await countryStorage.getCountry();
-      if (existing) return; // kullanıcı zaten seçti (onboarding/profil) — geo ile ezme
-      const code = await getCountryCode();
-      if (code) await countryStorage.saveCountry(code);
-    })().catch(() => {});
   }, []);
 
   useEffect(() => {

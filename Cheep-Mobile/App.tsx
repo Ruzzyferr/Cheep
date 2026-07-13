@@ -20,6 +20,7 @@ import i18n, { SUPPORTED_LANGUAGES } from './src/i18n';
 import { LocaleProvider } from './src/context/LocaleContext';
 import { languageStorage } from './src/utils/storage';
 import { AuthProvider } from './src/context/AuthContext';
+import { LocationProvider } from './src/context/LocationContext';
 import { RootNavigator } from './src/navigation';
 import { colors } from './src/theme';
 
@@ -58,7 +59,9 @@ export default function App() {
         <I18nextProvider i18n={i18n}>
           <LocaleProvider>
             <AuthProvider>
-              <RootNavigator />
+              <LocationProvider>
+                <RootNavigator />
+              </LocationProvider>
             </AuthProvider>
           </LocaleProvider>
         </I18nextProvider>
