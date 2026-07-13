@@ -22,6 +22,26 @@
     "gate_allow": "Allow",
     "gate_later": "Not now"
   },
+  "location": {
+    "title": "Location",
+    "mode_auto": "Automatic — use my location",
+    "mode_pinned": "Pinned address",
+    "chip_pinned": "{{label}} · pinned",
+    "address_placeholder": "Type an address or city",
+    "search": "Search",
+    "searching": "Searching…",
+    "use_this": "Use this address",
+    "back_to_auto": "Back to automatic",
+    "not_found": "Address not found.",
+    "unsupported_country": "Cheep isn't available in this country yet.",
+    "no_branches": "We couldn't find any stores near this address. You can continue, but distances and routes won't be shown.",
+    "geocoder_unavailable": "Address search isn't working on this device.",
+    "country_only_title": "Or pick a country",
+    "country_only_hint": "Pin just a country instead of an address. The catalogue and currency switch to it; distance filtering stays off.",
+    "distances_off": "Distances off",
+    "country_changed": "You're in {{country}} — switched to {{country}} stores.",
+    "dismiss": "Got it"
+  },
   "onboarding": {
     "language_title": "Choose your app language",
     "language_subtitle": "You can change this later in Profile",

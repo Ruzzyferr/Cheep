@@ -52,10 +52,14 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Ülke scoping: saklanan ISO ülke kodunu x-country header'ı olarak gönder
-    const country = await countryStorage.getCountry();
-    if (country && config.headers) {
-      config.headers['x-country'] = country;
+    // Ülke scoping: saklanan ISO ülke kodunu x-country header'ı olarak gönder.
+    // Çağıran AÇIKÇA bir x-country verdiyse ONA dokunma — pin doğrulaması,
+    // kullanıcının henüz geçmediği bir ülkeye sorgu atmak zorunda.
+    if (config.headers && !config.headers['x-country']) {
+      const country = await countryStorage.getCountry();
+      if (country) {
+        config.headers['x-country'] = country;
+      }
     }
     
     // Log request in development — sadece method + url. Gövde (config.data) ASLA

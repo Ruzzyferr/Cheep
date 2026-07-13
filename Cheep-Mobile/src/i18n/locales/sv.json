@@ -22,6 +22,26 @@
     "gate_allow": "Tillåt",
     "gate_later": "Inte nu"
   },
+  "location": {
+    "title": "Plats",
+    "mode_auto": "Automatiskt — använd min plats",
+    "mode_pinned": "Fast adress",
+    "chip_pinned": "{{label}} · fast",
+    "address_placeholder": "Skriv en adress eller stad",
+    "search": "Sök",
+    "searching": "Söker…",
+    "use_this": "Använd den här adressen",
+    "back_to_auto": "Tillbaka till automatiskt",
+    "not_found": "Adressen hittades inte.",
+    "unsupported_country": "Cheep finns inte i det här landet än.",
+    "no_branches": "Vi hittade inga butiker nära den här adressen. Du kan fortsätta ändå, men avstånd och rutter visas inte.",
+    "geocoder_unavailable": "Adressökning fungerar inte på den här enheten.",
+    "country_only_title": "Eller välj ett land",
+    "country_only_hint": "Fäst bara ett land i stället för en adress. Katalog och valuta byts till landet; avståndsfiltrering förblir avstängd.",
+    "distances_off": "Avstånd av",
+    "country_changed": "Du är i {{country}} — bytte till butiker i {{country}}.",
+    "dismiss": "OK"
+  },
   "onboarding": {
     "language_title": "Välj appspråk",
     "language_subtitle": "Du kan ändra detta senare i Profil",

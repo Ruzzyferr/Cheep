@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { countryStorage } from '../utils/storage';
 
 export const COUNTRY_CONFIG: Record<string, { currency: string; symbol: string; locale: string }> = {
@@ -25,32 +25,43 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => { countryStorage.getCountry().then(c => { if (c && COUNTRY_CONFIG[c]) setCountryState(c); }); }, []);
 
-  const setCountry = async (code: string) => {
+  // useCallback: context tüketicileri (ör. LocationContext) bu fonksiyonun kimliğine
+  // bağımlı efektler kurabiliyor. Kararsız bir kimlik, her render'da o efektleri
+  // gereksiz yere yeniden tetikler.
+  const setCountry = useCallback(async (code: string) => {
     const c = code.toUpperCase();
     // Sadece DOĞRULANMIŞ kodu sakla — geçersiz kod x-country header'ına sızmasın.
     const valid = COUNTRY_CONFIG[c] ? c : DEFAULT_CODE;
     setCountryState(valid);
     await countryStorage.saveCountry(valid);
-  };
+  }, []);
 
-  const formatMoney = (n: number) => {
+  const formatMoney = useCallback((n: number) => {
     const { currency, locale } = cfg(country);
     try {
       return new Intl.NumberFormat(locale, { style: 'currency', currency, maximumFractionDigits: 2 }).format(n);
     } catch {
       return `${cfg(country).symbol}${n.toFixed(2)}`;
     }
-  };
-  const formatNumber = (n: number) => {
+  }, [country]);
+  const formatNumber = useCallback((n: number) => {
     try { return new Intl.NumberFormat(cfg(country).locale).format(n); } catch { return String(n); }
-  };
-  const formatDate = (d: Date | string) => {
+  }, [country]);
+  const formatDate = useCallback((d: Date | string) => {
     const date = typeof d === 'string' ? new Date(d) : d;
     try { return new Intl.DateTimeFormat(cfg(country).locale).format(date); } catch { return date.toISOString().slice(0, 10); }
-  };
+  }, [country]);
+
+  // useMemo: value nesnesi her render'da yeniden yaratılmasın — aksi halde tüm
+  // tüketiciler (referans eşitliğine bakan React.memo/useEffect dahil) her
+  // country değişiminde gereksiz yeniden render/efekt tetiklenmesi yaşar.
+  const value = useMemo(
+    () => ({ country, setCountry, formatMoney, formatNumber, formatDate }),
+    [country, setCountry, formatMoney, formatNumber, formatDate],
+  );
 
   return (
-    <LocaleContext.Provider value={{ country, setCountry, formatMoney, formatNumber, formatDate }}>
+    <LocaleContext.Provider value={value}>
       {children}
     </LocaleContext.Provider>
   );

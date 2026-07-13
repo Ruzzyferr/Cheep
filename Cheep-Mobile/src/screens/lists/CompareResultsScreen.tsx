@@ -3,7 +3,7 @@
  * Shopping route comparison results
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -23,17 +23,18 @@ import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import { compareInsights, byCoverageThenScore, missingCount } from '../../utils/compareInsights';
-import { getUserLocation, type Coords } from '../../utils/geo';
+import { useLocationAnchor } from '../../context/LocationContext';
+import { shouldFilterByDistance, RADIUS_OPTIONS, DEFAULT_RADIUS_KM } from '../../utils/anchor';
 import type { CompareResponse, RouteStrategy } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 
 type StoreCountFilter = 'all' | '1' | '2' | '3+';
 type SortOption = 'score' | 'price' | 'distance' | 'price_distance';
 
-// Rota yarıçapı seçenekleri: kimse market alışverişi için uzağa gitmez. Kullanıcı
-// hangi mesafedeki marketleri görmek istediğini seçer (yürüme / araba / geniş).
-const RADIUS_OPTIONS = [1.5, 3, 5] as const;
-const DEFAULT_RADIUS_KM = 3;
+// Yarıçap seçenekleri utils/anchor'dan gelir (RADIUS_OPTIONS / DEFAULT_RADIUS_KM /
+// MAX_RADIUS_KM). Burada YENİDEN TANIMLANMAZ: şube kapısı (geocode.service) aynı
+// listeden türeyen MAX_RADIUS_KM'yi kullanıyor — iki taraf ayrı düşerse, kapının
+// "kullanılabilir" dediği bir koordinat bu ekranda boş sonuç üretebilir.
 
 export function CompareResultsScreen({
   route,
@@ -47,25 +48,32 @@ export function CompareResultsScreen({
   const [storeCountFilter, setStoreCountFilter] = useState<StoreCountFilter>('all');
   const [sortOption, setSortOption] = useState<SortOption>('score');
   const [radiusKm, setRadiusKm] = useState<number>(DEFAULT_RADIUS_KM);
-  // undefined = konum henüz çözülmedi, null = izin yok/konum yok, Coords = var
-  const [loc, setLoc] = useState<Coords | null | undefined>(undefined);
   const insets = useSafeAreaInsets();
 
-  // Konumu bir kez çöz (yarıçap değişince GPS'i tekrar sorma).
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const l = await getUserLocation(); // {lat,lon} | null
-      if (alive) setLoc(l);
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
+  const { anchor } = useLocationAnchor();
+  const { country } = useLocale(); // (useLocale zaten import edilmiş — formatMoney için)
 
-  // Konum çözülünce ya da yarıçap değişince yeniden karşılaştır.
+  // MERKEZÎ İNVARYANT: yarıçap filtresi yalnızca çapa koordinatlıysa VE katalogla
+  // aynı ülkedeyse gönderilir. Aksi halde userLocation/radiusKm HİÇ gönderilmez →
+  // backend filtre uygulamaz → kullanıcı tüm marketleri görür (boş ekran yerine).
+  const filterByDistance = anchor ? shouldFilterByDistance(anchor, country) : false;
+
+  // İlk çözümleme tamamlandı mı? Effect, çapa null olduğu sürece bekler.
+  const anchorReady = anchor != null;
+
+  // Çapa nesnesi HER tazelemede yeniden yaratılıyor (resolvedAt: Date.now()), bu
+  // yüzden referansına bağlanmak yanlış: kullanıcı uygulamayı arka plana alıp geri
+  // açtığında konum hiç değişmemişken compare'i baştan çağırır (boş ağ isteği +
+  // spinner çakması). Yalnızca gerçekten önemli olan DEĞERLERE bağlan.
+  const userLocation = useMemo(
+    () => (filterByDistance && anchor?.coords ? anchor.coords : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filterByDistance, anchor?.coords?.lat, anchor?.coords?.lon],
+  );
+
+  // Çapa çözülünce ya da yarıçap değişince yeniden karşılaştır.
   useEffect(() => {
-    if (loc === undefined) return; // konum çözülene kadar bekle
+    if (!anchorReady) return; // çapa çözülene kadar bekle
     let alive = true;
 
     (async () => {
@@ -74,8 +82,7 @@ export function CompareResultsScreen({
         const data = await listService.compareList(listId, {
           maxStores: 4,
           includeMissingProducts: true,
-          // Konum varsa yarıçap filtresini gönder; yoksa filtreleme yapma (tümünü göster).
-          ...(loc ? { userLocation: loc, radiusKm } : {}),
+          ...(userLocation ? { userLocation, radiusKm } : {}),
         });
         if (!alive) return;
         setResults(data);
@@ -92,8 +99,11 @@ export function CompareResultsScreen({
     return () => {
       alive = false;
     };
+    // navigation ve t kasıtlı olarak dışarıda bırakıldı: ikisi de her render'da
+    // kararlı referanslardır (React Navigation / i18next), efekti tetiklemeleri
+    // gerekmez — asıl konu olan çapa artık DEĞERİ (userLocation) üzerinden izleniyor.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listId, radiusKm, loc]);
+  }, [listId, radiusKm, anchorReady, userLocation]);
 
   // İlk yükleme: sonuç yokken tam ekran spinner. Yarıçap değişiminde eski sonuçlar
   // ekranda kalır (seçici kaybolmasın), üstte ince bir gösterge çıkar.
@@ -110,7 +120,7 @@ export function CompareResultsScreen({
     return null;
   }
 
-  const hasLocation = loc != null;
+  const hasLocation = filterByDistance;
   // Konum var, yarıçap filtresi uygulandı ama yakında market yok → boş durum.
   const noNearbyStores =
     hasLocation && !!results.nearbyFilterApplied && results.strategies.length === 0;

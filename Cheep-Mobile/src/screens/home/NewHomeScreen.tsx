@@ -20,12 +20,13 @@ import { useTranslation } from 'react-i18next';
 import { productService, storeService, listService, categoryService } from '../../services';
 import { useAuth } from '../../context/AuthContext';
 import { useLocale } from '../../context/LocaleContext';
+import { useLocationAnchor } from '../../context/LocationContext';
 import { CheepMascot } from '../../components/brand/CheepMascot';
+import { LocationSheet } from '../../components/location/LocationSheet';
+import { CountryChangedBanner } from '../../components/location/CountryChangedBanner';
 import { FadeInUp, AnimatedNumber, PressableScale, Float } from '../../components/anim';
 import { getStoreLogoAsset } from '../../utils/storeLogo';
 import { ProductThumb } from '../../components/product/ProductThumb';
-import { getCountryCode } from '../../utils/geo';
-import { countryStorage } from '../../utils/storage';
 import { getCategoryIcon, categoryHomeRank } from '../../utils/categoryIcon';
 import { compareInsights, byCoverageThenScore } from '../../utils/compareInsights';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
@@ -40,6 +41,8 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
   const { user } = useAuth();
   const { t } = useTranslation();
   const { country, formatMoney } = useLocale();
+  const { anchor } = useLocationAnchor();
+  const [locationSheetOpen, setLocationSheetOpen] = useState(false);
   const [activeList, setActiveList] = useState<ShoppingList | null>(null);
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [markets, setMarkets] = useState<Store[]>([]);
@@ -59,19 +62,6 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
     return () => {
       aliveRef.current = false;
     };
-  }, []);
-
-  // Ülkeyi çöz/sakla (konum bazlı) — SADECE henüz saklı bir ülke yoksa (ilk-çalıştırma
-  // fallback'i). Kullanıcı onboarding/profilde bilinçli bir ülke seçtiyse geo tespiti
-  // bunu her Home ziyaretinde EZMEMELİ. Mesafe gösterimi YOK — mağaza koordinatları
-  // zincir-seviyesinde placeholder olduğu için yanıltıcı olurdu.
-  useEffect(() => {
-    (async () => {
-      const existing = await countryStorage.getCountry();
-      if (existing) return; // kullanıcı zaten seçti (onboarding/profil) — geo ile ezme
-      const code = await getCountryCode();
-      if (code) await countryStorage.saveCountry(code);
-    })().catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -286,6 +276,25 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
           </View>
         </View>
 
+        <CountryChangedBanner />
+
+        {/* Sabit çapa çipi — yalnızca kullanıcı manuel bir adres seçtiyse görünür. */}
+        {anchor?.mode === 'pinned' && (
+          <TouchableOpacity
+            style={styles.anchorChip}
+            onPress={() => setLocationSheetOpen(true)}
+            activeOpacity={0.8}
+          >
+            <MaterialIcons name="push-pin" size={14} color={colors.primary.main} />
+            <Text style={styles.anchorChipText}>
+              {t('location.chip_pinned', { label: anchor.label })}
+            </Text>
+            {!anchor.coords && (
+              <Text style={styles.anchorChipMuted}>· {t('location.distances_off')}</Text>
+            )}
+          </TouchableOpacity>
+        )}
+
         {/* Savings hero (signature) */}
         <FadeInUp delay={40} style={styles.sectionPad}>
           <View style={styles.hero}>
@@ -464,6 +473,8 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
           </View>
         </FadeInUp>
       </ScrollView>
+
+      <LocationSheet visible={locationSheetOpen} onClose={() => setLocationSheetOpen(false)} />
     </View>
   );
 }
@@ -539,6 +550,22 @@ const styles = StyleSheet.create({
   },
 
   sectionPad: { paddingHorizontal: layout.screenPadding },
+
+  // Anchor chip (sabit adres)
+  anchorChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: spacing.xs,
+    marginHorizontal: layout.screenPadding,
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    backgroundColor: colors.primary[50],
+  },
+  anchorChipText: { ...typography.styles.caption, color: colors.primary.main, fontWeight: '700' },
+  anchorChipMuted: { ...typography.styles.caption, color: colors.text.hint },
 
   // Hero
   hero: {

@@ -5,7 +5,7 @@
 
 import * as Location from 'expo-location';
 import { locationStorage } from './storage';
-import { ensureLocationConsent, hasLocationConsent } from './consent';
+import { ensureLocationConsent, getLocationConsent } from './consent';
 
 export interface Coords {
   lat: number;
@@ -13,9 +13,12 @@ export interface Coords {
 }
 
 /**
- * Uygulamanın desteklediği ülke kodları. getCountryCode() bu kümenin DIŞINDAKİ
- * bir tespit için null döner → çağıran taraf default'a (TR) düşer, geçersiz kod
- * asla x-country header'ına sızmaz. (LocaleContext'i import ETME — döngü riski.)
+ * Uygulamanın desteklediği ülke kodları. Ülke tespiti yapan her fonksiyon
+ * (getCountryCodeInteractive, reverseGeocodeCountry) bu kümenin DIŞINDAKİ bir
+ * tespit için null döner → çağıran taraf son bilinen ülkeye/kullanıcı seçimine
+ * düşer, geçersiz kod asla x-country header'ına sızmaz. Konum sayfasındaki
+ * ülke-yalnızca seçim de bu listeden üretilir.
+ * (LocaleContext'i import ETME — döngü riski.)
  */
 export const SUPPORTED_COUNTRY_CODES = ['TR', 'PL'] as const;
 
@@ -54,10 +57,20 @@ export const LOCATION_MAX_AGE_MS = 30 * 60 * 1000; // 30 dk
 /**
  * Cihaz konumunu döndürür.
  *
- * Sözleşme — null dönen her durumda çağıran taraf konum filtresi UYGULAMAZ
- * (tüm marketleri gösterir); eski/yanlış bir noktayla filtrelemekten iyidir:
+ * SÖZLEŞME — bu fonksiyon HİÇBİR ZAMAN diyalog göstermez (ne KVKK istemi ne
+ * de OS izin modalı): rızayı ve OS iznini yalnızca PASİF olarak OKUR. Sormak
+ * kapının (runLocationGate/ensureLocationReady) ve Profil'in açık rıza
+ * anahtarının işidir — burada requestForegroundPermissionsAsync() ÇAĞRILMAZ.
+ * Neden: LocationContext artık kapıyı çalıştırdıktan HEMEN SONRA bu fonksiyonu
+ * çağırıyor; iki fonksiyon da isteseydi, kapının reddedilen bir isteğinin
+ * hemen ardından burası ikinci bir sistem modalı açardı — Android 11+'ta arka
+ * arkaya iki ret, kullanıcının izni KALICI OLARAK reddetmesine (canAskAgain=false)
+ * yol açar ve uygulama bir daha asla soramaz.
+ *
+ * Null dönen her durumda çağıran taraf konum filtresi UYGULAMAZ (tüm
+ * marketleri gösterir); eski/yanlış bir noktayla filtrelemekten iyidir:
  *   • KVKK rızası yok           → null  (+ saklanan koordinat silinir)
- *   • OS konum izni yok         → null  (+ saklanan koordinat silinir)
+ *   • OS konum izni yok         → null  (+ saklanan koordinat silinir; SORULMAZ)
  *   • GPS anlık hata verdi      → TAZE cache (≤30 dk), yoksa null
  *   • GPS başarılı              → taze koordinat (zaman damgasıyla cache'lenir)
  */
@@ -65,12 +78,18 @@ export async function getUserLocation(): Promise<Coords | null> {
   try {
     // KVKK: OS izninden ÖNCE açık rıza. Rıza yoksa konum HİÇ işlenmez — eski
     // koordinat da tutulmaz (rızasız veri işleme olurdu).
-    const consented = await ensureLocationConsent();
-    if (!consented) {
+    //
+    // PASİF okuma (ensureLocationConsent DEĞİL): rıza henüz KARARSIZSA
+    // ensureLocationConsent istem gösterirdi ve bu fonksiyonun "hiç diyalog
+    // göstermem" sözü kırılırdı. Bugün buraya kapıdan sonra gelindiği için
+    // rıza hep karara bağlanmış oluyor — ama sözleşmeyi yoruma değil KODA
+    // bağlıyoruz: rıza 'granted' değilse konum yok, nokta.
+    if ((await getLocationConsent()) !== 'granted') {
       await locationStorage.clearLocation();
       return null;
     }
-    const { status } = await Location.requestForegroundPermissionsAsync();
+    // PASİF okuma — asla sormaz. İzin isteme tamamen kapının (gate) sorumluluğu.
+    const { status } = await Location.getForegroundPermissionsAsync();
     if (status !== 'granted') {
       await locationStorage.clearLocation();
       return null;
@@ -88,31 +107,6 @@ export async function getUserLocation(): Promise<Coords | null> {
 }
 
 /**
- * Cihaz konumundan ISO ülke kodunu (örn. "TR", "PL") çözer (reverse-geocode).
- * İzin yoksa/başarısızsa null döner; çağıran taraf kullanıcı seçimine/default'a düşer.
- */
-export async function getCountryCode(): Promise<string | null> {
-  try {
-    // Pasif ülke tespiti — SESSİZ: yalnızca daha önce açık rıza verildiyse konuma
-    // bak, aksi halde istem gösterme (kullanıcı ülkeyi elle seçer). Rıza istemi,
-    // kullanıcı aktif bir konum özelliğini (getUserLocation) kullandığında çıkar.
-    if (!(await hasLocationConsent())) return null;
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') return null;
-    const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
-    const places = await Location.reverseGeocodeAsync({
-      latitude: pos.coords.latitude,
-      longitude: pos.coords.longitude,
-    });
-    const iso = places[0]?.isoCountryCode?.toUpperCase();
-    // Yalnızca desteklenen ülke ise döndür; değilse null → çağıran default'a düşer.
-    return iso && (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(iso) ? iso : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * AKTİF ülke tespiti — onboarding ülke adımı için: açık rıza istemini gösterir,
  * sonra OS izni ister. Reddedilirse null → manuel seçici devrede kalır.
  */
@@ -126,6 +120,24 @@ export async function getCountryCodeInteractive(): Promise<string | null> {
     const places = await Location.reverseGeocodeAsync({
       latitude: pos.coords.latitude,
       longitude: pos.coords.longitude,
+    });
+    const iso = places[0]?.isoCountryCode?.toUpperCase();
+    return iso && (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(iso) ? iso : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Verilen koordinatın ISO ülke kodunu çözer. Desteklenmeyen ülke veya hata → null.
+ * GPS OKUMAZ, verilen koordinatı çözer — çapa akışında konum zaten elimizde,
+ * ikinci kez GPS istemek (ve ikinci bir izin diyaloğu riski) gereksizdir.
+ */
+export async function reverseGeocodeCountry(coords: Coords): Promise<string | null> {
+  try {
+    const places = await Location.reverseGeocodeAsync({
+      latitude: coords.lat,
+      longitude: coords.lon,
     });
     const iso = places[0]?.isoCountryCode?.toUpperCase();
     return iso && (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(iso) ? iso : null;

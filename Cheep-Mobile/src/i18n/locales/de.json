@@ -22,6 +22,26 @@
     "gate_allow": "Erlauben",
     "gate_later": "Jetzt nicht"
   },
+  "location": {
+    "title": "Standort",
+    "mode_auto": "Automatisch — meinen Standort verwenden",
+    "mode_pinned": "Feste Adresse",
+    "chip_pinned": "{{label}} · fest",
+    "address_placeholder": "Adresse oder Stadt eingeben",
+    "search": "Suchen",
+    "searching": "Wird gesucht…",
+    "use_this": "Diese Adresse verwenden",
+    "back_to_auto": "Zurück zu automatisch",
+    "not_found": "Adresse nicht gefunden.",
+    "unsupported_country": "Cheep ist in diesem Land noch nicht verfügbar.",
+    "no_branches": "Wir haben keine Filialen in der Nähe dieser Adresse gefunden. Du kannst trotzdem fortfahren, aber Entfernungen und Routen werden nicht angezeigt.",
+    "geocoder_unavailable": "Die Adresssuche funktioniert auf diesem Gerät nicht.",
+    "country_only_title": "Oder ein Land wählen",
+    "country_only_hint": "Lege statt einer Adresse nur ein Land fest. Katalog und Währung wechseln dorthin; die Entfernungsfilterung bleibt ausgeschaltet.",
+    "distances_off": "Entfernungen aus",
+    "country_changed": "Dein Standort: {{country}} — auf die dortigen Filialen umgestellt.",
+    "dismiss": "Verstanden"
+  },
   "onboarding": {
     "language_title": "Wähle deine App-Sprache",
     "language_subtitle": "Du kannst dies später im Profil ändern",
