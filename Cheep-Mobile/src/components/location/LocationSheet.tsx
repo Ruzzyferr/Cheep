@@ -6,7 +6,7 @@
  * "no_branches" durumunda koordinat UYDURULMAZ — kullanıcı onaylarsa
  * koordinatsız (yalnızca ülke) pin kaydedilir.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -55,14 +55,28 @@ export function LocationSheet({ visible, onClose }: Props) {
   const [searching, setSearching] = useState(false);
   const [searchState, setSearchState] = useState<SearchState>({ kind: 'idle' });
   const [flow, setFlow] = useState<ValidationFlow>({ kind: 'none' });
+  const [confirming, setConfirming] = useState(false);
+
+  // RN'in <Modal> bileşeni visible={false} olduğunda children'ı UNMOUNT ETMEZ,
+  // yalnızca native görünümü gizler — bileşen örneği, state'i ve devam eden
+  // promise'ler canlı kalır. Bu yüzden önceki bir açılışta başlatılan bir arama
+  // ya da doğrulama isteği, sheet kapatılıp yeniden açıldıktan sonra bile
+  // sonuçlanıp state'e yazabilir. "epoch" sayacı bu durumu engeller: her reset
+  // ve her yeni aramada artar; async bir cevap geldiğinde yakalanan epoch ile
+  // güncel epoch karşılaştırılır, uyuşmuyorsa cevap sessizce terk edilir.
+  const epochRef = useRef(0);
 
   useEffect(() => {
     if (visible) {
+      // Sheet yeniden açıldı: önceki açılıştan kalma isteklerin cevaplarını
+      // geçersiz kılmak için epoch'u artırıyoruz.
+      epochRef.current += 1;
       setSelectedMode(anchor?.mode ?? 'auto');
       setQuery('');
       setSearching(false);
       setSearchState({ kind: 'idle' });
       setFlow({ kind: 'none' });
+      setConfirming(false);
     }
   }, [visible, anchor?.mode]);
 
@@ -74,10 +88,19 @@ export function LocationSheet({ visible, onClose }: Props) {
   const handleSearch = useCallback(async () => {
     const q = query.trim();
     if (!q || searching) return;
+    // Yeni bir arama başlıyor: epoch'u artırıyoruz ki bu arama başlamadan
+    // önce fırlatılmış (henüz sonuçlanmamış) eski bir aramanın cevabı bu
+    // sonuçların üzerine yazamasın.
+    epochRef.current += 1;
+    const epoch = epochRef.current;
     setSearching(true);
     setFlow({ kind: 'none' });
     try {
       const result = await searchAddress(q);
+      // await sırasında sheet kapatılıp yeniden açılmış ya da yeni bir arama
+      // başlatılmış olabilir (bkz. üstteki epoch açıklaması) — o zaman bu
+      // artık bayat cevabı state'e yazmadan sessizce terk ediyoruz.
+      if (epochRef.current !== epoch) return;
       if (!result.available) {
         setSearchState({ kind: 'unavailable' });
       } else if (result.candidates.length === 0) {
@@ -86,13 +109,19 @@ export function LocationSheet({ visible, onClose }: Props) {
         setSearchState({ kind: 'results', candidates: result.candidates });
       }
     } finally {
-      setSearching(false);
+      if (epochRef.current === epoch) setSearching(false);
     }
   }, [query, searching]);
 
   const handleSelectCandidate = useCallback(async (c: GeocodeCandidate) => {
+    // Bu doğrulamanın hangi epoch'ta başladığını yakalıyoruz.
+    const epoch = epochRef.current;
     setFlow({ kind: 'checking', label: c.label });
     const v = await validateCandidate(c);
+    // await sırasında sheet kapatılıp yeniden açılmış ya da yeni bir arama
+    // başlatılmış olabilir — epoch değiştiyse bu artık bayat cevabı
+    // (ör. eski bir "no_branches" uyarısını) ekrana yansıtmadan çıkıyoruz.
+    if (epochRef.current !== epoch) return;
     if (v.status === 'unsupported_country') {
       setFlow({ kind: 'unsupported', label: c.label });
       return;
@@ -107,10 +136,17 @@ export function LocationSheet({ visible, onClose }: Props) {
   }, [pin, onClose]);
 
   const handleConfirmNoBranches = useCallback(async () => {
-    if (flow.kind !== 'no_branches') return;
-    await pin(flow.pin); // coords zaten null — burada asla üretilmez.
-    onClose();
-  }, [flow, pin, onClose]);
+    if (flow.kind !== 'no_branches' || confirming) return;
+    // Aday satırlarıyla tutarlı olsun diye pin() sürerken butonu meşgul
+    // gösterip devre dışı bırakıyoruz — art arda dokunmayla çifte pin() çağrısını önler.
+    setConfirming(true);
+    try {
+      await pin(flow.pin); // coords zaten null — burada asla üretilmez.
+      onClose();
+    } finally {
+      setConfirming(false);
+    }
+  }, [flow, confirming, pin, onClose]);
 
   const candidates = searchState.kind === 'results' ? searchState.candidates : [];
   const checkingLabel = flow.kind === 'checking' ? flow.label : null;
@@ -245,12 +281,15 @@ export function LocationSheet({ visible, onClose }: Props) {
                         variant="outline"
                         size="small"
                         onPress={() => setFlow({ kind: 'none' })}
+                        disabled={confirming}
                         style={styles.warnActionBtn}
                       />
                       <Button
                         title={t('common.continue')}
                         size="small"
                         onPress={handleConfirmNoBranches}
+                        disabled={confirming}
+                        loading={confirming}
                         style={styles.warnActionBtn}
                       />
                     </View>
