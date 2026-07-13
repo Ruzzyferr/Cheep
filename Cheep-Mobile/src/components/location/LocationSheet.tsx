@@ -6,6 +6,15 @@
  * "no_branches" durumunda koordinat UYDURULMAZ — kullanıcı onaylarsa
  * koordinatsız (yalnızca ülke) pin kaydedilir.
  *
+ * ÜLKE-YALNIZCA SEÇİM (3. kapı + çıkış kapısı): geocoder çalışmayan cihazlarda
+ * adres araması imkânsızdır; kullanıcı yine de ülkesini seçebilmelidir. Aynı
+ * butonlar bir KİLİTLENME TUZAĞINI da açar: konum rızası olmayan bir kullanıcı
+ * yabancı bir ülkeyi sabitlerse (user_country oraya yazılır), "otomatiğe dön"
+ * dediğinde detectedCountry null olur ve resolveAnchor lastCountry'ye (=pin'in
+ * yazdığı yabancı ülke) düşer — kullanıcı yanlış katalog/para biriminde MAHSUR
+ * kalırdı. Butonlar coords: null ile pin'ler → mesafe filtresi kapalı kalır,
+ * boş ekran riski yoktur; ve seçim kullanıcının AÇIK tercihidir (sessiz kabul değil).
+ *
  * KAPATMA KURALI: sheet HİÇBİR KOŞULDA kullanıcıyı hapsetmez. onRequestClose,
  * header ✕'i ve geri linki her zaman çalışır — bir yazma (pin/unpin) sürüyor
  * olsa bile. Bunun güvenli olmasının sebebi LocationContext.refresh()'in artık
@@ -32,6 +41,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useLocationAnchor } from '../../context/LocationContext';
 import { searchAddress, validateCandidate, type GeocodeCandidate } from '../../services/geocode.service';
 import type { PinnedAnchor } from '../../utils/anchor';
+import { SUPPORTED_COUNTRY_CODES } from '../../utils/geo';
 import { Button } from '../ui';
 import { colors, typography, spacing, borderRadius, layout } from '../../theme';
 
@@ -66,6 +76,10 @@ export function LocationSheet({ visible, onClose }: Props) {
   const [searchState, setSearchState] = useState<SearchState>({ kind: 'idle' });
   const [flow, setFlow] = useState<ValidationFlow>({ kind: 'none' });
   const [confirming, setConfirming] = useState(false);
+  // Ülke-yalnızca pin yazılırken hangi ülke yazılıyor (null → yazma yok).
+  // Diğer yükleniyor bayraklarıyla AYNI kurala tabidir: her epoch artışında
+  // sıfırlanır, finally'de yalnızca epoch uyuşuyorsa indirilir.
+  const [pinningCountry, setPinningCountry] = useState<string | null>(null);
 
   // RN'in <Modal> bileşeni visible={false} olduğunda children'ı UNMOUNT ETMEZ,
   // yalnızca native görünümü gizler — bileşen örneği, state'i ve devam eden
@@ -113,13 +127,14 @@ export function LocationSheet({ visible, onClose }: Props) {
     setSearchState({ kind: 'idle' });
     setFlow({ kind: 'none' });
     setConfirming(false);
+    setPinningCountry(null);
   }, [visible]);
 
-  // Sheet İÇİNDEKİ etkileşimli kontroller ('checking' doğrulaması ya da
-  // 'confirming' onayı sürerken) burada kilitlenir — amaç, aynı anda ikinci
-  // bir pin()/unpin() yazmasının başlamasını önlemektir. busy, dismissal'ı
-  // (kapatmayı) ETKİLEMEZ — o her zaman serbesttir, bkz. handleClose.
-  const busy = flow.kind === 'checking' || confirming;
+  // Sheet İÇİNDEKİ etkileşimli kontroller (bir doğrulama 'checking', bir onay
+  // 'confirming' ya da bir ülke-yalnızca pin yazması sürerken) burada kilitlenir —
+  // amaç, aynı anda ikinci bir pin()/unpin() yazmasının başlamasını önlemektir.
+  // busy, dismissal'ı (kapatmayı) ETKİLEMEZ — o her zaman serbesttir, bkz. handleClose.
+  const busy = flow.kind === 'checking' || confirming || pinningCountry !== null;
 
   // Sheet'i kapatan TEK yol — Android geri tuşu (onRequestClose), header ✕'i
   // ve "otomatiğe dön" linki hep buna gider. HİÇBİR KOŞULDA no-op olmaz:
@@ -286,6 +301,34 @@ export function LocationSheet({ visible, onClose }: Props) {
     }
   }, [flow, confirming, pin, onClose]);
 
+  // Ülke-yalnızca pin — 3. kapının (geocoder yok) karşılığı ve her zaman açık
+  // çıkış kapısı (bkz. dosya başı). KOORDİNAT ÜRETİLMEZ: coords null → çapa
+  // koordinatsız → shouldFilterByDistance() false → mesafe filtresi kapalı.
+  const handleSelectCountry = useCallback(async (countryCode: string) => {
+    if (busy) return; // aynı anda ikinci bir yazma başlatma
+    // Bu yazmanın hangi epoch'ta başladığını yakalıyoruz (diğer handler'larla aynı kural).
+    const epoch = epochRef.current;
+    setPinningCountry(countryCode);
+    setFlow({ kind: 'none' });
+    try {
+      await pin({ coords: null, countryCode, label: t(`countries.${countryCode}`) });
+      // await sırasında sheet kapatılıp yeniden açılmış olabilir — epoch
+      // değiştiyse onClose() artık bu session'a ait değil.
+      if (epochRef.current !== epoch) return;
+      onClose();
+    } catch {
+      // pin() (ve içindeki refresh()) ağ/depo hatasıyla patlayabilir; sheet açık
+      // ve kapatılabilir kalır, genel hata mesajı gösterilir.
+      if (epochRef.current === epoch) setFlow({ kind: 'error' });
+    } finally {
+      // Bayat bir çağrı, yükleniyor bayrakları dahil hiçbir state'i daha yeni bir
+      // epoch'un üzerine YAZAMAZ (bkz. handleConfirmNoBranches'teki uzun not).
+      // Asılı kalma riski yok: epoch yalnızca açılışta (bayrakların hepsi aynı
+      // commit'te sıfırlanır) ya da handleSearch'te (busy iken hiç artmaz) artar.
+      if (epochRef.current === epoch) setPinningCountry(null);
+    }
+  }, [busy, pin, onClose, t]);
+
   const candidates = searchState.kind === 'results' ? searchState.candidates : [];
   const checkingLabel = flow.kind === 'checking' ? flow.label : null;
 
@@ -447,6 +490,40 @@ export function LocationSheet({ visible, onClose }: Props) {
                   </View>
                 )}
 
+                {/* Ülke-yalnızca seçim. Geocoder çalışmasa bile (3. kapı) kullanıcı
+                    ülkesini seçebilir; yanlış ülkeye sabitlenmiş kullanıcı da buradan
+                    geri dönebilir. Koordinat YOK → mesafe filtresi kapalı → boş ekran
+                    riski yok. Sessiz kabul değil: dokunmak açık bir kullanıcı seçimidir. */}
+                <View style={styles.countrySection}>
+                  <Text style={styles.countryTitle}>{t('location.country_only_title')}</Text>
+                  <Text style={styles.countryHint}>{t('location.country_only_hint')}</Text>
+                  <View style={styles.countryRow}>
+                    {SUPPORTED_COUNTRY_CODES.map((code) => {
+                      const active = anchor?.countryCode === code;
+                      const writing = pinningCountry === code;
+                      return (
+                        <TouchableOpacity
+                          key={code}
+                          style={[styles.countryBtn, active && styles.countryBtnActive]}
+                          onPress={() => handleSelectCountry(code)}
+                          disabled={busy}
+                          activeOpacity={0.8}
+                        >
+                          {writing ? (
+                            <ActivityIndicator size="small" color={colors.primary.main} />
+                          ) : (
+                            <Text
+                              style={[styles.countryBtnText, active && styles.countryBtnTextActive]}
+                            >
+                              {t(`countries.${code}`)}
+                            </Text>
+                          )}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </View>
+
                 <TouchableOpacity onPress={handleUseAuto} disabled={busy} style={styles.backLink}>
                   <Text style={styles.backLinkText}>{t('location.back_to_auto')}</Text>
                 </TouchableOpacity>
@@ -584,6 +661,37 @@ const styles = StyleSheet.create({
   warnText: { ...typography.styles.body2, color: colors.text.primary },
   warnActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.xs },
   warnActionBtn: { flex: 1 },
+
+  countrySection: {
+    marginTop: spacing.lg,
+    paddingTop: spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+  },
+  countryTitle: {
+    ...typography.styles.body2,
+    color: colors.text.primary,
+    fontWeight: '700',
+  },
+  countryHint: {
+    ...typography.styles.caption,
+    color: colors.text.secondary,
+    marginTop: spacing.xs,
+  },
+  countryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.sm },
+  countryBtn: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: colors.border.main,
+    backgroundColor: colors.background.default,
+    minWidth: 96,
+    alignItems: 'center',
+  },
+  countryBtnActive: { borderColor: colors.primary.main, backgroundColor: colors.primary[50] },
+  countryBtnText: { ...typography.styles.body2, color: colors.text.primary, fontWeight: '600' },
+  countryBtnTextActive: { color: colors.primary.main, fontWeight: '700' },
 
   backLink: { marginTop: spacing.lg, alignItems: 'center', paddingVertical: spacing.sm },
   backLinkText: { ...typography.styles.body2, color: colors.primary.main, fontWeight: '600' },

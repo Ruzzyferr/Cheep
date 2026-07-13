@@ -36,6 +36,8 @@
     "unsupported_country": "Cheep henüz bu ülkede yok.",
     "no_branches": "Bu adresin yakınında market bulamadık. Yine de devam edebilirsin, ama mesafeler ve rotalar gösterilmez.",
     "geocoder_unavailable": "Bu cihazda adres arama çalışmıyor.",
+    "country_only_title": "Ya da ülke seç",
+    "country_only_hint": "Adres yerine yalnızca ülkeyi sabitle. Katalog ve para birimi bu ülkeye geçer; mesafe filtresi kapalı kalır.",
     "distances_off": "Mesafeler kapalı",
     "country_changed": "{{country}} konumundasın — {{country}} marketlerine geçildi.",
     "dismiss": "Tamam"

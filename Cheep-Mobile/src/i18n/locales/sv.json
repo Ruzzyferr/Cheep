@@ -36,6 +36,8 @@
     "unsupported_country": "Cheep finns inte i det här landet än.",
     "no_branches": "Vi hittade inga butiker nära den här adressen. Du kan fortsätta ändå, men avstånd och rutter visas inte.",
     "geocoder_unavailable": "Adressökning fungerar inte på den här enheten.",
+    "country_only_title": "Eller välj ett land",
+    "country_only_hint": "Fäst bara ett land i stället för en adress. Katalog och valuta byts till landet; avståndsfiltrering förblir avstängd.",
     "distances_off": "Avstånd av",
     "country_changed": "Du är i {{country}} — bytte till butiker i {{country}}.",
     "dismiss": "OK"

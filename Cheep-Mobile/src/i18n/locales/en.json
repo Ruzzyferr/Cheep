@@ -36,6 +36,8 @@
     "unsupported_country": "Cheep isn't available in this country yet.",
     "no_branches": "We couldn't find any stores near this address. You can continue, but distances and routes won't be shown.",
     "geocoder_unavailable": "Address search isn't working on this device.",
+    "country_only_title": "Or pick a country",
+    "country_only_hint": "Pin just a country instead of an address. The catalogue and currency switch to it; distance filtering stays off.",
     "distances_off": "Distances off",
     "country_changed": "You're in {{country}} — switched to {{country}} stores.",
     "dismiss": "Got it"
