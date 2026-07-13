@@ -50,7 +50,7 @@ export function ProfileScreen({
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const { country } = useLocale();
-  const { anchor } = useLocationAnchor();
+  const { anchor, refresh: refreshAnchor } = useLocationAnchor();
   const currencySymbol = COUNTRY_CONFIG[country]?.symbol ?? COUNTRY_CONFIG.TR.symbol;
   const [stats, setStats] = useState({ active: 0, lists: 0, items: 0 });
 
@@ -139,6 +139,14 @@ export function ProfileScreen({
     if (current === 'granted') {
       await revokeLocationConsent(); // rıza + saklanan koordinat silinir
       setLocConsent('denied');
+      // KVKK/GDPR: rıza geri alındığı ANDA yayınlanan çapa da koordinatsız olmalı.
+      // refresh() olmasaydı bellekteki anchor eski koordinatı + eşleşen ülkeyi
+      // taşımaya devam eder, shouldFilterByDistance() hâlâ true döner ve bir
+      // sonraki karşılaştırma isteği userLocation'ı YİNE gönderirdi — üstelik bu
+      // ekran "konum işlenmiyor" yazarken. (Depo zaten temiz; refresh() onu okuyup
+      // gerçeği yayınlar. Aksi halde durum ancak soğuk açılışta/ön plana gelişte
+      // kendini toparlıyordu.)
+      await refreshAnchor();
       return;
     }
 
@@ -163,7 +171,12 @@ export function ProfileScreen({
     } catch {
       setOsLocationGranted(null);
     }
-  }, [t]);
+
+    // Rıza (ve varsa OS izni) yeniden verildi → çapayı HEMEN tazele: konum artık
+    // işlenebilir, kullanıcı bir sonraki soğuk açılışı beklemesin. Ülke yazımı
+    // yine tek sahibinden (LocationProvider) geçer — burada setCountry çağrılmaz.
+    await refreshAnchor();
+  }, [t, refreshAnchor]);
 
   const handleLogout = () => {
     Alert.alert(t('profile.logout_title'), t('profile.logout_confirm'), [
