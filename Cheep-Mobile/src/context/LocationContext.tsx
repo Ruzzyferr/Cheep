@@ -106,7 +106,12 @@ export function LocationProvider({ children }: { children: ReactNode }) {
           if (next.countryCode !== lastCountry) {
             // Ülke kendini güncelledi (kullanıcı seyahat etti ya da pin değişti).
             await setCountryRef.current(next.countryCode);
-            setCountryChangedTo(next.countryCode);
+            // ŞERİT yalnızca OTOMATİK modda: metin "X ülkesindesin — X marketlerine
+            // geçildi" diyor. Bu ancak ülke kullanıcı GERÇEKTEN oraya gittiği için
+            // değiştiyse doğrudur. İzmir'de oturup Varşova'yı sabitleyen kullanıcıya
+            // "Polonya'dasın" demek düpedüz yalan olur; üstelik pin'in sonucunu
+            // kullanıcı zaten kendi seçtiği için bir bildirime de gerek yok.
+            if (next.mode === 'auto') setCountryChangedTo(next.countryCode);
             try {
               await userService.updatePreferences({ country_code: next.countryCode });
             } catch {
