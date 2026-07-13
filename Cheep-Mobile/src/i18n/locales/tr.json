@@ -83,7 +83,14 @@
     "saving": "Kaydediliyor…",
     "prefs_saved_title": "Kaydedildi",
     "prefs_saved_body": "Tercihleriniz güncellendi.",
-    "prefs_save_error": "Tercihler kaydedilemedi. Lütfen tekrar deneyin."
+    "prefs_save_error": "Tercihler kaydedilemedi. Lütfen tekrar deneyin.",
+    "location_consent": "Konum izni (KVKK)",
+    "location_consent_on": "Açık · en yakın market için yaklaşık konum işlenir",
+    "location_consent_off": "Kapalı · konum işlenmiyor",
+    "location_consent_on_os_off": "Açık · ancak cihaz konum izni kapalı — dokun ve aç",
+    "location_os_blocked_title": "Cihaz konum izni kapalı",
+    "location_os_blocked_body": "Rızanı aldık, ancak konum izni sistem ayarlarından kapatılmış. En yakın marketleri gösterebilmemiz için Ayarlar'dan konum iznini aç.",
+    "open_settings": "Ayarları aç"
   },
   "countries": { "TR": "Türkiye", "CH": "İsviçre", "SE": "İsveç", "DE": "Almanya", "PL": "Polonya" },
   "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },

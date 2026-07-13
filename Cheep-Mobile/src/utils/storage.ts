@@ -159,14 +159,49 @@ export const introStorage = {
 };
 
 // Location functions
+//
+// Kayıt zaman damgalıdır (`ts`). Damgasız kayıt = v1.1.0 ve öncesinden kalma;
+// yaşı bilinemediği için BAYAT sayılır. Zaman damgası şart: damgasız bir nokta
+// "şu anki konum" olarak kullanılırsa, kullanıcı şehir değiştirdiğinde yarıçap
+// filtresi eski şehrin etrafına uygulanır ve hiç market bulunamaz.
 export const locationStorage = {
   async saveLocation(location: { lat: number; lon: number }): Promise<void> {
-    await storage.setItem(STORAGE_KEYS.USER_LOCATION, JSON.stringify(location));
+    const payload = { lat: location.lat, lon: location.lon, ts: Date.now() };
+    await storage.setItem(STORAGE_KEYS.USER_LOCATION, JSON.stringify(payload));
   },
 
+  /** Saklanan koordinat (yaşına BAKMADAN). Tazelik gerekiyorsa getFreshLocation kullan. */
   async getLocation(): Promise<{ lat: number; lon: number } | null> {
     const data = await storage.getItem(STORAGE_KEYS.USER_LOCATION);
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    try {
+      const p = JSON.parse(data);
+      return typeof p?.lat === 'number' && typeof p?.lon === 'number'
+        ? { lat: p.lat, lon: p.lon }
+        : null;
+    } catch {
+      return null;
+    }
+  },
+
+  /** Yalnızca maxAgeMs'ten daha TAZE ise koordinat döner; bayat/damgasız → null. */
+  async getFreshLocation(maxAgeMs: number): Promise<{ lat: number; lon: number } | null> {
+    const data = await storage.getItem(STORAGE_KEYS.USER_LOCATION);
+    if (!data) return null;
+    try {
+      const p = JSON.parse(data);
+      if (typeof p?.lat !== 'number' || typeof p?.lon !== 'number') return null;
+      if (typeof p?.ts !== 'number') return null; // damgasız → yaşı bilinmiyor → bayat
+      if (Date.now() - p.ts > maxAgeMs) return null;
+      return { lat: p.lat, lon: p.lon };
+    } catch {
+      return null;
+    }
+  },
+
+  /** KVKK: rıza geri alınınca / izin kalkınca saklanan konum SİLİNİR. */
+  async clearLocation(): Promise<void> {
+    await storage.removeItem(STORAGE_KEYS.USER_LOCATION);
   },
 };
 

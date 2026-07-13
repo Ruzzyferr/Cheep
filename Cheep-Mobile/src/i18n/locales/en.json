@@ -83,7 +83,14 @@
     "saving": "Saving…",
     "prefs_saved_title": "Saved",
     "prefs_saved_body": "Your preferences have been updated.",
-    "prefs_save_error": "Preferences could not be saved. Please try again."
+    "prefs_save_error": "Preferences could not be saved. Please try again.",
+    "location_consent": "Location consent (GDPR)",
+    "location_consent_on": "On · approximate location used to find your nearest stores",
+    "location_consent_off": "Off · your location is not processed",
+    "location_consent_on_os_off": "On · but device location permission is off — tap to enable",
+    "location_os_blocked_title": "Device location permission is off",
+    "location_os_blocked_body": "You gave consent, but location permission is disabled in system settings. Turn it on in Settings so we can show your nearest stores.",
+    "open_settings": "Open settings"
   },
   "countries": { "TR": "Turkey", "CH": "Switzerland", "SE": "Sweden", "DE": "Germany", "PL": "Poland" },
   "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },

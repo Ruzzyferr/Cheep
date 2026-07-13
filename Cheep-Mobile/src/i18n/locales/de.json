@@ -83,7 +83,14 @@
     "saving": "Wird gespeichert…",
     "prefs_saved_title": "Gespeichert",
     "prefs_saved_body": "Deine Präferenzen wurden aktualisiert.",
-    "prefs_save_error": "Präferenzen konnten nicht gespeichert werden. Bitte versuche es erneut."
+    "prefs_save_error": "Präferenzen konnten nicht gespeichert werden. Bitte versuche es erneut.",
+    "location_consent": "Standort-Einwilligung (DSGVO)",
+    "location_consent_on": "An · ungefährer Standort wird für die nächstgelegenen Märkte verwendet",
+    "location_consent_off": "Aus · dein Standort wird nicht verarbeitet",
+    "location_consent_on_os_off": "An · aber die Standortberechtigung des Geräts ist aus — zum Aktivieren tippen",
+    "location_os_blocked_title": "Standortberechtigung ist deaktiviert",
+    "location_os_blocked_body": "Du hast eingewilligt, aber die Standortberechtigung ist in den Systemeinstellungen deaktiviert. Aktiviere sie in den Einstellungen, damit wir die nächstgelegenen Märkte anzeigen können.",
+    "open_settings": "Einstellungen öffnen"
   },
   "countries": { "TR": "Türkei", "CH": "Schweiz", "SE": "Schweden", "DE": "Deutschland", "PL": "Polen" },
   "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },

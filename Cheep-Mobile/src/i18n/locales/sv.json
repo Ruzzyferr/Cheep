@@ -83,7 +83,14 @@
     "saving": "Sparar…",
     "prefs_saved_title": "Sparat",
     "prefs_saved_body": "Dina inställningar har uppdaterats.",
-    "prefs_save_error": "Inställningarna kunde inte sparas. Försök igen."
+    "prefs_save_error": "Inställningarna kunde inte sparas. Försök igen.",
+    "location_consent": "Platsmedgivande (GDPR)",
+    "location_consent_on": "På · ungefärlig plats används för att hitta dina närmaste butiker",
+    "location_consent_off": "Av · din plats behandlas inte",
+    "location_consent_on_os_off": "På · men enhetens platsbehörighet är av — tryck för att slå på",
+    "location_os_blocked_title": "Platsbehörigheten är avstängd",
+    "location_os_blocked_body": "Du har gett ditt medgivande, men platsbehörigheten är avstängd i systeminställningarna. Slå på den i Inställningar så att vi kan visa dina närmaste butiker.",
+    "open_settings": "Öppna inställningar"
   },
   "countries": { "TR": "Turkiet", "CH": "Schweiz", "SE": "Sverige", "DE": "Tyskland", "PL": "Polen" },
   "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },

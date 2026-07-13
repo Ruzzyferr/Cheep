@@ -14,7 +14,9 @@ import {
   TextInput,
   ActivityIndicator,
   Modal,
+  Linking,
 } from 'react-native';
+import * as Location from 'expo-location';
 import { MaterialIcons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useFocusEffect } from '@react-navigation/native';
@@ -29,7 +31,7 @@ import type { UserProfile } from '../../types';
 import { ONBOARDING_QUESTIONS } from '../onboarding/onboardingConfig';
 import i18n, { SUPPORTED_LANGUAGES } from '../../i18n';
 import { languageStorage, type LocationConsent } from '../../utils/storage';
-import { getLocationConsent, ensureLocationConsent, revokeLocationConsent } from '../../utils/consent';
+import { getLocationConsent, promptLocationConsent, revokeLocationConsent } from '../../utils/consent';
 import { SUPPORTED_COUNTRY_CODES } from '../../utils/geo';
 
 // ─── Preference option lists from onboarding config ───────────────────────────
@@ -66,6 +68,10 @@ export function ProfileScreen({
 
   // ─── KVKK konum açık-rıza durumu ───────────────────────────────────────────
   const [locConsent, setLocConsent] = useState<LocationConsent>(null);
+  // OS konum izni AYRI bir durumdur: kullanıcı rızayı verip sonra sistem
+  // ayarlarından izni kaldırabilir (ya da Android izni kendisi geri alabilir).
+  // Bunu göstermezsek profil "Açık" derken konum özellikleri sessizce çalışmaz.
+  const [osLocationGranted, setOsLocationGranted] = useState<boolean | null>(null);
 
   // ─── Load profile + stats on focus ─────────────────────────────────────────
   useFocusEffect(
@@ -86,10 +92,16 @@ export function ProfileScreen({
         }
       })();
 
-      // KVKK konum rıza durumunu yükle
+      // KVKK rızası + OS izni — ikisi de okunur (ekranda ayrı ayrı yansıtılır).
       (async () => {
         const c = await getLocationConsent();
         if (alive) setLocConsent(c);
+        try {
+          const perm = await Location.getForegroundPermissionsAsync();
+          if (alive) setOsLocationGranted(perm.status === 'granted');
+        } catch {
+          if (alive) setOsLocationGranted(null);
+        }
       })();
 
       // Load preferences
@@ -123,13 +135,33 @@ export function ProfileScreen({
   const handleToggleLocationConsent = useCallback(async () => {
     const current = await getLocationConsent();
     if (current === 'granted') {
-      await revokeLocationConsent();
+      await revokeLocationConsent(); // rıza + saklanan koordinat silinir
       setLocConsent('denied');
-    } else {
-      const ok = await ensureLocationConsent();
-      setLocConsent(ok ? 'granted' : 'denied');
+      return;
     }
-  }, []);
+
+    // AÇMA yolu: kullanıcının açık talebi → istem 'denied' olsa bile gösterilir.
+    // (ensureLocationConsent burada kullanılamaz: 'denied' ise sormadan false döner
+    //  ve rıza bir daha asla açılamazdı.)
+    const ok = await promptLocationConsent();
+    setLocConsent(ok ? 'granted' : 'denied');
+    if (!ok) return;
+
+    // Rıza tek başına yetmez — OS izni de gerekir. Kalıcı reddedilmişse
+    // (canAskAgain=false) sistem istemi bir daha çıkmaz; kullanıcıyı Ayarlar'a al.
+    try {
+      const perm = await Location.requestForegroundPermissionsAsync();
+      setOsLocationGranted(perm.status === 'granted');
+      if (perm.status !== 'granted' && !perm.canAskAgain) {
+        Alert.alert(t('profile.location_os_blocked_title'), t('profile.location_os_blocked_body'), [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('profile.open_settings'), onPress: () => Linking.openSettings() },
+        ]);
+      }
+    } catch {
+      setOsLocationGranted(null);
+    }
+  }, [t]);
 
   const handleLogout = () => {
     Alert.alert(t('profile.logout_title'), t('profile.logout_confirm'), [
@@ -421,11 +453,13 @@ export function ProfileScreen({
             <Divider />
             <MenuItem
               icon="location-on"
-              title="Konum izni (KVKK)"
+              title={t('profile.location_consent')}
               subtitle={
-                locConsent === 'granted'
-                  ? 'Açık · en yakın market için yaklaşık konum işlenir'
-                  : 'Kapalı · konum işlenmiyor'
+                locConsent !== 'granted'
+                  ? t('profile.location_consent_off')
+                  : osLocationGranted === false
+                    ? t('profile.location_consent_on_os_off')
+                    : t('profile.location_consent_on')
               }
               onPress={handleToggleLocationConsent}
             />

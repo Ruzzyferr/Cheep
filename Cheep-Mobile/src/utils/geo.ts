@@ -43,19 +43,37 @@ export function formatDistance(km: number): string {
 }
 
 /**
- * Cihaz konumunu döndürür. Önce izin ister; reddedilirse veya hata olursa
- * daha önce cache'lenmiş konuma düşer (yoksa null). Başarılı alımı cache'ler.
+ * Cache'lenmiş bir konumun "şu anki konumum" sayılabileceği azami yaş.
+ * Cache YALNIZCA anlık bir GPS hatasını (kapalı mekân, soğuk fix) tolere etmek
+ * içindir — kullanıcının nerede olduğunu HATIRLAMAK için değil. Daha eski bir
+ * nokta kullanılırsa, şehir değiştiren kullanıcı eski şehrinin etrafında
+ * filtrelenir ve "yakında market yok" görür.
+ */
+export const LOCATION_MAX_AGE_MS = 30 * 60 * 1000; // 30 dk
+
+/**
+ * Cihaz konumunu döndürür.
+ *
+ * Sözleşme — null dönen her durumda çağıran taraf konum filtresi UYGULAMAZ
+ * (tüm marketleri gösterir); eski/yanlış bir noktayla filtrelemekten iyidir:
+ *   • KVKK rızası yok           → null  (+ saklanan koordinat silinir)
+ *   • OS konum izni yok         → null  (+ saklanan koordinat silinir)
+ *   • GPS anlık hata verdi      → TAZE cache (≤30 dk), yoksa null
+ *   • GPS başarılı              → taze koordinat (zaman damgasıyla cache'lenir)
  */
 export async function getUserLocation(): Promise<Coords | null> {
   try {
-    // KVKK: OS izninden ÖNCE açık rıza. Rıza yoksa konumu HİÇ isteme; cache'e düş.
+    // KVKK: OS izninden ÖNCE açık rıza. Rıza yoksa konum HİÇ işlenmez — eski
+    // koordinat da tutulmaz (rızasız veri işleme olurdu).
     const consented = await ensureLocationConsent();
     if (!consented) {
-      return await locationStorage.getLocation();
+      await locationStorage.clearLocation();
+      return null;
     }
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      return await locationStorage.getLocation();
+      await locationStorage.clearLocation();
+      return null;
     }
     const pos = await Location.getCurrentPositionAsync({
       accuracy: Location.Accuracy.Balanced,
@@ -64,7 +82,8 @@ export async function getUserLocation(): Promise<Coords | null> {
     await locationStorage.saveLocation(coords);
     return coords;
   } catch {
-    return await locationStorage.getLocation();
+    // Anlık GPS hatası — yalnızca TAZE cache'e düş. Bayat nokta asla kullanılmaz.
+    return await locationStorage.getFreshLocation(LOCATION_MAX_AGE_MS);
   }
 }
 
