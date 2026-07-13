@@ -57,10 +57,20 @@ export const LOCATION_MAX_AGE_MS = 30 * 60 * 1000; // 30 dk
 /**
  * Cihaz konumunu döndürür.
  *
- * Sözleşme — null dönen her durumda çağıran taraf konum filtresi UYGULAMAZ
- * (tüm marketleri gösterir); eski/yanlış bir noktayla filtrelemekten iyidir:
+ * SÖZLEŞME — bu fonksiyon HİÇBİR ZAMAN diyalog göstermez (ne KVKK istemi ne
+ * de OS izin modalı): rızayı ve OS iznini yalnızca PASİF olarak OKUR. Sormak
+ * kapının (runLocationGate/ensureLocationReady) ve Profil'in açık rıza
+ * anahtarının işidir — burada requestForegroundPermissionsAsync() ÇAĞRILMAZ.
+ * Neden: LocationContext artık kapıyı çalıştırdıktan HEMEN SONRA bu fonksiyonu
+ * çağırıyor; iki fonksiyon da isteseydi, kapının reddedilen bir isteğinin
+ * hemen ardından burası ikinci bir sistem modalı açardı — Android 11+'ta arka
+ * arkaya iki ret, kullanıcının izni KALICI OLARAK reddetmesine (canAskAgain=false)
+ * yol açar ve uygulama bir daha asla soramaz.
+ *
+ * Null dönen her durumda çağıran taraf konum filtresi UYGULAMAZ (tüm
+ * marketleri gösterir); eski/yanlış bir noktayla filtrelemekten iyidir:
  *   • KVKK rızası yok           → null  (+ saklanan koordinat silinir)
- *   • OS konum izni yok         → null  (+ saklanan koordinat silinir)
+ *   • OS konum izni yok         → null  (+ saklanan koordinat silinir; SORULMAZ)
  *   • GPS anlık hata verdi      → TAZE cache (≤30 dk), yoksa null
  *   • GPS başarılı              → taze koordinat (zaman damgasıyla cache'lenir)
  */
@@ -73,7 +83,8 @@ export async function getUserLocation(): Promise<Coords | null> {
       await locationStorage.clearLocation();
       return null;
     }
-    const { status } = await Location.requestForegroundPermissionsAsync();
+    // PASİF okuma — asla sormaz. İzin isteme tamamen kapının (gate) sorumluluğu.
+    const { status } = await Location.getForegroundPermissionsAsync();
     if (status !== 'granted') {
       await locationStorage.clearLocation();
       return null;

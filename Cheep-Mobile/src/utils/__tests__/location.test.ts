@@ -29,7 +29,10 @@ const gps = {
 };
 vi.mock('expo-location', () => ({
   Accuracy: { Low: 1, Balanced: 3 },
-  requestForegroundPermissionsAsync: async () => ({ status: gps.permission }),
+  // vi.fn() OLARAK tanımlı: getUserLocation()'ın bunu HİÇ ÇAĞIRMADIĞINI
+  // (yalnızca pasif getForegroundPermissionsAsync'i kullandığını) doğrulayan
+  // testin gözetleyicisi budur — ikinci bir OS izin modalı riskini kilitler.
+  requestForegroundPermissionsAsync: vi.fn(async () => ({ status: gps.permission })),
   getForegroundPermissionsAsync: async () => ({
     status: gps.permission,
     canAskAgain: true,
@@ -60,6 +63,7 @@ vi.mock('../../i18n', () => ({ default: { t: (k: string) => k } }));
 const BERGAMA = { latitude: 39.1206, longitude: 27.1806 };
 const CIGLI = { latitude: 38.4949, longitude: 26.9819 };
 
+import * as Location from 'expo-location';
 import { getUserLocation } from '../geo';
 import {
   ensureLocationConsent,
@@ -77,6 +81,7 @@ beforeEach(() => {
   alertAnswer.accept = true;
   alertAnswer.shown = 0;
   vi.useRealTimers();
+  vi.mocked(Location.requestForegroundPermissionsAsync).mockClear();
 });
 
 /** Bergama'da ilk kurulum: rıza verildi, konum alındı ve cache'lendi. */
@@ -110,6 +115,26 @@ describe('rıza kapalıyken konum', () => {
     gps.position = CIGLI;
 
     expect(await getUserLocation()).toBeNull();
+  });
+});
+
+describe('getUserLocation() asla OS izni İSTEMEZ (yalnızca kapı sorar)', () => {
+  it('izin verilmişken bile requestForegroundPermissionsAsync HİÇ çağrılmaz', async () => {
+    await installInBergama();
+
+    expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
+  });
+
+  it('izin reddedilmişken de requestForegroundPermissionsAsync ÇAĞRILMAZ (ikinci modal riski yok)', async () => {
+    await ensureLocationConsent();
+    gps.permission = 'denied'; // kapı zaten sordu ve reddedildi (os_denied)
+
+    const loc = await getUserLocation();
+
+    expect(loc).toBeNull();
+    // KİLİT NOKTA: burası ikinci bir sistem modalı AÇMAYA teşebbüs bile etmez —
+    // yalnızca pasif getForegroundPermissionsAsync okunur.
+    expect(Location.requestForegroundPermissionsAsync).not.toHaveBeenCalled();
   });
 });
 
