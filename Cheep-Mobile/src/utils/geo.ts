@@ -5,7 +5,7 @@
 
 import * as Location from 'expo-location';
 import { locationStorage } from './storage';
-import { ensureLocationConsent, hasLocationConsent } from './consent';
+import { ensureLocationConsent } from './consent';
 
 export interface Coords {
   lat: number;
@@ -13,9 +13,12 @@ export interface Coords {
 }
 
 /**
- * Uygulamanın desteklediği ülke kodları. getCountryCode() bu kümenin DIŞINDAKİ
- * bir tespit için null döner → çağıran taraf default'a (TR) düşer, geçersiz kod
- * asla x-country header'ına sızmaz. (LocaleContext'i import ETME — döngü riski.)
+ * Uygulamanın desteklediği ülke kodları. Ülke tespiti yapan her fonksiyon
+ * (getCountryCodeInteractive, reverseGeocodeCountry) bu kümenin DIŞINDAKİ bir
+ * tespit için null döner → çağıran taraf son bilinen ülkeye/kullanıcı seçimine
+ * düşer, geçersiz kod asla x-country header'ına sızmaz. Konum sayfasındaki
+ * ülke-yalnızca seçim de bu listeden üretilir.
+ * (LocaleContext'i import ETME — döngü riski.)
  */
 export const SUPPORTED_COUNTRY_CODES = ['TR', 'PL'] as const;
 
@@ -88,31 +91,6 @@ export async function getUserLocation(): Promise<Coords | null> {
 }
 
 /**
- * Cihaz konumundan ISO ülke kodunu (örn. "TR", "PL") çözer (reverse-geocode).
- * İzin yoksa/başarısızsa null döner; çağıran taraf kullanıcı seçimine/default'a düşer.
- */
-export async function getCountryCode(): Promise<string | null> {
-  try {
-    // Pasif ülke tespiti — SESSİZ: yalnızca daha önce açık rıza verildiyse konuma
-    // bak, aksi halde istem gösterme (kullanıcı ülkeyi elle seçer). Rıza istemi,
-    // kullanıcı aktif bir konum özelliğini (getUserLocation) kullandığında çıkar.
-    if (!(await hasLocationConsent())) return null;
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') return null;
-    const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
-    const places = await Location.reverseGeocodeAsync({
-      latitude: pos.coords.latitude,
-      longitude: pos.coords.longitude,
-    });
-    const iso = places[0]?.isoCountryCode?.toUpperCase();
-    // Yalnızca desteklenen ülke ise döndür; değilse null → çağıran default'a düşer.
-    return iso && (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(iso) ? iso : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * AKTİF ülke tespiti — onboarding ülke adımı için: açık rıza istemini gösterir,
  * sonra OS izni ister. Reddedilirse null → manuel seçici devrede kalır.
  */
@@ -136,8 +114,8 @@ export async function getCountryCodeInteractive(): Promise<string | null> {
 
 /**
  * Verilen koordinatın ISO ülke kodunu çözer. Desteklenmeyen ülke veya hata → null.
- * (getCountryCode'dan farkı: GPS okumaz, verilen koordinatı çözer — çapa akışında
- * konum zaten elimizde, ikinci kez GPS istemek gereksiz.)
+ * GPS OKUMAZ, verilen koordinatı çözer — çapa akışında konum zaten elimizde,
+ * ikinci kez GPS istemek (ve ikinci bir izin diyaloğu riski) gereksizdir.
  */
 export async function reverseGeocodeCountry(coords: Coords): Promise<string | null> {
   try {

@@ -105,10 +105,6 @@ export const anchorStorage = {
       : 'auto';
   },
 
-  async setMode(m: LocationMode): Promise<void> {
-    await storage.setItem(STORAGE_KEYS.LOCATION_MODE, m);
-  },
-
   async getPinned(): Promise<PinnedAnchor | null> {
     const raw = await storage.getItem(STORAGE_KEYS.PINNED_ANCHOR);
     if (!raw) return null;
