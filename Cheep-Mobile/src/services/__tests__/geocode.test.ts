@@ -22,8 +22,9 @@ vi.mock('expo-location', () => ({
 const branches = { count: 0 };
 vi.mock('../store.service', () => ({
   storeService: {
-    getNearbyStores: async () =>
+    getNearbyStores: vi.fn(async () =>
       Array.from({ length: branches.count }, (_, i) => ({ id: i })),
+    ),
   },
 }));
 
@@ -35,6 +36,7 @@ vi.mock('expo-secure-store', () => ({
 }));
 
 import { searchAddress, validateCandidate } from '../geocode.service';
+import { storeService } from '../store.service';
 
 const WARSAW = { lat: 52.23, lon: 21.01 };
 
@@ -43,6 +45,7 @@ beforeEach(() => {
   geo.results = [];
   geo.reverse = [];
   branches.count = 0;
+  vi.mocked(storeService.getNearbyStores).mockClear();
 });
 
 describe('searchAddress', () => {
@@ -78,6 +81,14 @@ describe('validateCandidate — 1. kapı: ülke', () => {
       label: 'Berlin', coords: { lat: 52.52, lon: 13.4 }, countryCode: null,
     });
     expect(v).toEqual({ status: 'unsupported_country' });
+  });
+
+  it('mevcut ama desteklenmeyen ülke kodu kapı tarafından kendi başına reddedilir', async () => {
+    const v = await validateCandidate({
+      label: 'Berlin', coords: { lat: 52.52, lon: 13.4 }, countryCode: 'DE',
+    });
+    expect(v).toEqual({ status: 'unsupported_country' });
+    expect(storeService.getNearbyStores).not.toHaveBeenCalled();
   });
 });
 

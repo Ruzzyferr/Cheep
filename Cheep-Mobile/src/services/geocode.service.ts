@@ -81,8 +81,11 @@ export async function searchAddress(query: string): Promise<SearchResult> {
 }
 
 export async function validateCandidate(c: GeocodeCandidate): Promise<Validation> {
-  // 1. kapı — ülke.
-  if (!c.countryCode) return { status: 'unsupported_country' };
+  // 1. kapı — ülke. Kodun VARLIĞI yetmez, DESTEKLENEN bir ülke olmalı: kapı kendi
+  // kararını versin, çağıranın ön-eleme yaptığına güvenmesin.
+  if (!c.countryCode || !(SUPPORTED_COUNTRY_CODES as readonly string[]).includes(c.countryCode)) {
+    return { status: 'unsupported_country' };
+  }
 
   // 2. kapı — şube. Çevresinde hiç market yoksa koordinatı KULLANMA: yarıçap
   // filtresi her şeyi eler ve kullanıcı boş ekran görür.
