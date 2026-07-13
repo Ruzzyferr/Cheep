@@ -22,6 +22,24 @@
     "gate_allow": "İzin ver",
     "gate_later": "Şimdi değil"
   },
+  "location": {
+    "title": "Konum",
+    "mode_auto": "Otomatik — konumumu kullan",
+    "mode_pinned": "Sabit adres",
+    "chip_pinned": "{{label}} · sabit",
+    "address_placeholder": "Adres veya şehir yaz",
+    "search": "Ara",
+    "searching": "Aranıyor…",
+    "use_this": "Bu adresi kullan",
+    "back_to_auto": "Otomatiğe dön",
+    "not_found": "Adres bulunamadı.",
+    "unsupported_country": "Cheep henüz bu ülkede yok.",
+    "no_branches": "Bu adresin yakınında market bulamadık. Yine de devam edebilirsin, ama mesafeler ve rotalar gösterilmez.",
+    "geocoder_unavailable": "Bu cihazda adres arama çalışmıyor.",
+    "distances_off": "Mesafeler kapalı",
+    "country_changed": "{{country}} konumundasın — {{country}} marketlerine geçildi.",
+    "dismiss": "Tamam"
+  },
   "onboarding": {
     "language_title": "Uygulama dilini seç",
     "language_subtitle": "Bunu daha sonra Profil'den değiştirebilirsin",

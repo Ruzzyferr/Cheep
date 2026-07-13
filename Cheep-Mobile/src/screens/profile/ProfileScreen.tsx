@@ -23,7 +23,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useLocale, COUNTRY_CONFIG } from '../../context/LocaleContext';
+import { useLocationAnchor } from '../../context/LocationContext';
 import { Card, Button } from '../../components/ui';
+import { LocationSheet } from '../../components/location/LocationSheet';
 import { listService, profileService, userService } from '../../services';
 import { colors, typography, spacing, layout, shadows, borderRadius } from '../../theme';
 import type { ProfileStackScreenProps } from '../../navigation/types';
@@ -32,7 +34,6 @@ import { ONBOARDING_QUESTIONS } from '../onboarding/onboardingConfig';
 import i18n, { SUPPORTED_LANGUAGES } from '../../i18n';
 import { languageStorage, type LocationConsent } from '../../utils/storage';
 import { getLocationConsent, promptLocationConsent, revokeLocationConsent } from '../../utils/consent';
-import { SUPPORTED_COUNTRY_CODES } from '../../utils/geo';
 
 // ─── Preference option lists from onboarding config ───────────────────────────
 const HOUSEHOLD_OPTIONS = ONBOARDING_QUESTIONS.find((q) => q.key === 'household_size')!.options!;
@@ -48,13 +49,14 @@ export function ProfileScreen({
 }: ProfileStackScreenProps<'ProfileMain'>) {
   const { user, logout } = useAuth();
   const { t } = useTranslation();
-  const { country, setCountry } = useLocale();
+  const { country } = useLocale();
+  const { anchor } = useLocationAnchor();
   const currencySymbol = COUNTRY_CONFIG[country]?.symbol ?? COUNTRY_CONFIG.TR.symbol;
   const [stats, setStats] = useState({ active: 0, lists: 0, items: 0 });
 
-  // ─── Language / Country picker state ───────────────────────────────────────
+  // ─── Language picker / konum sayfası state ─────────────────────────────────
   const [langPickerOpen, setLangPickerOpen] = useState(false);
-  const [countryPickerOpen, setCountryPickerOpen] = useState(false);
+  const [locationSheetOpen, setLocationSheetOpen] = useState(false);
 
   // ─── Preferences state ─────────────────────────────────────────────────────
   const [prefLoading, setPrefLoading] = useState(false);
@@ -190,18 +192,6 @@ export function ProfileScreen({
     } catch (error) {
       console.error('Dil tercihi /users/me üzerinden kaydedilemedi:', error);
     }
-  };
-
-  const handleSelectCountry = async (code: string) => {
-    setCountryPickerOpen(false);
-    await setCountry(code); // LocaleContext doğrular + saklar (x-country header'ı bundan sonra bu kodu gönderir)
-    try {
-      await userService.updatePreferences({ country_code: code });
-    } catch (error) {
-      console.error('Ülke tercihi /users/me üzerinden kaydedilemedi:', error);
-    }
-    // Ülkeye özgü veri (market/fiyat) yeniden çekilsin diye ana sekmeye dön.
-    navigation.navigate('Home', { screen: 'HomeMain' });
   };
 
   const toggleMulti = (arr: string[], setArr: (v: string[]) => void, value: string) => {
@@ -423,8 +413,12 @@ export function ProfileScreen({
             <MenuItem
               icon="public"
               title={t('profile.country')}
-              subtitle={t(`countries.${country}`)}
-              onPress={() => setCountryPickerOpen(true)}
+              subtitle={
+                anchor?.mode === 'pinned' && anchor.label
+                  ? t('location.chip_pinned', { label: anchor.label })
+                  : t(`countries.${country}`)
+              }
+              onPress={() => setLocationSheetOpen(true)}
             />
             <Divider />
             <MenuItem
@@ -489,17 +483,9 @@ export function ProfileScreen({
         onClose={() => setLangPickerOpen(false)}
       />
 
-      {/* Country picker */}
-      <OptionPickerModal
-        visible={countryPickerOpen}
-        title={t('profile.country')}
-        options={Object.keys(COUNTRY_CONFIG)
-          .filter((code) => (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(code))
-          .map((code) => ({ value: code, label: t(`countries.${code}`) }))}
-        selectedValue={country}
-        onSelect={handleSelectCountry}
-        onClose={() => setCountryPickerOpen(false)}
-      />
+      {/* Konum sayfası — ülke satırı artık burayı açar; ülke değişimi tek sahibi
+          LocationProvider'dır (setCountry + userService.updatePreferences orada). */}
+      <LocationSheet visible={locationSheetOpen} onClose={() => setLocationSheetOpen(false)} />
     </View>
   );
 }

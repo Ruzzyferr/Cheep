@@ -22,6 +22,24 @@
     "gate_allow": "Zezwól",
     "gate_later": "Nie teraz"
   },
+  "location": {
+    "title": "Lokalizacja",
+    "mode_auto": "Automatycznie — użyj mojej lokalizacji",
+    "mode_pinned": "Stały adres",
+    "chip_pinned": "{{label}} · stały",
+    "address_placeholder": "Wpisz adres lub miasto",
+    "search": "Szukaj",
+    "searching": "Szukam…",
+    "use_this": "Użyj tego adresu",
+    "back_to_auto": "Wróć do automatycznego",
+    "not_found": "Nie znaleziono adresu.",
+    "unsupported_country": "Cheep nie działa jeszcze w tym kraju.",
+    "no_branches": "Nie znaleźliśmy sklepów w pobliżu tego adresu. Możesz kontynuować, ale odległości i trasy nie będą wyświetlane.",
+    "geocoder_unavailable": "Wyszukiwanie adresów nie działa na tym urządzeniu.",
+    "distances_off": "Odległości wyłączone",
+    "country_changed": "Jesteś w {{country}} — przełączono na sklepy w {{country}}.",
+    "dismiss": "OK"
+  },
   "onboarding": {
     "language_title": "Wybierz język aplikacji",
     "language_subtitle": "Możesz to później zmienić w Profilu",
