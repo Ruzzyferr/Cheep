@@ -5,15 +5,15 @@
  * yanlış bir noktayı döndürür, uygulama onu sorgusuz kabul eder, kullanıcı yanlış
  * mesafeler görür. Üç kapı bunu engeller:
  *   1) Ülke kapısı  — nokta TR/PL dışındaysa reddet.
- *   2) Şube kapısı  — çevresinde market yoksa KOORDİNATSIZ pin ver (yalnızca ülke),
- *                     aksi halde yarıçap filtresi boş ekran üretir.
+ *   2) Şube kapısı  — MAX_RADIUS_KM içinde market yoksa KOORDİNATSIZ pin ver
+ *                     (yalnızca ülke), aksi halde yarıçap filtresi boş ekran üretir.
  *   3) Geocoder yok — bazı Android'lerde geocodeAsync çalışmaz; bunu sessiz "sonuç
  *                     yok" gibi göstermek yerine açıkça bildir.
  */
 import * as Location from 'expo-location';
 import { storeService } from './store.service';
 import { SUPPORTED_COUNTRY_CODES, type Coords } from '../utils/geo';
-import type { PinnedAnchor } from '../utils/anchor';
+import { MAX_RADIUS_KM, type PinnedAnchor } from '../utils/anchor';
 
 export interface GeocodeCandidate {
   label: string;
@@ -87,12 +87,21 @@ export async function validateCandidate(c: GeocodeCandidate): Promise<Validation
     return { status: 'unsupported_country' };
   }
 
-  // 2. kapı — şube. Çevresinde hiç market yoksa koordinatı KULLANMA: yarıçap
-  // filtresi her şeyi eler ve kullanıcı boş ekran görür.
+  // 2. kapı — şube. DİKKAT: /stores/nearby uç noktası bir şey BULANA KADAR sınır
+  // kutusunu genişletir (±1° → ±3° → ±8°; ±8° ≈ 550–890 km, Polonya'nın tamamından
+  // geniş). Yani "liste boş değil" HİÇBİR ŞEY ifade etmez — TR/PL içindeki her
+  // koordinat için ülkenin öbür ucundan şubeler döner. Kapının sorması gereken
+  // soru şudur: kullanıcının SEÇEBİLECEĞİ EN GENİŞ yarıçapın (MAX_RADIUS_KM)
+  // içinde gerçekten bir şube var mı? Yoksa hangi yarıçap seçilirse seçilsin
+  // sonuç boştur → koordinatı KULLANMA, koordinatsız (yalnızca ülke) pin ver.
   let hasBranches = false;
   try {
     const nearby = await storeService.getNearbyStores(c.coords.lat, c.coords.lon, c.countryCode);
-    hasBranches = nearby.length > 0;
+    // Temkinli: distanceKm eksik ya da sayı değilse o satır İSABET SAYILMAZ —
+    // "bilinmeyen mesafe"yi "yakın" varsaymak tam da boş ekranı üreten hatadır.
+    hasBranches = nearby.some(
+      (n) => typeof n?.distanceKm === 'number' && Number.isFinite(n.distanceKm) && n.distanceKm <= MAX_RADIUS_KM,
+    );
   } catch {
     hasBranches = false; // ağ hatası → temkinli davran, mesafeleri kapat
   }

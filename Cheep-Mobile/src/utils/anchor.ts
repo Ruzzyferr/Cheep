@@ -11,6 +11,22 @@ import type { Coords } from './geo';
 
 export type LocationMode = 'auto' | 'pinned';
 
+/**
+ * Yarıçap POLİTİKASI — çapa politikasının bir parçası olduğu için burada durur.
+ *
+ * Kimse market alışverişi için uzağa gitmez: kullanıcı karşılaştırma ekranında
+ * hangi mesafedeki marketleri göreceğini seçer (yürüme / araba / geniş).
+ *
+ * MAX_RADIUS_KM, kullanıcının seçebileceği EN GENİŞ yarıçaptır. Bir koordinat
+ * ancak bu yarıçap içinde en az bir şube varsa KULLANILABİLİR sayılır — aksi
+ * halde kullanıcı hangi yarıçapı seçerse seçsin sonuç kümesi BOŞ kalır (boş
+ * ekran). Bu sabit hem şube kapısında (geocode.service) hem de karşılaştırma
+ * ekranında kullanılır; iki taraf birbirinden ayrı düşemesin diye TEK yerde.
+ */
+export const RADIUS_OPTIONS = [1.5, 3, 5] as const;
+export const DEFAULT_RADIUS_KM = 3;
+export const MAX_RADIUS_KM: number = Math.max(...RADIUS_OPTIONS);
+
 /** Kullanıcının elle sabitlediği nokta. coords=null → doğrulanamadı, yalnızca ülke. */
 export interface PinnedAnchor {
   coords: Coords | null;

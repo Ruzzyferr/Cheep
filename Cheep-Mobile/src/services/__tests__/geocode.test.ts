@@ -19,14 +19,25 @@ vi.mock('expo-location', () => ({
   reverseGeocodeAsync: async () => geo.reverse,
 }));
 
-const branches = { count: 0 };
+// GERÇEKÇİ MOCK: /stores/nearby uç noktası bir şey BULANA KADAR sınır kutusunu
+// genişletir (±1° → ±3° → ±8°). Yani TR/PL içindeki HER koordinat için dolu bir
+// liste döner — ama satırlar ülkenin öbür ucundan olabilir. Bu yüzden mock
+// "kaç satır" değil, GERÇEK distanceKm değerleri döndürür: kapının doğruluğu
+// yalnızca bu alanla sınanabilir. (Eski mock çıplak {id} nesneleri döndürüyordu
+// ve tam da bu yüzden hatayı göremiyordu.)
+const branches = { rows: [] as unknown[] };
 vi.mock('../store.service', () => ({
   storeService: {
-    getNearbyStores: vi.fn(async () =>
-      Array.from({ length: branches.count }, (_, i) => ({ id: i })),
-    ),
+    getNearbyStores: vi.fn(async () => branches.rows),
   },
 }));
+
+/** Uç noktanın döndürdüğü satırın gerçekçi şekli. */
+const row = (distanceKm: unknown, id = 1) => ({
+  store_id: id,
+  distanceKm,
+  branch: { id, name: `Şube ${id}`, lat: 0, lon: 0, address: null, city: null },
+});
 
 vi.mock('react-native', () => ({ Platform: { OS: 'android' } }));
 vi.mock('expo-secure-store', () => ({
@@ -37,6 +48,7 @@ vi.mock('expo-secure-store', () => ({
 
 import { searchAddress, validateCandidate } from '../geocode.service';
 import { storeService } from '../store.service';
+import { MAX_RADIUS_KM } from '../../utils/anchor';
 
 const WARSAW = { lat: 52.23, lon: 21.01 };
 
@@ -44,7 +56,7 @@ beforeEach(() => {
   geo.available = true;
   geo.results = [];
   geo.reverse = [];
-  branches.count = 0;
+  branches.rows = [];
   vi.mocked(storeService.getNearbyStores).mockClear();
 });
 
@@ -92,9 +104,9 @@ describe('validateCandidate — 1. kapı: ülke', () => {
   });
 });
 
-describe('validateCandidate — 2. kapı: şube', () => {
-  it('çevrede şube varsa KOORDİNATLI pin döner', async () => {
-    branches.count = 5;
+describe('validateCandidate — 2. kapı: şube (MAX_RADIUS_KM içinde mi?)', () => {
+  it('MAX_RADIUS_KM içinde şube varsa KOORDİNATLI pin döner', async () => {
+    branches.rows = [row(MAX_RADIUS_KM - 0.2, 1), row(120, 2)];
     const v = await validateCandidate({
       label: 'Warszawa', coords: WARSAW, countryCode: 'PL',
     });
@@ -104,8 +116,58 @@ describe('validateCandidate — 2. kapı: şube', () => {
     });
   });
 
-  it('çevrede şube YOKSA pin KOORDİNATSIZ döner — yoksa boş ekran üretirdi', async () => {
-    branches.count = 0;
+  it('tam MAX_RADIUS_KM sınırındaki şube İSABET sayılır (kapsayıcı sınır)', async () => {
+    branches.rows = [row(MAX_RADIUS_KM, 1)];
+    const v = await validateCandidate({
+      label: 'Warszawa', coords: WARSAW, countryCode: 'PL',
+    });
+    expect(v.status).toBe('ok');
+  });
+
+  it('şube listesi DOLU ama hepsi MAX_RADIUS_KM dışındaysa → no_branches, coords null', async () => {
+    // Uç noktanın gerçek davranışı: sınır kutusunu ±8°'ye kadar genişletip ülkenin
+    // öbür ucundaki şubeleri döndürür. Liste dolu diye koordinatı kabul edersek,
+    // kullanıcı 3 km yarıçapla karşılaştırdığında BOŞ EKRAN görür.
+    branches.rows = [row(87.4, 1), row(310.2, 2), row(MAX_RADIUS_KM + 0.1, 3)];
+    const v = await validateCandidate({
+      label: 'Ustrzyki Górne', coords: { lat: 49.09, lon: 22.68 }, countryCode: 'PL',
+    });
+    expect(v).toEqual({
+      status: 'no_branches',
+      pin: { coords: null, countryCode: 'PL', label: 'Ustrzyki Górne' },
+    });
+    expect(v.status === 'no_branches' && v.pin.coords).toBeNull();
+  });
+
+  it('hiç şube dönmezse → no_branches, coords null', async () => {
+    branches.rows = [];
+    const v = await validateCandidate({
+      label: 'Warszawa', coords: WARSAW, countryCode: 'PL',
+    });
+    expect(v).toEqual({
+      status: 'no_branches',
+      pin: { coords: null, countryCode: 'PL', label: 'Warszawa' },
+    });
+  });
+
+  it('distanceKm eksik / NaN / sayı-değil olan satır İSABET SAYILMAZ', async () => {
+    branches.rows = [
+      { store_id: 1, branch: { id: 1, name: 'A', lat: 0, lon: 0, address: null, city: null } }, // alan yok
+      row(Number.NaN, 2),
+      row('0.4', 3), // string
+      row(null, 4),
+    ];
+    const v = await validateCandidate({
+      label: 'Warszawa', coords: WARSAW, countryCode: 'PL',
+    });
+    expect(v).toEqual({
+      status: 'no_branches',
+      pin: { coords: null, countryCode: 'PL', label: 'Warszawa' },
+    });
+  });
+
+  it('ağ hatasında temkinli davranır — koordinat kullanılmaz', async () => {
+    vi.mocked(storeService.getNearbyStores).mockRejectedValueOnce(new Error('network'));
     const v = await validateCandidate({
       label: 'Warszawa', coords: WARSAW, countryCode: 'PL',
     });

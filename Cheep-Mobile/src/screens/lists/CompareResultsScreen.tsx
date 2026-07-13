@@ -24,17 +24,17 @@ import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import { compareInsights, byCoverageThenScore, missingCount } from '../../utils/compareInsights';
 import { useLocationAnchor } from '../../context/LocationContext';
-import { shouldFilterByDistance } from '../../utils/anchor';
+import { shouldFilterByDistance, RADIUS_OPTIONS, DEFAULT_RADIUS_KM } from '../../utils/anchor';
 import type { CompareResponse, RouteStrategy } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 
 type StoreCountFilter = 'all' | '1' | '2' | '3+';
 type SortOption = 'score' | 'price' | 'distance' | 'price_distance';
 
-// Rota yarıçapı seçenekleri: kimse market alışverişi için uzağa gitmez. Kullanıcı
-// hangi mesafedeki marketleri görmek istediğini seçer (yürüme / araba / geniş).
-const RADIUS_OPTIONS = [1.5, 3, 5] as const;
-const DEFAULT_RADIUS_KM = 3;
+// Yarıçap seçenekleri utils/anchor'dan gelir (RADIUS_OPTIONS / DEFAULT_RADIUS_KM /
+// MAX_RADIUS_KM). Burada YENİDEN TANIMLANMAZ: şube kapısı (geocode.service) aynı
+// listeden türeyen MAX_RADIUS_KM'yi kullanıyor — iki taraf ayrı düşerse, kapının
+// "kullanılabilir" dediği bir koordinat bu ekranda boş sonuç üretebilir.
 
 export function CompareResultsScreen({
   route,
