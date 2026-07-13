@@ -36,6 +36,29 @@ export type Validation =
 /** En fazla kaç aday gösterilir — kullanıcı hangisini kastettiğini seçecek. */
 const MAX_CANDIDATES = 5;
 
+/**
+ * TEL ÜZERİNDEKİ YUVARLAMA PAYI (km).
+ *
+ * /stores/nearby uç noktası mesafeyi TEK ONDALIĞA yuvarlayarak serileştiriyor
+ * (`Math.round(n.distanceKm * 10) / 10`), ama karşılaştırma (compare) filtresi
+ * sunucuda YUVARLANMAMIŞ haversine ile çalışıyor (`distanceKm > maxKm → ele`).
+ * Yani telden gelen r değeri, gerçek mesafeyi ±0.05 km belirsizlikle taşır:
+ *   gerçek d ∈ [r - 0.05, r + 0.05]
+ *
+ * Kapı, ham `r <= MAX_RADIUS_KM` karşılaştırması yaptığında bu belirsizliği YOK
+ * SAYAR: 5.04 km'deki bir şube tele 5.0 olarak çıkar, kapı "içeride" der ve
+ * KOORDİNATLI pin verir; kullanıcı en geniş yarıçapı (5 km) seçtiğinde compare
+ * gerçek 5.04'ü görüp şubeyi ELER → HİÇBİR yarıçapın kullanamayacağı bir pin ve
+ * BOŞ EKRAN. Bu yüzden kapı payı GÜVENLİ yöne (daraltarak) uygular: yalnızca
+ * r + 0.05 <= MAX_RADIUS_KM olan satırlar isabet sayılır. Belirsizlikte mesafe
+ * filtresi KAPANIR (koordinatsız pin → tüm marketler listelenir) — projenin
+ * merkezî kuralı budur; ters yön (payı genişletmek) boş ekranı ÜRETİR.
+ */
+export const WIRE_ROUNDING_KM = 0.05;
+
+/** Şube kapısının fiilen kullandığı eşik (telden gelen, yuvarlanmış değer için). */
+export const BRANCH_GATE_MAX_KM: number = MAX_RADIUS_KM - WIRE_ROUNDING_KM;
+
 function labelOf(
   place: { city?: string | null; district?: string | null; region?: string | null; name?: string | null },
   fallback: string,
@@ -94,13 +117,18 @@ export async function validateCandidate(c: GeocodeCandidate): Promise<Validation
   // soru şudur: kullanıcının SEÇEBİLECEĞİ EN GENİŞ yarıçapın (MAX_RADIUS_KM)
   // içinde gerçekten bir şube var mı? Yoksa hangi yarıçap seçilirse seçilsin
   // sonuç boştur → koordinatı KULLANMA, koordinatsız (yalnızca ülke) pin ver.
+  // Eşik ham MAX_RADIUS_KM değil, yuvarlama payı düşülmüş BRANCH_GATE_MAX_KM'dir
+  // (uç nokta mesafeyi tek ondalığa yuvarlıyor; bkz. WIRE_ROUNDING_KM).
   let hasBranches = false;
   try {
     const nearby = await storeService.getNearbyStores(c.coords.lat, c.coords.lon, c.countryCode);
     // Temkinli: distanceKm eksik ya da sayı değilse o satır İSABET SAYILMAZ —
     // "bilinmeyen mesafe"yi "yakın" varsaymak tam da boş ekranı üreten hatadır.
     hasBranches = nearby.some(
-      (n) => typeof n?.distanceKm === 'number' && Number.isFinite(n.distanceKm) && n.distanceKm <= MAX_RADIUS_KM,
+      (n) =>
+        typeof n?.distanceKm === 'number' &&
+        Number.isFinite(n.distanceKm) &&
+        n.distanceKm <= BRANCH_GATE_MAX_KM,
     );
   } catch {
     hasBranches = false; // ağ hatası → temkinli davran, mesafeleri kapat

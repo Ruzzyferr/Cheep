@@ -46,7 +46,7 @@ vi.mock('expo-secure-store', () => ({
   deleteItemAsync: async () => {},
 }));
 
-import { searchAddress, validateCandidate } from '../geocode.service';
+import { searchAddress, validateCandidate, BRANCH_GATE_MAX_KM, WIRE_ROUNDING_KM } from '../geocode.service';
 import { storeService } from '../store.service';
 import { MAX_RADIUS_KM } from '../../utils/anchor';
 
@@ -116,8 +116,35 @@ describe('validateCandidate — 2. kapı: şube (MAX_RADIUS_KM içinde mi?)', ()
     });
   });
 
-  it('tam MAX_RADIUS_KM sınırındaki şube İSABET sayılır (kapsayıcı sınır)', async () => {
+  it('eşik, yuvarlama payı düşülmüş MAX_RADIUS_KM olmalı', () => {
+    expect(BRANCH_GATE_MAX_KM).toBe(MAX_RADIUS_KM - WIRE_ROUNDING_KM);
+  });
+
+  it('tam eşikteki (BRANCH_GATE_MAX_KM) şube İSABET sayılır — kapsayıcı sınır', async () => {
+    branches.rows = [row(BRANCH_GATE_MAX_KM, 1)];
+    const v = await validateCandidate({
+      label: 'Warszawa', coords: WARSAW, countryCode: 'PL',
+    });
+    expect(v.status).toBe('ok');
+  });
+
+  it('telden tam MAX_RADIUS_KM olarak gelen şube İSABET SAYILMAZ (yuvarlama payı)', async () => {
+    // Uç nokta mesafeyi tek ondalığa yuvarlıyor: gerçekte 5.04 km'deki bir şube
+    // tele 5.0 olarak çıkar. Kapı bunu kabul edip KOORDİNATLI pin verseydi, compare
+    // (yuvarlanmamış haversine ile) 5.04 > 5 deyip şubeyi eler → kullanıcı en geniş
+    // yarıçapı seçse bile BOŞ EKRAN. Belirsizlikte mesafe filtresi KAPANIR.
     branches.rows = [row(MAX_RADIUS_KM, 1)];
+    const v = await validateCandidate({
+      label: 'Warszawa', coords: WARSAW, countryCode: 'PL',
+    });
+    expect(v).toEqual({
+      status: 'no_branches',
+      pin: { coords: null, countryCode: 'PL', label: 'Warszawa' },
+    });
+  });
+
+  it('telden gelen bir sonraki alt basamak (4.9) hâlâ İSABET sayılır — kapı gereksiz yere daralmaz', async () => {
+    branches.rows = [row(MAX_RADIUS_KM - 0.1, 1)];
     const v = await validateCandidate({
       label: 'Warszawa', coords: WARSAW, countryCode: 'PL',
     });
