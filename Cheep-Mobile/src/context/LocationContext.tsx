@@ -45,6 +45,14 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const runningRef = useRef(false);
   const prevAppState = useRef<AppStateStatus>(AppState.currentState);
 
+  // setCountry'yi ref'te tutuyoruz ki refresh'in kimliği ona bağımlı olmasın.
+  // LocaleProvider artık kendi value'sunu memoize ediyor, ama bu provider'ın
+  // doğruluğu başka bir context'in kimlik kararlılığına güvenmemeli: kararsız
+  // bir setCountry, refresh'i yeniden yaratır → mount efekti yeniden tetiklenir
+  // → GPS'ten gelen konum, kullanıcının az önce elle seçtiği ülkeyi sessizce ezer.
+  const setCountryRef = useRef(setCountry);
+  setCountryRef.current = setCountry;
+
   const refresh = useCallback(async () => {
     if (runningRef.current) return;
     runningRef.current = true;
@@ -69,7 +77,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
 
       if (next.countryCode !== lastCountry) {
         // Ülke kendini güncelledi (kullanıcı seyahat etti ya da pin değişti).
-        await setCountry(next.countryCode);
+        await setCountryRef.current(next.countryCode);
         setCountryChangedTo(next.countryCode);
         try {
           await userService.updatePreferences({ country_code: next.countryCode });
@@ -80,7 +88,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     } finally {
       runningRef.current = false;
     }
-  }, [setCountry]);
+  }, []);
 
   useEffect(() => {
     if (!enabled) return;
