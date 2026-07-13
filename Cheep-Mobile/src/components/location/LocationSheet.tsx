@@ -128,7 +128,13 @@ export function LocationSheet({ visible, onClose }: Props) {
 
   const handleSearch = useCallback(async () => {
     const q = query.trim();
-    if (!q || searching) return;
+    // busy (checking/confirming) sürerken klavyeden de, butondan da yeni bir
+    // arama başlatılamaz — aksi halde epoch burada artar ama 'checking' ya da
+    // 'confirming' o yazmayı hâlâ sürdürür ve kendi epoch'u artık bayat kalır
+    // (bkz. dosya başı ve handleConfirmNoBranches notları). Buton zaten
+    // disabled={busy} ile korunuyordu; TextInput'un onSubmitEditing'i de aynı
+    // kapıdan geçmeli — aksi halde klavyenin "ara" tuşu bu korumayı bypass eder.
+    if (!q || searching || busy) return;
     // Yeni bir arama başlıyor: epoch'u artırıyoruz ki bu arama başlamadan
     // önce fırlatılmış (henüz sonuçlanmamış) eski bir aramanın cevabı bu
     // sonuçların üzerine yazamasın.
@@ -156,9 +162,16 @@ export function LocationSheet({ visible, onClose }: Props) {
       // ayrı, genel bir mesaj gösteriyoruz.
       if (epochRef.current === epoch) setSearchState({ kind: 'error' });
     } finally {
-      if (epochRef.current === epoch) setSearching(false);
+      // searching yalnızca bu bileşenin kendi spinner bayrağı (setSearchState
+      // gibi İÇERİK taşımıyor) — epoch uyuşmasa bile temizlenmesi güvenlidir,
+      // hatta zorunludur: aksi halde spinner sonsuza dek asılı kalabilirdi.
+      // (Pratikte searching zaten kendi kendini yönetiyor çünkü yeni bir arama
+      // handleSearch'ün en başında senkron olarak true'ya çekiyor; yine de aynı
+      // ilkeyi burada da uyguluyoruz — bkz. handleConfirmNoBranches'teki
+      // confirming notu.)
+      setSearching(false);
     }
-  }, [query, searching]);
+  }, [query, searching, busy]);
 
   const handleSelectCandidate = useCallback(async (c: GeocodeCandidate) => {
     // Bu doğrulamanın hangi epoch'ta başladığını yakalıyoruz.
@@ -228,10 +241,20 @@ export function LocationSheet({ visible, onClose }: Props) {
       // yine de açık ve kapatılabilir kalır; genel hata mesajını gösteriyoruz.
       if (epochRef.current === epoch) setFlow({ kind: 'error' });
     } finally {
-      // Yalnızca HÂLÂ AYNI epoch'taysak confirming'i indiriyoruz; aksi halde
-      // yeni session'ın kendi state'ine (zaten useEffect ile sıfırlanmış)
-      // müdahale etmiş oluruz.
-      if (epochRef.current === epoch) setConfirming(false);
+      // confirming'i KOŞULSUZ indiriyoruz. Bu, setFlow gibi İÇERİK yazan bir
+      // çağrı değil — bu bileşenin kendi yerel meşgul (spinner) bayrağı;
+      // paylaşılan bir UI state'i değil. Eskiden epoch uyuşmazlığında
+      // (örn. handleSearch klavyeden meşgulken bile tetiklenip epoch'u
+      // artırdığında) bu satır hiç çalışmıyordu ve confirming sonsuza dek
+      // true'da asılı kalıyordu → busy de sonsuza dek true kalıyor, mod
+      // seçici/arama/adaylar/geri linki sheet kapatılıp açılana kadar
+      // sessizce kilitli kalıyordu. Artık TextInput da handleSearch da
+      // busy'yken arama başlatamıyor (bkz. handleSearch), dolayısıyla bu yol
+      // zaten kapalı; yine de bir spinner bayrağının epoch kontrolüne bağlı
+      // kalması ilke olarak yanlıştı — kendi spinner'ını temizlemek HER ZAMAN
+      // güvenlidir, çünkü hiçbir İÇERİK yazmaz. (onClose() ve her setFlow
+      // çağrısı hâlâ epoch'a bağlı — onlar İÇERİK/eylem taşır, bkz. yukarısı.)
+      setConfirming(false);
     }
   }, [flow, confirming, pin, onClose]);
 
@@ -304,6 +327,7 @@ export function LocationSheet({ visible, onClose }: Props) {
                     onChangeText={setQuery}
                     onSubmitEditing={handleSearch}
                     returnKeyType="search"
+                    editable={!busy}
                   />
                   <TouchableOpacity
                     style={[styles.searchBtn, (searching || !query.trim() || busy) && styles.searchBtnDisabled]}
