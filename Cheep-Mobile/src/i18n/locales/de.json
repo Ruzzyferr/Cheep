@@ -37,7 +37,7 @@
     "no_branches": "Wir haben keine Filialen in der Nähe dieser Adresse gefunden. Du kannst trotzdem fortfahren, aber Entfernungen und Routen werden nicht angezeigt.",
     "geocoder_unavailable": "Die Adresssuche funktioniert auf diesem Gerät nicht.",
     "distances_off": "Entfernungen aus",
-    "country_changed": "Du bist in {{country}} — auf Filialen in {{country}} umgestellt.",
+    "country_changed": "Dein Standort: {{country}} — auf die dortigen Filialen umgestellt.",
     "dismiss": "Verstanden"
   },
   "onboarding": {

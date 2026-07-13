@@ -37,7 +37,7 @@
     "no_branches": "Nie znaleźliśmy sklepów w pobliżu tego adresu. Możesz kontynuować, ale odległości i trasy nie będą wyświetlane.",
     "geocoder_unavailable": "Wyszukiwanie adresów nie działa na tym urządzeniu.",
     "distances_off": "Odległości wyłączone",
-    "country_changed": "Jesteś w {{country}} — przełączono na sklepy w {{country}}.",
+    "country_changed": "Twoja lokalizacja: {{country}} — przełączono na tamtejsze sklepy.",
     "dismiss": "OK"
   },
   "onboarding": {
