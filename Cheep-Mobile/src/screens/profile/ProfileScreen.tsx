@@ -146,7 +146,17 @@ export function ProfileScreen({
       // ekran "konum işlenmiyor" yazarken. (Depo zaten temiz; refresh() onu okuyup
       // gerçeği yayınlar. Aksi halde durum ancak soğuk açılışta/ön plana gelişte
       // kendini toparlıyordu.)
-      await refreshAnchor();
+      //
+      // SESSİZ olmak ZORUNDA: düz refresh() otomatik modda ETKİLEŞİMLİ izin kapısını
+      // (runLocationGate) çalıştırır ve kapı, rıza 'granted' olmadığı için KVKK
+      // açık-rıza istemini AÇAR — yani kullanıcı konumu kapatır kapatmaz "tekrar
+      // açalım mı?" diye sorulur. Kabul ederse rıza geri açılır, aynı geçiş GPS'i
+      // okur ve çapa yeniden koordinat kazanır; ekran ise hâlâ "konum işlenmiyor"
+      // der. Reddetse bile bu bir rıza karanlık-deseni olur (KVKK m.7 / GDPR
+      // Art. 7(3): geri alma, verme kadar kolay olmalı). silent:true kapıyı —
+      // ve YALNIZCA kapıyı — atlar; çapa yine depodan okunup koordinatsız yayınlanır
+      // (getUserLocation() 'denied' rızada sormadan null döner).
+      await refreshAnchor({ silent: true });
       return;
     }
 
@@ -175,7 +185,14 @@ export function ProfileScreen({
     // Rıza (ve varsa OS izni) yeniden verildi → çapayı HEMEN tazele: konum artık
     // işlenebilir, kullanıcı bir sonraki soğuk açılışı beklemesin. Ülke yazımı
     // yine tek sahibinden (LocationProvider) geçer — burada setCountry çağrılmaz.
-    await refreshAnchor();
+    //
+    // Burada da SESSİZ: rıza istemini ve OS izin modalını bu ekran YUKARIDA zaten
+    // kendisi gösterdi. Düz refresh() izin kapısını çalıştırır, kapı da (OS izni
+    // verilmediyse) önce kendi gerekçe diyaloğunu, ardından İKİNCİ bir sistem izin
+    // modalını açardı — kullanıcının az önce cevapladığı istemlerin üstüne üstüne.
+    // silent:true kapıyı atlar; rıza + OS izni gerçekten verildiyse getUserLocation()
+    // GPS'i normal şekilde okur ve koordinatlı çapa yayınlanır.
+    await refreshAnchor({ silent: true });
   }, [t, refreshAnchor]);
 
   const handleLogout = () => {

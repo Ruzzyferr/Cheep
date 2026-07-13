@@ -21,10 +21,38 @@ import {
 import { countryStorage } from '../utils/storage';
 import { userService } from '../services';
 
+/**
+ * refresh() seçenekleri.
+ *
+ * silent: true → İZİN KAPISI (runLocationGate) ÇALIŞTIRILMAZ; başka HİÇBİR ŞEY
+ * değişmez (depo yine okunur, GPS yine denenir, çapa yine yayınlanır).
+ *
+ * NEDEN VAR: refresh() pasif bir "yeniden oku" DEĞİLDİR — otomatik modda önce
+ * runLocationGate() koşar ve bu kapı ETKİLEŞİMLİDİR (KVKK açık-rıza istemi,
+ * gerekçe diyaloğu, OS izin modalı). Profil'deki konum satırından rıza GERİ
+ * ALINDIĞINDA çapanın hemen koordinatsız yayınlanması gerekir; ama bunu düz
+ * refresh() ile yapmak kapıyı da tetikler ve kullanıcıya AZ ÖNCE geri aldığı
+ * rızayı yeniden sorar ("kapattım, hemen tekrar soruyor" — KVKK m.7 / GDPR
+ * Art. 7(3): geri almak, vermek kadar kolay olmalı; onaylarsa rıza geri açılır
+ * ve ekran "konum işlenmiyor" derken koordinat yeniden işlenir). Aynı şekilde
+ * rızayı YENİDEN VERME yolunda ProfileScreen zaten OS iznini kendisi istiyor;
+ * kapı ikinci bir gerekçe diyaloğu + ikinci bir sistem modalı açardı.
+ *
+ * Sessiz geçiş yine DOĞRUDUR: getUserLocation() rıza 'denied' iken kendiliğinden
+ * SORMADAN null döner (ensureLocationConsent), yani koordinatsız çapa yayınlanır;
+ * rıza + OS izni yeniden verildiyse de GPS normal şekilde okunur.
+ *
+ * Kapı, uygulama açılışında ve arka plandan dönüşte NORMAL (etkileşimli) koşmaya
+ * devam eder — sessiz biçim yalnızca Profil'deki rıza anahtarına özeldir.
+ */
+export interface RefreshOptions {
+  silent?: boolean;
+}
+
 interface LocationValue {
   /** null = henüz çözülmedi (ilk render). */
   anchor: ShoppingAnchor | null;
-  refresh: () => Promise<void>;
+  refresh: (opts?: RefreshOptions) => Promise<void>;
   pin: (p: PinnedAnchor) => Promise<void>;
   unpin: () => Promise<void>;
   /** Otomatik ülke geçişi olduysa yeni ülke kodu — şerit bunu gösterir. */
@@ -45,6 +73,11 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const runningRef = useRef(false);
   // Bir refresh() çalışırken gelen ikinci bir istek burada "beklemede" işaretlenir.
   const pendingRef = useRef(false);
+  // Beklemede olan isteklerden EN AZ BİRİ sessiz mi istedi? Birleştirilen (trailing)
+  // geçiş için sessizlik KAZANIR: diyalog GÖSTERMEMEK her zaman güvenli taraftır —
+  // atlanan kapı bir sonraki açılışta/ön plana gelişte zaten yeniden koşar, ama geri
+  // alınmış bir rızayı yeniden sormak KVKK ihlalidir (bkz. RefreshOptions).
+  const pendingSilentRef = useRef(false);
   const prevAppState = useRef<AppStateStatus>(AppState.currentState);
 
   // setCountry'yi ref'te tutuyoruz ki refresh'in kimliği ona bağımlı olmasın.
@@ -55,7 +88,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const setCountryRef = useRef(setCountry);
   setCountryRef.current = setCountry;
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (opts?: RefreshOptions) => {
+    const silent = opts?.silent === true;
     if (runningRef.current) {
       // Zaten süren bir refresh() var. Bunu ESKİDEN sessizce DÜŞÜRÜYORDUK — bu
       // yanlıştı: refresh() yalnızca depodaki (storage) durumu okuyup anchor'ı
@@ -78,12 +112,17 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       // bir önceki bilinen durumda kalır; garanti edilen yalnızca SONRAKİ
       // (trailing) koşumun terk edilmemesidir.
       pendingRef.current = true;
+      if (silent) pendingSilentRef.current = true;
       return;
     }
     runningRef.current = true;
+    // Bu geçiş sessiz mi? İlk geçiş çağıranın isteğini kullanır; birleştirilen
+    // (trailing) geçiş, bu koşum sürerken gelen isteklerden belirlenir (aşağıda).
+    let passSilent = silent;
     try {
       do {
         pendingRef.current = false;
+        pendingSilentRef.current = false;
         try {
           const mode = await anchorStorage.getMode();
           const pinned = await anchorStorage.getPinned();
@@ -93,7 +132,11 @@ export function LocationProvider({ children }: { children: ReactNode }) {
           let detectedCountry: string | null = null;
           if (mode !== 'pinned' || !pinned) {
             // Otomatik mod: önce izin kapısı, SONRA konum.
-            await runLocationGate();
+            // SESSİZ geçişte kapı ATLANIR (yalnızca o) — kapı etkileşimlidir ve
+            // rıza anahtarından çağrıldığında az önce geri alınan rızayı yeniden
+            // sorardı (bkz. RefreshOptions). getUserLocation() rıza yoksa zaten
+            // SORMADAN null döner, dolayısıyla çapa doğru (koordinatsız) yayınlanır.
+            if (!passSilent) await runLocationGate();
             gps = await getUserLocation();
             if (gps) detectedCountry = await reverseGeocodeCountry(gps);
           }
@@ -134,7 +177,10 @@ export function LocationProvider({ children }: { children: ReactNode }) {
         }
         // Bu koşum sürerken en az bir yeni refresh() isteği geldiyse (pendingRef
         // tekrar true olduysa), depoyu baştan okuyarak bir kez daha koşuyoruz —
-        // bu geçiş patlamış olsa bile (yukarıdaki catch sayesinde).
+        // bu geçiş patlamış olsa bile (yukarıdaki catch sayesinde). Sonraki geçişin
+        // sessizliği o bekleyen isteklerden gelir (herhangi biri sessiz istediyse
+        // sessiz koşar — bkz. pendingSilentRef).
+        passSilent = pendingSilentRef.current;
       } while (pendingRef.current);
     } finally {
       runningRef.current = false;
