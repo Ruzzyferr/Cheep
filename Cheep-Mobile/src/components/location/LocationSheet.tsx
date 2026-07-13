@@ -133,6 +133,26 @@ export function LocationSheet({ visible, onClose }: Props) {
     setPinningCountry(null);
   }, [visible]);
 
+  // Sheet, çapa daha ÇÖZÜLMEDEN (anchor === null) açılabilir: soğuk açılışta
+  // provider'ın ilk refresh()'i (izin kapısı + GPS) sürerken kullanıcı Profil'e
+  // gidip ülke satırına dokunabilir. O anda yukarıdaki reset selectedMode'u
+  // 'auto'ya tohumlar ve çapa 'pinned' olarak indiğinde seçici YANLIŞ modda
+  // kalırdı (kullanıcının sabit adresi var ama ekran "Otomatik" diyor).
+  //
+  // Bu efekt YALNIZCA "null → çözüldü" GEÇİŞİNDE ve yalnızca selectedMode'u
+  // tohumlar. C3'e geri DÖNMEZ: reset efektinin bağımlılığına anchor.mode
+  // EKLENMİYOR; burada epoch ARTIRILMIYOR ve başka HİÇBİR state (query, searching,
+  // searchState, flow, confirming, pinningCountry) sıfırlanmıyor. Sheet'in kendi
+  // pin()/unpin() yazması anchor'ı null'dan çıkarmaz (zaten çözülmüştür), o yüzden
+  // bu efekt o yazma sırasında KOŞMAZ ve onClose() yarışını yeniden açmaz.
+  const anchorResolvedRef = useRef(anchor != null);
+  useEffect(() => {
+    const wasResolved = anchorResolvedRef.current;
+    anchorResolvedRef.current = anchor != null;
+    if (!visible || wasResolved || anchor == null) return;
+    setSelectedMode(anchor.mode);
+  }, [visible, anchor]);
+
   // Sheet İÇİNDEKİ etkileşimli kontroller (bir doğrulama 'checking', bir onay
   // 'confirming' ya da bir ülke-yalnızca pin yazması sürerken) burada kilitlenir —
   // amaç, aynı anda ikinci bir pin()/unpin() yazmasının başlamasını önlemektir.
