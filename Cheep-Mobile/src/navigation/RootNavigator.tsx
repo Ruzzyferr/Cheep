@@ -15,12 +15,19 @@ import { VerifyEmailScreen } from '../screens/auth/VerifyEmailScreen';
 import { IntroTourScreen } from '../screens/intro/IntroTourScreen';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { colors } from '../theme';
+import { useLocationGate } from '../hooks/useLocationGate';
 import type { RootStackParamList } from './types';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
   const { isAuthenticated, isLoading, emailVerified, onboardingDone, introSeen } = useAuth();
+
+  // Konum kapısı: her açılışta (ve arka plandan dönüşte) konumun çalıştığını teyit
+  // eder, kapalıysa açtırır. YALNIZCA uygulamanın ana kısmına ulaşmış kullanıcılar
+  // için — onboarding'in kendi konum-rıza istemiyle çakışmasın (üst üste iki diyalog).
+  const inMainApp = isAuthenticated && emailVerified && onboardingDone && introSeen;
+  useLocationGate(inMainApp);
 
   // Show loading screen while checking auth
   if (isLoading) {

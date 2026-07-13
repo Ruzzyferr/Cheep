@@ -33,6 +33,7 @@ const STORAGE_KEYS = {
   FAVORITE_STORES: 'favorite_stores',
   USER_LANGUAGE: 'user_language',
   LOCATION_CONSENT: 'kvkk_location_consent', // KVKK açık rıza: 'granted' | 'denied' | (yok=belirsiz)
+  LOCATION_PROMPT_SNOOZE: 'location_prompt_snooze_until', // ms epoch — bu ana kadar sorma
 } as const;
 
 // Generic storage functions
@@ -218,6 +219,28 @@ export const consentStorage = {
   },
   async clearLocationConsent(): Promise<void> {
     await storage.removeItem(STORAGE_KEYS.LOCATION_CONSENT);
+  },
+};
+
+// Konum istemi erteleme (snooze).
+//
+// Durum HER açılışta kontrol edilir, ama İSTEM her açılışta gösterilmez: kullanıcı
+// "şimdi değil" dediyse ya da Android sistem modalını reddettiyse bir süre sorulmaz.
+// Aksi halde her açılışta üst üste diyalog çıkar — hem rahatsız edici hem de Play
+// politikası açısından riskli; üstelik Android iki retten sonra sistem modalını
+// zaten hiç göstermez, yani ısrar etmenin teknik faydası da yok.
+export const locationPromptStorage = {
+  async isSnoozed(): Promise<boolean> {
+    const raw = await storage.getItem(STORAGE_KEYS.LOCATION_PROMPT_SNOOZE);
+    if (!raw) return false;
+    const until = Number(raw);
+    return Number.isFinite(until) && Date.now() < until;
+  },
+  async snooze(ms: number): Promise<void> {
+    await storage.setItem(STORAGE_KEYS.LOCATION_PROMPT_SNOOZE, String(Date.now() + ms));
+  },
+  async clear(): Promise<void> {
+    await storage.removeItem(STORAGE_KEYS.LOCATION_PROMPT_SNOOZE);
   },
 };
 

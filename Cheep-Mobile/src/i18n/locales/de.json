@@ -16,7 +16,11 @@
     "location_title": "Standort verarbeiten? (Datenschutz-Einwilligung)",
     "location_message": "Cheep verarbeitet deinen ungefähren Standort ausschließlich, um dir die nächstgelegenen Filialen und echte Entfernungen anzuzeigen. Dein Standort bleibt auf deinem Gerät, wird nicht im Hintergrund gesammelt und nicht an Dritte weitergegeben.\n\nDies ist KEINE Voraussetzung für die Nutzung des Dienstes; du kannst Cheep auch bei Ablehnung weiter nutzen. Du kannst deine Einwilligung jederzeit unter Profil › Datenschutz widerrufen.",
     "location_decline": "Nein, danke",
-    "location_accept": "Ja, ich stimme zu"
+    "location_accept": "Ja, ich stimme zu",
+    "gate_title": "Standortberechtigung ist deaktiviert",
+    "gate_message": "Für die besten Ergebnisse brauchen wir die Standortberechtigung: nur so können wir dir die nächstgelegenen Filialen und echte Geh- bzw. Fahrstrecken anzeigen. Ohne sie können wir Märkte in deiner Nähe nicht sortieren.",
+    "gate_allow": "Erlauben",
+    "gate_later": "Jetzt nicht"
   },
   "onboarding": {
     "language_title": "Wähle deine App-Sprache",

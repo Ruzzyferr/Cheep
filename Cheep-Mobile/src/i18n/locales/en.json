@@ -16,7 +16,11 @@
     "location_title": "Process your location? (privacy consent)",
     "location_message": "Cheep only uses your approximate location to show you the nearest store branches and real distances. Your location stays on your device, isn't collected in the background, and isn't shared with third parties.\n\nThis is NOT required to use the service; you can keep using Cheep even if you decline. You can withdraw your consent anytime from Profile › Privacy.",
     "location_decline": "No, thanks",
-    "location_accept": "Yes, I consent"
+    "location_accept": "Yes, I consent",
+    "gate_title": "Location permission is off",
+    "gate_message": "We need location permission for the best results: it is the only way we can show the store branches nearest to you and real walking/driving distances. Without it we cannot rank nearby stores.",
+    "gate_allow": "Allow",
+    "gate_later": "Not now"
   },
   "onboarding": {
     "language_title": "Choose your app language",

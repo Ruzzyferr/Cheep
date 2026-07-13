@@ -16,7 +16,11 @@
     "location_title": "Konumun işlensin mi? (KVKK açık rıza)",
     "location_message": "Cheep, yalnızca sana en yakın market şubelerini ve gerçek mesafeleri göstermek için yaklaşık konumunu işler. Konumun cihazında kalır, arka planda toplanmaz ve üçüncü kişilerle paylaşılmaz.\n\nBu hizmetin zorunlu şartı DEĞİLDİR; reddetsen de Cheep’i kullanmaya devam edebilirsin. Rızanı istediğin an Profil › Gizlilik’ten geri alabilirsin.",
     "location_decline": "Hayır, teşekkürler",
-    "location_accept": "Evet, açık rıza veriyorum"
+    "location_accept": "Evet, açık rıza veriyorum",
+    "gate_title": "Konum izni kapalı",
+    "gate_message": "En iyi sonuç için konum iznine ihtiyacımız var: sana en yakın market şubelerini ve gerçek yürüme/sürüş mesafelerini ancak böyle gösterebiliriz. İzin kapalıyken yakındaki marketleri sıralayamayız.",
+    "gate_allow": "İzin ver",
+    "gate_later": "Şimdi değil"
   },
   "onboarding": {
     "language_title": "Uygulama dilini seç",
