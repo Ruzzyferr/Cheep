@@ -29,11 +29,18 @@ export const storeService = {
   },
 
   /**
-   * Get nearest store branches to a given coordinate (country-scoped).
+   * Get nearest store branches to a given coordinate.
+   *
+   * countryCode verilirse o ülkeye sorulur (saklanan ülke yerine) — pin
+   * doğrulaması için: "bu adresin çevresinde gerçekten market var mı?"
    */
-  async getNearbyStores(lat: number, lon: number): Promise<NearbyStore[]> {
+  async getNearbyStores(lat: number, lon: number, countryCode?: string): Promise<NearbyStore[]> {
     const response = await apiClient.get<ApiResponse<NearbyStore[]>>(
-      API_ENDPOINTS.STORES.NEARBY, { params: { lat, lon } }
+      API_ENDPOINTS.STORES.NEARBY,
+      {
+        params: { lat, lon },
+        ...(countryCode ? { headers: { 'x-country': countryCode } } : {}),
+      },
     );
     return response.data.data || [];
   },
