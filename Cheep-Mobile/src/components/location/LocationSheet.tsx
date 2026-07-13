@@ -14,6 +14,9 @@
  * yazdığı yabancı ülke) düşer — kullanıcı yanlış katalog/para biriminde MAHSUR
  * kalırdı. Butonlar coords: null ile pin'ler → mesafe filtresi kapalı kalır,
  * boş ekran riski yoktur; ve seçim kullanıcının AÇIK tercihidir (sessiz kabul değil).
+ * TEK İSTİSNA: çapa ZATEN o ülkedeyse VE koordinatlıysa buton DEVRE DIŞIDIR —
+ * o dokunuş yalnızca çalışan bir pin'i (adres + mesafe filtresi) sessizce çöpe
+ * atardı; koordinatsız çapada ise buton açık kalır, çünkü çıkış kapısı odur.
  *
  * KAPATMA KURALI: sheet HİÇBİR KOŞULDA kullanıcıyı hapsetmez. onRequestClose,
  * header ✕'i ve geri linki her zaman çalışır — bir yazma (pin/unpin) sürüyor
@@ -501,12 +504,22 @@ export function LocationSheet({ visible, onClose }: Props) {
                     {SUPPORTED_COUNTRY_CODES.map((code) => {
                       const active = anchor?.countryCode === code;
                       const writing = pinningCountry === code;
+                      // Buton "seçili" görünüyor ama CANLI bir eylem: dokunmak
+                      // pin({ coords: null }) yazar. Çapa ZATEN bu ülkedeyse VE
+                      // koordinatlıysa (doğrulanmış adres, mesafeler çalışıyor),
+                      // dokunuş yalnızca AŞAĞI ÇEKEBİLİR: adres etiketi ve mesafe
+                      // filtresi, no-op gibi görünen bir dokunuşla SESSİZCE gider.
+                      // Böyle bir dokunuşu hiç başlatmıyoruz. Çapanın koordinatı
+                      // YOKSA buton AÇIK KALIR — yanlış ülkeye sabitlenmiş
+                      // kullanıcının çıkış kapısı odur (bkz. dosya başı) ve
+                      // kaybedecek bir şey yoktur.
+                      const wouldOnlyDowngrade = active && anchor?.coords != null;
                       return (
                         <TouchableOpacity
                           key={code}
                           style={[styles.countryBtn, active && styles.countryBtnActive]}
                           onPress={() => handleSelectCountry(code)}
-                          disabled={busy}
+                          disabled={busy || wouldOnlyDowngrade}
                           activeOpacity={0.8}
                         >
                           {writing ? (
