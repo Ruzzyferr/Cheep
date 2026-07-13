@@ -34,6 +34,8 @@ const STORAGE_KEYS = {
   USER_LANGUAGE: 'user_language',
   LOCATION_CONSENT: 'kvkk_location_consent', // KVKK açık rıza: 'granted' | 'denied' | (yok=belirsiz)
   LOCATION_PROMPT_SNOOZE: 'location_prompt_snooze_until', // ms epoch — bu ana kadar sorma
+  LOCATION_MODE: 'location_mode',           // 'auto' | 'pinned'
+  PINNED_ANCHOR: 'pinned_anchor',           // JSON: PinnedAnchor
 } as const;
 
 // Generic storage functions
