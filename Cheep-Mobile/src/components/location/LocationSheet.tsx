@@ -526,14 +526,21 @@ export function LocationSheet({ visible, onClose }: Props) {
                       const writing = pinningCountry === code;
                       // Buton "seçili" görünüyor ama CANLI bir eylem: dokunmak
                       // pin({ coords: null }) yazar. Çapa ZATEN bu ülkedeyse VE
-                      // koordinatlıysa (doğrulanmış adres, mesafeler çalışıyor),
-                      // dokunuş yalnızca AŞAĞI ÇEKEBİLİR: adres etiketi ve mesafe
-                      // filtresi, no-op gibi görünen bir dokunuşla SESSİZCE gider.
-                      // Böyle bir dokunuşu hiç başlatmıyoruz. Çapanın koordinatı
-                      // YOKSA buton AÇIK KALIR — yanlış ülkeye sabitlenmiş
-                      // kullanıcının çıkış kapısı odur (bkz. dosya başı) ve
-                      // kaybedecek bir şey yoktur.
-                      const wouldOnlyDowngrade = active && anchor?.coords != null;
+                      // GERÇEKTEN SABİTLENMİŞ (mode:'pinned') koordinatlı bir
+                      // adresse (doğrulanmış adres, mesafeler çalışıyor), dokunuş
+                      // yalnızca AŞAĞI ÇEKEBİLİR: adres etiketi ve mesafe filtresi,
+                      // no-op gibi görünen bir dokunuşla SESSİZCE gider. Böyle bir
+                      // dokunuşu hiç başlatmıyoruz. mode kontrolü KASITLI: OTOMATİK
+                      // moddaki koordinatlı bir GPS fix'i korumaya değer bir "pin"
+                      // DEĞİLDİR — o kullanıcı sabit bir adres seçmemiştir, en
+                      // yakın şube her yarıçapın dışındaysa koordinatsız pin'e geçiş
+                      // TEK çıkış kapısıdır ve bu buton onu engellememelidir.
+                      // Çapanın koordinatı YOKSA (ya da mode 'auto' ise) buton
+                      // AÇIK KALIR — yanlış ülkeye sabitlenmiş kullanıcının ya da
+                      // kırık geocoder'lı otomatik-mod kullanıcısının çıkış kapısı
+                      // odur (bkz. dosya başı) ve kaybedecek bir şey yoktur.
+                      const wouldOnlyDowngrade =
+                        active && anchor?.mode === 'pinned' && anchor.coords != null;
                       return (
                         <TouchableOpacity
                           key={code}
