@@ -108,13 +108,16 @@ describe('rıza kapalıyken konum', () => {
     expect(await locationStorage.getLocation()).toBeNull();
   });
 
-  it('OS izni yoksa eski koordinata düşmez', async () => {
+  it('OS izni yoksa eski koordinata düşmez ve cache SİLİNİR', async () => {
     await installInBergama();
 
     gps.permission = 'denied'; // kullanıcı sistem ayarlarından izni kaldırdı
     gps.position = CIGLI;
 
     expect(await getUserLocation()).toBeNull();
+    // İzni kalkmış bir uygulamada hayalet koordinat KALMAMALI — aksi halde
+    // izin kapalıyken bile eski nokta sunucuya gitmeye devam ederdi.
+    expect(await locationStorage.getLocation()).toBeNull();
   });
 });
 

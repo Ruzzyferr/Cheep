@@ -5,7 +5,7 @@
 
 import * as Location from 'expo-location';
 import { locationStorage } from './storage';
-import { ensureLocationConsent } from './consent';
+import { ensureLocationConsent, getLocationConsent } from './consent';
 
 export interface Coords {
   lat: number;
@@ -78,8 +78,13 @@ export async function getUserLocation(): Promise<Coords | null> {
   try {
     // KVKK: OS izninden ÖNCE açık rıza. Rıza yoksa konum HİÇ işlenmez — eski
     // koordinat da tutulmaz (rızasız veri işleme olurdu).
-    const consented = await ensureLocationConsent();
-    if (!consented) {
+    //
+    // PASİF okuma (ensureLocationConsent DEĞİL): rıza henüz KARARSIZSA
+    // ensureLocationConsent istem gösterirdi ve bu fonksiyonun "hiç diyalog
+    // göstermem" sözü kırılırdı. Bugün buraya kapıdan sonra gelindiği için
+    // rıza hep karara bağlanmış oluyor — ama sözleşmeyi yoruma değil KODA
+    // bağlıyoruz: rıza 'granted' değilse konum yok, nokta.
+    if ((await getLocationConsent()) !== 'granted') {
       await locationStorage.clearLocation();
       return null;
     }
