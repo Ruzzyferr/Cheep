@@ -133,3 +133,21 @@ export async function getCountryCodeInteractive(): Promise<string | null> {
     return null;
   }
 }
+
+/**
+ * Verilen koordinatın ISO ülke kodunu çözer. Desteklenmeyen ülke veya hata → null.
+ * (getCountryCode'dan farkı: GPS okumaz, verilen koordinatı çözer — çapa akışında
+ * konum zaten elimizde, ikinci kez GPS istemek gereksiz.)
+ */
+export async function reverseGeocodeCountry(coords: Coords): Promise<string | null> {
+  try {
+    const places = await Location.reverseGeocodeAsync({
+      latitude: coords.lat,
+      longitude: coords.lon,
+    });
+    const iso = places[0]?.isoCountryCode?.toUpperCase();
+    return iso && (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(iso) ? iso : null;
+  } catch {
+    return null;
+  }
+}
