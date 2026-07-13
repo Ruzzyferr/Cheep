@@ -5,6 +5,14 @@
  * birini seçmeden hiçbir şey kaydedilmez (bkz. validateCandidate akışı).
  * "no_branches" durumunda koordinat UYDURULMAZ — kullanıcı onaylarsa
  * koordinatsız (yalnızca ülke) pin kaydedilir.
+ *
+ * KAPATMA KURALI: sheet HİÇBİR KOŞULDA kullanıcıyı hapsetmez. onRequestClose,
+ * header ✕'i ve geri linki her zaman çalışır — bir yazma (pin/unpin) sürüyor
+ * olsa bile. Bunun güvenli olmasının sebebi LocationContext.refresh()'in artık
+ * eşzamanlı çağrıları DÜŞÜRMEYİP BİRLEŞTİRMESİ: sheet kapanıp yeniden açılsa
+ * bile, geç gelen bir pin()/unpin() sonunda depodaki GERÇEK durumu okuyup
+ * yayınlar. Sheet'in tek görevi, o geç cevabı kendi ekranına (stale UI olarak)
+ * YAZMAMAK — bunu epoch (nesil) sayacı sağlar.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -31,6 +39,7 @@ type SearchState =
   | { kind: 'idle' }
   | { kind: 'unavailable' }
   | { kind: 'not_found' }
+  | { kind: 'error' }
   | { kind: 'results'; candidates: GeocodeCandidate[] };
 
 // Bir adayın doğrulanması sırasında akış hangi aşamaya girdi.
@@ -38,7 +47,8 @@ type ValidationFlow =
   | { kind: 'none' }
   | { kind: 'checking'; label: string }
   | { kind: 'unsupported'; label: string }
-  | { kind: 'no_branches'; label: string; pin: PinnedAnchor };
+  | { kind: 'no_branches'; label: string; pin: PinnedAnchor }
+  | { kind: 'error' };
 
 interface Props {
   visible: boolean;
@@ -61,9 +71,12 @@ export function LocationSheet({ visible, onClose }: Props) {
   // yalnızca native görünümü gizler — bileşen örneği, state'i ve devam eden
   // promise'ler canlı kalır. Bu yüzden önceki bir açılışta başlatılan bir arama
   // ya da doğrulama isteği, sheet kapatılıp yeniden açıldıktan sonra bile
-  // sonuçlanıp state'e yazabilir. "epoch" sayacı bu durumu engeller: her reset
-  // ve her yeni aramada artar; async bir cevap geldiğinde yakalanan epoch ile
-  // güncel epoch karşılaştırılır, uyuşmuyorsa cevap sessizce terk edilir.
+  // sonuçlanıp state'e yazabilir. "epoch" sayacı BUNU engeller — TEK işi budur:
+  // her reset ve her yeni aramada artar; async bir cevap geldiğinde yakalanan
+  // epoch ile güncel epoch karşılaştırılır, uyuşmuyorsa cevap sessizce terk
+  // edilir (ne UI state'i yazılır ne de onClose() çağrılır, çünkü ekranın
+  // sahibi artık başka bir session'dır). epoch bir İPTAL mekanizması DEĞİLDİR
+  // ve sheet'in kapatılmasını hiçbir şekilde geciktirmez/engellemez.
   const epochRef = useRef(0);
 
   useEffect(() => {
@@ -80,28 +93,38 @@ export function LocationSheet({ visible, onClose }: Props) {
     }
   }, [visible, anchor?.mode]);
 
-  // Bir yazma işlemi ('checking' doğrulaması ya da 'confirming' onayı)
-  // sürerken sheet kapatılamaz: pin() hem depolamaya yazıyor hem de
-  // provider'ın refresh()'i ile ağ isteği yapabiliyor. Bu arada sheet
-  // kapanıp yeniden açılırsa, bayat yazma sonucu (ör. bu 'Auto' seçiminin
-  // unpin() çağrısı) ile o sürmekte olan yazma yarışır ve kullanıcının
-  // az önce yaptığı yeni seçim sessizce ezilebilir.
-  const writeInFlight = flow.kind === 'checking' || confirming;
+  // Sheet İÇİNDEKİ etkileşimli kontroller ('checking' doğrulaması ya da
+  // 'confirming' onayı sürerken) burada kilitlenir — amaç, aynı anda ikinci
+  // bir pin()/unpin() yazmasının başlamasını önlemektir. busy, dismissal'ı
+  // (kapatmayı) ETKİLEMEZ — o her zaman serbesttir, bkz. handleClose.
+  const busy = flow.kind === 'checking' || confirming;
+
+  // Sheet'i kapatan TEK yol — Android geri tuşu (onRequestClose), header ✕'i
+  // ve "otomatiğe dön" linki hep buna gider. HİÇBİR KOŞULDA no-op olmaz:
+  // önceki hatalı düzeltme burayı bir yazma sürerken kilitliyordu, bu da
+  // validateCandidate()/pin() ağ hatasıyla patladığında kullanıcıyı sheet'e
+  // kalıcı olarak hapsediyordu. Artık kapatma bir yazmanın bitmesini beklemez.
+  const handleClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
 
   const handleUseAuto = useCallback(async () => {
-    if (flow.kind === 'checking' || confirming) return;
-    await unpin();
-    onClose();
-  }, [unpin, onClose, flow.kind, confirming]);
-
-  // Modal'ın Android donanım geri tuşu (onRequestClose) ve header'daki ✕
-  // butonu için ortak, korumalı kapatma. writeInFlight true iken no-op:
-  // sheet'i kapatmak bayat bir pin() yazmasının yeni bir seçimin üzerine
-  // yazmasına kapı aralar (bkz. yukarıdaki writeInFlight açıklaması).
-  const closeIfIdle = useCallback(() => {
-    if (flow.kind === 'checking' || confirming) return;
-    onClose();
-  }, [onClose, flow.kind, confirming]);
+    if (busy) return; // aynı anda ikinci bir yazma başlatma
+    const epoch = epochRef.current;
+    try {
+      await unpin();
+      // await sırasında sheet kapatılıp yeniden açılmış olabilir — epoch
+      // değiştiyse bu artık bayat: onClose() çağırırsak başka bir session'ı
+      // bizim yerimize kapatmış oluruz.
+      if (epochRef.current !== epoch) return;
+      onClose();
+    } catch {
+      // unpin() (ve içindeki refresh()) ağ/depo hatasıyla patlayabilir.
+      // Sheet açık ve kapatılabilir kalmaya devam eder — kullanıcı ✕ ile her
+      // zaman çıkabilir; burada özel bir hata göstergesine gerek yok çünkü bu
+      // buton kendi başına bir "checking/confirming" durumu sergilemiyor.
+    }
+  }, [unpin, onClose, busy]);
 
   const handleSearch = useCallback(async () => {
     const q = query.trim();
@@ -126,6 +149,12 @@ export function LocationSheet({ visible, onClose }: Props) {
       } else {
         setSearchState({ kind: 'results', candidates: result.candidates });
       }
+    } catch {
+      // searchAddress kendi içindeki geocoder hatalarını zaten yakalayıp
+      // available:false döndürüyor; buraya düşen her şey beklenmedik bir
+      // hatadır — "unavailable" (cihaz geocoder'ı yok) ile KARIŞTIRMADAN
+      // ayrı, genel bir mesaj gösteriyoruz.
+      if (epochRef.current === epoch) setSearchState({ kind: 'error' });
     } finally {
       if (epochRef.current === epoch) setSearching(false);
     }
@@ -135,48 +164,69 @@ export function LocationSheet({ visible, onClose }: Props) {
     // Bu doğrulamanın hangi epoch'ta başladığını yakalıyoruz.
     const epoch = epochRef.current;
     setFlow({ kind: 'checking', label: c.label });
-    const v = await validateCandidate(c);
-    // await sırasında sheet kapatılıp yeniden açılmış ya da yeni bir arama
-    // başlatılmış olabilir — epoch değiştiyse bu artık bayat cevabı
-    // (ör. eski bir "no_branches" uyarısını) ekrana yansıtmadan çıkıyoruz.
-    if (epochRef.current !== epoch) return;
-    if (v.status === 'unsupported_country') {
-      setFlow({ kind: 'unsupported', label: c.label });
-      return;
+    try {
+      const v = await validateCandidate(c);
+      // await sırasında sheet kapatılıp yeniden açılmış ya da yeni bir arama
+      // başlatılmış olabilir — epoch değiştiyse bu artık bayat cevabı
+      // (ör. eski bir "no_branches" uyarısını) ekrana yansıtmadan çıkıyoruz.
+      if (epochRef.current !== epoch) return;
+      if (v.status === 'unsupported_country') {
+        setFlow({ kind: 'unsupported', label: c.label });
+        return;
+      }
+      if (v.status === 'no_branches') {
+        // coords zaten null geldi — burada asla koordinat ÜRETİLMEZ,
+        // validateCandidate'in döndürdüğü pin aynen taşınır.
+        setFlow({ kind: 'no_branches', label: c.label, pin: v.pin });
+        return;
+      }
+      // status === 'ok' — koordinatlı doğrulanmış pin, doğrudan kaydet.
+      await pin(v.pin);
+      // İKİNCİ await: pin() hem depolamaya yazıyor hem de provider'ın
+      // refresh()'i ile ağ isteği yapabiliyor. Bu sürede sheet kapatılıp
+      // yeniden açılmış olabilir — epoch değiştiyse onClose() ARTIK BU
+      // SESSION'A AİT DEĞİL; yine de çağırırsak yeni açılmış session'ı
+      // bizim yerimize kapatmış oluruz. (Depoya geç yazan pin() artık
+      // zararsız: LocationContext.refresh() eşzamanlı çağrıları birleştirip
+      // depodaki GERÇEK durumu yayınlıyor — bkz. dosya başı not.)
+      if (epochRef.current !== epoch) return;
+      onClose();
+    } catch {
+      // KRİTİK düzeltme: eskiden burada try/finally YOKTU. validateCandidate()
+      // ya da pin() ağ hatasıyla patlarsa flow 'checking'de SONSUZA DEK asılı
+      // kalıyor, ve önceki (hatalı) düzeltme her kapatma yolunu bu duruma
+      // bağladığı için kullanıcı sheet'e KALICI OLARAK HAPSOLUYORDU. Artık
+      // kapatma flow'a bağlı değil (bkz. handleClose); burada sadece
+      // spinner'ı temizleyip genel bir hata mesajı gösteriyoruz.
+      if (epochRef.current === epoch) setFlow({ kind: 'error' });
+    } finally {
+      // Bu epoch'ta flow hâlâ 'checking'de asılıysa (örn. yukarıdaki catch
+      // atlanmadıysa da) burada kesin olarak temizleniyor — spinner hiçbir
+      // koşulda asılı kalmaz. Fonksiyonel updater en güncel state'i okur.
+      if (epochRef.current === epoch) {
+        setFlow((f) => (f.kind === 'checking' ? { kind: 'none' } : f));
+      }
     }
-    if (v.status === 'no_branches') {
-      setFlow({ kind: 'no_branches', label: c.label, pin: v.pin });
-      return;
-    }
-    // status === 'ok' — koordinatlı doğrulanmış pin, doğrudan kaydet.
-    await pin(v.pin);
-    // İKİNCİ await: pin() hem depolamaya yazıyor hem de provider'ın
-    // refresh()'i ile ağ isteği yapabiliyor. Bu sürede sheet kapatılıp
-    // yeniden açılmış olabilir — epoch değiştiyse onClose() ARTIK BU
-    // SESSION'A AİT DEĞİL; yine de çağırırsak yeni açılmış session'ı
-    // bizim yerimize kapatmış oluruz. (Not: writeInFlight sayesinde sheet
-    // zaten 'checking' sırasında kapatılamaz, ama bu kontrol savunma
-    // amaçlı ikinci bir katman olarak kalıyor.)
-    if (epochRef.current !== epoch) return;
-    onClose();
   }, [pin, onClose]);
 
   const handleConfirmNoBranches = useCallback(async () => {
     if (flow.kind !== 'no_branches' || confirming) return;
-    // Bu onayın hangi epoch'ta başladığını yakalıyoruz (bkz. dosya başındaki
-    // epoch açıklaması). pin() burada da süren bir yazma işlemi: writeInFlight
-    // (confirming=true) sheet'in bu sırada kapatılmasını zaten engelliyor,
-    // ama epoch kontrolünü yine de ikinci bir savunma katmanı olarak bırakıyoruz.
+    // Bu onayın hangi epoch'ta başladığını yakalıyoruz.
     const epoch = epochRef.current;
+    const pendingPin = flow.pin; // coords zaten null — burada asla üretilmez.
     // Aday satırlarıyla tutarlı olsun diye pin() sürerken butonu meşgul
     // gösterip devre dışı bırakıyoruz — art arda dokunmayla çifte pin() çağrısını önler.
     setConfirming(true);
     try {
-      await pin(flow.pin); // coords zaten null — burada asla üretilmez.
+      await pin(pendingPin);
       // await sırasında epoch değişmiş olabilir — değiştiyse bu artık bayat
       // bir onay: onClose() çağırırsak yeni açılmış session'ı kapatırız.
       if (epochRef.current !== epoch) return;
       onClose();
+    } catch {
+      // pin() (ve içindeki refresh()) ağ/depo hatasıyla patlayabilir. Sheet
+      // yine de açık ve kapatılabilir kalır; genel hata mesajını gösteriyoruz.
+      if (epochRef.current === epoch) setFlow({ kind: 'error' });
     } finally {
       // Yalnızca HÂLÂ AYNI epoch'taysak confirming'i indiriyoruz; aksi halde
       // yeni session'ın kendi state'ine (zaten useEffect ile sıfırlanmış)
@@ -189,7 +239,7 @@ export function LocationSheet({ visible, onClose }: Props) {
   const checkingLabel = flow.kind === 'checking' ? flow.label : null;
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={closeIfIdle}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <KeyboardAvoidingView
         style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -197,12 +247,7 @@ export function LocationSheet({ visible, onClose }: Props) {
         <View style={styles.sheet}>
           <View style={styles.header}>
             <Text style={styles.title}>{t('location.title')}</Text>
-            <TouchableOpacity
-              onPress={closeIfIdle}
-              disabled={writeInFlight}
-              style={styles.closeBtn}
-              hitSlop={8}
-            >
+            <TouchableOpacity onPress={handleClose} style={styles.closeBtn} hitSlop={8}>
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -213,7 +258,7 @@ export function LocationSheet({ visible, onClose }: Props) {
               <TouchableOpacity
                 style={[styles.modeBtn, selectedMode === 'auto' && styles.modeBtnActive]}
                 onPress={handleUseAuto}
-                disabled={writeInFlight}
+                disabled={busy}
                 activeOpacity={0.8}
               >
                 <MaterialIcons
@@ -228,6 +273,7 @@ export function LocationSheet({ visible, onClose }: Props) {
               <TouchableOpacity
                 style={[styles.modeBtn, selectedMode === 'pinned' && styles.modeBtnActive]}
                 onPress={() => setSelectedMode('pinned')}
+                disabled={busy}
                 activeOpacity={0.8}
               >
                 <MaterialIcons
@@ -260,9 +306,9 @@ export function LocationSheet({ visible, onClose }: Props) {
                     returnKeyType="search"
                   />
                   <TouchableOpacity
-                    style={[styles.searchBtn, (searching || !query.trim()) && styles.searchBtnDisabled]}
+                    style={[styles.searchBtn, (searching || !query.trim() || busy) && styles.searchBtnDisabled]}
                     onPress={handleSearch}
-                    disabled={searching || !query.trim()}
+                    disabled={searching || !query.trim() || busy}
                     activeOpacity={0.8}
                   >
                     {searching ? (
@@ -282,6 +328,9 @@ export function LocationSheet({ visible, onClose }: Props) {
                 {!searching && searchState.kind === 'not_found' && (
                   <Text style={styles.errorText}>{t('location.not_found')}</Text>
                 )}
+                {!searching && searchState.kind === 'error' && (
+                  <Text style={styles.errorText}>{t('common.something_went_wrong')}</Text>
+                )}
 
                 {/* Aday listesi — kullanıcı birini seçmeden hiçbir şey kaydedilmez. */}
                 {candidates.map((c, i) => {
@@ -294,7 +343,7 @@ export function LocationSheet({ visible, onClose }: Props) {
                       <TouchableOpacity
                         style={styles.useThisBtn}
                         onPress={() => handleSelectCandidate(c)}
-                        disabled={flow.kind === 'checking'}
+                        disabled={busy}
                         activeOpacity={0.8}
                       >
                         {isChecking ? (
@@ -311,6 +360,13 @@ export function LocationSheet({ visible, onClose }: Props) {
                   <View style={[styles.warnBox, styles.errorBox]}>
                     <MaterialIcons name="block" size={18} color={colors.error.main} />
                     <Text style={styles.warnText}>{t('location.unsupported_country')}</Text>
+                  </View>
+                )}
+
+                {flow.kind === 'error' && (
+                  <View style={[styles.warnBox, styles.errorBox]}>
+                    <MaterialIcons name="error-outline" size={18} color={colors.error.main} />
+                    <Text style={styles.warnText}>{t('common.something_went_wrong')}</Text>
                   </View>
                 )}
 
@@ -331,7 +387,7 @@ export function LocationSheet({ visible, onClose }: Props) {
                         title={t('common.continue')}
                         size="small"
                         onPress={handleConfirmNoBranches}
-                        disabled={confirming}
+                        disabled={busy}
                         loading={confirming}
                         style={styles.warnActionBtn}
                       />
@@ -339,7 +395,7 @@ export function LocationSheet({ visible, onClose }: Props) {
                   </View>
                 )}
 
-                <TouchableOpacity onPress={handleUseAuto} disabled={writeInFlight} style={styles.backLink}>
+                <TouchableOpacity onPress={handleUseAuto} disabled={busy} style={styles.backLink}>
                   <Text style={styles.backLinkText}>{t('location.back_to_auto')}</Text>
                 </TouchableOpacity>
               </View>

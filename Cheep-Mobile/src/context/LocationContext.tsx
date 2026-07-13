@@ -43,6 +43,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
 
   const enabled = isAuthenticated && emailVerified && onboardingDone && introSeen;
   const runningRef = useRef(false);
+  // Bir refresh() çalışırken gelen ikinci bir istek burada "beklemede" işaretlenir.
+  const pendingRef = useRef(false);
   const prevAppState = useRef<AppStateStatus>(AppState.currentState);
 
   // setCountry'yi ref'te tutuyoruz ki refresh'in kimliği ona bağımlı olmasın.
@@ -54,37 +56,58 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   setCountryRef.current = setCountry;
 
   const refresh = useCallback(async () => {
-    if (runningRef.current) return;
+    if (runningRef.current) {
+      // Zaten süren bir refresh() var. Bunu ESKİDEN sessizce DÜŞÜRÜYORDUK — bu
+      // yanlıştı: refresh() yalnızca depodaki (storage) durumu okuyup anchor'ı
+      // yayınlıyor, depoya yazmıyor. pin()/unpin() önce depoya yazar, SONRA
+      // refresh() çağırır ("last write wins" depo için doğru). Ama eğer bu ikinci
+      // refresh() çağrısı düşürülürse, sürmekte olan eski refresh() kendi (artık
+      // bayat) okumasıyla state'i günceller ve depodaki GERÇEK/güncel durumu bir
+      // daha hiç yayınlamayabilir — anchor, storage ile kalıcı olarak uyuşmaz hale
+      // gelir (örn. unpin() sonrası ekranda hâlâ terk edilmiş pin görünür). Bunun
+      // yerine DÜŞÜRMEK değil BİRLEŞTİRMEK (coalesce) doğru olan: "bitince bir kez
+      // daha, en güncel depo durumunu okuyarak koş" diye işaretliyoruz. Üçüncü,
+      // dördüncü... istek de aynı bayrağı işaretler; art arda değil TEK bir
+      // sondaki (trailing) koşum yeterlidir, çünkü o koşum depoyu YENİDEN OKUR ve
+      // dolayısıyla en son gerçeği yayınlar.
+      pendingRef.current = true;
+      return;
+    }
     runningRef.current = true;
     try {
-      const mode = await anchorStorage.getMode();
-      const pinned = await anchorStorage.getPinned();
-      const lastCountry = (await countryStorage.getCountry()) ?? 'TR';
+      do {
+        pendingRef.current = false;
+        const mode = await anchorStorage.getMode();
+        const pinned = await anchorStorage.getPinned();
+        const lastCountry = (await countryStorage.getCountry()) ?? 'TR';
 
-      let gps = null;
-      let detectedCountry: string | null = null;
-      if (mode !== 'pinned' || !pinned) {
-        // Otomatik mod: önce izin kapısı, SONRA konum.
-        await runLocationGate();
-        gps = await getUserLocation();
-        if (gps) detectedCountry = await reverseGeocodeCountry(gps);
-      }
-
-      const next = resolveAnchor({
-        mode, pinned, gps, detectedCountry, lastCountry, now: Date.now(),
-      });
-      setAnchor(next);
-
-      if (next.countryCode !== lastCountry) {
-        // Ülke kendini güncelledi (kullanıcı seyahat etti ya da pin değişti).
-        await setCountryRef.current(next.countryCode);
-        setCountryChangedTo(next.countryCode);
-        try {
-          await userService.updatePreferences({ country_code: next.countryCode });
-        } catch {
-          /* sunucu tercihi kaydedilemedi — yerel durum yine de doğru */
+        let gps = null;
+        let detectedCountry: string | null = null;
+        if (mode !== 'pinned' || !pinned) {
+          // Otomatik mod: önce izin kapısı, SONRA konum.
+          await runLocationGate();
+          gps = await getUserLocation();
+          if (gps) detectedCountry = await reverseGeocodeCountry(gps);
         }
-      }
+
+        const next = resolveAnchor({
+          mode, pinned, gps, detectedCountry, lastCountry, now: Date.now(),
+        });
+        setAnchor(next);
+
+        if (next.countryCode !== lastCountry) {
+          // Ülke kendini güncelledi (kullanıcı seyahat etti ya da pin değişti).
+          await setCountryRef.current(next.countryCode);
+          setCountryChangedTo(next.countryCode);
+          try {
+            await userService.updatePreferences({ country_code: next.countryCode });
+          } catch {
+            /* sunucu tercihi kaydedilemedi — yerel durum yine de doğru */
+          }
+        }
+        // Bu koşum sürerken en az bir yeni refresh() isteği geldiyse (pendingRef
+        // tekrar true olduysa), depoyu baştan okuyarak bir kez daha koşuyoruz.
+      } while (pendingRef.current);
     } finally {
       runningRef.current = false;
     }
