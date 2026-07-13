@@ -80,10 +80,28 @@ export function LocationSheet({ visible, onClose }: Props) {
     }
   }, [visible, anchor?.mode]);
 
+  // Bir yazma işlemi ('checking' doğrulaması ya da 'confirming' onayı)
+  // sürerken sheet kapatılamaz: pin() hem depolamaya yazıyor hem de
+  // provider'ın refresh()'i ile ağ isteği yapabiliyor. Bu arada sheet
+  // kapanıp yeniden açılırsa, bayat yazma sonucu (ör. bu 'Auto' seçiminin
+  // unpin() çağrısı) ile o sürmekte olan yazma yarışır ve kullanıcının
+  // az önce yaptığı yeni seçim sessizce ezilebilir.
+  const writeInFlight = flow.kind === 'checking' || confirming;
+
   const handleUseAuto = useCallback(async () => {
+    if (flow.kind === 'checking' || confirming) return;
     await unpin();
     onClose();
-  }, [unpin, onClose]);
+  }, [unpin, onClose, flow.kind, confirming]);
+
+  // Modal'ın Android donanım geri tuşu (onRequestClose) ve header'daki ✕
+  // butonu için ortak, korumalı kapatma. writeInFlight true iken no-op:
+  // sheet'i kapatmak bayat bir pin() yazmasının yeni bir seçimin üzerine
+  // yazmasına kapı aralar (bkz. yukarıdaki writeInFlight açıklaması).
+  const closeIfIdle = useCallback(() => {
+    if (flow.kind === 'checking' || confirming) return;
+    onClose();
+  }, [onClose, flow.kind, confirming]);
 
   const handleSearch = useCallback(async () => {
     const q = query.trim();
@@ -132,19 +150,38 @@ export function LocationSheet({ visible, onClose }: Props) {
     }
     // status === 'ok' — koordinatlı doğrulanmış pin, doğrudan kaydet.
     await pin(v.pin);
+    // İKİNCİ await: pin() hem depolamaya yazıyor hem de provider'ın
+    // refresh()'i ile ağ isteği yapabiliyor. Bu sürede sheet kapatılıp
+    // yeniden açılmış olabilir — epoch değiştiyse onClose() ARTIK BU
+    // SESSION'A AİT DEĞİL; yine de çağırırsak yeni açılmış session'ı
+    // bizim yerimize kapatmış oluruz. (Not: writeInFlight sayesinde sheet
+    // zaten 'checking' sırasında kapatılamaz, ama bu kontrol savunma
+    // amaçlı ikinci bir katman olarak kalıyor.)
+    if (epochRef.current !== epoch) return;
     onClose();
   }, [pin, onClose]);
 
   const handleConfirmNoBranches = useCallback(async () => {
     if (flow.kind !== 'no_branches' || confirming) return;
+    // Bu onayın hangi epoch'ta başladığını yakalıyoruz (bkz. dosya başındaki
+    // epoch açıklaması). pin() burada da süren bir yazma işlemi: writeInFlight
+    // (confirming=true) sheet'in bu sırada kapatılmasını zaten engelliyor,
+    // ama epoch kontrolünü yine de ikinci bir savunma katmanı olarak bırakıyoruz.
+    const epoch = epochRef.current;
     // Aday satırlarıyla tutarlı olsun diye pin() sürerken butonu meşgul
     // gösterip devre dışı bırakıyoruz — art arda dokunmayla çifte pin() çağrısını önler.
     setConfirming(true);
     try {
       await pin(flow.pin); // coords zaten null — burada asla üretilmez.
+      // await sırasında epoch değişmiş olabilir — değiştiyse bu artık bayat
+      // bir onay: onClose() çağırırsak yeni açılmış session'ı kapatırız.
+      if (epochRef.current !== epoch) return;
       onClose();
     } finally {
-      setConfirming(false);
+      // Yalnızca HÂLÂ AYNI epoch'taysak confirming'i indiriyoruz; aksi halde
+      // yeni session'ın kendi state'ine (zaten useEffect ile sıfırlanmış)
+      // müdahale etmiş oluruz.
+      if (epochRef.current === epoch) setConfirming(false);
     }
   }, [flow, confirming, pin, onClose]);
 
@@ -152,7 +189,7 @@ export function LocationSheet({ visible, onClose }: Props) {
   const checkingLabel = flow.kind === 'checking' ? flow.label : null;
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={closeIfIdle}>
       <KeyboardAvoidingView
         style={styles.overlay}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -160,7 +197,12 @@ export function LocationSheet({ visible, onClose }: Props) {
         <View style={styles.sheet}>
           <View style={styles.header}>
             <Text style={styles.title}>{t('location.title')}</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={8}>
+            <TouchableOpacity
+              onPress={closeIfIdle}
+              disabled={writeInFlight}
+              style={styles.closeBtn}
+              hitSlop={8}
+            >
               <Text style={styles.closeText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -171,6 +213,7 @@ export function LocationSheet({ visible, onClose }: Props) {
               <TouchableOpacity
                 style={[styles.modeBtn, selectedMode === 'auto' && styles.modeBtnActive]}
                 onPress={handleUseAuto}
+                disabled={writeInFlight}
                 activeOpacity={0.8}
               >
                 <MaterialIcons
@@ -296,7 +339,7 @@ export function LocationSheet({ visible, onClose }: Props) {
                   </View>
                 )}
 
-                <TouchableOpacity onPress={handleUseAuto} style={styles.backLink}>
+                <TouchableOpacity onPress={handleUseAuto} disabled={writeInFlight} style={styles.backLink}>
                   <Text style={styles.backLinkText}>{t('location.back_to_auto')}</Text>
                 </TouchableOpacity>
               </View>
