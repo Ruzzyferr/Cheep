@@ -23,7 +23,8 @@ import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import { compareInsights, byCoverageThenScore, missingCount } from '../../utils/compareInsights';
-import { getUserLocation, type Coords } from '../../utils/geo';
+import { useLocationAnchor } from '../../context/LocationContext';
+import { shouldFilterByDistance } from '../../utils/anchor';
 import type { CompareResponse, RouteStrategy } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 
@@ -47,25 +48,19 @@ export function CompareResultsScreen({
   const [storeCountFilter, setStoreCountFilter] = useState<StoreCountFilter>('all');
   const [sortOption, setSortOption] = useState<SortOption>('score');
   const [radiusKm, setRadiusKm] = useState<number>(DEFAULT_RADIUS_KM);
-  // undefined = konum henüz çözülmedi, null = izin yok/konum yok, Coords = var
-  const [loc, setLoc] = useState<Coords | null | undefined>(undefined);
   const insets = useSafeAreaInsets();
 
-  // Konumu bir kez çöz (yarıçap değişince GPS'i tekrar sorma).
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const l = await getUserLocation(); // {lat,lon} | null
-      if (alive) setLoc(l);
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
+  const { anchor } = useLocationAnchor();
+  const { country } = useLocale(); // (useLocale zaten import edilmiş — formatMoney için)
 
-  // Konum çözülünce ya da yarıçap değişince yeniden karşılaştır.
+  // MERKEZÎ İNVARYANT: yarıçap filtresi yalnızca çapa koordinatlıysa VE katalogla
+  // aynı ülkedeyse gönderilir. Aksi halde userLocation/radiusKm HİÇ gönderilmez →
+  // backend filtre uygulamaz → kullanıcı tüm marketleri görür (boş ekran yerine).
+  const filterByDistance = anchor ? shouldFilterByDistance(anchor, country) : false;
+
+  // Çapa çözülünce ya da yarıçap değişince yeniden karşılaştır.
   useEffect(() => {
-    if (loc === undefined) return; // konum çözülene kadar bekle
+    if (!anchor) return; // çapa çözülene kadar bekle
     let alive = true;
 
     (async () => {
@@ -74,8 +69,9 @@ export function CompareResultsScreen({
         const data = await listService.compareList(listId, {
           maxStores: 4,
           includeMissingProducts: true,
-          // Konum varsa yarıçap filtresini gönder; yoksa filtreleme yapma (tümünü göster).
-          ...(loc ? { userLocation: loc, radiusKm } : {}),
+          ...(filterByDistance && anchor.coords
+            ? { userLocation: anchor.coords, radiusKm }
+            : {}),
         });
         if (!alive) return;
         setResults(data);
@@ -93,7 +89,7 @@ export function CompareResultsScreen({
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listId, radiusKm, loc]);
+  }, [listId, radiusKm, anchor, filterByDistance]);
 
   // İlk yükleme: sonuç yokken tam ekran spinner. Yarıçap değişiminde eski sonuçlar
   // ekranda kalır (seçici kaybolmasın), üstte ince bir gösterge çıkar.
@@ -110,7 +106,7 @@ export function CompareResultsScreen({
     return null;
   }
 
-  const hasLocation = loc != null;
+  const hasLocation = filterByDistance;
   // Konum var, yarıçap filtresi uygulandı ama yakında market yok → boş durum.
   const noNearbyStores =
     hasLocation && !!results.nearbyFilterApplied && results.strategies.length === 0;
