@@ -79,19 +79,41 @@ export function LocationSheet({ visible, onClose }: Props) {
   // ve sheet'in kapatılmasını hiçbir şekilde geciktirmez/engellemez.
   const epochRef = useRef(0);
 
+  // Reset YALNIZCA gerçek bir false→true (açılış) geçişinde koşar. Önceki hali
+  // [visible, anchor?.mode] dinliyordu ve bu KRİTİK bir hataydı: anchor.mode'u
+  // değiştiren şey sheet'in KENDİ pin()/unpin() çağrısıdır. Yani sheet kendi
+  // epoch'unu kendi yazması sırasında artırıyor, handler'ın `epochRef.current
+  // !== epoch` kontrolü tutuyor ve onClose() ATLANIYORDU. Yarışı reset'in
+  // kazanması için refresh()'in setAnchor'dan SONRA bir kez daha await etmesi
+  // yeterli — ki ÜLKE DEĞİŞTİĞİNDE tam olarak bunu yapıyor (setCountry +
+  // userService.updatePreferences). Sonuç: Türkiye'deki kullanıcı Varşova'yı
+  // sabitliyor, pin kaydediliyor, ülke geçiyor ama MODAL AÇIK KALIYOR ve boş bir
+  // "sabit adres" ekranına resetleniyor — "hiçbir şey olmadı" gibi görünüyor.
+  // Aynısı yabancı bir pin'i kaldırırken ("otomatiğe dön") de oluyordu.
+  const wasVisibleRef = useRef(false);
+  // Açılış anında mod seçiciyi mevcut çapadan tohumlamak için — efektin bağımlılık
+  // listesine anchor.mode'u KOYMADAN (bkz. yukarıdaki hata). Ref her render'da
+  // güncellenir, efekt yalnızca açılışta okur.
+  const anchorModeRef = useRef(anchor?.mode);
+  anchorModeRef.current = anchor?.mode;
+
   useEffect(() => {
-    if (visible) {
-      // Sheet yeniden açıldı: önceki açılıştan kalma isteklerin cevaplarını
-      // geçersiz kılmak için epoch'u artırıyoruz.
-      epochRef.current += 1;
-      setSelectedMode(anchor?.mode ?? 'auto');
-      setQuery('');
-      setSearching(false);
-      setSearchState({ kind: 'idle' });
-      setFlow({ kind: 'none' });
-      setConfirming(false);
-    }
-  }, [visible, anchor?.mode]);
+    const wasVisible = wasVisibleRef.current;
+    wasVisibleRef.current = visible;
+    if (!visible || wasVisible) return; // yalnızca kapalı → açık geçişi
+
+    // Sheet yeniden açıldı: önceki açılıştan kalma isteklerin cevaplarını
+    // geçersiz kılmak için epoch'u artırıyoruz. (Bu özellik KORUNDU: her epoch
+    // artışı, aynı commit'te TÜM yükleniyor bayraklarının sıfırlanmasıyla
+    // eşleşir — hiçbir bayrak asılı kalamaz.)
+    epochRef.current += 1;
+    setSelectedMode(anchorModeRef.current ?? 'auto');
+    setQuery('');
+    setSearching(false);
+    setSearchState({ kind: 'idle' });
+    setFlow({ kind: 'none' });
+    setConfirming(false);
+  }, [visible]);
 
   // Sheet İÇİNDEKİ etkileşimli kontroller ('checking' doğrulaması ya da
   // 'confirming' onayı sürerken) burada kilitlenir — amaç, aynı anda ikinci
