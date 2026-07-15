@@ -14,8 +14,12 @@ export const getMyLists = async (req: Request, res: Response, next: NextFunction
             res.status(401).json({ success: false, message: 'Unauthorized' });
             return;
         }
+        if (!req.country) {
+            res.status(400).json({ success: false, message: 'Ülke belirlenemedi' });
+            return;
+        }
 
-        const lists = await ListService.getUserLists(req.user.id);
+        const lists = await ListService.getUserLists(req.user.id, req.country.id);
 
         res.status(200).json({
             success: true,
@@ -57,8 +61,12 @@ export const createList = async (req: Request, res: Response, next: NextFunction
             res.status(401).json({ success: false, message: 'Unauthorized' });
             return;
         }
+        if (!req.country) {
+            res.status(400).json({ success: false, message: 'Ülke belirlenemedi' });
+            return;
+        }
 
-        const list = await ListService.createList(req.user.id, req.body);
+        const list = await ListService.createList(req.user.id, req.country.id, req.body);
         
         res.status(201).json({
             success: true,
@@ -228,13 +236,18 @@ export const createFromTemplate = async (req: Request, res: Response, next: Next
             res.status(401).json({ success: false, message: 'Unauthorized' });
             return;
         }
+        if (!req.country) {
+            res.status(400).json({ success: false, message: 'Ülke belirlenemedi' });
+            return;
+        }
 
         const { templateId } = req.params;
         const { name } = req.body;
-        
+
         const list = await ListService.createFromTemplate(
             req.user.id,
             parseInt(templateId),
+            req.country.id,
             name
         );
         

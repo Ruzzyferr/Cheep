@@ -23,33 +23,44 @@ vi.mock('../src/utils/prisma.client.js', () => ({
   },
 }));
 
-import { createList, activateList, cloneList, importFromList } from '../src/api/lists/lists.service.js';
+import { getUserLists, createList, activateList, cloneList, importFromList } from '../src/api/lists/lists.service.js';
 
 beforeEach(() => { updateMany.mockReset(); create.mockReset(); findFirst.mockReset(); update.mockReset(); $transaction.mockClear(); });
 
+describe('getUserLists', () => {
+  it('yalnızca istenen ülkenin listelerini çeker', async () => {
+    findMany.mockResolvedValue([]);
+    await getUserLists(1, 5);
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: { user_id: 1, country_id: 5 },
+    }));
+  });
+});
+
 describe('createList', () => {
-  it('yeni listeyi aktif yapar ve diğerlerini pasife çeker', async () => {
-    create.mockResolvedValue({ id: 5, status: 'active' });
-    await createList(1, { name: 'Test' } as any);
-    // diğerleri inactive
+  it('yeni listeyi ülkeye bağlar, AYNI ÜLKEDEKİ diğerlerini pasife çeker', async () => {
+    create.mockResolvedValue({ id: 5, status: 'active', country_id: 5 });
+    await createList(1, 5, { name: 'Test' } as any);
+    // diğerleri inactive — ülkeye göre süzülü
     expect(updateMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: { user_id: 1, status: 'active' },
+      where: { user_id: 1, country_id: 5, status: 'active' },
       data: { status: 'inactive' },
     }));
-    // yeni liste active
+    // yeni liste active + ülkeli
     expect(create).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ user_id: 1, status: 'active' }),
+      data: expect.objectContaining({ user_id: 1, country_id: 5, status: 'active' }),
     }));
   });
 });
 
 describe('activateList', () => {
-  it('sahip listeyi aktif yapar, diğerlerini pasife', async () => {
-    findFirst.mockResolvedValue({ id: 9, user_id: 1 });
+  it('sahip listeyi aktif yapar, AYNI ÜLKEDEKİ diğerlerini pasife', async () => {
+    findFirst.mockResolvedValue({ id: 9, user_id: 1, country_id: 7 });
     update.mockResolvedValue({ id: 9, status: 'active' });
     const res = await activateList(9, 1);
+    // deaktivasyon listenin kendi ülkesiyle sınırlı (7), başka ülkeye dokunmaz
     expect(updateMany).toHaveBeenCalledWith(expect.objectContaining({
-      where: { user_id: 1, status: 'active' }, data: { status: 'inactive' },
+      where: { user_id: 1, country_id: 7, status: 'active' }, data: { status: 'inactive' },
     }));
     expect(update).toHaveBeenCalledWith(expect.objectContaining({
       where: { id: 9 }, data: { status: 'active' },
@@ -65,9 +76,9 @@ describe('activateList', () => {
 });
 
 describe('cloneList', () => {
-  it('kalemleri brand_independent ile kopyalar, klon pasif', async () => {
+  it('kalemleri brand_independent ile kopyalar, klon pasif ve kaynağın ülkesinde', async () => {
     findFirst.mockResolvedValue({
-      id: 3, user_id: 1, name: 'Haftalık', budget: null,
+      id: 3, user_id: 1, country_id: 7, name: 'Haftalık', budget: null,
       list_items: [{ product_id: 10, quantity: 2, unit: 'adet', brand_independent: true }],
     });
     const created = { id: 99 };
@@ -77,7 +88,7 @@ describe('cloneList', () => {
       fn({ list: { create: txCreate }, listItem: { createMany: txCreateMany } }));
     const res = await cloneList(3, 1);
     expect(txCreate).toHaveBeenCalledWith(expect.objectContaining({
-      data: expect.objectContaining({ user_id: 1, name: 'Haftalık (Kopya)', status: 'inactive' }),
+      data: expect.objectContaining({ user_id: 1, country_id: 7, name: 'Haftalık (Kopya)', status: 'inactive' }),
     }));
     expect(txCreateMany).toHaveBeenCalledWith(expect.objectContaining({
       data: [expect.objectContaining({ list_id: 99, product_id: 10, quantity: 2, unit: 'adet', brand_independent: true })],

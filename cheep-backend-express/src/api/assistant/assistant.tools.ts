@@ -138,7 +138,9 @@ export function buildToolExecutor(userId: number, countryId?: number) {
         }
 
         case 'get_user_lists': {
-          return await Lists.getUserLists(userId);
+          // Listeler ülkeye göre süzülür — asistan başka ülkenin listelerini görmesin.
+          if (countryId == null) return { error: 'Ülke belirlenemedi' };
+          return await Lists.getUserLists(userId, countryId);
         }
 
         case 'get_list_items': {
@@ -146,7 +148,9 @@ export function buildToolExecutor(userId: number, countryId?: number) {
         }
 
         case 'create_list': {
-          return await Lists.createList(userId, { name: args.name, budget: args.budget });
+          // Yeni liste isteğin ülkesine bağlanır (country_id zorunlu).
+          if (countryId == null) return { error: 'Ülke belirlenemedi' };
+          return await Lists.createList(userId, countryId, { name: args.name, budget: args.budget });
         }
 
         case 'add_items_to_list': {

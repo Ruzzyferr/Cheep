@@ -60,6 +60,7 @@ model Country {
   products Product[]
   users    User[]
   branches StoreBranch[]
+  lists    List[]
 
   @@map("countries")
 }
@@ -245,6 +246,10 @@ model StorePrice {
 model List {
   id          Int      @id @default(autoincrement())
   user_id     Int
+  // Liste OLUŞTURULDUĞU ülkeye aittir ve yalnızca o ülkedeyken görünür: içindeki
+  // ürünler/fiyatlar o ülkenin kataloğuna ait, başka ülkede anlamsız. Aktif liste
+  // de ÜLKE BAŞINA tektir (bkz. lists.service createList/activateList).
+  country_id  Int
   name        String
   is_template Boolean  @default(false) // Şablon liste mi?
   budget      Decimal? @db.Decimal(10, 2) // Opsiyonel bütçe
@@ -259,9 +264,11 @@ model List {
 
   // İlişkiler
   user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  country    Country    @relation(fields: [country_id], references: [id], onDelete: Cascade)
   list_items ListItem[]
 
   @@index([user_id])
+  @@index([country_id])
   @@index([is_template])
   @@index([status])
   @@map("lists")

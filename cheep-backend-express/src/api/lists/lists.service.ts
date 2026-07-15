@@ -7,11 +7,12 @@ import { notFound } from '../../utils/app-error.js';
 // ============================================
 
 /**
- * Kullanıcının tüm listelerini getir (aktif önce, sonra updated_at desc)
+ * Kullanıcının tüm listelerini getir (aktif önce, sonra updated_at desc).
+ * ÜLKEYE göre süzülür: bir liste yalnızca oluşturulduğu ülkedeyken görünür.
  */
-export const getUserLists = async (userId: number) => {
+export const getUserLists = async (userId: number, countryId: number) => {
     const lists = await prisma.list.findMany({
-        where: { user_id: userId },
+        where: { user_id: userId, country_id: countryId },
         include: {
             list_items: {
                 include: {
@@ -127,21 +128,25 @@ export const getListById = async (listId: number, userId: number) => {
 };
 
 /**
- * Yeni liste oluştur (aktif); kullanıcının diğer listeleri pasife çekilir.
+ * Yeni liste oluştur (aktif); kullanıcının AYNI ÜLKEDEKİ diğer listeleri pasife
+ * çekilir. Liste oluşturulduğu ülkeye bağlanır.
  */
 export const createList = async (
     userId: number,
+    countryId: number,
     data: {
         name: string;
         budget?: number | string | null;
     }
 ) => {
-    // 🔥 KURAL: Aynı anda sadece 1 aktif liste olabilir.
-    // "mevcut aktifleri inactive yap + yeni listeyi oluştur" atomik olmalı (race condition).
+    // 🔥 KURAL: Aynı anda ÜLKE BAŞINA sadece 1 aktif liste olabilir. Deaktivasyon
+    // ülkeye göre süzülür — yoksa Polonya'da liste açmak Türkiye'deki aktif listeyi
+    // pasife çekerdi. "mevcut aktifleri inactive yap + yeni listeyi oluştur" atomik.
     return await prisma.$transaction(async (tx) => {
         await tx.list.updateMany({
             where: {
                 user_id: userId,
+                country_id: countryId,
                 status: 'active',
             },
             data: {
@@ -152,6 +157,7 @@ export const createList = async (
         return await tx.list.create({
             data: {
                 user_id: userId,
+                country_id: countryId,
                 name: data.name,
                 budget: data.budget != null ? new Decimal(data.budget) : null,
                 status: 'active', // Yeni liste her zaman active olarak oluşturulur
@@ -171,9 +177,12 @@ export const activateList = async (listId: number, userId: number) => {
     const owned = await prisma.list.findFirst({ where: { id: listId, user_id: userId } });
     if (!owned) return null;
     return await prisma.$transaction(async (tx) => {
+        // Deaktivasyon listenin KENDİ ülkesiyle sınırlı — aktif liste ülke başına
+        // tektir; başka ülkedeki aktif listeye dokunma.
         await tx.list.updateMany({
             where: {
                 user_id: userId,
+                country_id: owned.country_id,
                 status: 'active',
             },
             data: {
@@ -196,7 +205,8 @@ export const cloneList = async (listId: number, userId: number) => {
     if (!src) return null;
     return await prisma.$transaction(async (tx) => {
         const clone = await tx.list.create({
-            data: { user_id: userId, name: `${src.name} (Kopya)`, budget: src.budget, status: 'inactive' },
+            // Klon, kaynağın ülkesinde kalır (pasif oluşturulur; aktif listeyi ezmez).
+            data: { user_id: userId, country_id: src.country_id, name: `${src.name} (Kopya)`, budget: src.budget, status: 'inactive' },
         });
         if (src.list_items.length > 0) {
             await tx.listItem.createMany({
@@ -336,6 +346,7 @@ export const getTemplates = async () => {
 export const createFromTemplate = async (
     userId: number,
     templateId: number,
+    countryId: number,
     listName?: string
 ) => {
     // Şablonu bul
@@ -350,11 +361,17 @@ export const createFromTemplate = async (
         throw notFound('Şablon bulunamadı');
     }
 
-    // Yeni liste oluştur + şablon ürünlerini kopyala — atomik olmalı.
+    // Yeni liste oluştur + şablon ürünlerini kopyala — atomik olmalı. Yeni liste
+    // isteğin ülkesine bağlanır; aynı ülkedeki aktif liste pasife çekilir.
     const newListId = await prisma.$transaction(async (tx) => {
+        await tx.list.updateMany({
+            where: { user_id: userId, country_id: countryId, status: 'active' },
+            data: { status: 'inactive' },
+        });
         const newList = await tx.list.create({
             data: {
                 user_id: userId,
+                country_id: countryId,
                 name: listName || `${template.name} (Kopya)`,
                 budget: template.budget,
                 is_template: false,
@@ -504,10 +521,11 @@ export const replaceWithCompletedList = async (
             });
         }
 
-        // Yeni liste oluştur
+        // Yeni liste oluştur — tamamlanan listenin ülkesinde kalır (aynı ülke reuse).
         const newList = await tx.list.create({
             data: {
                 user_id: userId,
+                country_id: completedList.country_id,
                 name: completedList.name,
                 budget: completedList.budget,
                 is_template: false,
