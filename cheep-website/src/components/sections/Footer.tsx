@@ -62,8 +62,9 @@ export function Footer() {
           Tüm marka adları ve logoları ilgili sahiplerinin tescilli markalarıdır. Cheep bu
           marketlerle resmi bir ortaklık veya iş birliği içinde değildir; marka adları yalnızca
           hangi markete ait fiyatın gösterildiğini belirtmek için kullanılır. Türkiye’de fiyatlar
-          T.C. Ticaret Bakanlığı’nın herkese açık resmi kaynağından (marketfiyati.org.tr)
-          derlenir; bilgilendirme amaçlıdır ve kasadaki güncel fiyattan farklı olabilir.
+          T.C. Ticaret Bakanlığı’nın herkese açık resmi kaynağından (marketfiyati.org.tr),
+          Polonya’da ise marketlerin herkese açık kaynaklarından derlenir; bilgilendirme
+          amaçlıdır ve kasadaki güncel fiyattan farklı olabilir.
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-between gap-4 text-sm text-cream/50 md:flex-row">

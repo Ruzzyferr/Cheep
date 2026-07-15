@@ -56,7 +56,7 @@ export function Hero() {
         <div className="hero-copy max-w-2xl">
           <p className="hero-eyebrow eyebrow mb-6 inline-flex items-center gap-2 rounded-full border border-forest/20 bg-paper/60 px-4 py-2 text-forest-deep backdrop-blur">
             <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-clementine" />
-            Türkiye’de canlı · 5 ülke
+            Türkiye ve Polonya’da canlı · 5 ülke
           </p>
 
           <h1 className="text-hero font-display font-bold text-ink">

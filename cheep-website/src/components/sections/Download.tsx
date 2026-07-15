@@ -21,7 +21,7 @@ export function Download() {
                 Bir sonraki sepetin <span className="text-gradient-clementine">daha ucuz</span> olsun
               </h2>
               <p className="mx-auto mt-5 max-w-xl text-lg text-cream/70">
-                Cheep’i indir, listeni oluştur, tasarrufu gör. Türkiye’de ücretsiz.
+                Cheep’i indir, listeni oluştur, tasarrufu gör. Türkiye ve Polonya’da ücretsiz.
               </p>
 
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">

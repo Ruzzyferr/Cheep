@@ -3,10 +3,10 @@ import { Reveal } from '../ui/Reveal'
 // 2-letter codes render deterministically on every OS (flag emoji don't on Windows)
 const COUNTRIES = [
   { code: 'TR', tint: '#E30A17', name: 'Türkiye', stores: '7.272 şube', live: true },
+  { code: 'PL', tint: '#DC143C', name: 'Polonya', stores: '13.422 şube', live: true },
   { code: 'DE', tint: '#111111', name: 'Almanya', stores: '4.925 şube', live: false },
   { code: 'CH', tint: '#D52B1E', name: 'İsviçre', stores: '2.008 şube', live: false },
   { code: 'SE', tint: '#006AA7', name: 'İsveç', stores: '1.554 şube', live: false },
-  { code: 'PL', tint: '#DC143C', name: 'Polonya', stores: '730 şube', live: false },
 ]
 
 const BRANDS = [
@@ -21,7 +21,7 @@ export function Coverage() {
         <Reveal className="mx-auto mb-14 max-w-2xl text-center">
           <p className="eyebrow mb-4 text-clementine">Kapsam</p>
           <h2 className="text-section text-ink">
-            Türkiye’de canlı, <span className="text-gradient-forest">Avrupa yolda</span>
+            Türkiye ve Polonya’da canlı, <span className="text-gradient-forest">Avrupa yolda</span>
           </h2>
           <p className="mt-5 text-lg text-ink-soft">
             Aynı motor beş ülkede çalışıyor. Fiyatlar barkod bazında eşleşiyor, her hafta
