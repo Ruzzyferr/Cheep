@@ -41,6 +41,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocationAnchor } from '../../context/LocationContext';
 import { searchAddress, validateCandidate, type GeocodeCandidate } from '../../services/geocode.service';
 import type { PinnedAnchor } from '../../utils/anchor';
@@ -70,6 +71,7 @@ interface Props {
 
 export function LocationSheet({ visible, onClose }: Props) {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { anchor, pin, unpin } = useLocationAnchor();
 
   // Sheet her açıldığında mevcut çapaya göre başlasın (önceki kalıntı state sızmasın).
@@ -380,9 +382,13 @@ export function LocationSheet({ visible, onClose }: Props) {
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <KeyboardAvoidingView
         style={styles.overlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        <View style={styles.sheet}>
+        {/* Alt güvenli alan (sistem gezinme çubuğu) için paddingBottom inset'le
+            büyütülür — yoksa "otomatiğe dön" ve ülke butonları 3-tuşlu/gesture
+            çubuğunun altında kalır. Değer StyleSheet'te sabit olamaz (cihaza göre
+            değişir), o yüzden inline. */}
+        <View style={[styles.sheet, { paddingBottom: layout.screenPadding + insets.bottom }]}>
           <View style={styles.header}>
             <Text style={styles.title}>{t('location.title')}</Text>
             <TouchableOpacity onPress={handleClose} style={styles.closeBtn} hitSlop={8}>
@@ -613,7 +619,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     maxHeight: '85%',
-    paddingBottom: layout.screenPadding,
+    // paddingBottom inline verilir (layout.screenPadding + güvenli alan inset'i).
   },
   header: {
     flexDirection: 'row',

@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import * as Location from 'expo-location';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -614,10 +615,13 @@ function OptionPickerModal({
   onSelect: (value: string) => void;
   onClose: () => void;
 }) {
+  // Alt sistem gezinme çubuğu için güvenli alan inset'i — dropdown içeriği
+  // 3-tuşlu/gesture çubuğunun altında kalmasın.
+  const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.pickerOverlay}>
-        <View style={styles.pickerModal}>
+        <View style={[styles.pickerModal, { paddingBottom: layout.screenPadding + insets.bottom }]}>
           <View style={styles.pickerHeader}>
             <Text style={styles.pickerTitle}>{title}</Text>
             <TouchableOpacity onPress={onClose} style={styles.pickerClose}>
@@ -900,7 +904,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: borderRadius.xl,
     borderTopRightRadius: borderRadius.xl,
     maxHeight: '70%',
-    paddingBottom: layout.screenPadding,
+    // paddingBottom inline verilir (layout.screenPadding + güvenli alan inset'i).
   },
 
   pickerHeader: {
