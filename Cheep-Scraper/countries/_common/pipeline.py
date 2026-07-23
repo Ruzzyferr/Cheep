@@ -192,16 +192,29 @@ def summary_is_healthy(summary: Dict) -> bool:
     successful enough to gate downstream actions (e.g. weekly prune) on?
 
     A run is healthy only if there is at least one market entry and every
-    market entry both avoided count-collapse (no `skipped`) and had zero
-    failed imports."""
+    market entry avoided count-collapse (no `skipped`) and kept failed
+    imports within tolerance.
+
+    Failure tolerance (2026-07-23): the original zero-failed rule was too
+    strict in practice — a SINGLE malformed item out of 1,003 (prod
+    Biedronka, 2026-07-21) marked the whole run unhealthy, which cancelled
+    the nightly prune AND the EAN harvest even though 1,002 real prices had
+    just been imported. The gate exists to stop prune after a *collapsed*
+    run, not to demand perfection: tolerate up to max(1, 1%) failed imports
+    per market, as long as that market still imported something."""
     markets = summary.get("markets") or []
     if not markets:
         return False
     for market in markets:
         if market.get("skipped"):
             return False
-        if market.get("failed", 0) > 0:
-            return False
+        failed = market.get("failed", 0)
+        if failed > 0:
+            successful = market.get("successful", 0)
+            if successful == 0:
+                return False
+            if failed > max(1, (successful + failed) // 100):
+                return False
     return True
 
 

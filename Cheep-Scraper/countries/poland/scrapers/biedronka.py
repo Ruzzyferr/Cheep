@@ -161,7 +161,13 @@ FALLBACK_CATEGORY_URLS = [
     f"{BASE}/drogeria/papier-toaletowy-i-chusteczki/papier-toaletowy/",
 ]
 
-MAX_PAGES = 500              # hard cap: total category-listing page fetches per run
+MAX_PAGES = 1000             # hard cap: total category-listing page fetches per run.
+                             # 500 -> 1000 (2026-07-23): the sitemap now yields ~245
+                             # categories and the 500 cap was being hit mid-crawl on prod
+                             # (2026-07-21 run: cap reached at 1,003/1,501 products, so
+                             # roughly a third of the catalog silently never refreshed).
+                             # ~245 categories x mostly 1-3 pages fits comfortably under
+                             # 1000 while still guarding against a crawler trap.
 MAX_PAGES_PER_CATEGORY = 20  # hard cap: pages within a single category (crawler-trap guard)
 MAX_SITEMAPS = 10            # hard cap: child <sitemap> entries followed from the index
 

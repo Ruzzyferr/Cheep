@@ -50,6 +50,46 @@ def test_summary_unhealthy_when_market_has_failures():
     assert summary_is_healthy(summary) is False
 
 
+def test_summary_healthy_with_single_failure_within_tolerance():
+    # 2026-07-23: 1 malformed item out of 1,003 (prod Biedronka 2026-07-21)
+    # must NOT cancel the nightly prune + EAN harvest — tolerate up to
+    # max(1, 1%) failed imports per market.
+    summary = {
+        "country": "PL",
+        "markets": [
+            {"market": "Biedronka", "successful": 1002, "failed": 1},
+        ],
+    }
+    assert summary_is_healthy(summary) is True
+
+
+def test_summary_healthy_at_one_percent_failure_boundary():
+    # 10 failed of 1000 attempted == exactly the 1% allowance -> healthy;
+    # 11 of 1001 -> over the allowance -> unhealthy.
+    at_boundary = {
+        "country": "PL",
+        "markets": [{"market": "Carrefour", "successful": 990, "failed": 10}],
+    }
+    over_boundary = {
+        "country": "PL",
+        "markets": [{"market": "Carrefour", "successful": 990, "failed": 11}],
+    }
+    assert summary_is_healthy(at_boundary) is True
+    assert summary_is_healthy(over_boundary) is False
+
+
+def test_summary_unhealthy_when_only_failures():
+    # failed>0 with successful==0 is a collapsed market, never tolerated —
+    # the min-1 allowance must not mask a market that imported nothing.
+    summary = {
+        "country": "PL",
+        "markets": [
+            {"market": "Auchan", "successful": 0, "failed": 1},
+        ],
+    }
+    assert summary_is_healthy(summary) is False
+
+
 def test_summary_unhealthy_when_no_markets():
     summary = {"country": "PL", "markets": []}
     assert summary_is_healthy(summary) is False
