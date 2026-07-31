@@ -138,3 +138,8 @@ cheep-backend-express/build/
 deploy/.env
 deploy/.droplet-ip
 deploy/*.pem
+
+# Derleme çıktıları — mağaza paketleri depoda tutulmaz (her biri ~60 MB).
+# Üretimi tekrarlanabilir: docs/BUILD-RELEASE.md
+*.aab
+*.apk

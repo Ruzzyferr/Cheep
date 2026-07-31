@@ -52,17 +52,31 @@ yükleme yapılamaz — düşürmek de mümkün değil.
 
 ## Android AAB
 
+⚠️ `--clean` `android/` klasörünü **tamamen siler**. `key.properties` ve
+keystore git'te olmadığı için önce yedekle, sonra geri koy:
+
 ```bash
 cd C:/dev/Cheep/Cheep-Mobile
+
+# 0) İmza dosyalarını kenara al (android/ birazdan silinecek)
+mkdir -p /tmp/sign
+cp android/key.properties android/app/cheep-upload.keystore /tmp/sign/
 
 # 1) Native projeyi üret (app.json / plugin değişikliklerini uygular)
 npx expo prebuild --platform android --clean
 
-# 2) İmzalı release paketi
+# 2) İmza dosyalarını geri koy
+cp /tmp/sign/key.properties android/
+cp /tmp/sign/cheep-upload.keystore android/app/
+
+# 3) İmzalı release paketi
 cd android
-./gradlew clean
 ./gradlew bundleRelease
 ```
+
+`build.gradle`'daki imza **yapılandırmasını** geri koymana gerek yok — onu
+`plugins/withReleaseSigning.js` her prebuild'de yeniden enjekte ediyor
+(aşağıya bak). Geri konması gereken tek şey anahtarın kendisi.
 
 Çıktı: `android/app/build/outputs/bundle/release/app-release.aab`
 
@@ -81,19 +95,35 @@ cp app/build/outputs/bundle/release/app-release.aab \
 adb install -r app/build/outputs/apk/release/app-release.apk
 ```
 
-### İmzayı doğrula
+### İmzayı doğrula — BUNU HER SÜRÜMDE YAP
+
+En sinsi hata: AAB'nin **debug anahtarıyla** imzalanmış olması. Derleme
+başarılı görünür, dosya üretilir, ama Play Console yüklemeyi reddeder.
+Parmak izini yayındaki sürümle karşılaştır — eşleşmeliler:
 
 ```bash
-# AAB'nin gerçekten imzalandığını teyit et
-jarsigner -verify -verbose -certs \
-  app/build/outputs/bundle/release/app-release.aab | head -5
+export PATH="/c/Program Files/Java/jdk-17/bin:$PATH"
+
+# AAB'yi imzalayan sertifika
+unzip -p app/build/outputs/bundle/release/app-release.aab META-INF/*.RSA \
+  | keytool -printcert | grep -E "Owner:|SHA1:"
 ```
+
+Beklenen (1.3.0 itibarıyla yayındaki anahtar):
+
+```
+Owner: CN=Cheep, OU=Mobile, O=Cheep, L=Istanbul, C=TR
+SHA1:  9D:E5:2F:06:13:A2:F7:CF:02:D4:10:93:41:E7:B8:71:73:87:AF:73
+```
+
+`Owner: CN=Android Debug` görüyorsan **yükleme**: imza yapılandırması
+uygulanmamış demektir (`key.properties` eksik olabilir).
 
 ---
 
 ## İmzalama
 
-`android/key.properties` (git'te **değil**, elle oluşturulur):
+`android/key.properties` (git'te **değil**, elle konur):
 
 ```properties
 storeFile=cheep-upload.keystore
@@ -104,14 +134,22 @@ keyPassword=***
 
 Keystore dosyası: `android/app/cheep-upload.keystore`
 
-⚠️ **Bu iki dosyanın yedeğini güvenli bir yerde tut.** Keystore kaybolursa
-mevcut uygulamaya bir daha güncelleme yükleyemezsin — Play Store yeni bir
-uygulama olarak yayınlamanı ister ve mevcut kullanıcılar güncelleme alamaz.
-(Play App Signing açıksa Google anahtar sıfırlaması yapabilir, ama upload
-anahtarını kaybetmek yine de günlerce süren bir destek sürecidir.)
+### Neden bir config plugin var
 
-`android/` her prebuild'de silindiği için bu iki dosyayı prebuild sonrası
-geri koyman gerekir.
+Expo'nun ürettiği `build.gradle` şablonunda release bloğu **debug anahtarıyla**
+imzalıyor ("Caution! In production, you need to generate your own keystore
+file"). `build.gradle`'ı elle düzeltirsen ilk `prebuild --clean`'de kaybolur ve
+fark etmeden debug imzalı bir AAB üretirsin.
+
+`plugins/withReleaseSigning.js` bu bloğu her prebuild'de yeniden enjekte eder,
+yani tuzak kapalı. Expo şablonu ileride değişirse plugin sessizce atlamaz —
+anlaşılır bir hata fırlatıp derlemeyi durdurur.
+
+⚠️ **Keystore ve key.properties'in yedeğini güvenli bir yerde tut.** Keystore
+kaybolursa mevcut uygulamaya bir daha güncelleme yükleyemezsin — Play Store
+yeni bir uygulama olarak yayınlamanı ister ve mevcut kullanıcılar güncelleme
+alamaz. (Play App Signing açıksa Google upload anahtarını sıfırlayabilir, ama
+bu yine de günlerce süren bir destek sürecidir.)
 
 ---
 
