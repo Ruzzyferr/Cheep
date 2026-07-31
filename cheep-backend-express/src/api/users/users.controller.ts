@@ -1,3 +1,4 @@
+import { intParam } from '../../utils/request-params.js';
 import { type Request, type Response, type NextFunction } from 'express';
 import * as UserService from './users.service.js';
 
@@ -137,7 +138,7 @@ export const addFavoriteStore = async (req: Request, res: Response, next: NextFu
         }
 
         const { storeId } = req.params;
-        const result = await UserService.addFavoriteStore(req.user.id, parseInt(storeId));
+        const result = await UserService.addFavoriteStore(req.user.id, intParam(storeId));
 
         res.status(200).json({
             success: true,
@@ -162,7 +163,7 @@ export const removeFavoriteStore = async (req: Request, res: Response, next: Nex
         }
 
         const { storeId } = req.params;
-        const result = await UserService.removeFavoriteStore(req.user.id, parseInt(storeId));
+        const result = await UserService.removeFavoriteStore(req.user.id, intParam(storeId));
 
         res.status(200).json({
             success: true,

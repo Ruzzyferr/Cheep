@@ -1,3 +1,4 @@
+import { intParam } from '../../utils/request-params.js';
 import { type Request, type Response, type NextFunction } from 'express';
 import * as CompareEngine from '../../services/compare-engine.service.js';
 import { prisma } from '../../utils/prisma.client.js';
@@ -22,7 +23,7 @@ export const compareList = async (req: Request, res: Response, next: NextFunctio
         } = req.body;
 
         const result = await CompareEngine.compareShoppingList(
-            parseInt(id),
+            intParam(id),
             req.user.id,
             {
                 maxStores: maxStores || 3,
@@ -37,7 +38,7 @@ export const compareList = async (req: Request, res: Response, next: NextFunctio
         // Sadece last_compared_at güncelle (status'i değiştirme)
         // user_id ile sınırla: başkasının listesi güncellenemesin (IDOR koruması)
         await prisma.list.updateMany({
-            where: { id: parseInt(id), user_id: req.user.id },
+            where: { id: intParam(id), user_id: req.user.id },
             data: {
                 last_compared_at: new Date(),
             },
@@ -67,7 +68,7 @@ export const useRoute = async (req: Request, res: Response, next: NextFunction) 
 
         // Listeyi completed yap (sadece sahibinin listesi - IDOR koruması)
         const result = await prisma.list.updateMany({
-            where: { id: parseInt(id), user_id: req.user.id },
+            where: { id: intParam(id), user_id: req.user.id },
             data: {
                 status: 'completed',
                 completed_at: new Date(),

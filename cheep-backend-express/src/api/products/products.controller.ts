@@ -1,3 +1,4 @@
+import { param } from '../../utils/request-params.js';
 import { type Request, type Response, type NextFunction } from 'express';
 import * as ProductService from './products.service.js';
 import {productMatcher} from "./product-matcher.service.js";
@@ -67,7 +68,7 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
 
 export const getProductByBarcode = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { barcode } = req.params;
+        const barcode = param(req.params.barcode);
         const product = await ProductService.getProductByBarcode(barcode, req.country?.id);
         res.status(200).json(product);
     } catch (error) {

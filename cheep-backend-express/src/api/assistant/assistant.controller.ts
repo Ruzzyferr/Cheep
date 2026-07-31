@@ -1,3 +1,4 @@
+import { intParam } from '../../utils/request-params.js';
 import { type Request, type Response, type NextFunction } from 'express';
 import * as AssistantService from './assistant.service.js';
 
@@ -58,7 +59,7 @@ export const get = async (req: Request, res: Response) => {
       return;
     }
 
-    const thread = await AssistantService.getThread(parseInt(req.params.id), req.user.id);
+    const thread = await AssistantService.getThread(intParam(req.params.id), req.user.id);
 
     res.status(200).json({
       success: true,
@@ -79,7 +80,7 @@ export const remove = async (req: Request, res: Response) => {
       return;
     }
 
-    const result = await AssistantService.deleteThread(parseInt(req.params.id), req.user.id);
+    const result = await AssistantService.deleteThread(intParam(req.params.id), req.user.id);
 
     res.status(200).json(result);
   } catch (e: any) {
@@ -99,7 +100,7 @@ export const message = async (req: Request, res: Response) => {
 
     const result = await AssistantService.sendMessage(
       req.user.id,
-      parseInt(req.params.id),
+      intParam(req.params.id),
       req.body.content,
       req.country?.currency ?? 'TRY',
       req.country?.id,

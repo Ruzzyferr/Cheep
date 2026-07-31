@@ -1,0 +1,12 @@
+[Unit]
+Description=Cheep veritabanı yedeği zamanlayıcısı (her gece 02:00)
+
+[Timer]
+# PL scrape hattı 03:00'te başlıyor; yedek ondan önce alınsın ki günün
+# ingest'i öncesindeki temiz duruma dönebilelim.
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

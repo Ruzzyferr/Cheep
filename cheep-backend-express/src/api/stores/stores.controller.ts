@@ -1,3 +1,4 @@
+import { intParam } from '../../utils/request-params.js';
 import { type Request, type Response, type NextFunction } from 'express';
 import * as StoreService from './stores.service.js';
 import * as StoreBranchService from '../../services/store-branch.service.js';
@@ -16,7 +17,7 @@ export const getAllStores = async (req: Request, res: Response, next: NextFuncti
 
 export const getStoreById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const store = await StoreService.getStoreById(parseInt(req.params.id));
+        const store = await StoreService.getStoreById(intParam(req.params.id));
         if (!store) {
             res.status(404).json({ 
                 success: false,
@@ -44,7 +45,7 @@ export const createStore = async (req: Request, res: Response, next: NextFunctio
 
 export const updateStore = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const store = await StoreService.updateStore(parseInt(req.params.id), req.body);
+        const store = await StoreService.updateStore(intParam(req.params.id), req.body);
         res.status(200).json(store);
     } catch (error) {
         next(error);
@@ -53,7 +54,7 @@ export const updateStore = async (req: Request, res: Response, next: NextFunctio
 
 export const deleteStore = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await StoreService.deleteStore(parseInt(req.params.id));
+        await StoreService.deleteStore(intParam(req.params.id));
         res.status(204).send();
     } catch (error) {
         next(error);

@@ -1,3 +1,4 @@
+import { intParam } from '../../utils/request-params.js';
 import { type Request, type Response, type NextFunction } from 'express';
 import * as ListService from './lists.service.js';
 
@@ -41,7 +42,7 @@ export const getListById = async (req: Request, res: Response, next: NextFunctio
         }
 
         const { id } = req.params;
-        const list = await ListService.getListById(parseInt(id), req.user.id);
+        const list = await ListService.getListById(intParam(id), req.user.id);
         
         res.status(200).json({
             success: true,
@@ -154,7 +155,7 @@ export const updateList = async (req: Request, res: Response, next: NextFunction
         }
 
         const { id } = req.params;
-        const list = await ListService.updateList(parseInt(id), req.user.id, req.body);
+        const list = await ListService.updateList(intParam(id), req.user.id, req.body);
         
         res.status(200).json({
             success: true,
@@ -177,7 +178,7 @@ export const deleteList = async (req: Request, res: Response, next: NextFunction
         }
 
         const { id } = req.params;
-        const result = await ListService.deleteList(parseInt(id), req.user.id);
+        const result = await ListService.deleteList(intParam(id), req.user.id);
         
         res.status(200).json(result);
     } catch (error) {
@@ -196,7 +197,7 @@ export const getListStatistics = async (req: Request, res: Response, next: NextF
         }
 
         const { id } = req.params;
-        const stats = await ListService.getListStatistics(parseInt(id), req.user.id);
+        const stats = await ListService.getListStatistics(intParam(id), req.user.id);
         
         res.status(200).json({
             success: true,
@@ -246,7 +247,7 @@ export const createFromTemplate = async (req: Request, res: Response, next: Next
 
         const list = await ListService.createFromTemplate(
             req.user.id,
-            parseInt(templateId),
+            intParam(templateId),
             req.country.id,
             name
         );
@@ -280,7 +281,7 @@ export const importFromCompletedList = async (req: Request, res: Response, next:
         
         const result = await ListService.importFromCompletedList(
             req.user.id,
-            parseInt(completedListId),
+            intParam(completedListId),
             targetListId
         );
         
@@ -310,7 +311,7 @@ export const replaceWithCompletedList = async (req: Request, res: Response, next
         
         const newList = await ListService.replaceWithCompletedList(
             req.user.id,
-            parseInt(completedListId),
+            intParam(completedListId),
             oldActiveListId
         );
         
@@ -341,7 +342,7 @@ export const addItemToList = async (req: Request, res: Response, next: NextFunct
         }
 
         const { id } = req.params;
-        const item = await ListService.addItemToList(parseInt(id), req.user.id, req.body);
+        const item = await ListService.addItemToList(intParam(id), req.user.id, req.body);
         
         res.status(201).json({
             success: true,
@@ -364,7 +365,7 @@ export const updateListItem = async (req: Request, res: Response, next: NextFunc
         }
 
         const { itemId } = req.params;
-        const item = await ListService.updateListItem(parseInt(itemId), req.user.id, req.body);
+        const item = await ListService.updateListItem(intParam(itemId), req.user.id, req.body);
         
         res.status(200).json({
             success: true,
@@ -388,8 +389,8 @@ export const removeItemFromList = async (req: Request, res: Response, next: Next
 
         const { id, itemId } = req.params;
         const result = await ListService.removeItemFromList(
-            parseInt(id),
-            parseInt(itemId),
+            intParam(id),
+            intParam(itemId),
             req.user.id
         );
         
@@ -410,7 +411,7 @@ export const clearList = async (req: Request, res: Response, next: NextFunction)
         }
 
         const { id } = req.params;
-        const result = await ListService.clearList(parseInt(id), req.user.id);
+        const result = await ListService.clearList(intParam(id), req.user.id);
         
         res.status(200).json(result);
     } catch (error) {

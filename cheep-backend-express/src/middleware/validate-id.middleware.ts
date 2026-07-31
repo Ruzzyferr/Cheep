@@ -1,3 +1,4 @@
+import { param as paramValue } from '../utils/request-params.js';
 import { type Request, type Response, type NextFunction } from 'express';
 
 /**
@@ -10,7 +11,8 @@ import { type Request, type Response, type NextFunction } from 'express';
  */
 export const validateIdParam = (param = 'id') => {
     return (req: Request, res: Response, next: NextFunction): void => {
-        const raw = req.params[param];
+        // Express 5.2: params değerleri string | string[] — tekile daralt.
+        const raw = paramValue(req.params[param]);
         // Sadece rakamlardan oluşmalı (işaret/ondalık/boşluk yok).
         if (raw === undefined || !/^\d+$/.test(raw)) {
             res.status(400).json({

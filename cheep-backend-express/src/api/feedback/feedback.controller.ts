@@ -1,3 +1,4 @@
+import { intParam } from '../../utils/request-params.js';
 import { type Request, type Response, type NextFunction } from 'express';
 import * as FeedbackService from './feedback.service.js';
 
@@ -63,7 +64,7 @@ export const getUserFeedbacks = async (req: Request, res: Response, next: NextFu
 export const getPriceFeedbacks = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { storePriceId } = req.params;
-        const feedbacks = await FeedbackService.getPriceFeedbacks(parseInt(storePriceId));
+        const feedbacks = await FeedbackService.getPriceFeedbacks(intParam(storePriceId));
 
         res.status(200).json({
             success: true,
@@ -88,7 +89,7 @@ export const deleteFeedback = async (req: Request, res: Response, next: NextFunc
         }
 
         const { feedbackId } = req.params;
-        await FeedbackService.deleteFeedback(parseInt(feedbackId), req.user.id);
+        await FeedbackService.deleteFeedback(intParam(feedbackId), req.user.id);
 
         res.status(204).send();
     } catch (error) {
@@ -102,7 +103,7 @@ export const deleteFeedback = async (req: Request, res: Response, next: NextFunc
 export const getPriceAccuracyStats = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { storePriceId } = req.params;
-        const stats = await FeedbackService.getPriceAccuracyStats(parseInt(storePriceId));
+        const stats = await FeedbackService.getPriceAccuracyStats(intParam(storePriceId));
 
         res.status(200).json({
             success: true,

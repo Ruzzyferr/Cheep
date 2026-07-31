@@ -1,3 +1,4 @@
+import { intParam, param } from '../../utils/request-params.js';
 import { type Request, type Response, type NextFunction } from 'express';
 import * as CategoryService from './categories.service.js';
 import { categoryMatcher } from './category-matcher.service.js';
@@ -50,7 +51,7 @@ export const getCategoryTree = async (req: Request, res: Response, next: NextFun
  */
 export const getCategoryById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = intParam(req.params.id);
         const category = await CategoryService.getCategoryById(id);
 
         if (!category) {
@@ -74,7 +75,7 @@ export const getCategoryById = async (req: Request, res: Response, next: NextFun
  */
 export const getCategoryBySlug = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { slug } = req.params;
+        const slug = param(req.params.slug);
         const category = await CategoryService.getCategoryBySlug(slug);
 
         if (!category) {
@@ -98,7 +99,7 @@ export const getCategoryBySlug = async (req: Request, res: Response, next: NextF
  */
 export const getSubcategories = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = intParam(req.params.id);
         const subcategories = await CategoryService.getSubcategories(id);
         res.status(200).json({
             success: true,
@@ -170,7 +171,7 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
  */
 export const updateCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = intParam(req.params.id);
         const category = await CategoryService.updateCategory(id, req.body);
         res.status(200).json(category);
     } catch (error) {
@@ -183,7 +184,7 @@ export const updateCategory = async (req: Request, res: Response, next: NextFunc
  */
 export const deleteCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = intParam(req.params.id);
         await CategoryService.deleteCategory(id);
         res.status(204).send();
     } catch (error) {
@@ -196,7 +197,7 @@ export const deleteCategory = async (req: Request, res: Response, next: NextFunc
  */
 export const getCategoryBreadcrumb = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = intParam(req.params.id);
         const breadcrumb = await CategoryService.getCategoryBreadcrumb(id);
         res.status(200).json(breadcrumb);
     } catch (error) {
@@ -209,7 +210,7 @@ export const getCategoryBreadcrumb = async (req: Request, res: Response, next: N
  */
 export const getCategoryProductCount = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const id = parseInt(req.params.id);
+        const id = intParam(req.params.id);
         const includeChildren = req.query.includeChildren === 'true';
         const count = await CategoryService.getCategoryProductCount(id, includeChildren);
         res.status(200).json({ count });
