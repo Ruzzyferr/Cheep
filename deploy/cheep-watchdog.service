@@ -1,0 +1,12 @@
+[Unit]
+Description=Cheep nöbetçi (container/API/DB/disk/yedek/TLS kontrolü)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/cheep/deploy/watchdog.sh
+Nice=15
+IOSchedulingClass=idle
+StandardOutput=append:/var/log/cheep-watchdog.log
+StandardError=append:/var/log/cheep-watchdog.log
