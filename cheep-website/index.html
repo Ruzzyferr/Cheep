@@ -3,28 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/cheep-favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="apple-touch-icon" href="/cheep-favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0F3A29" />
-    <meta
-      name="description"
-      content="Cheep — aynı ürün, en ucuz fiyat. Marketlerin fiyatlarını karşılaştır, alışveriş listeni en uygun yere taşı, her sepette tasarruf et."
-    />
-    <meta property="og:title" content="Cheep — Aynı ürün, en ucuz fiyat" />
-    <meta
-      property="og:description"
-      content="Marketlerin fiyatlarını karşılaştır, en ucuz sepeti bul, tasarruf et."
-    />
-    <meta property="og:type" content="website" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Fontlar kendi origin'imizden (public/fonts). İlk boyamada görünen iki
+         yüz önden yüklenir; kalan ağırlıklar/alt kümeler gerektiğinde gelir. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/space-grotesk-600-700-latin.woff2"
+      crossorigin
     />
-    <title>Cheep — Aynı ürün, en ucuz fiyat</title>
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/hanken-grotesk-400-700-latin.woff2"
+      crossorigin
+    />
+    <!-- Başlık, açıklama, canonical, hreflang, og/twitter ve JSON-LD build sırasında
+         rota başına buraya basılır (scripts/prerender.mjs · src/seo/pages.ts).
+         Dev sunucusunda bu yer boş kalır; head'i istemcide useSeo doldurur. -->
+    <title>Cheep — Market Fiyatları Karşılaştırma Uygulaması</title>
+    <!--app-head-->
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><!--app-html--></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

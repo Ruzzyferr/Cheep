@@ -1,4 +1,7 @@
 @import 'tailwindcss';
+/* Kendi origin'imizden servis edilen web fontları (scripts/fetch-fonts.mjs ile
+   üretilir). Google Fonts'a giden render-blocking istek bilerek kaldırıldı. */
+@import './fonts.css';
 
 /* ============================================================
    Cheep — "Fresh Market" design tokens (Tailwind v4 @theme)
@@ -26,11 +29,17 @@
   --color-mint: #57c99a;
   --color-mint-500: #2e9e78;
   --color-mint-soft: #e8f7ef;
+  /* mint-500 dolgu olarak iyi ama açık zeminde metin olarak 3.3:1 kalıyor;
+     bu ton beyazda 5.3:1, mint-soft üstünde 4.8:1. */
+  --color-mint-deep: #1f7a5a;
 
   /* Clementine — deals, warmth, the one hot accent */
   --color-clementine: #f0682b;
   --color-clementine-light: #f89b6f;
   --color-clementine-dark: #c8521e;
+  /* Küçük punto metin ve beyaz yazılı dolu butonlar için. Parlak clementine
+     beyaza karşı 3.1:1 (WCAG AA'nın 4.5 eşiğinin altında); bu ton 4.8:1. */
+  --color-clementine-deep: #c24e19;
 
   /* Ink + neutrals */
   --color-ink: #14211b;
@@ -87,6 +96,12 @@
   ::selection {
     background: var(--color-clementine);
     color: #fff;
+  }
+
+  /* SSS akordeonu native <details> — WebKit'in varsayılan üçgenini kaldır
+     (Tailwind'in list-none'ı bu pseudo-element'e yetmiyor). */
+  summary::-webkit-details-marker {
+    display: none;
   }
 
   /* Custom focus ring — accessibility floor */

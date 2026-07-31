@@ -1,7 +1,16 @@
 import { useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
+import { useLocale } from '../../i18n'
+import { formatNumber } from '../../lib/format'
 
-/** Counts 0 → `to` when scrolled into view (IntersectionObserver). Turkish format. */
+/**
+ * Görünür olunca 0 → `to` sayar. Sayı aktif dile göre biçimlenir
+ * (tr-TR "55.000", pl-PL "55 000").
+ *
+ * İlk render'da (ve prerender çıktısında) **son değer** basılır: prerender
+ * edilmiş HTML'de arama motorunun ve JS'siz ziyaretçinin gerçek sayıyı görmesi
+ * gerekiyor. Animasyon mount sonrası yine 0'dan başlar.
+ */
 export function CountUp({
   to,
   duration = 2,
@@ -18,14 +27,13 @@ export function CountUp({
   className?: string
 }) {
   const ref = useRef<HTMLSpanElement>(null)
+  const locale = useLocale()
+
+  const fmt = (v: number) => prefix + formatNumber(locale, v, decimals) + suffix
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    const fmt = (v: number) =>
-      prefix +
-      v.toLocaleString('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) +
-      suffix
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       el.textContent = fmt(to)
       return
@@ -54,11 +62,12 @@ export function CountUp({
     )
     io.observe(el)
     return () => io.disconnect()
-  }, [to, duration, decimals, prefix, suffix])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [to, duration, decimals, prefix, suffix, locale])
 
   return (
     <span ref={ref} className={className}>
-      {prefix}0{suffix}
+      {fmt(to)}
     </span>
   )
 }

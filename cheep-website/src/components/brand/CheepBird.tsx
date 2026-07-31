@@ -25,6 +25,7 @@ export function CheepBird({
   shadow = true,
   className,
   style,
+  label = 'Cheep',
 }: {
   size?: number
   expression?: BirdExpression
@@ -32,6 +33,8 @@ export function CheepBird({
   shadow?: boolean
   className?: string
   style?: React.CSSProperties
+  /** Erişilebilir ad. Dekoratif kullanımlarda marka adı yeterli. */
+  label?: string
 }) {
   const gid = useId().replace(/:/g, '')
   return (
@@ -43,7 +46,7 @@ export function CheepBird({
       className={className}
       style={style}
       role="img"
-      aria-label="Cheep kuş maskotu"
+      aria-label={label}
     >
       <defs>
         <radialGradient id={`body-${gid}`} cx="38%" cy="30%" r="80%">

@@ -1,56 +1,51 @@
+import { Link } from 'react-router-dom'
 import { CheepBird } from '../brand/CheepBird'
-
-const COLS: { title: string; links: { label: string; href: string }[] }[] = [
-  {
-    title: 'Ürün',
-    links: [
-      { label: 'Nasıl çalışır', href: '/#how' },
-      { label: 'Özellikler', href: '/#features' },
-      { label: 'Ülkeler', href: '/#coverage' },
-      { label: 'İndir', href: '/#download' },
-    ],
-  },
-  {
-    title: 'Yasal',
-    links: [
-      { label: 'Gizlilik Politikası', href: '/privacy' },
-      { label: 'Hesap Silme', href: '/delete' },
-      { label: 'Kullanım Şartları', href: '/terms' },
-    ],
-  },
-  {
-    title: 'İletişim',
-    links: [
-      { label: 'destek@cheep.live', href: 'mailto:destek@cheep.live' },
-      { label: 'gizlilik@cheep.live', href: 'mailto:gizlilik@cheep.live' },
-    ],
-  },
-]
+import { useT, useHref } from '../../i18n'
 
 export function Footer() {
+  const t = useT()
+  const href = useHref()
+  const home = href('/')
+
+  /** Çapa bağlantıları ana sayfaya döner (yasal sayfalardan da çalışsın diye). */
+  const resolve = (h: string) =>
+    h.startsWith('#') ? (home === '/' ? `/${h}` : `${home}${h}`) : href(h)
+
   return (
-    <footer className="bg-forest-night pt-20 pb-10 text-cream/80">
+    <footer className="bg-forest-night pt-16 pb-[max(2.5rem,env(safe-area-inset-bottom))] text-cream/80 md:pt-20">
       <div className="container-cheep">
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-5">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-5">
           <div className="col-span-2">
-            <a href="#top" className="flex items-center gap-2">
+            <Link to={home} className="inline-flex items-center gap-2 py-1">
               <CheepBird size={40} shadow={false} />
               <span className="font-display text-2xl font-bold text-cream">Cheep</span>
-            </a>
-            <p className="mt-4 max-w-xs text-sm text-cream/60">
-              Aynı ürün, en ucuz fiyat. Marketlerin fiyatlarını karşılaştır, her sepette tasarruf et.
-            </p>
+            </Link>
+            <p className="mt-4 max-w-xs text-sm text-cream/60">{t.footer.tagline}</p>
           </div>
 
-          {COLS.map((c) => (
+          {t.footer.cols.map((c) => (
             <div key={c.title}>
-              <p className="mb-4 font-mono text-xs font-bold uppercase tracking-widest text-mint">{c.title}</p>
-              <ul className="space-y-2.5">
+              <p className="mb-3 font-mono text-xs font-bold uppercase tracking-widest text-mint">
+                {c.title}
+              </p>
+              <ul>
                 {c.links.map((l) => (
                   <li key={l.label}>
-                    <a href={l.href} className="text-sm text-cream/70 transition-colors hover:text-cream">
-                      {l.label}
-                    </a>
+                    {l.href.startsWith('/') ? (
+                      <Link
+                        to={href(l.href)}
+                        className="-mx-2 block rounded-lg px-2 py-3 text-sm text-cream/70 transition-colors hover:bg-cream/5 hover:text-cream"
+                      >
+                        {l.label}
+                      </Link>
+                    ) : (
+                      <a
+                        href={resolve(l.href)}
+                        className="-mx-2 block rounded-lg px-2 py-3 text-sm text-cream/70 transition-colors hover:bg-cream/5 hover:text-cream"
+                      >
+                        {l.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -58,18 +53,13 @@ export function Footer() {
           ))}
         </div>
 
-        <p className="mt-14 border-t border-cream/10 pt-8 text-xs leading-relaxed text-cream/45">
-          Tüm marka adları ve logoları ilgili sahiplerinin tescilli markalarıdır. Cheep bu
-          marketlerle resmi bir ortaklık veya iş birliği içinde değildir; marka adları yalnızca
-          hangi markete ait fiyatın gösterildiğini belirtmek için kullanılır. Türkiye’de fiyatlar
-          T.C. Ticaret Bakanlığı’nın herkese açık resmi kaynağından (marketfiyati.org.tr),
-          Polonya’da ise marketlerin herkese açık kaynaklarından derlenir; bilgilendirme
-          amaçlıdır ve kasadaki güncel fiyattan farklı olabilir.
+        <p className="mt-14 border-t border-cream/10 pt-8 text-xs leading-relaxed text-cream/65">
+          {t.footer.disclaimer}
         </p>
 
         <div className="mt-8 flex flex-col items-center justify-between gap-4 text-sm text-cream/50 md:flex-row">
-          <p>© 2026 Cheep. Tüm hakları saklıdır.</p>
-          <p className="font-mono text-xs">Türkiye’de sevgiyle yapıldı 🇹🇷</p>
+          <p>{t.footer.copyright}</p>
+          <p className="font-mono text-xs">{t.footer.madeIn}</p>
         </div>
       </div>
     </footer>
