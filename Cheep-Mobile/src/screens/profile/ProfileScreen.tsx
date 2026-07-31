@@ -3,7 +3,7 @@
  * User profile, quick stats and settings (premium fintech layout).
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -34,6 +34,11 @@ import type { UserProfile } from '../../types';
 import { ONBOARDING_QUESTIONS } from '../onboarding/onboardingConfig';
 import i18n, { SUPPORTED_LANGUAGES } from '../../i18n';
 import { languageStorage, type LocationConsent } from '../../utils/storage';
+import {
+  getNotificationStatus,
+  ensureNotificationsReady,
+  unregisterPushToken,
+} from '../../utils/notificationGate';
 import { getLocationConsent, promptLocationConsent, revokeLocationConsent } from '../../utils/consent';
 
 // ─── Preference option lists from onboarding config ───────────────────────────
@@ -75,6 +80,7 @@ export function ProfileScreen({
   // ayarlarından izni kaldırabilir (ya da Android izni kendisi geri alabilir).
   // Bunu göstermezsek profil "Açık" derken konum özellikleri sessizce çalışmaz.
   const [osLocationGranted, setOsLocationGranted] = useState<boolean | null>(null);
+  const [notifGranted, setNotifGranted] = useState<boolean | null>(null);
 
   // ─── Load profile + stats on focus ─────────────────────────────────────────
   useFocusEffect(
@@ -135,6 +141,34 @@ export function ProfileScreen({
 
   // ─── Handlers ───────────────────────────────────────────────────────────────
   // KVKK: konum açık-rızasını aç/geri al (ilgili kişi hakkı — ayarlardan yönetim).
+
+  // Bildirim durumunu SORMADAN oku (ekran açıldığında).
+  useEffect(() => {
+    void getNotificationStatus().then((st) => setNotifGranted(st.osGranted));
+  }, []);
+
+  /**
+   * Bildirim anahtarı. Açma yolu izin kapısını çalıştırır (gerekçe → sistem modalı).
+   * KAPATMA yolu sistem iznini geri ALAMAZ — OS buna izin vermiyor — ama sunucudaki
+   * push token'ı siler, yani bildirim gelmez. Kullanıcıyı yanıltmamak için bunu
+   * metinde söylüyoruz ve tam kapatma için ayarlara yönlendiriyoruz.
+   */
+  const handleToggleNotifications = useCallback(async () => {
+    const st = await getNotificationStatus();
+    if (st.osGranted) {
+      await unregisterPushToken();
+      setNotifGranted(false);
+      Alert.alert(t('notifications.off_title'), t('notifications.off_body'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('profile.open_settings'), onPress: () => Linking.openSettings() },
+      ]);
+      return;
+    }
+    await ensureNotificationsReady();
+    const after = await getNotificationStatus();
+    setNotifGranted(after.osGranted);
+  }, [t]);
+
   const handleToggleLocationConsent = useCallback(async () => {
     const current = await getLocationConsent();
     if (current === 'granted') {
@@ -455,8 +489,14 @@ export function ProfileScreen({
             <MenuItem
               icon="notifications-none"
               title={t('profile.notifications')}
-              subtitle={t('profile.notifications_subtitle')}
-              onPress={() => console.log('Notifications')}
+              subtitle={
+                notifGranted === null
+                  ? t('profile.notifications_subtitle')
+                  : notifGranted
+                    ? t('profile.notifications_on')
+                    : t('profile.notifications_off')
+              }
+              onPress={handleToggleNotifications}
             />
             <Divider />
             <MenuItem
@@ -487,6 +527,13 @@ export function ProfileScreen({
                     : t('profile.location_consent_on')
               }
               onPress={handleToggleLocationConsent}
+            />
+            <Divider />
+            <MenuItem
+              icon="mail-outline"
+              title={t('support.menu_title')}
+              subtitle={t('support.menu_subtitle')}
+              onPress={() => (navigation as any).navigate('Support')}
             />
           </Card>
         </View>

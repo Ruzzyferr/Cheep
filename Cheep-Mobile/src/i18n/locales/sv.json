@@ -55,22 +55,41 @@
       "household_size": {
         "title": "Hur många personer handlar du för?",
         "mascot": "Nu kör vi! 🐦",
-        "options": { "1": "1", "2": "2", "3-4": "3-4", "5plus": "5+" }
+        "options": {
+          "1": "1",
+          "2": "2",
+          "3-4": "3-4",
+          "5plus": "5+"
+        }
       },
       "diet": {
         "title": "Hur äter du?",
         "mascot": "Du gör det jättebra!",
-        "options": { "omnivore": "Allätare", "vegetarian": "Vegetarisk", "vegan": "Vegansk", "pescatarian": "Pescetarisk" }
+        "options": {
+          "omnivore": "Allätare",
+          "vegetarian": "Vegetarisk",
+          "vegan": "Vegansk",
+          "pescatarian": "Pescetarisk"
+        }
       },
       "avoid": {
         "title": "Undviker du något av det här?",
         "mascot": "Vi filtrerar bort det åt dig 🐦",
-        "options": { "pork_gelatin": "Fläskkött & gelatin", "alcohol": "Alkoholhaltiga produkter" }
+        "options": {
+          "pork_gelatin": "Fläskkött & gelatin",
+          "alcohol": "Alkoholhaltiga produkter"
+        }
       },
       "allergies": {
         "title": "Allergier/intoleranser?",
         "mascot": "Säkerheten först!",
-        "options": { "lactose": "Laktos", "gluten": "Gluten", "peanut": "Jordnöt", "tree_nut": "Trädnötter", "none": "Inga" }
+        "options": {
+          "lactose": "Laktos",
+          "gluten": "Gluten",
+          "peanut": "Jordnöt",
+          "tree_nut": "Trädnötter",
+          "none": "Inga"
+        }
       },
       "weekly_budget": {
         "title": "Din veckobudget?",
@@ -114,10 +133,24 @@
     "location_consent_on_os_off": "På · men enhetens platsbehörighet är av — tryck för att slå på",
     "location_os_blocked_title": "Platsbehörigheten är avstängd",
     "location_os_blocked_body": "Du har gett ditt medgivande, men platsbehörigheten är avstängd i systeminställningarna. Slå på den i Inställningar så att vi kan visa dina närmaste butiker.",
-    "open_settings": "Öppna inställningar"
+    "open_settings": "Öppna inställningar",
+    "notifications_on": "På — vi meddelar prissänkningar",
+    "notifications_off": "Av — tryck för att slå på"
   },
-  "countries": { "TR": "Turkiet", "CH": "Schweiz", "SE": "Sverige", "DE": "Tyskland", "PL": "Polen" },
-  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },
+  "countries": {
+    "TR": "Turkiet",
+    "CH": "Schweiz",
+    "SE": "Sverige",
+    "DE": "Tyskland",
+    "PL": "Polen"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English",
+    "de": "Deutsch",
+    "pl": "Polski",
+    "sv": "Svenska"
+  },
   "product": {
     "no_price_info": "Ingen prisinformation",
     "all_categories": "Alla kategorier",
@@ -246,13 +279,26 @@
     "load_error": "Något gick fel när listan skulle jämföras",
     "filters_title": "Filter",
     "store_count_filter": "Antal butiker",
-    "store_count": { "one": "En butik", "two": "2 butiker", "three_plus": "3+ butiker" },
+    "store_count": {
+      "one": "En butik",
+      "two": "2 butiker",
+      "three_plus": "3+ butiker"
+    },
     "radius_filter": "Avstånd",
-    "radius": { "walk": "Gå ({{km}} km)", "car": "Bil ({{km}} km)", "wide": "Brett ({{km}} km)" },
+    "radius": {
+      "walk": "Gå ({{km}} km)",
+      "car": "Bil ({{km}} km)",
+      "wide": "Brett ({{km}} km)"
+    },
     "no_nearby_title": "Inga butiker i närheten",
     "no_nearby_text": "Inga butiker hittades inom {{km}} km. Prova att öka avståndet.",
     "sort_title": "Sortera efter",
-    "sort": { "recommended": "Rekommenderad", "cheapest": "Billigast", "nearest": "Närmast", "price_distance": "Pris + avstånd" },
+    "sort": {
+      "recommended": "Rekommenderad",
+      "cheapest": "Billigast",
+      "nearest": "Närmast",
+      "price_distance": "Pris + avstånd"
+    },
     "summary_title": "Sammanfattning",
     "cheapest": "Billigast",
     "cheapest_full": "Billigast (hela listan)",
@@ -272,7 +318,10 @@
     "list_label": "Lista:",
     "total_items_label": "Totalt antal varor:",
     "recommended_route_badge": "Rekommenderad rutt",
-    "route_type": { "single": "En butik", "multi": "Flera butiker" },
+    "route_type": {
+      "single": "En butik",
+      "multi": "Flera butiker"
+    },
     "score": "Poäng: {{score}}/100",
     "coverage_badge_full": "Alla produkter finns på den här rutten",
     "coverage_badge_partial": "{{count}} produkter saknas på den här rutten",
@@ -314,5 +363,42 @@
         "desc": "Se hur mycket du sparar varje gång du handlar. När du är redo, slutför ditt köp i den billigaste butiken!"
       }
     }
+  },
+  "notifications": {
+    "title": "Aviseringar",
+    "empty_title": "Inga aviseringar än",
+    "empty_body": "Du ser det här när något på din lista blir billigare.",
+    "gate_title": "Vill du få veta om prissänkningar?",
+    "gate_message": "Vi meddelar dig när varor på din lista blir billigare. Du kan stänga av det när som helst.",
+    "gate_allow": "Meddela mig",
+    "gate_later": "Inte nu",
+    "os_blocked_title": "Aviseringar är avstängda",
+    "os_blocked_body": "Behörigheten är avstängd, så vi kan inte nå dig. Du kan slå på den i telefonens inställningar.",
+    "off_title": "Aviseringar avstängda",
+    "off_body": "Vi skickar inga aviseringar längre. Öppna telefoninställningarna för att blockera dem helt."
+  },
+  "support": {
+    "title": "Kontakta oss",
+    "menu_title": "Kontakta oss",
+    "menu_subtitle": "Frågor, idéer eller problem",
+    "intro": "Något som inte fungerar, eller en idé? Skriv till oss så återkommer vi.",
+    "topic": "Ämne",
+    "topics": {
+      "bug": "Fel",
+      "price": "Prisproblem",
+      "account": "Konto",
+      "suggestion": "Förslag",
+      "other": "Övrigt"
+    },
+    "email": "Din e-post",
+    "email_placeholder": "du@exempel.com",
+    "email_hint": "Vi svarar till den här adressen.",
+    "message": "Ditt meddelande",
+    "message_placeholder": "Berätta vad som hände…",
+    "send": "Skicka",
+    "sent_title": "Meddelandet är mottaget",
+    "sent_body": "Vi återkommer via e-post inom kort.",
+    "error": "Meddelandet kunde inte skickas. Försök igen.",
+    "auth_link": "Problem? Kontakta oss"
   }
 }

@@ -55,22 +55,41 @@
       "household_size": {
         "title": "Dla ilu osób robisz zakupy?",
         "mascot": "Zaczynajmy! 🐦",
-        "options": { "1": "1", "2": "2", "3-4": "3-4", "5plus": "5+" }
+        "options": {
+          "1": "1",
+          "2": "2",
+          "3-4": "3-4",
+          "5plus": "5+"
+        }
       },
       "diet": {
         "title": "Jaki jest Twój sposób odżywiania?",
         "mascot": "Świetnie Ci idzie!",
-        "options": { "omnivore": "Wszystkożerne", "vegetarian": "Wegetariańskie", "vegan": "Wegańskie", "pescatarian": "Pescetariańskie" }
+        "options": {
+          "omnivore": "Wszystkożerne",
+          "vegetarian": "Wegetariańskie",
+          "vegan": "Wegańskie",
+          "pescatarian": "Pescetariańskie"
+        }
       },
       "avoid": {
         "title": "Czy czegoś z tego unikasz?",
         "mascot": "Odfiltrujemy to dla Ciebie 🐦",
-        "options": { "pork_gelatin": "Wieprzowina i żelatyna", "alcohol": "Produkty alkoholowe" }
+        "options": {
+          "pork_gelatin": "Wieprzowina i żelatyna",
+          "alcohol": "Produkty alkoholowe"
+        }
       },
       "allergies": {
         "title": "Alergie/nietolerancje?",
         "mascot": "Bezpieczeństwo przede wszystkim!",
-        "options": { "lactose": "Laktoza", "gluten": "Gluten", "peanut": "Orzeszki ziemne", "tree_nut": "Orzechy", "none": "Brak" }
+        "options": {
+          "lactose": "Laktoza",
+          "gluten": "Gluten",
+          "peanut": "Orzeszki ziemne",
+          "tree_nut": "Orzechy",
+          "none": "Brak"
+        }
       },
       "weekly_budget": {
         "title": "Twój tygodniowy budżet?",
@@ -114,10 +133,24 @@
     "location_consent_on_os_off": "Włączona · ale uprawnienie lokalizacji w telefonie jest wyłączone — dotknij, aby włączyć",
     "location_os_blocked_title": "Uprawnienie lokalizacji jest wyłączone",
     "location_os_blocked_body": "Zgoda została udzielona, ale uprawnienie lokalizacji jest wyłączone w ustawieniach systemu. Włącz je w Ustawieniach, abyśmy mogli pokazać najbliższe sklepy.",
-    "open_settings": "Otwórz ustawienia"
+    "open_settings": "Otwórz ustawienia",
+    "notifications_on": "Włączone — damy znać o spadkach cen",
+    "notifications_off": "Wyłączone — dotknij, aby włączyć"
   },
-  "countries": { "TR": "Turcja", "CH": "Szwajcaria", "SE": "Szwecja", "DE": "Niemcy", "PL": "Polska" },
-  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },
+  "countries": {
+    "TR": "Turcja",
+    "CH": "Szwajcaria",
+    "SE": "Szwecja",
+    "DE": "Niemcy",
+    "PL": "Polska"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English",
+    "de": "Deutsch",
+    "pl": "Polski",
+    "sv": "Svenska"
+  },
   "product": {
     "no_price_info": "Brak informacji o cenie",
     "all_categories": "Wszystkie kategorie",
@@ -246,13 +279,26 @@
     "load_error": "Wystąpił błąd podczas porównywania listy",
     "filters_title": "Filtry",
     "store_count_filter": "Liczba sklepów",
-    "store_count": { "one": "Jeden sklep", "two": "2 sklepy", "three_plus": "3+ sklepy" },
+    "store_count": {
+      "one": "Jeden sklep",
+      "two": "2 sklepy",
+      "three_plus": "3+ sklepy"
+    },
     "radius_filter": "Odległość",
-    "radius": { "walk": "Pieszo ({{km}} km)", "car": "Autem ({{km}} km)", "wide": "Szeroko ({{km}} km)" },
+    "radius": {
+      "walk": "Pieszo ({{km}} km)",
+      "car": "Autem ({{km}} km)",
+      "wide": "Szeroko ({{km}} km)"
+    },
     "no_nearby_title": "Brak sklepów w pobliżu",
     "no_nearby_text": "Nie znaleziono sklepów w promieniu {{km}} km. Spróbuj zwiększyć odległość.",
     "sort_title": "Sortuj według",
-    "sort": { "recommended": "Polecane", "cheapest": "Najtańsze", "nearest": "Najbliższe", "price_distance": "Cena + odległość" },
+    "sort": {
+      "recommended": "Polecane",
+      "cheapest": "Najtańsze",
+      "nearest": "Najbliższe",
+      "price_distance": "Cena + odległość"
+    },
     "summary_title": "Podsumowanie",
     "cheapest": "Najtańszy",
     "cheapest_full": "Najtańsze (cała lista)",
@@ -272,7 +318,10 @@
     "list_label": "Lista:",
     "total_items_label": "Łącznie produktów:",
     "recommended_route_badge": "Polecana trasa",
-    "route_type": { "single": "Jeden sklep", "multi": "Wiele sklepów" },
+    "route_type": {
+      "single": "Jeden sklep",
+      "multi": "Wiele sklepów"
+    },
     "score": "Wynik: {{score}}/100",
     "coverage_badge_full": "Wszystkie produkty na tej trasie",
     "coverage_badge_partial": "{{count}} produktów brakuje na tej trasie",
@@ -314,5 +363,42 @@
         "desc": "Zobacz, ile oszczędzasz przy każdych zakupach. Gdy będziesz gotowy, dokończ zakupy w najtańszym sklepie!"
       }
     }
+  },
+  "notifications": {
+    "title": "Powiadomienia",
+    "empty_title": "Brak powiadomień",
+    "empty_body": "Zobaczysz tu produkt z Twojej listy, gdy stanieje.",
+    "gate_title": "Powiadomić Cię o spadku ceny?",
+    "gate_message": "Damy znać, gdy produkty z Twojej listy stanieją. Możesz to wyłączyć w każdej chwili.",
+    "gate_allow": "Powiadamiaj",
+    "gate_later": "Nie teraz",
+    "os_blocked_title": "Powiadomienia są wyłączone",
+    "os_blocked_body": "Brak zgody na powiadomienia, więc nie możemy Cię poinformować. Włącz je w ustawieniach telefonu.",
+    "off_title": "Powiadomienia wyłączone",
+    "off_body": "Nie będziemy już wysyłać powiadomień. Aby zablokować je systemowo, otwórz ustawienia telefonu."
+  },
+  "support": {
+    "title": "Kontakt",
+    "menu_title": "Kontakt",
+    "menu_subtitle": "Pytania, pomysły lub problemy",
+    "intro": "Coś nie działa albo masz pomysł? Napisz do nas, odpowiemy najszybciej jak się da.",
+    "topic": "Temat",
+    "topics": {
+      "bug": "Błąd",
+      "price": "Problem z ceną",
+      "account": "Konto",
+      "suggestion": "Sugestia",
+      "other": "Inne"
+    },
+    "email": "Twój e-mail",
+    "email_placeholder": "ty@przyklad.com",
+    "email_hint": "Na ten adres wyślemy odpowiedź.",
+    "message": "Twoja wiadomość",
+    "message_placeholder": "Opisz, co się stało…",
+    "send": "Wyślij",
+    "sent_title": "Wiadomość dotarła",
+    "sent_body": "Wkrótce odpiszemy na podany adres e-mail.",
+    "error": "Nie udało się wysłać wiadomości. Spróbuj ponownie.",
+    "auth_link": "Masz problem? Napisz do nas"
   }
 }

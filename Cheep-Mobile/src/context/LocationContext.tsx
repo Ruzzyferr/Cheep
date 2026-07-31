@@ -15,6 +15,7 @@ import { useAuth } from './AuthContext';
 import { useLocale } from './LocaleContext';
 import { getUserLocation, reverseGeocodeCountry } from '../utils/geo';
 import { runLocationGate } from '../utils/locationGate';
+import { runNotificationGate } from '../utils/notificationGate';
 import {
   anchorStorage, resolveAnchor, type PinnedAnchor, type ShoppingAnchor,
 } from '../utils/anchor';
@@ -78,6 +79,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   // atlanan kapı bir sonraki açılışta/ön plana gelişte zaten yeniden koşar, ama geri
   // alınmış bir rızayı yeniden sormak KVKK ihlalidir (bkz. RefreshOptions).
   const pendingSilentRef = useRef(false);
+  /** Bildirim kapısı oturumda bir kez çalışsın (her ön plana gelişte değil). */
+  const notificationGateRanRef = useRef(false);
   const prevAppState = useRef<AppStateStatus>(AppState.currentState);
 
   // setCountry'yi ref'te tutuyoruz ki refresh'in kimliği ona bağımlı olmasın.
@@ -136,7 +139,21 @@ export function LocationProvider({ children }: { children: ReactNode }) {
             // rıza anahtarından çağrıldığında az önce geri alınan rızayı yeniden
             // sorardı (bkz. RefreshOptions). getUserLocation() rıza yoksa zaten
             // SORMADAN null döner, dolayısıyla çapa doğru (koordinatsız) yayınlanır.
-            if (!passSilent) await runLocationGate();
+            if (!passSilent) {
+              await runLocationGate();
+              // Bildirim kapısı KONUM KAPISINDAN SONRA, ardışık olarak çalışır:
+              // ikisi aynı anda tetiklenirse Android üst üste iki sistem modalı
+              // gösterir ve kullanıcı ikincisini okumadan kapatır.
+              //
+              // Neden burada: sıralamayı bilen tek yer burası — konum kapısının
+              // ne zaman ÇÖZÜMLENDİĞİNİ başka hiçbir bileşen bilmiyor. Oturumda
+              // yalnızca bir kez çalışır; kapının kendi erteleme mantığı zaten
+              // tekrar tekrar sormayı engelliyor.
+              if (!notificationGateRanRef.current) {
+                notificationGateRanRef.current = true;
+                void runNotificationGate().catch(() => {});
+              }
+            }
             gps = await getUserLocation();
             if (gps) detectedCountry = await reverseGeocodeCountry(gps);
           }

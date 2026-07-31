@@ -2,6 +2,7 @@
  * 📝 Register Screen
  */
 
+import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import {
   View,
@@ -10,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TouchableOpacity,
   Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -22,6 +24,7 @@ import { colors, typography, spacing, layout } from '../../theme';
 const hint = (name: any) => <MaterialIcons name={name} size={20} color={colors.text.hint} />;
 
 export function RegisterScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const { register } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -93,6 +96,15 @@ export function RegisterScreen({ navigation }: any) {
               <Text style={styles.subtitle}>Cheep&apos;e katıl, tasarrufa başla</Text>
             </View>
           </View>
+
+          {/* Destek — giriş YAPAMAYAN kullanıcının tek ulaşma yolu. */}
+          <TouchableOpacity
+            style={styles.supportLink}
+            onPress={() => (navigation as any).navigate('Support')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.supportLinkText}>{t('support.auth_link')}</Text>
+          </TouchableOpacity>
         </FadeInUp>
 
         <FadeInUp delay={100} style={styles.formContainer}>
@@ -170,6 +182,8 @@ export function RegisterScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  supportLink: { alignItems: 'center', marginTop: 8, paddingVertical: 8 },
+  supportLinkText: { fontSize: 13, color: colors.text.secondary, textDecorationLine: 'underline' },
   container: {
     flex: 1,
     backgroundColor: colors.background.default,

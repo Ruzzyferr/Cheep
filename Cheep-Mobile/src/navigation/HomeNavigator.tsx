@@ -5,18 +5,22 @@
 
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useTranslation } from 'react-i18next';
 import { NewHomeScreen } from '../screens/home/NewHomeScreen';
 import { ProductDetailScreen } from '../screens/product/ProductDetailScreen';
 import { StoreDetailScreen } from '../screens/store/StoreDetailScreen';
 import { CategoryProductsScreen } from '../screens/product/CategoryProductsScreen';
 import { PriceDifferenceScreen } from '../screens/product/PriceDifferenceScreen';
 import { SearchScreen } from '../screens/search/SearchScreen';
+import { NotificationsScreen } from '../screens/notifications/NotificationsScreen';
 import { colors, typography } from '../theme';
 import type { HomeStackParamList } from './types';
 
 const Stack = createStackNavigator<HomeStackParamList>();
 
 export function HomeNavigator() {
+  const { t } = useTranslation();
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -55,6 +59,11 @@ export function HomeNavigator() {
         name="Search"
         component={SearchScreen}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+        options={{ title: t('notifications.title') }}
       />
       <Stack.Screen
         name="PriceDifferenceList"

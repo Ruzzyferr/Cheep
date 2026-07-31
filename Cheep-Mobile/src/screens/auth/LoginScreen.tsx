@@ -2,6 +2,7 @@
  * 🔐 Login Screen
  */
 
+import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import {
   View,
@@ -10,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TouchableOpacity,
   Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -20,6 +22,7 @@ import { useAuth } from '../../context/AuthContext';
 import { colors, typography, spacing, layout } from '../../theme';
 
 export function LoginScreen({ navigation }: any) {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -80,6 +83,15 @@ export function LoginScreen({ navigation }: any) {
           </Float>
           <Text style={styles.appName}>Cheep</Text>
           <Text style={styles.tagline}>Akıllı Alışveriş Asistanı</Text>
+
+          {/* Destek — giriş YAPAMAYAN kullanıcının tek ulaşma yolu. */}
+          <TouchableOpacity
+            style={styles.supportLink}
+            onPress={() => (navigation as any).navigate('Support')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.supportLinkText}>{t('support.auth_link')}</Text>
+          </TouchableOpacity>
         </FadeInUp>
 
         {/* Form */}
@@ -137,6 +149,8 @@ export function LoginScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  supportLink: { alignItems: 'center', marginTop: 8, paddingVertical: 8 },
+  supportLinkText: { fontSize: 13, color: colors.text.secondary, textDecorationLine: 'underline' },
   container: {
     flex: 1,
     backgroundColor: colors.background.default,

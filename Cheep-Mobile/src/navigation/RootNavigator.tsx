@@ -13,6 +13,8 @@ import { OnboardingNavigator } from './OnboardingNavigator';
 import { AssistantNavigator } from './AssistantNavigator';
 import { VerifyEmailScreen } from '../screens/auth/VerifyEmailScreen';
 import { IntroTourScreen } from '../screens/intro/IntroTourScreen';
+import { SupportScreen } from '../screens/support/SupportScreen';
+import { useTranslation } from 'react-i18next';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { colors } from '../theme';
 import type { RootStackParamList } from './types';
@@ -21,6 +23,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 
 export function RootNavigator() {
   const { isAuthenticated, isLoading, emailVerified, onboardingDone, introSeen } = useAuth();
+  const { t } = useTranslation();
 
   // Show loading screen while checking auth
   if (isLoading) {
@@ -38,7 +41,14 @@ export function RootNavigator() {
           // İlk açılış: "nasıl kullanılır" tanıtımı (auth'tan önce)
           <Stack.Screen name="Intro" component={IntroTourScreen} />
         ) : !isAuthenticated ? (
-          <Stack.Screen name="Auth" component={AuthNavigator} />
+          <>
+            <Stack.Screen name="Auth" component={AuthNavigator} />
+            <Stack.Screen
+              name="Support"
+              component={SupportScreen}
+              options={{ headerShown: true, title: t('support.title'), presentation: 'modal' }}
+            />
+          </>
         ) : !emailVerified ? (
           <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
         ) : !onboardingDone ? (
@@ -52,6 +62,11 @@ export function RootNavigator() {
               name="Intro"
               component={IntroTourScreen}
               options={{ presentation: 'modal' }}
+            />
+            <Stack.Screen
+              name="Support"
+              component={SupportScreen}
+              options={{ headerShown: true, title: t('support.title') }}
             />
           </>
         )}

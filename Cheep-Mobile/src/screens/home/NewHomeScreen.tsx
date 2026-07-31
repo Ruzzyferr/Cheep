@@ -3,7 +3,7 @@
  * Cream canvas · forest savings hero · mascot · premium animated cards.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -14,10 +14,11 @@ import {
   RefreshControl,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { CommonActions } from '@react-navigation/native';
+import { CommonActions, useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { productService, storeService, listService, categoryService } from '../../services';
+import { notificationService } from '../../services/notification.service';
 import { useAuth } from '../../context/AuthContext';
 import { useLocale } from '../../context/LocaleContext';
 import { useLocationAnchor } from '../../context/LocationContext';
@@ -37,6 +38,21 @@ import type { Category } from '../../services/category.service';
 import type { HomeStackScreenProps } from '../../navigation/types';
 
 export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) {
+
+  // Zil rozeti: okunmamış fiyat düşüşü sayısı. Ekrana her dönüşte tazelenir —
+  // bildirim ekranından çıkınca rozetin inatla durmaması için.
+  const [unreadCount, setUnreadCount] = useState(0);
+  useFocusEffect(
+    useCallback(() => {
+      let alive = true;
+      void notificationService.unreadCount().then((n) => {
+        if (alive) setUnreadCount(n);
+      });
+      return () => {
+        alive = false;
+      };
+    }, []),
+  );
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { t } = useTranslation();
@@ -269,9 +285,15 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
             <TouchableOpacity style={styles.iconBtn} onPress={goSearch} activeOpacity={0.7}>
               <MaterialIcons name="search" size={22} color={colors.text.primary} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconBtn} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.iconBtn}
+              onPress={() => navigation.navigate('Notifications')}
+              activeOpacity={0.7}
+            >
               <MaterialIcons name="notifications-none" size={22} color={colors.text.primary} />
-              <View style={styles.dot} />
+              {/* Rozet artık GERÇEK okunmamış sayısını yansıtır; yoksa hiç çizilmez.
+                  Önceden sabit bir nokta duruyordu ve buton hiçbir şey yapmıyordu. */}
+              {unreadCount > 0 && <View style={styles.dot} />}
             </TouchableOpacity>
           </View>
         </View>

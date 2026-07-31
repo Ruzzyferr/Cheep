@@ -19,6 +19,10 @@ export type RootStackParamList = {
   Onboarding: undefined;
   Assistant: undefined;
   Intro: { replay?: boolean } | undefined;
+  // Destek KÖK yığında: giriş yapamayan kullanıcı da ulaşabilmeli — asıl
+  // ihtiyacı olan kişi zaten o. Home yığınında kalsaydı yalnızca giriş
+  // sonrası erişilebilirdi.
+  Support: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =
@@ -64,6 +68,7 @@ export type HomeStackParamList = {
   CategoryProducts: { categoryId: number; categoryName: string; targetListId?: number; targetListName?: string };
   Search: { targetListId?: number; targetListName?: string } | undefined;
   PriceDifferenceList: undefined;
+  Notifications: undefined;
 };
 
 export type HomeStackScreenProps<T extends keyof HomeStackParamList> =

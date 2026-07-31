@@ -33,6 +33,8 @@ const STORAGE_KEYS = {
   FAVORITE_STORES: 'favorite_stores',
   USER_LANGUAGE: 'user_language',
   LOCATION_CONSENT: 'kvkk_location_consent', // KVKK açık rıza: 'granted' | 'denied' | (yok=belirsiz)
+  NOTIFICATION_PROMPT_SNOOZE: '@cheep:notification_prompt_snooze',
+  PUSH_TOKEN: '@cheep:push_token',
   LOCATION_PROMPT_SNOOZE: 'location_prompt_snooze_until', // ms epoch — bu ana kadar sorma
   LOCATION_MODE: 'location_mode',           // 'auto' | 'pinned'
   PINNED_ANCHOR: 'pinned_anchor',           // JSON: PinnedAnchor
@@ -243,6 +245,40 @@ export const locationPromptStorage = {
   },
   async clear(): Promise<void> {
     await storage.removeItem(STORAGE_KEYS.LOCATION_PROMPT_SNOOZE);
+  },
+};
+
+
+/**
+ * Bildirim istemi ertelemesi. locationPromptStorage ile aynı mantık: kullanıcı
+ * "şimdi değil" derse belirli bir süre bir daha sorulmaz — her açılışta diyalog
+ * yağmuru olmasın.
+ */
+export const notificationPromptStorage = {
+  async isSnoozed(): Promise<boolean> {
+    const raw = await storage.getItem(STORAGE_KEYS.NOTIFICATION_PROMPT_SNOOZE);
+    if (!raw) return false;
+    const until = Number(raw);
+    return Number.isFinite(until) && Date.now() < until;
+  },
+  async snooze(ms: number): Promise<void> {
+    await storage.setItem(STORAGE_KEYS.NOTIFICATION_PROMPT_SNOOZE, String(Date.now() + ms));
+  },
+  async clear(): Promise<void> {
+    await storage.removeItem(STORAGE_KEYS.NOTIFICATION_PROMPT_SNOOZE);
+  },
+};
+
+/** Sunucuya kaydedilmiş push token — çıkışta silmek için saklanır. */
+export const pushTokenStorage = {
+  async save(token: string): Promise<void> {
+    await storage.setItem(STORAGE_KEYS.PUSH_TOKEN, token);
+  },
+  async get(): Promise<string | null> {
+    return await storage.getItem(STORAGE_KEYS.PUSH_TOKEN);
+  },
+  async clear(): Promise<void> {
+    await storage.removeItem(STORAGE_KEYS.PUSH_TOKEN);
   },
 };
 

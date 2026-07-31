@@ -55,22 +55,41 @@
       "household_size": {
         "title": "Kaç kişiye alışveriş yapıyorsun?",
         "mascot": "Başlayalım! 🐦",
-        "options": { "1": "1", "2": "2", "3-4": "3-4", "5plus": "5+" }
+        "options": {
+          "1": "1",
+          "2": "2",
+          "3-4": "3-4",
+          "5plus": "5+"
+        }
       },
       "diet": {
         "title": "Beslenme tarzın?",
         "mascot": "Harika gidiyorsun!",
-        "options": { "omnivore": "Hepçil", "vegetarian": "Vejetaryen", "vegan": "Vegan", "pescatarian": "Pesketaryen" }
+        "options": {
+          "omnivore": "Hepçil",
+          "vegetarian": "Vejetaryen",
+          "vegan": "Vegan",
+          "pescatarian": "Pesketaryen"
+        }
       },
       "avoid": {
         "title": "Şunlardan kaçınıyor musun?",
         "mascot": "Sana göre süzeceğiz 🐦",
-        "options": { "pork_gelatin": "Domuz eti & jelatin", "alcohol": "Alkollü ürünler" }
+        "options": {
+          "pork_gelatin": "Domuz eti & jelatin",
+          "alcohol": "Alkollü ürünler"
+        }
       },
       "allergies": {
         "title": "Alerjin/intoleransın?",
         "mascot": "Güvenlik önce!",
-        "options": { "lactose": "Laktoz", "gluten": "Gluten", "peanut": "Fıstık", "tree_nut": "Kabuklu yemiş", "none": "Yok" }
+        "options": {
+          "lactose": "Laktoz",
+          "gluten": "Gluten",
+          "peanut": "Fıstık",
+          "tree_nut": "Kabuklu yemiş",
+          "none": "Yok"
+        }
       },
       "weekly_budget": {
         "title": "Haftalık bütçen?",
@@ -114,10 +133,24 @@
     "location_consent_on_os_off": "Açık · ancak cihaz konum izni kapalı — dokun ve aç",
     "location_os_blocked_title": "Cihaz konum izni kapalı",
     "location_os_blocked_body": "Rızanı aldık, ancak konum izni sistem ayarlarından kapatılmış. En yakın marketleri gösterebilmemiz için Ayarlar'dan konum iznini aç.",
-    "open_settings": "Ayarları aç"
+    "open_settings": "Ayarları aç",
+    "notifications_on": "Açık — fiyat düşünce haber veriyoruz",
+    "notifications_off": "Kapalı — açmak için dokun"
   },
-  "countries": { "TR": "Türkiye", "CH": "İsviçre", "SE": "İsveç", "DE": "Almanya", "PL": "Polonya" },
-  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },
+  "countries": {
+    "TR": "Türkiye",
+    "CH": "İsviçre",
+    "SE": "İsveç",
+    "DE": "Almanya",
+    "PL": "Polonya"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English",
+    "de": "Deutsch",
+    "pl": "Polski",
+    "sv": "Svenska"
+  },
   "product": {
     "no_price_info": "Fiyat bilgisi yok",
     "all_categories": "Tüm Kategoriler",
@@ -246,13 +279,26 @@
     "load_error": "Karşılaştırma yapılırken bir hata oluştu",
     "filters_title": "Filtreler",
     "store_count_filter": "Market Sayısı",
-    "store_count": { "one": "Tek Market", "two": "2 Market", "three_plus": "3+ Market" },
+    "store_count": {
+      "one": "Tek Market",
+      "two": "2 Market",
+      "three_plus": "3+ Market"
+    },
     "radius_filter": "Mesafe",
-    "radius": { "walk": "Yürüme ({{km}} km)", "car": "Araba ({{km}} km)", "wide": "Geniş ({{km}} km)" },
+    "radius": {
+      "walk": "Yürüme ({{km}} km)",
+      "car": "Araba ({{km}} km)",
+      "wide": "Geniş ({{km}} km)"
+    },
     "no_nearby_title": "Yakında market yok",
     "no_nearby_text": "{{km}} km içinde market bulunamadı. Mesafeyi genişletmeyi deneyin.",
     "sort_title": "Sıralama",
-    "sort": { "recommended": "Önerilen", "cheapest": "En ucuz", "nearest": "En yakın", "price_distance": "Fiyat + Konum" },
+    "sort": {
+      "recommended": "Önerilen",
+      "cheapest": "En ucuz",
+      "nearest": "En yakın",
+      "price_distance": "Fiyat + Konum"
+    },
     "summary_title": "Özet",
     "cheapest": "En ucuz",
     "cheapest_full": "En Ucuz (tüm liste)",
@@ -272,7 +318,10 @@
     "list_label": "Liste:",
     "total_items_label": "Toplam Ürün:",
     "recommended_route_badge": "Önerilen Rota",
-    "route_type": { "single": "Tek Market", "multi": "Çoklu Market" },
+    "route_type": {
+      "single": "Tek Market",
+      "multi": "Çoklu Market"
+    },
     "score": "Skor: {{score}}/100",
     "coverage_badge_full": "Tüm ürünler bu rotada",
     "coverage_badge_partial": "{{count}} ürün bu rotada yok",
@@ -314,5 +363,42 @@
         "desc": "Her alışverişte ne kadar kazandığını gör. Hazır olunca sepetini en ucuz markette tamamla!"
       }
     }
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "empty_title": "Henüz bildirim yok",
+    "empty_body": "Listendeki bir ürün ucuzladığında burada göreceksin.",
+    "gate_title": "Fiyat düşünce haber verelim mi?",
+    "gate_message": "Listendeki ürünler ucuzladığında sana bildirim gönderelim. İstemezsen kapatabilirsin.",
+    "gate_allow": "Haber ver",
+    "gate_later": "Şimdi değil",
+    "os_blocked_title": "Bildirimler kapalı",
+    "os_blocked_body": "Bildirim izni kapalı olduğu için sana haber veremiyoruz. Telefon ayarlarından açabilirsin.",
+    "off_title": "Bildirimler kapatıldı",
+    "off_body": "Artık bildirim göndermeyeceğiz. Telefonun bildirim iznini tamamen kapatmak için ayarlara gidebilirsin."
+  },
+  "support": {
+    "title": "Bize ulaşın",
+    "menu_title": "Bize ulaşın",
+    "menu_subtitle": "Soru, öneri veya sorun bildir",
+    "intro": "Bir sorun mu var, bir önerin mi? Yaz, en kısa sürede dönelim.",
+    "topic": "Konu",
+    "topics": {
+      "bug": "Hata",
+      "price": "Fiyat sorunu",
+      "account": "Hesap",
+      "suggestion": "Öneri",
+      "other": "Diğer"
+    },
+    "email": "E-posta adresin",
+    "email_placeholder": "ornek@eposta.com",
+    "email_hint": "Cevabımızı bu adrese göndereceğiz.",
+    "message": "Mesajın",
+    "message_placeholder": "Ne olduğunu anlat…",
+    "send": "Gönder",
+    "sent_title": "Mesajın bize ulaştı",
+    "sent_body": "En kısa sürede e-postayla döneceğiz.",
+    "error": "Mesaj gönderilemedi. Lütfen tekrar dene.",
+    "auth_link": "Sorun mu yaşıyorsun? Bize yaz"
   }
 }

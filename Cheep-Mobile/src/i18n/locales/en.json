@@ -55,22 +55,41 @@
       "household_size": {
         "title": "How many people do you shop for?",
         "mascot": "Let's get started! 🐦",
-        "options": { "1": "1", "2": "2", "3-4": "3-4", "5plus": "5+" }
+        "options": {
+          "1": "1",
+          "2": "2",
+          "3-4": "3-4",
+          "5plus": "5+"
+        }
       },
       "diet": {
         "title": "What's your diet?",
         "mascot": "You're doing great!",
-        "options": { "omnivore": "Omnivore", "vegetarian": "Vegetarian", "vegan": "Vegan", "pescatarian": "Pescatarian" }
+        "options": {
+          "omnivore": "Omnivore",
+          "vegetarian": "Vegetarian",
+          "vegan": "Vegan",
+          "pescatarian": "Pescatarian"
+        }
       },
       "avoid": {
         "title": "Do you avoid any of these?",
         "mascot": "We'll filter these out for you 🐦",
-        "options": { "pork_gelatin": "Pork & gelatin", "alcohol": "Alcoholic products" }
+        "options": {
+          "pork_gelatin": "Pork & gelatin",
+          "alcohol": "Alcoholic products"
+        }
       },
       "allergies": {
         "title": "Any allergies/intolerances?",
         "mascot": "Safety first!",
-        "options": { "lactose": "Lactose", "gluten": "Gluten", "peanut": "Peanut", "tree_nut": "Tree nuts", "none": "None" }
+        "options": {
+          "lactose": "Lactose",
+          "gluten": "Gluten",
+          "peanut": "Peanut",
+          "tree_nut": "Tree nuts",
+          "none": "None"
+        }
       },
       "weekly_budget": {
         "title": "What's your weekly budget?",
@@ -114,10 +133,24 @@
     "location_consent_on_os_off": "On · but device location permission is off — tap to enable",
     "location_os_blocked_title": "Device location permission is off",
     "location_os_blocked_body": "You gave consent, but location permission is disabled in system settings. Turn it on in Settings so we can show your nearest stores.",
-    "open_settings": "Open settings"
+    "open_settings": "Open settings",
+    "notifications_on": "On — we'll tell you about price drops",
+    "notifications_off": "Off — tap to enable"
   },
-  "countries": { "TR": "Turkey", "CH": "Switzerland", "SE": "Sweden", "DE": "Germany", "PL": "Poland" },
-  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },
+  "countries": {
+    "TR": "Turkey",
+    "CH": "Switzerland",
+    "SE": "Sweden",
+    "DE": "Germany",
+    "PL": "Poland"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English",
+    "de": "Deutsch",
+    "pl": "Polski",
+    "sv": "Svenska"
+  },
   "product": {
     "no_price_info": "No price info",
     "all_categories": "All Categories",
@@ -246,13 +279,26 @@
     "load_error": "Something went wrong comparing your list",
     "filters_title": "Filters",
     "store_count_filter": "Number of Stores",
-    "store_count": { "one": "Single Store", "two": "2 Stores", "three_plus": "3+ Stores" },
+    "store_count": {
+      "one": "Single Store",
+      "two": "2 Stores",
+      "three_plus": "3+ Stores"
+    },
     "radius_filter": "Distance",
-    "radius": { "walk": "Walk ({{km}} km)", "car": "Drive ({{km}} km)", "wide": "Wide ({{km}} km)" },
+    "radius": {
+      "walk": "Walk ({{km}} km)",
+      "car": "Drive ({{km}} km)",
+      "wide": "Wide ({{km}} km)"
+    },
     "no_nearby_title": "No stores nearby",
     "no_nearby_text": "No stores found within {{km}} km. Try widening the distance.",
     "sort_title": "Sort by",
-    "sort": { "recommended": "Recommended", "cheapest": "Cheapest", "nearest": "Nearest", "price_distance": "Price + Distance" },
+    "sort": {
+      "recommended": "Recommended",
+      "cheapest": "Cheapest",
+      "nearest": "Nearest",
+      "price_distance": "Price + Distance"
+    },
     "summary_title": "Summary",
     "cheapest": "Cheapest",
     "cheapest_full": "Cheapest (whole list)",
@@ -272,7 +318,10 @@
     "list_label": "List:",
     "total_items_label": "Total Items:",
     "recommended_route_badge": "Recommended Route",
-    "route_type": { "single": "Single Store", "multi": "Multiple Stores" },
+    "route_type": {
+      "single": "Single Store",
+      "multi": "Multiple Stores"
+    },
     "score": "Score: {{score}}/100",
     "coverage_badge_full": "All products in this route",
     "coverage_badge_partial": "{{count}} products missing from this route",
@@ -314,5 +363,42 @@
         "desc": "See how much you're saving on every shop. When you're ready, complete your cart at the cheapest store!"
       }
     }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty_title": "No notifications yet",
+    "empty_body": "You'll see it here when something on your list gets cheaper.",
+    "gate_title": "Want a heads-up on price drops?",
+    "gate_message": "We'll notify you when items on your list get cheaper. You can turn this off anytime.",
+    "gate_allow": "Notify me",
+    "gate_later": "Not now",
+    "os_blocked_title": "Notifications are off",
+    "os_blocked_body": "Notification permission is off, so we can't reach you. You can enable it in your phone settings.",
+    "off_title": "Notifications turned off",
+    "off_body": "We won't send notifications anymore. To block them at the system level, open your phone settings."
+  },
+  "support": {
+    "title": "Contact us",
+    "menu_title": "Contact us",
+    "menu_subtitle": "Questions, ideas or problems",
+    "intro": "Something wrong, or an idea? Write to us and we'll get back to you.",
+    "topic": "Topic",
+    "topics": {
+      "bug": "Bug",
+      "price": "Price issue",
+      "account": "Account",
+      "suggestion": "Suggestion",
+      "other": "Other"
+    },
+    "email": "Your email",
+    "email_placeholder": "you@example.com",
+    "email_hint": "We'll reply to this address.",
+    "message": "Your message",
+    "message_placeholder": "Tell us what happened…",
+    "send": "Send",
+    "sent_title": "Message received",
+    "sent_body": "We'll get back to you by email shortly.",
+    "error": "Couldn't send your message. Please try again.",
+    "auth_link": "Having trouble? Contact us"
   }
 }

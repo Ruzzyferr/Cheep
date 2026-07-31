@@ -33,6 +33,21 @@ export const API_ENDPOINTS = {
     RESEND_VERIFICATION: '/auth/resend-verification',
   },
 
+  // Bildirimler (fiyat düşüşü) + push token
+  NOTIFICATIONS: {
+    LIST: '/notifications',
+    UNREAD_COUNT: '/notifications/unread-count',
+    MARK_READ: (id: number) => `/notifications/${id}/read`,
+    MARK_ALL_READ: '/notifications/read-all',
+    PUSH_TOKEN: '/notifications/push-token',
+    PUSH_TOKEN_REMOVE: '/notifications/push-token/remove',
+  },
+
+  // Destek / iletişim (giriş zorunlu değil)
+  SUPPORT: {
+    CONTACT: '/support/contact',
+  },
+
   // Affiliate
   AFFILIATES: {
     CLICK: '/affiliates/click',

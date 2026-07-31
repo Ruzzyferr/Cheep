@@ -55,22 +55,41 @@
       "household_size": {
         "title": "Für wie viele Personen kaufst du ein?",
         "mascot": "Los geht's! 🐦",
-        "options": { "1": "1", "2": "2", "3-4": "3-4", "5plus": "5+" }
+        "options": {
+          "1": "1",
+          "2": "2",
+          "3-4": "3-4",
+          "5plus": "5+"
+        }
       },
       "diet": {
         "title": "Wie ernährst du dich?",
         "mascot": "Du machst das super!",
-        "options": { "omnivore": "Alles", "vegetarian": "Vegetarisch", "vegan": "Vegan", "pescatarian": "Pescetarisch" }
+        "options": {
+          "omnivore": "Alles",
+          "vegetarian": "Vegetarisch",
+          "vegan": "Vegan",
+          "pescatarian": "Pescetarisch"
+        }
       },
       "avoid": {
         "title": "Möchtest du etwas davon vermeiden?",
         "mascot": "Wir filtern das für dich raus 🐦",
-        "options": { "pork_gelatin": "Schweinefleisch & Gelatine", "alcohol": "Alkoholische Produkte" }
+        "options": {
+          "pork_gelatin": "Schweinefleisch & Gelatine",
+          "alcohol": "Alkoholische Produkte"
+        }
       },
       "allergies": {
         "title": "Allergien/Unverträglichkeiten?",
         "mascot": "Sicherheit geht vor!",
-        "options": { "lactose": "Laktose", "gluten": "Gluten", "peanut": "Erdnuss", "tree_nut": "Schalenfrüchte", "none": "Keine" }
+        "options": {
+          "lactose": "Laktose",
+          "gluten": "Gluten",
+          "peanut": "Erdnuss",
+          "tree_nut": "Schalenfrüchte",
+          "none": "Keine"
+        }
       },
       "weekly_budget": {
         "title": "Dein Wochenbudget?",
@@ -114,10 +133,24 @@
     "location_consent_on_os_off": "An · aber die Standortberechtigung des Geräts ist aus — zum Aktivieren tippen",
     "location_os_blocked_title": "Standortberechtigung ist deaktiviert",
     "location_os_blocked_body": "Du hast eingewilligt, aber die Standortberechtigung ist in den Systemeinstellungen deaktiviert. Aktiviere sie in den Einstellungen, damit wir die nächstgelegenen Märkte anzeigen können.",
-    "open_settings": "Einstellungen öffnen"
+    "open_settings": "Einstellungen öffnen",
+    "notifications_on": "An — wir melden Preissenkungen",
+    "notifications_off": "Aus — zum Aktivieren tippen"
   },
-  "countries": { "TR": "Türkei", "CH": "Schweiz", "SE": "Schweden", "DE": "Deutschland", "PL": "Polen" },
-  "languages": { "tr": "Türkçe", "en": "English", "de": "Deutsch", "pl": "Polski", "sv": "Svenska" },
+  "countries": {
+    "TR": "Türkei",
+    "CH": "Schweiz",
+    "SE": "Schweden",
+    "DE": "Deutschland",
+    "PL": "Polen"
+  },
+  "languages": {
+    "tr": "Türkçe",
+    "en": "English",
+    "de": "Deutsch",
+    "pl": "Polski",
+    "sv": "Svenska"
+  },
   "product": {
     "no_price_info": "Keine Preisangabe",
     "all_categories": "Alle Kategorien",
@@ -246,13 +279,26 @@
     "load_error": "Beim Vergleichen deiner Liste ist ein Fehler aufgetreten",
     "filters_title": "Filter",
     "store_count_filter": "Anzahl der Geschäfte",
-    "store_count": { "one": "Ein Geschäft", "two": "2 Geschäfte", "three_plus": "3+ Geschäfte" },
+    "store_count": {
+      "one": "Ein Geschäft",
+      "two": "2 Geschäfte",
+      "three_plus": "3+ Geschäfte"
+    },
     "radius_filter": "Entfernung",
-    "radius": { "walk": "Zu Fuß ({{km}} km)", "car": "Auto ({{km}} km)", "wide": "Weit ({{km}} km)" },
+    "radius": {
+      "walk": "Zu Fuß ({{km}} km)",
+      "car": "Auto ({{km}} km)",
+      "wide": "Weit ({{km}} km)"
+    },
     "no_nearby_title": "Keine Geschäfte in der Nähe",
     "no_nearby_text": "Keine Geschäfte innerhalb von {{km}} km gefunden. Erhöhe die Entfernung.",
     "sort_title": "Sortieren nach",
-    "sort": { "recommended": "Empfohlen", "cheapest": "Günstigste", "nearest": "Nächstgelegen", "price_distance": "Preis + Entfernung" },
+    "sort": {
+      "recommended": "Empfohlen",
+      "cheapest": "Günstigste",
+      "nearest": "Nächstgelegen",
+      "price_distance": "Preis + Entfernung"
+    },
     "summary_title": "Zusammenfassung",
     "cheapest": "Am günstigsten",
     "cheapest_full": "Günstigste (ganze Liste)",
@@ -272,7 +318,10 @@
     "list_label": "Liste:",
     "total_items_label": "Artikel gesamt:",
     "recommended_route_badge": "Empfohlene Route",
-    "route_type": { "single": "Ein Geschäft", "multi": "Mehrere Geschäfte" },
+    "route_type": {
+      "single": "Ein Geschäft",
+      "multi": "Mehrere Geschäfte"
+    },
     "score": "Punktzahl: {{score}}/100",
     "coverage_badge_full": "Alle Produkte auf dieser Route",
     "coverage_badge_partial": "{{count}} Produkte fehlen auf dieser Route",
@@ -314,5 +363,42 @@
         "desc": "Sieh, wie viel du bei jedem Einkauf sparst. Wenn du bereit bist, schließe deinen Einkauf im günstigsten Geschäft ab!"
       }
     }
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "empty_title": "Noch keine Benachrichtigungen",
+    "empty_body": "Hier siehst du es, wenn etwas auf deiner Liste günstiger wird.",
+    "gate_title": "Bei Preissenkungen Bescheid geben?",
+    "gate_message": "Wir benachrichtigen dich, wenn Artikel auf deiner Liste günstiger werden. Jederzeit abschaltbar.",
+    "gate_allow": "Benachrichtigen",
+    "gate_later": "Später",
+    "os_blocked_title": "Benachrichtigungen sind aus",
+    "os_blocked_body": "Die Berechtigung ist deaktiviert, daher können wir dich nicht erreichen. Du kannst sie in den Einstellungen aktivieren.",
+    "off_title": "Benachrichtigungen deaktiviert",
+    "off_body": "Wir senden keine Benachrichtigungen mehr. Für eine vollständige Sperre öffne die Telefoneinstellungen."
+  },
+  "support": {
+    "title": "Kontakt",
+    "menu_title": "Kontakt",
+    "menu_subtitle": "Fragen, Ideen oder Probleme",
+    "intro": "Etwas stimmt nicht oder du hast eine Idee? Schreib uns, wir melden uns.",
+    "topic": "Thema",
+    "topics": {
+      "bug": "Fehler",
+      "price": "Preisproblem",
+      "account": "Konto",
+      "suggestion": "Vorschlag",
+      "other": "Sonstiges"
+    },
+    "email": "Deine E-Mail",
+    "email_placeholder": "du@beispiel.com",
+    "email_hint": "An diese Adresse antworten wir.",
+    "message": "Deine Nachricht",
+    "message_placeholder": "Beschreibe, was passiert ist…",
+    "send": "Senden",
+    "sent_title": "Nachricht erhalten",
+    "sent_body": "Wir melden uns in Kürze per E-Mail.",
+    "error": "Nachricht konnte nicht gesendet werden. Bitte erneut versuchen.",
+    "auth_link": "Probleme? Schreib uns"
   }
 }
