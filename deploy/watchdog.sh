@@ -48,10 +48,18 @@ print(json.dumps({
     "subject": os.environ["SUBJ"],
     "text": os.environ["BODY"],
 }))')
-    curl -sS -m 20 -X POST https://api.resend.com/emails \
+    # Resend'in yanıtını YUTMA: anahtar iptal olsa veya gönderen alan adı
+    # doğrulaması düşse nöbetçi sessizce uyaramaz hâle gelirdi. Başarısızlık
+    # loga yazılır ki "nöbetçiyi kim gözetliyor" boşluğu en azından görünür olsun.
+    local code
+    code=$(curl -sS -m 20 -X POST https://api.resend.com/emails \
         -H "Authorization: Bearer $RESEND_API_KEY" \
         -H "Content-Type: application/json" \
-        -d "$payload" -o /dev/null -w "" || echo "UYARI: e-posta gönderimi başarısız: $subject" >&2
+        -d "$payload" -o /tmp/cheep-watchdog-mail.out -w '%{http_code}' 2>/dev/null)
+    if [ "$code" != "200" ]; then
+        echo "UYARI: e-posta gönderilemedi (HTTP $code): $subject — $(head -c 200 /tmp/cheep-watchdog-mail.out 2>/dev/null)" >&2
+        return 1
+    fi
 }
 
 # report <kontrol-adı> <ok|fail> <mesaj>
