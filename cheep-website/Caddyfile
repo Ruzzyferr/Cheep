@@ -2,7 +2,7 @@
 #
 # Build, her rotayı prerender edip `dist/<yol>/index.html` olarak yazıyor
 # (scripts/prerender.mjs). Sıralama önemli:
-#   {path}            → gerçek dosya (asset, robots.txt, sitemap.xml)
+#   {path}            → gerçek dosya (asset, font, robots.txt, sitemap.xml)
 #   {path}/index.html → prerender edilmiş sayfa (/pl → /pl/index.html)
 #   /index.html       → SPA fallback (bilinmeyen yollar; router ana sayfaya alır)
 :80 {
@@ -11,10 +11,23 @@
 	try_files {path} {path}/index.html /index.html
 	file_server
 
-	# İçerik hash'li asset'ler kalıcı; HTML her zaman taze doğrulanmalı.
+	# İçerik hash'li asset'ler — adları değişmeden içerikleri değişemez.
 	@immutable path /assets/*
 	header @immutable Cache-Control "public, max-age=31536000, immutable"
 
-	@html path *.html /
+	# Fontlar hash'siz (adları aile+ağırlık+alt küme kodluyor). Uzun ömürlü ama
+	# `immutable` değil: bir gün dosya değişirse tarayıcı yine de doğrulayabilsin.
+	@fonts path /fonts/*
+	header @fonts Cache-Control "public, max-age=31536000"
+
+	@images path *.png *.jpg *.webp *.svg *.ico
+	header @images Cache-Control "public, max-age=604800"
+
+	@crawl path /robots.txt /sitemap.xml
+	header @crawl Cache-Control "public, max-age=3600"
+
+	# Geri kalan her şey HTML. `*.html` ile eşleştirmek yetmiyor: prerender
+	# edilmiş sayfalara /pl, /terms gibi uzantısız yollarla geliniyor.
+	@html not path /assets/* /fonts/* *.png *.jpg *.webp *.svg *.ico /robots.txt /sitemap.xml
 	header @html Cache-Control "public, max-age=0, must-revalidate"
 }
