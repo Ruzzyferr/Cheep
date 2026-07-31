@@ -56,10 +56,25 @@ if (!ingestApiKey && isProduction) {
 }
 
 // --- CORS allowlist ---
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean);
+// Not: Mobil uygulama (React Native) Origin göndermez, CORS onu ilgilendirmez.
+// Bu liste yalnızca TARAYICIDAN gelen istekler için: cheep.live'daki hesap silme
+// formu API'ye tarayıcıdan POST atıyor.
+//
+// Site origin'i her zaman ekli: prod .env'de ALLOWED_ORIGINS yanlışlıkla
+// geliştirme değerlerinde kalmıştı (localhost:8081) ve hesap silme formu
+// sessizce CORS'a takılıyordu — Play Store'un zorunlu tuttuğu bir özellik.
+// Yapılandırma hatası bu sayfayı bir daha kıramasın diye kodda sabit.
+const SITE_ORIGINS = ['https://cheep.live'];
+
+const allowedOrigins = Array.from(
+    new Set([
+        ...SITE_ORIGINS,
+        ...(process.env.ALLOWED_ORIGINS || '')
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+    ])
+);
 
 // --- HTTP port ---
 const port = Number(process.env.PORT) || 3000;

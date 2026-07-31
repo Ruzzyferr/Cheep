@@ -10,6 +10,7 @@ import logger from "./utils/logger.js";
 import { config } from './config/index.js';
 import { prisma } from './utils/prisma.client.js';
 import { applyTrustProxy } from './config/trust-proxy.js';
+import { jsonBodyParser } from './middleware/body-parser.middleware.js';
 
 // dotenv config'i './config' içinde bir kez yapılır; burada tekrar etmeye gerek yok.
 
@@ -43,8 +44,10 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
 }));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Gövde boyutu: varsayılan dar, yalnızca toplu ingest uçları geniş.
+// Ayrıntı ve gerekçe: src/middleware/body-parser.middleware.ts
+app.use(jsonBodyParser());
+app.use(express.urlencoded({ limit: '100kb', extended: true }));
 
 // Input sanitization (tüm route'lar için)
 import { sanitizeInput } from './middleware/sanitize.middleware.js';
@@ -155,7 +158,13 @@ const swaggerUiOptions = {
     customSiteTitle: 'Cheep API Docs',
 };
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+// Swagger YALNIZCA production dışında. Canlıda açık bırakmak tüm API yüzeyini
+// (uçlar, parametreler, şemalar) herkese haritalıyordu — saldırgana hazır bir
+// keşif aracı. Dokümana ihtiyaç olursa `npm run dev` ile yerelde açılır.
+if (!config.isProduction) {
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+    logger.info('📚 Swagger /api-docs açık (production dışı)');
+}
 
 // Ana Rotalar — her API isteğinde ülke çözümlenir (x-country header veya default)
 import { resolveCountry } from './middleware/country.middleware.js';

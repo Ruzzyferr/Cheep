@@ -21,5 +21,12 @@ api.cheep.live {
 		# olmadan istemci başa sahte adres yazıp rate limit kovasını
 		# değiştirebilirdi. (src/config/trust-proxy.ts)
 		header_up X-Forwarded-For {remote_host}
+
+		# Deploy sırasında backend container'ı ~birkaç saniye yeniden başlıyor.
+		# Varsayılan davranışta bu süre boyunca kullanıcı 502 görüyordu. Caddy
+		# yalnızca BAĞLANTI kurulamadığında yeniden dener (istek uygulamaya hiç
+		# ulaşmamıştır), o yüzden POST'ları tekrarlamak güvenli.
+		lb_try_duration 15s
+		lb_try_interval 500ms
 	}
 }
