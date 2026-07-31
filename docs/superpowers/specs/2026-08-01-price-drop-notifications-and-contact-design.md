@@ -79,7 +79,18 @@ Mantık: kullanıcının **aktif** listelerindeki her ürün için, o ülkedeki 
 
 **Model — `UserPushToken`:** `user_id`, `token` (unique), `platform`, `locale`, `created_at`, `updated_at`.
 
-**İzin akışı:** Konum işinde konan kurala uyar — izin **yalnızca kullanıcı açıkça istediğinde** sorulur (bildirim tercihleri ekranındaki anahtar), uygulama açılışında değil. Arka arkaya iki modal, Android'de kalıcı "bir daha sorma" ile sonuçlanıyor.
+**İzin akışı — açılışta, konum kapısından SONRA.** `runLocationGate()` çözümlendikten sonra sırayla `runNotificationGate()` çalışır (eşzamanlı değil, ardışık — üst üste iki sistem modalı çıkmaz).
+
+Yeni `src/utils/notificationGate.ts`, `locationGate.ts` desenini birebir izler; o dosya bu sorunları zaten çözmüş durumda ve tekerleği yeniden icat etmeye gerek yok:
+
+- İzin zaten verilmişse veya kullanıcı yakın zamanda "şimdi değil" dediyse **hiçbir şey gösterilmez** (snooze).
+- Sistem modalından **önce gerekçe diyaloğu**: ne için bildirim göndereceğimizi anlatır. Kullanıcı "şimdi değil" derse sistem modalı hiç çağrılmaz — Android'de iki reddin izni kalıcı olarak kapattığı düşünülürse, bu kritik: reddedilecek bir istem hiç harcanmaz.
+- `canAskAgain === false` ise sistem modalı bir daha çıkmaz → kullanıcı uygulama ayarlarına yönlendirilir.
+- Reddedilirse farklı sürelerle ertelenir (konum kapısındaki `SNOOZE_*` sabitleriyle aynı mantık).
+
+Profil → "Bildirimler" ekranındaki anahtar da aynı kapıyı çağırır, böylece sonradan açmak mümkün.
+
+**İzin verilmese de zil çalışır.** Bu tasarımın ayrılmaz parçası: tespit tamamen backend'de yapılır ve `PriceDrop` satırları izinden bağımsız oluşur. İzin yalnızca telefona *bildirim düşmesini* etkiler; zil ikonu, bildirim listesi ve okunmamış rozeti her hâlükârda çalışır.
 
 **Gönderim:** Tespit işi `PriceDrop` satırlarını yazdıktan sonra Expo Push API'ye 100'lük gruplar hâlinde gönderir. Metin kullanıcının `language` alanına göre seçilir. `DeviceNotRegistered` dönen token'lar silinir.
 
