@@ -1,6 +1,12 @@
 import { Router } from 'express';
 import * as AuthController from './auth.controller.js'; // <-- .js uzantısı
-import { authLimiter, verifyLimiter } from '../../middleware/rate-limit.middleware.js';
+import {
+    registerLimiter,
+    loginIpLimiter,
+    loginAccountLimiter,
+    verifyLimiter,
+    changePasswordLimiter,
+} from '../../middleware/rate-limit.middleware.js';
 import { validate } from '../../schema/validation.middleware.js';
 import { authenticate } from '../../middleware/auth.middleware.js';
 import { registerSchema, loginSchema, changePasswordSchema, verifyEmailSchema } from './auth.schema.js';
@@ -35,7 +41,7 @@ const router = Router();
  *       201:
  *         description: Kullanıcı başarıyla oluşturuldu
  */
-router.post('/register', authLimiter, validate(registerSchema), AuthController.register);
+router.post('/register', registerLimiter, validate(registerSchema), AuthController.register);
 
 /**
  * @swagger
@@ -57,7 +63,7 @@ router.post('/register', authLimiter, validate(registerSchema), AuthController.r
  *       200:
  *         description: Başarılı giriş
  */
-router.post('/login', authLimiter, validate(loginSchema), AuthController.login);
+router.post('/login', loginIpLimiter, loginAccountLimiter, validate(loginSchema), AuthController.login);
 
 /**
  * @swagger
@@ -175,7 +181,7 @@ router.post('/logout', authenticate, AuthController.logout);
 router.post(
     '/change-password',
     authenticate,
-    authLimiter,
+    changePasswordLimiter,
     validate(changePasswordSchema),
     AuthController.changePassword
 );

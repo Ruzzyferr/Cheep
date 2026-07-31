@@ -31,10 +31,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # 3000 host'a açık kalır: eski (HTTP) APK'lar kırılmasın diye geçiş döneminde.
-    # HTTPS geçişi tamamen oturunca kapatılabilir (Caddy zaten backend:3000'e iç ağdan erişir).
-    ports:
-      - "3000:3000"
+    # Dışarı AÇILMIYOR. Caddy iç Docker ağından backend:3000'e ulaşıyor.
+    #
+    # Eskiden "3000:3000" ile host'a açıktı (geçiş dönemi için). Artık kapalı,
+    # çünkü Express `trust proxy=1` ile X-Forwarded-For'a güveniyor: port dışarı
+    # açık kalsaydı herkes Caddy'yi atlayıp sahte XFF ile rate limit kovasını
+    # değiştirebilir (ve TLS'siz konuşabilirdi). Yayınlanan tüm mobil sürümler
+    # zaten https://api.cheep.live kullanıyor; kapatmadan önce porta gerçek
+    # trafik gelmediği doğrulandı.
+    expose:
+      - "3000"
 
   # Tanıtım sitesi (cheep.live) — Vite SPA build'i, kendi Caddy'siyle iç ağda :80'de servis edilir.
   website:

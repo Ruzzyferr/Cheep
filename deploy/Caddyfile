@@ -15,5 +15,11 @@ cheep.live {
 
 api.cheep.live {
 	encode gzip
-	reverse_proxy backend:3000
+	reverse_proxy backend:3000 {
+		# XFF'i istemcinin gönderdiğine EKLEME, gerçek uzak adresle DEĞİŞTİR.
+		# Backend `trust proxy=1` ile son atlamayı istemci sayıyor; bu satır
+		# olmadan istemci başa sahte adres yazıp rate limit kovasını
+		# değiştirebilirdi. (src/config/trust-proxy.ts)
+		header_up X-Forwarded-For {remote_host}
+	}
 }

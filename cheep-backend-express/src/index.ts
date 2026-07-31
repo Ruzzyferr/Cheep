@@ -9,11 +9,17 @@ import morgan from "morgan";
 import logger from "./utils/logger.js";
 import { config } from './config/index.js';
 import { prisma } from './utils/prisma.client.js';
+import { applyTrustProxy } from './config/trust-proxy.js';
 
 // dotenv config'i './config' içinde bir kez yapılır; burada tekrar etmeye gerek yok.
 
 const app: Application = express();
 const PORT = config.port;
+
+// Caddy'nin arkasındayız. Bu ayar olmadan req.ip herkes için Caddy'nin Docker
+// IP'si olur ve tüm rate limit'ler kullanıcı başına değil GLOBAL çalışır.
+// Ayrıntı: src/config/trust-proxy.ts
+applyTrustProxy(app);
 
 const stream: morgan.StreamOptions = {
     write: (message) => logger.http(message.trim()),
