@@ -1,0 +1,14 @@
+[Unit]
+Description=Cheep fiyat düşüşü tespiti (aktif listelerdeki ürünler)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/opt/cheep/deploy/.env
+# Backend iç ağdan; dışarı açık port yok.
+ExecStart=/bin/bash -c 'curl -fsS -m 600 -X POST "http://127.0.0.1:3000/api/v1/notifications/detect" -H "x-api-key: $INGEST_API_KEY" | head -c 500'
+Nice=10
+IOSchedulingClass=idle
+StandardOutput=append:/var/log/cheep-price-drops.log
+StandardError=append:/var/log/cheep-price-drops.log

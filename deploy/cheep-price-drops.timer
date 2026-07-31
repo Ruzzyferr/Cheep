@@ -1,0 +1,13 @@
+[Unit]
+Description=Cheep fiyat düşüşü tespiti zamanlayıcısı
+
+[Timer]
+# 08:00 UTC = Türkiye 11:00, Polonya 10:00. Tek koşu her iki ülke için de makul
+# bir saate denk geliyor; kullanıcı başına sessiz-saat kuyruğu kurmaya gerek yok.
+# PL scrape hattı 03:00'te bittiği için veri taze.
+OnCalendar=*-*-* 08:00:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
