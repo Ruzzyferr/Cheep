@@ -14,7 +14,6 @@
 import { Alert, Linking, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import Constants from 'expo-constants';
 import i18n from '../i18n';
 import { notificationPromptStorage, pushTokenStorage } from './storage';
 import { notificationService } from '../services/notification.service';
@@ -67,21 +66,21 @@ function confirm(title: string, message: string, confirmText: string, cancelText
 }
 
 /**
- * Expo push token'ını alır ve sunucuya kaydeder.
+ * Cihazın FCM kayıt token'ını alır ve sunucuya kaydeder.
  *
- * Emülatör/simülatörde push token alınamaz (gerçek cihaz gerekir) — orada
- * sessizce atlanır, uygulama içi bildirimler zaten çalışıyor.
+ * Expo'nun push servisi bilerek KULLANILMIYOR: o da sonunda FCM'e gidiyor ama
+ * araya ekstra bir hesap ve `projectId` sokuyordu. Firebase zaten kurulu
+ * (google-services.json), aracıya gerek yok — `getDevicePushTokenAsync` ham
+ * FCM token'ını veriyor ve backend doğrudan FCM v1'e gönderiyor.
+ *
+ * Emülatör/simülatörde token alınamaz (gerçek cihaz gerekir) — orada sessizce
+ * atlanır, uygulama içi bildirimler zaten çalışıyor.
  */
 export async function registerPushToken(): Promise<string | null> {
   if (!Device.isDevice) return null;
   try {
-    const projectId =
-      Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
-
-    const { data: token } = await Notifications.getExpoPushTokenAsync(
-      projectId ? { projectId } : undefined,
-    );
-    if (!token) return null;
+    const { data: token } = await Notifications.getDevicePushTokenAsync();
+    if (!token || typeof token !== 'string') return null;
 
     await notificationService.registerPushToken(token, Platform.OS, i18n.language);
     await pushTokenStorage.save(token);

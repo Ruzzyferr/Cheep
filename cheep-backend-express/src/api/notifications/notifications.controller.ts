@@ -78,7 +78,9 @@ export const registerPushToken = async (req: Request, res: Response, next: NextF
         if (userId === null) return;
 
         const { token, platform, locale } = req.body ?? {};
-        if (typeof token !== 'string' || !token.startsWith('ExponentPushToken')) {
+        // FCM kayıt token'ları uzun, opak dizeler — sabit bir önek yok.
+        // Yalnızca kabaca doğrula; geçersizi FCM zaten reddeder ve temizleriz.
+        if (typeof token !== 'string' || token.length < 32 || token.length > 4096) {
             res.status(400).json({ success: false, message: 'Geçersiz push token' });
             return;
         }

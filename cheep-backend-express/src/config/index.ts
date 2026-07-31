@@ -117,6 +117,41 @@ const support = {
     inbox: process.env.SUPPORT_INBOX || 'info@swiip.app',
 };
 
+
+// --- Firebase Cloud Messaging (push bildirimleri) ---
+// Servis hesabı anahtarı GERÇEK BİR SIR: google-services.json'ın aksine
+// uygulamanın içine girmez, yalnızca sunucuda durur. Git'e KONMAZ.
+// FCM_SERVICE_ACCOUNT: servis hesabı JSON'unun tamamı (tek satır) veya base64'ü.
+interface FcmServiceAccount {
+    client_email: string;
+    private_key: string;
+    project_id: string;
+}
+
+function parseServiceAccount(): FcmServiceAccount | null {
+    const raw = process.env.FCM_SERVICE_ACCOUNT?.trim();
+    if (!raw) return null;
+    try {
+        const json = raw.startsWith('{') ? raw : Buffer.from(raw, 'base64').toString('utf8');
+        const sa = JSON.parse(json) as FcmServiceAccount;
+        if (!sa.client_email || !sa.private_key || !sa.project_id) throw new Error('eksik alan');
+        // .env üzerinden taşınırken satır sonları kaçışlı ("\n") geliyor;
+        // RS256 imzası için gerçek satır sonuna çevrilmeli.
+        sa.private_key = sa.private_key.split(String.raw`\n`).join('\n');
+        return sa;
+    } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn(`⚠️  FCM_SERVICE_ACCOUNT çözümlenemedi (${(err as Error).message}). Push devre dışı.`);
+        return null;
+    }
+}
+
+const fcmServiceAccount = parseServiceAccount();
+const fcm = {
+    serviceAccount: fcmServiceAccount,
+    projectId: process.env.FCM_PROJECT_ID || fcmServiceAccount?.project_id || '',
+};
+
 export const config = {
     isProduction,
     jwtSecret: jwtSecret as string,
@@ -129,4 +164,5 @@ export const config = {
     email,
     emailEnabled,
     support,
+    fcm,
 };

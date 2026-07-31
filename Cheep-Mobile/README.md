@@ -83,6 +83,29 @@ npm run lint       # expo lint
 npm run typecheck  # tsc --noEmit
 ```
 
+## 📦 Sürüm çıkarma
+
+Derleme **yerel** yapılır (`gradlew`), EAS Build kullanılmaz. `android/` ve
+`ios/` klasörleri git'te yok — `expo prebuild` üretir.
+
+```bash
+npx expo prebuild --platform android --clean
+cd android && ./gradlew bundleRelease
+```
+
+Tam rehber (imzalama, keystore, sürüm numarası, Play Console, iOS, push mimarisi):
+**[../docs/BUILD-RELEASE.md](../docs/BUILD-RELEASE.md)**
+
+## 🔔 Bildirimler
+
+Doğrudan **FCM** kullanılıyor, Expo push servisi değil. `google-services.json`
+proje KÖKÜNDE durur ve `app.json` üzerinden referanslanır — `android/app/` içine
+konursa bir sonraki prebuild'de silinir.
+
+İzin akışı `src/utils/notificationGate.ts`: açılışta, konum kapısından SONRA
+ardışık çalışır ve sistem modalından önce kendi gerekçesini gösterir (Android'de
+iki reddedilen izin kalıcı olarak kapanıyor).
+
 ## 📝 Notlar
 
 - Test kullanıcısı: `test@cheep.com` / `test123456`
