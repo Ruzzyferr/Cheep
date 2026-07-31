@@ -1,7 +1,20 @@
-# İç servis — TLS yok (edge Caddy hallediyor). SPA fallback: tüm yollar index.html'e.
+# İç servis — TLS yok (edge Caddy hallediyor).
+#
+# Build, her rotayı prerender edip `dist/<yol>/index.html` olarak yazıyor
+# (scripts/prerender.mjs). Sıralama önemli:
+#   {path}            → gerçek dosya (asset, robots.txt, sitemap.xml)
+#   {path}/index.html → prerender edilmiş sayfa (/pl → /pl/index.html)
+#   /index.html       → SPA fallback (bilinmeyen yollar; router ana sayfaya alır)
 :80 {
 	root * /srv
-	encode gzip
-	try_files {path} /index.html
+	encode gzip zstd
+	try_files {path} {path}/index.html /index.html
 	file_server
+
+	# İçerik hash'li asset'ler kalıcı; HTML her zaman taze doğrulanmalı.
+	@immutable path /assets/*
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+	@html path *.html /
+	header @html Cache-Control "public, max-age=0, must-revalidate"
 }

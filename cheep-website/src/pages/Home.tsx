@@ -5,6 +5,7 @@ import { HowItWorks } from '../components/sections/HowItWorks'
 import { Savings } from '../components/sections/Savings'
 import { Coverage } from '../components/sections/Coverage'
 import { Features } from '../components/sections/Features'
+import { Faq } from '../components/sections/Faq'
 import { Download } from '../components/sections/Download'
 import { Footer } from '../components/sections/Footer'
 
@@ -19,6 +20,7 @@ export function Home() {
         <Savings />
         <Coverage />
         <Features />
+        <Faq />
         <Download />
       </main>
       <Footer />
