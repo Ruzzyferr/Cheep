@@ -2,6 +2,7 @@ import { type Request, type Response, type NextFunction } from 'express';
 import { intParam } from '../../utils/request-params.js';
 import * as NotificationsService from './notifications.service.js';
 import { detectPriceDrops } from './price-drop.service.js';
+import * as PushService from '../../services/push.service.js';
 
 const requireUser = (req: Request, res: Response): number | null => {
     if (!req.user) {
@@ -65,6 +66,43 @@ export const runDetection = async (req: Request, res: Response, next: NextFuncti
     try {
         const sinceHours = Math.min(Math.max(Number(req.query.since_hours) || 26, 1), 24 * 14);
         res.status(200).json({ success: true, data: await detectPriceDrops(sinceHours) });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/** Cihaz push token'ı kaydeder (uygulama izin aldıktan sonra çağırır). */
+export const registerPushToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = requireUser(req, res);
+        if (userId === null) return;
+
+        const { token, platform, locale } = req.body ?? {};
+        if (typeof token !== 'string' || !token.startsWith('ExponentPushToken')) {
+            res.status(400).json({ success: false, message: 'Geçersiz push token' });
+            return;
+        }
+
+        await PushService.registerToken(userId, token, typeof platform === 'string' ? platform : 'android', locale);
+        res.status(200).json({ success: true });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/** Kullanıcı bildirimleri kapattığında / çıkış yaptığında token'ı siler. */
+export const removePushToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = requireUser(req, res);
+        if (userId === null) return;
+
+        const { token } = req.body ?? {};
+        if (typeof token !== 'string') {
+            res.status(400).json({ success: false, message: 'token zorunludur' });
+            return;
+        }
+        await PushService.removeToken(token);
+        res.status(200).json({ success: true });
     } catch (error) {
         next(error);
     }

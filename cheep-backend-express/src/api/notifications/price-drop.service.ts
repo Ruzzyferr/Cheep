@@ -1,6 +1,8 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../../utils/prisma.client.js';
 import logger from '../../utils/logger.js';
+import { sendPushBatch, type PushMessage } from '../../services/push.service.js';
+import { buildPushCopy, resolveLocale } from './push-copy.js';
 
 /**
  * Fiyat düşüşü tespiti.
@@ -27,6 +29,8 @@ export interface DetectResult {
     scannedUsers: number;
     created: number;
     skippedExisting: number;
+    pushSent: number;
+    pushFailed: number;
 }
 
 interface Candidate {
@@ -131,9 +135,13 @@ export const detectPriceDrops = async (sinceHours = 26): Promise<DetectResult> =
     today.setUTCHours(0, 0, 0, 0);
 
     let created = 0;
+    // Push için yalnızca GERÇEKTEN yeni oluşturulanlar toplanır: zaten var olan
+    // bir düşüş için ikinci kez bildirim göndermek kullanıcıyı rahatsız eder.
+    const fresh = new Map<number, { productName: string; dropPct: number }[]>();
+
     for (const r of rows) {
         try {
-            await prisma.priceDrop.create({
+            const row = await prisma.priceDrop.create({
                 data: {
                     user_id: r.user_id,
                     product_id: r.product_id,
@@ -144,8 +152,12 @@ export const detectPriceDrops = async (sinceHours = 26): Promise<DetectResult> =
                     drop_pct: r.drop_pct,
                     dropped_on: today,
                 },
+                select: { product: { select: { name: true } } },
             });
             created++;
+            const list = fresh.get(r.user_id) ?? [];
+            list.push({ productName: row.product.name, dropPct: r.drop_pct });
+            fresh.set(r.user_id, list);
         } catch (err) {
             // Gün-bazlı unique kısıtı: aynı gün ikinci koşuda çoğaltmaz.
             if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') continue;
@@ -153,13 +165,56 @@ export const detectPriceDrops = async (sinceHours = 26): Promise<DetectResult> =
         }
     }
 
+    const push = await notifyUsers(fresh);
+
     const result: DetectResult = {
         scannedUsers: new Set(raw.map((r) => r.user_id)).size,
         created,
         skippedExisting: rows.length - created,
+        pushSent: push.sent,
+        pushFailed: push.failed,
     };
     logger.info(
-        `[price-drop] ${result.scannedUsers} kullanıcı, ${raw.length} aday → ${created} yeni bildirim (${result.skippedExisting} zaten vardı)`
+        `[price-drop] ${result.scannedUsers} kullanıcı, ${raw.length} aday → ${created} yeni bildirim ` +
+        `(${result.skippedExisting} zaten vardı) · push ${push.sent} gönderildi, ${push.failed} başarısız`
     );
     return result;
 };
+
+/**
+ * Yeni düşüşü olan kullanıcılara TEK bildirim gönderir.
+ *
+ * Kullanıcı başına tek mesaj: beş ürün ucuzladıysa beş bildirim değil, "5 üründe
+ * fiyat düştü" diyen bir tane. Cihazda bildirim yığını oluşturmak en hızlı
+ * sessize alınma yolu.
+ *
+ * Push izni olmayan / token'ı olmayan kullanıcı sessizce atlanır — uygulama içi
+ * bildirimi zaten oluşturuldu.
+ */
+async function notifyUsers(
+    fresh: Map<number, { productName: string; dropPct: number }[]>
+): Promise<{ sent: number; failed: number }> {
+    if (fresh.size === 0) return { sent: 0, failed: 0 };
+
+    const userIds = [...fresh.keys()];
+    const tokens = await prisma.userPushToken.findMany({
+        where: { user_id: { in: userIds } },
+        select: { token: true, user_id: true, locale: true, user: { select: { language: true } } },
+    });
+
+    const messages: PushMessage[] = tokens.map((t) => {
+        const drops = fresh.get(t.user_id)!;
+        const locale = resolveLocale(t.locale ?? t.user.language);
+        const { title, body } = buildPushCopy(locale, drops);
+        return {
+            to: t.token,
+            title,
+            body,
+            // Uygulama açıldığında bildirim ekranına götürmek için.
+            data: { type: 'price_drop', count: drops.length },
+        };
+    });
+
+    const r = await sendPushBatch(messages);
+    return { sent: r.sent, failed: r.failed };
+}

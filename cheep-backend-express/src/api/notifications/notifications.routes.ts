@@ -65,4 +65,24 @@ router.post('/:id/read', authenticate, validateIdParam('id'), NotificationsContr
  */
 router.post('/detect', requireIngestKey, NotificationsController.runDetection);
 
+/**
+ * @swagger
+ * /api/v1/notifications/push-token:
+ *   post:
+ *     summary: Cihaz push token'ını kaydeder
+ *     tags: [Notifications]
+ *     security: [{ bearerAuth: [] }]
+ */
+router.post('/push-token', authenticate, NotificationsController.registerPushToken);
+
+/**
+ * @swagger
+ * /api/v1/notifications/push-token/remove:
+ *   post:
+ *     summary: Cihaz push token'ını siler (bildirim kapatma / çıkış)
+ *     tags: [Notifications]
+ *     security: [{ bearerAuth: [] }]
+ */
+router.post('/push-token/remove', authenticate, NotificationsController.removePushToken);
+
 export default router;
