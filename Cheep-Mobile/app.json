@@ -21,7 +21,8 @@
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundColor": "#1F6F4A"
       },
-      "package": "com.cheep.mobile"
+      "package": "com.cheep.mobile",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -41,7 +42,14 @@
           }
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "color": "#1F6F4A",
+          "defaultChannel": "price-drops"
+        }
+      ]
     ]
   }
 }

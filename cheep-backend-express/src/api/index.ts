@@ -11,6 +11,7 @@ import feedbackRouter from './feedback/feedback.routes.js';
 import profileRouter from './profile/profile.routes.js';
 import assistantRouter from './assistant/assistant.routes.js';
 import affiliatesRouter from './affiliates/affiliates.routes.js';
+import supportRouter from './support/support.routes.js';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use('/feedback', feedbackRouter);
 router.use('/profile', profileRouter);
 router.use('/assistant', assistantRouter);
 router.use('/affiliates', affiliatesRouter);
+router.use('/support', supportRouter);
 
 export default router;

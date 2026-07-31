@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "795873820137",
+    "project_id": "cheep-fe321",
+    "storage_bucket": "cheep-fe321.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795873820137:android:ef975cf609458870b85f78",
+        "android_client_info": {
+          "package_name": "com.cheep.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDR36psWxfMcQb4nuUfywzv9PLboCOA11M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -150,6 +150,23 @@ export const feedbackLimiter = rateLimit({
     },
 });
 
+/**
+ * Destek formu. Uç kimlik doğrulaması İSTEĞE BAĞLI olduğu için anahtar da öyle:
+ * girişliyse kullanıcı, değilse IP. Saatte 5 — gerçek bir kullanıcının aynı saat
+ * içinde beşten fazla destek mesajı yazması beklenmez, ama tek bir hata için
+ * ikinci/üçüncü kez yazmak isteyene de yer bırakır.
+ */
+export const contactLimiter = rateLimit({
+    ...base,
+    windowMs: 60 * 60 * 1000,
+    max: perEnv(5),
+    keyGenerator: userOrIpKey,
+    message: {
+        success: false,
+        message: 'Çok fazla mesaj gönderdiniz. Lütfen bir süre sonra tekrar deneyin.',
+    },
+});
+
 /** Liste karşılaştırma — kullanıcı başına; ağır bir uç olduğu için görece dar. */
 export const compareLimiter = rateLimit({
     ...base,

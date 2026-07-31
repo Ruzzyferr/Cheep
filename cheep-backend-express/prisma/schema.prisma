@@ -32,13 +32,16 @@ model User {
   email_verification_expires DateTime? // kodun son geçerlilik anı
 
   // İlişkiler
-  country         Country?            @relation(fields: [country_id], references: [id], onDelete: SetNull)
-  lists           List[]
-  favorite_stores UserFavoriteStore[]
-  price_feedbacks PriceFeedback[]
-  profile         UserProfile?
-  chat_threads    ChatThread[]
+  country          Country?            @relation(fields: [country_id], references: [id], onDelete: SetNull)
+  lists            List[]
+  favorite_stores  UserFavoriteStore[]
+  price_feedbacks  PriceFeedback[]
+  profile          UserProfile?
+  chat_threads     ChatThread[]
   affiliate_clicks AffiliateClick[]
+  support_messages SupportMessage[]
+  price_drops      PriceDrop[]
+  push_tokens      UserPushToken[]
 
   @@map("users")
 }
@@ -62,6 +65,8 @@ model Country {
   branches StoreBranch[]
   lists    List[]
 
+  price_drops PriceDrop[]
+
   @@map("countries")
 }
 
@@ -70,14 +75,14 @@ model Country {
 // ============================================
 
 model Store {
-  id         Int     @id @default(autoincrement())
-  name       String
-  logo_url   String?
-  address    String?
-  city       String?
-  lat        Float? // Enlem (Latitude)
-  lon        Float? // Boylam (Longitude)
-  country_id Int
+  id          Int     @id @default(autoincrement())
+  name        String
+  logo_url    String?
+  address     String?
+  city        String?
+  lat         Float? // Enlem (Latitude)
+  lon         Float? // Boylam (Longitude)
+  country_id  Int
   website_url String? // Online market / sepet tamamlama bağlantısı (affiliate temeli)
 
   created_at DateTime @default(now())
@@ -90,6 +95,7 @@ model Store {
   price_history     PriceHistory[]
   affiliate_clicks  AffiliateClick[]
   branches          StoreBranch[]
+  price_drops       PriceDrop[]
 
   @@index([country_id])
   @@map("stores")
@@ -104,7 +110,7 @@ model StoreBranch {
   lon          Float
   address      String?
   city         String?
-  source       String   // 'osm' | 'locator'
+  source       String // 'osm' | 'locator'
   external_ref String   @unique // 'osm:node/123', 'locator:migros:4567'
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
@@ -205,9 +211,10 @@ model Product {
   store_prices  StorePrice[]
   list_items    ListItem[]
   price_history PriceHistory[]
+  price_drops   PriceDrop[]
 
-  @@index([country_id])
   @@unique([country_id, ean_barcode])
+  @@index([country_id])
   @@index([muadil_grup_id])
   @@index([category_id])
   @@map("products")
@@ -253,10 +260,10 @@ model List {
   name        String
   is_template Boolean  @default(false) // Şablon liste mi?
   budget      Decimal? @db.Decimal(10, 2) // Opsiyonel bütçe
-  
+
   // Geçmiş liste yönetimi
-  status        String    @default("active") // active, completed
-  completed_at  DateTime? // Liste tamamlanma zamanı
+  status           String    @default("active") // active, completed
+  completed_at     DateTime? // Liste tamamlanma zamanı
   last_compared_at DateTime? // Son compare zamanı
 
   created_at DateTime @default(now())
@@ -275,11 +282,11 @@ model List {
 }
 
 model ListItem {
-  id         Int    @id @default(autoincrement())
-  list_id    Int
-  product_id Int
-  quantity   Float  @default(1) // Miktar (1.5 kg, 2 adet vb.)
-  unit       String @default("adet") // kg, adet, lt, g, ml vb.
+  id                Int     @id @default(autoincrement())
+  list_id           Int
+  product_id        Int
+  quantity          Float   @default(1) // Miktar (1.5 kg, 2 adet vb.)
+  unit              String  @default("adet") // kg, adet, lt, g, ml vb.
   brand_independent Boolean @default(false) // true → muadil grubundaki en ucuz markayı seç
 
   created_at DateTime @default(now())
@@ -359,7 +366,7 @@ model ChatThread {
 model ChatMessage {
   id         Int        @id @default(autoincrement())
   thread_id  Int
-  role       String     // 'user' | 'model' | 'tool'
+  role       String // 'user' | 'model' | 'tool'
   content    String     @db.Text
   tool_calls Json?
   created_at DateTime   @default(now())
@@ -376,16 +383,16 @@ model ChatMessage {
 model UserProfile {
   id              Int      @id @default(autoincrement())
   user_id         Int      @unique
-  household_size  String?  // '1' | '2' | '3-4' | '5+'
-  diet            String?  // 'omnivore' | 'vegetarian' | 'vegan' | 'pescatarian'
-  avoid           Json?    // ['pork_gelatin','alcohol', ...]
-  allergies       Json?    // ['lactose','gluten','peanut','tree_nut', ...serbest]
+  household_size  String? // '1' | '2' | '3-4' | '5+'
+  diet            String? // 'omnivore' | 'vegetarian' | 'vegan' | 'pescatarian'
+  avoid           Json? // ['pork_gelatin','alcohol', ...]
+  allergies       Json? // ['lactose','gluten','peanut','tree_nut', ...serbest]
   weekly_budget   Decimal? @db.Decimal(10, 2)
   onboarding_done Boolean  @default(false)
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
-  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("user_profiles")
 }
@@ -402,7 +409,7 @@ model MatchProposal {
   product_id           Int
   candidate_product_id Int
   similarity           Float
-  evidence             String   // 'fuzzy' | 'llm'
+  evidence             String // 'fuzzy' | 'llm'
   status               String   @default("pending") // pending | approved | rejected
   created_at           DateTime @default(now())
   updated_at           DateTime @updatedAt
@@ -411,4 +418,83 @@ model MatchProposal {
   @@index([status])
   @@index([country_id])
   @@map("match_proposals")
+}
+
+// ============================================
+// DESTEK MESAJLARI (uygulama içi iletişim formu)
+// ============================================
+// Mesaj ÖNCE buraya yazılır, SONRA e-postalanır: Resend'in geçici bir arızası
+// yüzünden kullanıcının hata raporunu kaybetmek kabul edilemez. `emailed_at`
+// null kalan satırlar gönderilememiş demektir.
+model SupportMessage {
+  id           Int       @id @default(autoincrement())
+  user_id      Int? // giriş yapmamış kullanıcı da yazabilir
+  email        String // cevap adresi (girişliyse hesabınkiyle aynı olmayabilir)
+  topic        String    @default("other") // bug | suggestion | price | account | other
+  message      String
+  // İstemciden gelen bağlam: "hangi sürümde oldu" diye sormaya gerek kalmasın.
+  app_version  String?
+  platform     String?
+  os_version   String?
+  locale       String?
+  country_code String?
+  emailed_at   DateTime?
+  created_at   DateTime  @default(now())
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: SetNull)
+
+  @@index([created_at])
+  @@index([user_id])
+  @@map("support_messages")
+}
+
+// ============================================
+// FİYAT DÜŞÜŞÜ BİLDİRİMLERİ
+// ============================================
+// Kullanıcının AKTİF listelerindeki ürünler için, o ülkedeki EN DÜŞÜK fiyat
+// düştüğünde üretilir. Mağaza başına değil ürün başına: kullanıcıyı ilgilendiren
+// sinyal "bu ürün ucuzladı", "şu markette ucuzladı" değil.
+//
+// Push izninden BAĞIMSIZ oluşur — uygulama içi zil/liste her hâlükârda çalışır.
+model PriceDrop {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  product_id Int
+  country_id Int
+  store_id   Int // yeni en ucuz fiyatın olduğu market
+  old_price  Decimal   @db.Decimal(10, 2)
+  new_price  Decimal   @db.Decimal(10, 2)
+  drop_pct   Float
+  read_at    DateTime?
+  // Tekillik için ayrı GÜN alanı: created_at tam zaman damgası olduğundan
+  // (user, product, created_at) kısıtı aynı gün içinde tekrarı engellemezdi.
+  dropped_on DateTime  @db.Date
+  created_at DateTime  @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  store   Store   @relation(fields: [store_id], references: [id], onDelete: Cascade)
+  country Country @relation(fields: [country_id], references: [id], onDelete: Cascade)
+
+  // Aynı ürün için günde tek kayıt (tespit işi tekrar koşarsa çoğaltmasın).
+  @@unique([user_id, product_id, dropped_on])
+  @@index([user_id, read_at])
+  @@index([created_at])
+  @@map("price_drops")
+}
+
+// Cihaz push token'ları. Bir kullanıcının birden fazla cihazı olabilir.
+model UserPushToken {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  token      String   @unique // Expo push token
+  platform   String   @default("android")
+  locale     String? // bildirim metnini seçmek için
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("user_push_tokens")
 }

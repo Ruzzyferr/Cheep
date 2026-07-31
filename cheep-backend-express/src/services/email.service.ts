@@ -31,12 +31,15 @@ interface SendMailArgs {
     subject: string;
     html: string;
     text: string;
+    /** Cevap adresi. Destek formunda kullanıcının adresi konur; "Yanıtla"
+     *  doğrudan ona gitsin, noreply@ kutusuna değil. */
+    replyTo?: string;
 }
 
 const fromHeader = () => `"${config.smtp.fromName}" <${config.email.fromEmail}>`;
 
 /** Resend HTTP API üzerinden gönderim (port 443). */
-const sendViaResend = async ({ to, subject, html, text }: SendMailArgs): Promise<boolean> => {
+const sendViaResend = async ({ to, subject, html, text, replyTo }: SendMailArgs): Promise<boolean> => {
     try {
         const res = await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -50,6 +53,7 @@ const sendViaResend = async ({ to, subject, html, text }: SendMailArgs): Promise
                 subject,
                 html,
                 text,
+                ...(replyTo ? { reply_to: replyTo } : {}),
             }),
         });
         if (!res.ok) {
@@ -66,11 +70,11 @@ const sendViaResend = async ({ to, subject, html, text }: SendMailArgs): Promise
 };
 
 /** SMTP üzerinden gönderim. */
-const sendViaSmtp = async ({ to, subject, html, text }: SendMailArgs): Promise<boolean> => {
+const sendViaSmtp = async ({ to, subject, html, text, replyTo }: SendMailArgs): Promise<boolean> => {
     const tx = getTransporter();
     if (!tx) return false;
     try {
-        await tx.sendMail({ from: fromHeader(), to, subject, text, html });
+        await tx.sendMail({ from: fromHeader(), to, subject, text, html, ...(replyTo ? { replyTo } : {}) });
         logger.info(`[email] SMTP ile gönderildi: to=${to}, subject="${subject}"`);
         return true;
     } catch (err) {
@@ -130,4 +134,67 @@ export const sendVerificationEmail = async (
     <p style="text-align:center;color:#94A3B8;font-size:12px;margin-top:16px;">© Cheep · Akıllı Alışveriş Asistanı</p>
   </div>`;
     return sendMail({ to, subject, html, text });
+};
+
+const escapeHtml = (s: string): string =>
+    s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+
+const TOPIC_LABELS: Record<string, string> = {
+    bug: 'Hata bildirimi',
+    suggestion: 'Öneri',
+    price: 'Fiyat sorunu',
+    account: 'Hesap',
+    other: 'Diğer',
+};
+
+/**
+ * Destek formundan gelen mesajı ekibe iletir.
+ *
+ * `replyTo` kullanıcının adresidir: "Yanıtla" dendiğinde doğrudan ona gider,
+ * kimsenin okumadığı noreply@ kutusuna değil.
+ */
+export const sendSupportMessage = async (args: {
+    to: string;
+    fromEmail: string;
+    topic: string;
+    message: string;
+    userLabel: string;
+    context: Record<string, string | null | undefined>;
+    messageId: number;
+}): Promise<boolean> => {
+    const topicLabel = TOPIC_LABELS[args.topic] ?? args.topic;
+    const subject = `Cheep destek — ${topicLabel} (#${args.messageId})`;
+
+    const ctxLines = Object.entries(args.context)
+        .filter(([, v]) => v)
+        .map(([k, v]) => `${k}: ${v}`);
+
+    const text = [
+        `Konu: ${topicLabel}`,
+        `Gönderen: ${args.userLabel} <${args.fromEmail}>`,
+        '',
+        args.message,
+        '',
+        '--- bağlam ---',
+        ...ctxLines,
+    ].join('\n');
+
+    const html = `
+  <div style="background:#F6F8FA;padding:24px;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
+    <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,23,42,.06);">
+      ${brandHeader}
+      <div style="padding:8px 32px 32px;color:#0F172A;">
+        <p style="font-size:13px;color:#64748B;margin:0 0 4px;">${escapeHtml(topicLabel)} · #${args.messageId}</p>
+        <p style="font-size:15px;margin:0 0 20px;">
+          <b>${escapeHtml(args.userLabel)}</b>
+          <span style="color:#64748B;">&lt;${escapeHtml(args.fromEmail)}&gt;</span>
+        </p>
+        <div style="background:#F8FAFC;border-left:3px solid #0D9488;border-radius:8px;padding:16px;white-space:pre-wrap;font-size:14px;line-height:1.6;">${escapeHtml(args.message)}</div>
+        <p style="font-size:12px;color:#94A3B8;margin:20px 0 6px;">Bağlam</p>
+        <div style="font-size:12px;color:#64748B;line-height:1.7;">${ctxLines.map((l) => escapeHtml(l)).join('<br>')}</div>
+      </div>
+    </div>
+  </div>`;
+
+    return sendMail({ to: args.to, subject, html, text, replyTo: args.fromEmail });
 };

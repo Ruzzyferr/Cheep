@@ -108,6 +108,15 @@ if (isProduction && !emailEnabled) {
     );
 }
 
+
+// --- Destek kutusu ---
+// Uygulama içi iletişim formundan gelen mesajlar buraya düşer. destek@cheep.live
+// şu an MX kaydı olmadığı için mail ALMIYOR; yönlendirme kurulunca SUPPORT_INBOX
+// env'i ona çevrilir. Varsayılan, bugün gerçekten çalışan adres.
+const support = {
+    inbox: process.env.SUPPORT_INBOX || 'info@swiip.app',
+};
+
 export const config = {
     isProduction,
     jwtSecret: jwtSecret as string,
@@ -119,4 +128,5 @@ export const config = {
     smtpEnabled,
     email,
     emailEnabled,
+    support,
 };
