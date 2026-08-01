@@ -402,5 +402,14 @@
     "sent_body": "Wkrótce odpiszemy na podany adres e-mail.",
     "error": "Nie udało się wysłać wiadomości. Spróbuj ponownie.",
     "auth_link": "Masz problem? Napisz do nas"
+  },
+  "update": {
+    "required_title": "Wymagana aktualizacja",
+    "required_body": "Aby kontynuować, zaktualizuj Cheep. Ta wersja nie jest już obsługiwana.",
+    "available_title": "Nowa wersja dostępna",
+    "available_body": "Jest nowa wersja Cheep. Zaktualizuj, aby korzystać z najnowszych ulepszeń.",
+    "action": "Aktualizuj",
+    "later": "Nie teraz",
+    "version_line": "Zainstalowana {{current}} · Najnowsza {{latest}}"
   }
 }

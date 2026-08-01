@@ -6,3 +6,4 @@ export { useParentCategories, useSubcategories } from './useCategories';
 export { useProductsInfinite, useProduct, useProductsList, flattenProducts } from './useProducts';
 export { useLists, useActiveList, useListDetail, useCompareList, useListMutations } from './useLists';
 export { useStores, useUnreadCount, useProfile } from './useMisc';
+export { useAppVersionPolicy } from './useAppVersion';

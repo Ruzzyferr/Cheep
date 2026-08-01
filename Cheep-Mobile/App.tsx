@@ -26,6 +26,7 @@ import { colors } from './src/theme';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { createQueryClient } from './src/queries/client';
 import { useAppStateFocus, useOnlineBridge } from './src/queries/focus';
+import { UpdateGate } from './src/components/update/UpdateGate';
 
 // Tek istemci, uygulama ömrü boyunca. Render içinde yaratılırsa her render'da
 // cache sıfırlanır ve tüm sorgular baştan çalışır.
@@ -79,7 +80,12 @@ export default function App() {
               <LocaleProvider>
                 <AuthProvider>
                   <LocationProvider>
-                    <RootNavigator />
+                    {/* Sürüm kapısı navigasyonu SARAR, yerine geçmez: kullanıcı
+                        güncelledikten sonra giriş/sepet/gezinme durumu yerinde
+                        kalsın. */}
+                    <UpdateGate>
+                      <RootNavigator />
+                    </UpdateGate>
                   </LocationProvider>
                 </AuthProvider>
               </LocaleProvider>

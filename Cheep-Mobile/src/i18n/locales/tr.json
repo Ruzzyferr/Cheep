@@ -402,5 +402,14 @@
     "sent_body": "En kısa sürede e-postayla döneceğiz.",
     "error": "Mesaj gönderilemedi. Lütfen tekrar dene.",
     "auth_link": "Sorun mu yaşıyorsun? Bize yaz"
+  },
+  "update": {
+    "required_title": "Güncelleme gerekli",
+    "required_body": "Devam edebilmek için Cheep'i güncellemen gerekiyor. Bu sürüm artık desteklenmiyor.",
+    "available_title": "Yeni sürüm hazır",
+    "available_body": "Cheep'in yeni sürümü yayında. Güncelleyerek en son iyileştirmelerden yararlan.",
+    "action": "Güncelle",
+    "later": "Şimdi değil",
+    "version_line": "Yüklü sürüm {{current}} · Yeni sürüm {{latest}}"
   }
 }

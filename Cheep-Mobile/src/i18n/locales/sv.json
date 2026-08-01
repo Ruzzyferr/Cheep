@@ -402,5 +402,14 @@
     "sent_body": "Vi återkommer via e-post inom kort.",
     "error": "Meddelandet kunde inte skickas. Försök igen.",
     "auth_link": "Problem? Kontakta oss"
+  },
+  "update": {
+    "required_title": "Uppdatering krävs",
+    "required_body": "Du behöver uppdatera Cheep för att fortsätta. Den här versionen stöds inte längre.",
+    "available_title": "Ny version tillgänglig",
+    "available_body": "En ny version av Cheep finns ute. Uppdatera för de senaste förbättringarna.",
+    "action": "Uppdatera",
+    "later": "Inte nu",
+    "version_line": "Installerad {{current}} · Senaste {{latest}}"
   }
 }

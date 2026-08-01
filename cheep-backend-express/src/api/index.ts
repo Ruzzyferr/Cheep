@@ -14,6 +14,7 @@ import affiliatesRouter from './affiliates/affiliates.routes.js';
 import supportRouter from './support/support.routes.js';
 import notificationsRouter from './notifications/notifications.routes.js';
 import seoRouter from './seo/seo.routes.js';
+import appRouter from './app/app.routes.js';
 
 const router = Router();
 
@@ -32,5 +33,7 @@ router.use('/affiliates', affiliatesRouter);
 router.use('/support', supportRouter);
 router.use('/notifications', notificationsRouter);
 router.use('/seo', seoRouter);
+// Sürüm kapısı: giriş ekranından ÖNCE, kimlik doğrulamasız çağrılır.
+router.use('/app', appRouter);
 
 export default router;

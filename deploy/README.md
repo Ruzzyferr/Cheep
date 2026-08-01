@@ -56,6 +56,37 @@ Haftalık otomasyon için cron (Pazar 03:00):
 0 3 * * 0 cd /opt/cheep/Cheep-Scraper && PYTHONUTF8=1 ./venv/bin/python countries/turkey/pipeline.py --ingest >> /var/log/cheep-scrape.log 2>&1
 ```
 
+## Zorunlu güncelleme kapısı
+
+Mobil uygulama açılırken `GET /api/v1/app/version` çağırır ve iki eşiğe bakar.
+Değerler `deploy/.env` içinde; **kod değişikliği gerekmez, container restart
+yeter**:
+
+```bash
+ANDROID_MIN_SUPPORTED_VERSION=1.2.0   # bunun ALTINDAKİ sürüm KİLİTLENİR
+ANDROID_LATEST_VERSION=1.4.0          # mağazadaki güncel sürüm (yumuşak uyarı)
+IOS_MIN_SUPPORTED_VERSION=            # iOS henüz yayında değil
+IOS_LATEST_VERSION=
+```
+
+**Nasıl kullanılır**
+
+- Normal sürüm çıkışı: yalnızca `*_LATEST_VERSION`'ı yükselt. Kullanıcı
+  kapatılabilir bir "yeni sürüm var" bildirimi görür, uygulamayı kullanmaya
+  devam eder.
+- Kritik hata / kırıcı API değişikliği: `*_MIN_SUPPORTED_VERSION`'ı da
+  yükselt. Eski sürümdeki herkes kilitlenir ve yalnızca Play'e gidebilir.
+
+**Neden iki ayrı eşik:** Play kademeli yayında güncellemeyi önce %20'ye açar.
+Tek eşik olsaydı kalan %80 uygulamayı kullanamaz ama güncelleyemezdi de —
+mağazada henüz yeni sürüm görünmüyor. Kademeli yayın %100'e ulaştıktan sonra
+`MIN_SUPPORTED`'ı yükseltmek güvenli.
+
+**Değişkenler boşsa kimse kilitlenmez.** Kapı bilerek hata affedici: sunucuya
+ulaşılamazsa, eşik boşsa ya da sürüm okunamazsa uygulama açılır. Yanlış bir
+env değeriyle tüm kullanıcı tabanını dışarıda bırakmak, güncel olmayan bir
+istemcinin bir gün daha çalışmasından çok daha kötü.
+
 ## Mobil (Expo Go)
 
 `Cheep-Mobile/.env` → `EXPO_PUBLIC_API_URL=http://<DROPLET_IP>:3000/api/v1`, sonra `npx expo start`.

@@ -402,5 +402,14 @@
     "sent_body": "We'll get back to you by email shortly.",
     "error": "Couldn't send your message. Please try again.",
     "auth_link": "Having trouble? Contact us"
+  },
+  "update": {
+    "required_title": "Update required",
+    "required_body": "You need to update Cheep to continue. This version is no longer supported.",
+    "available_title": "New version available",
+    "available_body": "A new version of Cheep is out. Update to get the latest improvements.",
+    "action": "Update",
+    "later": "Not now",
+    "version_line": "Installed {{current}} · Latest {{latest}}"
   }
 }
