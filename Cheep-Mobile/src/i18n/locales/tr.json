@@ -10,7 +10,9 @@
     "ok": "Tamam",
     "all": "Tümü",
     "loading": "Yükleniyor…",
-    "unit_default": "adet"
+    "unit_default": "adet",
+    "retry": "Tekrar dene",
+    "error_loading": "Veriler yüklenemedi"
   },
   "consent": {
     "location_title": "Konumun işlensin mi? (KVKK açık rıza)",

@@ -10,7 +10,9 @@
     "ok": "OK",
     "all": "Alla",
     "loading": "Laddar…",
-    "unit_default": "st"
+    "unit_default": "st",
+    "retry": "Försök igen",
+    "error_loading": "Kunde inte ladda data"
   },
   "consent": {
     "location_title": "Ska din plats behandlas? (samtycke till platsdelning)",

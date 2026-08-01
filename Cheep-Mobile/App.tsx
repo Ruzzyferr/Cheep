@@ -23,6 +23,23 @@ import { AuthProvider } from './src/context/AuthContext';
 import { LocationProvider } from './src/context/LocationContext';
 import { RootNavigator } from './src/navigation';
 import { colors } from './src/theme';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { createQueryClient } from './src/queries/client';
+import { useAppStateFocus, useOnlineBridge } from './src/queries/focus';
+
+// Tek istemci, uygulama ömrü boyunca. Render içinde yaratılırsa her render'da
+// cache sıfırlanır ve tüm sorgular baştan çalışır.
+const queryClient = createQueryClient();
+
+/**
+ * Odak/ağ köprüsünü provider'ın İÇİNDE kurmak için ince sarmalayıcı —
+ * `focusManager` global olsa da hook'lar bir bileşen gövdesi gerektiriyor.
+ */
+function QueryBridges({ children }: { children: React.ReactNode }) {
+  useAppStateFocus();
+  useOnlineBridge();
+  return <>{children}</>;
+}
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -56,15 +73,19 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <StatusBar barStyle="dark-content" backgroundColor={colors.background.default} />
-        <I18nextProvider i18n={i18n}>
-          <LocaleProvider>
-            <AuthProvider>
-              <LocationProvider>
-                <RootNavigator />
-              </LocationProvider>
-            </AuthProvider>
-          </LocaleProvider>
-        </I18nextProvider>
+        <QueryClientProvider client={queryClient}>
+          <QueryBridges>
+            <I18nextProvider i18n={i18n}>
+              <LocaleProvider>
+                <AuthProvider>
+                  <LocationProvider>
+                    <RootNavigator />
+                  </LocationProvider>
+                </AuthProvider>
+              </LocaleProvider>
+            </I18nextProvider>
+          </QueryBridges>
+        </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

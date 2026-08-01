@@ -10,7 +10,9 @@
     "ok": "OK",
     "all": "All",
     "loading": "Loading…",
-    "unit_default": "piece"
+    "unit_default": "piece",
+    "retry": "Try again",
+    "error_loading": "Could not load data"
   },
   "consent": {
     "location_title": "Process your location? (privacy consent)",

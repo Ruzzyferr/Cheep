@@ -10,7 +10,9 @@
     "ok": "OK",
     "all": "Wszystkie",
     "loading": "Ładowanie…",
-    "unit_default": "szt."
+    "unit_default": "szt.",
+    "retry": "Spróbuj ponownie",
+    "error_loading": "Nie udało się wczytać danych"
   },
   "consent": {
     "location_title": "Czy przetwarzać Twoją lokalizację? (zgoda na przetwarzanie danych)",

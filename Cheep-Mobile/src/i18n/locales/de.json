@@ -10,7 +10,9 @@
     "ok": "OK",
     "all": "Alle",
     "loading": "Wird geladen…",
-    "unit_default": "Stück"
+    "unit_default": "Stück",
+    "retry": "Erneut versuchen",
+    "error_loading": "Daten konnten nicht geladen werden"
   },
   "consent": {
     "location_title": "Standort verarbeiten? (Datenschutz-Einwilligung)",
