@@ -39,8 +39,17 @@ services:
     # değiştirebilir (ve TLS'siz konuşabilirdi). Yayınlanan tüm mobil sürümler
     # zaten https://api.cheep.live kullanıyor; kapatmadan önce porta gerçek
     # trafik gelmediği doğrulandı.
-    expose:
-      - "3000"
+    # SADECE LOOPBACK'e bağlı. `expose:` (yalnız Docker ağı) sunucudaki
+    # scraper'ları kırıyordu: systemd servisleri (cheep-fetcher,
+    # cheep-fetcher-pl) `CHEEP_API_URL=http://localhost:3000/api/v1` kullanıyor
+    # ve container yeniden yaratıldığında TR ingest'i tamamen durdu — veri
+    # çekiliyor ama yazılamıyordu, ~20 saat fark edilmedi.
+    #
+    # `127.0.0.1:` öneki güvenlik amacını korur: port yalnızca sunucunun
+    # kendisinden erişilebilir, internetten DEĞİL. Yukarıdaki XFF/TLS gerekçesi
+    # dışarıdan erişim içindi; loopback'te geçerli değil.
+    ports:
+      - "127.0.0.1:3000:3000"
     # Container'ı gerçekten istek karşılayana kadar "healthy" sayma.
     healthcheck:
       test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
