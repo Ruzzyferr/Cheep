@@ -32,7 +32,6 @@ import { ListActionsSheet } from '../../components/list/ListActionsSheet';
 import { SelectSourceListModal } from '../../components/list/SelectSourceListModal';
 import { ImportModeModal } from '../../components/list/ImportModeModal';
 import { NameInputModal } from '../../components/list/NameInputModal';
-import { useCart } from '../../context/CartContext';
 import { useToast } from '../../context/ToastContext';
 import { useLocale } from '../../context/LocaleContext';
 import { Button, ListSkeleton } from '../../components/ui';
@@ -65,7 +64,6 @@ export function ListDetailScreen({
   // çubuğunu ve liste boşluğunu tab-bar YÜKSEKLİĞİNCE yukarı almazsak butonlar
   // tab-bar'ın arkasında kalır. Bu hook safe-area dahil gerçek yüksekliği verir.
   const tabBarHeight = useBottomTabBarHeight();
-  const cart = useCart();
   const toast = useToast();
   const { formatMoney } = useLocale();
 
@@ -148,8 +146,9 @@ export function ListDetailScreen({
         toast.show(t('list.clone_done'));
       } else if (mode === 'rename') {
         await listService.updateList(list.id, { name });
+        // Tek geçersizleştirme yetiyor: bu ekran, liste listesi ve sepet
+        // rozeti aynı `['lists']` önekinde.
         await loadList();
-        cart.refresh();
       }
     } catch {
       Alert.alert(t('common.error'), t('common.something_went_wrong'));
