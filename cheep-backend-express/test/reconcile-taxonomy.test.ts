@@ -402,6 +402,56 @@ describe('planReconciliation — ASCII olmayan slug', () => {
     });
 });
 
+describe('planReconciliation — kanonik kategoriler silinmez', () => {
+    /**
+     * Devlet yeni bir kategori açtığında sıra şu: taksonomi türetilir →
+     * kategori seed edilir → daemon 5-6 GÜN sonra ürünleri oraya taşır.
+     * Yeni kategori o aralıkta BOŞ.
+     *
+     * "Ürünsüz kategoriyi sil" kuralı bunu doğar doğmaz siliyordu: seed
+     * yaratır → reconcile siler → ertesi hafta yine yaratır. Sonsuz salınım ve
+     * devletin yeni kategorisi hiçbir zaman ürün alamaz.
+     *
+     * Kanonik listede olan kategori, boş olsa bile korunur.
+     */
+    const nodes: OwnedCategory[] = [
+        cat({ id: 1, slug: 'kisisel-bakim', country_id: TR }),        // yeni, henüz boş
+        cat({ id: 2, slug: 'kaldirilmis-kategori', country_id: TR }), // artık kaynakta yok
+    ];
+
+    it('kanonik listedeki boş kategoriyi SİLMEZ', () => {
+        const plan = planReconciliation(nodes, [], {
+            canonicalSlugs: { [TR]: new Set(['kisisel-bakim']) },
+        });
+        const deleted = (plan.ops.filter((o) => o.kind === 'deleteCategory') as any[]).map((o) => o.slug);
+        expect(deleted).not.toContain('kisisel-bakim');
+    });
+
+    it('kanonik listede OLMAYAN boş kategoriyi siler', () => {
+        const plan = planReconciliation(nodes, [], {
+            canonicalSlugs: { [TR]: new Set(['kisisel-bakim']) },
+        });
+        const deleted = (plan.ops.filter((o) => o.kind === 'deleteCategory') as any[]).map((o) => o.slug);
+        expect(deleted).toContain('kaldirilmis-kategori');
+    });
+
+    it('kanonik liste verilmezse eski davranış sürer — ikisi de silinir', () => {
+        const plan = planReconciliation(nodes, []);
+        const deleted = (plan.ops.filter((o) => o.kind === 'deleteCategory') as any[]).map((o) => o.slug);
+        expect(deleted.sort()).toEqual(['kaldirilmis-kategori', 'kisisel-bakim']);
+    });
+
+    it('koruma yalnızca kendi ülkesinde geçerli', () => {
+        const plan = planReconciliation(
+            [cat({ id: 3, slug: 'kisisel-bakim', country_id: PL })],
+            [],
+            { canonicalSlugs: { [TR]: new Set(['kisisel-bakim']) } },
+        );
+        const deleted = (plan.ops.filter((o) => o.kind === 'deleteCategory') as any[]).map((o) => o.slug);
+        expect(deleted).toContain('kisisel-bakim');
+    });
+});
+
 describe('planReconciliation — güvenli mod (otomatik çalıştırma)', () => {
     // Haftalık zamanlayıcı bu modda çalışır. Otomatik uygulanan işlemler
     // DETERMİNİSTİK ONARIMLAR olmalı: ülke ayrıştırma, kırık parent bağı,

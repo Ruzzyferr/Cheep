@@ -428,8 +428,21 @@ export function planReconciliation(
 
     // 3) Birleştirmeden sonra kendi ülkesinde ürünü kalmayanları sil.
     //    Birleşenler zaten silinecek; iki kez silmeyelim.
+    // KANONİK KATEGORİLER SİLİNMEZ, boş olsalar bile.
+    //
+    // Devlet yeni bir kategori açtığında sıra şu: taksonomi türetilir →
+    // kategori seed edilir → daemon 5-6 GÜN sonra ürünleri oraya taşır. Yeni
+    // kategori o aralıkta boş. "Ürünsüz kategoriyi sil" kuralı onu doğar
+    // doğmaz siliyordu: seed yaratır → reconcile siler → ertesi hafta yine
+    // yaratır. Sonsuz salınım, ve devletin yeni kategorisi hiç ürün alamaz.
+    const isCanonical = (n: OwnedCategory) =>
+        options.canonicalSlugs?.[n.country_id]?.has(n.slug) ?? false;
+
     const doomed = nodes.filter(
-        (n) => !merged.has(n.id) && ownCountrySubtreeCount(n, nodes, remaining) === 0,
+        (n) =>
+            !merged.has(n.id) &&
+            !isCanonical(n) &&
+            ownCountrySubtreeCount(n, nodes, remaining) === 0,
     );
     const doomedIds = new Set([...doomed.map((n) => n.id), ...merged]);
 
