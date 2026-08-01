@@ -77,6 +77,7 @@ model Country {
 model Store {
   id          Int     @id @default(autoincrement())
   name        String
+  slug        String? // SEO sayfası URL'i — bir kez üretilir, ASLA değişmez
   logo_url    String?
   address     String?
   city        String?
@@ -97,6 +98,7 @@ model Store {
   branches          StoreBranch[]
   price_drops       PriceDrop[]
 
+  @@unique([country_id, slug])
   @@index([country_id])
   @@map("stores")
 }
@@ -195,6 +197,7 @@ model Category {
 model Product {
   id             Int     @id @default(autoincrement())
   name           String
+  slug           String? // SEO sayfası URL'i — bir kez üretilir, ASLA değişmez
   brand          String?
   ean_barcode    String? // EAN/UPC barkod numarası (benzersizlik ülke-scope: @@unique aşağıda)
   image_url      String?
@@ -214,9 +217,11 @@ model Product {
   price_drops   PriceDrop[]
 
   @@unique([country_id, ean_barcode])
+  @@unique([country_id, slug])
   @@index([country_id])
   @@index([muadil_grup_id])
   @@index([category_id])
+  @@index([slug])
   @@map("products")
 }
 
