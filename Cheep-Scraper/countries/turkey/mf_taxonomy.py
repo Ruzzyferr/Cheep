@@ -12,14 +12,24 @@ Her ürün `menu_category` (üst) + `main_category` (alt) taşır. Ham ve$rideki
 """
 import argparse
 import io
+import logging
 import json
 import os
 import re
 import sys
+import time
 import unicodedata
 from collections import Counter, defaultdict
 
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+
+def _force_utf8_stdout():
+    """Windows konsolunda Türkçe karakterler için.
+
+    MODÜL SEVİYESİNDE YAPILMAZ: bu dosyayı içe aktaran her şeyin (testler dahil)
+    stdout'unu ele geçirir ve pytest'in yakalamasını kırar.
+    """
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+
 
 # Üst kategori (menu_category) → MaterialCommunityIcons glyph + sıra.
 TOP_META = {
@@ -50,18 +60,63 @@ def slugify(s: str) -> str:
     return s or "diger"
 
 
-def build(raw_dir: str):
-    pairs = Counter()               # (menu, main) -> adet
+def _collect_pairs(raw_dir: str, cutoff: float | None):
+    """(menu, main) çiftlerini ham dosyalardan toplar.
+
+    `cutoff` verilirse o zamandan ÖNCE tazelenmiş dosyalar atlanır.
+    """
+    pairs = Counter()
+    skipped = 0
     for fn in os.listdir(raw_dir):
         if not fn.endswith(".json"):
             continue
+        path = os.path.join(raw_dir, fn)
+        if cutoff is not None:
+            try:
+                if os.path.getmtime(path) < cutoff:
+                    skipped += 1
+                    continue
+            except OSError:
+                continue
         try:
-            d = json.load(open(os.path.join(raw_dir, fn), encoding="utf-8"))
+            d = json.load(open(path, encoding="utf-8"))
         except Exception:
             continue
         menu = (d.get("menu_category") or "").strip() or "Diğer Ürünler"
         main = (d.get("main_category") or "").strip() or menu
         pairs[(menu, main)] += 1
+    return pairs, skipped
+
+
+def build(raw_dir: str, max_age_days: int | None = None):
+    """Ham veriden devletin kategori ağacını türetir.
+
+    KAYNAKLA BİRLİKTE KÜÇÜLME: `max_age_days` verilirse, o kadar gündür
+    tazelenmemiş ham dosyalar sayılmaz. Daemon her ürünü ~5-6 günde bir yeniden
+    çekip dosyayı ÜZERİNE yazıyor (mf_daemon.py), yani mtime "en son ne zaman
+    görüldü" demek. Kaynaktan düşen ürünün dosyası yaşlanır ve kategorisi —
+    başka ürünü kalmadıysa — taksonomiden düşer.
+
+    Dosyayı SİLMEK yerine yaşına bakıyoruz: tek bir bozuk sitemap çekimi tüm
+    kataloğu uçurmasın.
+    """
+    pairs, _ = _collect_pairs(raw_dir, None)
+    age_filter_skipped = False
+
+    if max_age_days:
+        cutoff = time.time() - max_age_days * 86400
+        fresh, skipped = _collect_pairs(raw_dir, cutoff)
+        # GÜVENLİK FRENİ: daemon uzun süre durmuşsa TÜM dosyalar bayat görünür.
+        # Yaş sınırını uygulamak taksonomiyi boşaltır ve bir sonraki seed
+        # kategorileri yok eder. Böyle bir durumda sınırı yok say.
+        if fresh:
+            pairs = fresh
+            if skipped:
+                logging.getLogger(__name__).info(
+                    "yaş sınırı: %d bayat dosya atlandı (>%d gün)", skipped, max_age_days
+                )
+        else:
+            age_filter_skipped = True
 
     tops = defaultdict(list)         # menu -> [(main, count)]
     menu_count = Counter()
@@ -96,15 +151,23 @@ def build(raw_dir: str):
 
     return {"tops": out_tops, "main_to_slug": main_to_slug,
             "total_products": sum(pairs.values()),
-            "n_top": len(out_tops), "n_sub": len(main_to_slug)}
+            "n_top": len(out_tops), "n_sub": len(main_to_slug),
+            "age_filter_skipped": age_filter_skipped}
 
 
 def main():
+    _force_utf8_stdout()
     ap = argparse.ArgumentParser()
     ap.add_argument("--raw-dir", default="mf_raw")
     ap.add_argument("--out", default="taxonomy.json")
+    ap.add_argument(
+        "--max-age-days", type=int, default=None,
+        help="Bu kadar gündür tazelenmemiş ham dosyalar sayılmaz "
+             "(kaynaktan düşen kategoriler taksonomiden çıksın). "
+             "Daemon turu ~5-6 gün; 45 makul bir taban.",
+    )
     a = ap.parse_args()
-    tax = build(a.raw_dir)
+    tax = build(a.raw_dir, a.max_age_days)
     json.dump(tax, open(a.out, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     print(f"ÜST={tax['n_top']} ALT={tax['n_sub']} (raw ürün={tax['total_products']})")
     for t in tax["tops"]:

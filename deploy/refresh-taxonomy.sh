@@ -44,7 +44,20 @@ if [ "$RAW_COUNT" -lt 100 ]; then
 fi
 
 log "1/5 devlet taksonomisi ham veriden türetiliyor"
-python countries/turkey/mf_taxonomy.py --raw-dir "$RAW_DIR" --out taxonomy.json
+# --max-age-days: kaynaktan DÜŞEN kategoriler taksonomiden çıksın. Daemon her
+# ürünü ~5-6 günde bir yeniden çekip ham dosyayı üzerine yazıyor, yani mtime
+# "en son ne zaman görüldü" demek. 45 gün ≈ 7 tam tur: geçici bir kesinti
+# yüzünden kategori düşürmeyecek kadar geniş, gerçek kaldırmayı bir buçuk ayda
+# yakalayacak kadar dar. Tüm dosyalar bayatsa (daemon durmuşsa) sınır kendini
+# devre dışı bırakır — bkz. mf_taxonomy.build güvenlik freni.
+python countries/turkey/mf_taxonomy.py --raw-dir "$RAW_DIR" --out taxonomy.json --max-age-days 45
+
+if python3 -c "
+import json, sys
+sys.exit(0 if json.load(open('taxonomy.json',encoding='utf-8')).get('age_filter_skipped') else 1)
+"; then
+  log "     ⚠️  tüm ham dosyalar bayat — yaş sınırı devre dışı bırakıldı (daemon duruyor olabilir)"
+fi
 
 # Güvenlik freni: türetilen ağaç beklenenden küçükse ham veri bozuk demektir.
 # Bu dosyayla seed etmek kategori yapısını daraltırdı.

@@ -66,12 +66,54 @@ def _prune(api_url, api_key, ttl_days=21):
         logger.warning("prune hata: %s", e)
 
 
-def _load_cat_map(path):
-    if path and os.path.exists(path):
-        cm = json.load(open(path, encoding="utf-8"))
-        return cm.get("main_to_id", {}), cm.get("other_id")
-    logger.warning("category_map yok (%s) — ingest kategorisiz", path)
-    return {}, None
+class CatMap:
+    """Kategori haritası — DİSKTEKİ DEĞİŞİKLİĞİ İZLER.
+
+    Haftalık taksonomi tazelemesi `category_map.json`'u yeniliyor ama bu daemon
+    sonsuza kadar çalışıyor (`Restart=always`, `Type=simple`). Harita döngüden
+    önce bir kez okunsaydı, devletin yeni açtığı kategori daemon elle yeniden
+    başlatılana kadar hiçbir ürüne uygulanmaz, hepsi "Diğer"e düşerdi.
+
+    mtime değişince yeniden okur; değişmediyse diske gitmez.
+    """
+
+    def __init__(self, path):
+        self.path = path
+        self.main_to_id = {}
+        self.other_id = None
+        self._mtime = None
+        self.loads = 0            # test edilebilirlik: kaç kez diskten okundu
+        self._refresh()
+
+    def _refresh(self):
+        if not self.path or not os.path.exists(self.path):
+            if self._mtime is None:
+                logger.warning("category_map yok (%s) — ingest kategorisiz", self.path)
+            return
+        try:
+            mtime = os.path.getmtime(self.path)
+        except OSError:
+            return
+        if mtime == self._mtime:
+            return
+        try:
+            with open(self.path, encoding="utf-8") as f:
+                cm = json.load(f)
+        except Exception as e:
+            # Yarım yazılmış dosyaya denk gelmiş olabiliriz. ESKİ HARİTAYI
+            # KORU: boşaltmak tüm kataloğu "Diğer"e düşürürdü.
+            logger.warning("category_map okunamadı (%s) — eski harita korunuyor", e)
+            return
+        self.main_to_id = cm.get("main_to_id", {}) or {}
+        self.other_id = cm.get("other_id")
+        self._mtime = mtime
+        self.loads += 1
+        logger.info("category_map yüklendi: %d alt kategori", len(self.main_to_id))
+
+    def resolve(self, main_category):
+        """Ham `main_category` → kategori id. Eşleşmezse "Diğer"."""
+        self._refresh()
+        return self.main_to_id.get((main_category or "").strip(), self.other_id)
 
 
 def run(raw_dir, api_url, api_key, category_map="category_map.json",
@@ -86,7 +128,7 @@ def run(raw_dir, api_url, api_key, category_map="category_map.json",
     logger.info("başlangıç durumu: %s", st.counts(conn))
 
     session = _session()
-    main_to_id, other_id = _load_cat_map(category_map)
+    cat_map = CatMap(category_map)
     # Hız tavanı: fetch'ler arası min gecikme = min_delay sn. Böylece daemon devlet
     # API'sine yüklenmeyip nazik, sabit bir hızda çeker (varsayılan 30s → ~120 ürün/saat
     # → tüm katalog ~5-6 günde bir tam tur). Bu, senkron "dalga"yı önler (tüm ürünler
@@ -104,7 +146,7 @@ def run(raw_dir, api_url, api_key, category_map="category_map.json",
         if not pending:
             return
         for pid, d in pending.items():
-            d["_cheep_cat"] = main_to_id.get((d.get("main_category") or "").strip(), other_id)
+            d["_cheep_cat"] = cat_map.resolve(d.get("main_category"))
         payloads = build_price_payloads(pending)
         if payloads:
             ingest(payloads, api_url, api_key)
