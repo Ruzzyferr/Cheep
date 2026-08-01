@@ -12,7 +12,7 @@
  */
 import { localePrefix, type Locale } from '../i18n'
 
-export type ContentKind = 'product' | 'category' | 'store' | 'city' | 'report' | 'compare'
+export type ContentKind = 'product' | 'category' | 'store' | 'city' | 'report' | 'compare' | 'browse'
 
 /** Dil başına yol parçaları. */
 const SEGMENTS: Record<Locale, Record<ContentKind, string>> = {
@@ -23,6 +23,7 @@ const SEGMENTS: Record<Locale, Record<ContentKind, string>> = {
     city: 'sehir',
     report: 'zam-raporu',
     compare: 'en-ucuz-market',
+    browse: 'fiyatlar',
   },
   pl: {
     product: 'produkt',
@@ -31,6 +32,7 @@ const SEGMENTS: Record<Locale, Record<ContentKind, string>> = {
     city: 'miasto',
     report: 'raport-cen',
     compare: 'najtansze-sklepy',
+    browse: 'ceny',
   },
 }
 
@@ -60,6 +62,10 @@ export function storeCategoryPath(locale: Locale, storeSlug: string, categorySlu
 
 export function cityPath(locale: Locale, slug: string): string {
   return `${localePrefix(locale)}/${segment(locale, 'city')}/${slug}`
+}
+
+export function browsePath(locale: Locale): string {
+  return `${localePrefix(locale)}/${segment(locale, 'browse')}`
 }
 
 export function reportPath(locale: Locale): string {

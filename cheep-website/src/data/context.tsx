@@ -27,7 +27,16 @@ export type PagePayload =
       drops: { product: Product; changePct: number }[]
       /** Market başına "kaç üründe en ucuz" — karşılaştırma şeridi. */
       stores: { store: Store; cheapestCount: number }[]
+      /** Anasayfadan kategorilere görünür giriş. */
+      categories: Category[]
       totals: { products: number; stores: number; branches: number }
+    }
+  | {
+      kind: 'browse'
+      categories: Category[]
+      stores: Store[]
+      cities: City[]
+      totals: { products: number; branches: number }
     }
   | {
       kind: 'product'

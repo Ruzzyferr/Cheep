@@ -7,6 +7,7 @@ export const tr: Dict = {
 
   nav: {
     links: [
+      { label: 'Fiyatlar', href: '/fiyatlar' },
       { label: 'Nasıl çalışır', href: '#how' },
       { label: 'Tasarruf', href: '#savings' },
       { label: 'Ülkeler', href: '#coverage' },
@@ -201,6 +202,14 @@ export const tr: Dict = {
           { label: 'Ülkeler', href: '#coverage' },
           { label: 'SSS', href: '#faq' },
           { label: 'İndir', href: '#download' },
+        ],
+      },
+      {
+        title: 'Fiyatlar',
+        links: [
+          { label: 'Market fiyatları', href: '/fiyatlar' },
+          { label: 'Zam raporu', href: '/zam-raporu' },
+          { label: 'En ucuz market', href: '/en-ucuz-market' },
         ],
       },
       {

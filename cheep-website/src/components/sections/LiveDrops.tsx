@@ -7,7 +7,7 @@ import { summarize } from '../../data/types'
 import { Reveal } from '../ui/Reveal'
 import { formatMoney, formatPct } from '../../lib/money'
 import { formatNumber } from '../../lib/format'
-import { productPath, storePath, reportPath, comparePath } from '../../data/routes'
+import { productPath, storePath, reportPath, comparePath, browsePath, categoryPath } from '../../data/routes'
 
 /**
  * Anasayfanın canlı vitrini: gerçek fiyat düşüşleri ve market sıralaması.
@@ -28,7 +28,7 @@ export function LiveDrops() {
   const c = CONTENT[locale]
 
   if (!data || data.payload.kind !== 'home') return null
-  const { drops, stores, totals } = data.payload
+  const { drops, stores, categories, totals } = data.payload
   if (drops.length === 0 && stores.length === 0) return null
 
   const currency = data.country.currency
@@ -140,6 +140,40 @@ export function LiveDrops() {
                 className="inline-flex min-h-11 items-center font-semibold text-clementine-deep hover:underline"
               >
                 {c.compare.title} →
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Kategoriler — sitedeki 7.600 sayfaya görünür giriş.
+            Bu blok eklenene kadar anasayfadan içeriğe giden hiçbir yol yoktu:
+            kullanıcı ancak yukarıdaki 6 ürün kartının kategorisine tıklayarak
+            dolambaçlı şekilde ulaşabiliyordu. */}
+        {categories.length > 0 && (
+          <div className="mt-20">
+            <Reveal className="mx-auto mb-8 max-w-2xl text-center">
+              <h3 className="text-2xl font-bold text-ink md:text-3xl">{c.browse.categories}</h3>
+            </Reveal>
+
+            <Reveal stagger className="mx-auto flex max-w-4xl flex-wrap justify-center gap-3">
+              {categories.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  to={categoryPath(locale, cat.slug)}
+                  className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full border border-line bg-paper px-5 py-3 text-sm font-medium text-ink transition-colors hover:border-clementine hover:text-clementine-deep"
+                >
+                  {cat.name}
+                  <span className="tabular-nums text-ink-hint">{n(cat.productCount)}</span>
+                </Link>
+              ))}
+            </Reveal>
+
+            <div className="mt-10 text-center">
+              <Link
+                to={browsePath(locale)}
+                className="inline-flex min-h-11 items-center rounded-full bg-clementine-deep px-8 py-4 text-lg font-semibold text-white transition-colors hover:bg-clementine-dark"
+              >
+                {c.browse.title} →
               </Link>
             </div>
           </div>

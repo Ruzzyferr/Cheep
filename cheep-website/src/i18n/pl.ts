@@ -6,6 +6,7 @@ export const pl: Dict = {
 
   nav: {
     links: [
+      { label: 'Ceny', href: '/ceny' },
       { label: 'Jak to działa', href: '#how' },
       { label: 'Oszczędności', href: '#savings' },
       { label: 'Kraje', href: '#coverage' },
@@ -200,6 +201,14 @@ export const pl: Dict = {
           { label: 'Kraje', href: '#coverage' },
           { label: 'FAQ', href: '#faq' },
           { label: 'Pobierz', href: '#download' },
+        ],
+      },
+      {
+        title: 'Ceny',
+        links: [
+          { label: 'Ceny w sklepach', href: '/ceny' },
+          { label: 'Raport cen', href: '/raport-cen' },
+          { label: 'Najtańsze sklepy', href: '/najtansze-sklepy' },
         ],
       },
       {

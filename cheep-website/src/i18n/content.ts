@@ -80,6 +80,15 @@ export interface ContentDict {
     cheapestCount: string
   }
 
+  browse: {
+    title: string
+    lead: string
+    categories: string
+    stores: string
+    cities: string
+    navLabel: string
+  }
+
   pagination: {
     nav: string
     prev: string
@@ -165,6 +174,15 @@ const tr: ContentDict = {
     cheapestCount: 'En ucuz olduğu ürün',
   },
 
+  browse: {
+    title: 'Market fiyatları',
+    lead: '{products} ürünün fiyatını {stores} markette ve {branches} şubede karşılaştırıyoruz. Kategoriye, markete veya şehre göre gez.',
+    categories: 'Kategoriler',
+    stores: 'Marketler',
+    cities: 'Şehirler',
+    navLabel: 'Fiyatlar',
+  },
+
   pagination: {
     nav: 'Sayfalar',
     prev: 'Önceki',
@@ -244,6 +262,15 @@ const pl: ContentDict = {
     products: 'Produkty',
     branches: 'Sklepy',
     cheapestCount: 'Najtańszy w produktach',
+  },
+
+  browse: {
+    title: 'Ceny w sklepach',
+    lead: 'Porównujemy ceny {products} produktów w {stores} sieciach i {branches} sklepach. Przeglądaj według kategorii, sklepu lub miasta.',
+    categories: 'Kategorie',
+    stores: 'Sklepy',
+    cities: 'Miasta',
+    navLabel: 'Ceny',
   },
 
   pagination: {

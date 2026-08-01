@@ -244,6 +244,16 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
       return head
     }
 
+    case 'browse': {
+      const title =
+        locale === 'tr'
+          ? 'Market fiyatları — kategori, market ve şehre göre karşılaştır | Cheep'
+          : 'Ceny w sklepach — kategorie, sklepy i miasta | Cheep'
+      const head = base(locale, path, title, c.browse.lead.replace(/\{\w+\}/g, ''), INDEXABLE)
+      head.jsonLd.push(breadcrumbLd([{ name: c.breadcrumbHome, path: homePath }, { name: c.browse.title }]))
+      return head
+    }
+
     case 'compare': {
       const title =
         locale === 'tr' ? 'En ucuz market hangisi? Karşılaştırma | Cheep' : 'Który sklep jest najtańszy? | Cheep'

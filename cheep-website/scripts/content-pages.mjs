@@ -196,6 +196,25 @@ export function buildPageList(country, locale, routes) {
     changefreq: 'daily',
   })
 
+  // ------------------------------------------------------------------ keşif
+  // Sitedeki her şeye açılan kapı. Anasayfadan içeriğe görünür bir yol
+  // olmadığı fark edilince eklendi; iç bağlantı ağının da merkezi.
+  pages.push({
+    path: routes.browsePath(locale),
+    payload: {
+      kind: 'browse',
+      categories,
+      stores,
+      cities,
+      totals: {
+        products: products.length,
+        branches: stores.reduce((sum, s) => sum + s.branchCount, 0),
+      },
+    },
+    priority: '0.9',
+    changefreq: 'daily',
+  })
+
   // --------------------------------------------------------------- karşılaştır
   const cheapestCounts = {}
   for (const p of products) {
@@ -223,6 +242,8 @@ export function buildPageList(country, locale, routes) {
 const HOME_DROPS = 6
 /** Anasayfa şeridinde kaç market. */
 const HOME_STORES = 8
+/** Anasayfada gösterilen kategori sayısı — gerisi keşif sayfasında. */
+const HOME_CATEGORIES = 18
 
 /**
  * Anasayfanın canlı vitrini için veri.
@@ -231,7 +252,7 @@ const HOME_STORES = 8
  * olduğu için ayrı ve küçük: 6 düşüş + market sıralaması + toplamlar.
  */
 export function buildHomePayload(country) {
-  const { products, stores } = country
+  const { products, stores, categories } = country
 
   const drops = products
     .map((p) => ({ product: slim(p), changePct: changePct(p) }))
@@ -254,6 +275,7 @@ export function buildHomePayload(country) {
     kind: 'home',
     drops,
     stores: ranked,
+    categories: categories.slice(0, HOME_CATEGORIES),
     totals: {
       products: products.length,
       stores: stores.length,

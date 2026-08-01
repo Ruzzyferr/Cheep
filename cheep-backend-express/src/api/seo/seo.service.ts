@@ -10,6 +10,7 @@
  */
 import { prisma } from '../../utils/prisma.client.js';
 import { localizeCategory } from '../../config/category-locale.js';
+import { normalizeCity } from '../../config/city-normalize.js';
 
 /** Bir sayfanın var olmayı hak etmesi için gereken en az market sayısı. */
 const MIN_STORES_FOR_PAGE = 2;
@@ -215,34 +216,53 @@ async function fetchStores(countryId: number): Promise<SeoStore[]> {
     }));
 }
 
-async function fetchCities(countryId: number): Promise<SeoCity[]> {
+async function fetchCities(countryId: number, countryCode: string): Promise<SeoCity[]> {
+    // Ham şube×market sayıları; şehir adı normalizasyonu JS'te yapılıyor
+    // çünkü Türkçe'ye duyarlı harf dönüşümü SQL'de güvenilir değil
+    // (Postgres'in lower/upper'ı 'İ' harfini locale'siz ele alıyor).
     const rows = await prisma.$queryRawUnsafe<
-        { city: string; total: bigint; stores: { slug: string; name: string; branchCount: number }[] }[]
+        { city: string; store_slug: string; store_name: string; n: bigint }[]
     >(
-        `SELECT b.city,
-                COUNT(*)::bigint AS total,
-                json_agg(json_build_object('slug', s.slug, 'name', s.name, 'branchCount', b.n)
-                         ORDER BY b.n DESC) AS stores
-         FROM (
-           SELECT city, store_id, COUNT(*) AS n
-           FROM store_branches
-           WHERE country_id = $1 AND city IS NOT NULL AND city <> ''
-           GROUP BY city, store_id
-         ) b
+        `SELECT b.city, s.slug AS store_slug, s.name AS store_name, COUNT(*)::bigint AS n
+         FROM store_branches b
          JOIN stores s ON s.id = b.store_id AND s.slug IS NOT NULL
-         GROUP BY b.city
-         HAVING SUM(b.n) >= $2
-         ORDER BY total DESC`,
+         WHERE b.country_id = $1 AND b.city IS NOT NULL AND b.city <> ''
+         GROUP BY b.city, s.slug, s.name`,
         countryId,
-        MIN_BRANCHES_FOR_CITY,
     );
 
-    return rows.map((r) => ({
-        slug: '', // controller dolduruyor (slugify backend util'i, burada import döngüsü olmasın)
-        name: r.city,
-        branchCount: Number(r.total),
-        stores: (r.stores ?? []).map((s) => ({ ...s, branchCount: Number(s.branchCount) })),
-    }));
+    // "Keçiören/Ankara" ve "Ankara" aynı sayfada toplanır; gerekçe:
+    // config/city-normalize.ts
+    const merged = new Map<string, { name: string; total: number; stores: Map<string, { name: string; n: number }> }>();
+
+    for (const r of rows) {
+        const name = normalizeCity(r.city, countryCode);
+        if (!name) continue;
+
+        let entry = merged.get(name);
+        if (!entry) {
+            entry = { name, total: 0, stores: new Map() };
+            merged.set(name, entry);
+        }
+        const count = Number(r.n);
+        entry.total += count;
+
+        const store = entry.stores.get(r.store_slug);
+        if (store) store.n += count;
+        else entry.stores.set(r.store_slug, { name: r.store_name, n: count });
+    }
+
+    return [...merged.values()]
+        .filter((c) => c.total >= MIN_BRANCHES_FOR_CITY)
+        .sort((a, b) => b.total - a.total)
+        .map((c) => ({
+            slug: '', // controller dolduruyor
+            name: c.name,
+            branchCount: c.total,
+            stores: [...c.stores.entries()]
+                .map(([slug, s]) => ({ slug, name: s.name, branchCount: s.n }))
+                .sort((a, b) => b.branchCount - a.branchCount),
+        }));
 }
 
 /** Tüm ülkeler için sayfa üretimine yetecek veriyi toplar. */
@@ -265,7 +285,7 @@ export async function buildExport(): Promise<SeoExport> {
             products,
             categories: await fetchCategories(c.id, c.code),
             stores: await fetchStores(c.id),
-            cities: await fetchCities(c.id),
+            cities: await fetchCities(c.id, c.code),
         });
     }
 
