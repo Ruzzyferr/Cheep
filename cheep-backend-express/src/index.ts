@@ -1,6 +1,7 @@
 import express, { type Application, type Request, type Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
 import apiRouter from './api/index.js';
@@ -44,6 +45,12 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
 }));
+// Yanıt sıkıştırma. Mobil kullanıcıların çoğu hücresel veride: ürün listesi
+// ve karşılaştırma yanıtları gzip ile ~%75 küçülüyor. SEO export'u (~40 MB)
+// bu olmadan taşınamazdı.
+// threshold: küçük yanıtlarda sıkıştırma CPU'su kazançtan büyük.
+app.use(compression({ threshold: 1024 }));
+
 // Gövde boyutu: varsayılan dar, yalnızca toplu ingest uçları geniş.
 // Ayrıntı ve gerekçe: src/middleware/body-parser.middleware.ts
 app.use(jsonBodyParser());

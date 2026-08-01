@@ -15,4 +15,15 @@ const router = Router();
  */
 router.get('/export', requireIngestKey, SeoController.exportAll);
 
+/**
+ * @swagger
+ * /api/v1/seo/slugs:
+ *   post:
+ *     summary: Slug'ı olmayan ürün ve marketlere slug üretir (ingest anahtarı gerekir)
+ *     tags: [SEO]
+ *     responses:
+ *       200: { description: Üretilen slug sayıları }
+ */
+router.post('/slugs', requireIngestKey, SeoController.backfillSlugs);
+
 export default router;
