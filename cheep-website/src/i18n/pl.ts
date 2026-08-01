@@ -206,7 +206,6 @@ export const pl: Dict = {
       {
         title: 'Ceny',
         links: [
-          { label: 'Ceny w sklepach', href: '/ceny' },
           { label: 'Raport cen', href: '/raport-cen' },
           { label: 'Najtańsze sklepy', href: '/najtansze-sklepy' },
         ],

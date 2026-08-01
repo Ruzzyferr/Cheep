@@ -207,7 +207,6 @@ export const tr: Dict = {
       {
         title: 'Fiyatlar',
         links: [
-          { label: 'Market fiyatları', href: '/fiyatlar' },
           { label: 'Zam raporu', href: '/zam-raporu' },
           { label: 'En ucuz market', href: '/en-ucuz-market' },
         ],

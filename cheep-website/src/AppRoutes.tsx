@@ -14,7 +14,6 @@ import { StoreCategoryPage } from './pages/content/StoreCategoryPage'
 import { CityPage } from './pages/content/CityPage'
 import { ReportPage } from './pages/content/ReportPage'
 import { ComparePage } from './pages/content/ComparePage'
-import { BrowsePage } from './pages/content/BrowsePage'
 import { ProductsPage } from './pages/content/ProductsPage'
 import { PageDataContext, readClientData, type PageData } from './data/context'
 import { ContentRoute } from './components/content/ContentRoute'
@@ -83,7 +82,6 @@ const CONTENT_SCREENS: { kind: ContentKind; suffix: string; expect: string; elem
   { kind: 'city', suffix: '/:slug', expect: 'city', element: <CityPage /> },
   { kind: 'report', suffix: '', expect: 'report', element: <ReportPage /> },
   { kind: 'compare', suffix: '', expect: 'compare', element: <ComparePage /> },
-  { kind: 'browse', suffix: '', expect: 'browse', element: <BrowsePage /> },
   { kind: 'products', suffix: '', expect: 'products', element: <ProductsPage /> },
 ]
 

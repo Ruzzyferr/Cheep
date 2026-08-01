@@ -212,28 +212,10 @@ export function buildPageList(country, locale, routes) {
         .slice(0, PRODUCTS_FIRST_SCREEN),
       categories,
       stores,
-      totals: {
-        products: products.length,
-        stores: stores.length,
-        branches: stores.reduce((sum, s) => sum + s.branchCount, 0),
-      },
-    },
-    priority: '0.9',
-    changefreq: 'daily',
-  })
-
-  // ------------------------------------------------------------------ keşif
-  // Sitedeki her şeye açılan kapı. Anasayfadan içeriğe görünür bir yol
-  // olmadığı fark edilince eklendi; iç bağlantı ağının da merkezi.
-  pages.push({
-    path: routes.browsePath(locale),
-    payload: {
-      kind: 'browse',
-      categories,
-      stores,
       cities,
       totals: {
         products: products.length,
+        stores: stores.length,
         branches: stores.reduce((sum, s) => sum + s.branchCount, 0),
       },
     },

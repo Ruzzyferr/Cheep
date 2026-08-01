@@ -41,14 +41,9 @@ export type PagePayload =
       products: Product[]
       categories: Category[]
       stores: Store[]
-      totals: { products: number; stores: number; branches: number }
-    }
-  | {
-      kind: 'browse'
-      categories: Category[]
-      stores: Store[]
+      /** Sayfa altındaki dizin için — kategori/market/şehir sayfalarına bağlantı. */
       cities: City[]
-      totals: { products: number; branches: number }
+      totals: { products: number; stores: number; branches: number }
     }
   | {
       kind: 'product'

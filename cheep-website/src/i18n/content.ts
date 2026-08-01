@@ -114,6 +114,7 @@ export interface ContentDict {
     loading: string
     apply: string
     close: string
+    directoryTitle: string
   }
 
   pagination: {
@@ -226,6 +227,7 @@ const tr: ContentDict = {
     loading: 'Yükleniyor…',
     apply: 'Uygula',
     close: 'Kapat',
+    directoryTitle: 'Tüm kategoriler, marketler ve şehirler',
   },
 
   browse: {
@@ -343,6 +345,7 @@ const pl: ContentDict = {
     loading: 'Ładowanie…',
     apply: 'Zastosuj',
     close: 'Zamknij',
+    directoryTitle: 'Wszystkie kategorie, sklepy i miasta',
   },
 
   browse: {

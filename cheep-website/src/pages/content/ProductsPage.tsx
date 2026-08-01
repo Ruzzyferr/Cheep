@@ -8,6 +8,7 @@ import { CategorySidebar } from '../../components/products/CategorySidebar'
 import { FilterBar } from '../../components/products/FilterBar'
 import { ProductsSkeleton } from '../../components/products/ProductsSkeleton'
 import { ProductsPagination } from '../../components/products/ProductsPagination'
+import { SiteDirectory } from '../../components/products/SiteDirectory'
 import { formatMoney, formatPct } from '../../lib/money'
 import { formatNumber } from '../../lib/format'
 import { productPath } from '../../data/routes'
@@ -311,6 +312,25 @@ export function ProductsPage() {
               labels={c.pagination}
             />
           )}
+
+          {/*
+            Dizin: kategori/market/şehir SAYFALARINA gerçek bağlantılar.
+            Soldaki liste filtre düğmesi (aynı sayfada kalır), burası ayrı
+            sayfalara gider. Bu görev eskiden /fiyatlar'daydı; o sayfa
+            kaldırıldı ama 7.665 içerik sayfasının iç bağlantısı kaldırılamazdı.
+          */}
+          <SiteDirectory
+            categories={initial.categories}
+            stores={initial.stores}
+            cities={initial.cities}
+            locale={locale}
+            labels={{
+              title: c.products.directoryTitle,
+              categories: c.browse.categories,
+              stores: c.browse.stores,
+              cities: c.browse.cities,
+            }}
+          />
         </div>
       </div>
     </ContentLayout>

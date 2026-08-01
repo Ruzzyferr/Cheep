@@ -210,12 +210,19 @@ if (fs.existsSync(dataFile)) {
     }
   }
   const header = '# Otomatik üretildi (scripts/prerender.mjs). Elle düzenlemeyin.'
+  // Kaldırılan keşif sayfası → ürünler. Yayındaydı ve indekste; sessizce
+  // 404'e düşürmek birikmiş sıralamayı ve gelen bağlantıları yakar.
+  lines.push('redir /fiyatlar /urunler 301')
+  lines.push('redir /fiyatlar/* /urunler 301')
+  lines.push('redir /pl/ceny /pl/produkty 301')
+  lines.push('redir /pl/ceny/* /pl/produkty 301')
+
   const body =
     lines.length > 0
       ? [header, ...lines, ''].join('\n')
       : ['# Yönlendirme yok.', ''].join('\n')
   fs.writeFileSync(path.join(dist, 'redirects.caddy'), body)
-  console.log(`301:         ${lines.length / 2} kategori yönlendirmesi → dist/redirects.caddy`)
+  console.log(`301:         ${lines.length} kural → dist/redirects.caddy`)
 }
 
 // ------------------------------------------------------------------- 404

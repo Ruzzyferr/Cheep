@@ -19,7 +19,6 @@ export type ContentKind =
   | 'city'
   | 'report'
   | 'compare'
-  | 'browse'
   | 'products'
 
 /** Dil başına yol parçaları. */
@@ -31,7 +30,6 @@ const SEGMENTS: Record<Locale, Record<ContentKind, string>> = {
     city: 'sehir',
     report: 'zam-raporu',
     compare: 'en-ucuz-market',
-    browse: 'fiyatlar',
     products: 'urunler',
   },
   pl: {
@@ -41,7 +39,6 @@ const SEGMENTS: Record<Locale, Record<ContentKind, string>> = {
     city: 'miasto',
     report: 'raport-cen',
     compare: 'najtansze-sklepy',
-    browse: 'ceny',
     products: 'produkty',
   },
 }
@@ -72,10 +69,6 @@ export function storeCategoryPath(locale: Locale, storeSlug: string, categorySlu
 
 export function cityPath(locale: Locale, slug: string): string {
   return `${localePrefix(locale)}/${segment(locale, 'city')}/${slug}`
-}
-
-export function browsePath(locale: Locale): string {
-  return `${localePrefix(locale)}/${segment(locale, 'browse')}`
 }
 
 /** Ürünler sayfası — kataloğun tamamında arama/filtre/sıralama. */
