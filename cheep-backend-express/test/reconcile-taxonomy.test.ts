@@ -319,6 +319,46 @@ describe('planReconciliation — ülke içi ikizleri birleştirir', () => {
     });
 });
 
+describe('planReconciliation — ülkeler arası kırık parent bağı', () => {
+    // Migration `country_id`'yi her kategoriye BAĞIMSIZ atadı (alt ağaç
+    // çoğunluğu). Bir yaprak TR'ye, parent'ı PL'ye düşebiliyor. Sonuç: TR
+    // kullanıcısı `gazsiz-icecekler`i ÜST kategori olarak görüyor, çünkü
+    // parent'ı kendi ülkesinin listesinde yok.
+    const nodes: OwnedCategory[] = [
+        cat({ id: 39, slug: 'icecek', country_id: PL }),
+        cat({ id: 40, slug: 'gazsiz-icecekler', country_id: TR, parent_id: 39 }),
+    ];
+    const counts: ProductCount[] = [
+        { categoryId: 39, countryId: PL, n: 300 },
+        { categoryId: 40, countryId: TR, n: 418 },
+    ];
+
+    const plan = planReconciliation(nodes, counts);
+
+    it('parent\'ın kendi ülkesindeki kopyasını yaratır', () => {
+        const created = plan.ops.filter((o) => o.kind === 'createCategory') as any[];
+        expect(created.map((o) => `${o.countryId}:${o.slug}`)).toEqual([`${TR}:icecek`]);
+    });
+
+    it('yaprağı kendi ülkesinin parent\'ına bağlar', () => {
+        const parentOp = plan.ops.find((o: any) => o.kind === 'createCategory') as any;
+        const reparent = plan.ops.find((o) => o.kind === 'reparent') as any;
+        expect(reparent).toMatchObject({ categoryId: 40 });
+        expect(reparent.toRef).toBe(parentOp.tempId);
+    });
+
+    it('aynı ülkedeki parent bağına dokunmaz', () => {
+        const same = planReconciliation(
+            [
+                cat({ id: 1, slug: 'icecek', country_id: TR }),
+                cat({ id: 2, slug: 'kahve', country_id: TR, parent_id: 1 }),
+            ],
+            [{ categoryId: 2, countryId: TR, n: 10 }],
+        );
+        expect(same.ops.filter((o) => o.kind === 'reparent')).toHaveLength(0);
+    });
+});
+
 describe('planReconciliation — ASCII olmayan slug', () => {
     // Canlıda `pirinç`, `bisküvi`, `kuruyemiş`, `sünger-bez` gibi slug'lar
     // vardı. URL'de yüzde-kodlanıyorlar (`/kategoria/bisk%C3%BCvi`) ve hem

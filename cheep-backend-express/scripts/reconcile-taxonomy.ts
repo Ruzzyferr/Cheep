@@ -138,6 +138,11 @@ async function main() {
                     `→ "${op.toSlug}" içinde birleşecek` +
                     (op.reparentChildIds.length > 0 ? ` (+${op.reparentChildIds.length} alt kategori)` : ''),
             );
+        } else if (op.kind === 'reparent') {
+            console.log(
+                `   🧬 [${countryCode.get(op.countryId)}] "${op.slug}" (#${op.categoryId}) ` +
+                    `kendi ülkesinin üst kategorisine bağlanacak (parent başka ülkedeydi)`,
+            );
         } else if (op.kind === 'renameSlug') {
             console.log(
                 `   ✏️  [${countryCode.get(op.countryId)}] "${op.oldSlug}" → "${op.newSlug}" ` +
@@ -200,6 +205,11 @@ async function main() {
                         });
                     }
                     await tx.category.delete({ where: { id: op.fromCategoryId } });
+                } else if (op.kind === 'reparent') {
+                    await tx.category.update({
+                        where: { id: op.categoryId },
+                        data: { parent_id: refToId(op.toRef) },
+                    });
                 } else if (op.kind === 'renameSlug') {
                     await tx.category.update({
                         where: { id: op.categoryId },

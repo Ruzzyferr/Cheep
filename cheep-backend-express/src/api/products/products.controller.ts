@@ -5,6 +5,7 @@ import {productMatcher} from "./product-matcher.service.js";
 import { getProfile } from '../profile/profile.service.js';
 import { evaluateProductConstraints } from '../../services/product-constraints.js';
 import { localizeCategory, type Lang } from '../../config/category-i18n.js';
+import type { SortMode } from './product-filter.js';
 
 /**
  * Ürün yanıtındaki kategori adını istemcinin diline çevirir.
@@ -30,19 +31,36 @@ export const getAllProducts = async (req: Request, res: Response, next: NextFunc
     try {
         const {
             category_id,
+            category_slug,
+            store_slug,
             brand,
             search,
+            sort,
+            min_stores,
+            min_price,
+            max_price,
             limit = 50,
-            offset = 0
-        } = req.query;
+            offset = 0,
+        } = req.query as Record<string, unknown>;
 
         const result = await ProductService.getAllProducts({
             category_id: category_id ? Number(category_id) : undefined,
+            category_slug: category_slug as string | undefined,
+            // Şema virgüllü değeri zaten diziye çevirir.
+            store_slug: store_slug as string[] | undefined,
             brand: brand as string | undefined,
             search: search as string | undefined,
+            sort: sort as SortMode | undefined,
+            min_stores: min_stores !== undefined ? Number(min_stores) : undefined,
+            min_price: min_price !== undefined ? Number(min_price) : undefined,
+            max_price: max_price !== undefined ? Number(max_price) : undefined,
             limit: Number(limit),
             offset: Number(offset),
             countryId: req.country?.id,
+            // Facet'ler yalnızca istendiğinde: iki fazladan toplu sorgu, mobil
+            // listeler için gereksiz yük.
+            // Şema `facets`'i boolean'a çevirir; Express'in query tipi bunu bilmez.
+            withFacets: (req.query as Record<string, unknown>).facets === true,
         });
 
         let products: (typeof result.products[number] & { constraint?: { hidden: boolean; warnings: string[] } })[] = result.products;
@@ -67,7 +85,19 @@ export const getAllProducts = async (req: Request, res: Response, next: NextFunc
         res.status(200).json({
             success: true,
             data: localizeProductCategory(products, req.lang ?? 'tr'),
-            pagination: result.pagination
+            pagination: result.pagination,
+            // Facet adları da çevrilir; filtre paneli arayüz diliyle uyumlu olmalı.
+            ...('facets' in result && result.facets
+                ? {
+                      facets: {
+                          categories: result.facets.categories.map((c) => ({
+                              ...c,
+                              ...localizeCategory(req.lang ?? 'tr', c.name, c.slug),
+                          })),
+                          stores: result.facets.stores,
+                      },
+                  }
+                : {}),
         });
     } catch (error) {
         next(error);

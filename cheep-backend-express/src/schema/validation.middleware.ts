@@ -32,20 +32,35 @@ export const validate = (
             });
         }
 
-        // --- DEĞİŞTİRİLEN BÖLÜM BAŞLANGICI ---
-        // 'req.query' ve 'req.params' üzerine doğrudan yazılamaz,
-        // bu yüzden 'req.body' için farklı bir mantık uyguluyoruz.
         if (property === 'body') {
-            // req.body değiştirilebilir, bu yüzden doğrudan atama yapabiliriz.
-            // Bu, bilinmeyen alanların (stripUnknown) kaldırıldığı temiz bir body sağlar.
+            // req.body düz bir özellik; doğrudan atanabilir.
             req.body = value;
         } else {
-            // req.query ve req.params üzerine yazılamaz.
-            // Bunun yerine, doğrulanmış ve varsayılan değerleri içeren 'value' nesnesini
-            // mevcut req[property] (yani req.query veya req.params) içine birleştiririz.
-            Object.assign(req[property], value);
+            // DİKKAT — Express 5'te `req.query` bir GETTER: her erişimde query
+            // string'i yeniden ayrıştırır. Buraya eskiden
+            // `Object.assign(req.query, value)` yazılıyordu ve o yazma
+            // TUTMUYORDU: getter bir sonraki okumada ham değeri geri veriyordu.
+            //
+            // Düz parametrelerde fark edilmiyordu (değer zaten aynı), ama
+            // şemanın DÖNÜŞTÜRDÜĞÜ her şey sessizce kayboluyordu — virgüllü
+            // listenin diziye çevrilmesi, sayıya dönüştürme ve `default`
+            // atamaları controller'a hiç ulaşmıyordu.
+            //
+            // Getter'ı doğrulanmış değerle değiştiriyoruz: controller'lar
+            // değişmeden doğru veriyi görür ve `stripUnknown` nihayet gerçekten
+            // uygulanır.
+            try {
+                Object.defineProperty(req, property, {
+                    value,
+                    writable: true,
+                    enumerable: true,
+                    configurable: true,
+                });
+            } catch {
+                // Tanımlanamıyorsa (donmuş nesne) en azından birleştirmeyi dene.
+                Object.assign(req[property], value);
+            }
         }
-        // --- DEĞİŞTİRİLEN BÖLÜM SONU ---
 
         next();
     };

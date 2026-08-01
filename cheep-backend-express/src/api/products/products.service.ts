@@ -3,18 +3,61 @@ import { Prisma } from '@prisma/client';
 import { getCountryIdByCode } from '../../utils/country.js';
 import { notFound, conflict } from '../../utils/app-error.js';
 import { normalizeSearchInput, tokenizeSearch, isBarcodeQuery } from './product-search.util.js';
+import { buildProductFilter, type SortMode } from './product-filter.js';
 
 interface GetAllProductsParams {
     category_id?: number;
+    /** Website URL'leri slug tabanlı; ülke içinde çözülür. */
+    category_slug?: string;
+    /** Market filtresi (çoklu). Ürün, bu marketlerden en az birinde bulunmalı. */
+    store_slug?: string[];
     brand?: string;
     search?: string;
+    sort?: SortMode;
+    /** En az kaç markette bulunsun — karşılaştırma değeri olmayanları eler. */
+    min_stores?: number;
+    min_price?: number;
+    max_price?: number;
     limit?: number;
     offset?: number;
     countryId?: number;
+    /** Facet sayıları da hesaplansın mı (website filtre paneli için). */
+    withFacets?: boolean;
+}
+
+export interface ProductFacets {
+    categories: Array<{ slug: string; name: string; n: number }>;
+    stores: Array<{ slug: string; name: string; n: number }>;
 }
 
 export const getAllProducts = async (params: GetAllProductsParams) => {
-    const { category_id, brand, search, limit = 50, offset = 0, countryId } = params;
+    const {
+        category_id,
+        category_slug,
+        store_slug,
+        brand,
+        search,
+        min_stores,
+        min_price,
+        max_price,
+        limit = 50,
+        offset = 0,
+        countryId,
+        withFacets = false,
+    } = params;
+
+    const filter = buildProductFilter({
+        countryId: countryId ?? 0,
+        category_id,
+        category_slug,
+        store_slug,
+        brand,
+        search,
+        sort: params.sort,
+        min_stores,
+        min_price,
+        max_price,
+    });
 
     const where: Prisma.ProductWhereInput = {};
     if (countryId) {
@@ -23,7 +66,28 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
     // Raw SQL filtresinde kullanılmak üzere çözülen kategori id listesi
     let categoryIdsForSql: number[] | null = null;
 
-    if (category_id) {
+    // Slug ile gelen kategori önce id'ye çevrilir. Slug artık YALNIZCA ülke
+    // içinde benzersiz; ülkesiz arama başka ülkenin kategorisini bulabilirdi.
+    let resolvedCategoryId = category_id;
+    if (filter.categorySlug && countryId) {
+        const bySlug = await prisma.category.findUnique({
+            where: { country_id_slug: { country_id: countryId, slug: filter.categorySlug } },
+            select: { id: true },
+        });
+        // Bilinmeyen slug → eşleşen ürün yok. Filtreyi düşürüp tüm kataloğu
+        // döndürmek kullanıcıyı yanıltırdı (yanlış URL'de dolu sayfa).
+        if (!bySlug) {
+            return {
+                products: [],
+                pagination: { total: 0, limit, offset, hasMore: false },
+                ...(withFacets ? { facets: { categories: [], stores: [] } } : {}),
+            };
+        }
+        resolvedCategoryId = bySlug.id;
+    }
+
+    if (resolvedCategoryId) {
+        const category_id = resolvedCategoryId;
         // 🔥 Parent kategorinin alt kategorilerini de dahil et
         const category = await prisma.category.findUnique({
             where: { id: category_id },
@@ -66,19 +130,26 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
     // 🔥 DATABASE SEVİYESİNDE SIRALAMA: Market sayısına göre (çoktan aza)
     // Raw SQL ile store_prices count'una göre sıralama
     
-    // WHERE clause builder — orijinal parametrelerden kurulur (tip güvenli)
-    let whereClause = Prisma.sql`WHERE 1=1`;
+    // WHERE parçaları AYRI tutulur ve sonra birleştirilir.
+    //
+    // Neden tek bir birikimli string değil: facet sayıları her boyut için
+    // KENDİ boyutu hariç hesaplanmalı. "BİM"i seçtiğinde diğer marketlerin
+    // sayısı sıfırlanırsa kullanıcı seçimini genişletemez — filtre paneli
+    // çıkmaz sokağa döner.
+    const clauses: Prisma.Sql[] = [];
+    let categoryClause: Prisma.Sql = Prisma.empty;
+    let storeClause: Prisma.Sql = Prisma.empty;
 
     if (countryId) {
-        whereClause = Prisma.sql`${whereClause} AND p.country_id = ${countryId}`;
+        clauses.push(Prisma.sql`p.country_id = ${countryId}`);
     }
 
     if (categoryIdsForSql && categoryIdsForSql.length > 0) {
-        whereClause = Prisma.sql`${whereClause} AND p.category_id IN (${Prisma.join(categoryIdsForSql)})`;
+        categoryClause = Prisma.sql`p.category_id IN (${Prisma.join(categoryIdsForSql)})`;
     }
 
     if (brand) {
-        whereClause = Prisma.sql`${whereClause} AND p.brand ILIKE ${'%' + brand + '%'}`;
+        clauses.push(Prisma.sql`p.brand ILIKE ${'%' + brand + '%'}`);
     }
 
     // 🔎 Akıllı arama: cheep_normalize (unaccent + Türkçe İ/ı) üzerinden trigram.
@@ -105,12 +176,12 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
             ? Prisma.sql`OR p.ean_barcode LIKE ${nq + '%'}`
             : Prisma.empty;
 
-        whereClause = Prisma.sql`${whereClause} AND (
+        clauses.push(Prisma.sql`(
             (${tokenAnd})
             OR cheep_normalize(${nq}) <% cheep_normalize(p.name)
             OR cheep_normalize(coalesce(p.brand, '')) LIKE '%' || cheep_normalize(${nq}) || '%'
             ${barcodeClause}
-        )`;
+        )`);
 
         // Alaka sıralaması: önce prefix eşleşmesi, sonra word_similarity.
         searchOrder = Prisma.sql`
@@ -119,11 +190,73 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
         `;
     }
 
+    // 🏪 Market filtresi. EXISTS ile: JOIN üzerinden filtrelemek ürünü market
+    // sayısı kadar çoğaltır ve hem toplam sayımı hem min_price'ı bozardı.
+    if (filter.storeSlugs && filter.storeSlugs.length > 0) {
+        storeClause = Prisma.sql`EXISTS (
+            SELECT 1 FROM store_prices spf
+            JOIN stores stf ON stf.id = spf.store_id
+            WHERE spf.product_id = p.id AND stf.slug IN (${Prisma.join(filter.storeSlugs)})
+        )`;
+    }
+
+    // 💰 Fiyat aralığı: ürünün EN DÜŞÜK fiyatı aralıkta olmalı. Kullanıcı
+    // "50 TL'ye kadar" derken en ucuz halini kastediyor; herhangi bir markette
+    // ucuz olan ürün listede kalmalı.
+    if (filter.minPrice !== undefined || filter.maxPrice !== undefined) {
+        const lo = filter.minPrice ?? 0;
+        const hi = filter.maxPrice ?? Number.MAX_SAFE_INTEGER;
+        clauses.push(Prisma.sql`EXISTS (
+            SELECT 1 FROM store_prices spp
+            WHERE spp.product_id = p.id
+            GROUP BY spp.product_id
+            HAVING MIN(spp.price::numeric) BETWEEN ${lo} AND ${hi}
+        )`);
+    }
+
+    // 🔢 En az N markette bulunma koşulu.
+    if (filter.minStores !== undefined) {
+        clauses.push(Prisma.sql`(
+            SELECT COUNT(DISTINCT spm.store_id) FROM store_prices spm WHERE spm.product_id = p.id
+        ) >= ${filter.minStores}`);
+    }
+
+    /** Verilen parçalardan WHERE üretir; boş parçalar atlanır. */
+    const composeWhere = (...parts: Prisma.Sql[]): Prisma.Sql => {
+        const active = parts.filter((p) => p !== Prisma.empty);
+        return active.length === 0
+            ? Prisma.sql`WHERE 1=1`
+            : Prisma.sql`WHERE ${Prisma.join(active, ' AND ')}`;
+    };
+
+    const whereClause = composeWhere(...clauses, categoryClause, storeClause);
+    // Facet'ler kendi boyutları HARİÇ hesaplanır (bkz. yukarıdaki gerekçe).
+    const whereForCategoryFacets = composeWhere(...clauses, storeClause);
+    const whereForStoreFacets = composeWhere(...clauses, categoryClause);
+
+    // 📊 Sıralama. `savings` = en ucuz ile en pahalı arasındaki fark: "burada
+    // kazanç var" sinyali, uygulamanın var oluş sebebi.
+    const sortOrder: Prisma.Sql = (() => {
+        switch (filter.effectiveSort) {
+            case 'price_asc':
+                return Prisma.sql`min_price ASC NULLS LAST,`;
+            case 'price_desc':
+                return Prisma.sql`min_price DESC NULLS LAST,`;
+            case 'savings':
+                return Prisma.sql`(MAX(sp.price::numeric) - MIN(sp.price::numeric)) DESC NULLS LAST,`;
+            case 'name':
+                return Prisma.sql`p.name ASC,`;
+            default:
+                // store_count / relevance → mevcut varsayılan (aşağıda zaten var)
+                return Prisma.empty;
+        }
+    })();
+
     // 🔎 `<%` operatörü GIN trigram index'lerini kullanabilir (bare word_similarity()
     // fonksiyonu kullanamaz), ama pg_trgm.word_similarity_threshold GUC'una bağlıdır
     // (varsayılan 0.6, yazım hataları için çok katı). Aynı bağlantıda SET LOCAL ile
     // 0.35'e düşürüyoruz — bu yüzden her iki raw sorgu da tek bir transaction içinde.
-    const [products, totalRows] = await prisma.$transaction(async (tx) => {
+    const [products, totalRows, categoryFacetRows, storeFacetRows] = await prisma.$transaction(async (tx) => {
         if (search && nq) {
             // SET LOCAL transaction-scoped'tur; değer sabit (kullanıcı girdisi değil).
             await tx.$executeRawUnsafe('SET LOCAL pg_trgm.word_similarity_threshold = 0.35');
@@ -140,6 +273,7 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
             GROUP BY p.id
             ORDER BY
                 ${searchOrder}
+                ${sortOrder}
                 store_count DESC,
                 min_price ASC,
                 p.created_at DESC
@@ -154,9 +288,45 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
             ${whereClause}
         `;
 
-        return [products, totalRows];
+        // Facet'ler yalnızca istendiğinde: website filtre paneli için gerekli,
+        // mobil listeler için iki fazladan ağır sorgu demek.
+        const categoryFacetRows = withFacets
+            ? await tx.$queryRaw<Array<{ slug: string; name: string; n: bigint }>>`
+                SELECT c.slug, c.name, COUNT(*)::bigint AS n
+                FROM "products" p
+                JOIN "categories" c ON c.id = p.category_id
+                ${whereForCategoryFacets}
+                GROUP BY c.slug, c.name
+                ORDER BY n DESC
+            `
+            : [];
+
+        const storeFacetRows = withFacets
+            ? await tx.$queryRaw<Array<{ slug: string; name: string; n: bigint }>>`
+                SELECT s.slug, s.name, COUNT(DISTINCT p.id)::bigint AS n
+                FROM "products" p
+                JOIN "store_prices" spx ON spx.product_id = p.id
+                JOIN "stores" s ON s.id = spx.store_id AND s.slug IS NOT NULL
+                ${whereForStoreFacets}
+                GROUP BY s.slug, s.name
+                ORDER BY n DESC
+            `
+            : [];
+
+        return [products, totalRows, categoryFacetRows, storeFacetRows] as const;
     });
     const total = Number(totalRows[0]?.count ?? 0);
+
+    const facets: ProductFacets | undefined = withFacets
+        ? {
+              categories: categoryFacetRows.map((r) => ({
+                  slug: r.slug,
+                  name: r.name,
+                  n: Number(r.n),
+              })),
+              stores: storeFacetRows.map((r) => ({ slug: r.slug, name: r.name, n: Number(r.n) })),
+          }
+        : undefined;
 
     // Eğer ürün yoksa boş array döndür
     if (products.length === 0) {
@@ -168,6 +338,7 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
                 offset,
                 hasMore: false,
             },
+            ...(facets ? { facets } : {}),
         };
     }
 
@@ -204,6 +375,7 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
             offset,
             hasMore: offset + limit < total,
         },
+        ...(facets ? { facets } : {}),
     };
 };
 

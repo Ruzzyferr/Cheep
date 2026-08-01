@@ -66,6 +66,17 @@ export type ReconcileOp =
           reparentChildIds: number[];
       }
     | {
+          /**
+           * Kategoriyi KENDİ ülkesindeki parent'a bağlar. Migration ülkeyi her
+           * kategoriye bağımsız atadığı için ağaç ülkeler arasında kırılabildi.
+           */
+          kind: 'reparent';
+          categoryId: number;
+          countryId: number;
+          slug: string;
+          toRef: CategoryRef;
+      }
+    | {
           /** ASCII olmayan slug'ı URL-güvenli karşılığına çevirir. */
           kind: 'renameSlug';
           categoryId: number;
@@ -303,6 +314,27 @@ export function planReconciliation(
             n: c.n,
         });
         movedProducts += c.n;
+    }
+
+    // 1b) Ülkeler arası kırık parent bağlarını onar.
+    //
+    // Migration `country_id`'yi her kategoriye BAĞIMSIZ atadı (alt ağaç
+    // çoğunluğu), bu yüzden bir yaprak TR'ye düşerken parent'ı PL'ye
+    // düşebildi. O yaprak TR listesinde parent'sız kalıyor ve arayüzde ÜST
+    // kategori gibi görünüyor — kullanıcı `gazsiz-icecekler`i anasayfada
+    // "Süt Ürünleri" ile aynı seviyede görüyordu.
+    for (const node of nodes) {
+        if (node.parent_id === null) continue;
+        const parent = byId.get(node.parent_id);
+        if (!parent || parent.country_id === node.country_id) continue;
+
+        ops.push({
+            kind: 'reparent',
+            categoryId: node.id,
+            countryId: node.country_id,
+            slug: node.slug,
+            toRef: ensureCopy(parent, node.country_id),
+        });
     }
 
     // Taşımadan SONRA kendi ülkesinde kalan ürünler.
