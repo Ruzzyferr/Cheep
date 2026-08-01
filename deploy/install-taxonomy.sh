@@ -13,4 +13,4 @@ echo "--- timer ---"
 systemctl list-timers cheep-taxonomy.timer --no-pager || true
 echo
 echo "Elle bir koşu:  systemctl start cheep-taxonomy.service && tail -40 /var/log/cheep-taxonomy.log"
-echo "Sağlık raporu:  docker exec deploy-backend-1 npx tsx scripts/taxonomy-health.ts"
+echo "Sağlık raporu:  docker exec deploy-backend-1 npx tsx scripts/data-health.ts"

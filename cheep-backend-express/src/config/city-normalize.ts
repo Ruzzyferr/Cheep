@@ -49,7 +49,39 @@ function foldKey(input: string): string {
         .replace(/[^a-z0-9]/g, '');
 }
 
+/** Kanonik il adları — sağlık raporu "bu bir il mi" diye buna bakıyor. */
+export const TR_PROVINCE_SET = new Set(TR_PROVINCES);
+
 const PROVINCE_BY_KEY = new Map(TR_PROVINCES.map((name) => [foldKey(name), name]));
+
+/**
+ * İl adı taşımayan yerleşim adları → bağlı oldukları il.
+ *
+ * NEDEN GEREKLİ: bazı şube kayıtlarında yalnızca ilçe/belde adı var, "ilçe/il"
+ * biçimi yok ve `address` alanı boş. Bu adlar il listesinde bulunamayınca kendi
+ * başlarına birer "şehir" sayfası açıyordu — "Büyükkarıştıran market fiyatları"
+ * gibi 6 şubelik sayfalar, bağlı oldukları ilin sayfasını güçlendirmek yerine
+ * ondan pay çalıyordu.
+ *
+ * EŞLEME KOORDİNATTAN DOĞRULANDI, ad benzerliğinden değil. Buraya yeni bir
+ * satır eklerken aynısını yapın: `SELECT city, avg(lat), avg(lon) FROM
+ * store_branches GROUP BY city`. Ad yanıltıcı olabiliyor — "Altınova" Yalova'nın
+ * bir ilçesini çağrıştırıyor ama verideki şubeler (40.94, 27.48) Tekirdağ'da.
+ *
+ * Liste kısa tutuluyor: yalnızca sayfa açacak kadar (>= MIN_BRANCHES_FOR_CITY)
+ * şubesi olan yerleşimler. Yeni bir tanesi çıktığında haftalık veri sağlık
+ * raporu uyarır (`scripts/data-health.ts`).
+ */
+const TR_LOCALITY_PROVINCE: Record<string, string> = {
+    // Tekirdağ
+    kapakli: 'Tekirdağ',      // 41.330, 27.976 — Çerkezköy'ün kuzeyi
+    altinova: 'Tekirdağ',     // 40.942, 27.485 — Süleymanpaşa; Yalova DEĞİL
+    // Kırklareli
+    luleburgaz: 'Kırklareli', // 41.396, 27.357
+    buyukkaristiran: 'Kırklareli', // 41.300, 27.546 — Lüleburgaz'a bağlı belde
+    // Aydın
+    akbuk: 'Aydın',           // 37.390, 27.433 — Didim
+};
 
 /** Türkçe'ye duyarlı baş harf büyütme (listede bulunamayan adlar için). */
 function titleCase(word: string): string {
@@ -73,8 +105,14 @@ export function normalizeCity(raw: string | null | undefined, countryCode = 'TR'
     if (cleaned.length < 2) return null;
 
     if (countryCode === 'TR') {
-        const canonical = PROVINCE_BY_KEY.get(foldKey(cleaned));
+        const key = foldKey(cleaned);
+        // Önce il listesi: "Kapaklı/Tekirdağ" gibi doğru biçimli kayıtlar
+        // buradan çıkar ve ilçe eşlemesine hiç uğramaz.
+        const canonical = PROVINCE_BY_KEY.get(key);
         if (canonical) return canonical;
+
+        const province = TR_LOCALITY_PROVINCE[key];
+        if (province) return province;
     }
 
     // Listede yok (ilçe, yurt dışı, yeni kayıt) — en azından biçimi düzelt.

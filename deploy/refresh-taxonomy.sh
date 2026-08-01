@@ -97,6 +97,6 @@ docker exec "$CID" npx tsx scripts/reconcile-taxonomy.ts \
   log "     reconcile hata verdi — bir sonraki haftaya bırakılıyor"
 
 log "5/5 sağlık raporu"
-docker exec "$CID" npx tsx scripts/taxonomy-health.ts --taxonomy /tmp/taxonomy.json 2>&1 | sed 's/^/     /' || true
+docker exec "$CID" npx tsx scripts/data-health.ts --taxonomy /tmp/taxonomy.json 2>&1 | sed 's/^/     /' || true
 
 log "taksonomi tazeleme bitti"

@@ -28,8 +28,10 @@ describe('normalizeCity', () => {
     });
 
     it('listede olmayan adı da düzgün biçimlendirir — sayfa kaybolmasın', () => {
-        expect(normalizeCity('kapaklı')).toBe('Kapaklı');
-        expect(normalizeCity('LÜLEBURGAZ')).toBe('Lüleburgaz');
+        // Ne il ne de bilinen bir ilçe: biçimi düzeltilip olduğu gibi geçer.
+        // (Kapaklı ve Lüleburgaz artık ile eşleniyor, bkz. aşağıdaki blok.)
+        expect(normalizeCity('kuşcenneti')).toBe('Kuşcenneti');
+        expect(normalizeCity('YEŞİLKÖY')).toBe('Yeşilköy');
     });
 
     it('Polonya için il tablosu uygulanmaz', () => {
@@ -43,3 +45,43 @@ describe('normalizeCity', () => {
         expect(normalizeCity('X')).toBeNull();
     });
 });
+
+describe('normalizeCity — ile bağlı olmayan yerleşim adları', () => {
+    /**
+     * Bazı şube kayıtlarında yalnızca ilçe/belde adı var, "ilçe/il" biçimi yok
+     * ve `address` alanı boş. Bu adlar il listesinde bulunamadığı için kendi
+     * başlarına birer "şehir" sayfası açıyordu: "Büyükkarıştıran market
+     * fiyatları" gibi 6 şubelik sayfalar, bağlı oldukları ilin sayfasını
+     * güçlendirmek yerine ondan pay çalıyordu.
+     *
+     * Eşleme, gerçek şube KOORDİNATLARINDAN doğrulandı — ad benzerliğinden
+     * değil. Örneğin Altınova adı Yalova'nın bir ilçesini çağrıştırıyor ama
+     * verideki kayıtlar (40.94, 27.48) Tekirdağ'da.
+     */
+    it('bilinen ilçe/beldeyi bağlı olduğu ile çevirir', () => {
+        expect(normalizeCity('Kapaklı')).toBe('Tekirdağ');
+        expect(normalizeCity('Lüleburgaz')).toBe('Kırklareli');
+        expect(normalizeCity('Büyükkarıştıran')).toBe('Kırklareli');
+        expect(normalizeCity('Akbük')).toBe('Aydın');
+        expect(normalizeCity('Altınova')).toBe('Tekirdağ');
+    });
+
+    it('büyük/küçük harf ve aksan farkını yine tolere eder', () => {
+        expect(normalizeCity('KAPAKLI')).toBe('Tekirdağ');
+        expect(normalizeCity('luleburgaz')).toBe('Kırklareli');
+    });
+
+    it('ilçe/il biçimi verilmişse il yine kazanır', () => {
+        // "Kapaklı/Tekirdağ" zaten doğru; eşleme onu bozmamalı.
+        expect(normalizeCity('Kapaklı/Tekirdağ')).toBe('Tekirdağ');
+    });
+
+    it('bilinmeyen yerleşim adı OLDUĞU GİBİ geçer — sayfa kaybolmasın', () => {
+        expect(normalizeCity('Bilinmeyenköy')).toBe('Bilinmeyenköy');
+    });
+
+    it('yalnızca TR için uygulanır', () => {
+        expect(normalizeCity('Kapaklı', 'PL')).toBe('Kapaklı');
+    });
+});
+

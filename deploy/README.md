@@ -127,7 +127,7 @@ docker exec deploy-backend-1 npx tsx scripts/reconcile-taxonomy.ts --apply
 ### Sağlık raporu
 
 ```bash
-docker exec deploy-backend-1 npx tsx scripts/taxonomy-health.ts
+docker exec deploy-backend-1 npx tsx scripts/data-health.ts
 tail -60 /var/log/cheep-taxonomy.log     # haftalık işin çıktısı
 ```
 

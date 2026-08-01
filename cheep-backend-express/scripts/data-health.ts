@@ -1,5 +1,5 @@
 /**
- * Taksonomi sağlık raporu.
+ * Haftalık veri sağlık raporu.
  *
  * NEDEN VAR: kategori sorunları sessizce birikiyor. Devlet yeni bir kategori
  * açtığında ürünleri "Diğer"e düşüyor, PL scraper'ı eşlenmemiş bir kategori
@@ -7,12 +7,17 @@
  * kategori çeviri sözlüğüne eklenmediğinde beş dilde birden Türkçe adıyla
  * çıkıyor. Hiçbiri hata vermiyor — aylar sonra fark ediliyor.
  *
+ * Aynı sessizlik konum verisinde de var: şube kaydında yalnızca ilçe adı
+ * geçtiğinde o ilçe kendi başına bir "şehir" sayfası açıyor ve bağlı olduğu
+ * ilin sayfasından pay çalıyor.
+ *
  * Haftalık taksonomi tazelemesinin son adımı bunu basar. Amaç düzeltmek değil,
- * GÖRÜNÜR KILMAK: hangi kategoriler çevrilmemiş, kaç ürün kategorisiz kalmış.
+ * GÖRÜNÜR KILMAK.
  */
 import * as fs from 'node:fs';
 import { prisma } from '../src/utils/prisma.client.js';
 import { CATEGORY_NAMES } from '../src/config/category-i18n.js';
+import { normalizeCity, TR_PROVINCE_SET } from '../src/config/city-normalize.js';
 
 /**
  * `--taxonomy <yol>` — devletin türettiği ağaç (mf_taxonomy.py çıktısı).
@@ -158,7 +163,47 @@ async function main() {
         console.log(`  ${n === 0 ? '✓' : '⚠️ '} ${label}: ${n}`);
     }
 
-    console.log(problems === 0 ? '\n✅ taksonomi sağlıklı\n' : `\n⚠️  ${problems} başlıkta dikkat gerekiyor\n`);
+    // 5) İl olmayan "şehir" sayfaları.
+    //
+    //    `city-normalize.ts` ilçe/il biçimini ve 81 ili çözüyor, ayrıca bilinen
+    //    ilçeleri iline eşliyor. Eşlemede olmayan yeni bir ilçe çıktığında kendi
+    //    sayfasını açar ve bağlı olduğu ilin sayfasından pay çalar; burada
+    //    görünür olsun ki tabloya eklensin.
+    const cityRows = await prisma.$queryRaw<Array<{ city: string; n: bigint }>>`
+        SELECT b.city, COUNT(*)::bigint AS n
+        FROM store_branches b
+        JOIN countries c ON c.id = b.country_id AND c.code = 'TR'
+        WHERE b.city IS NOT NULL AND b.city <> ''
+        GROUP BY b.city
+    `;
+
+    const merged = new Map<string, number>();
+    for (const r of cityRows) {
+        const name = normalizeCity(r.city, 'TR');
+        if (!name) continue;
+        merged.set(name, (merged.get(name) ?? 0) + Number(r.n));
+    }
+    // Sayfa açacak kadar şubesi olanlar (seo.service.ts MIN_BRANCHES_FOR_CITY).
+    const pageWorthy = [...merged.entries()].filter(([, n]) => n >= 5);
+    const notProvince = pageWorthy.filter(([name]) => !TR_PROVINCE_SET.has(name));
+
+    console.log('\n[konum]');
+    console.log(`  şehir sayfası: ${pageWorthy.length}`);
+    if (notProvince.length > 0) {
+        problems += 1;
+        console.log(
+            `  ⚠️  il olmayan ${notProvince.length} yerleşim kendi sayfasını açıyor — ` +
+                'config/city-normalize.ts içindeki TR_LOCALITY_PROVINCE tablosuna ekleyin\n' +
+                '      (ili KOORDİNATTAN doğrulayın, ad yanıltıcı olabiliyor):',
+        );
+        for (const [name, n] of notProvince.sort((a, b) => b[1] - a[1]).slice(0, 15)) {
+            console.log(`       ${name} — ${n} şube`);
+        }
+    } else {
+        console.log('  ✓ tüm şehir sayfaları bir ile karşılık geliyor');
+    }
+
+    console.log(problems === 0 ? '\n✅ veri sağlıklı\n' : `\n⚠️  ${problems} başlıkta dikkat gerekiyor\n`);
 }
 
 main()
