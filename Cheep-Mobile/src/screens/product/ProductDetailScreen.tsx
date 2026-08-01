@@ -3,7 +3,7 @@
  * Product information and price comparison
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,9 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { productService, categoryService, affiliateService } from '../../services';
+import { useQuery } from '@tanstack/react-query';
+import { useProduct, useScope, qk, STALE } from '../../queries';
+import { DetailSkeleton, ErrorState } from '../../components/ui';
 import { Card, Button } from '../../components/ui';
 import { PriceTrendCard } from '../../components/product/PriceTrendCard';
 import { ProductThumb } from '../../components/product/ProductThumb';
@@ -33,123 +36,62 @@ export function ProductDetailScreen({
 }: HomeStackScreenProps<'ProductDetail'>) {
   const { productId } = route.params;
   const { country, formatMoney } = useLocale();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [prices, setPrices] = useState<StorePrice[]>([]);
-  const [categoryWithParent, setCategoryWithParent] = useState<Category | null>(null);
-  const [priceStats, setPriceStats] = useState<{
-    cheapest: StorePrice | null;
-    mostExpensive: StorePrice | null;
-    averagePrice: number;
-    priceDifference: number;
-    savingsPercentage: number;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const scope = useScope();
   const [openingStore, setOpeningStore] = useState(false);
   const [showListModal, setShowListModal] = useState(false);
-  const [priceHistory, setPriceHistory] = useState<PriceHistoryResponse | null>(null);
-  const [historyLoading, setHistoryLoading] = useState(true);
 
-  useEffect(() => {
-    // `alive` flag: unmount sonrası setState/navigate yapmamak için.
-    let alive = true;
+  // Üç ayrı sorgu: ürün, kategori (üst bilgisi için) ve fiyat geçmişi.
+  // Eskiden hepsi tek bir useEffect içinde `alive` bayrağıyla elle
+  // yönetiliyordu; React Query iptal ve yarış durumlarını kendi çözüyor.
+  const productQ = useProduct(productId);
+  const product = productQ.data ?? null;
+  const loading = productQ.isPending;
 
-    const loadPriceHistory = async () => {
-      try {
-        setHistoryLoading(true);
-        const data = await productService.getPriceHistory(productId, 90);
-        if (!alive) return;
-        setPriceHistory(data);
-      } catch (error) {
-        if (!alive) return;
-        console.warn('Could not fetch price history:', error);
-        setPriceHistory(null);
-      } finally {
-        if (alive) setHistoryLoading(false);
-      }
-    };
+  const categoryQ = useQuery({
+    queryKey: qk.categories.subcategories(scope, product?.category_id ?? 0),
+    queryFn: () => categoryService.getCategoryById(product!.category_id as number),
+    enabled: Boolean(product?.category_id),
+    staleTime: STALE.static,
+  });
+  const categoryWithParent = (categoryQ.data as Category | undefined) ?? null;
 
-    const loadProduct = async () => {
-      try {
-        setLoading(true);
-        const productData = await productService.getProductById(productId);
-        if (!alive) return;
+  const historyQ = useQuery({
+    queryKey: qk.products.history(scope, productId, 90),
+    queryFn: () => productService.getPriceHistory(productId, 90),
+    staleTime: STALE.catalog,
+  });
+  const priceHistory = historyQ.data ?? null;
+  const historyLoading = historyQ.isPending;
 
-        setProduct(productData);
+  /** Ürünün fiyatları, ucuzdan pahalıya. */
+  const prices: StorePrice[] = useMemo(() => {
+    const list = product?.store_prices ?? [];
+    return [...list].sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+  }, [product]);
 
-        // Fetch category with parent information if category exists
-        if (productData.category_id) {
-          try {
-            const categoryData = await categoryService.getCategoryById(productData.category_id);
-            if (!alive) return;
-            setCategoryWithParent(categoryData);
-          } catch (error) {
-            if (!alive) return;
-            console.warn('Could not fetch category details:', error);
-            setCategoryWithParent(null);
-          }
-        }
-
-        // Use store_prices from productData if available, otherwise fetch separately
-        let pricesData: StorePrice[] = [];
-        if (productData.store_prices && productData.store_prices.length > 0) {
-          pricesData = productData.store_prices;
-        } else {
-          // Fallback: fetch prices separately if not included in product data
-          try {
-            pricesData = await productService.getProductPrices(productId);
-          } catch (error) {
-            console.warn('Could not fetch prices separately:', error);
-          }
-        }
-        if (!alive) return;
-
-        const sortedPrices = pricesData.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-        setPrices(sortedPrices);
-
-        // Calculate price statistics from prices data
-        if (sortedPrices.length > 0) {
-          const priceValues = sortedPrices.map((p) => parseFloat(p.price));
-          const cheapest = sortedPrices[0];
-          const mostExpensive = sortedPrices[sortedPrices.length - 1];
-          const averagePrice = priceValues.reduce((sum, p) => sum + p, 0) / priceValues.length;
-          const priceDifference = parseFloat(mostExpensive.price) - parseFloat(cheapest.price);
-          const savingsPercentage = parseFloat(mostExpensive.price) > 0
-            ? (priceDifference / parseFloat(mostExpensive.price)) * 100
-            : 0;
-
-          setPriceStats({
-            cheapest,
-            mostExpensive,
-            averagePrice,
-            priceDifference,
-            savingsPercentage,
-          });
-        } else {
-          // Reset stats if no prices
-          setPriceStats(null);
-        }
-      } catch (error) {
-        if (!alive) return;
-        console.error('Load product error:', error);
-      } finally {
-        if (alive) setLoading(false);
-      }
-    };
-
-    loadProduct();
-    loadPriceHistory();
-
-    return () => {
-      alive = false;
-    };
-  }, [productId]);
+  /** En ucuz / en pahalı / ortalama ve tasarruf yüzdesi. */
+  const priceStats = useMemo(() => {
+    if (prices.length === 0) return null;
+    const values = prices.map((p) => parseFloat(p.price));
+    const cheapest = prices[0];
+    const mostExpensive = prices[prices.length - 1];
+    const averagePrice = values.reduce((sum, p) => sum + p, 0) / values.length;
+    const priceDifference = parseFloat(mostExpensive.price) - parseFloat(cheapest.price);
+    const savingsPercentage =
+      parseFloat(mostExpensive.price) > 0
+        ? (priceDifference / parseFloat(mostExpensive.price)) * 100
+        : 0;
+    return { cheapest, mostExpensive, averagePrice, priceDifference, savingsPercentage };
+  }, [prices]);
 
   if (loading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color={colors.primary.main} />
-      </View>
-    );
+    // Boş bir spinner yerine sayfanın şeklini gösteren iskelet: kullanıcı ne
+    // geleceğini görür ve sayfa yerleşimi zıplamaz.
+    return <DetailSkeleton />;
+  }
+
+  if (productQ.isError) {
+    return <ErrorState onRetry={() => productQ.refetch()} />;
   }
 
   if (!product) {

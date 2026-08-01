@@ -3,7 +3,7 @@
  * Mağazalar arası en büyük fiyat farkına (tasarrufa) sahip ürünler.
  */
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,10 +14,10 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { productService } from '../../services';
+import { useProductsList } from '../../queries';
+import { ListSkeleton, RefreshBar, ErrorState } from '../../components/ui';
 import { useLocale } from '../../context/LocaleContext';
 import { EmptyState } from '../../components/common/EmptyState';
-import { ListSkeleton } from '../../components/ui';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { Product } from '../../types';
@@ -73,45 +73,14 @@ function buildDeals(products: Product[]): Deal[] {
 export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) {
   const { t } = useTranslation();
   const { country, formatMoney } = useLocale();
-  const [deals, setDeals] = useState<Deal[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  // Unmount sonrası setState yapmamak için canlılık bayrağı.
-  const aliveRef = useRef(true);
+  // Cache'li sorgu: ülke değişince key değiştiği için veri kendiliğinden
+  // yenilenir; canlılık bayrağı (aliveRef) ve elle setState zinciri gerekmez.
+  const productsQ = useProductsList({ limit: 200 });
+  const deals = useMemo(() => buildDeals(productsQ.data ?? []), [productsQ.data]);
 
-  useEffect(() => {
-    aliveRef.current = true;
-    return () => {
-      aliveRef.current = false;
-    };
-  }, []);
-
-  const load = useCallback(async () => {
-    try {
-      const products = await productService.getProducts({ limit: 200 });
-      if (!aliveRef.current) return;
-      setDeals(buildDeals(products));
-    } catch (error) {
-      if (!aliveRef.current) return;
-      console.warn('Deals load error:', error);
-      setDeals([]);
-    } finally {
-      if (aliveRef.current) {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [load, country]);
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    load();
-  }, [load]);
+  const onRefresh = () => {
+    void productsQ.refetch();
+  };
 
   const openProduct = (productId: number) => {
     navigation.navigate('Home', { screen: 'ProductDetail', params: { productId } });
@@ -165,8 +134,12 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
         <Text style={styles.subtitle}>{t('deals.subtitle')}</Text>
       </View>
 
-      {loading ? (
+      <RefreshBar visible={!productsQ.isPending && productsQ.isFetching && !productsQ.isRefetching} />
+
+      {productsQ.isPending ? (
         <ListSkeleton count={6} />
+      ) : productsQ.isError ? (
+        <ErrorState onRetry={onRefresh} />
       ) : deals.length === 0 ? (
         <EmptyState
           mascot="search"
@@ -181,7 +154,7 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary.main} />
+            <RefreshControl refreshing={productsQ.isRefetching} onRefresh={onRefresh} tintColor={colors.primary.main} />
           }
         />
       )}
