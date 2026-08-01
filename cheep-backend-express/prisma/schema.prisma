@@ -66,6 +66,8 @@ model Country {
   lists      List[]
   categories Category[]
 
+  category_redirects CategoryRedirect[]
+
   price_drops PriceDrop[]
 
   @@map("countries")
@@ -198,6 +200,21 @@ model Category {
   @@index([parent_id])
   @@index([country_id, parent_id])
   @@map("categories")
+}
+
+/// Birleştirme sırasında silinen kategorilerin eski slug'ları. Site üretimi
+/// buradan 301 kuralları türetir; yayındaki kategori URL'leri kırılmasın.
+model CategoryRedirect {
+  id         Int      @id @default(autoincrement())
+  country_id Int
+  old_slug   String
+  new_slug   String
+  created_at DateTime @default(now())
+
+  country Country @relation(fields: [country_id], references: [id], onDelete: Cascade)
+
+  @@unique([country_id, old_slug])
+  @@map("category_redirects")
 }
 
 // ============================================

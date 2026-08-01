@@ -14,25 +14,30 @@ import { STANDARD_CATEGORIES } from '../src/config/standard-categories.js';
 import * as fs from 'fs';
 
 async function main() {
-    // 1) Standart kategorileri idempotent upsert et (seed.ts ile aynı mantık).
+    const plCountry = await prisma.country.findFirst({ where: { code: 'PL' } });
+    if (!plCountry) throw new Error('PL country yok');
+
+    // 1) PL kategori ağacını idempotent upsert et (seed.ts ile aynı mantık).
+    //    STANDARD_CATEGORIES yalnızca PL'nin taksonomisidir; TR ağacı devletin
+    //    verisinden türer ve buraya karışmaz.
     const slugToId = new Map<string, number>();
     for (const c of STANDARD_CATEGORIES) {
         const parent = await prisma.category.upsert({
-            where: { slug: c.slug },
+            where: { country_id_slug: { country_id: plCountry.id, slug: c.slug } },
             update: { name: c.name, display_order: c.displayOrder, icon_url: c.icon || null },
-            create: { name: c.name, slug: c.slug, parent_id: null, display_order: c.displayOrder, icon_url: c.icon || null },
+            create: { name: c.name, slug: c.slug, country_id: plCountry.id, parent_id: null, display_order: c.displayOrder, icon_url: c.icon || null },
         });
         slugToId.set(c.slug, parent.id);
         for (const s of c.subcategories) {
             const sub = await prisma.category.upsert({
-                where: { slug: s.slug },
+                where: { country_id_slug: { country_id: plCountry.id, slug: s.slug } },
                 update: { name: s.name, parent_id: parent.id, display_order: s.displayOrder },
-                create: { name: s.name, slug: s.slug, parent_id: parent.id, display_order: s.displayOrder },
+                create: { name: s.name, slug: s.slug, country_id: plCountry.id, parent_id: parent.id, display_order: s.displayOrder },
             });
             slugToId.set(s.slug, sub.id);
         }
     }
-    console.log(`[sync] kategoriler senkronlandı: ${slugToId.size} slug`);
+    console.log(`[sync] PL kategorileri senkronlandı: ${slugToId.size} slug`);
 
     // 2) Export'tan (store_id|store_sku) -> slug eşlemesi kur.
     const exportPath = process.env.EXPORT_PATH || '/tmp/pl_export.json';
@@ -44,8 +49,7 @@ async function main() {
     }
 
     // 3) PL ürünlerinin boş category_id'lerini doldur.
-    const pl = await prisma.country.findFirst({ where: { code: 'PL' } });
-    if (!pl) throw new Error('PL country yok');
+    const pl = plCountry;
     const sps = await prisma.storePrice.findMany({
         where: { product: { country_id: pl.id } },
         select: { store_id: true, store_sku: true, product_id: true, product: { select: { category_id: true } } },

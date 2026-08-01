@@ -143,14 +143,19 @@ async function main() {
 
     console.log('✅ Marketler oluşturuldu');
 
-    // 3. STANDART KATEGORİLERİ OLUŞTUR
-    console.log('📋 Standart kategoriler oluşturuluyor...');
+    // 3. POLONYA KATEGORİ AĞACINI OLUŞTUR
+    //
+    // STANDARD_CATEGORIES yalnızca PL'nin taksonomisidir. TR ağacı devletin
+    // verisinden türetilir (Cheep-Scraper/countries/turkey/mf_taxonomy.py →
+    // mf_seed_categories.py) ve burada seed EDİLMEZ; elle tutulan bir listeyi
+    // TR'ye de basmak, iki ağacın tek tabloda çakışmasına ve ikiz kategorilere
+    // yol açmıştı.
+    console.log('📋 PL kategori ağacı oluşturuluyor...');
     const categoryMap = new Map<string, number>(); // slug -> id mapping
 
-    // Önce ana kategorileri oluştur
     for (const standardCategory of STANDARD_CATEGORIES) {
         const parentCategory = await prisma.category.upsert({
-            where: { slug: standardCategory.slug },
+            where: { country_id_slug: { country_id: pl.id, slug: standardCategory.slug } },
             update: {
                 name: standardCategory.name,
                 display_order: standardCategory.displayOrder,
@@ -159,6 +164,7 @@ async function main() {
             create: {
                 name: standardCategory.name,
                 slug: standardCategory.slug,
+                country_id: pl.id,
                 parent_id: null,
                 display_order: standardCategory.displayOrder,
                 icon_url: standardCategory.icon || null,
@@ -167,10 +173,9 @@ async function main() {
 
         categoryMap.set(standardCategory.slug, parentCategory.id);
 
-        // Alt kategorileri oluştur
         for (const subcategory of standardCategory.subcategories) {
             const subCategory = await prisma.category.upsert({
-                where: { slug: subcategory.slug },
+                where: { country_id_slug: { country_id: pl.id, slug: subcategory.slug } },
                 update: {
                     name: subcategory.name,
                     parent_id: parentCategory.id,
@@ -179,6 +184,7 @@ async function main() {
                 create: {
                     name: subcategory.name,
                     slug: subcategory.slug,
+                    country_id: pl.id,
                     parent_id: parentCategory.id,
                     display_order: subcategory.displayOrder,
                 },
@@ -188,7 +194,7 @@ async function main() {
         }
     }
 
-    console.log('✅ Standart kategoriler oluşturuldu');
+    console.log('✅ PL kategori ağacı oluşturuldu');
 
     // Kategorileri değişkenlere atayalım (ürünler için)
     const sutId = categoryMap.get('sut')!;

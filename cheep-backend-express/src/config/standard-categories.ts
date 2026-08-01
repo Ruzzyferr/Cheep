@@ -1,8 +1,20 @@
 /**
- * STANDARD CATEGORIES
- * 
- * Tüm marketler için sabit kategori yapısı.
- * Bu yapı değişmez - yeni kategori eklemek için bu dosyayı güncellemek gerekir.
+ * POLONYA KATEGORİ AĞACI.
+ *
+ * ⚠️ KAPSAM — bu liste YALNIZCA Polonya içindir. Türkiye kataloğunun
+ * taksonomisi devletin verisinden TÜRETİLİR, elle tutulmaz:
+ *   Cheep-Scraper/countries/turkey/mf_taxonomy.py  (menu_category/main_category
+ *   çiftlerinden ağacı çıkarır) → mf_seed_categories.py (API'ye basar).
+ *
+ * NEDEN BU UYARI VAR: bu liste bir kez TR'ye de seed edildi
+ * (`migrate-to-standard-categories.ts`, silindi). Kategori tablosunda o dönem
+ * `country_id` yoktu ve `slug` global benzersizdi; iki taksonomi tek ağaca
+ * sıkışınca ikiz kategoriler ("Atıştırmalık" vs "Atıştırmalık ve Tatlı") ve
+ * içi boşaltılmış ölü kabuklar ("Meyve ve Sebze": 0 ürün, 0 çocuk) üredi.
+ * Anasayfa tam da o ölü kabuğu gösteriyordu.
+ *
+ * PL ürünleri bu ağaca `Cheep-Scraper/countries/poland/category_map.json`
+ * üzerinden bağlanır (Lehçe kategori adı → buradaki slug).
  */
 
 export interface StandardCategory {
