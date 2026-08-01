@@ -43,7 +43,11 @@ app.use(cors({
     origin: config.allowedOrigins.length ? config.allowedOrigins : true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+    // x-country ve x-lang BURADA OLMAK ZORUNDA. Native uygulama CORS'a tabi
+    // değil ama TARAYICI istemcileri öyle: website'in ürünler sayfası her
+    // istekte ikisini de gönderiyor. Listede olmayan bir başlık preflight'ta
+    // reddedilir ve istek hiç çıkmaz — sayfa tamamen boş kalırdı.
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'x-country', 'x-lang'],
 }));
 // Yanıt sıkıştırma. Mobil kullanıcıların çoğu hücresel veride: ürün listesi
 // ve karşılaştırma yanıtları gzip ile ~%75 küçülüyor. SEO export'u (~40 MB)
