@@ -9,6 +9,7 @@
  * kaçınılmaz olarak N+1 üretiyor. Her sorgu ülke bazında tek turdur.
  */
 import { prisma } from '../../utils/prisma.client.js';
+import { localizeCategory } from '../../config/category-locale.js';
 
 /** Bir sayfanın var olmayı hak etmesi için gereken en az market sayısı. */
 const MIN_STORES_FOR_PAGE = 2;
@@ -80,7 +81,7 @@ export interface SeoExport {
 /** Postgres NUMERIC'i string döner; sayfa üretimi sayı bekliyor. */
 const num = (v: unknown): number => Number(v ?? 0);
 
-async function fetchProducts(countryId: number): Promise<SeoProduct[]> {
+async function fetchProducts(countryId: number, countryCode: string): Promise<SeoProduct[]> {
     // Tek turda ürün + tüm teklifleri. json_agg ile satır patlaması olmadan.
     const rows = await prisma.$queryRawUnsafe<
         {
@@ -113,13 +114,19 @@ async function fetchProducts(countryId: number): Promise<SeoProduct[]> {
     const slugs = rows.map((r) => r.slug);
     const history = await fetchHistory(countryId, slugs);
 
-    return rows.map((r) => ({
+    return rows.map((r) => {
+        // Kategori adı/slug'ı ülkenin diline çevrilir; gerekçe:
+        // config/category-locale.ts
+        const cat = r.category_slug
+            ? localizeCategory(countryCode, r.category_name ?? '', r.category_slug)
+            : null;
+        return ({
         slug: r.slug,
         name: r.name,
         brand: r.brand,
         image: r.image_url,
-        categorySlug: r.category_slug,
-        categoryName: r.category_name,
+        categorySlug: cat?.slug ?? null,
+        categoryName: cat?.name ?? null,
         offers: (r.offers ?? []).map((o) => ({
             storeSlug: o.storeSlug,
             storeName: o.storeName,
@@ -127,7 +134,8 @@ async function fetchProducts(countryId: number): Promise<SeoProduct[]> {
             updatedAt: new Date(o.updatedAt).toISOString(),
         })),
         history: history.get(r.slug) ?? [],
-    }));
+    });
+    });
 }
 
 /** Ürün başına günlük en düşük fiyat — grafiğin çizdiği seri. */
@@ -156,7 +164,7 @@ async function fetchHistory(countryId: number, slugs: string[]): Promise<Map<str
     return out;
 }
 
-async function fetchCategories(countryId: number): Promise<SeoCategory[]> {
+async function fetchCategories(countryId: number, countryCode: string): Promise<SeoCategory[]> {
     const rows = await prisma.$queryRawUnsafe<{ slug: string; name: string; n: bigint }[]>(
         `SELECT c.slug, c.name, COUNT(*)::bigint AS n
          FROM (
@@ -173,7 +181,10 @@ async function fetchCategories(countryId: number): Promise<SeoCategory[]> {
         countryId,
         MIN_STORES_FOR_PAGE,
     );
-    return rows.map((r) => ({ slug: r.slug, name: r.name, productCount: Number(r.n) }));
+    return rows.map((r) => {
+        const cat = localizeCategory(countryCode, r.name, r.slug);
+        return { slug: cat.slug, name: cat.name, productCount: Number(r.n) };
+    });
 }
 
 async function fetchStores(countryId: number): Promise<SeoStore[]> {
@@ -243,7 +254,7 @@ export async function buildExport(): Promise<SeoExport> {
 
     const out: SeoCountryExport[] = [];
     for (const c of countries) {
-        const products = await fetchProducts(c.id);
+        const products = await fetchProducts(c.id, c.code);
         // Ürünü olmayan ülke (Almanya, İsviçre, İsveç) sayfa üretmez.
         if (products.length === 0) continue;
 
@@ -252,7 +263,7 @@ export async function buildExport(): Promise<SeoExport> {
             name: c.name,
             currency: c.currency,
             products,
-            categories: await fetchCategories(c.id),
+            categories: await fetchCategories(c.id, c.code),
             stores: await fetchStores(c.id),
             cities: await fetchCities(c.id),
         });
