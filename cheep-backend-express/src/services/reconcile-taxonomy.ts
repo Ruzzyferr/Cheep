@@ -92,9 +92,18 @@ export interface CategoryRedirect {
     newSlug: string;
 }
 
+/** Güvenli modda uygulanmayıp rapora düşen ikiz çiftleri. */
+export interface PendingMerge {
+    countryId: number;
+    from: string;
+    to: string;
+}
+
 export interface ReconcilePlan {
     ops: ReconcileOp[];
     redirects: CategoryRedirect[];
+    /** Yalnızca güvenli modda dolar; insan incelemesi bekleyen birleştirmeler. */
+    pendingMerges: PendingMerge[];
     summary: { created: number; moved: number; movedProducts: number; deleted: number };
 }
 
@@ -110,6 +119,17 @@ export interface ReconcileOptions {
      * ikinci sınıf bir ölçüttür; prod çalıştırmasında dosyayı verin.
      */
     canonicalSlugs?: Record<number, Set<string>>;
+
+    /**
+     * Yalnızca DETERMİNİSTİK ONARIMLARI planla: ülke ayrıştırma, kırık parent
+     * bağı, ASCII slug, ürünsüz kategori silme.
+     *
+     * İkiz BİRLEŞTİRME dışarıda kalır. Haftalık zamanlayıcı bu modda çalışıyor
+     * ve iki meşru kategoriyi birleştirmek geri alınamaz; karar da sezgisel bir
+     * benzerlik eşiğine dayanıyor. Bulunan ikizler `pendingMerges` içinde
+     * raporlanır, insan bakar.
+     */
+    safeOnly?: boolean;
 }
 
 const key = (countryId: number, slug: string) => `${countryId}|${slug}`;
@@ -349,6 +369,7 @@ export function planReconciliation(
     // duruyordu: devletin `atistirmalik-ve-tatli`si ile STANDARD_CATEGORIES'ten
     // gelen `atistirmalik`. Kullanıcı ikisini birden görüyordu.
     const merged = new Set<number>();
+    const pendingMerges: PendingMerge[] = [];
     const childrenOfId = new Map<number, number[]>();
     for (const n of nodes) {
         if (n.parent_id === null) continue;
@@ -357,13 +378,18 @@ export function planReconciliation(
         else childrenOfId.set(n.parent_id, [n.id]);
     }
 
+    // Güvenli modda birleştirme uygulanmadığı için `merged` boş kalır; aynı
+    // çift her iki yönden de gruplanıp iki kez raporlanırdı. Ele alınan
+    // düğümleri ayrıca izliyoruz.
+    const handled = new Set<number>();
+
     for (const node of nodes) {
-        if (merged.has(node.id)) continue;
+        if (merged.has(node.id) || handled.has(node.id)) continue;
 
         // Bağlı bileşen: node ile ikiz olan ve onlarla ikiz olanlar.
         const group = [node];
         for (const other of nodes) {
-            if (other.id === node.id || merged.has(other.id)) continue;
+            if (other.id === node.id || merged.has(other.id) || handled.has(other.id)) continue;
             if (group.some((g) => areTwins(g, other))) group.push(other);
         }
         if (group.length < 2) continue;
@@ -378,7 +404,15 @@ export function planReconciliation(
             .sort((a, b) => b.blessed - a.blessed || b.score - a.score || a.node.id - b.node.id)[0].node;
 
         for (const g of group) {
+            handled.add(g.id);
             if (g.id === canonical.id) continue;
+
+            // Güvenli modda birleştirme UYGULANMAZ, yalnızca raporlanır.
+            if (options.safeOnly) {
+                pendingMerges.push({ countryId: g.country_id, from: g.slug, to: canonical.slug });
+                continue;
+            }
+
             merged.add(g.id);
             ops.push({
                 kind: 'mergeCategory',
@@ -489,6 +523,7 @@ export function planReconciliation(
     return {
         ops,
         redirects,
+        pendingMerges,
         summary: {
             created: ops.filter((o) => o.kind === 'createCategory').length,
             moved: ops.filter((o) => o.kind === 'moveProducts').length,

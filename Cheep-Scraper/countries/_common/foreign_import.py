@@ -14,6 +14,11 @@ CHUNK_SIZE = 900          # backend hard limit is 1000
 ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu", "szt", "opak"}
 
 
+# Bu koşuda eşlenemeyen ham kategori adları → ürün sayısı (bkz.
+# report_unmapped_categories). Süreç ömrü boyunca birikir.
+UNMAPPED_CATEGORIES: Dict[str, int] = {}
+
+
 def _resolve_prefix_slug(raw_cat: str, category_map: Dict[str, str]) -> Optional[str]:
     """Longest-prefix-wins lookup over `category_map` entries keyed
     `"prefix:<breadcrumb-prefix>"`. Used as a fallback when an exact
@@ -106,8 +111,33 @@ def build_api_payloads(
             slug = category_map.get(raw_cat) or _resolve_prefix_slug(raw_cat, category_map)
             if slug:
                 payload["category_slug"] = slug
+            else:
+                # SESSİZ KAYIP OLMASIN: eşlenmemiş kategori `category_slug`
+                # göndermez, ürün KATEGORİSİZ kaydedilir ve hiçbir listede
+                # görünmez. Eskiden bu hiçbir yere yazılmıyordu; kaynak yeni bir
+                # kategori açtığında aylarca fark edilmiyordu.
+                UNMAPPED_CATEGORIES[raw_cat] = UNMAPPED_CATEGORIES.get(raw_cat, 0) + 1
         payloads.append(payload)
     return payloads
+
+
+def report_unmapped_categories(logger=None) -> Dict[str, int]:
+    """Bu koşuda eşlenemeyen ham kategori adları → ürün sayısı.
+
+    `category_map.json` elle yönetiliyor; kaynak yeni bir kategori açtığında
+    buraya düşer. Günlük koşunun sonunda basılır ki eklenmesi gerektiği
+    görünsün.
+    """
+    if UNMAPPED_CATEGORIES and logger is not None:
+        total = sum(UNMAPPED_CATEGORIES.values())
+        logger.warning(
+            "EŞLENMEMİŞ KATEGORİ: %d farklı ad, %d ürün kategorisiz kaldı. "
+            "category_map.json'a ekleyin:",
+            len(UNMAPPED_CATEGORIES), total,
+        )
+        for name, n in sorted(UNMAPPED_CATEGORIES.items(), key=lambda kv: -kv[1])[:20]:
+            logger.warning('    "%s": "",   # %d ürün', name, n)
+    return dict(UNMAPPED_CATEGORIES)
 
 
 def _is_clean_absolute_url(url: str) -> bool:

@@ -402,6 +402,54 @@ describe('planReconciliation — ASCII olmayan slug', () => {
     });
 });
 
+describe('planReconciliation — güvenli mod (otomatik çalıştırma)', () => {
+    // Haftalık zamanlayıcı bu modda çalışır. Otomatik uygulanan işlemler
+    // DETERMİNİSTİK ONARIMLAR olmalı: ülke ayrıştırma, kırık parent bağı,
+    // ASCII slug, ürünsüz kategori silme. İkiz BİRLEŞTİRME otomatiğe girmez —
+    // iki meşru kategoriyi birleştirmek geri alınamaz ve karar sezgisel bir
+    // benzerlik eşiğine dayanıyor. Rapora yazılır, insan bakar.
+    const nodes: OwnedCategory[] = [
+        cat({ id: 48, slug: 'atistirmalik-ve-tatli', country_id: TR }),
+        cat({ id: 173, slug: 'atistirmalik', country_id: TR }),
+        cat({ id: 39, slug: 'icecek', country_id: PL }),
+        cat({ id: 20, slug: 'olu-kategori', country_id: TR }),
+    ];
+    const counts: ProductCount[] = [
+        { categoryId: 48, countryId: TR, n: 2000 },
+        { categoryId: 173, countryId: TR, n: 900 },
+        { categoryId: 39, countryId: PL, n: 100 },
+        { categoryId: 39, countryId: TR, n: 5 },
+    ];
+
+    const safe = planReconciliation(nodes, counts, { safeOnly: true });
+
+    it('ikiz birleştirmeyi PLANLAMAZ', () => {
+        expect(safe.ops.filter((o) => o.kind === 'mergeCategory')).toHaveLength(0);
+    });
+
+    it('çapraz ülke ayrıştırmayı yine de yapar', () => {
+        expect(safe.ops.filter((o) => o.kind === 'createCategory').length).toBeGreaterThan(0);
+        expect(safe.ops.filter((o) => o.kind === 'moveProducts').length).toBeGreaterThan(0);
+    });
+
+    it('ürünsüz kategoriyi yine de siler', () => {
+        const deleted = (safe.ops.filter((o) => o.kind === 'deleteCategory') as any[]).map((o) => o.categoryId);
+        expect(deleted).toContain(20);
+    });
+
+    it('birleştirilmeyen ikizleri RAPORLAR — insan görsün diye', () => {
+        expect(safe.pendingMerges.map((m) => `${m.from}→${m.to}`)).toEqual([
+            'atistirmalik→atistirmalik-ve-tatli',
+        ]);
+    });
+
+    it('güvenli mod dışında bekleyen birleştirme kalmaz', () => {
+        const full = planReconciliation(nodes, counts);
+        expect(full.pendingMerges).toEqual([]);
+        expect(full.ops.filter((o) => o.kind === 'mergeCategory').length).toBeGreaterThan(0);
+    });
+});
+
 describe('planReconciliation — özet', () => {
     it('yapılacak işi sayar', () => {
         const plan = planReconciliation(

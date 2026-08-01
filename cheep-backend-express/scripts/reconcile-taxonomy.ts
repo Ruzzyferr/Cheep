@@ -29,6 +29,12 @@ import {
 } from '../src/services/reconcile-taxonomy.js';
 
 const APPLY = process.argv.includes('--apply');
+/**
+ * Güvenli mod: yalnızca deterministik onarımlar uygulanır, ikiz birleştirme
+ * yalnızca RAPORLANIR. Haftalık zamanlayıcı bu modda çalışır — iki meşru
+ * kategoriyi birleştirmek geri alınamaz ve karar sezgisel bir eşiğe dayanıyor.
+ */
+const SAFE_ONLY = process.argv.includes('--safe-only');
 
 /** `--taxonomy <yol>` — mf_taxonomy.py çıktısı. */
 function argValue(flag: string): string | undefined {
@@ -91,7 +97,8 @@ async function main() {
     console.log(`\n📋 Taksonomi birleştirme planı (${APPLY ? 'UYGULANACAK' : 'KURU ÇALIŞMA'})`);
 
     const trCountry = await prisma.country.findUnique({ where: { code: 'TR' }, select: { id: true } });
-    const options = loadCanonical(trCountry?.id ?? 1);
+    const options = { ...loadCanonical(trCountry?.id ?? 1), safeOnly: SAFE_ONLY };
+    if (SAFE_ONLY) console.log('   🛡️  Güvenli mod: ikiz birleştirme uygulanmaz, raporlanır.');
     if (!options.canonicalSlugs) {
         console.log(
             '   ⚠️  Kanonik taksonomi verilmedi (--taxonomy). İkiz gruplarının\n' +
@@ -155,6 +162,17 @@ async function main() {
 
     for (const r of plan.redirects) {
         console.log(`   ↪️  [${countryCode.get(r.countryId)}] /${r.oldSlug} → /${r.newSlug}`);
+    }
+
+    if (plan.pendingMerges.length > 0) {
+        console.log(
+            `
+   ⚠️  ${plan.pendingMerges.length} ikiz çifti bulundu ama BİRLEŞTİRİLMEDİ ` +
+                '(güvenli mod). İnceleyip onaylıyorsanız --safe-only olmadan çalıştırın:',
+        );
+        for (const m of plan.pendingMerges) {
+            console.log(`      [${countryCode.get(m.countryId)}] "${m.from}" → "${m.to}"`);
+        }
     }
 
     if (!APPLY) {

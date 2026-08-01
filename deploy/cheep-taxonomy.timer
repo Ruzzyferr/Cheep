@@ -1,0 +1,14 @@
+[Unit]
+Description=Cheep taksonomi tazeleme zamanlayıcısı (haftalık, Pazar 01:30)
+
+[Timer]
+# Pazar: PL rotasyonunun dinlenme günü (run-daily.sh gün 7'de çıkıyor), yani
+# scrape ile çakışmaz. 01:30 seçildi çünkü PL pipeline'ı 03:00'te, site üretimi
+# 04:00'te başlıyor — taksonomi ikisinden de ÖNCE tazelenmeli ki yeni
+# kategoriler o gecenin ingest'ine ve site build'ine yetişsin.
+OnCalendar=Sun *-*-* 01:30:00
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

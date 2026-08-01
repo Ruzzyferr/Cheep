@@ -56,6 +56,59 @@ Haftalık otomasyon için cron (Pazar 03:00):
 0 3 * * 0 cd /opt/cheep/Cheep-Scraper && PYTHONUTF8=1 ./venv/bin/python countries/turkey/pipeline.py --ingest >> /var/log/cheep-scrape.log 2>&1
 ```
 
+## Otomatik çalışan işler
+
+| Ne | Ne zaman | Ne yapar |
+|---|---|---|
+| `cheep-fetcher` | sürekli (daemon) | TR kataloğunu devlet API'sinden çeker; ~5-6 günde tam tur |
+| `cheep-fetcher-pl` | her gece 03:00 | PL zincir rotasyonu (Pazar dinlenme), bayat fiyat temizliği |
+| `cheep-taxonomy` | **Pazar 01:30** | Devlet taksonomisini ham veriden yeniden türetir, yeni kategorileri açar, `category_map.json`'u yeniler, deterministik onarımları uygular, sağlık raporu basar |
+| `cheep-site-build` | her gece 04:00 | Siteyi taze fiyatlarla yeniden üretir |
+| `cheep-price-drops` | (kendi timer'ı) | Fiyat düşüşü bildirimleri |
+| `cheep-backup` | (kendi timer'ı) | Veritabanı yedeği |
+
+Kurulum: `sudo bash deploy/install-taxonomy.sh` (diğerleri için `install-*.sh`).
+
+### Taksonomi tazeleme neden gerekli
+
+Fetch daemon'ı `category_map.json`'u DONMUŞ bir dosya olarak okuyor. Devlet
+yeni bir kategori açtığında o kategorinin ürünleri sonsuza kadar "Diğer"e
+düşüyordu — taksonomi ham veriden türetilebilir olduğu hâlde yalnızca bir kez,
+elle türetilmişti. Haftalık iş bu döngüyü kapatır.
+
+Zamanlama tesadüf değil: Pazar, PL rotasyonunun dinlenme günü (çakışma yok) ve
+01:30, PL pipeline'ından (03:00) ve site üretiminden (04:00) önce — yeni
+kategoriler o gecenin ingest'ine ve site build'ine yetişir.
+
+**İkiz birleştirme otomatik YAPILMAZ.** Haftalık iş `--safe-only` ile çalışır:
+ülke ayrıştırma, kırık parent bağı, ASCII slug ve ürünsüz kategori silme gibi
+deterministik onarımları uygular. İki meşru kategoriyi birleştirmek geri
+alınamaz ve karar sezgisel bir benzerlik eşiğine dayanıyor; bulunan ikizler
+loga yazılır, onaylarsanız elle çalıştırırsınız:
+
+```bash
+docker exec deploy-backend-1 npx tsx scripts/reconcile-taxonomy.ts            # kuru çalışma
+docker exec deploy-backend-1 npx tsx scripts/reconcile-taxonomy.ts --apply
+```
+
+### Sağlık raporu
+
+```bash
+docker exec deploy-backend-1 npx tsx scripts/taxonomy-health.ts
+tail -60 /var/log/cheep-taxonomy.log     # haftalık işin çıktısı
+```
+
+Şunları görünür kılar — hiçbiri hata vermiyor, aylar sonra fark ediliyordu:
+
+- **Kategorisiz ürün**: PL scraper'ı eşlenmemiş bir kategori getirdiğinde ürün
+  kategorisiz kaydediliyor ve hiçbir listede görünmüyor. Eşlenmeyen ham
+  kategori adları PL günlük koşusunun logunda da listelenir
+  (`logs/fetcher-pl.log`), `countries/poland/category_map.json`'a eklenir.
+- **"Diğer" payı**: %15'i aşarsa kaynak yeni bir kategori açmış olabilir.
+- **Çevrilmemiş kategori**: `src/config/category-i18n.ts`'e eklenmemiş kategori
+  beş dilde birden Türkçe adıyla çıkar. Kırılma değil ama kalıcılaşır; rapor
+  eklenecek satırı hazır verir.
+
 ## Zorunlu güncelleme kapısı
 
 Mobil uygulama açılırken `GET /api/v1/app/version` çağırır ve iki eşiğe bakar.

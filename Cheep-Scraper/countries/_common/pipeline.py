@@ -184,6 +184,12 @@ async def run_country_pipeline(
 
     counts_path.parent.mkdir(parents=True, exist_ok=True)
     counts_path.write_text(json.dumps(prev_counts), encoding="utf-8")
+
+    # Eşlenemeyen kategoriler koşunun sonunda raporlanır: ürün kaydedildi ama
+    # KATEGORİSİZ, yani hiçbir listede görünmüyor. Sessizce geçmesin.
+    from countries._common.foreign_import import report_unmapped_categories
+    summary["unmapped_categories"] = report_unmapped_categories(logger)
+
     return summary
 
 
