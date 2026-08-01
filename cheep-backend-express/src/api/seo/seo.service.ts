@@ -198,14 +198,29 @@ async function fetchStores(countryId: number): Promise<SeoStore[]> {
         // Migros'ta 10.247 şube × 5.405 fiyat = 55 milyon ara satır, tek başına
         // dışa aktarımı dakikalarca sürdürüyordu. Skaler alt sorgular her
         // tabloyu kendi indeksiyle bir kez tarar.
+        // ÜRÜN SAYISI AYNI EVRENDEN SAYILIR. Eskiden bu alan markete ait TÜM
+        // store_prices satırlarını sayıyordu; sayfa "2.995 ürün karşılaştırıyoruz"
+        // yazarken hemen altındaki kartta "CarrefourSA 6.884 ürün" görünüyordu.
+        // İki sayı da doğruydu ama farklı şeyleri sayıyordu ve yan yana
+        // durunca güveni yiyordu. Artık ikisi de "yayınlanabilir ürün"
+        // (>= MIN_STORES_FOR_PAGE markette bulunan) evrenini sayar.
         `SELECT s.slug, s.name, s.logo_url,
                 (SELECT COUNT(*)          FROM store_branches b WHERE b.store_id = s.id)::bigint AS branches,
                 (SELECT COUNT(DISTINCT b.city) FROM store_branches b WHERE b.store_id = s.id AND b.city IS NOT NULL)::bigint AS cities,
-                (SELECT COUNT(*)          FROM store_prices sp   WHERE sp.store_id = s.id)::bigint AS products
+                (SELECT COUNT(*) FROM (
+                    SELECT sp.product_id
+                    FROM store_prices sp
+                    JOIN products p ON p.id = sp.product_id
+                    WHERE sp.store_id = s.id AND p.country_id = $1 AND p.slug IS NOT NULL
+                      AND (SELECT COUNT(DISTINCT sp2.store_id) FROM store_prices sp2
+                           WHERE sp2.product_id = sp.product_id) >= $2
+                    GROUP BY sp.product_id
+                 ) q)::bigint AS products
          FROM stores s
          WHERE s.country_id = $1 AND s.slug IS NOT NULL
          ORDER BY products DESC`,
         countryId,
+        MIN_STORES_FOR_PAGE,
     );
     return rows.map((r) => ({
         slug: r.slug,

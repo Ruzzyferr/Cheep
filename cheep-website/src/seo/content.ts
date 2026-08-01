@@ -244,6 +244,18 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
       return head
     }
 
+    case 'products': {
+      const title =
+        locale === 'tr'
+          ? 'Ürünler — market fiyatlarını karşılaştır | Cheep'
+          : 'Produkty — porównaj ceny w sklepach | Cheep'
+      const head = base(locale, path, title, c.products.lead.replace(/\{\w+\}/g, ''), INDEXABLE)
+      head.jsonLd.push(
+        breadcrumbLd([{ name: c.breadcrumbHome, path: homePath }, { name: c.products.title }]),
+      )
+      return head
+    }
+
     case 'browse': {
       const title =
         locale === 'tr'

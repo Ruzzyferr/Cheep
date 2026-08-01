@@ -5,6 +5,13 @@
 
 export const SITE_URL = 'https://cheep.live'
 
+/**
+ * Canlı API. Ürünler sayfasının filtre/arama/sayfalama etkileşimleri buraya
+ * gider; ilk ekran prerender edildiği için Googlebot ürünleri yine de HTML'de
+ * görür ve API erişilemezse sayfa boş kalmaz.
+ */
+export const API_URL = 'https://api.cheep.live/api/v1'
+
 export const PLAY_PACKAGE = 'com.cheep.mobile'
 
 /** Play Console'da web trafiğini ayırt edebilmek için UTM etiketli. */

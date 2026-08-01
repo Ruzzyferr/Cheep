@@ -5,7 +5,7 @@ import { CONTENT, fill } from '../../i18n/content'
 import { usePageData } from '../../data/context'
 import { ContentLayout } from '../../components/content/ContentLayout'
 import { formatNumber } from '../../lib/format'
-import { categoryPath, cityPath, storePath, reportPath, comparePath } from '../../data/routes'
+import { categoryPath, cityPath, storePath, reportPath, comparePath, productsPath } from '../../data/routes'
 
 /**
  * Keşif sayfası — sitedeki her şeye açılan kapı.
@@ -42,8 +42,15 @@ export function BrowsePage() {
         </p>
       </header>
 
-      {/* Öne çıkan iki hub — en çok arananlar */}
+      {/* Öne çıkan hub'lar. Ürünler sayfası başta: kullanıcı buraya kategori
+          hapı aramaya değil ÜRÜN aramaya geliyor. */}
       <div className="mt-8 flex flex-wrap gap-3">
+        <Link
+          to={productsPath(locale)}
+          className="inline-flex min-h-11 items-center rounded-full bg-clementine-deep px-6 py-3 font-semibold text-white transition-colors hover:bg-clementine-deep/85"
+        >
+          {c.products.title} →
+        </Link>
         <Link
           to={reportPath(locale)}
           className="inline-flex min-h-11 items-center rounded-full bg-ink px-6 py-3 font-semibold text-cream transition-colors hover:bg-ink/85"

@@ -89,6 +89,33 @@ export interface ContentDict {
     navLabel: string
   }
 
+  products: {
+    title: string
+    lead: string
+    navLabel: string
+    searchPlaceholder: string
+    allCategories: string
+    filters: string
+    stores: string
+    sort: string
+    sortRelevance: string
+    sortPriceAsc: string
+    sortPriceDesc: string
+    sortSavings: string
+    sortName: string
+    priceRange: string
+    priceMin: string
+    priceMax: string
+    resultCount: string
+    empty: string
+    clearFilters: string
+    error: string
+    retry: string
+    loading: string
+    apply: string
+    close: string
+  }
+
   pagination: {
     nav: string
     prev: string
@@ -172,6 +199,33 @@ const tr: ContentDict = {
     products: 'Ürün',
     branches: 'Şube',
     cheapestCount: 'En ucuz olduğu ürün',
+  },
+
+  products: {
+    title: 'Ürünler',
+    lead: '{products} ürünü {stores} markette karşılaştır. Kategoriye, markete ve fiyata göre filtrele.',
+    navLabel: 'Ürünler',
+    searchPlaceholder: 'Ürün veya marka ara…',
+    allCategories: 'Tüm kategoriler',
+    filters: 'Filtreler',
+    stores: 'Marketler',
+    sort: 'Sırala',
+    sortRelevance: 'Önerilen',
+    sortPriceAsc: 'En düşük fiyat',
+    sortPriceDesc: 'En yüksek fiyat',
+    sortSavings: 'En çok tasarruf',
+    sortName: 'İsme göre',
+    priceRange: 'Fiyat aralığı',
+    priceMin: 'En az',
+    priceMax: 'En çok',
+    resultCount: '{count} ürün',
+    empty: 'Bu filtrelerle ürün bulunamadı.',
+    clearFilters: 'Filtreleri temizle',
+    error: 'Ürünler yüklenemedi.',
+    retry: 'Tekrar dene',
+    loading: 'Yükleniyor…',
+    apply: 'Uygula',
+    close: 'Kapat',
   },
 
   browse: {
@@ -262,6 +316,33 @@ const pl: ContentDict = {
     products: 'Produkty',
     branches: 'Sklepy',
     cheapestCount: 'Najtańszy w produktach',
+  },
+
+  products: {
+    title: 'Produkty',
+    lead: 'Porównaj {products} produktów w {stores} sieciach. Filtruj według kategorii, sklepu i ceny.',
+    navLabel: 'Produkty',
+    searchPlaceholder: 'Szukaj produktu lub marki…',
+    allCategories: 'Wszystkie kategorie',
+    filters: 'Filtry',
+    stores: 'Sklepy',
+    sort: 'Sortuj',
+    sortRelevance: 'Polecane',
+    sortPriceAsc: 'Najniższa cena',
+    sortPriceDesc: 'Najwyższa cena',
+    sortSavings: 'Największa oszczędność',
+    sortName: 'Według nazwy',
+    priceRange: 'Zakres cen',
+    priceMin: 'Od',
+    priceMax: 'Do',
+    resultCount: '{count} produktów',
+    empty: 'Brak produktów dla tych filtrów.',
+    clearFilters: 'Wyczyść filtry',
+    error: 'Nie udało się wczytać produktów.',
+    retry: 'Spróbuj ponownie',
+    loading: 'Ładowanie…',
+    apply: 'Zastosuj',
+    close: 'Zamknij',
   },
 
   browse: {

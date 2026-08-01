@@ -196,6 +196,32 @@ export function buildPageList(country, locale, routes) {
     changefreq: 'daily',
   })
 
+  // ---------------------------------------------------------------- ürünler
+  // Kataloğun tamamında arama/filtre/sıralama sunan sayfa. Yalnızca ilk ekran
+  // üretilir; filtre kombinasyonlarının tamamını önceden üretmek mümkün değil
+  // (15.000+ ürün × kategori × market × sıralama). Sonrası canlı API'den.
+  const PRODUCTS_FIRST_SCREEN = 40
+  pages.push({
+    path: routes.productsPath(locale),
+    payload: {
+      kind: 'products',
+      // İlk ekran: en çok markette bulunan ürünler — karşılaştırma değeri en
+      // yüksek olanlar. API'nin filtresiz varsayılan sıralamasıyla aynı.
+      products: [...products]
+        .sort((a, b) => b.offers.length - a.offers.length)
+        .slice(0, PRODUCTS_FIRST_SCREEN),
+      categories,
+      stores,
+      totals: {
+        products: products.length,
+        stores: stores.length,
+        branches: stores.reduce((sum, s) => sum + s.branchCount, 0),
+      },
+    },
+    priority: '0.9',
+    changefreq: 'daily',
+  })
+
   // ------------------------------------------------------------------ keşif
   // Sitedeki her şeye açılan kapı. Anasayfadan içeriğe görünür bir yol
   // olmadığı fark edilince eklendi; iç bağlantı ağının da merkezi.

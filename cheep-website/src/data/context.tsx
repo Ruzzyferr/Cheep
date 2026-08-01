@@ -32,6 +32,18 @@ export type PagePayload =
       totals: { products: number; stores: number; branches: number }
     }
   | {
+      /**
+       * Ürünler sayfası. Yalnızca İLK EKRAN prerender edilir: Googlebot
+       * ürünleri HTML'de görsün ve API erişilemezse sayfa boş kalmasın.
+       * Arama/filtre/sıralama istemciden canlı API'ye gider.
+       */
+      kind: 'products'
+      products: Product[]
+      categories: Category[]
+      stores: Store[]
+      totals: { products: number; stores: number; branches: number }
+    }
+  | {
       kind: 'browse'
       categories: Category[]
       stores: Store[]
