@@ -33,13 +33,19 @@ export async function isStrictCountry(countryId?: number): Promise<boolean> {
 
 // category_slug → Category.id çözümü. Yabancı scraper'lar (PL vb.) numeric
 // category_id bilmez, kendi kanonik slug'larını gönderir (bkz. category_map.json).
+//
+// Slug artık YALNIZCA ülke içinde benzersiz: TR'nin `sut`'u ile PL'nin `sut`'u
+// ayrı kategoriler. Ülke vermeden çözmek, PL ürününü TR kategorisine bağlardı.
 const categorySlugCache = new Map<string, number | null>();
-async function resolveCategorySlug(slug?: string): Promise<number | null> {
-    if (!slug) return null;
-    if (categorySlugCache.has(slug)) return categorySlugCache.get(slug)!;
-    const cat = await prisma.category.findUnique({ where: { slug } });
+async function resolveCategorySlug(slug?: string, countryId?: number): Promise<number | null> {
+    if (!slug || typeof countryId !== 'number') return null;
+    const cacheKey = `${countryId}|${slug}`;
+    if (categorySlugCache.has(cacheKey)) return categorySlugCache.get(cacheKey)!;
+    const cat = await prisma.category.findUnique({
+        where: { country_id_slug: { country_id: countryId, slug } },
+    });
     const id = cat?.id ?? null;
-    categorySlugCache.set(slug, id);
+    categorySlugCache.set(cacheKey, id);
     return id;
 }
 
@@ -248,7 +254,8 @@ export class ProductMatcher {
         const rawCat = data.category_id != null ? Number(data.category_id) : NaN;
         const providedCategoryId = Number.isInteger(rawCat) ? rawCat : null;
         // Yabancı scraper'lar numeric category_id yerine kanonik slug gönderir.
-        const slugCategoryId = providedCategoryId ?? (await resolveCategorySlug(data.category_slug));
+        const slugCategoryId =
+            providedCategoryId ?? (await resolveCategorySlug(data.category_slug, resolvedCountryId));
 
         if (ean && resolvedCountryId) {
             const existingByEan = await prisma.product.findFirst({

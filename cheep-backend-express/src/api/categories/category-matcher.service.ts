@@ -765,21 +765,32 @@ export class CategoryMatcher {
     ]);
 
     /**
-     * Kategoriyi bul veya oluştur
-     * 🔒 Artık sadece STANDART kategorileri kullanır - yeni kategori oluşturulmaz!
-     * 
+     * Kategoriyi bul veya oluştur — ÜLKE İÇİNDE.
+     * Sadece STANDART kategorileri kullanır; serbest yeni kategori oluşturmaz.
+     *
+     * DİKKAT — `countryId` opsiyonel DEĞİL: bu yol bir kategorinin slug'ını ve
+     * parent'ını "standarda uydurmak" için GÜNCELLEYEBİLİYOR. Ülke sınırı
+     * olmadığı dönemde tam da bu davranış TR yapraklarını (`peynir`, `sut`)
+     * PL üst kategorilerinin altına taşıdı ve `meyve-ve-sebze`yi 0 ürünlü ölü
+     * bir kabuğa çevirdi. Artık yeniden bağlama yalnızca aynı ülke içinde olur.
+     *
+     * STANDARD_CATEGORIES yalnızca PL'nin taksonomisidir; TR ağacı devletin
+     * verisinden türetilir (`Cheep-Scraper/countries/turkey/mf_taxonomy.py`) ve
+     * bu yolu KULLANMAZ — TR ingest'i `category_id`'yi doğrudan verir.
+     *
      * @param categoryName Kategori adı (scraper'dan gelen)
+     * @param countryId Kategorinin ait olacağı ülke
      * @param productName Ürün adı (opsiyonel - daha iyi eşleştirme için)
      */
-    async findOrCreateCategory(categoryName: string, productName?: string): Promise<number> {
+    async findOrCreateCategory(categoryName: string, countryId: number, productName?: string): Promise<number> {
         if (!categoryName || categoryName.trim() === '') {
             throw new Error('Category name is required');
         }
 
         const trimmedName = categoryName.trim();
-        
-        // Cache kontrolü: Aynı kategori + ürün adı kombinasyonu daha önce eşleştirildi mi?
-        const cacheKey = `${trimmedName.toLowerCase()}|${(productName || '').toLowerCase().trim()}`;
+
+        // Cache ülkeye göre ayrılır: aynı ad iki ülkede FARKLI kategoridir.
+        const cacheKey = `${countryId}|${trimmedName.toLowerCase()}|${(productName || '').toLowerCase().trim()}`;
         if (this.categoryMatchCache.has(cacheKey)) {
             const cachedId = this.categoryMatchCache.get(cacheKey)!;
             console.log(`   💾 Cache hit: "${trimmedName}" → ID: ${cachedId}`);
@@ -830,6 +841,7 @@ export class CategoryMatcher {
         // 2. Veritabanında bu standart kategoriyi bul veya oluştur
         let category = await prisma.category.findFirst({
             where: {
+                country_id: countryId,
                 OR: [
                     { slug: standardSlug },
                     {
@@ -844,14 +856,15 @@ export class CategoryMatcher {
 
         if (!category) {
             // Standart kategoriyi veritabanına ekle
-            const parentId = parentStandardName 
-                ? await this.findOrCreateParentCategory(parentStandardName)
+            const parentId = parentStandardName
+                ? await this.findOrCreateParentCategory(parentStandardName, countryId)
                 : null;
 
             category = await prisma.category.create({
                 data: {
                     name: standardName,
                     slug: standardSlug,
+                    country_id: countryId,
                     parent_id: parentId,
                     display_order: 0,
                 },
@@ -859,8 +872,8 @@ export class CategoryMatcher {
             console.log(`   🆕 Standard category created: "${standardName}" → ID: ${category.id}`);
         } else {
             // Mevcut kategoriyi standart yapıya uygun hale getir
-            const parentId = parentStandardName 
-                ? await this.findOrCreateParentCategory(parentStandardName)
+            const parentId = parentStandardName
+                ? await this.findOrCreateParentCategory(parentStandardName, countryId)
                 : null;
 
             const updates: Record<string, any> = {};
@@ -1251,9 +1264,10 @@ export class CategoryMatcher {
     /**
      * Ana kategoriyi bul veya oluştur (standart kategorilerden)
      */
-    private async findOrCreateParentCategory(parentName: string): Promise<number> {
-        if (this.parentCache.has(parentName)) {
-            return this.parentCache.get(parentName)!;
+    private async findOrCreateParentCategory(parentName: string, countryId: number): Promise<number> {
+        const cacheKey = `${countryId}|${parentName}`;
+        if (this.parentCache.has(cacheKey)) {
+            return this.parentCache.get(cacheKey)!;
         }
 
         const standardParent = STANDARD_CATEGORIES.find(cat => cat.name === parentName);
@@ -1263,6 +1277,7 @@ export class CategoryMatcher {
 
         let parent = await prisma.category.findFirst({
             where: {
+                country_id: countryId,
                 OR: [
                     { slug: standardParent.slug },
                     {
@@ -1281,6 +1296,7 @@ export class CategoryMatcher {
                 data: {
                     name: standardParent.name,
                     slug: standardParent.slug,
+                    country_id: countryId,
                     parent_id: null,
                     display_order: standardParent.displayOrder,
                     icon_url: standardParent.icon || null,
@@ -1310,20 +1326,20 @@ export class CategoryMatcher {
             }
         }
 
-        this.parentCache.set(parentName, parent.id);
+        this.parentCache.set(cacheKey, parent.id);
         return parent.id;
     }
 
     /**
      * Kategori adından keyword'lere bakarak parent bulur
      */
-    private async findParentByKeywords(categoryName: string): Promise<number | null> {
+    private async findParentByKeywords(categoryName: string, countryId: number): Promise<number | null> {
         const parentName = this.findParentNameByKeywords(categoryName);
         if (!parentName) {
             console.log(`   ⚠️ No parent found for: "${categoryName}"`);
             return null;
         }
-        const parentId = await this.getParentIdByName(parentName);
+        const parentId = await this.getParentIdByName(parentName, countryId);
         console.log(`   🔗 Parent match: "${categoryName}" → "${parentName}" (keywords)`);
         return parentId;
     }
@@ -1354,12 +1370,12 @@ export class CategoryMatcher {
     /**
      * Birden fazla kategoriyi batch olarak işle
      */
-    async findOrCreateCategories(categoryNames: string[]): Promise<Map<string, number>> {
+    async findOrCreateCategories(categoryNames: string[], countryId: number): Promise<Map<string, number>> {
         const categoryMap = new Map<string, number>();
 
         for (const name of categoryNames) {
             try {
-                const categoryId = await this.findOrCreateCategory(name);
+                const categoryId = await this.findOrCreateCategory(name, countryId);
                 categoryMap.set(name, categoryId);
             } catch (error) {
                 console.error(`   ❌ Category error for "${name}":`, error);
@@ -1379,8 +1395,8 @@ export class CategoryMatcher {
         return this.slugify(name);
     }
 
-    public async ensureParentCategory(parentName: string): Promise<number> {
-        return await this.getParentIdByName(parentName);
+    public async ensureParentCategory(parentName: string, countryId: number): Promise<number> {
+        return await this.getParentIdByName(parentName, countryId);
     }
 
     private findParentNameByKeywords(categoryName: string): string | null {
@@ -1455,17 +1471,17 @@ export class CategoryMatcher {
             .trim();
     }
 
-    private async determineParentId(categoryName: string): Promise<number | null> {
+    private async determineParentId(categoryName: string, countryId: number): Promise<number | null> {
         const parentName = this.resolveParentName(categoryName);
         if (!parentName) {
             return null;
         }
-        return await this.getParentIdByName(parentName);
+        return await this.getParentIdByName(parentName, countryId);
     }
 
-    private async getParentIdByName(parentName: string): Promise<number> {
+    private async getParentIdByName(parentName: string, countryId: number): Promise<number> {
         // Artık sadece standart kategorileri kullan
-        return await this.findOrCreateParentCategory(parentName);
+        return await this.findOrCreateParentCategory(parentName, countryId);
     }
 }
 

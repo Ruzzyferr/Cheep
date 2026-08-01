@@ -11,18 +11,29 @@ import { TOPICS, GROUPS } from '../kafka/topics.js';
 import type { RawProduct } from '../kafka/avro/raw-product.schema.js';
 import type { NormalizedProduct } from '../kafka/avro/normalized-product.schema.js';
 import { categoryMatcher } from '../api/categories/category-matcher.service.js';
+import { getCountryIdByCode } from '../utils/country.js';
 import logger from '../utils/logger.js';
 
 function cleanText(value: string): string {
     return value.replace(/\s+/g, ' ').trim();
 }
 
-async function resolveCategoryId(rawCategory: string | null, name: string): Promise<number | null> {
+/**
+ * Kategori eşleştirmesi ülke içindedir: taksonomi ülkeye bağlı ve aynı ad iki
+ * ülkede farklı kategoriye denk gelir. Ülke çözülemezse kategori atanmaz —
+ * ürünü YANLIŞ ülkenin kategorisine bağlamaktansa kategorisiz bırakmak
+ * yeğdir (persister null kabul eder).
+ */
+async function resolveCategoryId(
+    rawCategory: string | null,
+    name: string,
+    countryCode: string,
+): Promise<number | null> {
     if (!rawCategory) return null;
     try {
-        return await categoryMatcher.findOrCreateCategory(rawCategory, name);
+        const countryId = await getCountryIdByCode(countryCode);
+        return await categoryMatcher.findOrCreateCategory(rawCategory, countryId, name);
     } catch {
-        // Standart kategoriye eşlenemezse kategori olmadan devam (persister null kabul eder)
         return null;
     }
 }
@@ -34,7 +45,7 @@ async function main() {
         handler: async (records) => {
             const out: Array<{ key: string; value: NormalizedProduct }> = [];
             for (const r of records) {
-                const categoryId = await resolveCategoryId(r.rawCategory, r.name);
+                const categoryId = await resolveCategoryId(r.rawCategory, r.name, r.countryCode);
                 const normalized: NormalizedProduct = {
                     eventId: r.eventId,
                     countryCode: r.countryCode,

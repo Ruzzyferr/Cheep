@@ -59,11 +59,12 @@ model Country {
   created_at DateTime @default(now())
 
   // İlişkiler
-  stores   Store[]
-  products Product[]
-  users    User[]
-  branches StoreBranch[]
-  lists    List[]
+  stores     Store[]
+  products   Product[]
+  users      User[]
+  branches   StoreBranch[]
+  lists      List[]
+  categories Category[]
 
   price_drops PriceDrop[]
 
@@ -167,10 +168,17 @@ model UserFavoriteStore {
 // ÜRÜN KATEGORİLERİ (HİYERARŞİK)
 // ============================================
 
+// Taksonomi ÜLKEYE BAĞLI. Uzun süre değildi ve `slug` global @unique idi;
+// TR (devletin marketfiyati verisinden türetilen ağaç) ile PL (scraper'ın kendi
+// ağacı) tek ağaca sıkışınca ikiz kategoriler ("Atıştırmalık" vs "Atıştırmalık
+// ve Tatlı") ve ölü kabuklar ("Meyve ve Sebze": 0 ürün, 0 çocuk) üredi.
+// Benzersizlik ülke başına olunca iki taksonomi çakışmadan yan yana durur ve
+// her ülke kendi kaynağından türetilebilir.
 model Category {
   id            Int     @id @default(autoincrement())
   name          String
-  slug          String  @unique
+  slug          String
+  country_id    Int
   parent_id     Int? // NULL ise ana kategori, değilse alt kategori
   display_order Int     @default(0) // Sıralama için
   icon_url      String?
@@ -183,10 +191,12 @@ model Category {
   children Category[] @relation("CategoryHierarchy")
 
   // İlişkiler
+  country  Country   @relation(fields: [country_id], references: [id], onDelete: Cascade)
   products Product[]
 
+  @@unique([country_id, slug])
   @@index([parent_id])
-  @@index([slug])
+  @@index([country_id, parent_id])
   @@map("categories")
 }
 

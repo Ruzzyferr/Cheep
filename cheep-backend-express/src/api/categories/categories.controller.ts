@@ -5,11 +5,17 @@ import { categoryMatcher } from './category-matcher.service.js';
 import logger from '../../utils/logger.js';
 
 /**
+ * Kategori uçları ÜLKEYE göre süzer. `req.country` `resolveCountry`
+ * middleware'inden gelir ve her zaman doludur (bilinmeyen kod 400 alır).
+ */
+const countryIdOf = (req: Request): number => req.country!.id;
+
+/**
  * Tüm kategorileri getir (düz liste)
  */
 export const getAllCategories = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const categories = await CategoryService.getAllCategories();
+        const categories = await CategoryService.getAllCategories(countryIdOf(req));
         res.status(200).json({
             success: true,
             data: categories,
@@ -24,7 +30,7 @@ export const getAllCategories = async (req: Request, res: Response, next: NextFu
  */
 export const getParentCategories = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const categories = await CategoryService.getParentCategories();
+        const categories = await CategoryService.getParentCategories(countryIdOf(req));
         res.status(200).json({
             success: true,
             data: categories,
@@ -39,8 +45,8 @@ export const getParentCategories = async (req: Request, res: Response, next: Nex
  */
 export const getCategoryTree = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const tree = await CategoryService.getCategoryTree();
-        res.status(200).json(tree);
+        const tree = await CategoryService.getCategoryTree(countryIdOf(req));
+        res.status(200).json({ success: true, data: tree });
     } catch (error) {
         next(error);
     }
@@ -52,7 +58,7 @@ export const getCategoryTree = async (req: Request, res: Response, next: NextFun
 export const getCategoryById = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const id = intParam(req.params.id);
-        const category = await CategoryService.getCategoryById(id);
+        const category = await CategoryService.getCategoryById(id, countryIdOf(req));
 
         if (!category) {
             return res.status(404).json({
@@ -76,7 +82,7 @@ export const getCategoryById = async (req: Request, res: Response, next: NextFun
 export const getCategoryBySlug = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const slug = param(req.params.slug);
-        const category = await CategoryService.getCategoryBySlug(slug);
+        const category = await CategoryService.getCategoryBySlug(slug, countryIdOf(req));
 
         if (!category) {
             return res.status(404).json({
@@ -100,7 +106,7 @@ export const getCategoryBySlug = async (req: Request, res: Response, next: NextF
 export const getSubcategories = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const id = intParam(req.params.id);
-        const subcategories = await CategoryService.getSubcategories(id);
+        const subcategories = await CategoryService.getSubcategories(id, countryIdOf(req));
         res.status(200).json({
             success: true,
             data: subcategories,
@@ -112,14 +118,14 @@ export const getSubcategories = async (req: Request, res: Response, next: NextFu
 
 /**
  * Kategori oluştur veya bul (Smart Matching)
- * 🔥 YENİ: Category Matcher kullanarak otomatik eşleştir
  * - Scraper'lar sadece isim gönderir
  * - Backend otomatik parent bulur ve eşleştirir
  */
 export const createCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { name, parent_id, slug } = req.body;
-        
+        const countryId = countryIdOf(req);
+
         if (!name) {
             return res.status(400).json({
                 success: false,
@@ -127,17 +133,17 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
                 error: 'NAME_REQUIRED'
             });
         }
-        
-        // 🔥 Smart Matching: Eğer slug YOK ve parent_id YOK ise CategoryMatcher kullan
-        // (Bu durumda scraper'dan geliyordur)
+
+        // Smart Matching: slug YOK ve parent_id YOK ise CategoryMatcher kullan
+        // (bu durumda scraper'dan geliyordur)
         if (!slug && (parent_id === null || parent_id === undefined)) {
-            const productName = req.body.product_name; // Opsiyonel: Ürün adı (daha iyi eşleştirme için)
+            const productName = req.body.product_name;
             logger.debug(`[Categories] Matcher: "${name}"${productName ? ` (product: "${productName}")` : ''}`);
 
             try {
-                const categoryId = await categoryMatcher.findOrCreateCategory(name, productName);
-                const category = await CategoryService.getCategoryById(categoryId);
-                
+                const categoryId = await categoryMatcher.findOrCreateCategory(name, countryId, productName);
+                const category = await CategoryService.getCategoryById(categoryId, countryId);
+
                 return res.status(200).json({
                     success: true,
                     data: category,
@@ -152,10 +158,9 @@ export const createCategory = async (req: Request, res: Response, next: NextFunc
                 });
             }
         }
-        
-        // Admin tarafından gönderilmişse, direkt oluştur
-        // (slug varsa veya parent_id varsa)
-        const category = await CategoryService.createCategory(req.body);
+
+        // Admin tarafından gönderilmişse, direkt oluştur (slug veya parent_id varsa)
+        const category = await CategoryService.createCategory({ ...req.body, country_id: countryId });
         res.status(201).json({
             success: true,
             data: category,
@@ -212,10 +217,9 @@ export const getCategoryProductCount = async (req: Request, res: Response, next:
     try {
         const id = intParam(req.params.id);
         const includeChildren = req.query.includeChildren === 'true';
-        const count = await CategoryService.getCategoryProductCount(id, includeChildren);
+        const count = await CategoryService.getCategoryProductCount(id, countryIdOf(req), includeChildren);
         res.status(200).json({ count });
     } catch (error) {
         next(error);
     }
 };
-
