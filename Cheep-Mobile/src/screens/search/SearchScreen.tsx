@@ -8,6 +8,7 @@ import { SearchBar } from '../../components/common/SearchBar';
 import { ProductGridCard } from '../../components/product/ProductGridCard';
 import { productService, listService } from '../../services';
 import { useCart } from '../../context/CartContext';
+import { useListMutations } from '../../queries';
 import { useToast } from '../../context/ToastContext';
 import { useLocale } from '../../context/LocaleContext';
 import { getRecentSearches, addRecentSearch } from '../../utils/recentSearches';
@@ -22,7 +23,8 @@ type SearchScreenProps = HomeStackScreenProps<'Search'> | ListsStackScreenProps<
 export function SearchScreen({ navigation, route }: SearchScreenProps) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { activeList, refresh } = useCart();
+  const { activeList } = useCart();
+  const { addItem } = useListMutations();
   const targetListId = route.params?.targetListId;
   const targetListName = route.params?.targetListName;
   const toast = useToast();
@@ -85,15 +87,18 @@ export function SearchScreen({ navigation, route }: SearchScreenProps) {
         }
         listId = await creatingListRef.current;
       }
-      await listService.addItem(listId, { product_id: product.id });
+      // Mutasyon `['lists']` önekini geçersizleştiriyor: sepet rozeti,
+      // liste detayı, anasayfa ve karşılaştırma birlikte tazeleniyor.
+      // Eskiden yalnızca `cart.refresh()` çağrılıyordu ve rozet dışındaki
+      // her şey bayat kalıyordu.
+      await addItem.mutateAsync({ listId, data: { product_id: product.id } });
       setAddedIds(prev => new Set(prev).add(product.id));
-      await refresh();
       toast.show(t('list.added_to', { list: listName ?? activeList?.name ?? '' }));
       if (query.trim()) addRecentSearch(query);
     } catch {
       // sessizce geç — kullanıcı tekrar deneyebilir
     }
-  }, [targetListId, targetListName, activeList, refresh, addedIds, t, query, toast]);
+  }, [targetListId, targetListName, activeList, addItem, addedIds, t, query, toast]);
 
   const runRecent = (term: string) => setQuery(term);
 

@@ -30,6 +30,7 @@ import i18n, { SUPPORTED_LANGUAGES } from '../../i18n';
 import { languageStorage } from '../../utils/storage';
 import { getCountryCodeInteractive, SUPPORTED_COUNTRY_CODES } from '../../utils/geo';
 import type { UserProfile } from '../../types';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Prepended locale steps (language + country) that precede ONBOARDING_QUESTIONS.
 const LOCALE_STEPS = 2;
@@ -192,6 +193,7 @@ function BudgetInput({
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 
 export function OnboardingScreen() {
+  const qc = useQueryClient();
   const { refreshOnboarding } = useAuth();
   const { t } = useTranslation();
   const { country, setCountry } = useLocale();
@@ -365,6 +367,9 @@ export function OnboardingScreen() {
       }
 
       await profileService.updateProfile(payload);
+      // Diyet/alerjen tercihleri ürün yanıtlarındaki `constraint` alanını
+      // belirliyor; onboarding'de girilen tercih ilk ürün listesine yansımalı.
+      void qc.invalidateQueries({ queryKey: ['products'] });
       await refreshOnboarding(); // flips RootNavigator gate to Main
     } catch (error: any) {
       Alert.alert(

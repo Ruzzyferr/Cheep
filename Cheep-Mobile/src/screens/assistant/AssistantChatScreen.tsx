@@ -24,6 +24,7 @@ import { MessageBubble } from '../../components/assistant/MessageBubble';
 import { ChatInputBar } from '../../components/assistant/ChatInputBar';
 import { ToolActivityChip } from '../../components/assistant/ToolActivityChip';
 import { ListActionCard } from '../../components/assistant/ListActionCard';
+import { useQueryClient } from '@tanstack/react-query';
 import { ThreadListSheet } from '../../components/assistant/ThreadListSheet';
 import { CheepMascot } from '../../components/brand/CheepMascot';
 import { Float } from '../../components/anim';
@@ -107,6 +108,7 @@ export function AssistantChatScreen({
   navigation,
 }: AssistantStackScreenProps<'AssistantChat'>) {
   const insets = useSafeAreaInsets();
+  const qc = useQueryClient();
   const flatListRef = useRef<FlatList<LocalMessage>>(null);
 
   const [threadId, setThreadId] = useState<number | null>(null);
@@ -214,6 +216,11 @@ export function AssistantChatScreen({
           (tc) => tc?.name && LIST_TOOL_NAMES.includes(tc.name)
         );
         if (listCall) {
+          // Asistan listeyi DEĞİŞTİRDİ. Sohbet ekranının kendi durumu yeterli
+          // değil: kullanıcı "haftalık listeme süt ekle" deyip anasayfaya
+          // dönünce eski sayıyı görüyordu. Diğer ekranlarla aradaki tek bağ
+          // bu geçersizleştirme.
+          void qc.invalidateQueries({ queryKey: ['lists'] });
           const args = listCall.args ?? {};
           const items = args.items;
           const cardMsg: LocalMessage = {

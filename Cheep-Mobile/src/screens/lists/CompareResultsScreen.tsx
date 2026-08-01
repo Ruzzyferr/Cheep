@@ -16,7 +16,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { listService } from '../../services';
+import { useCompareList } from '../../queries';
 import { Card } from '../../components/ui';
 import { StoreChip } from '../../components/store/StoreChip';
 import { useLocale } from '../../context/LocaleContext';
@@ -43,8 +43,6 @@ export function CompareResultsScreen({
   const { listId } = route.params;
   const { t } = useTranslation();
   const { formatMoney } = useLocale();
-  const [results, setResults] = useState<CompareResponse | null>(null);
-  const [loading, setLoading] = useState(true);
   const [storeCountFilter, setStoreCountFilter] = useState<StoreCountFilter>('all');
   const [sortOption, setSortOption] = useState<SortOption>('score');
   const [radiusKm, setRadiusKm] = useState<number>(DEFAULT_RADIUS_KM);
@@ -71,39 +69,34 @@ export function CompareResultsScreen({
     [filterByDistance, anchor?.coords?.lat, anchor?.coords?.lon],
   );
 
-  // Çapa çözülünce ya da yarıçap değişince yeniden karşılaştır.
+  /**
+   * Karşılaştırma sonucu.
+   *
+   * Sorgu key'i çapa ve yarıçapı içerdiği için ikisi değişince kendiliğinden
+   * yeniden çalışır; elle `alive` bayrağı ve efekt zinciri gerekmez.
+   *
+   * ASIL KAZANÇ ÇAPRAZ EKRAN: liste mutasyonları `['lists']` önekini
+   * geçersizleştiriyor ve bu sorgu o önekte. Kullanıcı başka bir ekranda
+   * listeye ürün ekleyip buraya döndüğünde sonuç artık bayat kalmıyor —
+   * eskiden eklenen ürün karşılaştırmaya hiç yansımıyordu.
+   */
+  const compareQ = useCompareList(anchorReady ? listId : undefined, {
+    maxStores: 4,
+    includeMissingProducts: true,
+    ...(userLocation ? { userLocation, radiusKm } : {}),
+  });
+
+  const results = compareQ.data ?? null;
+  const loading = compareQ.isPending || compareQ.isFetching;
+
+  // Liste karşılaştırılamıyorsa (silinmiş ya da boş) geri dön.
   useEffect(() => {
-    if (!anchorReady) return; // çapa çözülene kadar bekle
-    let alive = true;
-
-    (async () => {
-      try {
-        setLoading(true);
-        const data = await listService.compareList(listId, {
-          maxStores: 4,
-          includeMissingProducts: true,
-          ...(userLocation ? { userLocation, radiusKm } : {}),
-        });
-        if (!alive) return;
-        setResults(data);
-      } catch (error) {
-        if (!alive) return;
-        console.error('Compare error:', error);
-        Alert.alert(t('common.error'), t('compare.load_error'));
-        navigation.goBack();
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
-    // navigation ve t kasıtlı olarak dışarıda bırakıldı: ikisi de her render'da
-    // kararlı referanslardır (React Navigation / i18next), efekti tetiklemeleri
-    // gerekmez — asıl konu olan çapa artık DEĞERİ (userLocation) üzerinden izleniyor.
+    if (compareQ.isError) {
+      Alert.alert(t('common.error'), t('compare.load_error'));
+      navigation.goBack();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listId, radiusKm, anchorReady, userLocation]);
+  }, [compareQ.isError]);
 
   // İlk yükleme: sonuç yokken tam ekran spinner. Yarıçap değişiminde eski sonuçlar
   // ekranda kalır (seçici kaybolmasın), üstte ince bir gösterge çıkar.

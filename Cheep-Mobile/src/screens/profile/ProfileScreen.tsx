@@ -40,6 +40,7 @@ import {
   unregisterPushToken,
 } from '../../utils/notificationGate';
 import { getLocationConsent, promptLocationConsent, revokeLocationConsent } from '../../utils/consent';
+import { useQueryClient } from '@tanstack/react-query';
 
 // ─── Preference option lists from onboarding config ───────────────────────────
 const HOUSEHOLD_OPTIONS = ONBOARDING_QUESTIONS.find((q) => q.key === 'household_size')!.options!;
@@ -53,6 +54,7 @@ const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 export function ProfileScreen({
   navigation,
 }: ProfileStackScreenProps<'ProfileMain'>) {
+  const qc = useQueryClient();
   const { user, logout } = useAuth();
   const { t } = useTranslation();
   const { country } = useLocale();
@@ -286,6 +288,12 @@ export function ProfileScreen({
         weekly_budget: budgetNum,
       };
       await profileService.updateProfile(patch);
+      // Diyet/alerjen tercihleri ÜRÜN yanıtlarını değiştiriyor: backend her
+      // ürüne profile göre `constraint` (gizli/uyarı) ekliyor. Ürün cache'i
+      // geçersizleşmezse kullanıcı tercihini kaydediyor ama listelerde eski
+      // uyarıları görmeye devam ediyordu.
+      void qc.invalidateQueries({ queryKey: ['products'] });
+      void qc.invalidateQueries({ queryKey: ['profile'] });
       Alert.alert(t('profile.prefs_saved_title'), t('profile.prefs_saved_body'));
     } catch {
       Alert.alert(t('common.error'), t('profile.prefs_save_error'));

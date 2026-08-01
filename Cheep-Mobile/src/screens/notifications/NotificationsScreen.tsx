@@ -6,7 +6,7 @@
  * vermeyen kullanıcı da buraya girip ucuzlayan ürünleri görür.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,10 +17,12 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { notificationService, type PriceDropNotification } from '../../services/notification.service';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { qk } from '../../queries';
+import { RefreshBar, ErrorState } from '../../components/ui';
 import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import type { HomeStackScreenProps } from '../../navigation/types';
@@ -28,34 +30,40 @@ import type { HomeStackScreenProps } from '../../navigation/types';
 export function NotificationsScreen({ navigation }: HomeStackScreenProps<'Notifications'>) {
   const { t } = useTranslation();
   const { formatMoney } = useLocale();
-  const [items, setItems] = useState<PriceDropNotification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const qc = useQueryClient();
 
-  const load = useCallback(async () => {
-    try {
-      const res = await notificationService.list(50, 0);
-      setItems(res.items);
-      // Ekran açıldığında hepsini okundu say — kullanıcı listeyi gördü,
-      // rozetin inatla durması can sıkıcı olur.
-      if (res.items.some((i) => !i.read_at)) {
-        void notificationService.markAllRead().catch(() => {});
-      }
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+  const listQ = useQuery({
+    queryKey: qk.notifications.all(),
+    queryFn: () => notificationService.list(50, 0),
+  });
+  const items = listQ.data?.items ?? [];
+  const loading = listQ.isPending;
+
+  /**
+   * Ekran açıldığında hepsini okundu say — kullanıcı listeyi gördü, rozetin
+   * inatla durması can sıkıcı olur.
+   *
+   * Başarıda okunmamış SAYISI da geçersizleşir. Eskiden yalnızca bu ekranın
+   * kendi state'i güncelleniyordu; anasayfadaki zil rozeti okundu işaretlemeden
+   * haberdar olmuyor ve bir sonraki açılışa kadar duruyordu.
+   */
+  const markAllRead = useMutation({
+    mutationFn: () => notificationService.markAllRead(),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: qk.notifications.all() });
+      void qc.invalidateQueries({ queryKey: qk.notifications.unreadCount() });
+    },
+  });
+
+  useEffect(() => {
+    if (items.some((i) => !i.read_at) && !markAllRead.isPending) {
+      markAllRead.mutate();
     }
-  }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      void load();
-    }, [load]),
-  );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items]);
 
   const onRefresh = () => {
-    setRefreshing(true);
-    void load();
+    void listQ.refetch();
   };
 
   const renderItem = ({ item }: { item: PriceDropNotification }) => {
@@ -107,14 +115,20 @@ export function NotificationsScreen({ navigation }: HomeStackScreenProps<'Notifi
     );
   }
 
+  if (listQ.isError) {
+    return <ErrorState onRetry={onRefresh} />;
+  }
+
   return (
+    <>
+    <RefreshBar visible={listQ.isFetching && !listQ.isPending && !listQ.isRefetching} />
     <FlatList
       style={styles.container}
       contentContainerStyle={items.length === 0 ? styles.emptyWrap : styles.listContent}
       data={items}
       keyExtractor={(i) => String(i.id)}
       renderItem={renderItem}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      refreshControl={<RefreshControl refreshing={listQ.isRefetching} onRefresh={onRefresh} />}
       ListEmptyComponent={
         <View style={styles.empty}>
           <MaterialIcons name="notifications-none" size={48} color={colors.text.hint} />
@@ -123,6 +137,7 @@ export function NotificationsScreen({ navigation }: HomeStackScreenProps<'Notifi
         </View>
       }
     />
+    </>
   );
 }
 
