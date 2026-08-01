@@ -55,11 +55,17 @@ fetch("http://127.0.0.1:3000/api/v1/seo/export", { headers: { "x-api-key": proce
 
 # Doğrulama: bozuk/boş veriyle 7.800 sayfa üretip yayına almak, burada
 # durmaktan çok daha pahalı.
-COUNT=$(node -e "
-  const d = JSON.parse(require('fs').readFileSync('$TMP', 'utf8'));
-  const n = (d.countries || []).reduce((s, c) => s + (c.products || []).length, 0);
-  if (!n) { console.error('ürün yok'); process.exit(1); }
-  console.log(n);
+#
+# Host'ta node YOK (yalnızca konteynerlerin içinde) — python3 kullanıyoruz.
+COUNT=$(python3 -c "
+import json, sys
+with open('$TMP', encoding='utf-8') as f:
+    d = json.load(f)
+n = sum(len(c.get('products') or []) for c in d.get('countries') or [])
+if not n:
+    sys.stderr.write('ürün yok\n')
+    sys.exit(1)
+print(n)
 ")
 log "  $COUNT ürün, $(du -h "$TMP" | cut -f1)"
 mv "$TMP" "$DATA_FILE"
