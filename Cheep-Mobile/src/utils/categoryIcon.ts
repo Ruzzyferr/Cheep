@@ -97,31 +97,3 @@ export function getCategoryIcon(categoryName: string | null | undefined): string
   }
   return DEFAULT_ICON;
 }
-
-/**
- * Preferred home ordering: surface the everyday grocery categories first
- * (the API order otherwise leads with Giyim/Oyuncak/Sağlık which is odd for a
- * grocery app). Unknown categories keep their original relative order at the end.
- */
-const HOME_PRIORITY = [
-  'meyve ve sebze',
-  'süt ürünleri ve kahvaltılık',
-  'et, tavuk ve balık',
-  'temel gıda',
-  'fırın ve pastane',
-  'içecek',
-  'i̇çecek',
-  'atıştırmalık ve tatlı',
-  'temizlik ve kişisel bakım ürünleri',
-  'dondurma',
-  'hazır yemek ve donuk',
-  'bebek',
-  'sağlık ve kozmetik',
-  'ev, pet ve yaşam',
-  'diğer ürünler',
-];
-
-export function categoryHomeRank(categoryName: string | null | undefined): number {
-  const i = HOME_PRIORITY.indexOf(norm(categoryName ?? ''));
-  return i === -1 ? HOME_PRIORITY.length + 1 : i;
-}

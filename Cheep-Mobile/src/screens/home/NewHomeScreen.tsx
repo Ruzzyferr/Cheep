@@ -3,7 +3,7 @@
  * Cream canvas · forest savings hero · mascot · premium animated cards.
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,21 @@ import {
   RefreshControl,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { CommonActions, useFocusEffect } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { productService, storeService, listService, categoryService } from '../../services';
-import { notificationService } from '../../services/notification.service';
+import { listService } from '../../services';
+import {
+  useActiveList,
+  useCompareList,
+  useLists,
+  useParentCategories,
+  useProductsList,
+  useStores,
+  useUnreadCount,
+} from '../../queries';
+import { useMonthlySavings } from './useMonthlySavings';
+import { HomeSkeleton, RefreshBar, ErrorState } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
 import { useLocale } from '../../context/LocaleContext';
 import { useLocationAnchor } from '../../context/LocationContext';
@@ -28,203 +38,128 @@ import { CountryChangedBanner } from '../../components/location/CountryChangedBa
 import { FadeInUp, AnimatedNumber, PressableScale, Float } from '../../components/anim';
 import { getStoreLogoAsset } from '../../utils/storeLogo';
 import { ProductThumb } from '../../components/product/ProductThumb';
-import { getCategoryIcon, categoryHomeRank } from '../../utils/categoryIcon';
+import { getCategoryIcon } from '../../utils/categoryIcon';
 import { compareInsights, byCoverageThenScore } from '../../utils/compareInsights';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import type { Product, Store, ShoppingList } from '../../types';
-import type { Category } from '../../services/category.service';
+import type { Product } from '../../types';
 import type { HomeStackScreenProps } from '../../navigation/types';
 
 export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) {
-
-  // Zil rozeti: okunmamış fiyat düşüşü sayısı. Ekrana her dönüşte tazelenir —
-  // bildirim ekranından çıkınca rozetin inatla durmaması için.
-  const [unreadCount, setUnreadCount] = useState(0);
-  useFocusEffect(
-    useCallback(() => {
-      let alive = true;
-      void notificationService.unreadCount().then((n) => {
-        if (alive) setUnreadCount(n);
-      });
-      return () => {
-        alive = false;
-      };
-    }, []),
-  );
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { t } = useTranslation();
   const { country, formatMoney } = useLocale();
   const { anchor } = useLocationAnchor();
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
-  const [activeList, setActiveList] = useState<ShoppingList | null>(null);
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [markets, setMarkets] = useState<Store[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [estimatedPrice, setEstimatedPrice] = useState<{ min: number; max: number } | null>(null);
-  const [savingsPercent, setSavingsPercent] = useState<number | undefined>(undefined);
-  const [monthlySavings, setMonthlySavings] = useState<number>(0);
-  const [monthlySavingsIncrease, setMonthlySavingsIncrease] = useState<number>(0);
-  const [potentialSavings, setPotentialSavings] = useState<number>(0);
-  const [listStoreNames, setListStoreNames] = useState<string[]>([]);
-  const aliveRef = useRef(true);
 
-  useEffect(() => {
-    aliveRef.current = true;
-    return () => {
-      aliveRef.current = false;
+  // ——— Veri ———
+  // Hepsi cache'li sorgu. Ekrana dönüldüğünde bayat olanlar arka planda
+  // tazelenir ve listeye ürün eklendiğinde mutasyon `['lists']` önekini
+  // geçersizleştirdiği için aktif liste ile karşılaştırma KENDİLİĞİNDEN
+  // güncellenir. Eskiden hepsi tek bir loadData() içindeydi ve yalnızca
+  // mount'ta çalışıyordu; kullanıcı elle aşağı çekip yenilemek zorundaydı.
+  const activeListQ = useActiveList();
+  const productsQ = useProductsList({ limit: 100 });
+  const storesQ = useStores();
+  const categoriesQ = useParentCategories();
+  const unreadQ = useUnreadCount();
+
+  const activeList = activeListQ.data ?? null;
+  const markets = storesQ.data ?? [];
+  // Sıra ve seçim API'den gelir. Eskiden burada elle yazılmış bir öncelik
+  // listesi (`HOME_PRIORITY`) ilk 7'yi seçiyordu; listenin ilk sırası ürünü
+  // olmayan ölü bir kategoriye denk geldiği için kullanıcı boş ekran görüyordu.
+  const categories = categoriesQ.data ?? [];
+  const unreadCount = unreadQ.data ?? 0;
+
+  /** Marketler arası farkı en büyük olan ürünler — "Akıllı Fırsatlar" rayı. */
+  const featuredProducts = useMemo(() => {
+    const median = (nums: number[]) => {
+      const sorted = [...nums].sort((a, b) => a - b);
+      const m = Math.floor(sorted.length / 2);
+      return sorted.length % 2 ? sorted[m] : (sorted[m - 1] + sorted[m]) / 2;
     };
-  }, []);
+    return (productsQ.data ?? [])
+      .map((product) => ({
+        product,
+        prices: (product.store_prices ?? [])
+          .map((sp) => parseFloat(sp.price))
+          .filter((n) => Number.isFinite(n)),
+      }))
+      .filter(({ prices }) => prices.length >= 2)
+      .map(({ product, prices }) => {
+        const minPrice = Math.min(...prices);
+        const reference = median(prices);
+        return {
+          ...product,
+          priceDifference: Math.max(0, reference - minPrice),
+          minPrice,
+          maxPrice: reference,
+        };
+      })
+      .sort((a, b) => b.priceDifference - a.priceDifference);
+  }, [productsQ.data]);
 
-  useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [country]);
+  // Aktif listenin en ucuz rotası. Liste boşsa hiç sorulmaz.
+  const hasItems = (activeList?.list_items?.length ?? 0) > 0;
+  const compareQ = useCompareList(hasItems ? activeList?.id : undefined, {
+    maxStores: 3,
+    includeMissingProducts: true,
+  });
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [lists, products, stores, allCategories] = await Promise.all([
-        listService.getLists('active'),
-        productService.getProducts({ limit: 100 }),
-        storeService.getStores(),
-        categoryService.getParentCategories(),
-      ]);
-      if (!aliveRef.current) return;
+  const insights = useMemo(
+    () => (compareQ.data ? compareInsights(compareQ.data.strategies) : null),
+    [compareQ.data],
+  );
 
-      const parentCategories = allCategories
-        .filter((cat) => cat.parent_id === null)
-        .sort((a, b) => categoryHomeRank(a.name) - categoryHomeRank(b.name))
-        .slice(0, 7);
+  const estimatedPrice =
+    insights?.cheapest ? { min: Math.round(insights.min), max: Math.round(insights.max) } : null;
+  const savingsPercent = insights && insights.savingsPct > 0 ? insights.savingsPct : undefined;
+  const potentialSavings = insights ? Math.round(insights.savings) : 0;
 
-      const median = (nums: number[]) => {
-        const s = [...nums].sort((a, b) => a - b);
-        const m = Math.floor(s.length / 2);
-        return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
-      };
-      const productsWithPriceDifference = products
-        .map((product) => {
-          const prices = (product.store_prices ?? [])
-            .map((sp) => parseFloat(sp.price))
-            .filter((p) => Number.isFinite(p));
-          return { product, prices };
-        })
-        .filter(({ prices }) => prices.length >= 2)
-        .map(({ product, prices }) => {
-          const minPrice = Math.min(...prices);
-          const reference = median(prices);
-          const priceDifference = Math.max(0, reference - minPrice);
-          return { ...product, priceDifference, minPrice, maxPrice: reference };
-        })
-        .sort((a, b) => b.priceDifference - a.priceDifference);
-
-      const firstActiveList = lists[0] || null;
-      setActiveList(firstActiveList);
-      setFeaturedProducts(productsWithPriceDifference);
-      setMarkets(stores);
-      setCategories(parentCategories);
-
-      if (firstActiveList && firstActiveList.list_items && firstActiveList.list_items.length > 0) {
-        try {
-          const listDetail = await listService.getListById(firstActiveList.id);
-          if (!aliveRef.current) return;
-          if (listDetail.list_items && listDetail.list_items.length > 0) {
-            const compareResult = await listService.compareList(firstActiveList.id, {
-              maxStores: 3,
-              includeMissingProducts: true,
-            });
-            if (!aliveRef.current) return;
-            const insights = compareInsights(compareResult.strategies);
-            if (insights.cheapest) {
-              setEstimatedPrice({ min: Math.round(insights.min), max: Math.round(insights.max) });
-              setSavingsPercent(insights.savingsPct > 0 ? insights.savingsPct : undefined);
-              setPotentialSavings(Math.round(insights.savings));
-              const bestRoute = [...compareResult.strategies].sort(byCoverageThenScore)[0];
-              if (bestRoute && bestRoute.stores.length > 0) {
-                const names: string[] = [];
-                const seen = new Set<number>();
-                bestRoute.stores.forEach((sa) => {
-                  if (!seen.has(sa.store.id)) {
-                    seen.add(sa.store.id);
-                    if (sa.store.name) names.push(sa.store.name);
-                  }
-                });
-                setListStoreNames(names);
-              } else {
-                setListStoreNames([]);
-              }
-            } else {
-              setEstimatedPrice(null);
-              setSavingsPercent(undefined);
-              setPotentialSavings(0);
-              setListStoreNames([]);
-            }
-          }
-        } catch (error) {
-          console.error('list price calc error:', error);
-          setEstimatedPrice(null);
-          setSavingsPercent(undefined);
-        }
-      } else {
-        setEstimatedPrice(null);
-        setSavingsPercent(undefined);
-        setPotentialSavings(0);
-        setListStoreNames([]);
-      }
-
-      // Bu ay toplam tasarruf (tamamlanmış listelerden, sınırlı).
-      try {
-        const MAX = 6;
-        const completed = await listService.getLists('completed');
-        if (!aliveRef.current) return;
-        const cm = new Date().getMonth();
-        const cy = new Date().getFullYear();
-        const pm = cm === 0 ? 11 : cm - 1;
-        const py = cm === 0 ? cy - 1 : cy;
-        const inMonth = (d: Date, m: number, y: number) => d.getMonth() === m && d.getFullYear() === y;
-        const relevant = completed
-          .filter((l) => {
-            if (!l.completed_at) return false;
-            const d = new Date(l.completed_at);
-            return inMonth(d, cm, cy) || inMonth(d, pm, py);
-          })
-          .sort((a, b) => new Date(b.completed_at as string).getTime() - new Date(a.completed_at as string).getTime())
-          .slice(0, MAX);
-        let total = 0;
-        let prev = 0;
-        for (const l of relevant) {
-          const cd = new Date(l.completed_at as string);
-          try {
-            const cr = await listService.compareList(l.id, { maxStores: 3, includeMissingProducts: true });
-            if (!aliveRef.current) return;
-            const sv = compareInsights(cr.strategies).savings || 0;
-            if (inMonth(cd, cm, cy)) total += sv;
-            else prev += sv;
-          } catch {
-            /* skip */
-          }
-        }
-        if (!aliveRef.current) return;
-        setMonthlySavings(Math.round(total));
-        setMonthlySavingsIncrease(Math.round(total - prev));
-      } catch (error) {
-        console.warn('monthly savings error:', error);
-      }
-    } catch (error) {
-      console.error('load data error:', error);
-    } finally {
-      if (aliveRef.current) setLoading(false);
+  const listStoreNames = useMemo(() => {
+    if (!compareQ.data) return [];
+    const best = [...compareQ.data.strategies].sort(byCoverageThenScore)[0];
+    if (!best) return [];
+    const seen = new Set<number>();
+    const names: string[] = [];
+    for (const sa of best.stores) {
+      if (seen.has(sa.store.id)) continue;
+      seen.add(sa.store.id);
+      if (sa.store.name) names.push(sa.store.name);
     }
-  };
+    return names;
+  }, [compareQ.data]);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadData();
-    setRefreshing(false);
+  const monthlyQ = useMonthlySavings();
+  const monthlySavings = monthlyQ.data?.total ?? 0;
+  const monthlySavingsIncrease = monthlyQ.data?.increase ?? 0;
+
+  // İlk yükleme: temel bloklar gelene kadar iskelet. Eskiden bu ekran
+  // `loading` state'ini tutuyor ama HİÇBİR YERDE render etmiyordu; kullanıcı
+  // yükleme boyunca boş bir kabuğa bakıyordu.
+  const isPending = activeListQ.isPending || productsQ.isPending || categoriesQ.isPending;
+  // Ekranı boşaltmayan arka plan tazelemesi göstergesi.
+  const isBackgroundFetching =
+    !isPending &&
+    (activeListQ.isFetching || productsQ.isFetching || categoriesQ.isFetching || compareQ.isFetching);
+  // Hata durumu yalnızca HİÇBİR temel blok gelmediyse; biri geldiyse
+  // kullanıcıya elimizdekini gösteririz.
+  const isError = activeListQ.isError && productsQ.isError && categoriesQ.isError;
+  const refreshing = activeListQ.isRefetching || productsQ.isRefetching;
+
+  const handleRefresh = () => {
+    void Promise.all([
+      activeListQ.refetch(),
+      productsQ.refetch(),
+      storesQ.refetch(),
+      categoriesQ.refetch(),
+      unreadQ.refetch(),
+      compareQ.refetch(),
+      monthlyQ.refetch(),
+    ]);
   };
 
   const getLowestPrice = (product: Product) => {
@@ -300,6 +235,9 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
 
         <CountryChangedBanner />
 
+        {/* Arka plan tazelemesi: ekran boşalmaz, üstte ince bir çizgi belirir. */}
+        <RefreshBar visible={isBackgroundFetching} />
+
         {/* Sabit çapa çipi — yalnızca kullanıcı manuel bir adres seçtiyse görünür. */}
         {anchor?.mode === 'pinned' && (
           <TouchableOpacity
@@ -317,6 +255,12 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
           </TouchableOpacity>
         )}
 
+        {isError ? (
+          <ErrorState onRetry={handleRefresh} />
+        ) : isPending ? (
+          <HomeSkeleton />
+        ) : (
+        <>
         {/* Savings hero (signature) */}
         <FadeInUp delay={40} style={styles.sectionPad}>
           <View style={styles.hero}>
@@ -494,6 +438,8 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
             ))}
           </View>
         </FadeInUp>
+        </>
+        )}
       </ScrollView>
 
       <LocationSheet visible={locationSheetOpen} onClose={() => setLocationSheetOpen(false)} />

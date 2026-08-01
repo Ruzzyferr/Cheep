@@ -10,7 +10,7 @@
  *   ⋮ menu (bottom-sheet): Aktif liste yap · Klonla · Başka listeden aktar · Sil
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -21,11 +21,12 @@ import {
   Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
+import { useListDetail, useListMutations } from '../../queries';
+import { RefreshBar } from '../../components/ui';
 import { ProductThumb } from '../../components/product/ProductThumb';
 import { ListActionsSheet } from '../../components/list/ListActionsSheet';
 import { SelectSourceListModal } from '../../components/list/SelectSourceListModal';
@@ -47,8 +48,13 @@ export function ListDetailScreen({
 }: ListsStackScreenProps<'ListDetail'>) {
   const { listId } = route.params;
   const { t } = useTranslation();
-  const [list, setList] = useState<ShoppingList | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Liste artık cache'ten. Başka bir ekranda ürün eklenirse (ör. kategori
+  // ekranından hızlı ekleme) mutasyon `['lists']` önekini geçersizleştirir ve
+  // bu ekran kendiliğinden tazelenir.
+  const listQ = useListDetail(listId);
+  const { invalidateLists } = useListMutations();
+  const list = listQ.data ?? null;
+  const loading = listQ.isPending;
   const [showActionsSheet, setShowActionsSheet] = useState(false);
   const [showSource, setShowSource] = useState(false);
   const [showImportMode, setShowImportMode] = useState(false);
@@ -69,28 +75,27 @@ export function ListDetailScreen({
     setTimeout(fn, Platform.OS === 'ios' ? 350 : 0);
   };
 
-  // Reload list when screen comes into focus (e.g., after adding a product)
-  useFocusEffect(
-    useCallback(() => {
-      loadList();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [listId])
-  );
-
+  /**
+   * Listeyi tazele.
+   *
+   * Eskiden burada elle bir `loadList()` + `useFocusEffect` zinciri vardı ve
+   * her mutasyondan sonra ayrıca `cart.refresh()` çağrılıyordu. Şimdi tek bir
+   * geçersizleştirme yetiyor: `['lists']` önekindeki her sorgu — bu ekran,
+   * liste listesi, sepet rozeti ve karşılaştırma — birlikte tazeleniyor.
+   * Ekrana dönüşteki tazeleme de React Query'nin odak yönetimiyle geliyor.
+   */
   const loadList = async () => {
-    try {
-      setLoading(true);
-      const data = await listService.getListById(listId);
-      setList(data);
-      cart.refresh(); // sepet rozetini güncel tut (ekleme/silme sonrası)
-    } catch (error) {
-      console.error('Load list error:', error);
+    await invalidateLists();
+  };
+
+  // Liste yüklenemiyorsa (silinmiş ya da başka kullanıcının) geri dön.
+  React.useEffect(() => {
+    if (listQ.isError) {
       Alert.alert(t('common.error'), t('list.select_modal.load_error'));
       navigation.goBack();
-    } finally {
-      setLoading(false);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listQ.isError]);
 
   const handleToggleBrandIndependent = async (item: ListItem) => {
     try {
@@ -254,11 +259,16 @@ export function ListDetailScreen({
     return null;
   }
 
+  // Arka plan tazelemesi — ekran boşalmaz, üstte ince bir çizgi belirir.
+  const backgroundFetching = listQ.isFetching && !listQ.isPending;
+
   const items = list.list_items || [];
   const isActive = list.status === 'active';
 
   return (
     <View style={styles.container}>
+      <RefreshBar visible={backgroundFetching} />
+
       {/* Header Info */}
       <View style={styles.header}>
         <View style={styles.headerTop}>

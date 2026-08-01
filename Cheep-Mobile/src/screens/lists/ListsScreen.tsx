@@ -16,7 +16,8 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { listService } from '../../services';
+import { useLists, useListMutations } from '../../queries';
+import { RefreshBar, ErrorState } from '../../components/ui';
 import { ListCard } from '../../components/list/ListCard';
 import { EmptyState } from '../../components/common/EmptyState';
 import { ListSkeleton } from '../../components/ui';
@@ -28,16 +29,17 @@ import type { ListsStackScreenProps } from '../../navigation/types';
 
 export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsMain'>) {
   const { t } = useTranslation();
-  const [lists, setLists] = useState<ShoppingList[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+
+  // Listeler artık cache'ten. Ekrana dönüldüğünde ve herhangi bir ekranda
+  // liste değiştiğinde kendiliğinden tazelenir; elle loadLists() zinciri yok.
+  const listsQ = useLists();
+  const { deleteList } = useListMutations();
+  const lists = listsQ.data ?? [];
 
   // Reload lists when screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      loadLists();
-
       // Check if we should open create modal (from FAB)
       const routeParams = route.params;
       const shouldOpen = routeParams?.openCreateModal || getShouldOpenCreateModalFromFAB();
@@ -61,36 +63,23 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
     }, [route.params?.openCreateModal])
   );
 
-  const loadLists = async () => {
-    try {
-      setLoading(true);
-      const data = await listService.getLists();
-      setLists(data);
-    } catch (error) {
-      console.error('Load lists error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadLists();
-    setRefreshing(false);
+  const handleRefresh = () => {
+    void listsQ.refetch();
   };
 
   const handleCreateList = () => {
     setShowCreateModal(true);
   };
 
+  // Oluşturma modalı kendi mutasyonunu çalıştırıyor; burada yalnızca
+  // listeyi tazelemek yeterli.
   const handleCreateSuccess = () => {
-    loadLists();
+    void listsQ.refetch();
   };
 
   const handleDeleteList = async (listId: number) => {
     try {
-      await listService.deleteList(listId);
-      await loadLists();
+      await deleteList.mutateAsync(listId);
     } catch {
       Alert.alert(t('common.error'), t('list.delete_error'));
     }
@@ -121,9 +110,13 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
         </TouchableOpacity>
       </View>
 
+      <RefreshBar visible={!listsQ.isPending && listsQ.isFetching && !listsQ.isRefetching} />
+
       {/* Lists */}
-      {loading && lists.length === 0 ? (
+      {listsQ.isPending ? (
         <ListSkeleton count={4} />
+      ) : listsQ.isError ? (
+        <ErrorState onRetry={handleRefresh} />
       ) : (
         <FlatList
           style={styles.list}
@@ -139,7 +132,7 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing}
+              refreshing={listsQ.isRefetching}
               onRefresh={handleRefresh}
               tintColor={colors.primary.main}
             />

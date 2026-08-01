@@ -1,47 +1,43 @@
 /**
- * 🛒 Cart (active list) context
+ * 🛒 Sepet (aktif liste) bağlamı.
  *
- * Tracks the user's active shopping list summary — item count + name — so the UI
- * can show a cart badge on the Lists tab and a "which list am I adding to" pill
- * while browsing, WITHOUT opening the Lists screen. Any screen that mutates a list
- * calls refresh() to keep the badge accurate.
+ * Kullanıcının aktif listesinin özetini — ad + ürün sayısı — verir; Listeler
+ * sekmesindeki rozet ve "hangi listeye ekliyorum" pill'i bunu okur.
+ *
+ * ARTIK KENDİ STATE'İNİ TUTMUYOR: veriyi `useActiveList` sorgusundan alıyor.
+ * Eskiden her mutasyon yapan ekranın elle `refresh()` çağırması gerekiyordu ve
+ * biri unutulduğunda rozet bayat kalıyordu. Şimdi liste mutasyonları
+ * `['lists']` önekini geçersizleştirdiği için rozet kendiliğinden güncelleniyor.
+ *
+ * Bağlam yine de duruyor: çağrı yerleri değişmesin ve gelecekte sepete özgü
+ * bir davranış eklenirse tek yerde toplansın.
  */
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { listService } from '../services';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useActiveList } from '../queries/useLists';
 import type { ShoppingList } from '../types';
 
 interface CartContextType {
   activeList: ShoppingList | null;
   count: number;
+  /** Elle tazeleme — normalde gerekmez, mutasyonlar zaten geçersizleştirir. */
   refresh: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [activeList, setActiveList] = useState<ShoppingList | null>(null);
+  const { data, refetch } = useActiveList();
+  const activeList = data ?? null;
 
-  const refresh = useCallback(async () => {
-    try {
-      const lists = await listService.getLists();
-      // Aktif liste = status==='active' olan tek liste.
-      setActiveList(lists.find((l) => l.status === 'active') ?? null);
-    } catch {
-      // sessizce geç — rozet kritik değil
-    }
-  }, []);
+  const value: CartContextType = {
+    activeList,
+    count: activeList?.list_items?.length ?? 0,
+    refresh: async () => {
+      await refetch();
+    },
+  };
 
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
-
-  const count = activeList?.list_items?.length ?? 0;
-
-  return (
-    <CartContext.Provider value={{ activeList, count, refresh }}>
-      {children}
-    </CartContext.Provider>
-  );
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
 export function useCart(): CartContextType {

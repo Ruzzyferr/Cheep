@@ -3,7 +3,7 @@
  * En büyük fiyat farkına sahip ürünler listesi
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { productService } from '../../services';
+import { useProductsList } from '../../queries';
+import { GridSkeleton, RefreshBar, ErrorState } from '../../components/ui';
 import { SmartDealCard } from '../../components/home';
 import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout } from '../../theme';
@@ -23,52 +24,34 @@ import type { HomeStackScreenProps } from '../../navigation/types';
 export function PriceDifferenceScreen({
   navigation,
 }: HomeStackScreenProps<'PriceDifferenceList'>) {
-  const [products, setProducts] = useState<(Product & { priceDifference?: number; minPrice?: number; maxPrice?: number })[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
   const { formatMoney } = useLocale();
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
+  // Bu ekranın hiç yükleme göstergesi yoktu: kullanıcı veri gelene kadar boş
+  // bir listeye bakıyordu.
+  const productsQ = useProductsList({ limit: 200 });
 
-  const loadProducts = async () => {
-    try {
-      const allProducts = await productService.getProducts({ limit: 200 }); // Daha fazla ürün çekiyoruz
+  /** Marketler arası farkı en büyük olan ilk 50 ürün. */
+  const products = useMemo(() => {
+    return (productsQ.data ?? [])
+      .map((product) => ({
+        product,
+        // Geçersiz/boş fiyatları (NaN) ele: ₺NaN / Infinity render etmeyi önler.
+        prices: (product.store_prices ?? [])
+          .map((sp) => parseFloat(sp.price))
+          .filter((n) => Number.isFinite(n)),
+      }))
+      .filter(({ prices }) => prices.length >= 2)
+      .map(({ product, prices }) => {
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        return { ...product, priceDifference: maxPrice - minPrice, minPrice, maxPrice };
+      })
+      .sort((a, b) => b.priceDifference - a.priceDifference)
+      .slice(0, 50);
+  }, [productsQ.data]);
 
-      // Fiyat farkına göre sırala (en büyük fark en üstte)
-      const productsWithPriceDifference = allProducts
-        .map((product) => {
-          // Geçersiz/boş fiyatları (NaN) ele: ₺NaN / Infinity render etmeyi önler.
-          const prices = (product.store_prices ?? [])
-            .map((sp) => parseFloat(sp.price))
-            .filter((p) => Number.isFinite(p));
-          return { product, prices };
-        })
-        .filter(({ prices }) => prices.length >= 2) // En az 2 geçerli fiyat olmalı
-        .map(({ product, prices }) => {
-          const minPrice = Math.min(...prices);
-          const maxPrice = Math.max(...prices);
-          const priceDifference = maxPrice - minPrice;
-          return {
-            ...product,
-            priceDifference,
-            minPrice,
-            maxPrice,
-          };
-        })
-        .sort((a, b) => b.priceDifference - a.priceDifference) // Büyükten küçüğe sırala
-        .slice(0, 50); // İlk 50 ürünü al
-
-      setProducts(productsWithPriceDifference);
-    } catch (error) {
-      console.error('❌ Load products error:', error);
-    }
-  };
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await loadProducts();
-    setRefreshing(false);
+  const handleRefresh = () => {
+    void productsQ.refetch();
   };
 
   const getLowestPrice = (product: Product) => {
@@ -111,14 +94,21 @@ export function PriceDifferenceScreen({
         </Text>
       </View>
 
+      <RefreshBar visible={!productsQ.isPending && productsQ.isFetching && !productsQ.isRefetching} />
+
       {/* Products List */}
+      {productsQ.isPending ? (
+        <GridSkeleton count={6} />
+      ) : productsQ.isError ? (
+        <ErrorState onRetry={handleRefresh} />
+      ) : (
       <FlatList
         data={products}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.listContainer}
         refreshControl={
           <RefreshControl
-            refreshing={refreshing}
+            refreshing={productsQ.isRefetching}
             onRefresh={handleRefresh}
             tintColor={colors.primary.main}
           />
@@ -166,6 +156,7 @@ export function PriceDifferenceScreen({
         numColumns={2}
         columnWrapperStyle={styles.row}
       />
+      )}
     </View>
   );
 }
