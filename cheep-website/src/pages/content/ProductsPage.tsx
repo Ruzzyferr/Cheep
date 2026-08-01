@@ -19,6 +19,7 @@ import {
   type ProductsResponse,
 } from '../../lib/api'
 import { useProductQueryState } from './products/useProductQueryState'
+import { cn } from '../../lib/utils'
 
 /** Sayfa başına ürün. Prerender edilen ilk ekranla aynı olmalı. */
 const PAGE_SIZE = 40
@@ -79,6 +80,10 @@ export function ProductsPage() {
   const [loading, setLoading] = useState(false)
   const [failed, setFailed] = useState(false)
   const [attempt, setAttempt] = useState(0)
+  // Mobilde kategori paneli varsayılan KAPALI: açık başlarsa arama ve ürünler
+  // yine ekranın altına iner. Masaüstünde `lg:block` her zaman görünür kılar,
+  // bu yüzden state yalnızca mobili etkiler (SSR ile de tutarlı).
+  const [categoriesOpen, setCategoriesOpen] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
@@ -145,6 +150,7 @@ export function ProductsPage() {
   }
 
   const n = (v: number) => formatNumber(locale, v)
+  const selectedCategoryName = categories.find((cat) => cat.slug === state.category)?.name ?? null
 
   return (
     <ContentLayout
@@ -163,22 +169,17 @@ export function ProductsPage() {
         </p>
       </header>
 
-      <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-[16rem_1fr]">
-        {/* Kategori sütunu — masaüstünde yapışkan, mobilde üstte açılır liste */}
-        <aside className="lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:self-start lg:overflow-y-auto">
-          <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-ink-hint">
-            {c.browse.categories}
-          </h2>
-          <CategorySidebar
-            categories={categories}
-            selected={state.category}
-            onSelect={(slug) => update({ category: slug })}
-            locale={locale}
-            labels={{ allCategories: c.products.allCategories }}
-          />
-        </aside>
+      {/*
+        Izgara yerleşimi AÇIK: mobilde DOM sırası (filtreler → kategoriler →
+        sonuçlar), masaüstünde kategoriler sol sütuna alınır.
 
-        <div className="min-w-0">
+        NEDEN: kategori listesi mobilde tüm genişliği kaplayıp aramayı ve
+        ürünleri ekranın çok altına itiyordu — kullanıcı sayfayı açtığında 60+
+        kategori adından başka bir şey görmüyordu. Tam da bu sayfanın çözmek
+        için var olduğu "karışıklık" sorunu.
+      */}
+      <div className="mt-10 grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-[16rem_1fr]">
+        <div className="min-w-0 lg:col-start-2 lg:row-start-1">
           <FilterBar
             search={state.search}
             onSearch={useCallback((value: string) => update({ search: value }), [update])}
@@ -209,8 +210,43 @@ export function ProductsPage() {
               clearFilters: c.products.clearFilters,
             }}
           />
+        </div>
 
-          <p aria-live="polite" className="mt-6 text-sm text-ink-soft">
+        {/* Kategoriler — mobilde katlanır, masaüstünde yapışkan sol sütun */}
+        <aside className="lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:self-start lg:overflow-y-auto">
+          <button
+            type="button"
+            onClick={() => setCategoriesOpen((v) => !v)}
+            aria-expanded={categoriesOpen}
+            className="flex min-h-11 w-full items-center justify-between rounded-xl border border-line bg-paper px-4 py-2.5 text-sm font-semibold text-ink lg:hidden"
+          >
+            <span>
+              {c.browse.categories}
+              {selectedCategoryName ? `: ${selectedCategoryName}` : ''}
+            </span>
+            <span aria-hidden className="text-ink-hint">{categoriesOpen ? '−' : '+'}</span>
+          </button>
+
+          <h2 className="mb-3 hidden text-sm font-bold uppercase tracking-wide text-ink-hint lg:block">
+            {c.browse.categories}
+          </h2>
+
+          <div className={cn('mt-3 lg:mt-0', categoriesOpen ? 'block' : 'hidden', 'lg:block')}>
+            <CategorySidebar
+              categories={categories}
+              selected={state.category}
+              onSelect={(slug) => {
+                update({ category: slug })
+                setCategoriesOpen(false)
+              }}
+              locale={locale}
+              labels={{ allCategories: c.products.allCategories }}
+            />
+          </div>
+        </aside>
+
+        <div className="min-w-0 lg:col-start-2 lg:row-start-2">
+          <p aria-live="polite" className="text-sm text-ink-soft">
             {loading ? c.products.loading : fill(c.products.resultCount, { count: n(total) })}
           </p>
 

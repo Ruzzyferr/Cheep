@@ -10,7 +10,10 @@ export const SITE_URL = 'https://cheep.live'
  * gider; ilk ekran prerender edildiği için Googlebot ürünleri yine de HTML'de
  * görür ve API erişilemezse sayfa boş kalmaz.
  */
-export const API_URL = 'https://api.cheep.live/api/v1'
+// `VITE_API_URL` ile geçersiz kılınabilir. Yerelde ürünler sayfasının
+// filtre/arama akışını denemek için şart: prod adresi sabit olsaydı yerel
+// backend'e karşı test edilemezdi.
+export const API_URL = import.meta.env.VITE_API_URL || 'https://api.cheep.live/api/v1'
 
 export const PLAY_PACKAGE = 'com.cheep.mobile'
 
