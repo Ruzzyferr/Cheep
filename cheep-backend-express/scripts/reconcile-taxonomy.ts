@@ -138,6 +138,11 @@ async function main() {
                     `→ "${op.toSlug}" içinde birleşecek` +
                     (op.reparentChildIds.length > 0 ? ` (+${op.reparentChildIds.length} alt kategori)` : ''),
             );
+        } else if (op.kind === 'renameSlug') {
+            console.log(
+                `   ✏️  [${countryCode.get(op.countryId)}] "${op.oldSlug}" → "${op.newSlug}" ` +
+                    `(ASCII olmayan slug URL'de yüzde-kodlanıyordu)`,
+            );
         } else {
             console.log(`   🗑️  [${countryCode.get(op.countryId)}] "${op.slug}" (#${op.categoryId}) silinecek`);
         }
@@ -195,6 +200,11 @@ async function main() {
                         });
                     }
                     await tx.category.delete({ where: { id: op.fromCategoryId } });
+                } else if (op.kind === 'renameSlug') {
+                    await tx.category.update({
+                        where: { id: op.categoryId },
+                        data: { slug: op.newSlug },
+                    });
                 } else {
                     // Ürünü kalmadığı planlandı; yine de kategorisiz ürün
                     // bırakmamak için önce bağı kopar (FK SetNull zaten var,

@@ -10,12 +10,15 @@ import logger from '../../utils/logger.js';
  */
 const countryIdOf = (req: Request): number => req.country!.id;
 
+/** İstemcinin arayüz dili; `resolveRequestLang` doldurur. */
+const langOf = (req: Request) => req.lang ?? 'tr';
+
 /**
  * Tüm kategorileri getir (düz liste)
  */
 export const getAllCategories = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const categories = await CategoryService.getAllCategories(countryIdOf(req));
+        const categories = await CategoryService.getAllCategories(countryIdOf(req), langOf(req));
         res.status(200).json({
             success: true,
             data: categories,
@@ -30,7 +33,7 @@ export const getAllCategories = async (req: Request, res: Response, next: NextFu
  */
 export const getParentCategories = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const categories = await CategoryService.getParentCategories(countryIdOf(req));
+        const categories = await CategoryService.getParentCategories(countryIdOf(req), langOf(req));
         res.status(200).json({
             success: true,
             data: categories,
@@ -45,7 +48,7 @@ export const getParentCategories = async (req: Request, res: Response, next: Nex
  */
 export const getCategoryTree = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const tree = await CategoryService.getCategoryTree(countryIdOf(req));
+        const tree = await CategoryService.getCategoryTree(countryIdOf(req), langOf(req));
         res.status(200).json({ success: true, data: tree });
     } catch (error) {
         next(error);
@@ -106,7 +109,7 @@ export const getCategoryBySlug = async (req: Request, res: Response, next: NextF
 export const getSubcategories = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const id = intParam(req.params.id);
-        const subcategories = await CategoryService.getSubcategories(id, countryIdOf(req));
+        const subcategories = await CategoryService.getSubcategories(id, countryIdOf(req), langOf(req));
         res.status(200).json({
             success: true,
             data: subcategories,

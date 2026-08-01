@@ -13,6 +13,13 @@ declare namespace Express {
             code: string;
             currency: string;
         };
+        /**
+         * İstemcinin arayüz dili. `resolveRequestLang` doldurur ve her zaman
+         * desteklenen bir dile çözülür. Ülkeden BAĞIMSIZ: Türkiye'de yaşayıp
+         * uygulamayı İngilizce kullanan biri TR kataloğunu İngilizce kategori
+         * adlarıyla görür.
+         */
+        lang?: 'tr' | 'en' | 'de' | 'pl' | 'sv';
     }
 }
 

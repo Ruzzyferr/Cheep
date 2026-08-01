@@ -319,6 +319,49 @@ describe('planReconciliation — ülke içi ikizleri birleştirir', () => {
     });
 });
 
+describe('planReconciliation — ASCII olmayan slug', () => {
+    // Canlıda `pirinç`, `bisküvi`, `kuruyemiş`, `sünger-bez` gibi slug'lar
+    // vardı. URL'de yüzde-kodlanıyorlar (`/kategoria/bisk%C3%BCvi`) ve hem
+    // çirkin hem arama motoru için zayıf. Slug ASCII olmalı.
+    const plan = planReconciliation(
+        [cat({ id: 121, slug: 'pirinç', country_id: PL })],
+        [{ categoryId: 121, countryId: PL, n: 228 }],
+    );
+
+    it('slug\'ı ASCII karşılığına çevirmeyi planlar', () => {
+        const renames = plan.ops.filter((o) => o.kind === 'renameSlug') as any[];
+        expect(renames).toHaveLength(1);
+        expect(renames[0]).toMatchObject({ categoryId: 121, oldSlug: 'pirinç', newSlug: 'pirinc' });
+    });
+
+    it('eski slug için yönlendirme üretir', () => {
+        expect(plan.redirects).toContainEqual({ countryId: PL, oldSlug: 'pirinç', newSlug: 'pirinc' });
+    });
+
+    it('zaten ASCII olan slug\'a dokunmaz — idempotent', () => {
+        const clean = planReconciliation(
+            [cat({ id: 1, slug: 'pirinc', country_id: PL })],
+            [{ categoryId: 1, countryId: PL, n: 5 }],
+        );
+        expect(clean.ops.filter((o) => o.kind === 'renameSlug')).toHaveLength(0);
+    });
+
+    it('ASCII karşılığı başka bir kategoride kullanılıyorsa yeniden adlandırmaz', () => {
+        // Çakışma olursa unique index patlar; birleştirme kararını insana bırak.
+        const clash = planReconciliation(
+            [
+                cat({ id: 1, slug: 'pirinç', country_id: PL }),
+                cat({ id: 2, slug: 'pirinc', country_id: PL }),
+            ],
+            [
+                { categoryId: 1, countryId: PL, n: 5 },
+                { categoryId: 2, countryId: PL, n: 7 },
+            ],
+        );
+        expect(clash.ops.filter((o) => o.kind === 'renameSlug')).toHaveLength(0);
+    });
+});
+
 describe('planReconciliation — özet', () => {
     it('yapılacak işi sayar', () => {
         const plan = planReconciliation(

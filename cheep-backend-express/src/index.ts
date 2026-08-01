@@ -175,7 +175,8 @@ if (!config.isProduction) {
 
 // Ana Rotalar — her API isteğinde ülke çözümlenir (x-country header veya default)
 import { resolveCountry } from './middleware/country.middleware.js';
-app.use('/api/v1', resolveCountry, apiRouter);
+import { resolveRequestLang } from './middleware/lang.middleware.js';
+app.use('/api/v1', resolveCountry, resolveRequestLang, apiRouter);
 
 // Ana sayfa
 app.get('/', (req: Request, res: Response) => {

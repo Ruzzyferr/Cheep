@@ -22,6 +22,7 @@ import { Prisma } from '@prisma/client';
 import slugifyModule from 'slugify';
 import logger from '../../utils/logger.js';
 import { notFound, conflict, badRequest } from '../../utils/app-error.js';
+import { localizeCategory, type Lang } from '../../config/category-i18n.js';
 
 const slugify =
     (slugifyModule as unknown as typeof import('slugify')['default']) ??
@@ -82,6 +83,16 @@ export const getCategoriesWithCounts = async (countryId: number): Promise<Catego
     return rows.map((r) => ({ ...r, product_count: Number(r.product_count) }));
 };
 
+/**
+ * Satırların ad ve slug'ını istemcinin diline çevirir.
+ *
+ * Veritabanındaki adlar yalnızca Türkçe (TR ağacı devletten, PL ağacı
+ * scraper'dan gelir; ikisi de Türkçe adlandırılmış). Çeviri sunucuda yapılır
+ * ki mobil, website ve SEO aynı sözlükten beslensin.
+ */
+export const localizeRows = <T extends { name: string; slug: string }>(rows: T[], lang: Lang): T[] =>
+    rows.map((r) => ({ ...r, ...localizeCategory(lang, r.name, r.slug) }));
+
 /** Yalnızca kökler (parent_id = null). */
 export const onlyParents = (rows: CategoryRow[]): CategoryRow[] => {
     const ids = new Set(rows.map((r) => r.id));
@@ -101,8 +112,8 @@ export const buildTree = (rows: CategoryRow[]): CategoryTreeNode[] =>
 /**
  * Tüm kategoriler (düz liste, ülkeye göre süzülmüş).
  */
-export const getAllCategories = async (countryId: number): Promise<CategoryRow[]> => {
-    return await getCategoriesWithCounts(countryId);
+export const getAllCategories = async (countryId: number, lang: Lang = 'tr'): Promise<CategoryRow[]> => {
+    return localizeRows(await getCategoriesWithCounts(countryId), lang);
 };
 
 /**
@@ -110,25 +121,30 @@ export const getAllCategories = async (countryId: number): Promise<CategoryRow[]
  * öncelik listeleri YOKTUR (mobilde `HOME_PRIORITY` tam da bu yüzden ölü
  * kategoriyi ilk sıraya koyuyordu).
  */
-export const getParentCategories = async (countryId: number): Promise<CategoryRow[]> => {
+export const getParentCategories = async (countryId: number, lang: Lang = 'tr'): Promise<CategoryRow[]> => {
     const rows = await getCategoriesWithCounts(countryId);
     const parents = onlyParents(rows);
     logger.debug(`[Categories] country=${countryId} parent categories: ${parents.length}`);
-    return parents;
+    return localizeRows(parents, lang);
 };
 
 /**
  * Hiyerarşik ağaç.
  */
-export const getCategoryTree = async (countryId: number): Promise<CategoryTreeNode[]> => {
-    return buildTree(await getCategoriesWithCounts(countryId));
+export const getCategoryTree = async (countryId: number, lang: Lang = 'tr'): Promise<CategoryTreeNode[]> => {
+    const tree = buildTree(await getCategoriesWithCounts(countryId));
+    return localizeRows(tree, lang).map((node) => ({ ...node, children: localizeRows(node.children, lang) }));
 };
 
 /**
  * Bir kategorinin alt kategorileri.
  */
-export const getSubcategories = async (parentId: number, countryId: number): Promise<CategoryRow[]> => {
-    return childrenOf(await getCategoriesWithCounts(countryId), parentId);
+export const getSubcategories = async (
+    parentId: number,
+    countryId: number,
+    lang: Lang = 'tr',
+): Promise<CategoryRow[]> => {
+    return localizeRows(childrenOf(await getCategoriesWithCounts(countryId), parentId), lang);
 };
 
 /**

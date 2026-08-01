@@ -4,6 +4,27 @@ import * as ProductService from './products.service.js';
 import {productMatcher} from "./product-matcher.service.js";
 import { getProfile } from '../profile/profile.service.js';
 import { evaluateProductConstraints } from '../../services/product-constraints.js';
+import { localizeCategory, type Lang } from '../../config/category-i18n.js';
+
+/**
+ * Ürün yanıtındaki kategori adını istemcinin diline çevirir.
+ *
+ * SIRALAMA ÖNEMLİ: diyet/alerjen değerlendirmesi
+ * (`evaluateProductConstraints`) kategori adının TÜRKÇE olmasına dayanır —
+ * kural tablosu Türkçe anahtarlarla yazılı. Çeviri o adımdan SONRA yapılır,
+ * yoksa İngilizce arayüzde tüm diyet uyarıları sessizce kaybolurdu.
+ */
+function localizeProductCategory<T extends { category?: { name: string; slug: string | null } | null }>(
+    products: T[],
+    lang: Lang,
+): T[] {
+    if (lang === 'tr') return products;
+    return products.map((p) => {
+        if (!p.category?.slug) return p;
+        const localized = localizeCategory(lang, p.category.name, p.category.slug);
+        return { ...p, category: { ...p.category, ...localized } };
+    });
+}
 
 export const getAllProducts = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -45,7 +66,7 @@ export const getAllProducts = async (req: Request, res: Response, next: NextFunc
 
         res.status(200).json({
             success: true,
-            data: products,
+            data: localizeProductCategory(products, req.lang ?? 'tr'),
             pagination: result.pagination
         });
     } catch (error) {
@@ -59,7 +80,7 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
         const product = await ProductService.getProductById(Number(id), req.country?.id);
         res.status(200).json({
             success: true,
-            data: product
+            data: localizeProductCategory([product], req.lang ?? 'tr')[0]
         });
     } catch (error) {
         next(error);

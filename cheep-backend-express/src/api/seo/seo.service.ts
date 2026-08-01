@@ -9,7 +9,7 @@
  * kaçınılmaz olarak N+1 üretiyor. Her sorgu ülke bazında tek turdur.
  */
 import { prisma } from '../../utils/prisma.client.js';
-import { localizeCategory } from '../../config/category-locale.js';
+import { defaultLangForCountry, localizeCategory } from '../../config/category-i18n.js';
 import { normalizeCity } from '../../config/city-normalize.js';
 
 /** Bir sayfanın var olmayı hak etmesi için gereken en az market sayısı. */
@@ -117,9 +117,10 @@ async function fetchProducts(countryId: number, countryCode: string): Promise<Se
 
     return rows.map((r) => {
         // Kategori adı/slug'ı ülkenin diline çevrilir; gerekçe:
-        // config/category-locale.ts
+        // config/category-i18n.ts
+        // Site, ülkenin dilinde yayınlanır (TR → tr, PL → pl).
         const cat = r.category_slug
-            ? localizeCategory(countryCode, r.category_name ?? '', r.category_slug)
+            ? localizeCategory(defaultLangForCountry(countryCode), r.category_name ?? '', r.category_slug)
             : null;
         return ({
         slug: r.slug,
@@ -183,7 +184,7 @@ async function fetchCategories(countryId: number, countryCode: string): Promise<
         MIN_STORES_FOR_PAGE,
     );
     return rows.map((r) => {
-        const cat = localizeCategory(countryCode, r.name, r.slug);
+        const cat = localizeCategory(defaultLangForCountry(countryCode), r.name, r.slug);
         return { slug: cat.slug, name: cat.name, productCount: Number(r.n) };
     });
 }

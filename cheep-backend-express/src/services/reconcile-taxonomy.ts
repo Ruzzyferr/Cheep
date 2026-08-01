@@ -12,6 +12,8 @@
  * canlıda denenmek zorunda kalmasın diye ayrıldı.
  */
 
+import { slugifyName } from '../config/category-i18n.js';
+
 export interface OwnedCategory {
     id: number;
     slug: string;
@@ -63,6 +65,14 @@ export type ReconcileOp =
           toSlug: string;
           reparentChildIds: number[];
       }
+    | {
+          /** ASCII olmayan slug'ı URL-güvenli karşılığına çevirir. */
+          kind: 'renameSlug';
+          categoryId: number;
+          countryId: number;
+          oldSlug: string;
+          newSlug: string;
+      }
     | { kind: 'deleteCategory'; categoryId: number; countryId: number; slug: string };
 
 export interface CategoryRedirect {
@@ -92,6 +102,12 @@ export interface ReconcileOptions {
 }
 
 const key = (countryId: number, slug: string) => `${countryId}|${slug}`;
+
+/**
+ * Slug'ı URL-güvenli ASCII'ye indirger. Çeviri sözlüğüyle aynı katlamayı
+ * kullanır ki iki taraf aynı sonucu üretsin.
+ */
+const asciiSlug = (slug: string): string => slugifyName(slug);
 
 /**
  * Slug'ı anlamlı kelimelere ayırır. Bağlaçlar atılır: ikiz kategoriler tam da
@@ -386,7 +402,36 @@ export function planReconciliation(
         .map((n) => ({ node: n, score: ownCountrySubtreeCount(n, nodes, remaining) }))
         .concat(planned);
 
+    // 5) ASCII olmayan slug'ları URL-güvenli hale getir.
+    //
+    // Canlıda `pirinç`, `bisküvi`, `kuruyemiş`, `sünger-bez` gibi slug'lar
+    // vardı; URL'de yüzde-kodlanıp `/kategoria/bisk%C3%BCvi` oluyorlar.
+    // Silinecek ya da birleşecek kategorilere dokunmaya gerek yok.
+    const slugsInUse = new Set(nodes.map((n) => key(n.country_id, n.slug)));
+    for (const n of nodes) {
+        if (doomedIds.has(n.id)) continue;
+        const ascii = asciiSlug(n.slug);
+        if (ascii === n.slug || ascii.length === 0) continue;
+        // Hedef slug başka bir kategoride kullanılıyorsa dokunma: unique index
+        // patlar ve hangisinin kalacağı bir insan kararıdır.
+        if (slugsInUse.has(key(n.country_id, ascii))) continue;
+        slugsInUse.add(key(n.country_id, ascii));
+        ops.push({
+            kind: 'renameSlug',
+            categoryId: n.id,
+            countryId: n.country_id,
+            oldSlug: n.slug,
+            newSlug: ascii,
+        });
+    }
+
     const redirects: CategoryRedirect[] = [];
+
+    // Yeniden adlandırılan slug'ın eskisi yeniye yönlenir.
+    for (const op of ops) {
+        if (op.kind !== 'renameSlug') continue;
+        redirects.push({ countryId: op.countryId, oldSlug: op.oldSlug, newSlug: op.newSlug });
+    }
 
     // Birleşen ikizin eski slug'ı doğrudan kanoniğe yönlenir — hedef kesin.
     for (const op of ops) {
