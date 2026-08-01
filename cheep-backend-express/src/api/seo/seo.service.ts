@@ -64,6 +64,12 @@ export interface SeoCity {
     stores: { slug: string; name: string; branchCount: number }[];
 }
 
+/** Silinen/yeniden adlandırılan kategori slug'ı → hayatta kalan karşılığı. */
+export interface SeoRedirect {
+    from: string;
+    to: string;
+}
+
 export interface SeoCountryExport {
     code: string;
     name: string;
@@ -72,6 +78,8 @@ export interface SeoCountryExport {
     categories: SeoCategory[];
     stores: SeoStore[];
     cities: SeoCity[];
+    /** Site üretimi bunlardan 301 kuralları çıkarır. */
+    redirects: SeoRedirect[];
 }
 
 export interface SeoExport {
@@ -281,6 +289,29 @@ async function fetchCities(countryId: number, countryCode: string): Promise<SeoC
         }));
 }
 
+/**
+ * Taksonomi birleştirmesinde silinen kategori slug'ları.
+ *
+ * Yayındaki `/kategori/meyve-ve-sebze` gibi URL'ler birleştirme sonrası
+ * kayboldu. Yönlendirme olmadan silmek birikmiş sıralamayı yakar; site üretimi
+ * bu listeden 301 kuralları çıkarır. Slug'lar ülkenin diline çevrilir —
+ * kategori slug'ları da çevriliyor (bkz. config/category-i18n.ts).
+ */
+async function fetchRedirects(countryId: number, countryCode: string): Promise<SeoRedirect[]> {
+    const rows = await prisma.categoryRedirect.findMany({
+        where: { country_id: countryId },
+        select: { old_slug: true, new_slug: true },
+        orderBy: { old_slug: 'asc' },
+    });
+    const lang = defaultLangForCountry(countryCode);
+    return rows.map((r) => ({
+        // Eski slug ÇEVRİLMEZ: yayındaki hâli neyse o. Yeni slug çevrilir,
+        // çünkü hedef sayfa o dilde yayınlanıyor.
+        from: r.old_slug,
+        to: localizeCategory(lang, '', r.new_slug).slug,
+    }));
+}
+
 /** Tüm ülkeler için sayfa üretimine yetecek veriyi toplar. */
 export async function buildExport(): Promise<SeoExport> {
     const countries = await prisma.country.findMany({
@@ -302,6 +333,7 @@ export async function buildExport(): Promise<SeoExport> {
             categories: await fetchCategories(c.id, c.code),
             stores: await fetchStores(c.id),
             cities: await fetchCities(c.id, c.code),
+            redirects: await fetchRedirects(c.id, c.code),
         });
     }
 

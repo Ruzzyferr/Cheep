@@ -181,6 +181,43 @@ if (fs.existsSync(dataFile)) {
   console.log('içerik:      .seo-data.json yok — yalnızca tanıtım sayfaları üretildi')
 }
 
+// ------------------------------------------------------- kategori 301'leri
+/**
+ * Taksonomi birleştirmesinde silinen/yeniden adlandırılan kategori slug'ları
+ * için 301 kuralları.
+ *
+ * `/kategori/meyve-ve-sebze` gibi URL'ler yayındaydı ve birleştirme sonrası
+ * kayboldu. Yönlendirmeden vazgeçmek birikmiş sıralamayı yakar ve kullanıcıyı
+ * 404'e düşürür.
+ *
+ * Dosya HER ZAMAN yazılır (boş olsa da): Caddyfile onu `import` ediyor ve
+ * eksik dosya Caddy'yi başlatmaz.
+ */
+{
+  const lines = []
+  if (seoData) {
+    for (const country of seoData.countries) {
+      const locale = routes.COUNTRY_LOCALE[country.code]
+      if (!locale) continue
+      for (const r of country.redirects ?? []) {
+        const from = routes.categoryPath(locale, r.from)
+        const to = routes.categoryPath(locale, r.to)
+        if (from === to) continue
+        lines.push(`redir ${from} ${to} 301`)
+        // Sayfalı hâlleri de taşı: /kategori/<slug>/2 gibi URL'ler indekste.
+        lines.push(`redir ${from}/* ${to} 301`)
+      }
+    }
+  }
+  const header = '# Otomatik üretildi (scripts/prerender.mjs). Elle düzenlemeyin.'
+  const body =
+    lines.length > 0
+      ? [header, ...lines, ''].join('\n')
+      : ['# Yönlendirme yok.', ''].join('\n')
+  fs.writeFileSync(path.join(dist, 'redirects.caddy'), body)
+  console.log(`301:         ${lines.length / 2} kategori yönlendirmesi → dist/redirects.caddy`)
+}
+
 // ------------------------------------------------------------------- 404
 /**
  * Gerçek 404 sayfası.

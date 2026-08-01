@@ -14,6 +14,12 @@
 :80 {
 	root * /srv
 	encode gzip zstd
+
+	# Taksonomi birleştirmesinde silinen kategori slug'ları için 301'ler.
+	# Build üretiyor (scripts/prerender.mjs) ve boş olsa da HER ZAMAN yazıyor —
+	# eksik import dosyası Caddy'yi başlatmaz.
+	import /srv/redirects.caddy
+
 	try_files {path} {path}/index.html
 	file_server
 
