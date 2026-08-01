@@ -1,0 +1,14 @@
+[Unit]
+Description=Cheep sitesinin SEO sayfalarını taze fiyatlarla yeniden üretir
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/cheep/deploy/build-site.sh
+# Derleme CPU'yu doyuruyor; API ve scrape'in önüne geçmesin.
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=1800
+StandardOutput=append:/var/log/cheep-site-build.log
+StandardError=append:/var/log/cheep-site-build.log

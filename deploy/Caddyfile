@@ -11,10 +11,32 @@
 cheep.live {
 	encode gzip
 	reverse_proxy website:80
+
+	# Erişim logu. Bu ana kadar HİÇ açık değildi ve "Googlebot siteyi tarıyor
+	# mu?" sorusuna bakacak veri yoktu — 7.800 SEO sayfası yayına girerken bu
+	# körlük kabul edilemez. Caddy kendi rotasyonunu yapıyor (harici logrotate
+	# gerekmiyor); üç dosya × 10 MB ile disk sınırlı.
+	log {
+		output file /var/log/caddy/cheep.live.log {
+			roll_size 10MiB
+			roll_keep 3
+			roll_keep_for 720h
+		}
+		format json
+	}
 }
 
 api.cheep.live {
 	encode gzip
+
+	log {
+		output file /var/log/caddy/api.cheep.live.log {
+			roll_size 10MiB
+			roll_keep 3
+			roll_keep_for 720h
+		}
+		format json
+	}
 	reverse_proxy backend:3000 {
 		# XFF'i istemcinin gönderdiğine EKLEME, gerçek uzak adresle DEĞİŞTİR.
 		# Backend `trust proxy=1` ile son atlamayı istemci sayıyor; bu satır

@@ -72,9 +72,12 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
+      # Erişim logları: tarayıcı trafiğini (Googlebot dahil) görebilmek için.
+      - caddy_logs:/var/log/caddy
       - caddy_config:/config
 
 volumes:
+  caddy_logs:
   cheep_pgdata:
   caddy_data:
   caddy_config:

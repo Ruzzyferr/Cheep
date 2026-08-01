@@ -7,7 +7,11 @@ import { renderToString } from 'react-dom/server'
 import { StaticRouter } from 'react-router'
 import { AppRoutes } from './AppRoutes'
 import { buildHead, renderHead, PAGES, pageUrl, alternatesFor } from './seo/pages'
+import { buildContentHead } from './seo/content'
 import { LOCALES, localePrefix, DICTS } from './i18n'
+import type { PageData } from './data/context'
+import { serializeData, DATA_GLOBAL } from './data/context'
+import * as routes from './data/routes'
 
 /**
  * Prerender giriş noktası. `vite build --ssr src/entry-server.tsx` ile derlenir,
@@ -17,12 +21,25 @@ import { LOCALES, localePrefix, DICTS } from './i18n'
  * çalışmamalı: WebGL hero (three.js) lazy + istemci-özel, ScrollTrigger ve Lenis
  * effect içinde dinamik import ediliyor. Effect'ler renderToString'de hiç çalışmaz.
  */
-export function render(url: string): string {
+export function render(url: string, pageData?: PageData | null): string {
   return renderToString(
     <StaticRouter location={url}>
-      <AppRoutes />
+      <AppRoutes pageData={pageData ?? null} />
     </StaticRouter>,
   )
 }
 
-export { buildHead, renderHead, PAGES, pageUrl, alternatesFor, LOCALES, localePrefix, DICTS }
+export {
+  buildHead,
+  renderHead,
+  buildContentHead,
+  PAGES,
+  pageUrl,
+  alternatesFor,
+  LOCALES,
+  localePrefix,
+  DICTS,
+  serializeData,
+  DATA_GLOBAL,
+  routes,
+}

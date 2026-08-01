@@ -1,0 +1,12 @@
+[Unit]
+Description=Cheep site üretimi zamanlayıcısı
+
+[Timer]
+# 04:00 UTC — PL scrape 03:00'te bitiyor, fiyat düşüşü tespiti 08:00'de.
+# Site böylece günün en taze verisiyle üretiliyor ve iki iş çakışmıyor.
+OnCalendar=*-*-* 04:00:00
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

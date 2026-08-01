@@ -4,12 +4,23 @@
 # (scripts/prerender.mjs). Sıralama önemli:
 #   {path}            → gerçek dosya (asset, font, robots.txt, sitemap.xml)
 #   {path}/index.html → prerender edilmiş sayfa (/pl → /pl/index.html)
-#   /index.html       → SPA fallback (bilinmeyen yollar; router ana sayfaya alır)
+#   (eşleşme yoksa)   → gerçek HTTP 404 + dist/404.html
+#
+# SPA fallback (/index.html) BİLEREK KALDIRILDI. Her geçerli URL prerender
+# edildiği için geri dönüşe gerek yok; varken bilinmeyen yollara anasayfa
+# HTML'ini 200 ile sunuyordu. Bu hem Google için "soft 404" (silinmiş ürün
+# sayfaları indekste kalıyordu) hem de istemci farklı bir sayfa çizdiği için
+# React hydration uyuşmazlığı (#418) üretiyordu.
 :80 {
 	root * /srv
 	encode gzip zstd
-	try_files {path} {path}/index.html /index.html
+	try_files {path} {path}/index.html
 	file_server
+
+	handle_errors {
+		rewrite * /404.html
+		file_server
+	}
 
 	# İçerik hash'li asset'ler — adları değişmeden içerikleri değişemez.
 	@immutable path /assets/*

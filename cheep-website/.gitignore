@@ -28,3 +28,7 @@ shots
 *.njsproj
 *.sln
 *.sw?
+
+# Üretilen SEO verisi — git'te tutulmaz (3,5 MB, her gece yenilenir).
+# Docker build bağlamına GİRMESİ gerekiyor, o yüzden .dockerignore'da YOK.
+.seo-data.json
