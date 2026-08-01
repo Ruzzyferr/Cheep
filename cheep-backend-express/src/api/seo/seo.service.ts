@@ -180,15 +180,17 @@ async function fetchStores(countryId: number): Promise<SeoStore[]> {
     const rows = await prisma.$queryRawUnsafe<
         { slug: string; name: string; logo_url: string | null; branches: bigint; cities: bigint; products: bigint }[]
     >(
+        // DİKKAT: branches ve prices'ı aynı sorguda JOIN'lemeyin. İkisi de
+        // store_id'ye bağlı olduğu için join kartezyen çarpım üretir —
+        // Migros'ta 10.247 şube × 5.405 fiyat = 55 milyon ara satır, tek başına
+        // dışa aktarımı dakikalarca sürdürüyordu. Skaler alt sorgular her
+        // tabloyu kendi indeksiyle bir kez tarar.
         `SELECT s.slug, s.name, s.logo_url,
-                COUNT(DISTINCT b.id)::bigint      AS branches,
-                COUNT(DISTINCT b.city)::bigint    AS cities,
-                COUNT(DISTINCT sp.product_id)::bigint AS products
+                (SELECT COUNT(*)          FROM store_branches b WHERE b.store_id = s.id)::bigint AS branches,
+                (SELECT COUNT(DISTINCT b.city) FROM store_branches b WHERE b.store_id = s.id AND b.city IS NOT NULL)::bigint AS cities,
+                (SELECT COUNT(*)          FROM store_prices sp   WHERE sp.store_id = s.id)::bigint AS products
          FROM stores s
-         LEFT JOIN store_branches b ON b.store_id = s.id
-         LEFT JOIN store_prices sp  ON sp.store_id = s.id
          WHERE s.country_id = $1 AND s.slug IS NOT NULL
-         GROUP BY s.slug, s.name, s.logo_url
          ORDER BY products DESC`,
         countryId,
     );
