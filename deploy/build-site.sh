@@ -82,6 +82,17 @@ fi
 
 docker image prune -f >/dev/null 2>&1 || true
 
+# --- 3b) IndexNow: Bing/Yandex'e değişenleri bildir --------------------
+# Google'ın karşılığı yok (sitemap + Search Console ile ilerliyoruz) ama
+# Bing ve Yandex saatler içinde tarıyor. Yalnızca fiyatı değişen ürünler
+# gönderiliyor — her gece 6.800 URL bildirmek protokolün kötüye kullanımı.
+INDEXNOW_KEY=$(grep '^INDEXNOW_KEY=' "$ENV_FILE" 2>/dev/null | cut -d= -f2- || true)
+if [ -n "${INDEXNOW_KEY:-}" ]; then
+    docker run --rm         -v "$SITE_DIR:/app" -w /app         -e INDEXNOW_KEY="$INDEXNOW_KEY"         node:22-alpine node scripts/indexnow.mjs 2>&1 | sed 's/^/  /' || log "  indexnow atlandı (hata)"
+else
+    log "  INDEXNOW_KEY yok — IndexNow atlandı"
+fi
+
 # --- 4) duman testi ------------------------------------------------------
 sleep 5
 CODE=$(curl -s -o /dev/null -w '%{http_code}' https://cheep.live/ || echo 000)
