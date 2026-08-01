@@ -7,7 +7,7 @@ import { summarize } from '../../data/types'
 import { Reveal } from '../ui/Reveal'
 import { formatMoney, formatPct } from '../../lib/money'
 import { formatNumber } from '../../lib/format'
-import { productPath, storePath, reportPath, comparePath, browsePath, categoryPath } from '../../data/routes'
+import { productPath, storePath, reportPath, comparePath, browsePath, productsPath, categoryPath } from '../../data/routes'
 
 /**
  * Anasayfanın canlı vitrini: gerçek fiyat düşüşleri ve market sıralaması.
@@ -168,10 +168,22 @@ export function LiveDrops() {
               ))}
             </Reveal>
 
-            <div className="mt-10 text-center">
+            {/*
+              Birincil aksiyon ÜRÜNLER sayfası: kullanıcı buraya ürün aramaya
+              geliyor, kategori/market/şehir dizinine değil. Dizin (`/fiyatlar`)
+              footer'dan erişilebilir kalıyor — 7.665 SEO sayfasına iç bağlantıyı
+              o dağıtıyor, öksüz bırakılamaz.
+            */}
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                to={productsPath(locale)}
+                className="inline-flex min-h-11 items-center rounded-full bg-clementine-deep px-8 py-4 text-lg font-semibold text-white transition-colors hover:bg-clementine-dark"
+              >
+                {c.products.title} →
+              </Link>
               <Link
                 to={browsePath(locale)}
-                className="inline-flex min-h-11 items-center rounded-full bg-clementine-deep px-8 py-4 text-lg font-semibold text-white transition-colors hover:bg-clementine-dark"
+                className="inline-flex min-h-11 items-center rounded-full border border-ink/15 px-6 py-4 font-semibold text-ink transition-colors hover:border-clementine hover:text-clementine-deep"
               >
                 {c.browse.title} →
               </Link>

@@ -7,7 +7,6 @@ export const pl: Dict = {
   nav: {
     links: [
       { label: 'Produkty', href: '/produkty' },
-      { label: 'Ceny', href: '/ceny' },
       { label: 'Jak to działa', href: '#how' },
       { label: 'Oszczędności', href: '#savings' },
       { label: 'Kraje', href: '#coverage' },

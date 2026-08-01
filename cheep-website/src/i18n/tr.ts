@@ -8,7 +8,6 @@ export const tr: Dict = {
   nav: {
     links: [
       { label: 'Ürünler', href: '/urunler' },
-      { label: 'Fiyatlar', href: '/fiyatlar' },
       { label: 'Nasıl çalışır', href: '#how' },
       { label: 'Tasarruf', href: '#savings' },
       { label: 'Ülkeler', href: '#coverage' },
