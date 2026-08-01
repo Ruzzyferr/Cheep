@@ -6,6 +6,7 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { API_BASE_URL, API_TIMEOUT, API_ENDPOINTS } from '../constants/api';
 import { authStorage, countryStorage } from '../utils/storage';
+import i18n from '../i18n';
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -61,7 +62,17 @@ apiClient.interceptors.request.use(
         config.headers['x-country'] = country;
       }
     }
-    
+
+    // Dil scoping: kategori adları veritabanında yalnızca Türkçe tutuluyor ve
+    // sunucuda çevriliyor. Bu header olmadan İngilizce uygulamada "Meyve &
+    // Sebze", "Şarküteri" görünüyordu. Ülkeden AYRI: Türkiye'de yaşayıp
+    // uygulamayı İngilizce kullanan biri TR kataloğunu İngilizce kategori
+    // adlarıyla görmeli.
+    if (config.headers && !config.headers['x-lang']) {
+      config.headers['x-lang'] = i18n.language || 'tr';
+    }
+
+
     // Log request in development — sadece method + url. Gövde (config.data) ASLA
     // loglanmaz: login/register parolaları ve token/refreshToken sızıntısını önler.
     if (__DEV__) {
