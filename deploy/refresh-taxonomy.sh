@@ -71,11 +71,19 @@ print('     eşleme:', len(m.get('main_to_id', {})), 'alt kategori')
 log "4/5 deterministik onarımlar (güvenli mod)"
 CID=$(docker compose -f "$COMPOSE" ps -q backend 2>/dev/null || true)
 [ -n "$CID" ] || CID=deploy-backend-1
+
+# Devletin ağacını container'a taşı. KANONİK OTORİTE BU DOSYA: ikiz kararında
+# ürün sayısı DEĞİL devletin taksonomisi kazanır. Dosya verilmezse veri konuşur
+# ve elle tutulan PL listesinden gelen bir slug, devletinkini yenebilir —
+# tam olarak temizlemeye çalıştığımız durum.
+docker cp taxonomy.json "$CID:/tmp/taxonomy.json" 2>/dev/null || \
+  log "     taxonomy.json kopyalanamadı — kanonik otorite olmadan devam"
+
 docker exec "$CID" npx tsx scripts/reconcile-taxonomy.ts \
-  --safe-only --apply --taxonomy /dev/null 2>&1 | sed 's/^/     /' || \
+  --safe-only --apply --taxonomy /tmp/taxonomy.json 2>&1 | sed 's/^/     /' || \
   log "     reconcile hata verdi — bir sonraki haftaya bırakılıyor"
 
 log "5/5 sağlık raporu"
-docker exec "$CID" npx tsx scripts/taxonomy-health.ts 2>&1 | sed 's/^/     /' || true
+docker exec "$CID" npx tsx scripts/taxonomy-health.ts --taxonomy /tmp/taxonomy.json 2>&1 | sed 's/^/     /' || true
 
 log "taksonomi tazeleme bitti"

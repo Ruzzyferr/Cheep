@@ -10,8 +10,36 @@
  * Haftalık taksonomi tazelemesinin son adımı bunu basar. Amaç düzeltmek değil,
  * GÖRÜNÜR KILMAK: hangi kategoriler çevrilmemiş, kaç ürün kategorisiz kalmış.
  */
+import * as fs from 'node:fs';
 import { prisma } from '../src/utils/prisma.client.js';
 import { CATEGORY_NAMES } from '../src/config/category-i18n.js';
+
+/**
+ * `--taxonomy <yol>` — devletin türettiği ağaç (mf_taxonomy.py çıktısı).
+ *
+ * TR kataloğunun TEK kaynağı marketfiyati.org.tr. Bu dosyada olmayan bir TR
+ * kategorisi, elle tutulan listelerden sızmış bir kalıntıdır: ürünler daemon'ın
+ * bir sonraki turunda devletin kategorisine taşınır ve kalıntı boşalıp silinir.
+ * Rapor bunu görünür kılar ki "taşınma oldu mu" beklemeden bilinsin.
+ */
+function canonicalTrSlugs(): Set<string> | null {
+    const i = process.argv.indexOf('--taxonomy');
+    const path = i >= 0 ? process.argv[i + 1] : undefined;
+    if (!path || !fs.existsSync(path)) return null;
+    try {
+        const tax = JSON.parse(fs.readFileSync(path, 'utf-8')) as {
+            tops: Array<{ slug: string; children: Array<{ slug: string }> }>;
+        };
+        const out = new Set<string>();
+        for (const top of tax.tops ?? []) {
+            out.add(top.slug);
+            for (const c of top.children ?? []) out.add(c.slug);
+        }
+        return out;
+    } catch {
+        return null;
+    }
+}
 
 /** Bu orandan fazla ürün "Diğer"de ise sınıflandırma bozulmuş demektir. */
 const OTHER_SHARE_WARN = 0.15;
@@ -23,6 +51,7 @@ async function main() {
     });
 
     let problems = 0;
+    const canonicalTr = canonicalTrSlugs();
 
     for (const country of countries) {
         const total = await prisma.product.count({ where: { country_id: country.id } });
@@ -82,6 +111,24 @@ async function main() {
             if (untranslated.length > 15) console.log(`       … ve ${untranslated.length - 15} tane daha`);
         } else {
             console.log('  ✓ tüm kategoriler çevrili');
+        }
+
+        // 4) TR: devletin ağacında OLMAYAN kategoriler.
+        //    Ülke başına taksonomi ilkesinin ihlali — bu slug'lar elle tutulan
+        //    listelerden sızmış kalıntılardır.
+        if (country.code === 'TR' && canonicalTr) {
+            const foreign = cats.filter((c) => !canonicalTr.has(c.slug));
+            if (foreign.length > 0) {
+                problems += 1;
+                console.log(
+                    `  ⚠️  devletin ağacında olmayan kategori: ${foreign.length} — ` +
+                        'daemon turunda ürünleri taşınacak, sonra boşalıp silinecek:',
+                );
+                for (const c of foreign.slice(0, 15)) console.log(`       ${c.slug}`);
+                if (foreign.length > 15) console.log(`       … ve ${foreign.length - 15} tane daha`);
+            } else {
+                console.log('  ✓ tüm kategoriler devletin ağacından');
+            }
         }
     }
 

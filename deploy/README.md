@@ -80,6 +80,39 @@ Zamanlama tesadüf değil: Pazar, PL rotasyonunun dinlenme günü (çakışma yo
 01:30, PL pipeline'ından (03:00) ve site üretiminden (04:00) önce — yeni
 kategoriler o gecenin ingest'ine ve site build'ine yetişir.
 
+### ⚠️ Ülke başına taksonomi — kanonik otorite
+
+**TR'nin kategorileri YALNIZCA devletten gelir** (marketfiyati.org.tr →
+`mf_taxonomy.py`). **PL'ninkiler yalnızca kendi kaynağından**
+(`standard-categories.ts` + `countries/poland/category_map.json`). İki ağaç
+`country_id` ile ayrıldı ve aynı slug iki ülkede yan yana var olabilir.
+
+`reconcile-taxonomy`'yi **HER ZAMAN `--taxonomy` ile çalıştırın**:
+
+```bash
+docker cp taxonomy.json deploy-backend-1:/tmp/taxonomy.json
+docker exec deploy-backend-1 npx tsx scripts/reconcile-taxonomy.ts --taxonomy /tmp/taxonomy.json
+```
+
+Dosya verilmezse ikiz kararını **ürün sayısı** verir ve elle tutulan PL
+listesinden gelen bir slug devletinkini yenebilir — `sut-urunleri`,
+`et-tavuk-balik`, `meyve-sebze` gibi. Haftalık iş bunu zaten otomatik yapıyor;
+uyarı ELLE çalıştırmalar için.
+
+### Kendi kendine yakınsama
+
+Yanlış kategoriye düşmüş TR ürünleri için elle bir şey yapmak gerekmez:
+
+1. Haftalık iş devletin ağacını yeniden türetir ve `category_map.json`'u yeniler
+2. Fetch daemon'ı 5-6 günlük turunda her ürünü yeniden çeker; ingest, mevcut
+   ürünün `category_id`'sini payload'daki devlet kategorisiyle **günceller**
+   (`product-matcher.service.ts`)
+3. Boşalan eski kategoriler haftalık güvenli onarımda silinir ve 301 üretilir
+
+Yani bir kategori kalıntısı en geç **iki hafta** içinde kendiliğinden temizlenir.
+Sağlık raporundaki "devletin ağacında olmayan kategori" satırı bu geçişi
+izlemek içindir — sayı her hafta azalmalı.
+
 **İkiz birleştirme otomatik YAPILMAZ.** Haftalık iş `--safe-only` ile çalışır:
 ülke ayrıştırma, kırık parent bağı, ASCII slug ve ürünsüz kategori silme gibi
 deterministik onarımları uygular. İki meşru kategoriyi birleştirmek geri
