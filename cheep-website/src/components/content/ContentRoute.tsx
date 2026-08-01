@@ -1,5 +1,5 @@
 import { useContext, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { SiteLink as Link } from '../ui/SiteLink'
 import { LocaleContext } from '../../i18n'
 import { CONTENT } from '../../i18n/content'
 import { PageDataContext } from '../../data/context'

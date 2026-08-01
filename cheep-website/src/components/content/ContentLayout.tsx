@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { SiteLink as Link } from '../ui/SiteLink'
 import { Nav } from '../ui/Nav'
 import { Footer } from '../sections/Footer'
 
@@ -15,12 +15,27 @@ export interface Crumb {
  * sayfa başlıklarında (`seo/content.ts`) üretiliyor, buradaki görsel karşılığı.
  * İkisi aynı sırayı göstermeli, yoksa yapılandırılmış veri uyarısı alınır.
  */
-export function ContentLayout({ crumbs, children }: { crumbs: Crumb[]; children: ReactNode }) {
+export function ContentLayout({
+  crumbs,
+  children,
+  wide = false,
+}: {
+  crumbs: Crumb[]
+  children: ReactNode
+  /**
+   * Geniş kabuk — ürün ızgaraları için.
+   *
+   * Varsayılan 1240px okunabilir satır uzunluğu içindir ve METİN sayfalarında
+   * doğrudur. Ürün ızgarasında ise 1920px'lik ekranda iki yanda ~340px boşluk
+   * bırakıyor ve satır başına yalnızca 4 ürün sığıyordu.
+   */
+  wide?: boolean
+}) {
   return (
     <>
       <Nav />
       <main className="bg-cream pb-20 pt-28 md:pt-32">
-        <div className="container-cheep">
+        <div className={wide ? 'container-cheep-wide' : 'container-cheep'}>
           <Breadcrumbs crumbs={crumbs} />
           {children}
         </div>

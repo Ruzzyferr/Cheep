@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { Link } from 'react-router-dom'
+import { SiteLink as Link } from '../../components/ui/SiteLink'
 import { LocaleContext } from '../../i18n'
 import { CONTENT } from '../../i18n/content'
 import { usePageData } from '../../data/context'

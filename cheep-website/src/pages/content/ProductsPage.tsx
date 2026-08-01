@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { SiteLink as Link } from '../../components/ui/SiteLink'
 import { LocaleContext } from '../../i18n'
 import { CONTENT, fill } from '../../i18n/content'
 import { usePageData } from '../../data/context'
@@ -154,6 +154,7 @@ export function ProductsPage() {
 
   return (
     <ContentLayout
+      wide
       crumbs={[
         { label: c.breadcrumbHome, href: locale === 'tr' ? '/' : '/pl' },
         { label: c.products.title },
@@ -213,7 +214,17 @@ export function ProductsPage() {
         </div>
 
         {/* Kategoriler — mobilde katlanır, masaüstünde yapışkan sol sütun */}
-        <aside className="lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:self-start lg:overflow-y-auto">
+        {/*
+          data-lenis-prevent ŞART: sitede Lenis smooth-scroll var ve tüm
+          tekerlek olaylarını yakalayıp pencere kaydırmasına çeviriyor. Bu
+          öznitelik olmadan kullanıcı fareyi kategori listesinin üstüne getirip
+          tekerleği çevirdiğinde liste değil SAYFA kayıyordu — uzun kategori
+          listesinin altını görmek imkânsızdı.
+        */}
+        <aside
+          data-lenis-prevent
+          className="lg:col-start-1 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:self-start lg:overflow-y-auto lg:pr-1"
+        >
           <button
             type="button"
             onClick={() => setCategoriesOpen((v) => !v)}
@@ -278,7 +289,7 @@ export function ProductsPage() {
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                 {products.map((p, i) => (
                   <ApiProductCard
                     key={p.slug ?? `${p.name}-${i}`}

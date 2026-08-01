@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { SiteLink as Link } from '../ui/SiteLink'
 import { CheepBird } from '../brand/CheepBird'
 import { Footer } from '../sections/Footer'
 import { useT, useHref } from '../../i18n'

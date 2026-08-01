@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
+import { SiteLink as Link } from './SiteLink'
 import { CheepBird } from '../brand/CheepBird'
 import { cn } from '../../lib/utils'
 import { useT, useLocale, useHref, localeHref, stripLocale, LOCALES } from '../../i18n'

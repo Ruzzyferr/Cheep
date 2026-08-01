@@ -135,6 +135,20 @@
     padding-inline: clamp(1.25rem, 4vw, 3rem);
   }
 
+  /*
+   * Geniş kabuk — ürün ızgaraları.
+   *
+   * 1240px okunabilir satır uzunluğu için doğru bir sınır ama ürün ızgarasında
+   * geniş ekranda iki yanda büyük boşluk bırakıyor. Izgara zaten sütun sayısını
+   * artırarak boşluğu değerlendiriyor; metin sayfaları dar kalmaya devam ediyor.
+   */
+  .container-cheep-wide {
+    width: 100%;
+    max-width: 1720px;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 3vw, 2.5rem);
+  }
+
   .eyebrow {
     font-family: var(--font-mono);
     font-size: 0.72rem;

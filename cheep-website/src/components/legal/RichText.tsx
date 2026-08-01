@@ -1,5 +1,5 @@
 import { Fragment, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { SiteLink as Link } from '../ui/SiteLink'
 import type { Block } from '../../i18n/types'
 import { useHref } from '../../i18n'
 

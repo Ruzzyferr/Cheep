@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { SiteLink as Link } from '../ui/SiteLink'
 import type { Locale } from '../../i18n'
 import type { Product } from '../../data/types'
 import { summarize } from '../../data/types'
