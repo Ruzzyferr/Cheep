@@ -89,11 +89,24 @@ Derleme **yerel** yapılır (`gradlew`), EAS Build kullanılmaz. `android/` ve
 `ios/` klasörleri git'te yok — `expo prebuild` üretir.
 
 ```bash
-npx expo prebuild --platform android --clean
-cd android && ./gradlew bundleRelease
+npm run release:android        # prebuild + bundleRelease + imza denetimi + masaüstüne kopyala
+npm run release:android:apk    # Play'e değil, telefona kurmak için APK
 ```
 
-Tam rehber (imzalama, keystore, sürüm numarası, Play Console, iOS, push mimarisi):
+Prebuild ve gradlew'i **elle çalıştırma**: adımlardan birini atlamak sessizce
+debug anahtarıyla imzalanmış, Play Console'un reddedeceği bir AAB üretiyor.
+Script imzayı üretimden sonra denetler.
+
+İmza anahtarı **proje dışında** yaşar (`~/CheepKeys`, ya da `$CHEEP_KEYSTORE_DIR`)
+ve `android/key.properties`'i her prebuild'de `plugins/withReleaseSigning.js`
+oradan üretir. Bunun sebebi acı: anahtar bir kez `android/app/` altındaydı ve
+`prebuild --clean` onu sildi.
+
+```bash
+npm run keys:new               # yeni upload anahtarı üret (mevcudun üzerine yazmaz)
+```
+
+Tam rehber (imza kasası, sürüm numarası, Play Console, iOS, push mimarisi):
 **[../docs/BUILD-RELEASE.md](../docs/BUILD-RELEASE.md)**
 
 ## 🔔 Bildirimler

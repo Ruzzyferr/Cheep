@@ -12,7 +12,8 @@ Amaç: aylar sonra geri dönüldüğünde hatırlamaya gerek kalmaması.
 | **Paket adı** | `com.cheep.mobile` (Android ve iOS aynı) |
 | **Derleme yöntemi** | Yerel `gradlew` (EAS Build **kullanılmıyor**) |
 | **Native klasörler** | `android/` ve `ios/` **git'te DEĞİL** — `expo prebuild` üretir |
-| **İmza anahtarı** | `android/app/cheep-upload.keystore` (yedeği olmadan sürüm çıkamazsın) |
+| **İmza anahtarı** | `~/CheepKeys/` — **proje dışında** (bkz. "İmza kasası") |
+| **Sürüm komutu** | `npm run release:android` (elle prebuild + gradlew yerine) |
 | **Java** | JDK 17 — `C:\Program Files\Java\jdk-17` |
 | **Kabuk** | Git Bash (cmd değil — `./gradlew` cmd'de çalışmaz) |
 
@@ -27,7 +28,8 @@ Amaç: aylar sonra geri dönüldüğünde hatırlamaya gerek kalmaması.
    `app.json` içindeki `android.googleServicesFile` bunu işaret eder ve
    `prebuild` sırasında `android/app/` altına kopyalanır.
    ⚠️ Doğrudan `android/app/` içine koyma — o klasör her prebuild'de siliniyor.
-4. **Keystore** ve `android/key.properties` yerinde olmalı (aşağıya bak).
+4. **İmza kasası** (`~/CheepKeys/`) yerinde olmalı (aşağıya bak). `key.properties`
+   elle konmaz — plugin her prebuild'de kasadan üretir.
 
 ---
 
@@ -52,78 +54,54 @@ yükleme yapılamaz — düşürmek de mümkün değil.
 
 ## Android AAB
 
-⚠️ `--clean` `android/` klasörünü **tamamen siler**. `key.properties` ve
-keystore git'te olmadığı için önce yedekle, sonra geri koy:
-
 ```bash
 cd C:/dev/Cheep/Cheep-Mobile
-
-# 0) İmza dosyalarını kenara al (android/ birazdan silinecek)
-mkdir -p /tmp/sign
-cp android/key.properties android/app/cheep-upload.keystore /tmp/sign/
-
-# 1) Native projeyi üret (app.json / plugin değişikliklerini uygular)
-npx expo prebuild --platform android --clean
-
-# 2) İmza dosyalarını geri koy
-cp /tmp/sign/key.properties android/
-cp /tmp/sign/cheep-upload.keystore android/app/
-
-# 3) İmzalı release paketi
-cd android
-./gradlew bundleRelease
+npm run release:android
 ```
 
-`build.gradle`'daki imza **yapılandırmasını** geri koymana gerek yok — onu
-`plugins/withReleaseSigning.js` her prebuild'de yeniden enjekte ediyor
-(aşağıya bak). Geri konması gereken tek şey anahtarın kendisi.
+Hepsi bu. Script sırayla: kasayı doğrular → `expo prebuild --clean` çalıştırır →
+`gradlew bundleRelease` → **imzayı denetler** → çıktıyı masaüstüne
+`cheep-<sürüm>-vc<kod>.aab` adıyla kopyalar.
 
-Çıktı: `android/app/build/outputs/bundle/release/app-release.aab`
-
-Anlamlı bir adla kopyala:
+Elle prebuild/gradlew çalıştırmaya gerek yok ve **çalıştırılmamalı** — adımlardan
+birini atlamak sessizce debug imzalı bir AAB üretebiliyor.
 
 ```bash
-cp app/build/outputs/bundle/release/app-release.aab \
-   ../../cheep-1.3.0-vc15.aab
+npm run release:android:apk        # Play'e değil, telefona kurmak için APK
+npm run release:android -- --skip-prebuild   # yalnızca yeniden derle
 ```
 
-### Test için APK (Play'e değil, doğrudan telefona kurmak için)
+Ara çıktı: `android/app/build/outputs/bundle/release/app-release.aab`
+
+### İmza doğrulaması otomatik
+
+En sinsi hata AAB'nin **debug anahtarıyla** imzalanmış olmasıdır: derleme
+başarılı görünür, dosya üretilir, Play Console yüklemeyi reddeder. Script bunu
+üretimden sonra sertifika parmak izini kasadakiyle karşılaştırarak yakalar ve
+eşleşmezse hata koduyla çıkar. Elle kontrol gerekirse:
 
 ```bash
-./gradlew assembleRelease
-# → android/app/build/outputs/apk/release/app-release.apk
-adb install -r app/build/outputs/apk/release/app-release.apk
+"/c/Program Files/Java/jdk-17/bin/keytool.exe" -printcert \
+  -jarfile android/app/build/outputs/bundle/release/app-release.aab
 ```
 
-### İmzayı doğrula — BUNU HER SÜRÜMDE YAP
-
-En sinsi hata: AAB'nin **debug anahtarıyla** imzalanmış olması. Derleme
-başarılı görünür, dosya üretilir, ama Play Console yüklemeyi reddeder.
-Parmak izini yayındaki sürümle karşılaştır — eşleşmeliler:
-
-```bash
-export PATH="/c/Program Files/Java/jdk-17/bin:$PATH"
-
-# AAB'yi imzalayan sertifika
-unzip -p app/build/outputs/bundle/release/app-release.aab META-INF/*.RSA \
-  | keytool -printcert | grep -E "Owner:|SHA1:"
-```
-
-Beklenen (1.3.0 itibarıyla yayındaki anahtar):
-
-```
-Owner: CN=Cheep, OU=Mobile, O=Cheep, L=Istanbul, C=TR
-SHA1:  9D:E5:2F:06:13:A2:F7:CF:02:D4:10:93:41:E7:B8:71:73:87:AF:73
-```
-
-`Owner: CN=Android Debug` görüyorsan **yükleme**: imza yapılandırması
-uygulanmamış demektir (`key.properties` eksik olabilir).
+`Owner: CN=Android Debug` görüyorsan yükleme — kasa bulunamamış demektir.
 
 ---
 
-## İmzalama
+## İmza kasası
 
-`android/key.properties` (git'te **değil**, elle konur):
+Anahtar **proje klasörünün dışında** yaşar:
+
+```
+~/CheepKeys/                     (veya $CHEEP_KEYSTORE_DIR)
+  cheep-upload.keystore          ← gerçek sır
+  signing.properties             ← parolalar + alias
+  upload_certificate.pem         ← Play Console upload key reset formu için
+  backups/<tarih>/               ← ikinci kopya
+```
+
+`signing.properties`:
 
 ```properties
 storeFile=cheep-upload.keystore
@@ -132,7 +110,43 @@ keyAlias=cheep-upload
 keyPassword=***
 ```
 
-Keystore dosyası: `android/app/cheep-upload.keystore`
+`android/key.properties` **elle konmaz** — `plugins/withReleaseSigning.js` her
+prebuild'de bunu kasadan, keystore'a **mutlak yol** vererek üretir. Kasa yoksa
+dosya yazılmaz, derleme debug imzasına düşer ve prebuild yüksek sesle uyarır.
+
+### Neden proje dışında
+
+Keystore önce `android/app/` altındaydı — yani sürüm çıkarmanın tek geri
+alınamaz sırrı, sürüm çıkarma adımının kendisi tarafından silinen klasörün
+içindeydi. Belgede "önce yedekle" uyarısı vardı ama koruma, o satırı okumayı
+hatırlamaya bağlıydı. Bir `prebuild --clean` anahtarı götürdü ve geri gelmedi.
+
+Şimdi üç katman var:
+
+| Katman | Ne yapar |
+|---|---|
+| Kasa proje dışında | `--clean` anahtarı göremiyor bile |
+| `npm run release:android` | Elle `--clean` yazma ihtiyacını kaldırır, imzayı denetler |
+| `.claude/hooks/guard-destructive.mjs` | `prebuild --clean` ve `rm -rf android/` komutlarını reddeder |
+
+### Yeni anahtar üretmek
+
+```bash
+cd Cheep-Mobile
+npm run keys:new
+```
+
+Kasayı oluşturur, güçlü bir parola üretip yazar, tarihli yedek bırakır ve
+Play Console'a yüklenecek `.pem` sertifikasını dışa aktarır. **Mevcut kasanın
+üzerine yazmaz.**
+
+⚠️ Yeni bir upload anahtarı yayındaki uygulamada kendiliğinden geçerli olmaz:
+Play Console → **App integrity** → **upload key reset** ile `.pem` gönderilip
+Google'ın onaylaması gerekir (1–2 iş günü).
+
+⚠️ **Kasayı harici bir diske veya şifreli buluta da kopyala.** Keystore
+kaybolursa mevcut uygulamaya güncelleme yükleyemezsin; Play App Signing açık
+olduğu için sıfırlama mümkün ama günlerce süren bir destek sürecidir.
 
 ### Neden bir config plugin var
 
@@ -144,12 +158,6 @@ fark etmeden debug imzalı bir AAB üretirsin.
 `plugins/withReleaseSigning.js` bu bloğu her prebuild'de yeniden enjekte eder,
 yani tuzak kapalı. Expo şablonu ileride değişirse plugin sessizce atlamaz —
 anlaşılır bir hata fırlatıp derlemeyi durdurur.
-
-⚠️ **Keystore ve key.properties'in yedeğini güvenli bir yerde tut.** Keystore
-kaybolursa mevcut uygulamaya bir daha güncelleme yükleyemezsin — Play Store
-yeni bir uygulama olarak yayınlamanı ister ve mevcut kullanıcılar güncelleme
-alamaz. (Play App Signing açıksa Google upload anahtarını sıfırlayabilir, ama
-bu yine de günlerce süren bir destek sürecidir.)
 
 ---
 

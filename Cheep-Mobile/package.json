@@ -10,7 +10,10 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "release:android": "node scripts/release-android.mjs",
+    "release:android:apk": "node scripts/release-android.mjs --apk",
+    "keys:new": "node scripts/new-upload-key.mjs"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",

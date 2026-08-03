@@ -1,5 +1,6 @@
 /**
- * Release imzalama yapılandırmasını android/app/build.gradle'a enjekte eder.
+ * Release imzalama yapılandırmasını android/app/build.gradle'a enjekte eder ve
+ * android/key.properties dosyasını PROJE DIŞINDAKİ kasadan yeniden üretir.
  *
  * NEDEN PLUGIN: `expo prebuild --clean` android/ klasörünü tamamen siler ve
  * şablondan yeniden üretir. Şablonun release bloğu DEBUG anahtarıyla imzalıyor
@@ -7,13 +8,36 @@
  * build.gradle'ı elle düzenlersen ilk prebuild'de kaybolur ve fark etmeden
  * debug anahtarıyla imzalanmış bir AAB üretirsin — Play Console bunu reddeder.
  *
- * Plugin her prebuild'de yeniden uygulandığı için o tuzak kapanıyor.
+ * NEDEN KASA (2026-08): upload keystore'u `android/app/` altında tutuyorduk.
+ * Yani sürüm çıkarmanın TEK geri alınamaz sırrı, sürüm çıkarma adımının kendisi
+ * tarafından silinen klasörün içinde duruyordu. Bir `--clean` onu götürdü ve
+ * geri getirilemedi: keystore'un yedeği yoksa Play'e bir daha güncelleme
+ * yükleyemezsin, Google'dan upload anahtarı sıfırlaması istemek gerekir.
  *
- * Anahtarın kendisi git'te DEĞİL: android/key.properties + keystore dosyası
- * elle konuluyor. Dosya yoksa debug imzasına düşüyoruz, böylece anahtarı
- * olmayan biri de projeyi derleyip çalıştırabiliyor.
+ * Belgeye "önce yedekle" yazmak yetmedi — çünkü koruma, onu okumayı hatırlayan
+ * kişiye bağlıydı. Artık anahtar silinebilir bir yerde DURMUYOR:
+ *
+ *     ~/CheepKeys/                     (veya $CHEEP_KEYSTORE_DIR)
+ *       cheep-upload.keystore          ← gerçek sır, git'te ve projede değil
+ *       signing.properties             ← parolalar + alias
+ *
+ * Plugin her prebuild'de android/key.properties'i buradan MUTLAK yolla üretir.
+ * `--clean` artık yalnızca türetilebilir dosyaları siler; sildiği her şey bir
+ * sonraki prebuild'de geri gelir.
+ *
+ * Kasa yoksa key.properties yazılmaz ve derleme debug imzasına düşer — anahtarı
+ * olmayan biri de projeyi derleyip çalıştırabilsin diye. Bu durumda prebuild
+ * yüksek sesle uyarır, çünkü sessiz debug imzası en sinsi hata.
  */
-const { withAppBuildGradle } = require('@expo/config-plugins');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { withAppBuildGradle, withDangerousMod } = require('@expo/config-plugins');
+
+/** Kasanın yeri. Ortam değişkeniyle taşınabilir (CI, başka makine). */
+function vaultDir() {
+  return process.env.CHEEP_KEYSTORE_DIR || path.join(os.homedir(), 'CheepKeys');
+}
 
 const SIGNING_CONFIG = `
         release {
@@ -40,7 +64,97 @@ const OUR_RELEASE_SIGNING =
   '            // Dosya yoksa debug imzasına düşer — anahtarsız da derlenebilsin diye.\n' +
   "            signingConfig rootProject.file('key.properties').exists() ? signingConfigs.release : signingConfigs.debug";
 
-module.exports = function withReleaseSigning(config) {
+/** `key=value` biçimli .properties dosyasını okur. Yoksa null. */
+function readProperties(file) {
+  if (!fs.existsSync(file)) return null;
+  const out = {};
+  for (const raw of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#') || line.startsWith('!')) continue;
+    const eq = line.indexOf('=');
+    if (eq < 0) continue;
+    out[line.slice(0, eq).trim()] = line.slice(eq + 1).trim();
+  }
+  return out;
+}
+
+function warn(lines) {
+  const bar = '─'.repeat(72);
+  console.warn(`\n${bar}\n${lines.join('\n')}\n${bar}\n`);
+}
+
+/**
+ * android/key.properties'i kasadan üretir.
+ *
+ * storeFile MUTLAK yol olarak yazılır — Gradle'ın `file()` çağrısı mutlak yolu
+ * olduğu gibi kullanır, göreli yolu android/app/ altında arar. Mutlak yol
+ * yazmak keystore'un projeye kopyalanmasını gereksiz kılıyor; kopyalanmadığı
+ * için de silinemiyor.
+ *
+ * .properties biçiminde ters bölü kaçış karakteri olduğundan Windows yolları
+ * eğik bölüyle yazılır (Gradle Windows'ta da kabul eder).
+ */
+function withKeyProperties(config) {
+  return withDangerousMod(config, [
+    'android',
+    (cfg) => {
+      const dir = vaultDir();
+      const props = readProperties(path.join(dir, 'signing.properties'));
+      const target = path.join(cfg.modRequest.platformProjectRoot, 'key.properties');
+
+      if (!props) {
+        warn([
+          '⚠️  İMZA KASASI BULUNAMADI — release DEBUG anahtarıyla imzalanacak.',
+          `   Aranan: ${path.join(dir, 'signing.properties')}`,
+          '   Play Console böyle bir AAB\'yi reddeder.',
+          '   Kasayı başka makineden kopyala veya CHEEP_KEYSTORE_DIR ayarla.',
+        ]);
+        // Eski bir key.properties kalmışsa sil: yanlış kasayla imzalanmış
+        // sanmaktansa debug imzasına düşüp uyarı görmek yeğdir.
+        if (fs.existsSync(target)) fs.rmSync(target);
+        return cfg;
+      }
+
+      const storeFile = path.resolve(dir, props.storeFile || 'cheep-upload.keystore');
+      if (!fs.existsSync(storeFile)) {
+        warn([
+          '⚠️  KEYSTORE DOSYASI YOK — release DEBUG anahtarıyla imzalanacak.',
+          `   signing.properties bunu işaret ediyor: ${storeFile}`,
+        ]);
+        if (fs.existsSync(target)) fs.rmSync(target);
+        return cfg;
+      }
+
+      const missing = ['storePassword', 'keyAlias', 'keyPassword'].filter((k) => !props[k]);
+      if (missing.length > 0) {
+        throw new Error(
+          `withReleaseSigning: ${path.join(dir, 'signing.properties')} eksik alan içeriyor: ` +
+            missing.join(', '),
+        );
+      }
+
+      fs.writeFileSync(
+        target,
+        [
+          '# ÜRETİLMİŞ DOSYA — elle düzenleme, her prebuild\'de üzerine yazılır.',
+          `# Kaynak: ${path.join(dir, 'signing.properties')} (plugins/withReleaseSigning.js)`,
+          `storeFile=${storeFile.replace(/\\/g, '/')}`,
+          `storePassword=${props.storePassword}`,
+          `keyAlias=${props.keyAlias}`,
+          `keyPassword=${props.keyPassword}`,
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      console.log(`✓ imza anahtarı kasadan bağlandı: ${storeFile}`);
+      return cfg;
+    },
+  ]);
+}
+
+/** Şablonun debug imzasını bizim release config'imizle değiştirir. */
+function withSigningGradle(config) {
   return withAppBuildGradle(config, (cfg) => {
     let gradle = cfg.modResults.contents;
 
@@ -70,4 +184,11 @@ module.exports = function withReleaseSigning(config) {
     cfg.modResults.contents = gradle;
     return cfg;
   });
+}
+
+module.exports = function withReleaseSigning(config) {
+  return withKeyProperties(withSigningGradle(config));
 };
+
+module.exports.vaultDir = vaultDir;
+module.exports.readProperties = readProperties;
