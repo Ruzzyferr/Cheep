@@ -13,7 +13,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.cheep.mobile"
+      "bundleIdentifier": "com.cheep.mobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "versionCode": 16,
@@ -22,7 +25,11 @@
         "backgroundColor": "#1F6F4A"
       },
       "package": "com.cheep.mobile",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -51,6 +58,12 @@
           "defaultChannel": "price-drops"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "2c82d524-84f5-4b14-8102-862332f5d492"
+      }
+    },
+    "owner": "ruzzyferr"
   }
 }

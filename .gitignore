@@ -143,3 +143,6 @@ deploy/*.pem
 # Üretimi tekrarlanabilir: docs/BUILD-RELEASE.md
 *.aab
 *.apk
+
+# Anahtar kasası yedekleri — asla depoya girmemeli
+CheepKeys-yedek-*/
