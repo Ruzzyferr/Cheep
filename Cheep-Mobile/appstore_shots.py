@@ -17,10 +17,13 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="repla
 
 # Dil/ulke parametreleri: App Store yerellestirmeleri icin ayri setler uretilir.
 # Lehce vitrinde Polonya zincirleri ve zloty gorunmeli -> Varsova koordinati.
+# ui_lang: uygulama ICI dil secicisinden secilecek secenegin etiketi.
+# Tarayici locale'i arayuz dilini DEGISTIRMIYOR (i18n `lng: 'tr'` ile sabit
+# baslatiliyor), o yuzden Profil > Uygulama dili uzerinden gecmek sart.
 PRESETS = {
-    "tr":    dict(locale="tr-TR", lat=41.01, lon=28.98, out="appstore-screenshots"),
-    "en":    dict(locale="en-US", lat=41.01, lon=28.98, out="appstore-screenshots-en"),
-    "pl":    dict(locale="pl-PL", lat=52.23, lon=21.01, out="appstore-screenshots-pl"),
+    "tr":    dict(locale="tr-TR", lat=41.01, lon=28.98, out="appstore-screenshots",    lang="tr", country="TR"),
+    "en":    dict(locale="en-US", lat=41.01, lon=28.98, out="appstore-screenshots-en", lang="en", country="TR"),
+    "pl":    dict(locale="pl-PL", lat=52.23, lon=21.01, out="appstore-screenshots-pl", lang="pl", country="PL"),
 }
 ap = argparse.ArgumentParser()
 ap.add_argument("preset", nargs="?", default="tr", choices=sorted(PRESETS))
@@ -71,7 +74,24 @@ with sync_playwright() as p:
         geolocation={"latitude": CFG["lat"], "longitude": CFG["lon"]},
         permissions=["geolocation"],
     )
-    ctx.add_init_script("try{localStorage.setItem('intro_seen','1')}catch(e){}")
+    # Depoyu ACILISTAN ONCE tohumla. Nedeni:
+    #  - dil: App.tsx acilista user_language okuyup i18n.changeLanguage cagiriyor.
+    #    Uygulama ici seciciden gecmek DENENDI ve ceviri KISMI kaldi (alt sekmeler
+    #    ve urun detay ekrani Turkce kaldi) - bastan tohumlamak temiz sonuc veriyor.
+    #  - ulke: tarayiciya geolocation izni vermek YETMIYOR; uygulamanin kendi KVKK
+    #    riza kapisi ayri (kvkk_location_consent), o olmadan koordinat hic okunmuyor
+    #    ve urunler TR olarak kaliyor.
+    ctx.add_init_script(
+        "try{"
+        "localStorage.setItem('intro_seen','1');"
+        "localStorage.setItem('onboarding_completed','1');"
+        "localStorage.setItem('user_language','%s');"
+        "localStorage.setItem('user_country','%s');"
+        "localStorage.setItem('kvkk_location_consent','granted');"
+        "localStorage.setItem('location_mode','auto');"
+        "localStorage.setItem('user_location',JSON.stringify({lat:%s,lon:%s,ts:Date.now()}));"
+        "}catch(e){}" % (CFG["lang"], CFG["country"], CFG["lat"], CFG["lon"])
+    )
     pg = ctx.new_page()
     pg.on("pageerror", lambda e: errs.append(str(e)[:180]))
 
