@@ -8,6 +8,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { shadows } from '../../theme/shadows';
+import { useTranslation } from 'react-i18next';
 
 interface ListActionCardProps {
   title: string;
@@ -18,13 +19,14 @@ interface ListActionCardProps {
 }
 
 export function ListActionCard({ title, itemCount, onPress, disabled }: ListActionCardProps) {
+  const { t } = useTranslation();
   return (
     <TouchableOpacity
       style={[styles.container, disabled && styles.containerDisabled]}
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.85}
-      accessibilityLabel={`${title} listesini görüntüle`}
+      accessibilityLabel={t('list.view_list', { title })}
     >
       <View style={styles.iconWrap}>
         <Text style={styles.iconEmoji}>📋</Text>
@@ -38,7 +40,7 @@ export function ListActionCard({ title, itemCount, onPress, disabled }: ListActi
         )}
       </View>
       <View style={styles.action}>
-        <Text style={styles.actionLabel}>Görüntüle</Text>
+        <Text style={styles.actionLabel}>{t('list.view')}</Text>
         <MaterialIcons name="chevron-right" size={18} color={colors.primary.main} />
       </View>
     </TouchableOpacity>

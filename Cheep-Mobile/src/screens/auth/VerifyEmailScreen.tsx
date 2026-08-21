@@ -13,10 +13,12 @@ import {
   Platform,
 } from 'react-native';
 import { Button, CodeInput } from '../../components/ui';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { colors, typography, spacing, layout } from '../../theme';
 
 export function VerifyEmailScreen() {
+  const { t } = useTranslation();
   const { user, verifyEmail, resendVerification, logout } = useAuth();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,7 +35,7 @@ export function VerifyEmailScreen() {
       await verifyEmail(code);
       // Başarılı → gate otomatik olarak sonraki adıma (Onboarding) geçer
     } catch (e: any) {
-      setError(e?.message || 'Kod doğrulanamadı. Tekrar deneyin.');
+      setError(e?.message || t('auth.code_error'));
       setCode('');
     } finally {
       setLoading(false);
@@ -53,9 +55,9 @@ export function VerifyEmailScreen() {
     setResending(true);
     try {
       await resendVerification();
-      Alert.alert('Kod gönderildi', 'Yeni doğrulama kodu e-posta adresine gönderildi.');
+      Alert.alert(t('auth.code_sent_title'), t('auth.code_sent_body'));
     } catch (e: any) {
-      Alert.alert('Hata', e?.message || 'Kod gönderilemedi. Lütfen tekrar deneyin.');
+      Alert.alert(t('common.error'), e?.message || t('auth.code_send_error'));
     } finally {
       setResending(false);
     }
@@ -71,10 +73,9 @@ export function VerifyEmailScreen() {
           <Text style={styles.icon}>✉️</Text>
         </View>
 
-        <Text style={styles.title}>E-postanı doğrula</Text>
+        <Text style={styles.title}>{t('auth.verify_title')}</Text>
         <Text style={styles.subtitle}>
-          <Text style={styles.email}>{user?.email}</Text> adresine gönderdiğimiz 6 haneli
-          kodu gir.
+          {t('auth.verify_subtitle', { email: user?.email ?? '' })}
         </Text>
 
         <View style={styles.codeWrap}>
@@ -84,7 +85,7 @@ export function VerifyEmailScreen() {
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <Button
-          title="Doğrula"
+          title={t('auth.verify')}
           onPress={handleVerify}
           loading={loading}
           disabled={code.length !== 6}
@@ -93,9 +94,9 @@ export function VerifyEmailScreen() {
         />
 
         <View style={styles.resendRow}>
-          <Text style={styles.resendText}>Kod gelmedi mi? </Text>
+          <Text style={styles.resendText}>{t('auth.no_code')} </Text>
           <Button
-            title={resending ? 'Gönderiliyor…' : 'Tekrar gönder'}
+            title={resending ? t('auth.sending') : t('auth.resend')}
             onPress={handleResend}
             variant="text"
             disabled={resending}
@@ -103,7 +104,7 @@ export function VerifyEmailScreen() {
         </View>
 
         <TouchableOpacity onPress={logout} style={styles.logout}>
-          <Text style={styles.logoutText}>Farklı bir hesap kullan</Text>
+          <Text style={styles.logoutText}>{t('auth.use_other_account')}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

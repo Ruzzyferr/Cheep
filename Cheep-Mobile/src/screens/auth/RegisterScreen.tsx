@@ -37,25 +37,25 @@ export function RegisterScreen({ navigation }: any) {
     const newErrors: any = {};
 
     if (!name) {
-      newErrors.name = 'İsim gereklidir';
+      newErrors.name = t('auth.name_required');
     } else if (name.length < 2) {
-      newErrors.name = 'İsim en az 2 karakter olmalıdır';
+      newErrors.name = t('auth.name_min');
     }
 
     if (!email) {
       newErrors.email = 'Email adresi gereklidir';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Geçerli bir email adresi giriniz';
+      newErrors.email = t('auth.email_invalid');
     }
 
     if (!password) {
-      newErrors.password = 'Şifre gereklidir';
+      newErrors.password = t('auth.password_required');
     } else if (password.length < 6) {
-      newErrors.password = 'Şifre en az 6 karakter olmalıdır';
+      newErrors.password = t('auth.password_min');
     }
 
     if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Şifreler eşleşmiyor';
+      newErrors.confirmPassword = t('auth.passwords_mismatch');
     }
 
     setErrors(newErrors);
@@ -71,8 +71,8 @@ export function RegisterScreen({ navigation }: any) {
       // Navigation will be handled by AuthContext
     } catch (error: any) {
       Alert.alert(
-        'Kayıt Hatası',
-        error?.message || 'Bir hata oluştu. Lütfen tekrar deneyin.'
+        t('auth.register_error'),
+        error?.message || t('auth.generic_error')
       );
     } finally {
       setLoading(false);
@@ -92,8 +92,8 @@ export function RegisterScreen({ navigation }: any) {
           <View style={styles.brandRow}>
             <CheepMascot size={56} shadow={false} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.title}>Hesap oluştur</Text>
-              <Text style={styles.subtitle}>Cheep&apos;e katıl, tasarrufa başla</Text>
+              <Text style={styles.title}>{t('auth.register_title')}</Text>
+              <Text style={styles.subtitle}>{t('auth.register_subtitle')}</Text>
             </View>
           </View>
 
@@ -109,8 +109,8 @@ export function RegisterScreen({ navigation }: any) {
 
         <FadeInUp delay={100} style={styles.formContainer}>
           <Input
-            label="İsim"
-            placeholder="Adınız Soyadınız"
+            label={t('auth.name')}
+            placeholder={t('auth.name_placeholder')}
             value={name}
             onChangeText={setName}
             error={errors.name}
@@ -134,7 +134,7 @@ export function RegisterScreen({ navigation }: any) {
           />
 
           <Input
-            label="Şifre"
+            label={t('auth.password')}
             placeholder="••••••••"
             value={password}
             onChangeText={setPassword}
@@ -147,7 +147,7 @@ export function RegisterScreen({ navigation }: any) {
           />
 
           <Input
-            label="Şifre Tekrar"
+            label={t('auth.password_repeat')}
             placeholder="••••••••"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
@@ -159,7 +159,7 @@ export function RegisterScreen({ navigation }: any) {
           />
 
           <Button
-            title="Kayıt Ol"
+            title={t('auth.register')}
             onPress={handleRegister}
             loading={loading}
             fullWidth
@@ -168,9 +168,9 @@ export function RegisterScreen({ navigation }: any) {
 
           {/* Login Link */}
           <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Zaten hesabınız var mı? </Text>
+            <Text style={styles.loginText}>{t('auth.have_account')} </Text>
             <Button
-              title="Giriş Yap"
+              title={t('auth.login')}
               onPress={() => navigation.navigate('Login')}
               variant="text"
             />

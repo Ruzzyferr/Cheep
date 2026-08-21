@@ -20,10 +20,12 @@ import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout } from '../../theme';
 import type { Product } from '../../types';
 import type { HomeStackScreenProps } from '../../navigation/types';
+import { useTranslation } from 'react-i18next';
 
 export function PriceDifferenceScreen({
   navigation,
 }: HomeStackScreenProps<'PriceDifferenceList'>) {
+  const { t } = useTranslation();
   const { formatMoney } = useLocale();
 
   // Bu ekranın hiç yükleme göstergesi yoktu: kullanıcı veri gelene kadar boş
@@ -87,7 +89,7 @@ export function PriceDifferenceScreen({
           >
             <MaterialIcons name="arrow-back" size={24} color={colors.text.primary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Akıllı Fırsatlar</Text>
+          <Text style={styles.headerTitle}>{t('product.smart_deals')}</Text>
         </View>
         <Text style={styles.headerSubtitle}>
           En büyük fiyat farkına sahip {products.length} ürün
@@ -150,7 +152,7 @@ export function PriceDifferenceScreen({
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <MaterialIcons name="inventory-2" size={64} color={colors.text.hint} />
-            <Text style={styles.emptyText}>Ürün bulunamadı</Text>
+            <Text style={styles.emptyText}>{t('product.not_found')}</Text>
           </View>
         }
         numColumns={2}

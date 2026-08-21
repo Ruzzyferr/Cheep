@@ -35,13 +35,13 @@ export function LoginScreen({ navigation }: any) {
     if (!email) {
       newErrors.email = 'Email adresi gereklidir';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Geçerli bir email adresi giriniz';
+      newErrors.email = t('auth.email_invalid');
     }
 
     if (!password) {
-      newErrors.password = 'Şifre gereklidir';
+      newErrors.password = t('auth.password_required');
     } else if (password.length < 6) {
-      newErrors.password = 'Şifre en az 6 karakter olmalıdır';
+      newErrors.password = t('auth.password_min');
     }
 
     setErrors(newErrors);
@@ -57,8 +57,8 @@ export function LoginScreen({ navigation }: any) {
       // Navigation will be handled by AuthContext
     } catch (error: any) {
       Alert.alert(
-        'Giriş Hatası',
-        error?.message || 'Bir hata oluştu. Lütfen tekrar deneyin.'
+        t('auth.login_error'),
+        error?.message || t('auth.generic_error')
       );
     } finally {
       setLoading(false);
@@ -82,7 +82,7 @@ export function LoginScreen({ navigation }: any) {
             </View>
           </Float>
           <Text style={styles.appName}>Cheep</Text>
-          <Text style={styles.tagline}>Akıllı Alışveriş Asistanı</Text>
+          <Text style={styles.tagline}>{t('auth.tagline')}</Text>
 
           {/* Destek — giriş YAPAMAYAN kullanıcının tek ulaşma yolu. */}
           <TouchableOpacity
@@ -96,8 +96,8 @@ export function LoginScreen({ navigation }: any) {
 
         {/* Form */}
         <FadeInUp delay={120} style={styles.formContainer}>
-          <Text style={styles.title}>Hoş geldin 👋</Text>
-          <Text style={styles.subtitle}>Hesabına giriş yap</Text>
+          <Text style={styles.title}>{t('auth.welcome')}</Text>
+          <Text style={styles.subtitle}>{t('auth.login_subtitle')}</Text>
 
           <Input
             label="Email"
@@ -113,7 +113,7 @@ export function LoginScreen({ navigation }: any) {
           />
 
           <Input
-            label="Şifre"
+            label={t('auth.password')}
             placeholder="••••••••"
             value={password}
             onChangeText={setPassword}
@@ -126,7 +126,7 @@ export function LoginScreen({ navigation }: any) {
           />
 
           <Button
-            title="Giriş Yap"
+            title={t('auth.login')}
             onPress={handleLogin}
             loading={loading}
             fullWidth
@@ -135,9 +135,9 @@ export function LoginScreen({ navigation }: any) {
 
           {/* Register Link */}
           <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Hesabınız yok mu? </Text>
+            <Text style={styles.registerText}>{t('auth.no_account')} </Text>
             <Button
-              title="Kayıt Ol"
+              title={t('auth.register')}
               onPress={() => navigation.navigate('Register')}
               variant="text"
             />

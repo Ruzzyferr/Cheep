@@ -30,6 +30,7 @@ import { CheepMascot } from '../../components/brand/CheepMascot';
 import { Float } from '../../components/anim';
 import { colors, spacing, typography, borderRadius } from '../../theme';
 import type { AssistantStackScreenProps } from '../../navigation/types';
+import i18n from '../../i18n';
 
 // ============================================================
 // Types
@@ -62,9 +63,9 @@ function resolveListId(call: ToolCall): number | undefined {
 }
 
 const SUGGESTIONS = [
-  'Haftalık liste hazırla',
-  'Bütçeme göre sepet oluştur',
-  'Hızlı kahvaltı tarifi ver',
+  i18n.t('assistant.chip_weekly'),
+  i18n.t('assistant.chip_budget'),
+  i18n.t('assistant.chip_recipe'),
 ];
 
 // ─── EmptyState Component ───────────────────────────────────
@@ -78,12 +79,12 @@ const EmptyState = ({ onSuggestion }: EmptyStateProps) => (
       <Float amplitude={5}>
         <CheepMascot size={84} expression="happy" />
       </Float>
-      <Text style={styles.assistantTitle}>Ben Cheep</Text>
-      <Text style={styles.assistantSub}>Alışveriş asistanın</Text>
+      <Text style={styles.assistantTitle}>{i18n.t('assistant.im_cheep')}</Text>
+      <Text style={styles.assistantSub}>{i18n.t('assistant.title')}</Text>
     </View>
     <MessageBubble
       role="model"
-      content="Merhaba! Bugün ne pişirelim? Tarif yaz ya da 'haftalık liste hazırla' de."
+      content={i18n.t('assistant.greeting')}
     />
     <View style={styles.suggestions}>
       {SUGGESTIONS.map((s) => (
@@ -130,7 +131,7 @@ export function AssistantChatScreen({
       setThreadId(thread.id);
     } catch (err) {
       console.error('Failed to create thread:', err);
-      Alert.alert('Hata', 'Asistan başlatılamadı. Lütfen tekrar deneyin.');
+      Alert.alert('Hata', i18n.t('assistant.start_error'));
     }
   };
 
@@ -143,7 +144,7 @@ export function AssistantChatScreen({
       setInputValue('');
     } catch (err) {
       console.error('Failed to create new thread:', err);
-      Alert.alert('Hata', 'Yeni sohbet başlatılamadı.');
+      Alert.alert('Hata', i18n.t('assistant.new_chat_error'));
     }
   }, []);
 
@@ -164,7 +165,7 @@ export function AssistantChatScreen({
       setInputValue('');
     } catch (err) {
       console.error('loadThread error:', err);
-      Alert.alert('Hata', 'Sohbet yüklenemedi.');
+      Alert.alert('Hata', i18n.t('assistant.load_error'));
     }
   }, []);
 
@@ -259,7 +260,7 @@ export function AssistantChatScreen({
           {
             id: `err-${Date.now()}`,
             role: 'model',
-            content: 'Bir hata oluştu. Lütfen tekrar deneyin.',
+            content: i18n.t('auth.generic_error'),
           },
         ]);
       }
@@ -277,7 +278,7 @@ export function AssistantChatScreen({
   // ─── Render item ─────────────────────────────────────────────
   const renderItem = ({ item }: { item: LocalMessage }) => {
     if (item.role === 'typing') {
-      return <ToolActivityChip label="yazıyor..." />;
+      return <ToolActivityChip label={i18n.t('assistant.typing')} />;
     }
     if (item.role === 'list_card' && item.listCard) {
       const cardListId = item.listCard.listId;
@@ -323,7 +324,7 @@ export function AssistantChatScreen({
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => setHistoryVisible(true)}
-            accessibilityLabel="Geçmiş sohbetler"
+            accessibilityLabel={i18n.t('assistant.history')}
           >
             <MaterialIcons name="history" size={22} color={colors.text.primary} />
           </TouchableOpacity>
@@ -367,10 +368,10 @@ export function AssistantChatScreen({
             Günlük 5 mesajlık limitin doldu.{' '}
           </Text>
           <Pressable
-            onPress={() => Alert.alert('Yakında', 'Premium özelliği yakında kullanıma açılacak.')}
+            onPress={() => Alert.alert(i18n.t('assistant.soon_title'), i18n.t('assistant.soon_body'))}
             accessibilityRole="button"
           >
-            <Text style={styles.limitBannerLink}>Sınırsız için Premium&apos;a geç.</Text>
+            <Text style={styles.limitBannerLink}>{i18n.t('assistant.go_premium')}</Text>
           </Pressable>
         </View>
       )}

@@ -43,12 +43,12 @@ export function HomeNavigator() {
       <Stack.Screen
         name="ProductDetail"
         component={ProductDetailScreen}
-        options={{ title: 'Ürün Detayı' }}
+        options={{ title: t('screens.product_detail') }}
       />
       <Stack.Screen
         name="StoreDetail"
         component={StoreDetailScreen}
-        options={{ title: 'Market Detayı' }}
+        options={{ title: t('screens.store_detail') }}
       />
       <Stack.Screen
         name="CategoryProducts"

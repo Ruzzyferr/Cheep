@@ -18,6 +18,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { assistantService } from '../../services/assistant.service';
 import type { ChatThread } from '../../services/assistant.service';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
+import i18n from '../../i18n';
 
 // ============================================================
 // Helpers
@@ -28,14 +29,14 @@ function formatRelative(isoDate: string): string {
   const then = new Date(isoDate).getTime();
   const diffMs = now - then;
   const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 1) return 'az önce';
-  if (diffMin < 60) return `${diffMin}dk önce`;
+  if (diffMin < 1) return i18n.t('time.just_now');
+  if (diffMin < 60) return i18n.t('time.minutes_ago', { n: diffMin });
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `${diffH}sa önce`;
+  if (diffH < 24) return i18n.t('time.hours_ago', { n: diffH });
   const diffD = Math.floor(diffH / 24);
-  if (diffD < 7) return `${diffD}g önce`;
+  if (diffD < 7) return i18n.t('time.days_ago', { n: diffD });
   const diffW = Math.floor(diffD / 7);
-  return `${diffW}hf önce`;
+  return i18n.t('time.weeks_ago', { n: diffW });
 }
 
 // ============================================================
@@ -72,7 +73,7 @@ export function ThreadListSheet({
       setThreads(data);
     } catch (err) {
       console.error('listThreads error:', err);
-      Alert.alert('Hata', 'Geçmiş sohbetler yüklenemedi.');
+      Alert.alert('Hata', i18n.t('assistant.history_error'));
     } finally {
       setLoading(false);
     }
@@ -95,8 +96,8 @@ export function ThreadListSheet({
 
   const handleDelete = useCallback(
     (id: number) => {
-      Alert.alert('Sohbeti sil', 'Bu sohbet kalıcı olarak silinecek. Emin misiniz?', [
-        { text: 'Vazgeç', style: 'cancel' },
+      Alert.alert('Sohbeti sil', i18n.t('assistant.delete_confirm'), [
+        { text: i18n.t('common.dismiss'), style: 'cancel' },
         {
           text: 'Sil',
           style: 'destructive',
@@ -173,7 +174,7 @@ export function ThreadListSheet({
         <View style={styles.sheet}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>Geçmiş Sohbetler</Text>
+            <Text style={styles.title}>{i18n.t('assistant.history_title')}</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityLabel="Kapat">
               <MaterialIcons name="close" size={22} color={colors.text.secondary} />
             </TouchableOpacity>
@@ -202,7 +203,7 @@ export function ThreadListSheet({
               ListEmptyComponent={
                 <View style={styles.emptyContainer}>
                   <MaterialIcons name="history" size={40} color={colors.text.disabled ?? colors.text.secondary} />
-                  <Text style={styles.emptyText}>Henüz geçmiş sohbet yok.</Text>
+                  <Text style={styles.emptyText}>{i18n.t('assistant.history_empty')}</Text>
                 </View>
               }
             />

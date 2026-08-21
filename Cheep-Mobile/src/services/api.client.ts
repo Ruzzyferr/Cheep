@@ -152,7 +152,7 @@ apiClient.interceptors.response.use(
     // Handle network error
     if (!error.response) {
       return Promise.reject({
-        message: 'Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.',
+        message: i18n.t('common.connection_error'),
         code: 'NETWORK_ERROR',
       });
     }
@@ -161,7 +161,7 @@ apiClient.interceptors.response.use(
     const errorMessage = 
       (error.response?.data as any)?.message || 
       error.message || 
-      'Bir hata oluştu';
+      i18n.t('common.generic_error');
     
     return Promise.reject({
       message: errorMessage,

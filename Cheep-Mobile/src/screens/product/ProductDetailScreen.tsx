@@ -29,11 +29,13 @@ import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { Product, StorePrice } from '../../types';
 import type { HomeStackScreenProps } from '../../navigation/types';
 import type { Category } from '../../services/category.service';
+import { useTranslation } from 'react-i18next';
 
 export function ProductDetailScreen({
   route,
   navigation,
 }: HomeStackScreenProps<'ProductDetail'>) {
+  const { t } = useTranslation();
   const { productId } = route.params;
   const { country, formatMoney } = useLocale();
   const scope = useScope();
@@ -97,7 +99,7 @@ export function ProductDetailScreen({
   if (!product) {
     return (
       <View style={styles.error}>
-        <Text>Ürün bulunamadı</Text>
+        <Text>{t('product.not_found')}</Text>
       </View>
     );
   }
@@ -137,7 +139,7 @@ export function ProductDetailScreen({
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>En Pahalı</Text>
+                <Text style={styles.statLabel}>{t('product.most_expensive')}</Text>
                 <Text style={[styles.statValue, styles.expensivePrice]}>
                   {formatMoney(parseFloat(priceStats.mostExpensive?.price || '0'))}
                 </Text>
@@ -167,7 +169,7 @@ export function ProductDetailScreen({
 
         {/* Price Comparison */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Market Fiyatları</Text>
+          <Text style={styles.sectionTitle}>{t('product.store_prices')}</Text>
           {prices.length > 0 && (
             <Text style={styles.priceCount}>{prices.length} market</Text>
           )}
@@ -222,7 +224,7 @@ export function ProductDetailScreen({
                       {isCheapest && (
                         <View style={styles.bestDealBadge}>
                           <MaterialIcons name="local-offer" size={16} color={colors.secondary.main} />
-                          <Text style={styles.bestDealText}>En İyi</Text>
+                          <Text style={styles.bestDealText}>{t('product.best')}</Text>
                         </View>
                       )}
                       <Text style={[styles.price, isCheapest && styles.cheapestPriceText]}>
@@ -256,9 +258,7 @@ export function ProductDetailScreen({
           <View style={styles.disclaimerBox}>
             <MaterialIcons name="info-outline" size={14} color={colors.text.hint} />
             <Text style={styles.disclaimerText}>
-              Fiyatlar herkese açık resmi kaynaklardan derlenir ve bilgilendirme amaçlıdır;
-              anlık olarak değişebilir. Bağlayıcı olan, marketin kendi kanalındaki güncel
-              fiyattır. Karşılaştırma yalnızca listelenen marketler arasındadır.
+              {t('product.price_disclaimer')}
             </Text>
           </View>
         )}
@@ -266,7 +266,7 @@ export function ProductDetailScreen({
         {/* Affiliate: en ucuz markette al */}
         {priceStats?.cheapest?.store?.id ? (
           <Button
-            title={`En ucuz markette al (${priceStats.cheapest.store.name})`}
+            title={t('product.buy_cheapest', { store: priceStats.cheapest.store.name })}
             onPress={async () => {
               const store = priceStats.cheapest!.store!;
               setOpeningStore(true);
@@ -305,7 +305,7 @@ export function ProductDetailScreen({
         {/* Product Details */}
         {(showRealBarcode || product.category || categoryWithParent) && (
           <View style={styles.detailsSection}>
-            <Text style={styles.sectionTitle}>Ürün Bilgileri</Text>
+            <Text style={styles.sectionTitle}>{t('product.info')}</Text>
             <Card padding="md" variant="outlined">
               {showRealBarcode && (
                 <View style={styles.detailRow}>

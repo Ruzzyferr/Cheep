@@ -8,16 +8,18 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
+import { useTranslation } from 'react-i18next';
 
 interface EmptyListCardProps {
   onCreateList: () => void;
 }
 
 export function EmptyListCard({ onCreateList }: EmptyListCardProps) {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       <View style={styles.content}>
-        <Text style={styles.title}>Aktif Alışveriş Listeniz</Text>
+        <Text style={styles.title}>{t('list.active_list')}</Text>
         
         <View style={styles.row}>
           <Text style={styles.message}>

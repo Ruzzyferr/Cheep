@@ -8,6 +8,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { StackNavigationProp } from '@react-navigation/stack';
@@ -34,6 +35,7 @@ export function TabNavigator() {
 }
 
 function TabNavigatorInner() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { count } = useCart();
 
@@ -75,7 +77,7 @@ function TabNavigatorInner() {
           name="Home"
           component={HomeNavigator}
           options={{
-            tabBarLabel: 'Ana Sayfa',
+            tabBarLabel: t('tabs.home'),
             tabBarIcon: ({ color }) => (
               <MaterialIcons
                 name="home"
@@ -94,7 +96,7 @@ function TabNavigatorInner() {
           name="Lists"
           component={ListsNavigator}
           options={{
-            tabBarLabel: 'Listelerim',
+            tabBarLabel: t('tabs.lists'),
             // Aktif listedeki ürün sayısını rozet olarak göster — kullanıcı
             // Listelerim'e girmeden sepetinde kaç ürün olduğunu görür.
             tabBarBadge: count > 0 ? count : undefined,
@@ -145,7 +147,7 @@ function TabNavigatorInner() {
           name="Deals"
           component={DealsNavigator}
           options={{
-            tabBarLabel: 'Fırsatlar',
+            tabBarLabel: t('tabs.deals'),
             tabBarIcon: ({ color }) => (
               <MaterialIcons
                 name="sell"
@@ -164,7 +166,7 @@ function TabNavigatorInner() {
           name="Profile"
           component={ProfileNavigator}
           options={{
-            tabBarLabel: 'Profil',
+            tabBarLabel: t('tabs.profile'),
             tabBarIcon: ({ color }) => (
               <MaterialIcons
                 name="person"

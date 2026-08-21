@@ -12,7 +12,12 @@
     "loading": "Yükleniyor…",
     "unit_default": "adet",
     "retry": "Tekrar dene",
-    "error_loading": "Veriler yüklenemedi"
+    "error_loading": "Veriler yüklenemedi",
+    "connection_error": "Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.",
+    "generic_error": "Bir hata oluştu",
+    "link_failed_title": "Bağlantı açılamadı",
+    "link_failed_body": "Lütfen daha sonra tekrar deneyin.",
+    "dismiss": "Vazgeç"
   },
   "consent": {
     "location_title": "Konumun işlensin mi? (KVKK açık rıza)",
@@ -179,7 +184,16 @@
       "highest": "En yüksek",
       "chart_a11y": "Fiyat geçmişi grafiği",
       "footer": "{{store}} fiyat seyri"
-    }
+    },
+    "not_found": "Ürün bulunamadı",
+    "most_expensive": "En Pahalı",
+    "store_prices": "Market Fiyatları",
+    "best": "En İyi",
+    "info": "Ürün Bilgileri",
+    "buy_cheapest": "En ucuz markette al ({{store}})",
+    "smart_deals": "Akıllı Fırsatlar",
+    "store_details": "Mağaza Detayları",
+    "price_disclaimer": "Fiyatlar herkese açık resmi kaynaklardan derlenir ve bilgilendirme amaçlıdır; anlık olarak değişebilir. Bağlayıcı olan, marketin kendi kanalındaki güncel fiyattır. Karşılaştırma yalnızca listelenen marketler arasındadır."
   },
   "home": {
     "greeting": "Merhaba",
@@ -208,7 +222,7 @@
     "build_cheapest_route": "En Ucuz Rotayı Oluştur"
   },
   "list": {
-    "budget_label": "Bütçe:",
+    "budget_label": "Bütçe (Opsiyonel)",
     "added_to": "{{list}} listesine eklendi",
     "item_count": "{{count}} ürün",
     "last_compared": "Son karşılaştırma: {{date}}",
@@ -239,7 +253,7 @@
     "rename_title": "Listeyi yeniden adlandır",
     "rename_save": "Kaydet",
     "clone_title": "Listeyi klonla",
-    "name_label": "Liste adı",
+    "name_label": "Liste Adı",
     "import_from_list": "Başka listeden aktar",
     "import_source_title": "Hangi listeden aktarılsın?",
     "import_done": "Ürünler aktarıldı",
@@ -263,8 +277,17 @@
     "screen_title": "Listelerim",
     "empty_title": "Henüz liste yok",
     "empty_desc": "İlk alışveriş listeni oluştur, en uygun marketi anında bulalım.",
-    "create_action": "Liste Oluştur",
-    "delete_error": "Liste silinirken bir hata oluştu"
+    "create_action": "Oluştur",
+    "delete_error": "Liste silinirken bir hata oluştu",
+    "create_title": "Yeni Liste Oluştur",
+    "create_subtitle": "Alışveriş listenizi oluşturun",
+    "name_placeholder": "Örn: Haftalık Alışveriş",
+    "budget_placeholder": "Örn: 500",
+    "name_required": "Lütfen liste adı girin",
+    "create_error": "Liste oluşturulurken bir hata oluştu",
+    "active_list": "Aktif Alışveriş Listeniz",
+    "view": "Görüntüle",
+    "view_list": "{{title}} listesini görüntüle"
   },
   "deals": {
     "title": "Fırsatlar",
@@ -339,7 +362,13 @@
     "distance_label": "Mesafe:",
     "within_budget": "Bütçe dahilinde",
     "over_budget": "Bütçe aşıyor",
-    "view_details": "Detayları Gör →"
+    "view_details": "Detayları Gör →",
+    "multi_store": "Çoklu Market",
+    "all_in_route": "Tüm ürünler bu rotada",
+    "missing_in_route": "{{n}} ürün bu rotada yok",
+    "missing_products": "Bulunamayan Ürünler",
+    "store_link_error": "Mağaza bağlantısı açılamadı. Lütfen tekrar deneyin.",
+    "single_store": "Tek Market"
   },
   "intro": {
     "skip": "Atla",
@@ -419,5 +448,82 @@
     "action": "Güncelle",
     "later": "Şimdi değil",
     "version_line": "Yüklü sürüm {{current}} · Yeni sürüm {{latest}}"
+  },
+  "tabs": {
+    "home": "Ana Sayfa",
+    "lists": "Listelerim",
+    "deals": "Fırsatlar",
+    "profile": "Profil"
+  },
+  "screens": {
+    "product_detail": "Ürün Detayı",
+    "store_detail": "Market Detayı",
+    "list_detail": "Liste Detayı",
+    "compare_results": "Karşılaştırma Sonuçları",
+    "route_detail": "Rota Detayı"
+  },
+  "auth": {
+    "email_invalid": "Geçerli bir email adresi giriniz",
+    "password_required": "Şifre gereklidir",
+    "password_min": "Şifre en az 6 karakter olmalıdır",
+    "name_required": "İsim gereklidir",
+    "name_min": "İsim en az 2 karakter olmalıdır",
+    "passwords_mismatch": "Şifreler eşleşmiyor",
+    "login_error": "Giriş Hatası",
+    "register_error": "Kayıt Hatası",
+    "generic_error": "Bir hata oluştu. Lütfen tekrar deneyin.",
+    "password": "Şifre",
+    "password_repeat": "Şifre Tekrar",
+    "name": "İsim",
+    "name_placeholder": "Adınız Soyadınız",
+    "login": "Giriş Yap",
+    "register": "Kayıt Ol",
+    "verify": "Doğrula",
+    "code_error": "Kod doğrulanamadı. Tekrar deneyin.",
+    "code_sent_title": "Kod gönderildi",
+    "code_sent_body": "Yeni doğrulama kodu e-posta adresine gönderildi.",
+    "code_send_error": "Kod gönderilemedi. Lütfen tekrar deneyin.",
+    "sending": "Gönderiliyor…",
+    "resend": "Tekrar gönder",
+    "tagline": "Akıllı Alışveriş Asistanı",
+    "welcome": "Hoş geldin 👋",
+    "login_subtitle": "Hesabına giriş yap",
+    "no_account": "Hesabınız yok mu?",
+    "have_account": "Zaten hesabınız var mı?",
+    "register_title": "Hesap oluştur",
+    "register_subtitle": "Cheep’e katıl, tasarrufa başla",
+    "verify_title": "E-postanı doğrula",
+    "verify_subtitle": "{{email}} adresine gönderdiğimiz 6 haneli kodu gir.",
+    "no_code": "Kod gelmedi mi?",
+    "use_other_account": "Farklı bir hesap kullan"
+  },
+  "assistant": {
+    "title": "Alışveriş asistanın",
+    "placeholder": "Bir şey sor...",
+    "send": "Gönder",
+    "greeting": "Merhaba! Bugün ne pişirelim? Tarif yaz ya da “haftalık liste hazırla” de.",
+    "chip_weekly": "Haftalık liste hazırla",
+    "chip_budget": "Bütçeme göre sepet oluştur",
+    "chip_recipe": "Hızlı kahvaltı tarifi ver",
+    "start_error": "Asistan başlatılamadı. Lütfen tekrar deneyin.",
+    "new_chat_error": "Yeni sohbet başlatılamadı.",
+    "load_error": "Sohbet yüklenemedi.",
+    "typing": "yazıyor...",
+    "history": "Geçmiş sohbetler",
+    "history_title": "Geçmiş Sohbetler",
+    "history_empty": "Henüz geçmiş sohbet yok.",
+    "history_error": "Geçmiş sohbetler yüklenemedi.",
+    "delete_confirm": "Bu sohbet kalıcı olarak silinecek. Emin misiniz?",
+    "soon_title": "Yakında",
+    "soon_body": "Premium özelliği yakında kullanıma açılacak.",
+    "go_premium": "Sınırsız için Premium’a geç.",
+    "im_cheep": "Ben Cheep"
+  },
+  "time": {
+    "just_now": "az önce",
+    "minutes_ago": "{{n}}dk önce",
+    "hours_ago": "{{n}}sa önce",
+    "days_ago": "{{n}}g önce",
+    "weeks_ago": "{{n}}hf önce"
   }
 }

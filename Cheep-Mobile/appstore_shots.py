@@ -21,9 +21,9 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="repla
 # Tarayici locale'i arayuz dilini DEGISTIRMIYOR (i18n `lng: 'tr'` ile sabit
 # baslatiliyor), o yuzden Profil > Uygulama dili uzerinden gecmek sart.
 PRESETS = {
-    "tr":    dict(locale="tr-TR", lat=41.01, lon=28.98, out="appstore-screenshots",    lang="tr", country="TR"),
-    "en":    dict(locale="en-US", lat=41.01, lon=28.98, out="appstore-screenshots-en", lang="en", country="TR"),
-    "pl":    dict(locale="pl-PL", lat=52.23, lon=21.01, out="appstore-screenshots-pl", lang="pl", country="PL"),
+    "tr":    dict(locale="tr-TR", lat=41.01, lon=28.98, out="appstore-screenshots",    lang="tr", country="TR", login="Giriş Yap"),
+    "en":    dict(locale="en-US", lat=41.01, lon=28.98, out="appstore-screenshots-en", lang="en", country="TR", login="Log In"),
+    "pl":    dict(locale="pl-PL", lat=52.23, lon=21.01, out="appstore-screenshots-pl", lang="pl", country="PL", login="Zaloguj się"),
 }
 ap = argparse.ArgumentParser()
 ap.add_argument("preset", nargs="?", default="tr", choices=sorted(PRESETS))
@@ -104,10 +104,11 @@ with sync_playwright() as p:
     if ins.count() >= 2:
         ins.nth(0).fill("test@cheep.com")
         ins.nth(1).fill("test123456")
-        # Enter ile gonderim DENENDI ve CALISMADI (form submit'e baglanmiyor).
-        # Buton metni her locale'de Turkce kaliyor: i18n `lng: 'tr'` ile sabit
-        # baslatiliyor ve tarayici diline bakmiyor, o yuzden metinle tiklamak guvenli.
-        tap(pg, "Giriş Yap")
+        # Enter ile gonderim DENENDI ve CALISMADI (form submit'e baglanmiyor),
+        # bu yuzden butona metinle tiklaniyor. Etiket preset'ten geliyor: auth
+        # ekrani artik CEVRILI, dolayisiyla dile gore degisiyor. Sabit "Giriş Yap"
+        # yazmak Lehce/Ingilizce kosularinda girisi sessizce basarisiz birakir.
+        tap(pg, CFG["login"])
         pg.wait_for_timeout(9000)
         print("giris yapildi (locale=%s)" % CFG["locale"])
 

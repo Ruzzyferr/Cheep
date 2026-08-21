@@ -8,6 +8,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, typography, spacing } from '../../theme';
 import type { HomeStackScreenProps } from '../../navigation/types';
+import { useTranslation } from 'react-i18next';
 
 // Mağaza detay ekranı henüz yapım aşamasında. Canlı bir hedef olarak bağlı
 // olduğundan (ProductDetail / Ana Sayfa), bozuk görünmemesi için bunu açıkça
@@ -15,10 +16,11 @@ import type { HomeStackScreenProps } from '../../navigation/types';
 export function StoreDetailScreen({
   navigation,
 }: HomeStackScreenProps<'StoreDetail'>) {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       <MaterialIcons name="storefront" size={56} color={colors.text.hint} />
-      <Text style={styles.text}>Mağaza Detayları</Text>
+      <Text style={styles.text}>{t('product.store_details')}</Text>
       <Text style={styles.subtitle}>
         Bu özellik yakında kullanıma açılacak.
       </Text>

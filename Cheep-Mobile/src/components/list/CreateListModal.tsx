@@ -21,6 +21,7 @@ import { listService } from '../../services';
 import { Button, Input } from '../ui';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
+import { useTranslation } from 'react-i18next';
 
 interface CreateListModalProps {
   visible: boolean;
@@ -33,13 +34,14 @@ export function CreateListModal({
   onClose,
   onSuccess,
 }: CreateListModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [budget, setBudget] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      Alert.alert('Hata', 'Lütfen liste adı girin');
+      Alert.alert('Hata', t('list.name_required'));
       return;
     }
 
@@ -57,7 +59,7 @@ export function CreateListModal({
       onClose();
     } catch (error: any) {
       console.error('Create list error:', error);
-      const errorMessage = error?.response?.data?.message || 'Liste oluşturulurken bir hata oluştu';
+      const errorMessage = error?.response?.data?.message || t('list.create_error');
       Alert.alert('Hata', errorMessage);
     } finally {
       setLoading(false);
@@ -105,8 +107,8 @@ export function CreateListModal({
                   <MaterialIcons name="add-shopping-cart" size={24} color={colors.primary.main} />
                 </View>
                 <View style={styles.headerTextContainer}>
-                  <Text style={styles.title}>Yeni Liste Oluştur</Text>
-                  <Text style={styles.subtitle}>Alışveriş listenizi oluşturun</Text>
+                  <Text style={styles.title}>{t('list.create_title')}</Text>
+                  <Text style={styles.subtitle}>{t('list.create_subtitle')}</Text>
                 </View>
               </View>
               <TouchableOpacity 
@@ -128,8 +130,8 @@ export function CreateListModal({
             >
               <View style={styles.inputSection}>
                 <Input
-                  label="Liste Adı"
-                  placeholder="Örn: Haftalık Alışveriş"
+                  label={t('list.name_label')}
+                  placeholder={t('list.name_placeholder')}
                   value={name}
                   onChangeText={setName}
                   required
@@ -138,8 +140,8 @@ export function CreateListModal({
                 />
 
                 <Input
-                  label="Bütçe (Opsiyonel)"
-                  placeholder="Örn: 500"
+                  label={t('list.budget_label')}
+                  placeholder={t('list.budget_placeholder')}
                   value={budget}
                   onChangeText={setBudget}
                   keyboardType="numeric"
@@ -151,14 +153,14 @@ export function CreateListModal({
             {/* Footer */}
             <View style={styles.footer}>
               <Button
-                title="İptal"
+                title={t('common.cancel')}
                 onPress={handleClose}
                 variant="outline"
                 disabled={loading}
                 style={styles.cancelButton}
               />
               <Button
-                title="Oluştur"
+                title={t('list.create_action')}
                 onPress={handleCreate}
                 loading={loading}
                 disabled={loading || !name.trim()}

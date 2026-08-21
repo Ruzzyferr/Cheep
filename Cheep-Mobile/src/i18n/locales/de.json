@@ -12,7 +12,12 @@
     "loading": "Wird geladen…",
     "unit_default": "Stück",
     "retry": "Erneut versuchen",
-    "error_loading": "Daten konnten nicht geladen werden"
+    "error_loading": "Daten konnten nicht geladen werden",
+    "connection_error": "Verbindungsfehler. Bitte prüfe deine Internetverbindung.",
+    "generic_error": "Etwas ist schiefgelaufen",
+    "link_failed_title": "Link konnte nicht geöffnet werden",
+    "link_failed_body": "Bitte versuche es später erneut.",
+    "dismiss": "Verwerfen"
   },
   "consent": {
     "location_title": "Standort verarbeiten? (Datenschutz-Einwilligung)",
@@ -179,7 +184,16 @@
       "highest": "Höchster",
       "chart_a11y": "Preisverlaufsdiagramm",
       "footer": "Preisverlauf {{store}}"
-    }
+    },
+    "not_found": "Produkt nicht gefunden",
+    "most_expensive": "Am teuersten",
+    "store_prices": "Marktpreise",
+    "best": "Beste",
+    "info": "Produktinfos",
+    "buy_cheapest": "Im günstigsten Markt kaufen ({{store}})",
+    "smart_deals": "Smarte Angebote",
+    "store_details": "Marktdetails",
+    "price_disclaimer": "Die Preise stammen aus öffentlich zugänglichen amtlichen Quellen und dienen nur zur Information; sie können sich jederzeit ändern. Verbindlich ist der aktuelle Preis im eigenen Kanal des Marktes. Der Vergleich umfasst nur die aufgeführten Märkte."
   },
   "home": {
     "greeting": "Hallo",
@@ -208,7 +222,7 @@
     "build_cheapest_route": "Günstigste Route erstellen"
   },
   "list": {
-    "budget_label": "Budget:",
+    "budget_label": "Budget (optional)",
     "added_to": "Zu {{list}} hinzugefügt",
     "item_count": "{{count}} Artikel",
     "last_compared": "Zuletzt verglichen: {{date}}",
@@ -263,8 +277,17 @@
     "screen_title": "Meine Listen",
     "empty_title": "Noch keine Listen",
     "empty_desc": "Erstelle deine erste Einkaufsliste und wir finden sofort den besten Markt.",
-    "create_action": "Liste erstellen",
-    "delete_error": "Beim Löschen der Liste ist ein Fehler aufgetreten"
+    "create_action": "Erstellen",
+    "delete_error": "Beim Löschen der Liste ist ein Fehler aufgetreten",
+    "create_title": "Neue Liste erstellen",
+    "create_subtitle": "Erstelle deine Einkaufsliste",
+    "name_placeholder": "z. B. Wocheneinkauf",
+    "budget_placeholder": "z. B. 500",
+    "name_required": "Bitte gib einen Listennamen ein",
+    "create_error": "Die Liste konnte nicht erstellt werden",
+    "active_list": "Deine aktive Einkaufsliste",
+    "view": "Ansehen",
+    "view_list": "Liste {{title}} ansehen"
   },
   "deals": {
     "title": "Angebote",
@@ -338,8 +361,14 @@
     "total_amount_label": "Gesamtbetrag:",
     "distance_label": "Entfernung:",
     "within_budget": "Im Budget",
-    "over_budget": "Über dem Budget",
-    "view_details": "Details ansehen →"
+    "over_budget": "Über Budget",
+    "view_details": "Details ansehen →",
+    "multi_store": "Mehrere Märkte",
+    "all_in_route": "Alle Artikel auf dieser Route",
+    "missing_in_route": "{{n}} Artikel fehlen auf dieser Route",
+    "missing_products": "Fehlende Produkte",
+    "store_link_error": "Der Markt-Link konnte nicht geöffnet werden. Bitte versuche es erneut.",
+    "single_store": "Ein Markt"
   },
   "intro": {
     "skip": "Überspringen",
@@ -419,5 +448,82 @@
     "action": "Aktualisieren",
     "later": "Später",
     "version_line": "Installiert {{current}} · Neueste {{latest}}"
+  },
+  "tabs": {
+    "home": "Start",
+    "lists": "Listen",
+    "deals": "Angebote",
+    "profile": "Profil"
+  },
+  "screens": {
+    "product_detail": "Produktdetails",
+    "store_detail": "Marktdetails",
+    "list_detail": "Listendetails",
+    "compare_results": "Vergleichsergebnisse",
+    "route_detail": "Routendetails"
+  },
+  "auth": {
+    "email_invalid": "Gib eine gültige E-Mail-Adresse ein",
+    "password_required": "Passwort ist erforderlich",
+    "password_min": "Das Passwort muss mindestens 6 Zeichen haben",
+    "name_required": "Name ist erforderlich",
+    "name_min": "Der Name muss mindestens 2 Zeichen haben",
+    "passwords_mismatch": "Passwörter stimmen nicht überein",
+    "login_error": "Anmeldefehler",
+    "register_error": "Registrierungsfehler",
+    "generic_error": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+    "password": "Passwort",
+    "password_repeat": "Passwort wiederholen",
+    "name": "Name",
+    "name_placeholder": "Vor- und Nachname",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "verify": "Bestätigen",
+    "code_error": "Der Code konnte nicht bestätigt werden. Bitte versuche es erneut.",
+    "code_sent_title": "Code gesendet",
+    "code_sent_body": "Ein neuer Bestätigungscode wurde an deine E-Mail gesendet.",
+    "code_send_error": "Der Code konnte nicht gesendet werden. Bitte versuche es erneut.",
+    "sending": "Wird gesendet…",
+    "resend": "Erneut senden",
+    "tagline": "Intelligenter Einkaufsassistent",
+    "welcome": "Willkommen 👋",
+    "login_subtitle": "Melde dich bei deinem Konto an",
+    "no_account": "Noch kein Konto?",
+    "have_account": "Hast du schon ein Konto?",
+    "register_title": "Konto erstellen",
+    "register_subtitle": "Tritt Cheep bei und beginne zu sparen",
+    "verify_title": "Bestätige deine E-Mail",
+    "verify_subtitle": "Gib den 6-stelligen Code ein, den wir an {{email}} gesendet haben.",
+    "no_code": "Keinen Code erhalten?",
+    "use_other_account": "Anderes Konto verwenden"
+  },
+  "assistant": {
+    "title": "Dein Einkaufsassistent",
+    "placeholder": "Frag etwas…",
+    "send": "Senden",
+    "greeting": "Hallo! Was kochen wir heute? Frag nach einem Rezept oder sag „Wochenliste erstellen“.",
+    "chip_weekly": "Wochenliste erstellen",
+    "chip_budget": "Warenkorb nach Budget erstellen",
+    "chip_recipe": "Gib mir ein schnelles Frühstücksrezept",
+    "start_error": "Der Assistent konnte nicht gestartet werden. Bitte versuche es erneut.",
+    "new_chat_error": "Neuer Chat konnte nicht gestartet werden.",
+    "load_error": "Chat konnte nicht geladen werden.",
+    "typing": "schreibt…",
+    "history": "Chatverlauf",
+    "history_title": "Chatverlauf",
+    "history_empty": "Noch keine früheren Chats.",
+    "history_error": "Chatverlauf konnte nicht geladen werden.",
+    "delete_confirm": "Dieser Chat wird dauerhaft gelöscht. Bist du sicher?",
+    "soon_title": "Demnächst",
+    "soon_body": "Die Premium-Funktion ist bald verfügbar.",
+    "go_premium": "Wechsle zu Premium für unbegrenzte Nutzung.",
+    "im_cheep": "Ich bin Cheep"
+  },
+  "time": {
+    "just_now": "gerade eben",
+    "minutes_ago": "vor {{n}} Min.",
+    "hours_ago": "vor {{n}} Std.",
+    "days_ago": "vor {{n}} T.",
+    "weeks_ago": "vor {{n}} Wo."
   }
 }

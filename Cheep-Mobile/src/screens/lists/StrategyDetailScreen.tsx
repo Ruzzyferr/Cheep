@@ -22,6 +22,7 @@ import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { StoreAllocation, ProductAllocation } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
+import i18n from '../../i18n';
 
 // route.params üzerinden gelen sayısal alanlar null/string olabilir; .toFixed
 // çağırmadan önce güvenli bir sayıya zorla (geçersizse 0).
@@ -45,7 +46,7 @@ export function StrategyDetailScreen({
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <Text style={styles.strategyType}>
-              {strategy.type === 'single_store' ? 'Tek Market' : 'Çoklu Market'}
+              {strategy.type === 'single_store' ? i18n.t('compare.single_store') : i18n.t('compare.multi_store')}
             </Text>
             <View style={styles.scoreBadge}>
               <Text style={styles.scoreText}>Skor: {num(strategy.score)}/100</Text>
@@ -79,7 +80,7 @@ export function StrategyDetailScreen({
                   withinBudget ? styles.budgetWithinText : styles.budgetOverText,
                 ]}
               >
-                {withinBudget ? 'Bütçe dahilinde' : 'Bütçe aşıyor'}
+                {withinBudget ? i18n.t('compare.within_budget') : i18n.t('compare.over_budget')}
                 {strategy.budgetRemaining !== null && (
                   <Text>
                     {' '}
@@ -102,7 +103,7 @@ export function StrategyDetailScreen({
                   color={full ? colors.success.dark : colors.warning.dark}
                 />
                 <Text style={[styles.covText, full ? styles.covTextFull : styles.covTextPartial]}>
-                  {full ? 'Tüm ürünler bu rotada' : `${missing} ürün bu rotada yok`}
+                  {full ? i18n.t('compare.all_in_route') : i18n.t('compare.missing_in_route', { n: missing })}
                 </Text>
                 <Text style={[styles.covPct, full ? styles.covTextFull : styles.covTextPartial]}>
                   %{num(strategy.coveragePercentage)}
@@ -126,7 +127,7 @@ export function StrategyDetailScreen({
         {/* Missing Products */}
         {strategy.missingProducts.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Bulunamayan Ürünler</Text>
+            <Text style={styles.sectionTitle}>{i18n.t('compare.missing_products')}</Text>
             {strategy.missingProducts.map((missing, index) => (
               <Card key={index} padding="md" style={styles.missingCard}>
                 <Text style={styles.missingProductName}>
@@ -173,7 +174,7 @@ function StoreSection({
       });
       await openExternalUrl(res.url);
     } catch {
-      Alert.alert('Hata', 'Mağaza bağlantısı açılamadı. Lütfen tekrar deneyin.');
+      Alert.alert('Hata', i18n.t('compare.store_link_error'));
     } finally {
       setOpening(false);
     }

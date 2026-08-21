@@ -12,7 +12,12 @@
     "loading": "Loading…",
     "unit_default": "piece",
     "retry": "Try again",
-    "error_loading": "Could not load data"
+    "error_loading": "Could not load data",
+    "connection_error": "Connection error. Please check your internet connection.",
+    "generic_error": "Something went wrong",
+    "link_failed_title": "Could not open link",
+    "link_failed_body": "Please try again later.",
+    "dismiss": "Dismiss"
   },
   "consent": {
     "location_title": "Process your location? (privacy consent)",
@@ -179,7 +184,16 @@
       "highest": "Highest",
       "chart_a11y": "Price history chart",
       "footer": "{{store}} price trend"
-    }
+    },
+    "not_found": "Product not found",
+    "most_expensive": "Most Expensive",
+    "store_prices": "Store Prices",
+    "best": "Best",
+    "info": "Product Info",
+    "buy_cheapest": "Buy at the cheapest store ({{store}})",
+    "smart_deals": "Smart Deals",
+    "store_details": "Store Details",
+    "price_disclaimer": "Prices are compiled from publicly available official sources and are for information only; they may change at any time. The binding price is the current one in the store’s own channel. The comparison covers only the listed stores."
   },
   "home": {
     "greeting": "Hello",
@@ -208,7 +222,7 @@
     "build_cheapest_route": "Build Cheapest Route"
   },
   "list": {
-    "budget_label": "Budget:",
+    "budget_label": "Budget (Optional)",
     "added_to": "Added to {{list}}",
     "item_count": "{{count}} items",
     "last_compared": "Last compared: {{date}}",
@@ -239,7 +253,7 @@
     "rename_title": "Rename list",
     "rename_save": "Save",
     "clone_title": "Duplicate list",
-    "name_label": "List name",
+    "name_label": "List Name",
     "import_from_list": "Import from another list",
     "import_source_title": "Which list to import from?",
     "import_done": "Items imported",
@@ -263,8 +277,17 @@
     "screen_title": "My Lists",
     "empty_title": "No lists yet",
     "empty_desc": "Create your first shopping list and we'll instantly find the best store.",
-    "create_action": "Create List",
-    "delete_error": "Something went wrong deleting the list"
+    "create_action": "Create",
+    "delete_error": "Something went wrong deleting the list",
+    "create_title": "Create New List",
+    "create_subtitle": "Build your shopping list",
+    "name_placeholder": "e.g. Weekly Shopping",
+    "budget_placeholder": "e.g. 500",
+    "name_required": "Please enter a list name",
+    "create_error": "Could not create the list",
+    "active_list": "Your Active Shopping List",
+    "view": "View",
+    "view_list": "View the {{title}} list"
   },
   "deals": {
     "title": "Deals",
@@ -339,7 +362,13 @@
     "distance_label": "Distance:",
     "within_budget": "Within budget",
     "over_budget": "Over budget",
-    "view_details": "View Details →"
+    "view_details": "View Details →",
+    "multi_store": "Multiple Stores",
+    "all_in_route": "All items on this route",
+    "missing_in_route": "{{n}} items missing on this route",
+    "missing_products": "Missing Products",
+    "store_link_error": "Could not open the store link. Please try again.",
+    "single_store": "Single Store"
   },
   "intro": {
     "skip": "Skip",
@@ -419,5 +448,82 @@
     "action": "Update",
     "later": "Not now",
     "version_line": "Installed {{current}} · Latest {{latest}}"
+  },
+  "tabs": {
+    "home": "Home",
+    "lists": "My Lists",
+    "deals": "Deals",
+    "profile": "Profile"
+  },
+  "screens": {
+    "product_detail": "Product Details",
+    "store_detail": "Store Details",
+    "list_detail": "List Details",
+    "compare_results": "Comparison Results",
+    "route_detail": "Route Details"
+  },
+  "auth": {
+    "email_invalid": "Enter a valid email address",
+    "password_required": "Password is required",
+    "password_min": "Password must be at least 6 characters",
+    "name_required": "Name is required",
+    "name_min": "Name must be at least 2 characters",
+    "passwords_mismatch": "Passwords do not match",
+    "login_error": "Login Error",
+    "register_error": "Registration Error",
+    "generic_error": "Something went wrong. Please try again.",
+    "password": "Password",
+    "password_repeat": "Confirm Password",
+    "name": "Name",
+    "name_placeholder": "Your full name",
+    "login": "Log In",
+    "register": "Sign Up",
+    "verify": "Verify",
+    "code_error": "Could not verify the code. Please try again.",
+    "code_sent_title": "Code sent",
+    "code_sent_body": "A new verification code has been sent to your email.",
+    "code_send_error": "Could not send the code. Please try again.",
+    "sending": "Sending…",
+    "resend": "Resend",
+    "tagline": "Smart Shopping Assistant",
+    "welcome": "Welcome 👋",
+    "login_subtitle": "Log in to your account",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "register_title": "Create account",
+    "register_subtitle": "Join Cheep and start saving",
+    "verify_title": "Verify your email",
+    "verify_subtitle": "Enter the 6-digit code we sent to {{email}}.",
+    "no_code": "Didn't get the code?",
+    "use_other_account": "Use a different account"
+  },
+  "assistant": {
+    "title": "Your shopping assistant",
+    "placeholder": "Ask something…",
+    "send": "Send",
+    "greeting": "Hi! What shall we cook today? Ask for a recipe or say “make a weekly list”.",
+    "chip_weekly": "Make a weekly list",
+    "chip_budget": "Build a basket for my budget",
+    "chip_recipe": "Give me a quick breakfast recipe",
+    "start_error": "Could not start the assistant. Please try again.",
+    "new_chat_error": "Could not start a new chat.",
+    "load_error": "Could not load the chat.",
+    "typing": "typing…",
+    "history": "Chat history",
+    "history_title": "Chat History",
+    "history_empty": "No past chats yet.",
+    "history_error": "Could not load chat history.",
+    "delete_confirm": "This chat will be permanently deleted. Are you sure?",
+    "soon_title": "Coming soon",
+    "soon_body": "The Premium feature will be available soon.",
+    "go_premium": "Go Premium for unlimited use.",
+    "im_cheep": "I'm Cheep"
+  },
+  "time": {
+    "just_now": "just now",
+    "minutes_ago": "{{n}}m ago",
+    "hours_ago": "{{n}}h ago",
+    "days_ago": "{{n}}d ago",
+    "weeks_ago": "{{n}}w ago"
   }
 }

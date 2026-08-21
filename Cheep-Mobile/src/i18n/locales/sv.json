@@ -12,7 +12,12 @@
     "loading": "Laddar…",
     "unit_default": "st",
     "retry": "Försök igen",
-    "error_loading": "Kunde inte ladda data"
+    "error_loading": "Kunde inte ladda data",
+    "connection_error": "Anslutningsfel. Kontrollera din internetanslutning.",
+    "generic_error": "Något gick fel",
+    "link_failed_title": "Länken kunde inte öppnas",
+    "link_failed_body": "Försök igen senare.",
+    "dismiss": "Avbryt"
   },
   "consent": {
     "location_title": "Ska din plats behandlas? (samtycke till platsdelning)",
@@ -179,7 +184,16 @@
       "highest": "Högsta",
       "chart_a11y": "Prishistorikdiagram",
       "footer": "Prisutveckling {{store}}"
-    }
+    },
+    "not_found": "Produkten hittades inte",
+    "most_expensive": "Dyrast",
+    "store_prices": "Butikspriser",
+    "best": "Bäst",
+    "info": "Produktinfo",
+    "buy_cheapest": "Köp i billigaste butiken ({{store}})",
+    "smart_deals": "Smarta erbjudanden",
+    "store_details": "Butiksdetaljer",
+    "price_disclaimer": "Priserna sammanställs från offentligt tillgängliga officiella källor och är endast informativa; de kan ändras när som helst. Bindande är det aktuella priset i butikens egen kanal. Jämförelsen omfattar endast de listade butikerna."
   },
   "home": {
     "greeting": "Hej",
@@ -208,7 +222,7 @@
     "build_cheapest_route": "Skapa billigaste rutten"
   },
   "list": {
-    "budget_label": "Budget:",
+    "budget_label": "Budget (valfritt)",
     "added_to": "Tillagd i {{list}}",
     "item_count": "{{count}} varor",
     "last_compared": "Senast jämförd: {{date}}",
@@ -263,8 +277,17 @@
     "screen_title": "Mina listor",
     "empty_title": "Inga listor än",
     "empty_desc": "Skapa din första inköpslista så hittar vi genast den bästa butiken.",
-    "create_action": "Skapa lista",
-    "delete_error": "Något gick fel när listan skulle tas bort"
+    "create_action": "Skapa",
+    "delete_error": "Något gick fel när listan skulle tas bort",
+    "create_title": "Skapa ny lista",
+    "create_subtitle": "Skapa din inköpslista",
+    "name_placeholder": "t.ex. Veckohandling",
+    "budget_placeholder": "t.ex. 500",
+    "name_required": "Ange ett listnamn",
+    "create_error": "Listan kunde inte skapas",
+    "active_list": "Din aktiva inköpslista",
+    "view": "Visa",
+    "view_list": "Visa listan {{title}}"
   },
   "deals": {
     "title": "Erbjudanden",
@@ -339,7 +362,13 @@
     "distance_label": "Avstånd:",
     "within_budget": "Inom budget",
     "over_budget": "Över budget",
-    "view_details": "Visa detaljer →"
+    "view_details": "Visa detaljer →",
+    "multi_store": "Flera butiker",
+    "all_in_route": "Alla varor på denna rutt",
+    "missing_in_route": "{{n}} varor saknas på denna rutt",
+    "missing_products": "Saknade produkter",
+    "store_link_error": "Butikslänken kunde inte öppnas. Försök igen.",
+    "single_store": "En butik"
   },
   "intro": {
     "skip": "Hoppa över",
@@ -419,5 +448,82 @@
     "action": "Uppdatera",
     "later": "Inte nu",
     "version_line": "Installerad {{current}} · Senaste {{latest}}"
+  },
+  "tabs": {
+    "home": "Hem",
+    "lists": "Listor",
+    "deals": "Erbjudanden",
+    "profile": "Profil"
+  },
+  "screens": {
+    "product_detail": "Produktdetaljer",
+    "store_detail": "Butiksdetaljer",
+    "list_detail": "Listdetaljer",
+    "compare_results": "Jämförelseresultat",
+    "route_detail": "Ruttdetaljer"
+  },
+  "auth": {
+    "email_invalid": "Ange en giltig e-postadress",
+    "password_required": "Lösenord krävs",
+    "password_min": "Lösenordet måste ha minst 6 tecken",
+    "name_required": "Namn krävs",
+    "name_min": "Namnet måste ha minst 2 tecken",
+    "passwords_mismatch": "Lösenorden matchar inte",
+    "login_error": "Inloggningsfel",
+    "register_error": "Registreringsfel",
+    "generic_error": "Något gick fel. Försök igen.",
+    "password": "Lösenord",
+    "password_repeat": "Upprepa lösenord",
+    "name": "Namn",
+    "name_placeholder": "För- och efternamn",
+    "login": "Logga in",
+    "register": "Registrera dig",
+    "verify": "Verifiera",
+    "code_error": "Koden kunde inte verifieras. Försök igen.",
+    "code_sent_title": "Kod skickad",
+    "code_sent_body": "En ny verifieringskod har skickats till din e-post.",
+    "code_send_error": "Koden kunde inte skickas. Försök igen.",
+    "sending": "Skickar…",
+    "resend": "Skicka igen",
+    "tagline": "Smart shoppingassistent",
+    "welcome": "Välkommen 👋",
+    "login_subtitle": "Logga in på ditt konto",
+    "no_account": "Har du inget konto?",
+    "have_account": "Har du redan ett konto?",
+    "register_title": "Skapa konto",
+    "register_subtitle": "Gå med i Cheep och börja spara",
+    "verify_title": "Verifiera din e-post",
+    "verify_subtitle": "Ange den 6-siffriga koden vi skickade till {{email}}.",
+    "no_code": "Fick du ingen kod?",
+    "use_other_account": "Använd ett annat konto"
+  },
+  "assistant": {
+    "title": "Din shoppingassistent",
+    "placeholder": "Fråga något…",
+    "send": "Skicka",
+    "greeting": "Hej! Vad lagar vi idag? Be om ett recept eller säg ”gör en veckolista”.",
+    "chip_weekly": "Gör en veckolista",
+    "chip_budget": "Bygg en korg för min budget",
+    "chip_recipe": "Ge mig ett snabbt frukostrecept",
+    "start_error": "Assistenten kunde inte startas. Försök igen.",
+    "new_chat_error": "Ny chatt kunde inte startas.",
+    "load_error": "Chatten kunde inte laddas.",
+    "typing": "skriver…",
+    "history": "Chatthistorik",
+    "history_title": "Chatthistorik",
+    "history_empty": "Inga tidigare chattar än.",
+    "history_error": "Chatthistoriken kunde inte laddas.",
+    "delete_confirm": "Chatten raderas permanent. Är du säker?",
+    "soon_title": "Kommer snart",
+    "soon_body": "Premium-funktionen blir tillgänglig snart.",
+    "go_premium": "Uppgradera till Premium för obegränsad användning.",
+    "im_cheep": "Jag är Cheep"
+  },
+  "time": {
+    "just_now": "nyss",
+    "minutes_ago": "{{n}} min sedan",
+    "hours_ago": "{{n}} tim sedan",
+    "days_ago": "{{n}} d sedan",
+    "weeks_ago": "{{n}} v sedan"
   }
 }

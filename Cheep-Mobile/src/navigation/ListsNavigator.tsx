@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useTranslation } from 'react-i18next';
 import { ListsScreen } from '../screens/lists/ListsScreen';
 import { ListDetailScreen } from '../screens/lists/ListDetailScreen';
 import { CompareResultsScreen } from '../screens/lists/CompareResultsScreen';
@@ -18,6 +19,7 @@ import type { ListsStackParamList } from './types';
 const Stack = createStackNavigator<ListsStackParamList>();
 
 export function ListsNavigator() {
+  const { t } = useTranslation();
   return (
     <Stack.Navigator
       initialRouteName="ListsMain"
@@ -41,12 +43,12 @@ export function ListsNavigator() {
       <Stack.Screen
         name="ListDetail"
         component={ListDetailScreen}
-        options={{ title: 'Liste Detayı' }}
+        options={{ title: t('screens.list_detail') }}
       />
       <Stack.Screen
         name="ProductDetail"
         component={ProductDetailScreen}
-        options={{ title: 'Ürün Detayı' }}
+        options={{ title: t('screens.product_detail') }}
       />
       <Stack.Screen
         name="CategoryProducts"
@@ -61,12 +63,12 @@ export function ListsNavigator() {
       <Stack.Screen
         name="CompareResults"
         component={CompareResultsScreen}
-        options={{ title: 'Karşılaştırma Sonuçları' }}
+        options={{ title: t('screens.compare_results') }}
       />
       <Stack.Screen
         name="StrategyDetail"
         component={StrategyDetailScreen}
-        options={{ title: 'Rota Detayı' }}
+        options={{ title: t('screens.route_detail') }}
       />
     </Stack.Navigator>
   );

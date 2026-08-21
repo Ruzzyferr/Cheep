@@ -12,7 +12,12 @@
     "loading": "Ładowanie…",
     "unit_default": "szt.",
     "retry": "Spróbuj ponownie",
-    "error_loading": "Nie udało się wczytać danych"
+    "error_loading": "Nie udało się wczytać danych",
+    "connection_error": "Błąd połączenia. Sprawdź połączenie z internetem.",
+    "generic_error": "Coś poszło nie tak",
+    "link_failed_title": "Nie udało się otworzyć linku",
+    "link_failed_body": "Spróbuj ponownie później.",
+    "dismiss": "Anuluj"
   },
   "consent": {
     "location_title": "Czy przetwarzać Twoją lokalizację? (zgoda na przetwarzanie danych)",
@@ -179,7 +184,16 @@
       "highest": "Najwyższa",
       "chart_a11y": "Wykres historii cen",
       "footer": "Trend cen w {{store}}"
-    }
+    },
+    "not_found": "Nie znaleziono produktu",
+    "most_expensive": "Najdroższy",
+    "store_prices": "Ceny w sklepach",
+    "best": "Najlepszy",
+    "info": "Informacje o produkcie",
+    "buy_cheapest": "Kup w najtańszym sklepie ({{store}})",
+    "smart_deals": "Inteligentne okazje",
+    "store_details": "Szczegóły sklepu",
+    "price_disclaimer": "Ceny pochodzą z publicznie dostępnych źródeł urzędowych i mają charakter informacyjny; mogą się zmienić w każdej chwili. Wiążąca jest aktualna cena w kanale danego sklepu. Porównanie obejmuje wyłącznie wymienione sklepy."
   },
   "home": {
     "greeting": "Cześć",
@@ -208,7 +222,7 @@
     "build_cheapest_route": "Stwórz najtańszą trasę"
   },
   "list": {
-    "budget_label": "Budżet:",
+    "budget_label": "Budżet (opcjonalnie)",
     "added_to": "Dodano do {{list}}",
     "item_count": "{{count}} produktów",
     "last_compared": "Ostatnie porównanie: {{date}}",
@@ -263,8 +277,17 @@
     "screen_title": "Moje listy",
     "empty_title": "Brak list",
     "empty_desc": "Utwórz swoją pierwszą listę zakupów, a od razu znajdziemy najlepszy sklep.",
-    "create_action": "Utwórz listę",
-    "delete_error": "Wystąpił błąd podczas usuwania listy"
+    "create_action": "Utwórz",
+    "delete_error": "Wystąpił błąd podczas usuwania listy",
+    "create_title": "Utwórz nową listę",
+    "create_subtitle": "Stwórz swoją listę zakupów",
+    "name_placeholder": "np. Zakupy tygodniowe",
+    "budget_placeholder": "np. 500",
+    "name_required": "Podaj nazwę listy",
+    "create_error": "Nie udało się utworzyć listy",
+    "active_list": "Twoja aktywna lista zakupów",
+    "view": "Zobacz",
+    "view_list": "Zobacz listę {{title}}"
   },
   "deals": {
     "title": "Okazje",
@@ -339,7 +362,13 @@
     "distance_label": "Odległość:",
     "within_budget": "W ramach budżetu",
     "over_budget": "Przekracza budżet",
-    "view_details": "Zobacz szczegóły →"
+    "view_details": "Zobacz szczegóły →",
+    "multi_store": "Kilka sklepów",
+    "all_in_route": "Wszystkie produkty na tej trasie",
+    "missing_in_route": "Brakuje {{n}} produktów na tej trasie",
+    "missing_products": "Brakujące produkty",
+    "store_link_error": "Nie udało się otworzyć linku do sklepu. Spróbuj ponownie.",
+    "single_store": "Jeden sklep"
   },
   "intro": {
     "skip": "Pomiń",
@@ -419,5 +448,82 @@
     "action": "Aktualizuj",
     "later": "Nie teraz",
     "version_line": "Zainstalowana {{current}} · Najnowsza {{latest}}"
+  },
+  "tabs": {
+    "home": "Główna",
+    "lists": "Listy",
+    "deals": "Okazje",
+    "profile": "Profil"
+  },
+  "screens": {
+    "product_detail": "Szczegóły produktu",
+    "store_detail": "Szczegóły sklepu",
+    "list_detail": "Szczegóły listy",
+    "compare_results": "Wyniki porównania",
+    "route_detail": "Szczegóły trasy"
+  },
+  "auth": {
+    "email_invalid": "Podaj prawidłowy adres e-mail",
+    "password_required": "Hasło jest wymagane",
+    "password_min": "Hasło musi mieć co najmniej 6 znaków",
+    "name_required": "Imię jest wymagane",
+    "name_min": "Imię musi mieć co najmniej 2 znaki",
+    "passwords_mismatch": "Hasła nie są takie same",
+    "login_error": "Błąd logowania",
+    "register_error": "Błąd rejestracji",
+    "generic_error": "Coś poszło nie tak. Spróbuj ponownie.",
+    "password": "Hasło",
+    "password_repeat": "Powtórz hasło",
+    "name": "Imię",
+    "name_placeholder": "Imię i nazwisko",
+    "login": "Zaloguj się",
+    "register": "Zarejestruj się",
+    "verify": "Zweryfikuj",
+    "code_error": "Nie udało się zweryfikować kodu. Spróbuj ponownie.",
+    "code_sent_title": "Kod wysłany",
+    "code_sent_body": "Nowy kod weryfikacyjny został wysłany na Twój e-mail.",
+    "code_send_error": "Nie udało się wysłać kodu. Spróbuj ponownie.",
+    "sending": "Wysyłanie…",
+    "resend": "Wyślij ponownie",
+    "tagline": "Inteligentny asystent zakupów",
+    "welcome": "Witaj 👋",
+    "login_subtitle": "Zaloguj się na swoje konto",
+    "no_account": "Nie masz konta?",
+    "have_account": "Masz już konto?",
+    "register_title": "Utwórz konto",
+    "register_subtitle": "Dołącz do Cheep i zacznij oszczędzać",
+    "verify_title": "Zweryfikuj swój e-mail",
+    "verify_subtitle": "Wpisz 6-cyfrowy kod, który wysłaliśmy na {{email}}.",
+    "no_code": "Nie otrzymałeś kodu?",
+    "use_other_account": "Użyj innego konta"
+  },
+  "assistant": {
+    "title": "Twój asystent zakupów",
+    "placeholder": "Zapytaj o coś…",
+    "send": "Wyślij",
+    "greeting": "Cześć! Co dziś ugotujemy? Poproś o przepis lub powiedz „przygotuj listę na tydzień”.",
+    "chip_weekly": "Przygotuj listę na tydzień",
+    "chip_budget": "Ułóż koszyk pod mój budżet",
+    "chip_recipe": "Podaj szybki przepis na śniadanie",
+    "start_error": "Nie udało się uruchomić asystenta. Spróbuj ponownie.",
+    "new_chat_error": "Nie udało się rozpocząć nowej rozmowy.",
+    "load_error": "Nie udało się wczytać rozmowy.",
+    "typing": "pisze…",
+    "history": "Historia rozmów",
+    "history_title": "Historia rozmów",
+    "history_empty": "Brak wcześniejszych rozmów.",
+    "history_error": "Nie udało się wczytać historii rozmów.",
+    "delete_confirm": "Ta rozmowa zostanie trwale usunięta. Na pewno?",
+    "soon_title": "Wkrótce",
+    "soon_body": "Funkcja Premium będzie wkrótce dostępna.",
+    "go_premium": "Przejdź na Premium, aby korzystać bez limitu.",
+    "im_cheep": "Jestem Cheep"
+  },
+  "time": {
+    "just_now": "przed chwilą",
+    "minutes_ago": "{{n}} min temu",
+    "hours_ago": "{{n}} godz. temu",
+    "days_ago": "{{n}} dni temu",
+    "weeks_ago": "{{n}} tyg. temu"
   }
 }

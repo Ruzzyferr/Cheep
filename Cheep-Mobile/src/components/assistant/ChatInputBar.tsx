@@ -14,6 +14,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { shadows } from '../../theme/shadows';
+import i18n from '../../i18n';
 
 interface ChatInputBarProps {
   value: string;
@@ -32,7 +33,7 @@ export function ChatInputBar({ value, onChangeText, onSend, sending, disabled }:
         style={styles.input}
         value={value}
         onChangeText={onChangeText}
-        placeholder="Bir şey sor..."
+        placeholder={i18n.t('assistant.placeholder')}
         placeholderTextColor={colors.text.hint}
         multiline
         maxLength={1000}
@@ -43,7 +44,7 @@ export function ChatInputBar({ value, onChangeText, onSend, sending, disabled }:
         style={[styles.sendButton, canSend ? styles.sendButtonActive : styles.sendButtonDisabled]}
         onPress={onSend}
         disabled={!canSend}
-        accessibilityLabel="Gönder"
+        accessibilityLabel={i18n.t('assistant.send')}
       >
         {sending ? (
           <ActivityIndicator size="small" color={colors.background.paper} />
