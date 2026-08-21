@@ -152,6 +152,41 @@ const fcm = {
     projectId: process.env.FCM_PROJECT_ID || fcmServiceAccount?.project_id || '',
 };
 
+
+// --- Apple Push Notification service (iOS) ---
+// iOS token'ları FCM'e gönderilemez: mobil uygulama expo-notifications ile ham
+// APNs CİHAZ token'ı alıyor (getDevicePushTokenAsync), FCM ise kendi kayıt
+// token'ını bekliyor. Aradaki uyuşmazlık yüzünden iOS doğrudan APNs'e gönderilir.
+//
+// APNS_KEY: App Store Connect'ten indirilen .p8 anahtarının içeriği — ya tek
+// satır halinde ("\\n" kaçışlı) ya da base64'ü. GERÇEK BİR SIR, git'e konmaz.
+function parseApnsKey(): string | null {
+    const raw = process.env.APNS_KEY?.trim();
+    if (!raw) return null;
+    const key = raw.includes('BEGIN PRIVATE KEY')
+        ? raw.split(String.raw`\n`).join('\n')
+        : Buffer.from(raw, 'base64').toString('utf8');
+    if (!key.includes('BEGIN PRIVATE KEY')) {
+        // eslint-disable-next-line no-console
+        console.warn('⚠️  APNS_KEY çözümlenemedi (PEM değil). iOS push devre dışı.');
+        return null;
+    }
+    return key;
+}
+
+const apnsKey = parseApnsKey();
+const apns = {
+    key: apnsKey,
+    keyId: process.env.APNS_KEY_ID || '',
+    teamId: process.env.APNS_TEAM_ID || '',
+    bundleId: process.env.APNS_BUNDLE_ID || 'com.cheep.mobile',
+    // Anahtar "Sandbox & Production" kapsamında üretildi; App Store sürümü
+    // production ucunu kullanır. TestFlight/geliştirme için
+    // APNS_HOST=api.sandbox.push.apple.com verilir.
+    host: process.env.APNS_HOST || 'api.push.apple.com',
+    enabled: Boolean(apnsKey && process.env.APNS_KEY_ID && process.env.APNS_TEAM_ID),
+};
+
 export const config = {
     isProduction,
     jwtSecret: jwtSecret as string,
@@ -165,4 +200,5 @@ export const config = {
     emailEnabled,
     support,
     fcm,
+    apns,
 };

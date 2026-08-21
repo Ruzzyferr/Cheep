@@ -1,3 +1,4 @@
+import http2 from 'node:http2';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/prisma.client.js';
 import logger from '../utils/logger.js';
@@ -28,6 +29,8 @@ export interface PushMessage {
     title: string;
     body: string;
     data?: Record<string, unknown>;
+    /** 'ios' → APNs, diğerleri → FCM. Belirtilmezse FCM varsayılır. */
+    platform?: string | null;
 }
 
 interface CachedToken {
@@ -80,6 +83,114 @@ async function getAccessToken(): Promise<string | null> {
 }
 
 /** Tek mesaj gönderir. Dönüş: 'ok' | 'dead' (token geçersiz) | 'fail'. */
+// ─────────────────────────────────────────────────────────────────────────────
+// APNs (iOS)
+//
+// Neden ayrı yol: mobil uygulama iOS'ta expo-notifications'ın
+// getDevicePushTokenAsync() çağrısıyla ham APNs cihaz token'ı alıyor. FCM v1
+// ise yalnızca kendi kayıt token'larını kabul eder; APNs token'ı gönderilirse
+// istek reddedilir. Bu yüzden iOS token'ları doğrudan Apple'a gider.
+//
+// APNs sağlayıcı API'si YALNIZCA HTTP/2 konuşur — fetch/undici ile
+// çağrılamaz, node:http2 kullanılır.
+// ─────────────────────────────────────────────────────────────────────────────
+
+let apnsCached: CachedToken | null = null;
+
+/** APNs sağlayıcı JWT'si. Apple 60 dakikadan eski token'ı reddeder; 50 dk önbelleklenir. */
+function getApnsToken(): string | null {
+    const { key, keyId, teamId } = config.apns;
+    if (!key || !keyId || !teamId) return null;
+    if (apnsCached && Date.now() < apnsCached.expiresAt) return apnsCached.value;
+    try {
+        const value = jwt.sign({ iss: teamId, iat: Math.floor(Date.now() / 1000) }, key, {
+            algorithm: 'ES256',
+            header: { alg: 'ES256', kid: keyId },
+        });
+        apnsCached = { value, expiresAt: Date.now() + 50 * 60 * 1000 };
+        return value;
+    } catch (err) {
+        logger.error('[push] APNs JWT üretilemedi:', err);
+        return null;
+    }
+}
+
+/**
+ * iOS mesajlarını tek bir HTTP/2 oturumu üzerinden gönderir.
+ * Oturumu her mesaj için yeniden kurmak APNs'te pahalıdır; batch boyunca açık tutulur.
+ */
+async function sendApnsBatch(
+    messages: PushMessage[]
+): Promise<{ sent: number; failed: number; dead: string[] }> {
+    const out = { sent: 0, failed: 0, dead: [] as string[] };
+    if (messages.length === 0) return out;
+
+    const token = getApnsToken();
+    if (!token) {
+        logger.warn('[push] APNs yapılandırılmamış (APNS_KEY/APNS_KEY_ID/APNS_TEAM_ID). iOS bildirimleri gönderilmedi.');
+        out.failed = messages.length;
+        return out;
+    }
+
+    const session = http2.connect(`https://${config.apns.host}`);
+    session.on('error', (err) => logger.error('[push] APNs oturum hatası:', err));
+
+    const sendOneApns = (m: PushMessage) =>
+        new Promise<'ok' | 'dead' | 'fail'>((resolve) => {
+            const payload = JSON.stringify({
+                aps: {
+                    alert: { title: m.title, body: m.body },
+                    sound: 'default',
+                    'mutable-content': 1,
+                },
+                ...Object.fromEntries(
+                    Object.entries(m.data ?? {}).map(([k, v]) => [k, String(v)])
+                ),
+            });
+
+            const req = session.request({
+                ':method': 'POST',
+                ':path': `/3/device/${m.to}`,
+                authorization: `bearer ${token}`,
+                'apns-topic': config.apns.bundleId,
+                'apns-push-type': 'alert',
+                'apns-priority': '10',
+                'content-type': 'application/json',
+                'content-length': Buffer.byteLength(payload),
+            });
+
+            let status = 0;
+            let body = '';
+            req.setEncoding('utf8');
+            req.on('response', (h) => { status = Number(h[':status'] ?? 0); });
+            req.on('data', (c: string) => { body += c; });
+            req.on('error', (err) => { logger.error('[push] APNs istek hatası:', err); resolve('fail'); });
+            req.on('end', () => {
+                if (status === 200) return resolve('ok');
+                // 410 Gone = cihaz artık kayıtlı değil; 400 BadDeviceToken = token geçersiz.
+                if (status === 410 || /BadDeviceToken|Unregistered/i.test(body)) return resolve('dead');
+                logger.warn(`[push] APNs ${status}: ${body.slice(0, 200)}`);
+                resolve('fail');
+            });
+            req.end(payload);
+        });
+
+    let cursor = 0;
+    const worker = async () => {
+        while (cursor < messages.length) {
+            const m = messages[cursor++]!;
+            const r = await sendOneApns(m);
+            if (r === 'ok') out.sent++;
+            else if (r === 'dead') out.dead.push(m.to);
+            else out.failed++;
+        }
+    };
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, messages.length) }, worker));
+
+    session.close();
+    return out;
+}
+
 async function sendOne(accessToken: string, projectId: string, m: PushMessage): Promise<'ok' | 'dead' | 'fail'> {
     try {
         const res = await fetch(`https://fcm.googleapis.com/v1/projects/${projectId}/messages:send`, {
@@ -129,31 +240,60 @@ export const sendPushBatch = async (
 ): Promise<{ sent: number; failed: number; pruned: number }> => {
     if (messages.length === 0) return { sent: 0, failed: 0, pruned: 0 };
 
-    const projectId = config.fcm.projectId;
-    const accessToken = await getAccessToken();
-    if (!accessToken || !projectId) {
-        logger.warn(
-            '[push] FCM yapılandırılmamış (FCM_SERVICE_ACCOUNT). Bildirimler uygulama içinde duruyor, push gönderilmedi.'
-        );
-        return { sent: 0, failed: messages.length, pruned: 0 };
-    }
+    // iOS ayrı yoldan gider: cihaz token'ı APNs'e aittir, FCM kabul etmez.
+    const iosMessages = messages.filter((m) => m.platform === 'ios');
+    const fcmMessages = messages.filter((m) => m.platform !== 'ios');
 
     let sent = 0;
     let failed = 0;
     const dead: string[] = [];
 
+    if (iosMessages.length) {
+        const r = await sendApnsBatch(iosMessages);
+        sent += r.sent;
+        failed += r.failed;
+        dead.push(...r.dead);
+    }
+
+    if (fcmMessages.length === 0) {
+        let prunedOnly = 0;
+        if (dead.length) {
+            const d = await prisma.userPushToken.deleteMany({ where: { token: { in: dead } } });
+            prunedOnly = d.count;
+            failed += dead.length;
+            logger.info(`[push] ${prunedOnly} geçersiz token silindi`);
+        }
+        return { sent, failed, pruned: prunedOnly };
+    }
+
+    const projectId = config.fcm.projectId;
+    const accessToken = await getAccessToken();
+    if (!accessToken || !projectId) {
+        logger.warn(
+            '[push] FCM yapılandırılmamış (FCM_SERVICE_ACCOUNT). Android bildirimleri gönderilmedi.'
+        );
+        failed += fcmMessages.length;
+        let prunedOnly = 0;
+        if (dead.length) {
+            const d = await prisma.userPushToken.deleteMany({ where: { token: { in: dead } } });
+            prunedOnly = d.count;
+            failed += dead.length;
+        }
+        return { sent, failed, pruned: prunedOnly };
+    }
+
     // Sabit boyutlu havuz: CONCURRENCY kadar iş paralel ilerler.
     let cursor = 0;
     const worker = async () => {
-        while (cursor < messages.length) {
-            const m = messages[cursor++]!;
+        while (cursor < fcmMessages.length) {
+            const m = fcmMessages[cursor++]!;
             const r = await sendOne(accessToken, projectId, m);
             if (r === 'ok') sent++;
             else if (r === 'dead') dead.push(m.to);
             else failed++;
         }
     };
-    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, messages.length) }, worker));
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, fcmMessages.length) }, worker));
 
     let pruned = 0;
     if (dead.length) {

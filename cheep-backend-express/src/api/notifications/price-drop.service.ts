@@ -199,7 +199,7 @@ async function notifyUsers(
     const userIds = [...fresh.keys()];
     const tokens = await prisma.userPushToken.findMany({
         where: { user_id: { in: userIds } },
-        select: { token: true, user_id: true, locale: true, user: { select: { language: true } } },
+        select: { token: true, user_id: true, locale: true, platform: true, user: { select: { language: true } } },
     });
 
     const messages: PushMessage[] = tokens.map((t) => {
@@ -212,6 +212,8 @@ async function notifyUsers(
             body,
             // Uygulama açıldığında bildirim ekranına götürmek için.
             data: { type: 'price_drop', count: drops.length },
+            // iOS token'lari APNs'e yonlendirilir; FCM bunlari kabul etmez.
+            platform: t.platform,
         };
     });
 
