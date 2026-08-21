@@ -77,3 +77,9 @@ android/app/cheep-upload.keystore
 # geçici görsel/otomasyon yardımcıları
 drive*.py
 shots/
+
+# EAS yerel imzalama kimlik bilgileri - ASLA commit edilmez
+credentials.json
+*.mobileprovision
+*.p12
+*.p8

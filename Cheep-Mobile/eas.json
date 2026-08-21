@@ -5,7 +5,8 @@
   },
   "build": {
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "credentialsSource": "local"
     },
     "preview": {
       "distribution": "internal",

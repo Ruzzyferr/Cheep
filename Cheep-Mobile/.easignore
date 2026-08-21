@@ -1,0 +1,49 @@
+# EAS Build arsivinden haric tutulanlar.
+# DIKKAT: Bu dosya varken EAS .gitignore'u DIKKATE ALMAZ; gizli dosya
+# kaliplarinin burada da tekrarlanmasi sart.
+
+# Bagimliliklar - EAS kendi npm install'ini calistirir
+node_modules/
+
+# Yerel native klasorler - EAS bulutta prebuild yapar
+android/
+ios/
+
+# Expo/derleme ciktilari
+.expo/
+dist/
+web-build/
+.kotlin/
+.metro-health-check*
+*.tsbuildinfo
+
+# Playwright ekran goruntusu uretimi ve otomasyon scriptleri (derlemeye gereksiz)
+screenshots/
+shots/
+__pycache__/
+*.py
+verify_multicountry_results.json
+verify_pl_pilot_results.json
+
+# ---- GIZLI: asla yuklenmez ----
+credentials.json
+*.jks
+*.p8
+*.p12
+*.key
+*.pem
+*.mobileprovision
+android/key.properties
+.env
+.env*.local
+
+# hata ayiklama
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+*.orig.*
+
+# macOS
+.DS_Store
+
+app-example
