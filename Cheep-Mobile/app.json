@@ -12,7 +12,7 @@
       "backgroundColor": "#1F6F4A"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.cheep.mobile",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
