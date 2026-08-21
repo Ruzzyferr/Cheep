@@ -9,13 +9,24 @@ viewport'ta kayiyor. Yalnizca ikon (arama) icin koordinat kullaniliyor.
 
 Kullanim:  npx expo start --web  calisiyorken  ->  python appstore_shots.py
 """
-import sys, io
+import sys, io, argparse
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
-OUT = Path("appstore-screenshots")
+# Dil/ulke parametreleri: App Store yerellestirmeleri icin ayri setler uretilir.
+# Lehce vitrinde Polonya zincirleri ve zloty gorunmeli -> Varsova koordinati.
+PRESETS = {
+    "tr":    dict(locale="tr-TR", lat=41.01, lon=28.98, out="appstore-screenshots"),
+    "en":    dict(locale="en-US", lat=41.01, lon=28.98, out="appstore-screenshots-en"),
+    "pl":    dict(locale="pl-PL", lat=52.23, lon=21.01, out="appstore-screenshots-pl"),
+}
+ap = argparse.ArgumentParser()
+ap.add_argument("preset", nargs="?", default="tr", choices=sorted(PRESETS))
+CFG = PRESETS[ap.parse_args().preset]
+
+OUT = Path(CFG["out"])
 OUT.mkdir(exist_ok=True)
 
 W, H, DSF = 430, 932, 3          # -> 1290 x 2796
@@ -56,8 +67,8 @@ with sync_playwright() as p:
     ctx = b.new_context(
         viewport={"width": W, "height": H},
         device_scale_factor=DSF,
-        locale="tr-TR",
-        geolocation={"latitude": 41.01, "longitude": 28.98},
+        locale=CFG["locale"],
+        geolocation={"latitude": CFG["lat"], "longitude": CFG["lon"]},
         permissions=["geolocation"],
     )
     ctx.add_init_script("try{localStorage.setItem('intro_seen','1')}catch(e){}")
@@ -73,9 +84,12 @@ with sync_playwright() as p:
     if ins.count() >= 2:
         ins.nth(0).fill("test@cheep.com")
         ins.nth(1).fill("test123456")
+        # Enter ile gonderim DENENDI ve CALISMADI (form submit'e baglanmiyor).
+        # Buton metni her locale'de Turkce kaliyor: i18n `lng: 'tr'` ile sabit
+        # baslatiliyor ve tarayici diline bakmiyor, o yuzden metinle tiklamak guvenli.
         tap(pg, "Giriş Yap")
         pg.wait_for_timeout(9000)
-        print("giris yapildi")
+        print("giris yapildi (locale=%s)" % CFG["locale"])
 
     # --- 1) ana ekran: tasarruf kahramani ---
     shot(pg, "01-ana-sayfa")

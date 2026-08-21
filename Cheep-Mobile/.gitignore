@@ -84,3 +84,5 @@ credentials.json
 *.p12
 *.p8
 appstore-screenshots/
+appstore-screenshots-en/
+appstore-screenshots-pl/
