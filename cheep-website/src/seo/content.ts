@@ -232,7 +232,21 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
           ? `${city.name} marketleri — en ucuz market ve şubeler | Cheep`
           : `${city.name} — sklepy i najtańsze ceny | Cheep`
       const description = fill(c.city.intro, { name: city.name, branches: city.branchCount })
-      const head = base(locale, path, title, description, INDEXABLE)
+      // NOINDEX — bu sayfalar sablondan uretiliyor ve birbirine %84-91 benziyor.
+      // Ozgun icerik sayfa basina ~300 karakter: sehir adi, sube sayisi, zincir
+      // dagilimi. Gerisi menu + alt bilgi. Google bunlari zaten "Duplicate,
+      // Google chose different canonical than user" diyerek indekslemiyordu;
+      // sitemap'te tutmak celiskili sinyaldi.
+      //
+      // Icerik ekleyerek COZULEMEZ: 275 sehir arasinda yalnizca 12 farkli zincir
+      // bilesimi var (PL'de 230 sehrin 115'i ayni bilesimde). Sayfalari gercekten
+      // ayristiracak veri sube adresleri/ilceleri; StoreBranch'te alan var ama
+      // NULL — yalnizca lat/lon dolu. Ters geocoding ile ilce cikarilirsa burasi
+      // INDEXABLE'a geri alinmali.
+      //
+      // `follow` bilincli: sayfalar kullaniciya acik kaliyor ve ic baglantilar
+      // market sayfalarina link degeri tasimaya devam ediyor.
+      const head = base(locale, path, title, description, NOINDEX)
       head.jsonLd.push(breadcrumbLd([{ name: c.breadcrumbHome, path: homePath }, { name: city.name }]))
       return head
     }
