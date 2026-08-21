@@ -253,7 +253,8 @@ export const tr: Dict = {
         ] },
         { h3: 'İzin verdiğinde' },
         { ul: [
-          '**Yaklaşık konum:** yalnızca izin verirsen ve sana en yakın market şubelerini göstermek için kullanılır. Konumun sürekli takip edilmez, arka planda toplanmaz.',
+          '**Konum:** yalnızca izin verirsen ve sana en yakın market şubelerini ve gerçek mesafeleri göstermek için kullanılır. Bu hesaplama için cihazının koordinatları sunucumuza iletilir. Konumun sürekli takip edilmez, arka planda toplanmaz.',
+          '**Bildirim kimliği:** bildirimlere izin verirsen, cihazına özel bir bildirim kimliği (push token) hesabınla ilişkilendirilerek saklanır. Yalnızca sana bildirim gönderebilmek için kullanılır; bildirimleri kapattığında veya çıkış yaptığında silinir.',
         ] },
         { h3: 'Otomatik olarak' },
         { ul: [

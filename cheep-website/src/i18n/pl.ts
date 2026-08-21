@@ -251,7 +251,8 @@ export const pl: Dict = {
         ] },
         { h3: 'Gdy wyrazisz zgodę' },
         { ul: [
-          '**Przybliżona lokalizacja:** wykorzystywana wyłącznie za Twoją zgodą i tylko po to, by pokazać najbliższe sklepy. Nie śledzimy lokalizacji w sposób ciągły ani nie zbieramy jej w tle.',
+          '**Lokalizacja:** wykorzystywana wyłącznie za Twoją zgodą i tylko po to, by pokazać najbliższe sklepy oraz rzeczywiste odległości. Współrzędne Twojego urządzenia są w tym celu przesyłane na nasz serwer. Nie śledzimy lokalizacji w sposób ciągły ani nie zbieramy jej w tle.',
+          '**Identyfikator powiadomień:** jeśli zezwolisz na powiadomienia, unikalny identyfikator Twojego urządzenia (token push) jest zapisywany i powiązany z Twoim kontem. Służy wyłącznie do wysyłania Ci powiadomień; jest usuwany po wyłączeniu powiadomień lub wylogowaniu.',
         ] },
         { h3: 'Automatycznie' },
         { ul: [
