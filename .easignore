@@ -1,0 +1,64 @@
+# ============================================================
+# EAS Build arsiv filtresi  (DEPO KOKU - baska yerde gecersiz)
+# ============================================================
+# EAS arsivi depo kokunden baslatir ve alt dizinlerdeki .gitignore
+# dosyalarini guvenilir sekilde uygulamaz; bu yuzden filtresiz halde
+# Cheep-Mobile/node_modules (6.7 GB) arsive giriyor ve yukleme 1.5 GB
+# oluyordu.
+#
+# DIKKAT 1: Bu dosya varken EAS TUM .gitignore dosyalarini yok sayar.
+# Gizli dosya kaliplari bu yuzden burada da tekrarlanmak ZORUNDA.
+#
+# DIKKAT 2: "/*" ile her seyi kapatip "!/Cheep-Mobile/" ile geri acma
+# yontemi DENENDI ve arsiv 80 bayta dustu (klasor geri geliyor, icerigi
+# gelmiyor). Bu yuzden haric tutulacaklar tek tek yaziliyor.
+# ============================================================
+
+# ---- iOS derlemesiyle ilgisi olmayan kardes projeler ----
+/Cheep-Scraper/
+/cheep-backend-express/
+/cheep-website/
+/cheep-store-assets/
+/docs/
+/deploy/
+/CheepKeys-yedek-2026-08-03/
+/node_modules/
+
+# ---- Cheep-Mobile icindeki agir / gereksiz olanlar ----
+/Cheep-Mobile/node_modules/
+/Cheep-Mobile/android/
+/Cheep-Mobile/ios/
+/Cheep-Mobile/.expo/
+/Cheep-Mobile/dist/
+/Cheep-Mobile/web-build/
+/Cheep-Mobile/.kotlin/
+/Cheep-Mobile/screenshots/
+/Cheep-Mobile/shots/
+/Cheep-Mobile/__pycache__/
+
+# Playwright / otomasyon scriptleri - derlemeye gereksiz
+/Cheep-Mobile/*.py
+/Cheep-Mobile/verify_multicountry_results.json
+/Cheep-Mobile/verify_pl_pilot_results.json
+
+# ---- GIZLI: asla yuklenmez ----
+/Cheep-Mobile/credentials.json
+/Cheep-Mobile/.env
+*.jks
+*.p8
+*.p12
+*.key
+*.pem
+*.mobileprovision
+*.keystore
+key.properties
+signing.properties
+
+# ---- hata ayiklama / isletim sistemi artiklari ----
+*.tsbuildinfo
+*.orig.*
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.DS_Store
