@@ -64,6 +64,7 @@ export function ProfileScreen({
 
   // ─── Language picker / konum sayfası state ─────────────────────────────────
   const [langPickerOpen, setLangPickerOpen] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
 
   // ─── Preferences state ─────────────────────────────────────────────────────
@@ -240,6 +241,52 @@ export function ProfileScreen({
         style: 'destructive',
         onPress: async () => {
           await logout();
+        },
+      },
+    ]);
+  };
+
+  /**
+   * Hesap silme — Apple App Store Guideline 5.1.1(v) uygulama ICINDEN silme
+   * sunulmasini sart kosar. Yikici ve geri alinamaz oldugu icin CIFT onay:
+   * once ne silinecegini anlatan uyari, sonra ayri bir son onay.
+   */
+  const handleDeleteAccount = () => {
+    if (deletingAccount) return;
+    Alert.alert(t('profile.delete_account_title'), t('profile.delete_account_body'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('profile.delete_account_continue'),
+        style: 'destructive',
+        onPress: () => {
+          Alert.alert(
+            t('profile.delete_account_confirm_title'),
+            t('profile.delete_account_confirm_body'),
+            [
+              { text: t('common.cancel'), style: 'cancel' },
+              {
+                text: t('profile.delete_account_final'),
+                style: 'destructive',
+                onPress: async () => {
+                  setDeletingAccount(true);
+                  try {
+                    // Push kaydini ONCE dusur: silme sonrasi token gecersiz olur.
+                    try {
+                      await unregisterPushToken();
+                    } catch {
+                      // en iyi caba - basarisiz olursa silmeyi engellemesin
+                    }
+                    await userService.deleteAccount();
+                    await logout();
+                  } catch {
+                    Alert.alert(t('common.error'), t('profile.delete_account_error'));
+                  } finally {
+                    setDeletingAccount(false);
+                  }
+                },
+              },
+            ]
+          );
         },
       },
     ]);
@@ -553,6 +600,18 @@ export function ProfileScreen({
             onPress={handleLogout}
             variant="outline"
             fullWidth
+          />
+        </View>
+
+        {/* Hesap silme - Apple 5.1.1(v) uyarinca uygulama icinden sunulmali */}
+        <View style={styles.section}>
+          <Button
+            title={t('profile.delete_account_action')}
+            onPress={handleDeleteAccount}
+            variant="outline"
+            fullWidth
+            loading={deletingAccount}
+            disabled={deletingAccount}
           />
         </View>
 

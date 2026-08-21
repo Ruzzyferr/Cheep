@@ -137,7 +137,15 @@
     "location_os_blocked_body": "Zgoda została udzielona, ale uprawnienie lokalizacji jest wyłączone w ustawieniach systemu. Włącz je w Ustawieniach, abyśmy mogli pokazać najbliższe sklepy.",
     "open_settings": "Otwórz ustawienia",
     "notifications_on": "Włączone — damy znać o spadkach cen",
-    "notifications_off": "Wyłączone — dotknij, aby włączyć"
+    "notifications_off": "Wyłączone — dotknij, aby włączyć",
+    "delete_account_action": "Usuń moje konto",
+    "delete_account_title": "Usuń konto",
+    "delete_account_body": "Twoje konto i wszystkie dane (listy, preferencje, opinie) zostaną trwale usunięte. Tej operacji nie można cofnąć.",
+    "delete_account_continue": "Dalej",
+    "delete_account_confirm_title": "Ostateczne potwierdzenie",
+    "delete_account_confirm_body": "To ostatni krok. Po potwierdzeniu konto zostanie natychmiast i trwale usunięte.",
+    "delete_account_final": "Usuń trwale",
+    "delete_account_error": "Nie udało się usunąć konta. Spróbuj ponownie."
   },
   "countries": {
     "TR": "Turcja",

@@ -137,7 +137,15 @@
     "location_os_blocked_body": "Rızanı aldık, ancak konum izni sistem ayarlarından kapatılmış. En yakın marketleri gösterebilmemiz için Ayarlar'dan konum iznini aç.",
     "open_settings": "Ayarları aç",
     "notifications_on": "Açık — fiyat düşünce haber veriyoruz",
-    "notifications_off": "Kapalı — açmak için dokun"
+    "notifications_off": "Kapalı — açmak için dokun",
+    "delete_account_action": "Hesabımı Sil",
+    "delete_account_title": "Hesabını sil",
+    "delete_account_body": "Hesabın ve tüm verilerin (listelerin, tercihlerin, geri bildirimlerin) kalıcı olarak silinir. Bu işlem geri alınamaz.",
+    "delete_account_continue": "Devam Et",
+    "delete_account_confirm_title": "Son onay",
+    "delete_account_confirm_body": "Bu son adım. Onaylarsan hesabın hemen ve kalıcı olarak silinir.",
+    "delete_account_final": "Kalıcı Olarak Sil",
+    "delete_account_error": "Hesap silinemedi. Lütfen tekrar dene."
   },
   "countries": {
     "TR": "Türkiye",

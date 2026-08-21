@@ -27,4 +27,14 @@ export const userService = {
     );
     return response.data.data!;
   },
+
+  /**
+   * Hesabı ve ona bağlı TÜM verileri kalıcı olarak siler (`DELETE /users/me`).
+   * Geri alınamaz. Apple App Store Guideline 5.1.1(v) hesap oluşturmaya izin
+   * veren uygulamalarda hesap silmenin de UYGULAMA İÇİNDEN sunulmasını şart
+   * koşar; cheep.live/delete web formu bu şartı tek başına karşılamaz.
+   */
+  async deleteAccount(): Promise<void> {
+    await apiClient.delete(API_ENDPOINTS.USERS.ME);
+  },
 };

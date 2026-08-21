@@ -137,7 +137,15 @@
     "location_os_blocked_body": "Du har gett ditt medgivande, men platsbehörigheten är avstängd i systeminställningarna. Slå på den i Inställningar så att vi kan visa dina närmaste butiker.",
     "open_settings": "Öppna inställningar",
     "notifications_on": "På — vi meddelar prissänkningar",
-    "notifications_off": "Av — tryck för att slå på"
+    "notifications_off": "Av — tryck för att slå på",
+    "delete_account_action": "Radera mitt konto",
+    "delete_account_title": "Radera kontot",
+    "delete_account_body": "Ditt konto och all data (listor, inställningar, återkoppling) raderas permanent. Detta går inte att ångra.",
+    "delete_account_continue": "Fortsätt",
+    "delete_account_confirm_title": "Slutgiltig bekräftelse",
+    "delete_account_confirm_body": "Detta är sista steget. Om du bekräftar raderas kontot omedelbart och permanent.",
+    "delete_account_final": "Radera permanent",
+    "delete_account_error": "Kontot kunde inte raderas. Försök igen."
   },
   "countries": {
     "TR": "Turkiet",

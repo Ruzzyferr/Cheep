@@ -137,7 +137,15 @@
     "location_os_blocked_body": "You gave consent, but location permission is disabled in system settings. Turn it on in Settings so we can show your nearest stores.",
     "open_settings": "Open settings",
     "notifications_on": "On — we'll tell you about price drops",
-    "notifications_off": "Off — tap to enable"
+    "notifications_off": "Off — tap to enable",
+    "delete_account_action": "Delete My Account",
+    "delete_account_title": "Delete your account",
+    "delete_account_body": "Your account and all your data (lists, preferences, feedback) will be permanently deleted. This cannot be undone.",
+    "delete_account_continue": "Continue",
+    "delete_account_confirm_title": "Final confirmation",
+    "delete_account_confirm_body": "This is the last step. If you confirm, your account is deleted immediately and permanently.",
+    "delete_account_final": "Delete Permanently",
+    "delete_account_error": "Could not delete your account. Please try again."
   },
   "countries": {
     "TR": "Turkey",

@@ -137,7 +137,15 @@
     "location_os_blocked_body": "Du hast eingewilligt, aber die Standortberechtigung ist in den Systemeinstellungen deaktiviert. Aktiviere sie in den Einstellungen, damit wir die nächstgelegenen Märkte anzeigen können.",
     "open_settings": "Einstellungen öffnen",
     "notifications_on": "An — wir melden Preissenkungen",
-    "notifications_off": "Aus — zum Aktivieren tippen"
+    "notifications_off": "Aus — zum Aktivieren tippen",
+    "delete_account_action": "Mein Konto löschen",
+    "delete_account_title": "Konto löschen",
+    "delete_account_body": "Dein Konto und alle Daten (Listen, Einstellungen, Rückmeldungen) werden dauerhaft gelöscht. Das lässt sich nicht rückgängig machen.",
+    "delete_account_continue": "Weiter",
+    "delete_account_confirm_title": "Letzte Bestätigung",
+    "delete_account_confirm_body": "Das ist der letzte Schritt. Nach der Bestätigung wird dein Konto sofort und dauerhaft gelöscht.",
+    "delete_account_final": "Endgültig löschen",
+    "delete_account_error": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut."
   },
   "countries": {
     "TR": "Türkei",
