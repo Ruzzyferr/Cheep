@@ -83,3 +83,4 @@ credentials.json
 *.mobileprovision
 *.p12
 *.p8
+appstore-screenshots/
