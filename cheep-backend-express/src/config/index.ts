@@ -110,9 +110,12 @@ if (isProduction && !emailEnabled) {
 
 
 // --- Destek kutusu ---
-// Uygulama içi iletişim formundan gelen mesajlar buraya düşer. destek@cheep.live
-// şu an MX kaydı olmadığı için mail ALMIYOR; yönlendirme kurulunca SUPPORT_INBOX
-// env'i ona çevrilir. Varsayılan, bugün gerçekten çalışan adres.
+// Uygulama içi iletişim formundan gelen mesajlar buraya düşer.
+// destek@cheep.live artık mail ALIYOR: MX kaydı ImprovMX'e gidiyor ve adres
+// info@swiip.app'e yönlendiriliyor. 2026-08-21'de uçtan uca doğrulandı
+// (ImprovMX log: SES -> mx1.improvmx.com -> smtp.google.com, 2 sn'de teslim).
+// Sunucuda SUPPORT_INBOX=destek@cheep.live olarak ayarlı.
+// Buradaki varsayılan, env verilmezse diye bırakılan doğrudan adres.
 const support = {
     inbox: process.env.SUPPORT_INBOX || 'info@swiip.app',
 };
