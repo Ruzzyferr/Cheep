@@ -109,7 +109,7 @@
     "country": "Kraj / Sklepy",
     "about": "O aplikacji",
     "about_title": "O Cheep",
-    "about_body": "Cheep · Wersja {{version}}\nZnajdź najlepszą cenę.",
+    "about_body": "Cheep · Wersja {{version}}\nZnajdź najlepszą cenę.\n\nŹródła danych\n• Turcja: marketfiyati.org.tr — oficjalna publiczna platforma cenowa Ministerstwa Handlu Republiki Turcji.\n• Polska: ceny publikowane publicznie przez sieci handlowe na ich własnych stronach.\n• Informacje o produktach: Open Food Facts, licencja ODbL.\n\nCheep nie jest powiązany z żadną siecią handlową ani przez nią wspierany. Ceny mają charakter informacyjny i mogą różnić się od cen w sklepie.",
     "app_section_title": "Aplikacja",
     "notifications": "Powiadomienia",
     "notifications_subtitle": "Alerty o spadku ceny",

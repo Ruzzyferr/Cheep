@@ -39,7 +39,9 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "Cheep, sana en yakın market şubelerini ve gerçek mesafeleri göstermek için konumunu kullanır."
+          "locationWhenInUsePermission": "Cheep uses your location only to show the supermarket branches nearest to you and their real walking distance, for example “Migros, 400 m away”. Your location is never shared with retailers and is never used for advertising. The app works fully without it — you can pick your city manually.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false
         }
       ],
       [
@@ -64,6 +66,11 @@
         "projectId": "2c82d524-84f5-4b14-8102-862332f5d492"
       }
     },
-    "owner": "ruzzyferr"
+    "owner": "ruzzyferr",
+    "locales": {
+      "en": "./locales/en.json",
+      "tr": "./locales/tr.json",
+      "pl": "./locales/pl.json"
+    }
   }
 }

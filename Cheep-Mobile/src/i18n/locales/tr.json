@@ -109,7 +109,7 @@
     "country": "Ülke / Marketler",
     "about": "Hakkında",
     "about_title": "Cheep Hakkında",
-    "about_body": "Cheep · Sürüm {{version}}\nEn uygun fiyatı bul.",
+    "about_body": "Cheep · Sürüm {{version}}\nEn uygun fiyatı bul.\n\nVeri kaynakları\n• Türkiye: marketfiyati.org.tr — T.C. Ticaret Bakanlığı'nın resmî, kamuya açık fiyat platformu.\n• Polonya: marketlerin kendi web sitelerinde herkese açık yayımladığı fiyatlar.\n• Ürün bilgileri: Open Food Facts, ODbL lisansı.\n\nCheep hiçbir marketle bağlantılı değildir ve hiçbiri tarafından desteklenmemektedir. Fiyatlar bilgi amaçlıdır, mağaza fiyatından farklı olabilir.",
     "app_section_title": "Uygulama",
     "notifications": "Bildirimler",
     "notifications_subtitle": "Fiyat düşüşü uyarıları",

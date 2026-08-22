@@ -109,7 +109,7 @@
     "country": "Land / Märkte",
     "about": "Über",
     "about_title": "Über Cheep",
-    "about_body": "Cheep · Version {{version}}\nFinde den besten Preis.",
+    "about_body": "Cheep · Version {{version}}\nFinde den besten Preis.\n\nDatenquellen\n• Türkei: marketfiyati.org.tr — die offizielle öffentliche Preisplattform des Handelsministeriums der Republik Türkei.\n• Polen: Preise, die die Händler selbst öffentlich auf ihren Websites veröffentlichen.\n• Produktinformationen: Open Food Facts, ODbL-Lizenz.\n\nCheep steht in keiner Verbindung zu einem Händler und wird von keinem unterstützt. Die Preise dienen der Information und können von den Preisen im Geschäft abweichen.",
     "app_section_title": "App",
     "notifications": "Benachrichtigungen",
     "notifications_subtitle": "Preissenkungs-Hinweise",
