@@ -109,7 +109,7 @@
     "country": "Country / Stores",
     "about": "About",
     "about_title": "About Cheep",
-    "about_body": "Cheep · Version {{version}}\nFind the best price.",
+    "about_body": "Cheep · Version {{version}}\nFind the best price.\n\nData sources\n• Türkiye: marketfiyati.org.tr — the official public price platform of the Ministry of Trade of the Republic of Türkiye.\n• Poland: prices published publicly by the retailers on their own websites.\n• Product information: Open Food Facts, licensed under ODbL.\n\nCheep is not affiliated with, and not endorsed by, any retailer. Prices are informational and may differ from in-store prices.",
     "app_section_title": "App",
     "notifications": "Notifications",
     "notifications_subtitle": "Price drop alerts",

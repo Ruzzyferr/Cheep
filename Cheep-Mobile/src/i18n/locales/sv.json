@@ -109,7 +109,7 @@
     "country": "Land / Butiker",
     "about": "Om",
     "about_title": "Om Cheep",
-    "about_body": "Cheep · Version {{version}}\nHitta det bästa priset.",
+    "about_body": "Cheep · Version {{version}}\nHitta det bästa priset.\n\nDatakällor\n• Turkiet: marketfiyati.org.tr — turkiska handelsministeriets officiella offentliga prisplattform.\n• Polen: priser som butikskedjorna själva publicerar offentligt på sina webbplatser.\n• Produktinformation: Open Food Facts, ODbL-licens.\n\nCheep är inte kopplat till eller rekommenderat av någon butikskedja. Priserna är informativa och kan skilja sig från priserna i butik.",
     "app_section_title": "App",
     "notifications": "Aviseringar",
     "notifications_subtitle": "Prissänkningsvarningar",
