@@ -61,11 +61,53 @@ export function compareInsights(strategies: RouteStrategy[]): CompareInsights {
   };
 }
 
-/** Default route ranking for "best": most complete basket first, then best score.
- *  A complete basket should be recommended over a cheaper-but-incomplete one. */
-export function byCoverageThenScore(a: RouteStrategy, b: RouteStrategy): number {
-  const ca = a.coveragePercentage ?? 0;
-  const cb = b.coveragePercentage ?? 0;
-  if (cb !== ca) return cb - ca;
-  return (b.score ?? 0) - (a.score ?? 0);
+
+
+export type RouteSortOption = 'score' | 'price' | 'distance' | 'price_distance';
+
+/**
+ * Rota sıralaması — GÖRÜNENLE tutarlı.
+ *
+ * Eski hâlde kademeler ondalıklı `coveragePercentage`'a göre kuruluyordu, ama
+ * ekran kapsamayı yuvarlayarak ("%100") ve ikili bir rozetle ("tüm ürünler
+ * bu rotada") gösteriyor. İki rota da "%100" derken biri 100, diğeri 99.6 ise
+ * sıralama görünmeyen bir farka göre kuruluyordu: kullanıcı önerilen rotada
+ * "Skor 52", hemen altındaki alternatifte "Skor 56" görüp uygulamayı bozuk
+ * sanıyordu.
+ *
+ * Artık kademe, ekranın gösterdiği ayrımın aynısı: sepet TAM mı, değil mi.
+ * Tam sepetler arasında kullanıcının gördüğü ölçüt (skor/fiyat/mesafe) tek
+ * belirleyici. Eksik sepetler arasında kapsama hâlâ önemli — orada zaten
+ * "N ürün eksik" yazıyor, yani fark görünür.
+ */
+export function rankStrategies<T extends RouteStrategy>(
+  strategies: T[],
+  sortOption: RouteSortOption
+): T[] {
+  return [...strategies].sort((a, b) => {
+    const ca = isComplete(a);
+    const cb = isComplete(b);
+    if (ca !== cb) return ca ? -1 : 1;
+
+    // Eksik sepetler arasında daha fazlasını kapsayan öne geçer.
+    if (!ca) {
+      const cov = (b.coveragePercentage ?? 0) - (a.coveragePercentage ?? 0);
+      if (cov !== 0) return cov;
+    }
+
+    switch (sortOption) {
+      case 'price':
+        return a.totalPrice - b.totalPrice;
+      case 'distance':
+        return a.totalDistance - b.totalDistance;
+      case 'price_distance': {
+        const priceDiff = a.totalPrice - b.totalPrice;
+        if (Math.abs(priceDiff) < 10) return a.totalDistance - b.totalDistance;
+        return priceDiff;
+      }
+      case 'score':
+      default:
+        return (b.score ?? 0) - (a.score ?? 0);
+    }
+  });
 }

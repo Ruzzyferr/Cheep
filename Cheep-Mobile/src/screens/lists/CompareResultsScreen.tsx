@@ -20,7 +20,7 @@ import { StoreChip } from '../../components/store/StoreChip';
 import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
-import { compareInsights, byCoverageThenScore, missingCount } from '../../utils/compareInsights';
+import { compareInsights, rankStrategies, missingCount } from '../../utils/compareInsights';
 import { useLocationAnchor } from '../../context/LocationContext';
 import { shouldFilterByDistance, RADIUS_OPTIONS, DEFAULT_RADIUS_KM } from '../../utils/anchor';
 import type { CompareResponse, RouteStrategy } from '../../types';
@@ -144,28 +144,10 @@ export function CompareResultsScreen({
     }
   }
 
-  // Sıralama — TÜM sıralamalar önce KAPSAMAYA göre gruplar. Fiyat/mesafe yalnızca aynı
-  // ürünleri kapsayan rotalar arasında karşılaştırılabilir: yoksa 16 ürünü eksik olduğu
-  // için "ucuz" görünen yarım bir sepet, tam sepetin önüne geçer (yanıltıcı). Bu yüzden
-  // ikincil anahtar (fiyat/mesafe) yalnızca aynı kapsama kademesi içinde uygulanır.
-  const coverage = (s: RouteStrategy) => s.coveragePercentage ?? 0;
-  filteredStrategies.sort((a, b) => {
-    if (coverage(a) !== coverage(b)) return coverage(b) - coverage(a);
-    switch (sortOption) {
-      case 'price':
-        return a.totalPrice - b.totalPrice;
-      case 'distance':
-        return a.totalDistance - b.totalDistance;
-      case 'price_distance': {
-        const priceDiff = a.totalPrice - b.totalPrice;
-        if (Math.abs(priceDiff) < 10) return a.totalDistance - b.totalDistance;
-        return priceDiff;
-      }
-      case 'score':
-      default:
-        return (b.score ?? 0) - (a.score ?? 0);
-    }
-  });
+  // Sıralama rankStrategies'te ve testli: kademe TAM/EKSİK sepet ayrımı (ekranın
+  // gösterdiği ayrımın aynısı), tam sepetler arasında kullanıcının gördüğü
+  // ölçüt tek belirleyici. Gerekçesi compareInsights.ts'te.
+  filteredStrategies = rankStrategies(filteredStrategies, sortOption);
 
   // En iyi rota: Sıralanmış listeden ilki
   const bestRoute = filteredStrategies[0] || null;

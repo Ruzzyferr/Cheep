@@ -40,7 +40,7 @@ import { FadeInUp, AnimatedNumber, PressableScale, Float } from '../../component
 import { getStoreLogoAsset } from '../../utils/storeLogo';
 import { ProductThumb } from '../../components/product/ProductThumb';
 import { getCategoryIcon } from '../../utils/categoryIcon';
-import { compareInsights, byCoverageThenScore } from '../../utils/compareInsights';
+import { compareInsights, rankStrategies } from '../../utils/compareInsights';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -125,7 +125,9 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
 
   const listStoreNames = useMemo(() => {
     if (!compareQ.data) return [];
-    const best = [...compareQ.data.strategies].sort(byCoverageThenScore)[0];
+    // Karşılaştırma ekranıyla AYNI sıralama — anasayfadaki 'en iyi rota' ile
+    // detaydaki ilk rota farklı çıkmamalı.
+    const best = rankStrategies(compareQ.data.strategies, 'score')[0];
     if (!best) return [];
     const seen = new Set<number>();
     const names: string[] = [];
@@ -190,6 +192,12 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
 
   const firstName = (user?.name || '').trim().split(' ')[0];
   const hasSavings = monthlySavings > 0;
+  // Kahraman rakamı İKİ ayrı sorgudan besleniyor (aylık tasarruf + karşılaştırma)
+  // ve ikisi farklı anlarda dönüyor. Beklerken 0 göstermek, AnimatedNumber ile
+  // birleşince ekranda ₺3,35 → ₺0,00 → ₺10,00 gibi bir zıplamaya yol açıyordu:
+  // kullanıcı yanlış rakamı okuyup sonra değiştiğini görüyor. İkisi de
+  // yerleşene kadar rakam yerine sakin bir yer tutucu gösteriyoruz.
+  const heroReady = !monthlyQ.isPending && !compareQ.isPending;
   const itemCount = activeList?.list_items?.length ?? 0;
 
   const goActiveList = () => {
@@ -277,11 +285,15 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
               <Text style={styles.heroOverline}>
                 {hasSavings ? t('home.overline_saved') : t('home.overline_potential')}
               </Text>
-              <AnimatedNumber
-                value={hasSavings ? monthlySavings : potentialSavings}
-                format={formatMoney}
-                style={styles.heroNumber}
-              />
+              {heroReady ? (
+                <AnimatedNumber
+                  value={hasSavings ? monthlySavings : potentialSavings}
+                  format={formatMoney}
+                  style={styles.heroNumber}
+                />
+              ) : (
+                <Text style={[styles.heroNumber, styles.heroNumberLoading]}>—</Text>
+              )}
               <Text style={styles.heroSub}>
                 {hasSavings
                   ? monthlySavingsIncrease > 0
@@ -562,6 +574,7 @@ const styles = StyleSheet.create({
     color: colors.primary[200],
     marginBottom: 2,
   },
+  heroNumberLoading: { opacity: 0.45 },
   heroNumber: {
     ...typography.styles.display,
     color: colors.background.paper,

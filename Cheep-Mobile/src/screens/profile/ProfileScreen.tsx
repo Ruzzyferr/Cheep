@@ -70,7 +70,9 @@ export function ProfileScreen({
   const { country } = useLocale();
   const { anchor, refresh: refreshAnchor } = useLocationAnchor();
   const currencySymbol = COUNTRY_CONFIG[country]?.symbol ?? COUNTRY_CONFIG.TR.symbol;
-  const [stats, setStats] = useState({ active: 0, lists: 0, items: 0 });
+  // İstatistikler yüklenene kadar 0/0/0 göstermek "hiç listen yok" gibi
+  // okunuyordu ve veri gelince rakamlar zıplıyordu. null = henüz bilmiyoruz.
+  const [stats, setStats] = useState<{ active: number; lists: number; items: number } | null>(null);
 
   // ─── Language picker / konum sayfası state ─────────────────────────────────
   const [langPickerOpen, setLangPickerOpen] = useState(false);
@@ -397,9 +399,9 @@ ${t('profile.delete_account_subscription_note')}`
 
         {/* Stats strip */}
         <View style={styles.statsRow}>
-          <StatTile icon="playlist-add-check" value={stats.active} label={t('profile.stat_active')} />
-          <StatTile icon="format-list-bulleted" value={stats.lists} label={t('profile.stat_lists')} />
-          <StatTile icon="shopping-basket" value={stats.items} label={t('profile.stat_items')} />
+          <StatTile icon="playlist-add-check" value={stats?.active} label={t('profile.stat_active')} />
+          <StatTile icon="format-list-bulleted" value={stats?.lists} label={t('profile.stat_lists')} />
+          <StatTile icon="shopping-basket" value={stats?.items} label={t('profile.stat_items')} />
         </View>
 
         {/* ──────────── Tercihlerim ──────────── */}
@@ -673,7 +675,8 @@ function StatTile({
   label,
 }: {
   icon: keyof typeof MaterialIcons.glyphMap;
-  value: number;
+  /** undefined = henüz yüklenmedi; 0 ile karıştırılmamalı. */
+  value: number | undefined;
   label: string;
 }) {
   return (
@@ -681,7 +684,9 @@ function StatTile({
       <View style={styles.statIcon}>
         <MaterialIcons name={icon} size={18} color={colors.primary.main} />
       </View>
-      <Text style={styles.statValue}>{value}</Text>
+      <Text style={[styles.statValue, value === undefined && styles.statValueLoading]}>
+        {value === undefined ? '—' : value}
+      </Text>
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );
@@ -876,6 +881,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
 
+  statValueLoading: { opacity: 0.4 },
   statValue: {
     ...typography.styles.h4,
     color: colors.text.primary,
