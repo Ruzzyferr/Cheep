@@ -151,7 +151,8 @@
     "delete_account_confirm_title": "Letzte Bestätigung",
     "delete_account_confirm_body": "Das ist der letzte Schritt. Nach der Bestätigung wird dein Konto sofort und dauerhaft gelöscht.",
     "delete_account_final": "Endgültig löschen",
-    "delete_account_error": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut."
+    "delete_account_error": "Konto konnte nicht gelöscht werden. Bitte versuche es erneut.",
+    "delete_account_subscription_note": "Dein Abo ist von deinem App-Konto unabhängig: Das Löschen des Kontos kündigt es nicht. Kündige es im Abo-Bereich der Kontoeinstellungen deines Geräts."
   },
   "countries": {
     "TR": "Türkei",

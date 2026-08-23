@@ -151,7 +151,8 @@
     "delete_account_confirm_title": "Son onay",
     "delete_account_confirm_body": "Bu son adım. Onaylarsan hesabın hemen ve kalıcı olarak silinir.",
     "delete_account_final": "Kalıcı Olarak Sil",
-    "delete_account_error": "Hesap silinemedi. Lütfen tekrar dene."
+    "delete_account_error": "Hesap silinemedi. Lütfen tekrar dene.",
+    "delete_account_subscription_note": "Aboneliğin uygulama hesabından bağımsızdır: hesabını silmek aboneliği iptal etmez. İptal için cihazının hesap ayarlarındaki abonelikler bölümünü kullan."
   },
   "countries": {
     "TR": "Türkiye",

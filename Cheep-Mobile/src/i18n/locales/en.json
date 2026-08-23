@@ -151,7 +151,8 @@
     "delete_account_confirm_title": "Final confirmation",
     "delete_account_confirm_body": "This is the last step. If you confirm, your account is deleted immediately and permanently.",
     "delete_account_final": "Delete Permanently",
-    "delete_account_error": "Could not delete your account. Please try again."
+    "delete_account_error": "Could not delete your account. Please try again.",
+    "delete_account_subscription_note": "Your subscription is separate from your app account: deleting the account does not cancel it. Cancel it in the subscriptions section of your device account settings."
   },
   "countries": {
     "TR": "Turkey",

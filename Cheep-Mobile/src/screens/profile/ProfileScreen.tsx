@@ -255,7 +255,15 @@ export function ProfileScreen({
    */
   const handleDeleteAccount = () => {
     if (deletingAccount) return;
-    Alert.alert(t('profile.delete_account_title'), t('profile.delete_account_body'), [
+    // Abonelik mağazaya bağlıdır, uygulama hesabına degil: hesabı silmek
+    // aboneligi IPTAL ETMEZ. Apple ve Play bu ayrimin kullaniciya soylenmesini
+    // bekliyor — soylenmezse kullanici odemeye devam eder ve haklı olarak iade ister.
+    const body = isPremium
+      ? `${t('profile.delete_account_body')}
+
+${t('profile.delete_account_subscription_note')}`
+      : t('profile.delete_account_body');
+    Alert.alert(t('profile.delete_account_title'), body, [
       { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('profile.delete_account_continue'),

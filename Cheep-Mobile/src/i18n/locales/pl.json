@@ -151,7 +151,8 @@
     "delete_account_confirm_title": "Ostateczne potwierdzenie",
     "delete_account_confirm_body": "To ostatni krok. Po potwierdzeniu konto zostanie natychmiast i trwale usunięte.",
     "delete_account_final": "Usuń trwale",
-    "delete_account_error": "Nie udało się usunąć konta. Spróbuj ponownie."
+    "delete_account_error": "Nie udało się usunąć konta. Spróbuj ponownie.",
+    "delete_account_subscription_note": "Subskrypcja jest niezależna od konta w aplikacji: usunięcie konta jej nie anuluje. Anuluj ją w sekcji subskrypcji w ustawieniach konta na urządzeniu."
   },
   "countries": {
     "TR": "Turcja",

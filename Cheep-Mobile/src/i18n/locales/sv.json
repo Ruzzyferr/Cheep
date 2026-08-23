@@ -151,7 +151,8 @@
     "delete_account_confirm_title": "Slutgiltig bekräftelse",
     "delete_account_confirm_body": "Detta är sista steget. Om du bekräftar raderas kontot omedelbart och permanent.",
     "delete_account_final": "Radera permanent",
-    "delete_account_error": "Kontot kunde inte raderas. Försök igen."
+    "delete_account_error": "Kontot kunde inte raderas. Försök igen.",
+    "delete_account_subscription_note": "Din prenumeration är fristående från ditt appkonto: att radera kontot avslutar den inte. Säg upp den under prenumerationer i enhetens kontoinställningar."
   },
   "countries": {
     "TR": "Turkiet",
