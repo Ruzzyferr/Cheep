@@ -54,7 +54,7 @@ export function createChatSession(opts: {
 }): ChatSession {
   const apiKey = process.env.AI_GATEWAY_API_KEY;
   if (!apiKey) throw new Error('AI_GATEWAY_API_KEY tanımlı değil');
-  const model = process.env.AI_MODEL || 'google/gemini-3.1-flash-lite';
+  const model = process.env.AI_MODEL || 'inclusionai/ling-3.0-flash';
 
   const messages: OaiMessage[] = [{ role: 'system', content: opts.systemInstruction }];
   for (const turn of opts.history) {

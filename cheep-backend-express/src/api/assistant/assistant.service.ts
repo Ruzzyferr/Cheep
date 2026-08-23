@@ -6,6 +6,9 @@ import { getProfile } from '../profile/profile.service.js';
 import { checkAssistantLimit, startOfTrDay, startOfTrMonth } from '../../services/assistant-limit.js';
 import { AppError, notFound } from '../../utils/app-error.js';
 
+/** Modele yollanan azami geçmiş mesaj sayısı (maliyet tavanı). */
+export const HISTORY_LIMIT = 20;
+
 // ============================================
 // OWNER GUARD
 // ============================================
@@ -81,9 +84,13 @@ export const sendMessage = async (userId: number, threadId: number, content: str
   const dayStart = startOfTrDay(now);
   const monthStart = startOfTrMonth(now);
   const [history, profile, todayCount, monthCount, limitUser] = await Promise.all([
+    // Geçmiş SON N mesajla sınırlı: agent-loop her turda tüm geçmişi tekrar
+    // yolluyor, dolayısıyla sınırsız geçmiş girdi maliyetini sohbet uzadıkça
+    // doğrusal büyütür. Son 20 mesaj bağlamı korumaya fazlasıyla yetiyor.
     prisma.chatMessage.findMany({
       where: { thread_id: threadId },
-      orderBy: { created_at: 'asc' },
+      orderBy: { created_at: 'desc' },
+      take: HISTORY_LIMIT,
     }),
     getProfile(userId),
     prisma.chatMessage.count({
@@ -106,7 +113,8 @@ export const sendMessage = async (userId: number, threadId: number, content: str
 
   const session = createChatSession({
     systemInstruction: buildSystemPrompt(profile, currency, limitUser?.language ?? 'tr'),
-    history: history.map(m => ({
+    // desc çekildi — modele kronolojik sırayla verilmeli.
+    history: [...history].reverse().map(m => ({
       role: m.role === 'user' ? 'user' as const : 'model' as const,
       parts: [{ text: m.content }],
     })),
