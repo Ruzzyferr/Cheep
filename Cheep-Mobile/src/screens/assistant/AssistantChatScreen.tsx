@@ -124,7 +124,7 @@ export function AssistantChatScreen({
   const [limitWindow, setLimitWindow] = useState<'day' | 'month'>('day');
   const [limitReached, setLimitReached] = useState(false);
 
-  const { isPremium } = usePremium();
+  const { isPremium, available: purchasesAvailable } = usePremium();
   // 80 = girdi cubugunun yuksekligi. Sekme disi ekran, tab bar payi eklenmez.
   const bottomSpacing = useBottomSpacing(80);
 
@@ -387,8 +387,9 @@ export function AssistantChatScreen({
               : i18n.t('assistant.limit_free', { limit })}{' '}
           </Text>
           {/* Premium kullaniciya paywall gosterilmez: zaten odedi, yapabilecegi
-              bir sey yok. Yalnizca ucretsiz kullaniciya yukseltme sunuyoruz. */}
-          {!isPremium && (
+              bir sey yok. Satin alma hic mumkun degilse de gosterilmez —
+              olmayan bir cikis yolu sunmak kullaniciyi bosuna ugrastirir. */}
+          {!isPremium && purchasesAvailable && (
             <Pressable
               onPress={() => navigation.navigate('Paywall' as never)}
               accessibilityRole="button"

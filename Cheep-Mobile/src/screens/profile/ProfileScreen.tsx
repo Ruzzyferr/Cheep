@@ -58,7 +58,7 @@ export function ProfileScreen({
 }: ProfileStackScreenProps<'ProfileMain'>) {
   const qc = useQueryClient();
   const { user, logout } = useAuth();
-  const { isPremium } = usePremium();
+  const { isPremium, available: purchasesAvailable } = usePremium();
   // Tab bar float: icerigin altina 72 + guvenli alan birakilmazsa son dugme
   // (hesap silme) cubugun arkasinda kalir ve asagi kaydirilamaz.
   const bottomSpacing = useBottomSpacing();
@@ -544,14 +544,21 @@ ${t('profile.delete_account_subscription_note')}`
           <Text style={styles.sectionTitle}>{t('profile.app_section_title')}</Text>
           <Card padding="none" variant="elevated">
             {/* Abonelik en ustte: hem satin alma hem "aboneligim ne durumda"
-                sorusunun cevabi ayni yerde olsun. */}
-            <MenuItem
-              icon="workspace-premium"
-              title={t('premium.profile_row')}
-              subtitle={isPremium ? t('premium.profile_row_active') : t('premium.profile_row_free')}
-              onPress={() => (navigation as any).navigate('Paywall')}
-            />
-            <Divider />
+                sorusunun cevabi ayni yerde olsun.
+                Satin alma yapilamiyorsa (SDK anahtari yok) satir HIC cikmaz:
+                satilamayan bir aboneligi reklam etmek hem kullaniciyi hem
+                incelemeciyi yaniltir. Zaten abone olan durumunu gormeye devam eder. */}
+            {(purchasesAvailable || isPremium) && (
+              <>
+                <MenuItem
+                  icon="workspace-premium"
+                  title={t('premium.profile_row')}
+                  subtitle={isPremium ? t('premium.profile_row_active') : t('premium.profile_row_free')}
+                  onPress={() => (navigation as any).navigate('Paywall')}
+                />
+                <Divider />
+              </>
+            )}
             <MenuItem
               icon="translate"
               title={t('profile.language')}
