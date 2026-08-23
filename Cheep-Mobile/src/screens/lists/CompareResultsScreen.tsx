@@ -10,7 +10,6 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -27,6 +26,7 @@ import { shouldFilterByDistance, RADIUS_OPTIONS, DEFAULT_RADIUS_KM } from '../..
 import type { CompareResponse, RouteStrategy } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
+import { appAlert } from '../../utils/dialog';
 
 type StoreCountFilter = 'all' | '1' | '2' | '3+';
 type SortOption = 'score' | 'price' | 'distance' | 'price_distance';
@@ -93,7 +93,7 @@ export function CompareResultsScreen({
   // Liste karşılaştırılamıyorsa (silinmiş ya da boş) geri dön.
   useEffect(() => {
     if (compareQ.isError) {
-      Alert.alert(t('common.error'), t('compare.load_error'));
+      appAlert(t('common.error'), t('compare.load_error'));
       navigation.goBack();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

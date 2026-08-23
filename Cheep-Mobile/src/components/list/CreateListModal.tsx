@@ -10,7 +10,6 @@ import {
   StyleSheet,
   Modal,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -22,6 +21,7 @@ import { Button, Input } from '../ui';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import { useTranslation } from 'react-i18next';
+import { appAlert } from '../../utils/dialog';
 
 interface CreateListModalProps {
   visible: boolean;
@@ -41,7 +41,7 @@ export function CreateListModal({
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      Alert.alert('Hata', t('list.name_required'));
+      appAlert('Hata', t('list.name_required'));
       return;
     }
 
@@ -60,7 +60,7 @@ export function CreateListModal({
     } catch (error: any) {
       console.error('Create list error:', error);
       const errorMessage = error?.response?.data?.message || t('list.create_error');
-      Alert.alert('Hata', errorMessage);
+      appAlert('Hata', errorMessage);
     } finally {
       setLoading(false);
     }

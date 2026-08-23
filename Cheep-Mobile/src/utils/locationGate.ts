@@ -9,11 +9,12 @@
  *                         Android kullanılmayan uygulamalarda kendisi de geri alabilir)
  * Biri eksikse konum özellikleri sessizce çalışmaz. Kapı bu sapmayı yakalar.
  */
-import { Alert, Linking } from 'react-native';
+import { Linking } from 'react-native';
 import * as Location from 'expo-location';
 import i18n from '../i18n';
 import { getLocationConsent, promptLocationConsent } from './consent';
 import { locationPromptStorage } from './storage';
+import { appAlert } from './dialog';
 
 /** "Şimdi değil" — kullanıcı istemi geri çevirdi; bir hafta sorma. */
 const SNOOZE_DISMISSED_MS = 7 * 24 * 60 * 60 * 1000;
@@ -56,7 +57,7 @@ export async function getLocationStatus(): Promise<LocationStatus> {
 /** Alert'i Promise'e çeviren yardımcı (onay/iptal). */
 function confirm(title: string, message: string, confirmText: string, cancelText: string) {
   return new Promise<boolean>((resolve) => {
-    Alert.alert(
+    appAlert(
       title,
       message,
       [

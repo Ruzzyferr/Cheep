@@ -566,6 +566,16 @@
     "active_until": "Aboneliğin {{date}} tarihine kadar geçerli.",
     "profile_row": "Cheep Premium",
     "profile_row_free": "Asistandan daha fazlasını al",
-    "profile_row_active": "Aktif"
+    "profile_row_active": "Aktif",
+    "badge": "Premium",
+    "upsell_title": "Bugünlük bu kadar!",
+    "upsell_body": "Asistanla günlük {{limit}} mesaj hakkını kullandın. Premium ile ayda 300 mesaj — listelerini konuşarak hazırlamaya kaldığın yerden devam et.",
+    "upsell_cta": "Premium'a göz at",
+    "upsell_later": "Şimdi değil",
+    "card_title": "Asistanı sınırsıza yakın kullan",
+    "card_body": "Ayda 300 mesaj, düz cümleyle liste, sınırsız en ucuz rota.",
+    "card_cta": "Premium'u incele",
+    "card_active_title": "Cheep Premium aktif",
+    "card_active_body": "Teşekkürler! Aboneliğini buradan yönetebilirsin."
   }
 }

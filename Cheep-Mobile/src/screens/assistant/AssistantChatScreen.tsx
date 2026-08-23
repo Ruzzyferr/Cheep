@@ -12,7 +12,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
-  Alert,
   Pressable,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -31,7 +30,9 @@ import { colors, spacing, typography, borderRadius } from '../../theme';
 import type { AssistantStackScreenProps } from '../../navigation/types';
 import i18n from '../../i18n';
 import { usePremium } from '../../context/PremiumContext';
+import { showDialog } from '../../utils/dialog';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
+import { appAlert } from '../../utils/dialog';
 
 // ============================================================
 // Types
@@ -135,6 +136,25 @@ export function AssistantChatScreen({
     if (isPremium) setLimitReached(false);
   }, [isPremium]);
 
+  // Hak bitince maskotlu, sıcak bir yükseltme daveti — oturumda BİR KEZ.
+  // Her mesaj denemesinde tekrar açılsa rahatsız edici olurdu; band zaten
+  // ekranda kalıcı olarak duruyor.
+  const upsellShown = useRef(false);
+  useEffect(() => {
+    if (!limitReached || isPremium || !purchasesAvailable || upsellShown.current) return;
+    upsellShown.current = true;
+    showDialog({
+      title: i18n.t('premium.upsell_title'),
+      message: i18n.t('premium.upsell_body', { limit }),
+      mascot: 'celebrate',
+      tone: 'premium',
+      buttons: [
+        { text: i18n.t('premium.upsell_cta'), onPress: () => navigation.navigate('Paywall' as never) },
+        { text: i18n.t('premium.upsell_later'), style: 'cancel' },
+      ],
+    });
+  }, [limitReached, isPremium, purchasesAvailable, limit, navigation]);
+
   // ─── Init: create thread on mount ───────────────────────────
   useEffect(() => {
     initThread();
@@ -146,7 +166,7 @@ export function AssistantChatScreen({
       setThreadId(thread.id);
     } catch (err) {
       console.error('Failed to create thread:', err);
-      Alert.alert('Hata', i18n.t('assistant.start_error'));
+      appAlert('Hata', i18n.t('assistant.start_error'));
     }
   };
 
@@ -159,7 +179,7 @@ export function AssistantChatScreen({
       setInputValue('');
     } catch (err) {
       console.error('Failed to create new thread:', err);
-      Alert.alert('Hata', i18n.t('assistant.new_chat_error'));
+      appAlert('Hata', i18n.t('assistant.new_chat_error'));
     }
   }, []);
 
@@ -180,7 +200,7 @@ export function AssistantChatScreen({
       setInputValue('');
     } catch (err) {
       console.error('loadThread error:', err);
-      Alert.alert('Hata', i18n.t('assistant.load_error'));
+      appAlert('Hata', i18n.t('assistant.load_error'));
     }
   }, []);
 

@@ -9,8 +9,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Alert,
-} from 'react-native';
+  } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Card, Button } from '../../components/ui';
 import { ProductThumb } from '../../components/product/ProductThumb';
@@ -24,6 +23,7 @@ import type { StoreAllocation, ProductAllocation } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 import i18n from '../../i18n';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
+import { appAlert } from '../../utils/dialog';
 
 // route.params üzerinden gelen sayısal alanlar null/string olabilir; .toFixed
 // çağırmadan önce güvenli bir sayıya zorla (geçersizse 0).
@@ -180,7 +180,7 @@ function StoreSection({
       });
       await openExternalUrl(res.url);
     } catch {
-      Alert.alert('Hata', i18n.t('compare.store_link_error'));
+      appAlert('Hata', i18n.t('compare.store_link_error'));
     } finally {
       setOpening(false);
     }

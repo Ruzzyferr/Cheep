@@ -12,8 +12,7 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
-  Alert,
-} from 'react-native';
+  } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Button, Input } from '../../components/ui';
 import { CheepMascot } from '../../components/brand/CheepMascot';
@@ -21,6 +20,7 @@ import { FadeInUp, Float } from '../../components/anim';
 import { useAuth } from '../../context/AuthContext';
 import { colors, typography, spacing, layout } from '../../theme';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
+import { appAlert } from '../../utils/dialog';
 
 export function LoginScreen({ navigation }: any) {
   // Sekme disi ekran: tab bar payi yok ama sistem cubugu payi gerekli.
@@ -60,7 +60,7 @@ export function LoginScreen({ navigation }: any) {
       await login({ email, password });
       // Navigation will be handled by AuthContext
     } catch (error: any) {
-      Alert.alert(
+      appAlert(
         t('auth.login_error'),
         error?.message || t('auth.generic_error')
       );

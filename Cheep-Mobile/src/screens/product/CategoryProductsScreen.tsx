@@ -24,8 +24,7 @@ import {
   FlatList,
   RefreshControl,
   ActivityIndicator,
-  Alert,
-} from 'react-native';
+  } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -46,6 +45,7 @@ import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { Product } from '../../types';
 import type { HomeStackScreenProps, ListsStackScreenProps } from '../../navigation/types';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
+import { appAlert } from '../../utils/dialog';
 
 // Aynı bileşen hem Home hem Lists stack'inde kayıtlı (liste detayından "Ürün Ekle"
 // akışı kullanıcıyı Listeler sekmesinde tutar). İki stack'in param'ı özdeş.
@@ -149,7 +149,7 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
       toast.show(t('list.added_to', { list: listName }));
     } catch (error) {
       console.error('Quick add error:', error);
-      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+      appAlert(t('common.error'), t('list.select_modal.add_error'));
     }
   };
 

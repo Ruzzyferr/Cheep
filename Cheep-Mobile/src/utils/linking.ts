@@ -1,8 +1,9 @@
 /**
  * 🔗 Harici bağlantı yardımcıları
  */
-import { Linking, Alert } from 'react-native';
+import { Linking } from 'react-native';
 import i18n from '../i18n';
+import { appAlert } from './dialog';
 
 /**
  * Harici bir URL'yi (tarayıcı/uygulama) güvenli şekilde açar.
@@ -18,6 +19,6 @@ export async function openExternalUrl(url: string): Promise<void> {
       await Linking.openURL(url);
     }
   } catch {
-    Alert.alert(i18n.t('common.link_failed_title'), i18n.t('common.link_failed_body'));
+    appAlert(i18n.t('common.link_failed_title'), i18n.t('common.link_failed_body'));
   }
 }

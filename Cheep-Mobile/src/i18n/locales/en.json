@@ -566,6 +566,16 @@
     "active_until": "Your subscription is valid until {{date}}.",
     "profile_row": "Cheep Premium",
     "profile_row_free": "Get more from the assistant",
-    "profile_row_active": "Active"
+    "profile_row_active": "Active",
+    "badge": "Premium",
+    "upsell_title": "That is it for today!",
+    "upsell_body": "You have used your {{limit}} assistant messages for today. Premium gives you 300 a month — keep building your lists just by talking.",
+    "upsell_cta": "See Premium",
+    "upsell_later": "Not now",
+    "card_title": "Use the assistant almost without limits",
+    "card_body": "300 messages a month, lists from plain sentences, unlimited cheapest routes.",
+    "card_cta": "Explore Premium",
+    "card_active_title": "Cheep Premium is active",
+    "card_active_body": "Thank you! You can manage your subscription here."
   }
 }

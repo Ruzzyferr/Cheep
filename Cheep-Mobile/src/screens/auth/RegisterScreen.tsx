@@ -12,8 +12,7 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
-  Alert,
-} from 'react-native';
+  } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Button, Input } from '@/src/components';
 import { CheepMascot } from '../../components/brand/CheepMascot';
@@ -21,6 +20,7 @@ import { FadeInUp } from '../../components/anim';
 import { useAuth } from '../../context/AuthContext';
 import { colors, typography, spacing, layout } from '../../theme';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
+import { appAlert } from '../../utils/dialog';
 
 const hint = (name: any) => <MaterialIcons name={name} size={20} color={colors.text.hint} />;
 
@@ -74,7 +74,7 @@ export function RegisterScreen({ navigation }: any) {
       await register({ name, email, password });
       // Navigation will be handled by AuthContext
     } catch (error: any) {
-      Alert.alert(
+      appAlert(
         t('auth.register_error'),
         error?.message || t('auth.generic_error')
       );

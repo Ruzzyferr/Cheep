@@ -12,8 +12,7 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
-} from 'react-native';
+  } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
@@ -21,6 +20,7 @@ import { Card, Button } from '../ui';
 import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { ShoppingList } from '../../types';
+import { appAlert } from '../../utils/dialog';
 
 interface SelectListModalProps {
   visible: boolean;
@@ -60,7 +60,7 @@ export function SelectListModal({
       } catch (error) {
         if (!alive) return;
         console.error('Load lists error:', error);
-        Alert.alert(t('common.error'), t('list.select_modal.load_error'));
+        appAlert(t('common.error'), t('list.select_modal.load_error'));
       } finally {
         if (alive) setLoading(false);
       }
@@ -79,7 +79,7 @@ export function SelectListModal({
         quantity,
         unit: effectiveUnit,
       });
-      Alert.alert(t('list.select_modal.add_success_title'), t('list.select_modal.add_success_body'), [
+      appAlert(t('list.select_modal.add_success_title'), t('list.select_modal.add_success_body'), [
         {
           text: t('common.ok'),
           onPress: () => {
@@ -90,7 +90,7 @@ export function SelectListModal({
       ]);
     } catch (error) {
       console.error('Add item error:', error);
-      Alert.alert(t('common.error'), t('list.select_modal.add_error'));
+      appAlert(t('common.error'), t('list.select_modal.add_error'));
     } finally {
       setAdding(null);
     }
@@ -105,7 +105,7 @@ export function SelectListModal({
       onClose();
     } catch (error) {
       console.error('Create+add error:', error);
-      Alert.alert(t('common.error'), t('list.select_modal.create_error'));
+      appAlert(t('common.error'), t('list.select_modal.create_error'));
     } finally {
       setAdding(null);
     }

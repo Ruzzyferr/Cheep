@@ -566,6 +566,16 @@
     "active_until": "Dein Abo läuft bis zum {{date}}.",
     "profile_row": "Cheep Premium",
     "profile_row_free": "Hol mehr aus dem Assistenten heraus",
-    "profile_row_active": "Aktiv"
+    "profile_row_active": "Aktiv",
+    "badge": "Premium",
+    "upsell_title": "Das war es für heute!",
+    "upsell_body": "Du hast deine {{limit}} Assistenten-Nachrichten für heute aufgebraucht. Mit Premium sind es 300 im Monat — erstelle deine Listen einfach weiter im Gespräch.",
+    "upsell_cta": "Premium ansehen",
+    "upsell_later": "Jetzt nicht",
+    "card_title": "Nutze den Assistenten nahezu unbegrenzt",
+    "card_body": "300 Nachrichten im Monat, Listen aus einfachen Sätzen, unbegrenzte günstigste Routen.",
+    "card_cta": "Premium entdecken",
+    "card_active_title": "Cheep Premium ist aktiv",
+    "card_active_body": "Danke! Hier kannst du dein Abo verwalten."
   }
 }

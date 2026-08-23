@@ -7,7 +7,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Alert,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
@@ -16,6 +15,7 @@ import { Button, CodeInput } from '../../components/ui';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { colors, typography, spacing, layout } from '../../theme';
+import { appAlert } from '../../utils/dialog';
 
 export function VerifyEmailScreen() {
   const { t } = useTranslation();
@@ -55,9 +55,9 @@ export function VerifyEmailScreen() {
     setResending(true);
     try {
       await resendVerification();
-      Alert.alert(t('auth.code_sent_title'), t('auth.code_sent_body'));
+      appAlert(t('auth.code_sent_title'), t('auth.code_sent_body'));
     } catch (e: any) {
-      Alert.alert(t('common.error'), e?.message || t('auth.code_send_error'));
+      appAlert(t('common.error'), e?.message || t('auth.code_send_error'));
     } finally {
       setResending(false);
     }

@@ -11,12 +11,13 @@
  * o hakkı yakar. Kendi diyaloğumuzda "şimdi değil" denirse sistem modalı hiç
  * çağrılmaz — reddedilecek bir istem harcanmamış olur.
  */
-import { Alert, Linking, Platform } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import i18n from '../i18n';
 import { notificationPromptStorage, pushTokenStorage } from './storage';
 import { notificationService } from '../services/notification.service';
+import { appAlert } from './dialog';
 
 /** "Şimdi değil" — kullanıcı istemi geri çevirdi; bir hafta sorma. */
 const SNOOZE_DISMISSED_MS = 7 * 24 * 60 * 60 * 1000;
@@ -53,7 +54,7 @@ export async function getNotificationStatus(): Promise<NotificationStatus> {
 
 function confirm(title: string, message: string, confirmText: string, cancelText: string) {
   return new Promise<boolean>((resolve) => {
-    Alert.alert(
+    appAlert(
       title,
       message,
       [

@@ -33,6 +33,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLocale } from '../../context/LocaleContext';
 import { useLocationAnchor } from '../../context/LocationContext';
 import { CheepMascot } from '../../components/brand/CheepMascot';
+import { PremiumBadge } from '../../components/premium/PremiumBadge';
 import { LocationSheet } from '../../components/location/LocationSheet';
 import { CountryChangedBanner } from '../../components/location/CountryChangedBanner';
 import { FadeInUp, AnimatedNumber, PressableScale, Float } from '../../components/anim';
@@ -218,6 +219,8 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
           <View style={styles.brandRow}>
             <CheepMascot size={34} shadow={false} />
             <Text style={styles.wordmark}>Cheep</Text>
+            {/* Abone degilse hic cizilmez. */}
+            <PremiumBadge />
           </View>
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.iconBtn} onPress={goSearch} activeOpacity={0.7}>

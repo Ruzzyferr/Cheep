@@ -12,13 +12,13 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
-} from 'react-native';
+  } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { assistantService } from '../../services/assistant.service';
 import type { ChatThread } from '../../services/assistant.service';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import i18n from '../../i18n';
+import { appAlert } from '../../utils/dialog';
 
 // ============================================================
 // Helpers
@@ -73,7 +73,7 @@ export function ThreadListSheet({
       setThreads(data);
     } catch (err) {
       console.error('listThreads error:', err);
-      Alert.alert('Hata', i18n.t('assistant.history_error'));
+      appAlert('Hata', i18n.t('assistant.history_error'));
     } finally {
       setLoading(false);
     }
@@ -96,7 +96,7 @@ export function ThreadListSheet({
 
   const handleDelete = useCallback(
     (id: number) => {
-      Alert.alert('Sohbeti sil', i18n.t('assistant.delete_confirm'), [
+      appAlert('Sohbeti sil', i18n.t('assistant.delete_confirm'), [
         { text: i18n.t('common.dismiss'), style: 'cancel' },
         {
           text: 'Sil',
@@ -108,7 +108,7 @@ export function ThreadListSheet({
               setThreads((prev) => prev.filter((t) => t.id !== id));
             } catch (err) {
               console.error('deleteThread error:', err);
-              Alert.alert('Hata', 'Sohbet silinemedi.');
+              appAlert('Hata', 'Sohbet silinemedi.');
             } finally {
               setDeleting(null);
             }

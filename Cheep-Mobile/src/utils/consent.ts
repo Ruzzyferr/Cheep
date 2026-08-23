@@ -5,9 +5,9 @@
  * aydınlatmadan AYRI, opt-in (varsayılan kapalı), hizmet şartına bağlanmamış ve
  * iptal edilebilir bir açık rıza alınır. Rıza cihazda saklanır.
  */
-import { Alert } from 'react-native';
 import i18n from '../i18n';
 import { consentStorage, locationStorage, type LocationConsent } from './storage';
+import { appAlert } from './dialog';
 
 /** Kayıtlı rıza durumu (SORMADAN). */
 export async function getLocationConsent(): Promise<LocationConsent> {
@@ -22,7 +22,7 @@ export async function getLocationConsent(): Promise<LocationConsent> {
  */
 export async function promptLocationConsent(): Promise<boolean> {
   return new Promise<boolean>((resolve) => {
-    Alert.alert(
+    appAlert(
       i18n.t('consent.location_title'),
       i18n.t('consent.location_message'),
       [

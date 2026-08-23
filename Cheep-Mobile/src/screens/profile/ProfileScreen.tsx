@@ -10,7 +10,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   TextInput,
   ActivityIndicator,
   Modal,
@@ -25,6 +24,8 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 import { usePremium } from '../../context/PremiumContext';
+import { PremiumBadge } from '../../components/premium/PremiumBadge';
+import { PremiumCard } from '../../components/premium/PremiumCard';
 import { useLocale, COUNTRY_CONFIG } from '../../context/LocaleContext';
 import { useLocationAnchor } from '../../context/LocationContext';
 import { Card, Button } from '../../components/ui';
@@ -43,6 +44,7 @@ import {
 } from '../../utils/notificationGate';
 import { getLocationConsent, promptLocationConsent, revokeLocationConsent } from '../../utils/consent';
 import { useQueryClient } from '@tanstack/react-query';
+import { appAlert } from '../../utils/dialog';
 
 // ─── Preference option lists from onboarding config ───────────────────────────
 const HOUSEHOLD_OPTIONS = ONBOARDING_QUESTIONS.find((q) => q.key === 'household_size')!.options!;
@@ -58,7 +60,7 @@ export function ProfileScreen({
 }: ProfileStackScreenProps<'ProfileMain'>) {
   const qc = useQueryClient();
   const { user, logout } = useAuth();
-  const { isPremium, available: purchasesAvailable } = usePremium();
+  const { isPremium } = usePremium();
   // Tab bar float: icerigin altina 72 + guvenli alan birakilmazsa son dugme
   // (hesap silme) cubugun arkasinda kalir ve asagi kaydirilamaz.
   const bottomSpacing = useBottomSpacing();
@@ -169,7 +171,7 @@ export function ProfileScreen({
     if (st.osGranted) {
       await unregisterPushToken();
       setNotifGranted(false);
-      Alert.alert(t('notifications.off_title'), t('notifications.off_body'), [
+      appAlert(t('notifications.off_title'), t('notifications.off_body'), [
         { text: t('common.cancel'), style: 'cancel' },
         { text: t('profile.open_settings'), onPress: () => Linking.openSettings() },
       ]);
@@ -219,7 +221,7 @@ export function ProfileScreen({
       const perm = await Location.requestForegroundPermissionsAsync();
       setOsLocationGranted(perm.status === 'granted');
       if (perm.status !== 'granted' && !perm.canAskAgain) {
-        Alert.alert(t('profile.location_os_blocked_title'), t('profile.location_os_blocked_body'), [
+        appAlert(t('profile.location_os_blocked_title'), t('profile.location_os_blocked_body'), [
           { text: t('common.cancel'), style: 'cancel' },
           { text: t('profile.open_settings'), onPress: () => Linking.openSettings() },
         ]);
@@ -242,7 +244,7 @@ export function ProfileScreen({
   }, [t, refreshAnchor]);
 
   const handleLogout = () => {
-    Alert.alert(t('profile.logout_title'), t('profile.logout_confirm'), [
+    appAlert(t('profile.logout_title'), t('profile.logout_confirm'), [
       { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('profile.logout_action'),
@@ -269,13 +271,13 @@ export function ProfileScreen({
 
 ${t('profile.delete_account_subscription_note')}`
       : t('profile.delete_account_body');
-    Alert.alert(t('profile.delete_account_title'), body, [
+    appAlert(t('profile.delete_account_title'), body, [
       { text: t('common.cancel'), style: 'cancel' },
       {
         text: t('profile.delete_account_continue'),
         style: 'destructive',
         onPress: () => {
-          Alert.alert(
+          appAlert(
             t('profile.delete_account_confirm_title'),
             t('profile.delete_account_confirm_body'),
             [
@@ -295,7 +297,7 @@ ${t('profile.delete_account_subscription_note')}`
                     await userService.deleteAccount();
                     await logout();
                   } catch {
-                    Alert.alert(t('common.error'), t('profile.delete_account_error'));
+                    appAlert(t('common.error'), t('profile.delete_account_error'));
                   } finally {
                     setDeletingAccount(false);
                   }
@@ -309,7 +311,7 @@ ${t('profile.delete_account_subscription_note')}`
   };
 
   const handleAbout = () => {
-    Alert.alert(t('profile.about_title'), t('profile.about_body', { version: APP_VERSION }));
+    appAlert(t('profile.about_title'), t('profile.about_body', { version: APP_VERSION }));
   };
 
   // ─── Language / Country handlers ───────────────────────────────────────────
@@ -357,9 +359,9 @@ ${t('profile.delete_account_subscription_note')}`
       // uyarıları görmeye devam ediyordu.
       void qc.invalidateQueries({ queryKey: ['products'] });
       void qc.invalidateQueries({ queryKey: ['profile'] });
-      Alert.alert(t('profile.prefs_saved_title'), t('profile.prefs_saved_body'));
+      appAlert(t('profile.prefs_saved_title'), t('profile.prefs_saved_body'));
     } catch {
-      Alert.alert(t('common.error'), t('profile.prefs_save_error'));
+      appAlert(t('common.error'), t('profile.prefs_save_error'));
     } finally {
       setPrefSaving(false);
     }
@@ -378,6 +380,9 @@ ${t('profile.delete_account_subscription_note')}`
         </View>
         <Text style={styles.name}>{user?.name}</Text>
         <Text style={styles.email}>{user?.email}</Text>
+        <View style={styles.badgeRow}>
+          <PremiumBadge size="md" />
+        </View>
       </View>
 
       <ScrollView
@@ -385,6 +390,11 @@ ${t('profile.delete_account_subscription_note')}`
         contentContainerStyle={{ paddingBottom: bottomSpacing }}
         showsVerticalScrollIndicator={false}
       >
+        {/* Abonelik: istatistiklerin hemen ustunde, gormesi kolay yerde. */}
+        <View style={styles.premiumWrap}>
+          <PremiumCard onPress={() => (navigation as any).navigate('Paywall')} />
+        </View>
+
         {/* Stats strip */}
         <View style={styles.statsRow}>
           <StatTile icon="playlist-add-check" value={stats.active} label={t('profile.stat_active')} />
@@ -543,22 +553,6 @@ ${t('profile.delete_account_subscription_note')}`
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('profile.app_section_title')}</Text>
           <Card padding="none" variant="elevated">
-            {/* Abonelik en ustte: hem satin alma hem "aboneligim ne durumda"
-                sorusunun cevabi ayni yerde olsun.
-                Satin alma yapilamiyorsa (SDK anahtari yok) satir HIC cikmaz:
-                satilamayan bir aboneligi reklam etmek hem kullaniciyi hem
-                incelemeciyi yaniltir. Zaten abone olan durumunu gormeye devam eder. */}
-            {(purchasesAvailable || isPremium) && (
-              <>
-                <MenuItem
-                  icon="workspace-premium"
-                  title={t('premium.profile_row')}
-                  subtitle={isPremium ? t('premium.profile_row_active') : t('premium.profile_row_free')}
-                  onPress={() => (navigation as any).navigate('Paywall')}
-                />
-                <Divider />
-              </>
-            )}
             <MenuItem
               icon="translate"
               title={t('profile.language')}
@@ -852,6 +846,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+
+  badgeRow: { marginTop: spacing.sm, alignItems: 'center' },
+  premiumWrap: { paddingHorizontal: layout.screenPadding, paddingTop: spacing.md },
 
   statsRow: {
     flexDirection: 'row',

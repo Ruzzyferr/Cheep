@@ -16,7 +16,6 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  Alert,
   TouchableOpacity,
   Platform,
 } from 'react-native';
@@ -39,6 +38,7 @@ import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { ShoppingList, ListItem } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
+import { appAlert } from '../../utils/dialog';
 
 export function ListDetailScreen({
   route,
@@ -89,7 +89,7 @@ export function ListDetailScreen({
   // Liste yüklenemiyorsa (silinmiş ya da başka kullanıcının) geri dön.
   React.useEffect(() => {
     if (listQ.isError) {
-      Alert.alert(t('common.error'), t('list.select_modal.load_error'));
+      appAlert(t('common.error'), t('list.select_modal.load_error'));
       navigation.goBack();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,7 +100,7 @@ export function ListDetailScreen({
       await listService.updateItem(item.id, { brand_independent: !item.brand_independent });
       await loadList();
     } catch {
-      Alert.alert(t('common.error'), t('common.something_went_wrong'));
+      appAlert(t('common.error'), t('common.something_went_wrong'));
     }
   };
 
@@ -127,7 +127,7 @@ export function ListDetailScreen({
       await listService.activate(list.id);
       await loadList();
     } catch {
-      Alert.alert(t('common.error'), t('common.something_went_wrong'));
+      appAlert(t('common.error'), t('common.something_went_wrong'));
     }
   };
 
@@ -151,7 +151,7 @@ export function ListDetailScreen({
         await loadList();
       }
     } catch {
-      Alert.alert(t('common.error'), t('common.something_went_wrong'));
+      appAlert(t('common.error'), t('common.something_went_wrong'));
     }
   };
 
@@ -170,7 +170,7 @@ export function ListDetailScreen({
       toast.show(t('list.import_done'));
       await loadList();
     } catch {
-      Alert.alert(t('common.error'), t('common.something_went_wrong'));
+      appAlert(t('common.error'), t('common.something_went_wrong'));
     } finally {
       setPendingSourceId(null);
     }
@@ -181,7 +181,7 @@ export function ListDetailScreen({
     if (!list || pendingSourceId == null) return;
     // "Değiştir" tüm listeyi silip yeniden yazar; yıkıcı olduğu için önce onayla.
     if (mode === 'replace') {
-      Alert.alert(
+      appAlert(
         t('list.import_mode.replace_confirm_title'),
         t('list.import_mode.replace_confirm_body'),
         [
@@ -201,7 +201,7 @@ export function ListDetailScreen({
   const handleDeleteItem = async (itemId: number) => {
     if (!list) return;
 
-    Alert.alert(
+    appAlert(
       t('list.delete_item_title'),
       t('list.delete_item_confirm'),
       [
@@ -214,7 +214,7 @@ export function ListDetailScreen({
               await listService.deleteItem(list.id, itemId);
               await loadList();
             } catch {
-              Alert.alert(t('common.error'), t('common.something_went_wrong'));
+              appAlert(t('common.error'), t('common.something_went_wrong'));
             }
           },
         },
@@ -225,7 +225,7 @@ export function ListDetailScreen({
   const handleDeleteList = () => {
     if (!list) return;
 
-    Alert.alert(
+    appAlert(
       t('list.delete_title'),
       t('list.delete_confirm'),
       [
@@ -238,7 +238,7 @@ export function ListDetailScreen({
               await listService.deleteList(list.id);
               navigation.goBack();
             } catch {
-              Alert.alert(t('common.error'), t('common.something_went_wrong'));
+              appAlert(t('common.error'), t('common.something_went_wrong'));
             }
           },
         },

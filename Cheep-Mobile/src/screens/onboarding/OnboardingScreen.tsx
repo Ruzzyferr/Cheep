@@ -16,8 +16,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
-} from 'react-native';
+  } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useLocale, COUNTRY_CONFIG } from '../../context/LocaleContext';
@@ -32,6 +31,7 @@ import { getCountryCodeInteractive, SUPPORTED_COUNTRY_CODES } from '../../utils/
 import type { UserProfile } from '../../types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
+import { appAlert } from '../../utils/dialog';
 
 // Prepended locale steps (language + country) that precede ONBOARDING_QUESTIONS.
 const LOCALE_STEPS = 2;
@@ -376,7 +376,7 @@ export function OnboardingScreen() {
       void qc.invalidateQueries({ queryKey: ['products'] });
       await refreshOnboarding(); // flips RootNavigator gate to Main
     } catch (error: any) {
-      Alert.alert(
+      appAlert(
         t('common.error'),
         error?.message ?? t('onboarding.finish_error')
       );

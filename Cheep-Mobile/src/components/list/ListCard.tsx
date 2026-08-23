@@ -4,13 +4,14 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../ui';
 import { useLocale } from '../../context/LocaleContext';
 import {colors, typography, spacing, borderRadius} from '../../theme';
 import type { ShoppingList } from '../../types';
+import { appAlert } from '../../utils/dialog';
 
 interface ListCardProps {
   list: ShoppingList;
@@ -27,7 +28,7 @@ export function ListCard({ list, onPress, onDelete }: ListCardProps) {
   const handleDelete = (e: any) => {
     e.stopPropagation();
     if (onDelete) {
-      Alert.alert(
+      appAlert(
         t('list.delete_title'),
         t('list.delete_confirm'),
         [

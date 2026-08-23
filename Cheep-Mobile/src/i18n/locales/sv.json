@@ -566,6 +566,16 @@
     "active_until": "Din prenumeration gäller till {{date}}.",
     "profile_row": "Cheep Premium",
     "profile_row_free": "Få ut mer av assistenten",
-    "profile_row_active": "Aktivt"
+    "profile_row_active": "Aktivt",
+    "badge": "Premium",
+    "upsell_title": "Det var allt för i dag!",
+    "upsell_body": "Du har använt dina {{limit}} assistentmeddelanden för i dag. Med Premium får du 300 i månaden — fortsätt bygga dina listor genom att prata.",
+    "upsell_cta": "Se Premium",
+    "upsell_later": "Inte nu",
+    "card_title": "Använd assistenten nästan utan gränser",
+    "card_body": "300 meddelanden i månaden, listor från vanliga meningar, obegränsade billigaste rundor.",
+    "card_cta": "Utforska Premium",
+    "card_active_title": "Cheep Premium är aktivt",
+    "card_active_body": "Tack! Här kan du hantera din prenumeration."
   }
 }

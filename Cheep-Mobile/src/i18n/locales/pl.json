@@ -566,6 +566,16 @@
     "active_until": "Twoja subskrypcja jest ważna do {{date}}.",
     "profile_row": "Cheep Premium",
     "profile_row_free": "Wyciągnij więcej z asystenta",
-    "profile_row_active": "Aktywne"
+    "profile_row_active": "Aktywne",
+    "badge": "Premium",
+    "upsell_title": "To tyle na dziś!",
+    "upsell_body": "Wykorzystano dzienny limit {{limit}} wiadomości asystenta. Premium daje 300 miesięcznie — twórz listy dalej, po prostu rozmawiając.",
+    "upsell_cta": "Zobacz Premium",
+    "upsell_later": "Nie teraz",
+    "card_title": "Korzystaj z asystenta niemal bez ograniczeń",
+    "card_body": "300 wiadomości miesięcznie, listy ze zwykłych zdań, nielimitowane najtańsze trasy.",
+    "card_cta": "Poznaj Premium",
+    "card_active_title": "Cheep Premium jest aktywny",
+    "card_active_body": "Dziękujemy! Tutaj możesz zarządzać subskrypcją."
   }
 }

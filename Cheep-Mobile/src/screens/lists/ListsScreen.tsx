@@ -11,8 +11,7 @@ import {
   FlatList,
   RefreshControl,
   TouchableOpacity,
-  Alert,
-} from 'react-native';
+  } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +26,7 @@ import { colors, typography, spacing, layout } from '../../theme';
 import type { ShoppingList } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
+import { appAlert } from '../../utils/dialog';
 
 export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsMain'>) {
   // headerShown:false — ust guvenli alani ekran kendisi birakmali.
@@ -86,7 +86,7 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
     try {
       await deleteList.mutateAsync(listId);
     } catch {
-      Alert.alert(t('common.error'), t('list.delete_error'));
+      appAlert(t('common.error'), t('list.delete_error'));
     }
   };
 

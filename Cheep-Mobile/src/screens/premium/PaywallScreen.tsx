@@ -13,7 +13,7 @@
 
 import React, { useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Alert, Linking,
+  View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,7 @@ import type { PurchasesPackage } from 'react-native-purchases';
 import { usePremium } from '../../context/PremiumContext';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
+import { appAlert } from '../../utils/dialog';
 
 const TERMS_URL = 'https://cheep.live/terms';
 const PRIVACY_URL = 'https://cheep.live/privacy';
@@ -53,11 +54,11 @@ export function PaywallScreen() {
     try {
       const ok = await buy(chosen);
       if (ok) {
-        Alert.alert(t('premium.thanks_title'), t('premium.thanks_body'));
+        appAlert(t('premium.thanks_title'), t('premium.thanks_body'));
         navigation.goBack();
       }
     } catch {
-      Alert.alert(t('premium.error_title'), t('premium.error_body'));
+      appAlert(t('premium.error_title'), t('premium.error_body'));
     }
   };
 
@@ -66,9 +67,9 @@ export function PaywallScreen() {
       await restore();
       // Mesajı nötr tutuyoruz: geri yükleme çalıştı ama bu hesapta satın alma
       // bulunmamış da olabilir. Sonuç rozetten görülür.
-      Alert.alert(t('premium.restore_title'), t('premium.restore_body'));
+      appAlert(t('premium.restore_title'), t('premium.restore_body'));
     } catch {
-      Alert.alert(t('premium.error_title'), t('premium.error_body'));
+      appAlert(t('premium.error_title'), t('premium.error_body'));
     }
   };
 

@@ -28,6 +28,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { createQueryClient } from './src/queries/client';
 import { useAppStateFocus, useOnlineBridge } from './src/queries/focus';
 import { UpdateGate } from './src/components/update/UpdateGate';
+import { DialogHost } from './src/components/ui';
 
 // Tek istemci, uygulama ömrü boyunca. Render içinde yaratılırsa her render'da
 // cache sıfırlanır ve tüm sorgular baştan çalışır.
@@ -90,6 +91,10 @@ export default function App() {
                       <UpdateGate>
                         <RootNavigator />
                       </UpdateGate>
+                      {/* Uygulamanin TEK uyari/onay kutusu — isletim sisteminin
+                          yerel modali hicbir yerde kullanilmiyor. En disda:
+                          her ekranin ustunde cizilmeli. */}
+                      <DialogHost />
                     </LocationProvider>
                   </PremiumProvider>
                 </AuthProvider>
