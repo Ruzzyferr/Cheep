@@ -9,8 +9,20 @@
 }
 
 cheep.live {
-	encode gzip
-	reverse_proxy website:80
+	# App Review icin statik dosyalar (inceleme videosu). SPA'ya hic ugramadan
+	# diskten servis edilir. gzip DISINDA tutuluyor: sikistirilmis bir yanitta
+	# Range istekleri calismaz ve oynaticinin ileri sarmasi bozulur.
+	@notreview not path /review/*
+	encode @notreview gzip
+
+	handle_path /review/* {
+		root * /srv/review
+		file_server
+	}
+
+	handle {
+		reverse_proxy website:80
+	}
 
 	# Erişim logu. Bu ana kadar HİÇ açık değildi ve "Googlebot siteyi tarıyor
 	# mu?" sorusuna bakacak veri yoktu — 7.800 SEO sayfası yayına girerken bu

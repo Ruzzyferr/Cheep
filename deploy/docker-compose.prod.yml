@@ -80,6 +80,8 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # App Review varliklari (inceleme videosu) — depoya girmez, sunucuda durur.
+      - ./review-assets:/srv/review:ro
       - caddy_data:/data
       # Erişim logları: tarayıcı trafiğini (Googlebot dahil) görebilmek için.
       - caddy_logs:/var/log/caddy
