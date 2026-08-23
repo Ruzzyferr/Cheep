@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cheep",
     "slug": "cheep-mobile",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
@@ -19,7 +19,7 @@
       }
     },
     "android": {
-      "versionCode": 16,
+      "versionCode": 17,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundColor": "#1F6F4A"
@@ -59,7 +59,8 @@
           "color": "#1F6F4A",
           "defaultChannel": "price-drops"
         }
-      ]
+      ],
+      "./plugins/withIosOnlyLocales"
     ],
     "extra": {
       "eas": {
