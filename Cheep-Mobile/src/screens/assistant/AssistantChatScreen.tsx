@@ -249,7 +249,7 @@ export function AssistantChatScreen({
               title:
                 (typeof args.name === 'string' && args.name) ||
                 (typeof args.list_name === 'string' && args.list_name) ||
-                'Yeni Liste',
+                i18n.t('assistant.new_list_fallback'),
               itemCount: Array.isArray(items) ? items.length : undefined,
               // Gerçek liste id'sini araç çağrısından çöz (backend sonuç/args).
               listId: resolveListId(listCall),
@@ -330,7 +330,7 @@ export function AssistantChatScreen({
   // ─── Header buttons ──────────────────────────────────────────
   useEffect(() => {
     navigation.setOptions({
-      title: '✨ Asistan',
+      title: `✨ ${i18n.t('assistant.header_title')}`,
       headerRight: () => (
         <View style={styles.headerButtons}>
           {/* remaining/5 indicator */}
@@ -349,7 +349,7 @@ export function AssistantChatScreen({
           <TouchableOpacity
             style={styles.headerButton}
             onPress={handleNewChat}
-            accessibilityLabel="Yeni sohbet"
+            accessibilityLabel={i18n.t('assistant.new_chat')}
           >
             <MaterialIcons name="edit" size={22} color={colors.text.primary} />
           </TouchableOpacity>

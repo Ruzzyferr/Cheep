@@ -18,7 +18,8 @@
     "link_failed_title": "Länken kunde inte öppnas",
     "link_failed_body": "Försök igen senare.",
     "dismiss": "Avbryt",
-    "close": "Stäng"
+    "close": "Stäng",
+    "back": "Tillbaka"
   },
   "consent": {
     "location_title": "Ska din plats behandlas? (samtycke till platsdelning)",
@@ -195,7 +196,9 @@
     "buy_cheapest": "Köp i billigaste butiken ({{store}})",
     "smart_deals": "Smarta erbjudanden",
     "store_details": "Butiksdetaljer",
-    "price_disclaimer": "Priserna sammanställs från offentligt tillgängliga officiella källor och är endast informativa; de kan ändras när som helst. Bindande är det aktuella priset i butikens egen kanal. Jämförelsen omfattar endast de listade butikerna."
+    "price_disclaimer": "Priserna sammanställs från offentligt tillgängliga officiella källor och är endast informativa; de kan ändras när som helst. Bindande är det aktuella priset i butikens egen kanal. Jämförelsen omfattar endast de listade butikerna.",
+    "store_details_soon": "Den här funktionen kommer snart.",
+    "no_price_info_desc": "Inget pris har lagts till för den här produkten än."
   },
   "home": {
     "greeting": "Hej",
@@ -289,7 +292,9 @@
     "create_error": "Listan kunde inte skapas",
     "active_list": "Din aktiva inköpslista",
     "view": "Visa",
-    "view_list": "Visa listan {{title}}"
+    "view_list": "Visa listan {{title}}",
+    "brand_toggle_hint": "Tryck och håll för att ändra märkesval",
+    "no_active_list": "Du har ingen aktiv inköpslista just nu"
   },
   "deals": {
     "title": "Erbjudanden",
@@ -522,7 +527,10 @@
     "im_cheep": "Jag är Cheep",
     "limit_free": "Du har använt dina {{limit}} meddelanden för i dag.",
     "limit_premium_day": "Du har nått {{limit}} meddelanden i dag — fortsätt i morgon.",
-    "limit_premium_month": "Du har använt dina {{limit}} meddelanden för den här månaden."
+    "limit_premium_month": "Du har använt dina {{limit}} meddelanden för den här månaden.",
+    "header_title": "Assistent",
+    "new_chat": "Ny chatt",
+    "new_list_fallback": "Ny lista"
   },
   "time": {
     "just_now": "nyss",

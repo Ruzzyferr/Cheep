@@ -18,7 +18,8 @@
     "link_failed_title": "Nie udało się otworzyć linku",
     "link_failed_body": "Spróbuj ponownie później.",
     "dismiss": "Anuluj",
-    "close": "Zamknij"
+    "close": "Zamknij",
+    "back": "Wróć"
   },
   "consent": {
     "location_title": "Czy przetwarzać Twoją lokalizację? (zgoda na przetwarzanie danych)",
@@ -195,7 +196,9 @@
     "buy_cheapest": "Kup w najtańszym sklepie ({{store}})",
     "smart_deals": "Inteligentne okazje",
     "store_details": "Szczegóły sklepu",
-    "price_disclaimer": "Ceny pochodzą z publicznie dostępnych źródeł urzędowych i mają charakter informacyjny; mogą się zmienić w każdej chwili. Wiążąca jest aktualna cena w kanale danego sklepu. Porównanie obejmuje wyłącznie wymienione sklepy."
+    "price_disclaimer": "Ceny pochodzą z publicznie dostępnych źródeł urzędowych i mają charakter informacyjny; mogą się zmienić w każdej chwili. Wiążąca jest aktualna cena w kanale danego sklepu. Porównanie obejmuje wyłącznie wymienione sklepy.",
+    "store_details_soon": "Ta funkcja będzie dostępna wkrótce.",
+    "no_price_info_desc": "Do tego produktu nie dodano jeszcze ceny."
   },
   "home": {
     "greeting": "Cześć",
@@ -289,7 +292,9 @@
     "create_error": "Nie udało się utworzyć listy",
     "active_list": "Twoja aktywna lista zakupów",
     "view": "Zobacz",
-    "view_list": "Zobacz listę {{title}}"
+    "view_list": "Zobacz listę {{title}}",
+    "brand_toggle_hint": "Naciśnij i przytrzymaj, aby zmienić preferencję marki",
+    "no_active_list": "Nie masz teraz aktywnej listy zakupów"
   },
   "deals": {
     "title": "Okazje",
@@ -522,7 +527,10 @@
     "im_cheep": "Jestem Cheep",
     "limit_free": "Wykorzystano dzienny limit {{limit}} wiadomości.",
     "limit_premium_day": "Osiągnięto dziś {{limit}} wiadomości — wróć jutro.",
-    "limit_premium_month": "Wykorzystano limit {{limit}} wiadomości w tym miesiącu."
+    "limit_premium_month": "Wykorzystano limit {{limit}} wiadomości w tym miesiącu.",
+    "header_title": "Asystent",
+    "new_chat": "Nowy czat",
+    "new_list_fallback": "Nowa lista"
   },
   "time": {
     "just_now": "przed chwilą",

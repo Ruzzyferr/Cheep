@@ -7,12 +7,14 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import { AssistantChatScreen } from '../screens/assistant/AssistantChatScreen';
+import { useTranslation } from 'react-i18next';
 import { colors, typography } from '../theme';
 import type { AssistantStackParamList } from './types';
 
 const Stack = createStackNavigator<AssistantStackParamList>();
 
 export function AssistantNavigator() {
+  const { t } = useTranslation();
   return (
     <Stack.Navigator
       initialRouteName="AssistantChat"
@@ -31,7 +33,7 @@ export function AssistantNavigator() {
       <Stack.Screen
         name="AssistantChat"
         component={AssistantChatScreen}
-        options={{ title: '✨ Asistan' }}
+        options={{ title: `✨ ${t('assistant.header_title')}` }}
       />
     </Stack.Navigator>
   );

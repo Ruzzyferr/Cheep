@@ -22,9 +22,7 @@ export function EmptyListCard({ onCreateList }: EmptyListCardProps) {
         <Text style={styles.title}>{t('list.active_list')}</Text>
         
         <View style={styles.row}>
-          <Text style={styles.message}>
-            Şu anda aktif alışveriş listeniz yok
-          </Text>
+          <Text style={styles.message}>{t('list.no_active_list')}</Text>
           
           <TouchableOpacity style={styles.addButton} onPress={onCreateList}>
             <MaterialIcons name="add" size={24} color={colors.background.paper} />

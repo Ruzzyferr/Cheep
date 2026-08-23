@@ -21,15 +21,13 @@ export function StoreDetailScreen({
     <View style={styles.container}>
       <MaterialIcons name="storefront" size={56} color={colors.text.hint} />
       <Text style={styles.text}>{t('product.store_details')}</Text>
-      <Text style={styles.subtitle}>
-        Bu özellik yakında kullanıma açılacak.
-      </Text>
+      <Text style={styles.subtitle}>{t('product.store_details_soon')}</Text>
       <Text
         style={styles.back}
         accessibilityRole="button"
         onPress={() => navigation.goBack()}
       >
-        Geri dön
+        {t('common.back')}
       </Text>
     </View>
   );

@@ -18,7 +18,8 @@
     "link_failed_title": "Bağlantı açılamadı",
     "link_failed_body": "Lütfen daha sonra tekrar deneyin.",
     "dismiss": "Vazgeç",
-    "close": "Kapat"
+    "close": "Kapat",
+    "back": "Geri dön"
   },
   "consent": {
     "location_title": "Konumun işlensin mi? (KVKK açık rıza)",
@@ -195,7 +196,9 @@
     "buy_cheapest": "En ucuz markette al ({{store}})",
     "smart_deals": "Akıllı Fırsatlar",
     "store_details": "Mağaza Detayları",
-    "price_disclaimer": "Fiyatlar herkese açık resmi kaynaklardan derlenir ve bilgilendirme amaçlıdır; anlık olarak değişebilir. Bağlayıcı olan, marketin kendi kanalındaki güncel fiyattır. Karşılaştırma yalnızca listelenen marketler arasındadır."
+    "price_disclaimer": "Fiyatlar herkese açık resmi kaynaklardan derlenir ve bilgilendirme amaçlıdır; anlık olarak değişebilir. Bağlayıcı olan, marketin kendi kanalındaki güncel fiyattır. Karşılaştırma yalnızca listelenen marketler arasındadır.",
+    "store_details_soon": "Bu özellik yakında kullanıma açılacak.",
+    "no_price_info_desc": "Bu ürün için henüz fiyat bilgisi eklenmemiş."
   },
   "home": {
     "greeting": "Merhaba",
@@ -289,7 +292,9 @@
     "create_error": "Liste oluşturulurken bir hata oluştu",
     "active_list": "Aktif Alışveriş Listeniz",
     "view": "Görüntüle",
-    "view_list": "{{title}} listesini görüntüle"
+    "view_list": "{{title}} listesini görüntüle",
+    "brand_toggle_hint": "Marka tercihini değiştirmek için uzun basın",
+    "no_active_list": "Şu anda aktif alışveriş listeniz yok"
   },
   "deals": {
     "title": "Fırsatlar",
@@ -522,7 +527,10 @@
     "im_cheep": "Ben Cheep",
     "limit_free": "Günlük {{limit}} mesaj hakkın doldu.",
     "limit_premium_day": "Bugün {{limit}} mesaja ulaştın, yarın devam edebilirsin.",
-    "limit_premium_month": "Bu ayki {{limit}} mesaj hakkın doldu."
+    "limit_premium_month": "Bu ayki {{limit}} mesaj hakkın doldu.",
+    "header_title": "Asistan",
+    "new_chat": "Yeni sohbet",
+    "new_list_fallback": "Yeni Liste"
   },
   "time": {
     "just_now": "az önce",

@@ -18,7 +18,8 @@
     "link_failed_title": "Could not open link",
     "link_failed_body": "Please try again later.",
     "dismiss": "Dismiss",
-    "close": "Close"
+    "close": "Close",
+    "back": "Go back"
   },
   "consent": {
     "location_title": "Process your location? (privacy consent)",
@@ -195,7 +196,9 @@
     "buy_cheapest": "Buy at the cheapest store ({{store}})",
     "smart_deals": "Smart Deals",
     "store_details": "Store Details",
-    "price_disclaimer": "Prices are compiled from publicly available official sources and are for information only; they may change at any time. The binding price is the current one in the store’s own channel. The comparison covers only the listed stores."
+    "price_disclaimer": "Prices are compiled from publicly available official sources and are for information only; they may change at any time. The binding price is the current one in the store’s own channel. The comparison covers only the listed stores.",
+    "store_details_soon": "This feature is coming soon.",
+    "no_price_info_desc": "No price has been added for this product yet."
   },
   "home": {
     "greeting": "Hello",
@@ -289,7 +292,9 @@
     "create_error": "Could not create the list",
     "active_list": "Your Active Shopping List",
     "view": "View",
-    "view_list": "View the {{title}} list"
+    "view_list": "View the {{title}} list",
+    "brand_toggle_hint": "Press and hold to change the brand preference",
+    "no_active_list": "You have no active shopping list right now"
   },
   "deals": {
     "title": "Deals",
@@ -522,7 +527,10 @@
     "im_cheep": "I'm Cheep",
     "limit_free": "You have used your {{limit}} messages for today.",
     "limit_premium_day": "You have reached {{limit}} messages today — continue tomorrow.",
-    "limit_premium_month": "You have used your {{limit}} messages for this month."
+    "limit_premium_month": "You have used your {{limit}} messages for this month.",
+    "header_title": "Assistant",
+    "new_chat": "New chat",
+    "new_list_fallback": "New list"
   },
   "time": {
     "just_now": "just now",

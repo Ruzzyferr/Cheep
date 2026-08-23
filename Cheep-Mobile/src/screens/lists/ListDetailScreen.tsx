@@ -412,6 +412,7 @@ function ListItemCard({
   onDelete: (id: number) => void;
   onToggleBrandIndependent: (item: ListItem) => void;
 }) {
+  const { t } = useTranslation();
   const product = item.product;
   if (!product) return null;
 
@@ -425,7 +426,7 @@ function ListItemCard({
     <TouchableOpacity
       onLongPress={() => onToggleBrandIndependent(item)}
       activeOpacity={0.7}
-      accessibilityLabel="Marka tercihini değiştirmek için uzun basın"
+      accessibilityLabel={t('list.brand_toggle_hint')}
       style={styles.itemRow}
     >
       <View style={styles.itemThumb}>

@@ -251,10 +251,8 @@ export function ProductDetailScreen({
           <Card padding="lg" variant="outlined">
             <View style={styles.noPriceContainer}>
               <MaterialIcons name="info-outline" size={48} color={colors.text.hint} />
-              <Text style={styles.noPrice}>Fiyat bilgisi bulunmuyor</Text>
-              <Text style={styles.noPriceSubtext}>
-                Bu ürün için henüz fiyat bilgisi eklenmemiş
-              </Text>
+              <Text style={styles.noPrice}>{t('product.no_price_info')}</Text>
+              <Text style={styles.noPriceSubtext}>{t('product.no_price_info_desc')}</Text>
             </View>
           </Card>
         )}

@@ -18,7 +18,8 @@
     "link_failed_title": "Link konnte nicht geöffnet werden",
     "link_failed_body": "Bitte versuche es später erneut.",
     "dismiss": "Verwerfen",
-    "close": "Schließen"
+    "close": "Schließen",
+    "back": "Zurück"
   },
   "consent": {
     "location_title": "Standort verarbeiten? (Datenschutz-Einwilligung)",
@@ -195,7 +196,9 @@
     "buy_cheapest": "Im günstigsten Markt kaufen ({{store}})",
     "smart_deals": "Smarte Angebote",
     "store_details": "Marktdetails",
-    "price_disclaimer": "Die Preise stammen aus öffentlich zugänglichen amtlichen Quellen und dienen nur zur Information; sie können sich jederzeit ändern. Verbindlich ist der aktuelle Preis im eigenen Kanal des Marktes. Der Vergleich umfasst nur die aufgeführten Märkte."
+    "price_disclaimer": "Die Preise stammen aus öffentlich zugänglichen amtlichen Quellen und dienen nur zur Information; sie können sich jederzeit ändern. Verbindlich ist der aktuelle Preis im eigenen Kanal des Marktes. Der Vergleich umfasst nur die aufgeführten Märkte.",
+    "store_details_soon": "Diese Funktion kommt bald.",
+    "no_price_info_desc": "Für dieses Produkt wurde noch kein Preis hinzugefügt."
   },
   "home": {
     "greeting": "Hallo",
@@ -289,7 +292,9 @@
     "create_error": "Die Liste konnte nicht erstellt werden",
     "active_list": "Deine aktive Einkaufsliste",
     "view": "Ansehen",
-    "view_list": "Liste {{title}} ansehen"
+    "view_list": "Liste {{title}} ansehen",
+    "brand_toggle_hint": "Zum Ändern der Markenpräferenz gedrückt halten",
+    "no_active_list": "Du hast gerade keine aktive Einkaufsliste"
   },
   "deals": {
     "title": "Angebote",
@@ -522,7 +527,10 @@
     "im_cheep": "Ich bin Cheep",
     "limit_free": "Du hast deine {{limit}} Nachrichten für heute aufgebraucht.",
     "limit_premium_day": "Du hast heute {{limit}} Nachrichten erreicht — morgen geht es weiter.",
-    "limit_premium_month": "Du hast deine {{limit}} Nachrichten für diesen Monat aufgebraucht."
+    "limit_premium_month": "Du hast deine {{limit}} Nachrichten für diesen Monat aufgebraucht.",
+    "header_title": "Assistent",
+    "new_chat": "Neuer Chat",
+    "new_list_fallback": "Neue Liste"
   },
   "time": {
     "just_now": "gerade eben",
