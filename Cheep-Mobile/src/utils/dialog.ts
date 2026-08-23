@@ -59,8 +59,14 @@ export function showDialog(options: DialogOptions): void {
   // Buraya normalde hiç düşülmez: DialogHost uygulama kökünde her zaman
   // mount'lu. Yine de sessizce yutmuyoruz — bir onay kutusunun kaybolması,
   // çirkin görünmesinden daha kötüdür.
-  if (__DEV__) console.warn('DialogHost mount edilmemiş, yerel uyarıya düşülüyor:', options.title);
-  Alert.alert(options.title, options.message);
+  // __DEV__ React Native global'i; test/düğüm ortamında TANIMSIZ olabilir,
+  // doğrudan okumak ReferenceError atar.
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
+    console.warn('DialogHost mount edilmemiş, yerel uyarıya düşülüyor:', options.title);
+  }
+  // Düğmeleri de geçir: yoksa bir ONAY kutusu sessizce tek düğmeye iner ve
+  // kullanıcının seçimi hiç çalışmaz.
+  Alert.alert(options.title, options.message, options.buttons);
 }
 
 /** Evet/hayır sorusu. Onaylanırsa true döner. */

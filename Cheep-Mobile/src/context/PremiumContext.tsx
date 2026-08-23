@@ -23,7 +23,11 @@ interface PremiumContextType {
   isPremium: boolean;
   status: BillingStatus | null;
   offering: PurchasesOffering | null;
-  /** Satın alma bu derlemede hiç mümkün mü (SDK anahtarı var mı)? */
+  /**
+   * Gerçekten satın alma yapılabilir mi? Anahtarın varlığı YETMEZ — mağazada
+   * tanımlı ürün yoksa teklif boş gelir ve paywall ölü bir ekrana dönüşür.
+   * Koşul: anahtar var VE mağazadan gerçek bir teklif geldi.
+   */
   available: boolean;
   loading: boolean;
   /** Satın alma/geri yükleme sürüyor. */
@@ -108,7 +112,7 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
     isPremium: status?.isPremium ?? false,
     status,
     offering,
-    available: purchasesAvailable(),
+    available: purchasesAvailable() && Boolean(offering?.availablePackages?.length),
     loading,
     busy,
     refresh,

@@ -45,18 +45,10 @@ vi.mock('expo-location', () => ({
 }));
 
 // KVKK istemi: testte kullanıcının vereceği cevabı biz belirliyoruz.
+// Uygulama artık işletim sisteminin uyarı kutusunu değil kendi DialogHost'unu
+// kullanıyor; bu yüzden testte de gerçek yolu — diyalog köprüsünü — bağlıyoruz.
 const alertAnswer = { accept: true, shown: 0 };
-vi.mock('react-native', () => ({
-  Platform: { OS: 'ios' },
-  Alert: {
-    alert: (_t: string, _m: string, buttons: { text: string; onPress?: () => void }[]) => {
-      alertAnswer.shown++;
-      // buttons: [reddet, kabul]
-      const btn = alertAnswer.accept ? buttons[1] : buttons[0];
-      btn.onPress?.();
-    },
-  },
-}));
+vi.mock('react-native', () => ({ Platform: { OS: 'ios' } }));
 
 vi.mock('../../i18n', () => ({ default: { t: (k: string) => k } }));
 
@@ -72,6 +64,16 @@ import {
   getLocationConsent,
 } from '../consent';
 import { locationStorage } from '../storage';
+import { registerDialogHandler } from '../dialog';
+
+// Diyalog köprüsüne test cevabını bağla: kullanıcı kabul mü ediyor, ret mi.
+registerDialogHandler((o) => {
+  alertAnswer.shown++;
+  const buttons = o.buttons ?? [];
+  // buttons: [reddet, kabul]
+  const btn = alertAnswer.accept ? buttons[1] : buttons[0];
+  void btn?.onPress?.();
+});
 
 beforeEach(() => {
   mem.clear();
