@@ -16,7 +16,6 @@ import {
   Pressable,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { CommonActions } from '@react-navigation/native';
 import { assistantService } from '../../services/assistant.service';
 import type { ToolCall } from '../../services/assistant.service';
@@ -32,6 +31,7 @@ import { colors, spacing, typography, borderRadius } from '../../theme';
 import type { AssistantStackScreenProps } from '../../navigation/types';
 import i18n from '../../i18n';
 import { usePremium } from '../../context/PremiumContext';
+import { useBottomSpacing } from '../../hooks/useScreenSpacing';
 
 // ============================================================
 // Types
@@ -109,7 +109,6 @@ const EmptyState = ({ onSuggestion }: EmptyStateProps) => (
 export function AssistantChatScreen({
   navigation,
 }: AssistantStackScreenProps<'AssistantChat'>) {
-  const insets = useSafeAreaInsets();
   const qc = useQueryClient();
   const flatListRef = useRef<FlatList<LocalMessage>>(null);
 
@@ -126,6 +125,8 @@ export function AssistantChatScreen({
   const [limitReached, setLimitReached] = useState(false);
 
   const { isPremium } = usePremium();
+  // 80 = girdi cubugunun yuksekligi. Sekme disi ekran, tab bar payi eklenmez.
+  const bottomSpacing = useBottomSpacing(80);
 
   // Satın alma tamamlanınca banner kendiliğinden kalkmalı: kullanıcı paywall'dan
   // döndüğünde hâlâ "limitin doldu" görmesi, parasını ödediği şeyin çalışmadığı
@@ -371,7 +372,7 @@ export function AssistantChatScreen({
         renderItem={renderItem}
         contentContainerStyle={[
           styles.listContent,
-          { paddingBottom: insets.bottom + 80 },
+          { paddingBottom: bottomSpacing },
         ]}
         ListEmptyComponent={<EmptyState onSuggestion={handleSuggestion} />}
         onContentSizeChange={() =>

@@ -28,6 +28,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useLocale } from '../../context/LocaleContext';
 import { useToast } from '../../context/ToastContext';
 import { colors, typography, spacing, borderRadius } from '../../theme';
+import { useBottomSpacing } from '../../hooks/useScreenSpacing';
 
 const TOPICS: SupportTopic[] = ['bug', 'price', 'account', 'suggestion', 'other'];
 
@@ -35,6 +36,8 @@ const TOPICS: SupportTopic[] = ['bug', 'price', 'account', 'suggestion', 'other'
 const MIN_MESSAGE = 10;
 
 export function SupportScreen({ navigation }: any) {
+  // Sekme disi ekran: tab bar payi yok ama sistem cubugu payi gerekli.
+  const bottomSpacing = useBottomSpacing();
   const { t } = useTranslation();
   const { user } = useAuth();
   const { country } = useLocale();
@@ -88,7 +91,7 @@ export function SupportScreen({ navigation }: any) {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingBottom: bottomSpacing }]} keyboardShouldPersistTaps="handled">
         <Text style={styles.intro}>{t('support.intro')}</Text>
 
         <Text style={styles.label}>{t('support.topic')}</Text>

@@ -13,7 +13,6 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useCompareList } from '../../queries';
@@ -27,6 +26,7 @@ import { useLocationAnchor } from '../../context/LocationContext';
 import { shouldFilterByDistance, RADIUS_OPTIONS, DEFAULT_RADIUS_KM } from '../../utils/anchor';
 import type { CompareResponse, RouteStrategy } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
+import { useBottomSpacing } from '../../hooks/useScreenSpacing';
 
 type StoreCountFilter = 'all' | '1' | '2' | '3+';
 type SortOption = 'score' | 'price' | 'distance' | 'price_distance';
@@ -46,7 +46,8 @@ export function CompareResultsScreen({
   const [storeCountFilter, setStoreCountFilter] = useState<StoreCountFilter>('all');
   const [sortOption, setSortOption] = useState<SortOption>('score');
   const [radiusKm, setRadiusKm] = useState<number>(DEFAULT_RADIUS_KM);
-  const insets = useSafeAreaInsets();
+  // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
+  const bottomSpacing = useBottomSpacing();
 
   const { anchor } = useLocationAnchor();
   const { country } = useLocale(); // (useLocale zaten import edilmiş — formatMoney için)
@@ -173,7 +174,7 @@ export function CompareResultsScreen({
   return (
     <ScrollView 
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
+      contentContainerStyle={{ paddingBottom: bottomSpacing }}
     >
       {/* Filters */}
       <View style={styles.filtersSection}>

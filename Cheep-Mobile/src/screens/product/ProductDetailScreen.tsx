@@ -30,6 +30,7 @@ import type { Product, StorePrice } from '../../types';
 import type { HomeStackScreenProps } from '../../navigation/types';
 import type { Category } from '../../services/category.service';
 import { useTranslation } from 'react-i18next';
+import { useBottomSpacing } from '../../hooks/useScreenSpacing';
 
 export function ProductDetailScreen({
   route,
@@ -37,6 +38,8 @@ export function ProductDetailScreen({
 }: HomeStackScreenProps<'ProductDetail'>) {
   const { t } = useTranslation();
   const { productId } = route.params;
+  // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
+  const bottomSpacing = useBottomSpacing();
   const { country, formatMoney } = useLocale();
   const scope = useScope();
   const [openingStore, setOpeningStore] = useState(false);
@@ -110,7 +113,10 @@ export function ProductDetailScreen({
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomSpacing }]}
+      >
         {/* Product Image — görsel yoksa kategori-ikonlu placeholder */}
         <View style={styles.imageContainer}>
           <ProductThumb imageUrl={product.image_url} categoryName={product.category?.name} iconSize={56} />
@@ -754,7 +760,6 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingBottom: 100, // Tab bar height (72) + FAB space (20) + extra padding (8)
   },
 });
 

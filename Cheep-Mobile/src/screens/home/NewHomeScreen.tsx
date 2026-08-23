@@ -45,8 +45,11 @@ import { shadows } from '../../theme/shadows';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { Product } from '../../types';
 import type { HomeStackScreenProps } from '../../navigation/types';
+import { useBottomSpacing } from '../../hooks/useScreenSpacing';
 
 export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) {
+  // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
+  const bottomSpacing = useBottomSpacing();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const { t } = useTranslation();
@@ -205,7 +208,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
     <View style={styles.container}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: insets.top + spacing.sm, paddingBottom: insets.bottom + 110 }}
+        contentContainerStyle={{ paddingTop: insets.top + spacing.sm, paddingBottom: bottomSpacing }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={colors.primary.main} />
         }

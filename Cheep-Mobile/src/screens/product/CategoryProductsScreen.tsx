@@ -45,6 +45,7 @@ import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { Product } from '../../types';
 import type { HomeStackScreenProps, ListsStackScreenProps } from '../../navigation/types';
+import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 
 // Aynı bileşen hem Home hem Lists stack'inde kayıtlı (liste detayından "Ürün Ekle"
 // akışı kullanıcıyı Listeler sekmesinde tutar). İki stack'in param'ı özdeş.
@@ -59,6 +60,10 @@ const PAGE_SIZE = 24;
 const ALL_CATEGORIES = 0;
 
 export function CategoryProductsScreen({ navigation, route }: CategoryProductsProps) {
+  // headerShown:false — ust guvenli alani ekran kendisi birakmali.
+  const topSpacing = useTopSpacing();
+  // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
+  const bottomSpacing = useBottomSpacing();
   const { categoryId, categoryName } = route.params;
   // Hedef liste verildiyse (liste detayından "Ürün Ekle") ekleme O listeye gider;
   // yoksa aktif listeye. Böylece aktif olmayan bir listeye de ürün eklenebilir.
@@ -168,7 +173,7 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: topSpacing }]}>
         <View style={styles.headerTop}>
           <TouchableOpacity
             style={[styles.backButton, { marginRight: spacing.sm }]}
@@ -275,7 +280,7 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
           numColumns={2}
           keyExtractor={(item) => item.id.toString()}
           style={styles.list}
-          contentContainerStyle={styles.gridContainer}
+          contentContainerStyle={[styles.gridContainer, { paddingBottom: bottomSpacing }]}
           columnWrapperStyle={styles.row}
           refreshControl={
             <RefreshControl
@@ -331,7 +336,6 @@ const styles = StyleSheet.create({
 
   header: {
     backgroundColor: `${colors.background.paper}CC`,
-    paddingTop: spacing.xl,
   },
 
   headerTop: {
@@ -423,7 +427,6 @@ const styles = StyleSheet.create({
 
   gridContainer: {
     padding: layout.screenPadding,
-    paddingBottom: spacing['3xl'],
   },
 
   row: {

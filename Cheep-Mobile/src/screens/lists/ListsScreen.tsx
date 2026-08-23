@@ -26,8 +26,13 @@ import { getShouldOpenCreateModalFromFAB, setShouldOpenCreateModalFromFAB } from
 import { colors, typography, spacing, layout } from '../../theme';
 import type { ShoppingList } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
+import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 
 export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsMain'>) {
+  // headerShown:false — ust guvenli alani ekran kendisi birakmali.
+  const topSpacing = useTopSpacing();
+  // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
+  const bottomSpacing = useBottomSpacing();
   const { t } = useTranslation();
   const [showCreateModal, setShowCreateModal] = useState(false);
 
@@ -99,7 +104,7 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: topSpacing }]}>
         <Text style={styles.title}>{t('list.screen_title')}</Text>
         <TouchableOpacity
           style={styles.headerAddButton}
@@ -129,7 +134,7 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
               onDelete={handleDeleteList}
             />
           )}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: bottomSpacing }]}
           refreshControl={
             <RefreshControl
               refreshing={listsQ.isRefetching}
@@ -160,7 +165,6 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.background.paper,
     padding: layout.screenPadding,
-    paddingTop: spacing.xl,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
     flexDirection: 'row',

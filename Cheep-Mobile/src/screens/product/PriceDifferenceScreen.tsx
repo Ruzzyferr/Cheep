@@ -21,10 +21,15 @@ import { colors, typography, spacing, layout } from '../../theme';
 import type { Product } from '../../types';
 import type { HomeStackScreenProps } from '../../navigation/types';
 import { useTranslation } from 'react-i18next';
+import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 
 export function PriceDifferenceScreen({
   navigation,
 }: HomeStackScreenProps<'PriceDifferenceList'>) {
+  // headerShown:false — ust guvenli alani ekran kendisi birakmali.
+  const topSpacing = useTopSpacing();
+  // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
+  const bottomSpacing = useBottomSpacing();
   const { t } = useTranslation();
   const { formatMoney } = useLocale();
 
@@ -81,7 +86,7 @@ export function PriceDifferenceScreen({
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: topSpacing }]}>
         <View style={styles.headerTop}>
           <TouchableOpacity
             style={styles.backButton}
@@ -107,7 +112,7 @@ export function PriceDifferenceScreen({
       <FlatList
         data={products}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={[styles.listContainer, { paddingBottom: bottomSpacing }]}
         refreshControl={
           <RefreshControl
             refreshing={productsQ.isRefetching}
@@ -171,7 +176,6 @@ const styles = StyleSheet.create({
 
   header: {
     backgroundColor: `${colors.background.paper}CC`,
-    paddingTop: spacing.xl,
     paddingBottom: spacing.md,
   },
 
@@ -209,7 +213,6 @@ const styles = StyleSheet.create({
 
   listContainer: {
     padding: layout.screenPadding,
-    paddingBottom: spacing['3xl'],
   },
 
   row: {

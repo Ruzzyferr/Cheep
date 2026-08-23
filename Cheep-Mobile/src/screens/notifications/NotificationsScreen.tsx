@@ -26,8 +26,11 @@ import { RefreshBar, ErrorState } from '../../components/ui';
 import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import type { HomeStackScreenProps } from '../../navigation/types';
+import { useBottomSpacing } from '../../hooks/useScreenSpacing';
 
 export function NotificationsScreen({ navigation }: HomeStackScreenProps<'Notifications'>) {
+  // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
+  const bottomSpacing = useBottomSpacing();
   const { t } = useTranslation();
   const { formatMoney } = useLocale();
   const qc = useQueryClient();
@@ -124,7 +127,11 @@ export function NotificationsScreen({ navigation }: HomeStackScreenProps<'Notifi
     <RefreshBar visible={listQ.isFetching && !listQ.isPending && !listQ.isRefetching} />
     <FlatList
       style={styles.container}
-      contentContainerStyle={items.length === 0 ? styles.emptyWrap : styles.listContent}
+      contentContainerStyle={
+      items.length === 0
+        ? styles.emptyWrap
+        : [styles.listContent, { paddingBottom: bottomSpacing }]
+    }
       data={items}
       keyExtractor={(i) => String(i.id)}
       renderItem={renderItem}

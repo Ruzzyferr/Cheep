@@ -23,6 +23,7 @@ import { shadows } from '../../theme/shadows';
 import type { StoreAllocation, ProductAllocation } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 import i18n from '../../i18n';
+import { useBottomSpacing } from '../../hooks/useScreenSpacing';
 
 // route.params üzerinden gelen sayısal alanlar null/string olabilir; .toFixed
 // çağırmadan önce güvenli bir sayıya zorla (geçersizse 0).
@@ -35,13 +36,18 @@ export function StrategyDetailScreen({
   route,
 }: ListsStackScreenProps<'StrategyDetail'>) {
   const { strategy, listId } = route.params;
+  // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
+  const bottomSpacing = useBottomSpacing();
   const { formatMoney } = useLocale();
 
   const withinBudget = strategy.budgetStatus === 'within_budget';
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[styles.content, { paddingBottom: bottomSpacing }]}
+      >
         {/* Header Info */}
         <View style={styles.header}>
           <View style={styles.headerTop}>

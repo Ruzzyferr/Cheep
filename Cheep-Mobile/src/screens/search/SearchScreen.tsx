@@ -15,12 +15,15 @@ import { getRecentSearches, addRecentSearch } from '../../utils/recentSearches';
 import { colors, typography, spacing, layout } from '../../theme';
 import type { Product } from '../../types';
 import type { HomeStackScreenProps, ListsStackScreenProps } from '../../navigation/types';
+import { useBottomSpacing } from '../../hooks/useScreenSpacing';
 
 // Aynı bileşen hem Home hem Lists stack'inde kayıtlı (Ürün Ekle akışı kullanıcıyı
 // Listeler sekmesinde tutar). İki stack'in Search route param'ı özdeş.
 type SearchScreenProps = HomeStackScreenProps<'Search'> | ListsStackScreenProps<'Search'>;
 
 export function SearchScreen({ navigation, route }: SearchScreenProps) {
+  // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
+  const bottomSpacing = useBottomSpacing();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { activeList } = useCart();
@@ -172,7 +175,7 @@ export function SearchScreen({ navigation, route }: SearchScreenProps) {
               />
             </View>
           )}
-          contentContainerStyle={[styles.gridContainer, { paddingBottom: insets.bottom + 24 }]}
+          contentContainerStyle={[styles.gridContainer, { paddingBottom: bottomSpacing }]}
         />
       )}
     </View>

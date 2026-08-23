@@ -23,6 +23,7 @@ import Constants from 'expo-constants';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 import { usePremium } from '../../context/PremiumContext';
 import { useLocale, COUNTRY_CONFIG } from '../../context/LocaleContext';
 import { useLocationAnchor } from '../../context/LocationContext';
@@ -58,6 +59,11 @@ export function ProfileScreen({
   const qc = useQueryClient();
   const { user, logout } = useAuth();
   const { isPremium } = usePremium();
+  // Tab bar float: icerigin altina 72 + guvenli alan birakilmazsa son dugme
+  // (hesap silme) cubugun arkasinda kalir ve asagi kaydirilamaz.
+  const bottomSpacing = useBottomSpacing();
+  // headerShown:false — ust guvenli alani ekran kendisi birakmali.
+  const topSpacing = useTopSpacing();
   const { t } = useTranslation();
   const { country } = useLocale();
   const { anchor, refresh: refreshAnchor } = useLocationAnchor();
@@ -362,7 +368,7 @@ ${t('profile.delete_account_subscription_note')}`
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: topSpacing }]}>
         <View style={styles.avatarRing}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
@@ -374,7 +380,11 @@ ${t('profile.delete_account_subscription_note')}`
         <Text style={styles.email}>{user?.email}</Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={{ paddingBottom: bottomSpacing }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Stats strip */}
         <View style={styles.statsRow}>
           <StatTile icon="playlist-add-check" value={stats.active} label={t('profile.stat_active')} />
@@ -634,7 +644,6 @@ ${t('profile.delete_account_subscription_note')}`
           />
         </View>
 
-        <View style={styles.bottomSpacing} />
       </ScrollView>
 
       {/* Language picker */}
@@ -789,7 +798,6 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.background.paper,
     padding: layout.screenPadding,
-    paddingTop: spacing['2xl'],
     paddingBottom: spacing.lg,
     alignItems: 'center',
     borderBottomWidth: 1,
@@ -1018,10 +1026,6 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.border.light,
     marginLeft: spacing.md + 36 + spacing.md,
-  },
-
-  bottomSpacing: {
-    height: spacing['2xl'],
   },
 
   // ─── Option picker modal ────────────────────────────────────────────────────

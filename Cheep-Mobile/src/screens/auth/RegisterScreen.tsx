@@ -20,10 +20,14 @@ import { CheepMascot } from '../../components/brand/CheepMascot';
 import { FadeInUp } from '../../components/anim';
 import { useAuth } from '../../context/AuthContext';
 import { colors, typography, spacing, layout } from '../../theme';
+import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 
 const hint = (name: any) => <MaterialIcons name={name} size={20} color={colors.text.hint} />;
 
 export function RegisterScreen({ navigation }: any) {
+  // Sekme disi ekran: tab bar payi yok ama sistem cubugu payi gerekli.
+  const bottomSpacing = useBottomSpacing();
+  const topSpacing = useTopSpacing();
   const { t } = useTranslation();
   const { register } = useAuth();
   const [name, setName] = useState('');
@@ -85,7 +89,7 @@ export function RegisterScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: topSpacing, paddingBottom: bottomSpacing }]}
         keyboardShouldPersistTaps="handled"
       >
         <FadeInUp style={styles.header}>

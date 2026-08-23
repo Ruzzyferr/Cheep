@@ -21,8 +21,7 @@ import {
   Platform,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useBottomSpacing, useStickyBottomOffset } from '../../hooks/useScreenSpacing';
 import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
 import { useListDetail, useListMutations } from '../../queries';
@@ -59,11 +58,12 @@ export function ListDetailScreen({
   const [showImportMode, setShowImportMode] = useState(false);
   const [pendingSourceId, setPendingSourceId] = useState<number | null>(null);
   const [nameModal, setNameModal] = useState<null | 'clone' | 'rename'>(null);
-  const insets = useSafeAreaInsets();
   // Alt tab-bar position:absolute (float) → ekran onun altına uzanır. Alt aksiyon
   // çubuğunu ve liste boşluğunu tab-bar YÜKSEKLİĞİNCE yukarı almazsak butonlar
   // tab-bar'ın arkasında kalır. Bu hook safe-area dahil gerçek yüksekliği verir.
-  const tabBarHeight = useBottomTabBarHeight();
+  // Aksiyon cubugu (~92) icerigin ustunde durur; onun payini da birakiyoruz.
+  const bottomSpacing = useBottomSpacing(92);
+  const stickyBottom = useStickyBottomOffset();
   const toast = useToast();
   const { formatMoney } = useLocale();
 
@@ -332,9 +332,7 @@ export function ListDetailScreen({
         contentContainerStyle={[
           styles.listContent,
           // Son kalemler hem alt aksiyon çubuğunun hem tab-bar'ın altında kalmasın.
-          // Tab-bar ekranın altından `insets.bottom + tabBarHeight` kadar yer kaplar
-          // (float; bottom:insets.bottom) → aynı boşluğu + aksiyon çubuğu (~92) bırak.
-          items.length > 0 && { paddingBottom: insets.bottom + tabBarHeight + 92 },
+          items.length > 0 && { paddingBottom: bottomSpacing },
         ]}
         ListEmptyComponent={
           <EmptyState
@@ -347,14 +345,10 @@ export function ListDetailScreen({
         }
       />
 
-      {/* Bottom sticky bar: two equal buttons — tab-bar'ın ÜSTÜNE yerleşir (arkasında kalmaz).
-          Tab-bar float'tır (position:absolute, bottom:insets.bottom, height:72) → ekranın
-          altından gerçek kapladığı yer = insets.bottom + tabBarHeight. useBottomTabBarHeight()
-          yalnızca explicit height'i (72) verir, insets'i İÇERMEZ; bu yüzden ikisini toplarız.
-          Sadece tabBarHeight ile kaldırırsak jest çubuğu payı (insets.bottom) kadarı — cihaza
-          göre değişen miktarda (ör. S24 Ultra) — tab-bar arkasında kalır. */}
+      {/* Alt aksiyon çubuğu tab-bar'ın ÜSTÜNE yerleşir, arkasında kalmaz.
+          Hesabın gerekçesi useBottomSpacing'te. */}
       {items.length > 0 && (
-        <View style={[styles.actions, { bottom: insets.bottom + tabBarHeight }]}>
+        <View style={[styles.actions, { bottom: stickyBottom }]}>
           <View style={styles.actionRow}>
             <Button
               title={t('list.add_products')}

@@ -22,6 +22,7 @@ import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { Product } from '../../types';
 import type { DealsStackScreenProps } from '../../navigation/types';
+import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 
 interface Deal {
   product: Product;
@@ -71,6 +72,10 @@ function buildDeals(products: Product[]): Deal[] {
 }
 
 export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) {
+  // headerShown:false — ust guvenli alani ekran kendisi birakmali.
+  const topSpacing = useTopSpacing();
+  // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
+  const bottomSpacing = useBottomSpacing();
   const { t } = useTranslation();
   const { country, formatMoney } = useLocale();
   // Cache'li sorgu: ülke değişince key değiştiği için veri kendiliğinden
@@ -129,7 +134,7 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: topSpacing }]}>
         <Text style={styles.title}>{t('deals.title')}</Text>
         <Text style={styles.subtitle}>{t('deals.subtitle')}</Text>
       </View>
@@ -151,7 +156,7 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
           data={deals}
           keyExtractor={(item) => String(item.product.id)}
           renderItem={renderDeal}
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, { paddingBottom: bottomSpacing }]}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl refreshing={productsQ.isRefetching} onRefresh={onRefresh} tintColor={colors.primary.main} />
@@ -170,7 +175,6 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colors.background.paper,
     paddingHorizontal: layout.screenPadding,
-    paddingTop: spacing.xl,
     paddingBottom: spacing.md,
   },
   title: {

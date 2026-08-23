@@ -21,6 +21,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { PurchasesPackage } from 'react-native-purchases';
 import { usePremium } from '../../context/PremiumContext';
 import { colors, spacing, borderRadius, typography } from '../../theme';
+import { useBottomSpacing } from '../../hooks/useScreenSpacing';
 
 const TERMS_URL = 'https://cheep.live/terms';
 const PRIVACY_URL = 'https://cheep.live/privacy';
@@ -39,6 +40,8 @@ export function PaywallScreen() {
   const navigation = useNavigation<any>();
   const { offering, isPremium, status, available, busy, buy, restore } = usePremium();
   const [selected, setSelected] = useState<'monthly' | 'yearly'>('yearly');
+  // Sekme disi ekran: tab bar payi yok ama sistem cubugu payi gerekli.
+  const bottomSpacing = useBottomSpacing();
 
   const monthly = offering?.availablePackages.find((p) => p.packageType === 'MONTHLY');
   const yearly = offering?.availablePackages.find((p) => p.packageType === 'ANNUAL');
@@ -72,7 +75,7 @@ export function PaywallScreen() {
   // Zaten abone: satın alma değil, durum ekranı göster.
   if (isPremium) {
     return (
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={[styles.container, { paddingBottom: bottomSpacing }]}>
         <View style={styles.crown}>
           <Ionicons name="checkmark-circle" size={44} color={colors.success.main} />
         </View>
@@ -92,7 +95,7 @@ export function PaywallScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingBottom: bottomSpacing }]}>
       <View style={styles.crown}>
         <Ionicons name="sparkles" size={40} color={colors.accent.main} />
       </View>

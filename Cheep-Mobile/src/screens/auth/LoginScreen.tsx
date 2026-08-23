@@ -20,8 +20,12 @@ import { CheepMascot } from '../../components/brand/CheepMascot';
 import { FadeInUp, Float } from '../../components/anim';
 import { useAuth } from '../../context/AuthContext';
 import { colors, typography, spacing, layout } from '../../theme';
+import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 
 export function LoginScreen({ navigation }: any) {
+  // Sekme disi ekran: tab bar payi yok ama sistem cubugu payi gerekli.
+  const bottomSpacing = useBottomSpacing();
+  const topSpacing = useTopSpacing();
   const { t } = useTranslation();
   const { login } = useAuth();
   const [email, setEmail] = useState('');
@@ -71,7 +75,7 @@ export function LoginScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingTop: topSpacing, paddingBottom: bottomSpacing }]}
         keyboardShouldPersistTaps="handled"
       >
         {/* Logo */}
