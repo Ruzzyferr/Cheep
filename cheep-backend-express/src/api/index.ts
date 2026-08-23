@@ -15,6 +15,7 @@ import supportRouter from './support/support.routes.js';
 import notificationsRouter from './notifications/notifications.routes.js';
 import seoRouter from './seo/seo.routes.js';
 import appRouter from './app/app.routes.js';
+import billingRouter from './billing/billing.routes.js';
 
 const router = Router();
 
@@ -33,6 +34,8 @@ router.use('/affiliates', affiliatesRouter);
 router.use('/support', supportRouter);
 router.use('/notifications', notificationsRouter);
 router.use('/seo', seoRouter);
+// Abonelik: RevenueCat webhook ucu + istemcinin durum/senkron uclari.
+router.use('/billing', billingRouter);
 // Sürüm kapısı: giriş ekranından ÖNCE, kimlik doğrulamasız çağrılır.
 router.use('/app', appRouter);
 

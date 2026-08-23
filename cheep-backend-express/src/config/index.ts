@@ -190,6 +190,25 @@ const apns = {
     enabled: Boolean(apnsKey && process.env.APNS_KEY_ID && process.env.APNS_TEAM_ID),
 };
 
+// --- RevenueCat (Cheep Premium abonelikleri) ---
+// webhookSecret: RevenueCat panelinde webhook'a yazdigimiz Authorization degeri.
+//   Bu deger olmadan webhook ucu ACIK kalir; uretimde zorunlu tutuyoruz.
+// apiKey: v1 secret anahtar (sk_...). Yalnizca sunucuda; hak dogrulamasinin
+//   webhook kacirsa devreye giren yedek yolu icin kullanilir.
+const revenuecat = {
+    webhookSecret: process.env.REVENUECAT_WEBHOOK_SECRET || '',
+    apiKey: process.env.REVENUECAT_API_KEY || '',
+};
+const revenuecatEnabled = Boolean(revenuecat.webhookSecret);
+
+if (isProduction && !revenuecatEnabled) {
+    // Uygulama ayakta kalsin (abonelik disindaki her sey calisiyor) ama sessizce degil.
+    // eslint-disable-next-line no-console
+    console.warn(
+        '⚠️  REVENUECAT_WEBHOOK_SECRET yok — abonelik webhook ucu devre disi. Premium haklari guncellenmeyecek.'
+    );
+}
+
 export const config = {
     isProduction,
     jwtSecret: jwtSecret as string,
@@ -204,4 +223,6 @@ export const config = {
     support,
     fcm,
     apns,
+    revenuecat,
+    revenuecatEnabled,
 };

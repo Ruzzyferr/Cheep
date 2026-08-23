@@ -47,6 +47,10 @@ export const generalLimiter = rateLimit({
     windowMs: 60_000,
     max: perEnv(600),
     keyGenerator: userOrIpKey,
+    // RevenueCat webhook ucu sunucudan sunucuya gelir ve paylasilan sirla dogrulanir;
+    // tek bir IP'den yogun akar. Anonim IP kovasina konursa abonelik olaylari limite
+    // takilir ve haklar gec guncellenir. Guvenligi sir sagliyor, limit degil.
+    skip: (req) => req.originalUrl.split('?')[0] === '/api/v1/billing/revenuecat/webhook',
     message: {
         success: false,
         message: 'Çok fazla istek gönderdiniz. Lütfen biraz sonra tekrar deneyin.',

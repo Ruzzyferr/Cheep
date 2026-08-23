@@ -3,7 +3,7 @@ import { createChatSession } from '../../services/llm.client.js';
 import { toolDeclarations, buildToolExecutor } from './assistant.tools.js';
 import { runAgentLoop } from './agent-loop.js';
 import { getProfile } from '../profile/profile.service.js';
-import { checkDailyLimit, startOfTrDay } from '../../services/assistant-limit.js';
+import { checkAssistantLimit, startOfTrDay, startOfTrMonth } from '../../services/assistant-limit.js';
 import { AppError, notFound } from '../../utils/app-error.js';
 
 // ============================================
@@ -75,9 +75,12 @@ export function buildSystemPrompt(profile: any, currency: string = 'TRY', langua
 export const sendMessage = async (userId: number, threadId: number, content: string, currency: string = 'TRY', countryId?: number) => {
   await assertOwner(threadId, userId);
 
-  // Günlük limit kontrolü (LLM çağrısından ÖNCE)
-  const dayStart = startOfTrDay(new Date());
-  const [history, profile, todayCount, limitUser] = await Promise.all([
+  // Kota kontrolü (LLM çağrısından ÖNCE — reddedilen istek para harcamamalı).
+  // Ücretsiz katman günlük, premium aylık sayılır; ikisini de tek turda çekiyoruz.
+  const now = new Date();
+  const dayStart = startOfTrDay(now);
+  const monthStart = startOfTrMonth(now);
+  const [history, profile, todayCount, monthCount, limitUser] = await Promise.all([
     prisma.chatMessage.findMany({
       where: { thread_id: threadId },
       orderBy: { created_at: 'asc' },
@@ -86,11 +89,19 @@ export const sendMessage = async (userId: number, threadId: number, content: str
     prisma.chatMessage.count({
       where: { role: 'user', thread: { user_id: userId }, created_at: { gte: dayStart } },
     }),
+    prisma.chatMessage.count({
+      where: { role: 'user', thread: { user_id: userId }, created_at: { gte: monthStart } },
+    }),
     prisma.user.findUnique({ where: { id: userId }, select: { is_premium: true, language: true } }),
   ]);
-  const verdict = checkDailyLimit(todayCount, limitUser?.is_premium ?? false);
+  const verdict = checkAssistantLimit(
+    { today: todayCount, month: monthCount },
+    limitUser?.is_premium ?? false
+  );
   if (!verdict.allowed) {
-    throw new AppError('Günlük mesaj limitin doldu.', 429, 'DAILY_LIMIT');
+    // İstemci bu kodu görüp doğru ekranı açıyor: ücretsiz kullanıcıya paywall,
+    // premium kullanıcıya "yarın devam" bilgisi.
+    throw new AppError('Mesaj limitin doldu.', 429, 'DAILY_LIMIT');
   }
 
   const session = createChatSession({
@@ -126,5 +137,12 @@ export const sendMessage = async (userId: number, threadId: number, content: str
     },
   });
 
-  return { message: result.text, toolCalls: result.toolCalls, remaining: Math.max(0, verdict.remaining - 1) };
+  return {
+    message: result.text,
+    toolCalls: result.toolCalls,
+    remaining: Math.max(0, verdict.remaining - 1),
+    limit: verdict.limit,
+    window: verdict.window,
+    isPremium: limitUser?.is_premium ?? false,
+  };
 };

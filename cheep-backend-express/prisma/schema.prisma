@@ -42,8 +42,56 @@ model User {
   support_messages SupportMessage[]
   price_drops      PriceDrop[]
   push_tokens      UserPushToken[]
+  subscription     Subscription?
 
   @@map("users")
+}
+
+// ============================================
+// ABONELİK (Cheep Premium — App Store / Play Store)
+// ============================================
+
+/// Kullanıcının GÜNCEL abonelik durumu (kullanıcı başına tek satır).
+///
+/// Doğruluk kaynağı burasıdır: RevenueCat webhook'u bu satırı yazar, ondan
+/// sonra `user.is_premium` türetilir. Tam olay geçmişini RevenueCat zaten
+/// tutuyor; burada ikinci bir olay tablosu tutmuyoruz.
+model Subscription {
+  id      Int @id @default(autoincrement())
+  user_id Int @unique
+
+  store       String // "APP_STORE" | "PLAY_STORE"
+  product_id  String // örn. "cheep_premium_monthly"
+  entitlement String @default("premium") // RevenueCat entitlement kimliği
+
+  /// "ACTIVE" | "GRACE" | "BILLING_ISSUE" | "PAUSED" | "CANCELLED" | "EXPIRED" | "REFUNDED"
+  /// CANCELLED = yenilenmeyecek ama dönem sonuna kadar hak sürüyor.
+  status      String
+  period_type String @default("NORMAL") // "NORMAL" | "TRIAL" | "INTRO"
+
+  /// Hakkın bittiği an. null = süresiz (mağaza bildirmediyse).
+  current_period_end DateTime?
+  will_renew         Boolean   @default(true)
+
+  /// "PRODUCTION" | "SANDBOX" — sandbox satın almalar da hak verir (test edilebilsin),
+  /// ama gelir raporlamasında ayrıştırılabilmeleri gerekir.
+  environment String @default("PRODUCTION")
+
+  /// RevenueCat app_user_id — bizim user.id'mizin string hâli olmalı.
+  rc_app_user_id String?
+
+  /// Idempotans: aynı webhook olayı iki kez gelirse ya da sıra bozulursa
+  /// eski olay yeniyi ezmesin.
+  last_event_id String?
+  last_event_at DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([status, current_period_end])
+  @@map("subscriptions")
 }
 
 // ============================================
