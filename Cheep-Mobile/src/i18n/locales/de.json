@@ -17,7 +17,8 @@
     "generic_error": "Etwas ist schiefgelaufen",
     "link_failed_title": "Link konnte nicht geöffnet werden",
     "link_failed_body": "Bitte versuche es später erneut.",
-    "dismiss": "Verwerfen"
+    "dismiss": "Verwerfen",
+    "close": "Schließen"
   },
   "consent": {
     "location_title": "Standort verarbeiten? (Datenschutz-Einwilligung)",
@@ -517,7 +518,10 @@
     "soon_title": "Demnächst",
     "soon_body": "Die Premium-Funktion ist bald verfügbar.",
     "go_premium": "Wechsle zu Premium für unbegrenzte Nutzung.",
-    "im_cheep": "Ich bin Cheep"
+    "im_cheep": "Ich bin Cheep",
+    "limit_free": "Du hast deine {{limit}} Nachrichten für heute aufgebraucht.",
+    "limit_premium_day": "Du hast heute {{limit}} Nachrichten erreicht — morgen geht es weiter.",
+    "limit_premium_month": "Du hast deine {{limit}} Nachrichten für diesen Monat aufgebraucht."
   },
   "time": {
     "just_now": "gerade eben",
@@ -525,5 +529,34 @@
     "hours_ago": "vor {{n}} Std.",
     "days_ago": "vor {{n}} T.",
     "weeks_ago": "vor {{n}} Wo."
+  },
+  "premium": {
+    "title": "Cheep Premium",
+    "subtitle": "Nutze den KI-Assistenten nahezu unbegrenzt und lass ihn deinen Einkauf planen.",
+    "benefit_1": "300 Assistenten-Nachrichten pro Monat (kostenlos: 5 pro Tag)",
+    "benefit_2": "Aus einem einfachen Satz wird eine Liste — der Assistent findet die Produkte",
+    "benefit_3": "Berechne die günstigste Einkaufsroute so oft du willst",
+    "monthly": "Monatlich",
+    "yearly": "Jährlich",
+    "save_badge": "{{percent}} % sparen",
+    "cta_subscribe": "Premium holen",
+    "cta_restore": "Käufe wiederherstellen",
+    "renew_notice": "Das Abo verlängert sich automatisch. Es verlängert sich zum gleichen Preis, wenn du nicht mindestens 24 Stunden vor Ende des Zeitraums kündigst. Du kannst jederzeit in den Kontoeinstellungen deines Geräts kündigen.",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutzerklärung",
+    "unavailable": "Käufe sind derzeit nicht verfügbar. Bitte versuche es später erneut.",
+    "thanks_title": "Willkommen!",
+    "thanks_body": "Cheep Premium ist aktiv. Viel Freude mit dem Assistenten.",
+    "error_title": "Nicht abgeschlossen",
+    "error_body": "Der Kauf konnte nicht abgeschlossen werden. Du kannst es erneut versuchen.",
+    "restore_title": "Wiederherstellung abgeschlossen",
+    "restore_body": "Vorhandene Käufe dieses Kontos wurden wiederhergestellt.",
+    "active_title": "Premium aktiv",
+    "active_body": "Dein Abo läuft.",
+    "active_renews": "Dein Abo verlängert sich am {{date}}.",
+    "active_until": "Dein Abo läuft bis zum {{date}}.",
+    "profile_row": "Cheep Premium",
+    "profile_row_free": "Hol mehr aus dem Assistenten heraus",
+    "profile_row_active": "Aktiv"
   }
 }

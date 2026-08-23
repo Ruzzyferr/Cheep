@@ -17,7 +17,7 @@ export interface ChatThread {
 }
 
 /**
- * Bir Gemini araç çağrısı. Backend agent-loop her çağrıyı
+ * Bir LLM araç çağrısı. Backend agent-loop her çağrıyı
  * `{ name, args, result }` olarak döndürür (bkz. agent-loop.ts AgentResult).
  */
 export interface ToolCall {
@@ -36,7 +36,13 @@ export interface ChatMessage {
 export interface SendMessageResponse {
   message: string;
   toolCalls: ToolCall[];
+  /** Baglayici pencerede kalan mesaj hakki. */
   remaining?: number;
+  /** Baglayici pencerenin tavani — ucretsizde 5/gun, premiumda 300/ay. */
+  limit?: number;
+  /** Hangi pencere baglayici: gunluk mu aylik mi. */
+  window?: 'day' | 'month';
+  isPremium?: boolean;
 }
 
 // ============================================

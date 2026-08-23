@@ -20,6 +20,7 @@ import i18n, { SUPPORTED_LANGUAGES } from './src/i18n';
 import { LocaleProvider } from './src/context/LocaleContext';
 import { languageStorage } from './src/utils/storage';
 import { AuthProvider } from './src/context/AuthContext';
+import { PremiumProvider } from './src/context/PremiumContext';
 import { LocationProvider } from './src/context/LocationContext';
 import { RootNavigator } from './src/navigation';
 import { colors } from './src/theme';
@@ -79,14 +80,18 @@ export default function App() {
             <I18nextProvider i18n={i18n}>
               <LocaleProvider>
                 <AuthProvider>
-                  <LocationProvider>
+                  {/* Abonelik durumu Auth'un ICINDE: kullanici kimligi olmadan
+                      RevenueCat'e kimlik verilemez ve kota sorgulanamaz. */}
+                  <PremiumProvider>
+                    <LocationProvider>
                     {/* Sürüm kapısı navigasyonu SARAR, yerine geçmez: kullanıcı
                         güncelledikten sonra giriş/sepet/gezinme durumu yerinde
                         kalsın. */}
-                    <UpdateGate>
-                      <RootNavigator />
-                    </UpdateGate>
-                  </LocationProvider>
+                      <UpdateGate>
+                        <RootNavigator />
+                      </UpdateGate>
+                    </LocationProvider>
+                  </PremiumProvider>
                 </AuthProvider>
               </LocaleProvider>
             </I18nextProvider>

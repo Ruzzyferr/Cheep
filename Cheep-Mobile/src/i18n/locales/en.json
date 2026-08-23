@@ -17,7 +17,8 @@
     "generic_error": "Something went wrong",
     "link_failed_title": "Could not open link",
     "link_failed_body": "Please try again later.",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "close": "Close"
   },
   "consent": {
     "location_title": "Process your location? (privacy consent)",
@@ -517,7 +518,10 @@
     "soon_title": "Coming soon",
     "soon_body": "The Premium feature will be available soon.",
     "go_premium": "Go Premium for unlimited use.",
-    "im_cheep": "I'm Cheep"
+    "im_cheep": "I'm Cheep",
+    "limit_free": "You have used your {{limit}} messages for today.",
+    "limit_premium_day": "You have reached {{limit}} messages today — continue tomorrow.",
+    "limit_premium_month": "You have used your {{limit}} messages for this month."
   },
   "time": {
     "just_now": "just now",
@@ -525,5 +529,34 @@
     "hours_ago": "{{n}}h ago",
     "days_ago": "{{n}}d ago",
     "weeks_ago": "{{n}}w ago"
+  },
+  "premium": {
+    "title": "Cheep Premium",
+    "subtitle": "Use the AI assistant almost without limits and let it plan your shopping.",
+    "benefit_1": "300 assistant messages per month (free: 5 per day)",
+    "benefit_2": "Turn a plain sentence into a list — the assistant finds the products",
+    "benefit_3": "Work out the cheapest store route as often as you like",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save_badge": "Save {{percent}}%",
+    "cta_subscribe": "Go Premium",
+    "cta_restore": "Restore purchases",
+    "renew_notice": "The subscription renews automatically. It renews at the same price unless you cancel at least 24 hours before the period ends. You can cancel any time in your device account settings.",
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy",
+    "unavailable": "Purchases are not available right now. Please try again later.",
+    "thanks_title": "Welcome!",
+    "thanks_body": "Cheep Premium is active. Enjoy the assistant.",
+    "error_title": "Could not complete",
+    "error_body": "The purchase could not be completed. You can try again.",
+    "restore_title": "Restore finished",
+    "restore_body": "Any purchases on this account have been restored.",
+    "active_title": "Premium active",
+    "active_body": "Your subscription is running.",
+    "active_renews": "Your subscription renews on {{date}}.",
+    "active_until": "Your subscription is valid until {{date}}.",
+    "profile_row": "Cheep Premium",
+    "profile_row_free": "Get more from the assistant",
+    "profile_row_active": "Active"
   }
 }

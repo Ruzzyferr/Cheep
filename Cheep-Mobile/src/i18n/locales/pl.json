@@ -17,7 +17,8 @@
     "generic_error": "Coś poszło nie tak",
     "link_failed_title": "Nie udało się otworzyć linku",
     "link_failed_body": "Spróbuj ponownie później.",
-    "dismiss": "Anuluj"
+    "dismiss": "Anuluj",
+    "close": "Zamknij"
   },
   "consent": {
     "location_title": "Czy przetwarzać Twoją lokalizację? (zgoda na przetwarzanie danych)",
@@ -517,7 +518,10 @@
     "soon_title": "Wkrótce",
     "soon_body": "Funkcja Premium będzie wkrótce dostępna.",
     "go_premium": "Przejdź na Premium, aby korzystać bez limitu.",
-    "im_cheep": "Jestem Cheep"
+    "im_cheep": "Jestem Cheep",
+    "limit_free": "Wykorzystano dzienny limit {{limit}} wiadomości.",
+    "limit_premium_day": "Osiągnięto dziś {{limit}} wiadomości — wróć jutro.",
+    "limit_premium_month": "Wykorzystano limit {{limit}} wiadomości w tym miesiącu."
   },
   "time": {
     "just_now": "przed chwilą",
@@ -525,5 +529,34 @@
     "hours_ago": "{{n}} godz. temu",
     "days_ago": "{{n}} dni temu",
     "weeks_ago": "{{n}} tyg. temu"
+  },
+  "premium": {
+    "title": "Cheep Premium",
+    "subtitle": "Korzystaj z asystenta AI niemal bez ograniczeń i pozwól mu zaplanować zakupy.",
+    "benefit_1": "300 wiadomości asystenta miesięcznie (za darmo: 5 dziennie)",
+    "benefit_2": "Zamień zwykłe zdanie w listę — asystent sam znajdzie produkty",
+    "benefit_3": "Wyliczaj najtańszą trasę zakupową bez ograniczeń",
+    "monthly": "Miesięcznie",
+    "yearly": "Rocznie",
+    "save_badge": "Oszczędzasz {{percent}}%",
+    "cta_subscribe": "Przejdź na Premium",
+    "cta_restore": "Przywróć zakupy",
+    "renew_notice": "Subskrypcja odnawia się automatycznie. Zostanie odnowiona w tej samej cenie, jeśli nie anulujesz jej co najmniej 24 godziny przed końcem okresu. Możesz anulować w każdej chwili w ustawieniach konta na urządzeniu.",
+    "terms": "Warunki korzystania",
+    "privacy": "Polityka prywatności",
+    "unavailable": "Zakupy są chwilowo niedostępne. Spróbuj ponownie później.",
+    "thanks_title": "Witaj!",
+    "thanks_body": "Cheep Premium jest aktywny. Korzystaj z asystenta do woli.",
+    "error_title": "Nie udało się",
+    "error_body": "Nie udało się dokończyć zakupu. Możesz spróbować ponownie.",
+    "restore_title": "Przywracanie zakończone",
+    "restore_body": "Zakupy powiązane z tym kontem zostały przywrócone.",
+    "active_title": "Premium aktywne",
+    "active_body": "Twoja subskrypcja jest aktywna.",
+    "active_renews": "Twoja subskrypcja odnowi się {{date}}.",
+    "active_until": "Twoja subskrypcja jest ważna do {{date}}.",
+    "profile_row": "Cheep Premium",
+    "profile_row_free": "Wyciągnij więcej z asystenta",
+    "profile_row_active": "Aktywne"
   }
 }

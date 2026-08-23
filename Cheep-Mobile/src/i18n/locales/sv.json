@@ -17,7 +17,8 @@
     "generic_error": "Något gick fel",
     "link_failed_title": "Länken kunde inte öppnas",
     "link_failed_body": "Försök igen senare.",
-    "dismiss": "Avbryt"
+    "dismiss": "Avbryt",
+    "close": "Stäng"
   },
   "consent": {
     "location_title": "Ska din plats behandlas? (samtycke till platsdelning)",
@@ -517,7 +518,10 @@
     "soon_title": "Kommer snart",
     "soon_body": "Premium-funktionen blir tillgänglig snart.",
     "go_premium": "Uppgradera till Premium för obegränsad användning.",
-    "im_cheep": "Jag är Cheep"
+    "im_cheep": "Jag är Cheep",
+    "limit_free": "Du har använt dina {{limit}} meddelanden för i dag.",
+    "limit_premium_day": "Du har nått {{limit}} meddelanden i dag — fortsätt i morgon.",
+    "limit_premium_month": "Du har använt dina {{limit}} meddelanden för den här månaden."
   },
   "time": {
     "just_now": "nyss",
@@ -525,5 +529,34 @@
     "hours_ago": "{{n}} tim sedan",
     "days_ago": "{{n}} d sedan",
     "weeks_ago": "{{n}} v sedan"
+  },
+  "premium": {
+    "title": "Cheep Premium",
+    "subtitle": "Använd AI-assistenten nästan utan gränser och låt den planera dina inköp.",
+    "benefit_1": "300 assistentmeddelanden per månad (gratis: 5 per dag)",
+    "benefit_2": "Gör en vanlig mening till en lista — assistenten hittar varorna",
+    "benefit_3": "Räkna ut den billigaste butiksrundan hur ofta du vill",
+    "monthly": "Månadsvis",
+    "yearly": "Årsvis",
+    "save_badge": "Spara {{percent}} %",
+    "cta_subscribe": "Skaffa Premium",
+    "cta_restore": "Återställ köp",
+    "renew_notice": "Prenumerationen förnyas automatiskt. Den förnyas till samma pris om du inte säger upp den minst 24 timmar innan perioden tar slut. Du kan säga upp när som helst i enhetens kontoinställningar.",
+    "terms": "Användarvillkor",
+    "privacy": "Integritetspolicy",
+    "unavailable": "Köp är inte tillgängliga just nu. Försök igen senare.",
+    "thanks_title": "Välkommen!",
+    "thanks_body": "Cheep Premium är aktivt. Använd assistenten som du vill.",
+    "error_title": "Kunde inte slutföras",
+    "error_body": "Köpet kunde inte slutföras. Du kan försöka igen.",
+    "restore_title": "Återställning klar",
+    "restore_body": "Eventuella köp på det här kontot har återställts.",
+    "active_title": "Premium aktivt",
+    "active_body": "Din prenumeration är aktiv.",
+    "active_renews": "Din prenumeration förnyas den {{date}}.",
+    "active_until": "Din prenumeration gäller till {{date}}.",
+    "profile_row": "Cheep Premium",
+    "profile_row_free": "Få ut mer av assistenten",
+    "profile_row_active": "Aktivt"
   }
 }

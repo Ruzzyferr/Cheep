@@ -1,0 +1,291 @@
+/**
+ * 👑 Cheep Premium — satın alma ekranı
+ *
+ * App Store 3.1.2 ve Play abonelik kuralları ekranda ŞUNLARI zorunlu tutar;
+ * hepsi burada ve hepsi çeviriden gelir:
+ *   • aboneliğin adı ve süresi
+ *   • yerelleştirilmiş fiyat (mağazadan geldiği gibi)
+ *   • otomatik yenileme ve iptal bilgisi
+ *   • "Satın alımları geri yükle"
+ *   • Kullanım Koşulları ve Gizlilik Politikası bağlantıları
+ * Bunlardan biri eksikse inceleme reddedilir — silmeden önce iki kez düşün.
+ */
+
+import React, { useState } from 'react';
+import {
+  View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator, Alert, Linking,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
+import type { PurchasesPackage } from 'react-native-purchases';
+import { usePremium } from '../../context/PremiumContext';
+import { colors, spacing, borderRadius, typography } from '../../theme';
+
+const TERMS_URL = 'https://cheep.live/terms';
+const PRIVACY_URL = 'https://cheep.live/privacy';
+
+/** Yıllık paketin aylığa göre kazandırdığı yüzde — hesaplanamıyorsa null. */
+function savingPercent(monthly?: PurchasesPackage, yearly?: PurchasesPackage): number | null {
+  const m = monthly?.product.price;
+  const y = yearly?.product.price;
+  if (!m || !y || m <= 0) return null;
+  const pct = Math.round((1 - y / (m * 12)) * 100);
+  return pct > 0 ? pct : null;
+}
+
+export function PaywallScreen() {
+  const { t } = useTranslation();
+  const navigation = useNavigation<any>();
+  const { offering, isPremium, status, available, busy, buy, restore } = usePremium();
+  const [selected, setSelected] = useState<'monthly' | 'yearly'>('yearly');
+
+  const monthly = offering?.availablePackages.find((p) => p.packageType === 'MONTHLY');
+  const yearly = offering?.availablePackages.find((p) => p.packageType === 'ANNUAL');
+  const chosen = selected === 'yearly' ? yearly ?? monthly : monthly ?? yearly;
+  const saving = savingPercent(monthly, yearly);
+
+  const onBuy = async () => {
+    if (!chosen) return;
+    try {
+      const ok = await buy(chosen);
+      if (ok) {
+        Alert.alert(t('premium.thanks_title'), t('premium.thanks_body'));
+        navigation.goBack();
+      }
+    } catch {
+      Alert.alert(t('premium.error_title'), t('premium.error_body'));
+    }
+  };
+
+  const onRestore = async () => {
+    try {
+      await restore();
+      // Mesajı nötr tutuyoruz: geri yükleme çalıştı ama bu hesapta satın alma
+      // bulunmamış da olabilir. Sonuç rozetten görülür.
+      Alert.alert(t('premium.restore_title'), t('premium.restore_body'));
+    } catch {
+      Alert.alert(t('premium.error_title'), t('premium.error_body'));
+    }
+  };
+
+  // Zaten abone: satın alma değil, durum ekranı göster.
+  if (isPremium) {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <View style={styles.crown}>
+          <Ionicons name="checkmark-circle" size={44} color={colors.success.main} />
+        </View>
+        <Text style={styles.title}>{t('premium.active_title')}</Text>
+        <Text style={styles.subtitle}>
+          {status?.currentPeriodEnd
+            ? t(status.willRenew ? 'premium.active_renews' : 'premium.active_until', {
+                date: new Date(status.currentPeriodEnd).toLocaleDateString(),
+              })
+            : t('premium.active_body')}
+        </Text>
+        <Pressable style={styles.secondaryBtn} onPress={() => navigation.goBack()}>
+          <Text style={styles.secondaryBtnText}>{t('common.close')}</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.crown}>
+        <Ionicons name="sparkles" size={40} color={colors.accent.main} />
+      </View>
+      <Text style={styles.title}>{t('premium.title')}</Text>
+      <Text style={styles.subtitle}>{t('premium.subtitle')}</Text>
+
+      <View style={styles.benefits}>
+        {['benefit_1', 'benefit_2', 'benefit_3'].map((k) => (
+          <View key={k} style={styles.benefitRow}>
+            <Ionicons name="checkmark-circle" size={20} color={colors.primary.main} />
+            <Text style={styles.benefitText}>{t(`premium.${k}`)}</Text>
+          </View>
+        ))}
+      </View>
+
+      {!available || !offering ? (
+        <View style={styles.unavailable}>
+          <Text style={styles.unavailableText}>{t('premium.unavailable')}</Text>
+        </View>
+      ) : (
+        <>
+          {yearly ? (
+            <PlanCard
+              active={selected === 'yearly'}
+              onPress={() => setSelected('yearly')}
+              label={t('premium.yearly')}
+              price={yearly.product.priceString}
+              note={saving ? t('premium.save_badge', { percent: saving }) : undefined}
+            />
+          ) : null}
+          {monthly ? (
+            <PlanCard
+              active={selected === 'monthly'}
+              onPress={() => setSelected('monthly')}
+              label={t('premium.monthly')}
+              price={monthly.product.priceString}
+            />
+          ) : null}
+
+          <Pressable
+            style={[styles.cta, busy && styles.ctaDisabled]}
+            onPress={onBuy}
+            disabled={busy || !chosen}
+            accessibilityRole="button"
+          >
+            {busy ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.ctaText}>{t('premium.cta_subscribe')}</Text>
+            )}
+          </Pressable>
+
+          {/* Apple ve Google bu bilgilendirmenin ekranda olmasını ister. */}
+          <Text style={styles.renewNotice}>{t('premium.renew_notice')}</Text>
+
+          <Pressable onPress={onRestore} disabled={busy} accessibilityRole="button">
+            <Text style={styles.restore}>{t('premium.cta_restore')}</Text>
+          </Pressable>
+        </>
+      )}
+
+      <View style={styles.legal}>
+        <Pressable onPress={() => Linking.openURL(TERMS_URL)} accessibilityRole="link">
+          <Text style={styles.legalLink}>{t('premium.terms')}</Text>
+        </Pressable>
+        <Text style={styles.legalDot}>·</Text>
+        <Pressable onPress={() => Linking.openURL(PRIVACY_URL)} accessibilityRole="link">
+          <Text style={styles.legalLink}>{t('premium.privacy')}</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
+  );
+}
+
+function PlanCard({
+  active, onPress, label, price, note,
+}: {
+  active: boolean;
+  onPress: () => void;
+  label: string;
+  price: string;
+  note?: string;
+}) {
+  return (
+    <Pressable
+      style={[styles.plan, active && styles.planActive]}
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ selected: active }}
+    >
+      <View style={styles.planLeft}>
+        <Ionicons
+          name={active ? 'radio-button-on' : 'radio-button-off'}
+          size={22}
+          color={active ? colors.primary.main : colors.border.dark}
+        />
+        <View>
+          <Text style={styles.planLabel}>{label}</Text>
+          {note ? <Text style={styles.planNote}>{note}</Text> : null}
+        </View>
+      </View>
+      <Text style={styles.planPrice}>{price}</Text>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    padding: spacing.lg,
+    paddingBottom: spacing['2xl'],
+    backgroundColor: colors.background.default,
+    flexGrow: 1,
+  },
+  crown: { alignSelf: 'center', marginBottom: spacing.md },
+  title: { ...typography.styles.h2, color: colors.text.primary, textAlign: 'center' },
+  subtitle: {
+    ...typography.styles.body2,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+
+  benefits: {
+    backgroundColor: colors.background.paper,
+    borderRadius: borderRadius.lg,
+    padding: spacing.md,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+  },
+  benefitRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  benefitText: { ...typography.styles.body2, color: colors.text.primary, flex: 1 },
+
+  plan: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.background.paper,
+    borderRadius: borderRadius.lg,
+    borderWidth: 2,
+    borderColor: colors.border.light,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  planActive: { borderColor: colors.primary.main },
+  planLeft: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  planLabel: { ...typography.styles.body1, color: colors.text.primary, fontWeight: '600' },
+  planNote: { ...typography.styles.caption, color: colors.success.main },
+  planPrice: { ...typography.styles.body1, color: colors.text.primary, fontWeight: '700' },
+
+  cta: {
+    backgroundColor: colors.primary.main,
+    borderRadius: borderRadius.full,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    marginTop: spacing.md,
+  },
+  ctaDisabled: { opacity: 0.6 },
+  ctaText: { ...typography.styles.button, color: '#FFFFFF' },
+
+  renewNotice: {
+    ...typography.styles.caption,
+    color: colors.text.hint,
+    textAlign: 'center',
+    marginTop: spacing.md,
+    lineHeight: 17,
+  },
+  restore: {
+    ...typography.styles.body2,
+    color: colors.primary.main,
+    textAlign: 'center',
+    marginTop: spacing.md,
+    fontWeight: '600',
+  },
+
+  unavailable: { padding: spacing.md, backgroundColor: colors.warning.bg, borderRadius: borderRadius.md },
+  unavailableText: { ...typography.styles.body2, color: colors.warning.dark, textAlign: 'center' },
+
+  legal: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+  },
+  legalLink: { ...typography.styles.caption, color: colors.text.secondary, textDecorationLine: 'underline' },
+  legalDot: { color: colors.text.hint },
+
+  secondaryBtn: {
+    marginTop: spacing.lg,
+    alignSelf: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  secondaryBtnText: { ...typography.styles.button, color: colors.primary.main },
+});

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cheep",
     "slug": "cheep-mobile",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
@@ -19,7 +19,7 @@
       }
     },
     "android": {
-      "versionCode": 16,
+      "versionCode": 17,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundColor": "#1F6F4A"
@@ -64,6 +64,10 @@
     "extra": {
       "eas": {
         "projectId": "2c82d524-84f5-4b14-8102-862332f5d492"
+      },
+      "revenuecat": {
+        "iosApiKey": "",
+        "androidApiKey": ""
       }
     },
     "owner": "ruzzyferr",

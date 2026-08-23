@@ -14,3 +14,4 @@ export { assistantService } from './assistant.service';
 export { affiliateService } from './affiliate.service';
 export { notificationService } from './notification.service';
 export { supportService } from './support.service';
+export { billingService } from './billing.service';

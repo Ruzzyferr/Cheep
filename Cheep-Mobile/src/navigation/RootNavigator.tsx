@@ -14,6 +14,7 @@ import { AssistantNavigator } from './AssistantNavigator';
 import { VerifyEmailScreen } from '../screens/auth/VerifyEmailScreen';
 import { IntroTourScreen } from '../screens/intro/IntroTourScreen';
 import { SupportScreen } from '../screens/support/SupportScreen';
+import { PaywallScreen } from '../screens/premium/PaywallScreen';
 import { useTranslation } from 'react-i18next';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { colors } from '../theme';
@@ -67,6 +68,11 @@ export function RootNavigator() {
               name="Support"
               component={SupportScreen}
               options={{ headerShown: true, title: t('support.title') }}
+            />
+            <Stack.Screen
+              name="Paywall"
+              component={PaywallScreen}
+              options={{ headerShown: true, title: t('premium.title'), presentation: 'modal' }}
             />
           </>
         )}

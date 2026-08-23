@@ -23,6 +23,9 @@ export type RootStackParamList = {
   // ihtiyacı olan kişi zaten o. Home yığınında kalsaydı yalnızca giriş
   // sonrası erişilebilirdi.
   Support: undefined;
+  // Paywall KOK yiginda ve modal: hem asistan limitinden hem profilden acilir,
+  // hangi sekmede olursak olalim ayni ekrani gostermeli.
+  Paywall: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> =

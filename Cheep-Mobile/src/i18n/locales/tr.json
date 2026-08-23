@@ -17,7 +17,8 @@
     "generic_error": "Bir hata oluştu",
     "link_failed_title": "Bağlantı açılamadı",
     "link_failed_body": "Lütfen daha sonra tekrar deneyin.",
-    "dismiss": "Vazgeç"
+    "dismiss": "Vazgeç",
+    "close": "Kapat"
   },
   "consent": {
     "location_title": "Konumun işlensin mi? (KVKK açık rıza)",
@@ -517,7 +518,10 @@
     "soon_title": "Yakında",
     "soon_body": "Premium özelliği yakında kullanıma açılacak.",
     "go_premium": "Sınırsız için Premium’a geç.",
-    "im_cheep": "Ben Cheep"
+    "im_cheep": "Ben Cheep",
+    "limit_free": "Günlük {{limit}} mesaj hakkın doldu.",
+    "limit_premium_day": "Bugün {{limit}} mesaja ulaştın, yarın devam edebilirsin.",
+    "limit_premium_month": "Bu ayki {{limit}} mesaj hakkın doldu."
   },
   "time": {
     "just_now": "az önce",
@@ -525,5 +529,34 @@
     "hours_ago": "{{n}}sa önce",
     "days_ago": "{{n}}g önce",
     "weeks_ago": "{{n}}hf önce"
+  },
+  "premium": {
+    "title": "Cheep Premium",
+    "subtitle": "Yapay zekâ asistanını neredeyse sınırsız kullan, alışverişini o planlasın.",
+    "benefit_1": "Ayda 300 asistan mesajı (ücretsiz: günde 5)",
+    "benefit_2": "Düz cümleyi listeye çevir — ürünleri asistan bulsun",
+    "benefit_3": "En ucuz market rotasını istediğin kadar hesapla",
+    "monthly": "Aylık",
+    "yearly": "Yıllık",
+    "save_badge": "%{{percent}} tasarruf",
+    "cta_subscribe": "Premium'a geç",
+    "cta_restore": "Satın alımları geri yükle",
+    "renew_notice": "Abonelik otomatik yenilenir. Dönem bitmeden en az 24 saat önce iptal etmezsen aynı ücretle yenilenir. İptali cihazının hesap ayarlarından istediğin an yapabilirsin.",
+    "terms": "Kullanım Koşulları",
+    "privacy": "Gizlilik Politikası",
+    "unavailable": "Satın alma şu anda kullanılamıyor. Lütfen daha sonra tekrar dene.",
+    "thanks_title": "Hoş geldin!",
+    "thanks_body": "Cheep Premium aktif. Asistanı dilediğin gibi kullanabilirsin.",
+    "error_title": "İşlem tamamlanamadı",
+    "error_body": "Satın alma tamamlanamadı. Dilersen tekrar deneyebilirsin.",
+    "restore_title": "Geri yükleme tamamlandı",
+    "restore_body": "Bu hesaba ait satın alma varsa geri yüklendi.",
+    "active_title": "Premium aktif",
+    "active_body": "Aboneliğin sürüyor.",
+    "active_renews": "Aboneliğin {{date}} tarihinde yenilenecek.",
+    "active_until": "Aboneliğin {{date}} tarihine kadar geçerli.",
+    "profile_row": "Cheep Premium",
+    "profile_row_free": "Asistandan daha fazlasını al",
+    "profile_row_active": "Aktif"
   }
 }

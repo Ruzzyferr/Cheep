@@ -1,6 +1,6 @@
 /**
  * ✨ AssistantChatScreen
- * Gemini-powered shopping assistant chat interface
+ * LLM destekli alışveriş asistanı sohbet ekranı
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -31,6 +31,7 @@ import { Float } from '../../components/anim';
 import { colors, spacing, typography, borderRadius } from '../../theme';
 import type { AssistantStackScreenProps } from '../../navigation/types';
 import i18n from '../../i18n';
+import { usePremium } from '../../context/PremiumContext';
 
 // ============================================================
 // Types
@@ -118,7 +119,20 @@ export function AssistantChatScreen({
   const [sending, setSending] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
+  // Tavan ve pencere backend'den gelir: ucretsizde 5/gun, premiumda 300/ay.
+  // Sabit '/5' yazmak premium kullaniciya '258/5' gibi anlamsiz bir rozet gosteriyordu.
+  const [limit, setLimit] = useState<number>(5);
+  const [limitWindow, setLimitWindow] = useState<'day' | 'month'>('day');
   const [limitReached, setLimitReached] = useState(false);
+
+  const { isPremium } = usePremium();
+
+  // Satın alma tamamlanınca banner kendiliğinden kalkmalı: kullanıcı paywall'dan
+  // döndüğünde hâlâ "limitin doldu" görmesi, parasını ödediği şeyin çalışmadığı
+  // izlenimi verir.
+  useEffect(() => {
+    if (isPremium) setLimitReached(false);
+  }, [isPremium]);
 
   // ─── Init: create thread on mount ───────────────────────────
   useEffect(() => {
@@ -203,11 +217,13 @@ export function AssistantChatScreen({
         content: res.message,
       };
 
-      // Update remaining count
+      // Kalan hak + tavan + pencere
       if (typeof res.remaining === 'number') {
         setRemaining(res.remaining);
         if (res.remaining <= 0) setLimitReached(true);
       }
+      if (typeof res.limit === 'number') setLimit(res.limit);
+      if (res.window) setLimitWindow(res.window);
 
       const newMsgs: LocalMessage[] = [assistantMsg];
 
@@ -318,7 +334,7 @@ export function AssistantChatScreen({
         <View style={styles.headerButtons}>
           {/* remaining/5 indicator */}
           {remaining !== null && (
-            <Text style={styles.remainingBadge}>{remaining}/5</Text>
+            <Text style={styles.remainingBadge}>{remaining}/{limit}</Text>
           )}
           {/* 🕘 History — opens ThreadListSheet */}
           <TouchableOpacity
@@ -339,7 +355,7 @@ export function AssistantChatScreen({
         </View>
       ),
     });
-  }, [navigation, handleNewChat, remaining]);
+  }, [navigation, handleNewChat, remaining, limit]);
 
   // ─── Render ──────────────────────────────────────────────────
   return (
@@ -365,14 +381,20 @@ export function AssistantChatScreen({
       {limitReached && (
         <View style={styles.limitBanner}>
           <Text style={styles.limitBannerText}>
-            Günlük 5 mesajlık limitin doldu.{' '}
+            {isPremium
+              ? i18n.t(limitWindow === 'day' ? 'assistant.limit_premium_day' : 'assistant.limit_premium_month', { limit })
+              : i18n.t('assistant.limit_free', { limit })}{' '}
           </Text>
-          <Pressable
-            onPress={() => Alert.alert(i18n.t('assistant.soon_title'), i18n.t('assistant.soon_body'))}
-            accessibilityRole="button"
-          >
-            <Text style={styles.limitBannerLink}>{i18n.t('assistant.go_premium')}</Text>
-          </Pressable>
+          {/* Premium kullaniciya paywall gosterilmez: zaten odedi, yapabilecegi
+              bir sey yok. Yalnizca ucretsiz kullaniciya yukseltme sunuyoruz. */}
+          {!isPremium && (
+            <Pressable
+              onPress={() => navigation.navigate('Paywall' as never)}
+              accessibilityRole="button"
+            >
+              <Text style={styles.limitBannerLink}>{i18n.t('assistant.go_premium')}</Text>
+            </Pressable>
+          )}
         </View>
       )}
       <ChatInputBar

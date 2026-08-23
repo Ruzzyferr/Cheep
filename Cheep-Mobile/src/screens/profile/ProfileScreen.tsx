@@ -23,6 +23,7 @@ import Constants from 'expo-constants';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import { usePremium } from '../../context/PremiumContext';
 import { useLocale, COUNTRY_CONFIG } from '../../context/LocaleContext';
 import { useLocationAnchor } from '../../context/LocationContext';
 import { Card, Button } from '../../components/ui';
@@ -56,6 +57,7 @@ export function ProfileScreen({
 }: ProfileStackScreenProps<'ProfileMain'>) {
   const qc = useQueryClient();
   const { user, logout } = useAuth();
+  const { isPremium } = usePremium();
   const { t } = useTranslation();
   const { country } = useLocale();
   const { anchor, refresh: refreshAnchor } = useLocationAnchor();
@@ -523,6 +525,15 @@ export function ProfileScreen({
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('profile.app_section_title')}</Text>
           <Card padding="none" variant="elevated">
+            {/* Abonelik en ustte: hem satin alma hem "aboneligim ne durumda"
+                sorusunun cevabi ayni yerde olsun. */}
+            <MenuItem
+              icon="workspace-premium"
+              title={t('premium.profile_row')}
+              subtitle={isPremium ? t('premium.profile_row_active') : t('premium.profile_row_free')}
+              onPress={() => (navigation as any).navigate('Paywall')}
+            />
+            <Divider />
             <MenuItem
               icon="translate"
               title={t('profile.language')}
