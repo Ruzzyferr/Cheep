@@ -1,5 +1,5 @@
 import { prisma } from '../../utils/prisma.client.js';
-import { createChatSession } from '../../services/gemini.client.js';
+import { createChatSession } from '../../services/llm.client.js';
 import { toolDeclarations, buildToolExecutor } from './assistant.tools.js';
 import { runAgentLoop } from './agent-loop.js';
 import { getProfile } from '../profile/profile.service.js';
@@ -74,7 +74,7 @@ export function buildSystemPrompt(profile: any, currency: string = 'TRY', langua
 export const sendMessage = async (userId: number, threadId: number, content: string, currency: string = 'TRY', countryId?: number) => {
   await assertOwner(threadId, userId);
 
-  // Günlük limit kontrolü (Gemini çağrısından ÖNCE)
+  // Günlük limit kontrolü (LLM çağrısından ÖNCE)
   const dayStart = startOfTrDay(new Date());
   const [history, profile, todayCount, limitUser] = await Promise.all([
     prisma.chatMessage.findMany({

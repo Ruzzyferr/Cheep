@@ -1,4 +1,4 @@
-import type { ChatSession } from '../../services/gemini.client.js';
+import type { ChatSession } from '../../services/llm.client.js';
 
 export interface AgentResult { text: string; toolCalls: { name: string; args: any; result: any }[] }
 

@@ -14,7 +14,7 @@ router.get('/threads', authenticate, C.list);
 router.get('/threads/:id', authenticate, validateIdParam('id'), C.get);
 router.delete('/threads/:id', authenticate, validateIdParam('id'), C.remove);
 
-// Message endpoint — additionally rate-limited (Gemini free-tier protection)
+// Message endpoint — additionally rate-limited (LLM bütçesini korumak için)
 router.post(
   '/threads/:id/messages',
   authenticate,

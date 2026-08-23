@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { runAgentLoop } from '../src/api/assistant/agent-loop';
-import type { ChatSession, ChatSessionResult } from '../src/services/gemini.client';
+import type { ChatSession, ChatSessionResult } from '../src/services/llm.client';
 
 function fakeSession(script: ChatSessionResult[]): ChatSession {
   let i = 0;
