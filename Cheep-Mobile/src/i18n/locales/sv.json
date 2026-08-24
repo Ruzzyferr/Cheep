@@ -125,6 +125,7 @@
     "stat_lists": "Totala listor",
     "stat_items": "Produkter",
     "preferences_title": "Mina inställningar",
+    "prefs_empty_hint": "Inga preferenser än – tryck för att lägga till",
     "pref_household_size": "Hushållsstorlek",
     "pref_diet": "Matvanor",
     "pref_avoid": "Undviker",

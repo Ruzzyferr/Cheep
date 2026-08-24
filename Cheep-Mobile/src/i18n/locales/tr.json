@@ -125,6 +125,7 @@
     "stat_lists": "Toplam Liste",
     "stat_items": "Ürün",
     "preferences_title": "Tercihlerim",
+    "prefs_empty_hint": "Henüz tercih eklemedin — dokunup ekle",
     "pref_household_size": "Hane büyüklüğü",
     "pref_diet": "Beslenme tarzı",
     "pref_avoid": "Kaçınılanlar",

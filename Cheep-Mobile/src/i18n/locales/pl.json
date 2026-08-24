@@ -125,6 +125,7 @@
     "stat_lists": "Wszystkie listy",
     "stat_items": "Produkty",
     "preferences_title": "Moje preferencje",
+    "prefs_empty_hint": "Brak preferencji — dotknij, aby dodać",
     "pref_household_size": "Wielkość gospodarstwa domowego",
     "pref_diet": "Sposób odżywiania",
     "pref_avoid": "Unikane produkty",

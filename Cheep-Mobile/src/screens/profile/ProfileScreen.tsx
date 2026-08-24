@@ -1,9 +1,27 @@
 /**
  * 👤 Profile Screen
- * User profile, quick stats and settings (premium fintech layout).
+ *
+ * TASARIM NOTU (2026-08 yeniden düzen):
+ * Eskiden ekran üstten aşağı aynı ağırlıkta beyaz kartlardan oluşuyordu; ~180dp
+ * boş beyaz bir başlık, üç beyaz istatistik kutusu, HEP AÇIK duran uzun bir
+ * tercih formu ve en altta birbirinin aynısı iki iri çerçeveli buton
+ * ("Çıkış Yap" / "Hesabımı Sil"). Sonuç: gözün tutunacağı nokta yok, yıkıcı
+ * eylem rutin eylemle aynı ağırlıkta ve ekran bir ayarlar formuna dönüşmüş.
+ *
+ * Yeni sıra ve gerekçeleri:
+ *  1. Koyu yeşil hero başlık — kimlik + istatistik tek bakışta, kutu gürültüsü
+ *     yok, markanın rengi ekranın üstüne hâkim.
+ *  2. Premium kartı — gövdeye inen İLK öğe; ekrandaki tek koyu yüzey olduğu
+ *     için reklam gibi bağırmadan öne çıkar.
+ *  3. Tercihlerim — kapalı, tek satır özetli; DOKUNUNCA YERİNDE açılır. Ayrı
+ *     ekrana taşımadık: bu tercihler (diyet, alerji, bütçe) karşılaştırma
+ *     sonuçlarını doğrudan değiştiriyor, gömülürlerse güncellenmezler.
+ *  4. Uygulama menüsü — rutin ayarlar.
+ *  5. Hesap eylemleri — kutusuz, tipografik; "Hesabımı Sil" daha küçük ve
+ *     kırmızı. Yıkıcı eylem asla birincil buton ağırlığında olmamalı.
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,7 +32,10 @@ import {
   ActivityIndicator,
   Modal,
   Linking,
+  StatusBar,
+  Pressable,
 } from 'react-native';
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg';
 import * as Location from 'expo-location';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,7 +52,7 @@ import { useLocationAnchor } from '../../context/LocationContext';
 import { Card, Button } from '../../components/ui';
 import { LocationSheet } from '../../components/location/LocationSheet';
 import { listService, profileService, userService } from '../../services';
-import { colors, typography, spacing, layout, shadows, borderRadius } from '../../theme';
+import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { ProfileStackScreenProps } from '../../navigation/types';
 import type { UserProfile } from '../../types';
 import { ONBOARDING_QUESTIONS } from '../onboarding/onboardingConfig';
@@ -54,6 +75,11 @@ const ALLERGY_OPTIONS = ONBOARDING_QUESTIONS.find((q) => q.key === 'allergies')!
 
 // Uygulama sürümünü app config'ten oku (hardcode değil); yoksa makul varsayılan.
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
+
+/** Koyu başlık üzerindeki metin tonları. */
+const ON_DARK = '#FFFFFF';
+const ON_DARK_MUTED = 'rgba(255,255,255,0.68)';
+const ON_DARK_RULE = 'rgba(255,255,255,0.18)';
 
 export function ProfileScreen({
   navigation,
@@ -80,6 +106,7 @@ export function ProfileScreen({
   const [locationSheetOpen, setLocationSheetOpen] = useState(false);
 
   // ─── Preferences state ─────────────────────────────────────────────────────
+  const [prefsOpen, setPrefsOpen] = useState(false);
   const [prefLoading, setPrefLoading] = useState(false);
   const [prefSaving, setPrefSaving] = useState(false);
   const [householdSize, setHouseholdSize] = useState<string | undefined>(undefined);
@@ -88,6 +115,25 @@ export function ProfileScreen({
   const [allergies, setAllergies] = useState<string[]>([]);
   const [weeklyBudget, setWeeklyBudget] = useState<string>('');
   const [customAllergy, setCustomAllergy] = useState('');
+  /**
+   * Sunucudan gelen hâlin imzası. "Kaydet" düğmesi ancak bundan saparsak
+   * görünür — eskiden hep ekranda durup asıl eylemlerle (premium, çıkış)
+   * dikkat için yarışıyordu.
+   */
+  const [pristine, setPristine] = useState<string | null>(null);
+
+  const formKey = useMemo(
+    () =>
+      JSON.stringify({
+        householdSize: householdSize ?? null,
+        diet: diet ?? null,
+        avoid: [...avoid].sort(),
+        allergies: [...allergies].sort(),
+        weeklyBudget: weeklyBudget.trim(),
+      }),
+    [householdSize, diet, avoid, allergies, weeklyBudget]
+  );
+  const dirty = pristine !== null && formKey !== pristine;
 
   // ─── KVKK konum açık-rıza durumu ───────────────────────────────────────────
   const [locConsent, setLocConsent] = useState<LocationConsent>(null);
@@ -96,6 +142,18 @@ export function ProfileScreen({
   // Bunu göstermezsek profil "Açık" derken konum özellikleri sessizce çalışmaz.
   const [osLocationGranted, setOsLocationGranted] = useState<boolean | null>(null);
   const [notifGranted, setNotifGranted] = useState<boolean | null>(null);
+
+  /**
+   * Başlık koyu olduğu için durum çubuğu yazıları BEYAZ olmalı. App.tsx global
+   * olarak 'dark-content' veriyor; sekme ekranları unmount olmadığından odak
+   * girip çıkarken elle geri alıyoruz, yoksa diğer sekmeler beyaz yazıyla kalır.
+   */
+  useFocusEffect(
+    useCallback(() => {
+      StatusBar.setBarStyle('light-content');
+      return () => StatusBar.setBarStyle('dark-content');
+    }, [])
+  );
 
   // ─── Load profile + stats on focus ─────────────────────────────────────────
   useFocusEffect(
@@ -135,11 +193,23 @@ export function ProfileScreen({
           const profile = await profileService.getProfile();
           if (!alive) return;
           if (profile) {
+            const nextAvoid = profile.avoid ?? [];
+            const nextAllergies = profile.allergies ?? [];
+            const nextBudget = profile.weekly_budget != null ? String(profile.weekly_budget) : '';
             setHouseholdSize(profile.household_size ?? undefined);
             setDiet(profile.diet ?? undefined);
-            setAvoid(profile.avoid ?? []);
-            setAllergies(profile.allergies ?? []);
-            setWeeklyBudget(profile.weekly_budget != null ? String(profile.weekly_budget) : '');
+            setAvoid(nextAvoid);
+            setAllergies(nextAllergies);
+            setWeeklyBudget(nextBudget);
+            setPristine(
+              JSON.stringify({
+                householdSize: profile.household_size ?? null,
+                diet: profile.diet ?? null,
+                avoid: [...nextAvoid].sort(),
+                allergies: [...nextAllergies].sort(),
+                weeklyBudget: nextBudget.trim(),
+              })
+            );
           }
         } catch {
           /* keep previous values */
@@ -361,6 +431,7 @@ ${t('profile.delete_account_subscription_note')}`
       // uyarıları görmeye devam ediyordu.
       void qc.invalidateQueries({ queryKey: ['products'] });
       void qc.invalidateQueries({ queryKey: ['profile'] });
+      setPristine(formKey); // artık temiz: "Kaydet" tekrar gizlenir
       appAlert(t('profile.prefs_saved_title'), t('profile.prefs_saved_body'));
     } catch {
       appAlert(t('common.error'), t('profile.prefs_save_error'));
@@ -369,21 +440,75 @@ ${t('profile.delete_account_subscription_note')}`
     }
   };
 
+  /**
+   * Kapalı tercih kartındaki tek satır özet. Kullanıcı kartı açmadan neyin
+   * kayıtlı olduğunu görebilsin diye; hiçbir şey seçilmemişse yönlendirici bir
+   * ipucu döner.
+   */
+  const prefSummary = useMemo(() => {
+    const parts: string[] = [];
+    const household = HOUSEHOLD_OPTIONS.find((o) => o.value === householdSize);
+    if (household) parts.push(t(household.label));
+    const dietOpt = DIET_OPTIONS.find((o) => o.value === diet);
+    if (dietOpt) parts.push(t(dietOpt.label));
+    if (allergies.length) {
+      // Katalogdaki seçenekler çevrilir; kullanıcının elle yazdığı olduğu gibi kalır.
+      parts.push(
+        allergies
+          .map((a) => {
+            const known = ALLERGY_OPTIONS.find((o) => o.value === a);
+            return known ? t(known.label) : a;
+          })
+          .join(', ')
+      );
+    }
+    const budget = weeklyBudget.trim();
+    if (budget) parts.push(`${budget} ${currencySymbol}`);
+    return parts.length ? parts.join(' · ') : t('profile.prefs_empty_hint');
+  }, [householdSize, diet, allergies, weeklyBudget, currencySymbol, t]);
+
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* ─── Hero başlık ─────────────────────────────────────────────────── */}
       <View style={[styles.header, { paddingTop: topSpacing }]}>
-        <View style={styles.avatarRing}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {user?.name?.charAt(0).toUpperCase() || '?'}
-            </Text>
+        {/* Düz koyu yeşil yerine çok hafif dikey geçiş: yüzey "boyanmış" değil
+            "aydınlatılmış" duruyor. react-native-svg zaten maskot için var. */}
+        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+          <Defs>
+            {/* Başlık bilerek premium kartından AÇIK: kart ekranın en koyu
+                yüzeyi kalsın, yoksa ikisi birbirine karışıyor. */}
+            <LinearGradient id="profileHero" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0" stopColor={colors.primary.main} />
+              <Stop offset="1" stopColor={colors.primary.dark} />
+            </LinearGradient>
+          </Defs>
+          <Rect x="0" y="0" width="100%" height="100%" fill="url(#profileHero)" />
+        </Svg>
+
+        <View style={styles.identity}>
+          <View style={styles.avatarRing}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>
+                {user?.name?.charAt(0).toUpperCase() || '?'}
+              </Text>
+            </View>
           </View>
-        </View>
-        <Text style={styles.name}>{user?.name}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
-        <View style={styles.badgeRow}>
+          <View style={styles.identityText}>
+            <Text style={styles.name} numberOfLines={1}>{user?.name}</Text>
+            <Text style={styles.email} numberOfLines={1}>{user?.email}</Text>
+          </View>
+          {/* Rozet yalnızca aboneyse çizilir; değilse hiç yer kaplamaz. */}
           <PremiumBadge size="md" />
+        </View>
+
+        {/* İstatistikler başlığın içinde, kutusuz: üç beyaz kart yerine ince
+            dikey çizgiyle ayrılmış üç sütun. */}
+        <View style={styles.statsRow}>
+          <HeroStat value={stats?.active} label={t('profile.stat_active')} />
+          <View style={styles.statRule} />
+          <HeroStat value={stats?.lists} label={t('profile.stat_lists')} />
+          <View style={styles.statRule} />
+          <HeroStat value={stats?.items} label={t('profile.stat_items')} />
         </View>
       </View>
 
@@ -392,166 +517,185 @@ ${t('profile.delete_account_subscription_note')}`
         contentContainerStyle={{ paddingBottom: bottomSpacing }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Abonelik: istatistiklerin hemen ustunde, gormesi kolay yerde. */}
+        {/* Abonelik: gövdenin ilk öğesi — en değerli alan. */}
         <View style={styles.premiumWrap}>
           <PremiumCard onPress={() => (navigation as any).navigate('Paywall')} />
         </View>
 
-        {/* Stats strip */}
-        <View style={styles.statsRow}>
-          <StatTile icon="playlist-add-check" value={stats?.active} label={t('profile.stat_active')} />
-          <StatTile icon="format-list-bulleted" value={stats?.lists} label={t('profile.stat_lists')} />
-          <StatTile icon="shopping-basket" value={stats?.items} label={t('profile.stat_items')} />
-        </View>
-
-        {/* ──────────── Tercihlerim ──────────── */}
+        {/* ──────────── Tercihlerim (kapalı → yerinde açılır) ────────────
+            Üstünde ayrı bir bölüm başlığı YOK: kartın kendi satırı zaten
+            "Tercihlerim" diyor, ikisi birden tekrar okunuyordu. */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.preferences_title')}</Text>
-
-          {prefLoading ? (
-            <View style={styles.loadingWrap}>
-              <ActivityIndicator color={colors.primary.main} />
-            </View>
-          ) : (
-            <Card padding="none" variant="elevated">
-              {/* Hane büyüklüğü */}
-              <View style={styles.prefRow}>
-                <Text style={styles.prefLabel}>{t('profile.pref_household_size')}</Text>
-                <View style={styles.chipRow}>
-                  {HOUSEHOLD_OPTIONS.map((opt) => (
-                    <ChipButton
-                      key={opt.value}
-                      label={t(opt.label)}
-                      selected={householdSize === opt.value}
-                      onPress={() =>
-                        setHouseholdSize(householdSize === opt.value ? undefined : opt.value)
-                      }
-                    />
-                  ))}
-                </View>
+          <Card padding="none" variant="elevated">
+            <Pressable
+              style={styles.prefHeader}
+              onPress={() => setPrefsOpen((v) => !v)}
+              accessibilityRole="button"
+              accessibilityState={{ expanded: prefsOpen }}
+            >
+              <View style={styles.prefHeaderIcon}>
+                <MaterialIcons name="tune" size={20} color={colors.primary.main} />
               </View>
-
-              <Divider />
-
-              {/* Beslenme tarzı */}
-              <View style={styles.prefRow}>
-                <Text style={styles.prefLabel}>{t('profile.pref_diet')}</Text>
-                <View style={styles.chipRow}>
-                  {DIET_OPTIONS.map((opt) => (
-                    <ChipButton
-                      key={opt.value}
-                      label={t(opt.label)}
-                      selected={diet === opt.value}
-                      onPress={() =>
-                        setDiet(diet === opt.value ? undefined : opt.value)
-                      }
-                    />
-                  ))}
-                </View>
+              <View style={styles.prefHeaderText}>
+                <Text style={styles.prefHeaderTitle}>{t('profile.preferences_title')}</Text>
+                <Text style={styles.prefHeaderSummary} numberOfLines={1}>
+                  {prefLoading ? t('profile.saving') : prefSummary}
+                </Text>
               </View>
+              <MaterialIcons
+                name={prefsOpen ? 'expand-less' : 'expand-more'}
+                size={22}
+                color={colors.text.hint}
+              />
+            </Pressable>
 
-              <Divider />
-
-              {/* Kaçınılanlar */}
-              <View style={styles.prefRow}>
-                <Text style={styles.prefLabel}>{t('profile.pref_avoid')}</Text>
-                <View style={styles.chipRow}>
-                  {AVOID_OPTIONS.map((opt) => (
-                    <ChipButton
-                      key={opt.value}
-                      label={t(opt.label)}
-                      selected={avoid.includes(opt.value)}
-                      onPress={() => toggleMulti(avoid, setAvoid, opt.value)}
-                    />
-                  ))}
-                </View>
+            {prefsOpen && (prefLoading ? (
+              <View style={styles.loadingWrap}>
+                <ActivityIndicator color={colors.primary.main} />
               </View>
+            ) : (
+              <>
+                <Divider />
 
-              <Divider />
-
-              {/* Alerji/intolerans */}
-              <View style={styles.prefRow}>
-                <Text style={styles.prefLabel}>{t('profile.pref_allergies')}</Text>
-                <View style={styles.chipRow}>
-                  {ALLERGY_OPTIONS.map((opt) => (
-                    <ChipButton
-                      key={opt.value}
-                      label={t(opt.label)}
-                      selected={allergies.includes(opt.value)}
-                      onPress={() => toggleMulti(allergies, setAllergies, opt.value)}
-                    />
-                  ))}
-                  {/* Custom allergies added by user */}
-                  {allergies
-                    .filter(
-                      (a) => !ALLERGY_OPTIONS.some((opt) => opt.value === a)
-                    )
-                    .map((a) => (
+                {/* Hane büyüklüğü */}
+                <View style={styles.prefRow}>
+                  <Text style={styles.prefLabel}>{t('profile.pref_household_size')}</Text>
+                  <View style={styles.chipRow}>
+                    {HOUSEHOLD_OPTIONS.map((opt) => (
                       <ChipButton
-                        key={a}
-                        label={a}
-                        selected
+                        key={opt.value}
+                        label={t(opt.label)}
+                        selected={householdSize === opt.value}
                         onPress={() =>
-                          setAllergies(allergies.filter((x) => x !== a))
+                          setHouseholdSize(householdSize === opt.value ? undefined : opt.value)
                         }
                       />
                     ))}
+                  </View>
                 </View>
-                {/* Custom allergy input */}
-                <View style={styles.customInputRow}>
+
+                <Divider />
+
+                {/* Beslenme tarzı */}
+                <View style={styles.prefRow}>
+                  <Text style={styles.prefLabel}>{t('profile.pref_diet')}</Text>
+                  <View style={styles.chipRow}>
+                    {DIET_OPTIONS.map((opt) => (
+                      <ChipButton
+                        key={opt.value}
+                        label={t(opt.label)}
+                        selected={diet === opt.value}
+                        onPress={() => setDiet(diet === opt.value ? undefined : opt.value)}
+                      />
+                    ))}
+                  </View>
+                </View>
+
+                <Divider />
+
+                {/* Kaçınılanlar */}
+                <View style={styles.prefRow}>
+                  <Text style={styles.prefLabel}>{t('profile.pref_avoid')}</Text>
+                  <View style={styles.chipRow}>
+                    {AVOID_OPTIONS.map((opt) => (
+                      <ChipButton
+                        key={opt.value}
+                        label={t(opt.label)}
+                        selected={avoid.includes(opt.value)}
+                        onPress={() => toggleMulti(avoid, setAvoid, opt.value)}
+                      />
+                    ))}
+                  </View>
+                </View>
+
+                <Divider />
+
+                {/* Alerji/intolerans */}
+                <View style={styles.prefRow}>
+                  <Text style={styles.prefLabel}>{t('profile.pref_allergies')}</Text>
+                  <View style={styles.chipRow}>
+                    {ALLERGY_OPTIONS.map((opt) => (
+                      <ChipButton
+                        key={opt.value}
+                        label={t(opt.label)}
+                        selected={allergies.includes(opt.value)}
+                        onPress={() => toggleMulti(allergies, setAllergies, opt.value)}
+                      />
+                    ))}
+                    {/* Custom allergies added by user */}
+                    {allergies
+                      .filter((a) => !ALLERGY_OPTIONS.some((opt) => opt.value === a))
+                      .map((a) => (
+                        <ChipButton
+                          key={a}
+                          label={a}
+                          selected
+                          onPress={() => setAllergies(allergies.filter((x) => x !== a))}
+                        />
+                      ))}
+                  </View>
+                  {/* Custom allergy input */}
+                  <View style={styles.customInputRow}>
+                    <TextInput
+                      style={styles.customInput}
+                      placeholder={t('profile.add_allergy_placeholder')}
+                      placeholderTextColor={colors.text.hint}
+                      value={customAllergy}
+                      onChangeText={setCustomAllergy}
+                      onSubmitEditing={handleAddCustomAllergy}
+                      returnKeyType="done"
+                    />
+                    <TouchableOpacity
+                      style={styles.addButton}
+                      onPress={handleAddCustomAllergy}
+                      activeOpacity={0.7}
+                      accessibilityRole="button"
+                      accessibilityLabel={t('profile.add_allergy_placeholder')}
+                    >
+                      <MaterialIcons name="add" size={18} color={colors.background.paper} />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <Divider />
+
+                {/* Haftalık bütçe */}
+                <View style={styles.prefRow}>
+                  <Text style={styles.prefLabel}>
+                    {t('profile.pref_weekly_budget', { symbol: currencySymbol })}
+                  </Text>
                   <TextInput
-                    style={styles.customInput}
-                    placeholder={t('profile.add_allergy_placeholder')}
+                    style={styles.budgetInput}
+                    placeholder={t('profile.weekly_budget_placeholder')}
                     placeholderTextColor={colors.text.hint}
-                    value={customAllergy}
-                    onChangeText={setCustomAllergy}
-                    onSubmitEditing={handleAddCustomAllergy}
+                    value={weeklyBudget}
+                    onChangeText={setWeeklyBudget}
+                    keyboardType="numeric"
                     returnKeyType="done"
                   />
-                  <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={handleAddCustomAllergy}
-                    activeOpacity={0.7}
-                  >
-                    <MaterialIcons name="add" size={18} color={colors.background.paper} />
-                  </TouchableOpacity>
                 </View>
-              </View>
 
-              <Divider />
-
-              {/* Haftalık bütçe */}
-              <View style={styles.prefRow}>
-                <Text style={styles.prefLabel}>{t('profile.pref_weekly_budget', { symbol: currencySymbol })}</Text>
-                <TextInput
-                  style={styles.budgetInput}
-                  placeholder={t('profile.weekly_budget_placeholder')}
-                  placeholderTextColor={colors.text.hint}
-                  value={weeklyBudget}
-                  onChangeText={setWeeklyBudget}
-                  keyboardType="numeric"
-                  returnKeyType="done"
-                />
-              </View>
-
-              {/* Save button */}
-              <View style={styles.saveBtnWrap}>
-                <Button
-                  title={prefSaving ? t('profile.saving') : t('common.save')}
-                  onPress={handleSavePreferences}
-                  fullWidth
-                />
-              </View>
-            </Card>
-          )}
+                {/* Kaydet — yalnızca gerçekten değişiklik varsa. */}
+                {dirty && (
+                  <View style={styles.saveBtnWrap}>
+                    <Button
+                      title={prefSaving ? t('profile.saving') : t('common.save')}
+                      onPress={handleSavePreferences}
+                      loading={prefSaving}
+                      disabled={prefSaving}
+                      fullWidth
+                    />
+                  </View>
+                )}
+              </>
+            ))}
+          </Card>
         </View>
 
-        {/* Account Section — "Profili Düzenle" / "Favori Marketler" için henüz
+        {/* App Section — "Profili Düzenle" / "Favori Marketler" için henüz
             gerçek bir ekran yok (ProfileNavigator'da kayıtlı değil). Kırık
             görünmemeleri için bu menü öğeleri gizlendi; profil düzenleme zaten
             yukarıdaki "Tercihlerim" bölümünden yapılabiliyor. */}
-
-        {/* App Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('profile.app_section_title')}</Text>
           <Card padding="none" variant="elevated">
@@ -625,28 +769,35 @@ ${t('profile.delete_account_subscription_note')}`
           </Card>
         </View>
 
-        {/* Logout */}
-        <View style={styles.section}>
-          <Button
-            title={t('profile.logout_action')}
+        {/* ─── Hesap eylemleri ───────────────────────────────────────────────
+            Kutusuz ve tipografik. "Hesabımı Sil" bilerek daha küçük ve kırmızı:
+            geri alınamaz bir eylem, çıkış yapmakla aynı ağırlıkta durmamalı. */}
+        <View style={styles.accountActions}>
+          <Pressable
             onPress={handleLogout}
-            variant="outline"
-            fullWidth
-          />
-        </View>
+            style={styles.textAction}
+            accessibilityRole="button"
+          >
+            <Text style={styles.logoutText}>{t('profile.logout_action')}</Text>
+          </Pressable>
 
-        {/* Hesap silme - Apple 5.1.1(v) uyarinca uygulama icinden sunulmali */}
-        <View style={styles.section}>
-          <Button
-            title={t('profile.delete_account_action')}
+          <Pressable
             onPress={handleDeleteAccount}
-            variant="outline"
-            fullWidth
-            loading={deletingAccount}
             disabled={deletingAccount}
-          />
-        </View>
+            style={styles.textAction}
+            accessibilityRole="button"
+          >
+            {deletingAccount ? (
+              <ActivityIndicator size="small" color={colors.error.main} />
+            ) : (
+              <Text style={styles.deleteText}>{t('profile.delete_account_action')}</Text>
+            )}
+          </Pressable>
 
+          <Text style={styles.versionLine}>
+            {t('profile.version_subtitle', { version: APP_VERSION })}
+          </Text>
+        </View>
       </ScrollView>
 
       {/* Language picker */}
@@ -668,26 +819,14 @@ ${t('profile.delete_account_subscription_note')}`
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-// Stat tile
-function StatTile({
-  icon,
-  value,
-  label,
-}: {
-  icon: keyof typeof MaterialIcons.glyphMap;
-  /** undefined = henüz yüklenmedi; 0 ile karıştırılmamalı. */
-  value: number | undefined;
-  label: string;
-}) {
+/** Koyu başlık içindeki kutusuz istatistik sütunu. */
+function HeroStat({ value, label }: { value: number | undefined; label: string }) {
   return (
-    <View style={styles.statTile}>
-      <View style={styles.statIcon}>
-        <MaterialIcons name={icon} size={18} color={colors.primary.main} />
-      </View>
-      <Text style={[styles.statValue, value === undefined && styles.statValueLoading]}>
+    <View style={styles.heroStat}>
+      <Text style={[styles.heroStatValue, value === undefined && styles.heroStatLoading]}>
         {value === undefined ? '—' : value}
       </Text>
-      <Text style={styles.statLabel}>{label}</Text>
+      <Text style={styles.heroStatLabel} numberOfLines={1}>{label}</Text>
     </View>
   );
 }
@@ -707,6 +846,8 @@ function ChipButton({
       style={[styles.chip, selected && styles.chipSelected]}
       onPress={onPress}
       activeOpacity={0.7}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked: selected }}
     >
       <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
         {label}
@@ -801,98 +942,98 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.default,
   },
 
+  // ─── Hero başlık ───────────────────────────────────────────────────────────
+
   header: {
-    backgroundColor: colors.background.paper,
-    padding: layout.screenPadding,
-    paddingBottom: spacing.lg,
+    paddingHorizontal: layout.screenPadding,
+    paddingBottom: spacing.md,
+    borderBottomLeftRadius: borderRadius['2xl'],
+    borderBottomRightRadius: borderRadius['2xl'],
+    // Gradient SVG absolute; taşmasın diye kırp.
+    overflow: 'hidden',
+    backgroundColor: colors.primary[900], // SVG yüklenene kadar zemin
+  },
+
+  identity: {
+    flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
+    gap: spacing.md,
   },
 
   avatarRing: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    backgroundColor: colors.primary[50],
+    width: 66,
+    height: 66,
+    borderRadius: 33,
+    backgroundColor: 'rgba(255,255,255,0.12)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.md,
   },
 
   avatar: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: colors.primary.main,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: colors.primary.light,
     justifyContent: 'center',
     alignItems: 'center',
-    ...shadows.fab,
   },
 
   avatarText: {
-    ...typography.styles.h3,
-    color: colors.background.paper,
+    ...typography.styles.h4,
+    color: ON_DARK,
     fontWeight: '700',
   },
 
+  identityText: { flex: 1, gap: 2 },
+
   name: {
     ...typography.styles.h4,
-    color: colors.text.primary,
-    marginBottom: spacing.xs / 2,
+    fontSize: 19,
+    color: ON_DARK,
     fontWeight: '700',
   },
 
   email: {
     ...typography.styles.body2,
-    color: colors.text.secondary,
+    fontSize: 13,
+    color: ON_DARK_MUTED,
+  },
+
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.lg,
+  },
+
+  statRule: {
+    width: 1,
+    height: 28,
+    backgroundColor: ON_DARK_RULE,
+  },
+
+  heroStat: { flex: 1, alignItems: 'center', gap: 2 },
+
+  heroStatValue: {
+    ...typography.styles.h3,
+    fontSize: 21,
+    lineHeight: 26,
+    color: ON_DARK,
+    fontWeight: '700',
+  },
+
+  heroStatLoading: { opacity: 0.45 },
+
+  heroStatLabel: {
+    ...typography.styles.caption,
+    fontSize: 11,
+    color: ON_DARK_MUTED,
   },
 
   content: {
     flex: 1,
   },
 
-  badgeRow: { marginTop: spacing.sm, alignItems: 'center' },
-  premiumWrap: { paddingHorizontal: layout.screenPadding, paddingTop: spacing.md },
-
-  statsRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    paddingHorizontal: layout.screenPadding,
-    paddingTop: spacing.lg,
-  },
-
-  statTile: {
-    flex: 1,
-    backgroundColor: colors.background.card,
-    borderRadius: 16,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    ...shadows.card,
-  },
-
-  statIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: colors.primary[50],
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xs,
-  },
-
-  statValueLoading: { opacity: 0.4 },
-  statValue: {
-    ...typography.styles.h4,
-    color: colors.text.primary,
-    fontWeight: '700',
-  },
-
-  statLabel: {
-    ...typography.styles.caption,
-    color: colors.text.secondary,
-    marginTop: 2,
-  },
+  premiumWrap: { paddingHorizontal: layout.screenPadding, paddingTop: spacing.lg },
 
   section: {
     paddingHorizontal: layout.screenPadding,
@@ -905,7 +1046,37 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
 
-  // ─── Preferences ───────────────────────────────────────────────────────────
+  // ─── Tercihler ─────────────────────────────────────────────────────────────
+
+  prefHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+  },
+
+  prefHeaderIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: colors.primary[50],
+    marginRight: spacing.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  prefHeaderText: { flex: 1 },
+
+  prefHeaderTitle: {
+    ...typography.styles.body1,
+    color: colors.text.primary,
+    fontWeight: '600',
+  },
+
+  prefHeaderSummary: {
+    ...typography.styles.caption,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
 
   loadingWrap: {
     paddingVertical: spacing.xl,
@@ -1036,6 +1207,42 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.border.light,
     marginLeft: spacing.md + 36 + spacing.md,
+  },
+
+  // ─── Hesap eylemleri ───────────────────────────────────────────────────────
+
+  accountActions: {
+    paddingTop: spacing.xl,
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+
+  textAction: {
+    paddingVertical: spacing.sm + 2,
+    paddingHorizontal: spacing.lg,
+    minHeight: 44, // dokunma hedefi
+    justifyContent: 'center',
+  },
+
+  logoutText: {
+    ...typography.styles.subtitle2,
+    fontSize: 15,
+    color: colors.text.secondary,
+    fontWeight: '600',
+  },
+
+  deleteText: {
+    ...typography.styles.caption,
+    fontSize: 13,
+    color: colors.error.main,
+    fontWeight: '500',
+  },
+
+  versionLine: {
+    ...typography.styles.caption,
+    fontSize: 11,
+    color: colors.text.hint,
+    marginTop: spacing.sm,
   },
 
   // ─── Option picker modal ────────────────────────────────────────────────────

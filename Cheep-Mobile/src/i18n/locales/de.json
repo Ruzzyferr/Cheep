@@ -125,6 +125,7 @@
     "stat_lists": "Listen gesamt",
     "stat_items": "Produkte",
     "preferences_title": "Meine Präferenzen",
+    "prefs_empty_hint": "Noch keine Präferenzen – zum Hinzufügen tippen",
     "pref_household_size": "Haushaltsgröße",
     "pref_diet": "Ernährungsweise",
     "pref_avoid": "Vermeidungen",
