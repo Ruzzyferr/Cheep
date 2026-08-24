@@ -5,6 +5,54 @@ import { notFound, conflict } from '../../utils/app-error.js';
 import { normalizeSearchInput, tokenizeSearch, isBarcodeQuery } from './product-search.util.js';
 import { buildProductFilter, type SortMode } from './product-filter.js';
 
+/**
+ * 📐 ALAKA MERDİVENİ — arama sonuçlarının sıralaması.
+ *
+ * Eski hali iki basamaklıydı (ad-öneki + `word_similarity`) ve canlı veride
+ * ÇÖKÜYORDU:
+ *   "peynir"     → "Ülker Çiziviç Peynir Kremalı Sandviç Kraker"  (kraker)
+ *   "zeytinyağı" → "Duru Zeytinyağı Özlü DUŞ SABUNU"              (sabun)
+ *   "yumurta"    → "Ozmo Yumurta Kafalar"                          (şeker)
+ *   "süt"        → yalnızca Sütaş ürünleri (muzlu/çilekli içecekler)
+ *
+ * İki kök neden:
+ *  ① `word_similarity` sorgu bir kelimeyle TAM eşleştiğinde 1.0'da DOYUYOR.
+ *     Kraker de peynir de 1.0 alıyor → sıralama sessizce `store_count`'a
+ *     düşüyor ve en çok markette bulunan ÇÖP kazanıyor.
+ *  ② Önek testi `LIKE 'sut%'` kelime sınırı tanımıyor; "Sütaş…" ile başlayan
+ *     HER ürün "süt" aramasında birinci lige çıkıyor.
+ *
+ * Basamaklar (sırası kanıta dayalı, keyfî değil):
+ *  1. Ad, sorguyla TAM KELİME olarak BAŞLIYOR mu   ("Yumurta Gezen 10 Adet")
+ *  2. Ad, sorguyu TAM KELİME olarak İÇERİYOR mu    ("Sütaş Süzme Peynir")
+ *     — "Peynirli Börek" bu basamağı geçemez; yalnızca önek benzeri.
+ *  3. `word_similarity` — yazım hatası toleransı. Bu basamak olmadan
+ *     "zeytınyagi" hiçbir sonuç bulamaz.
+ *  4. Bütün-ad benzerliğinin KOVASI: sorgu, adın ne kadar büyük bir parçası?
+ *     Uzun çöp adlar ("…Özlü Duş Sabunu 600 Gr") düşük alır. Kova TAVANLI
+ *     (0.30 üstü hepsi eşit) — aksi halde bu SÜREKLİ değer her zaman ilk
+ *     ayrımı yapar ve 1 markette bulunan ürün 2 markettekini geçer; oysa
+ *     karşılaştırılabilirlik uygulamanın var oluş sebebi.
+ *  5. Sonrası çağırana ait: store_count DESC, min_price ASC.
+ *
+ * Kelime sınırı REGEX ile DEĞİL, boşlukla doldurulmuş LIKE ile yazıldı: sorgu
+ * kullanıcı girdisidir ve bir regex metakarakteri (`a([`) `~` operatöründe
+ * "invalid regular expression" ile 500 ürettiği gibi geri-izleme patlamasına
+ * (ReDoS) da açıktır. LIKE'ın metakarakterleri (`%`, `_`) yalnızca eşleşmeyi
+ * gevşetir — ne hata üretir ne tehlike; üstelik aday kümesi WHERE ile zaten
+ * daraltılmış olduğu için etkisi sadece sıralamadır.
+ */
+export function buildRelevanceOrder(nq: string): Prisma.Sql {
+    const nqSql = Prisma.sql`cheep_normalize(${nq})`;
+    const paddedName = Prisma.sql`(' ' || cheep_normalize(p.name) || ' ')`;
+    return Prisma.sql`
+        (${paddedName} LIKE (' ' || ${nqSql} || ' %'))::int DESC,
+        (${paddedName} LIKE ('% ' || ${nqSql} || ' %'))::int DESC,
+        word_similarity(${nqSql}, cheep_normalize(p.name)) DESC,
+        least(floor(similarity(${nqSql}, cheep_normalize(p.name)) / 0.10), 3) DESC,
+    `;
+}
+
 interface GetAllProductsParams {
     category_id?: number;
     /** Website URL'leri slug tabanlı; ülke içinde çözülür. */
@@ -183,11 +231,7 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
             ${barcodeClause}
         )`);
 
-        // Alaka sıralaması: önce prefix eşleşmesi, sonra word_similarity.
-        searchOrder = Prisma.sql`
-            (cheep_normalize(p.name) LIKE cheep_normalize(${nq}) || '%')::int DESC,
-            word_similarity(cheep_normalize(${nq}), cheep_normalize(p.name)) DESC,
-        `;
+        searchOrder = buildRelevanceOrder(nq);
     }
 
     // 🏪 Market filtresi. EXISTS ile: JOIN üzerinden filtrelemek ürünü market

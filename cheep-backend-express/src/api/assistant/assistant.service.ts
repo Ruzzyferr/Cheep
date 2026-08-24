@@ -5,6 +5,7 @@ import { runAgentLoop } from './agent-loop.js';
 import { getProfile } from '../profile/profile.service.js';
 import { checkAssistantLimit, startOfTrDay, startOfTrMonth } from '../../services/assistant-limit.js';
 import { AppError, notFound } from '../../utils/app-error.js';
+import type { ConstraintProfile } from '../../services/product-constraints.js';
 
 /** Modele yollanan azami geçmiş mesaj sayısı (maliyet tavanı). */
 export const HISTORY_LIMIT = 20;
@@ -121,7 +122,31 @@ export const sendMessage = async (userId: number, threadId: number, content: str
     toolDeclarations,
   });
 
-  const result = await runAgentLoop(session, content, buildToolExecutor(userId, countryId), 6);
+  // Profil araç yürütücüsüne geçiriliyor: diyet/alerjen kısıtı artık yalnızca
+  // sistem isteminde bir RİCA değil, ürün seçiminde uygulanan bir KURAL.
+  //
+  // Prisma satırı doğrudan geçilemez: `diet` orada `string | null`, kısıt
+  // arayüzünde `string | undefined`; `avoid`/`allergies` ise şemada `Json`
+  // olduğu için dizi olduğu GARANTİ DEĞİL. Bozuk bir Json değeri değerlendirici
+  // içinde patlamasın diye burada daraltılıyor.
+  const strList = (v: unknown): string[] =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
+  const constraints: ConstraintProfile | null = profile
+    ? {
+        diet: profile.diet ?? undefined,
+        avoid: strList(profile.avoid),
+        allergies: strList(profile.allergies),
+      }
+    : null;
+
+  const lang = limitUser?.language ?? 'tr';
+  const result = await runAgentLoop(
+    session,
+    content,
+    buildToolExecutor(userId, countryId, constraints),
+    8,
+    lang,
+  );
 
   // Persist user message then assistant reply
   await prisma.chatMessage.create({

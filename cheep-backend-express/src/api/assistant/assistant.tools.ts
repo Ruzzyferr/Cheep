@@ -1,6 +1,10 @@
 import * as Lists from '../lists/lists.service.js';
 import * as Products from '../products/products.service.js';
 import { compareShoppingList } from '../../services/compare-engine.service.js';
+import {
+    evaluateProductConstraints,
+    type ConstraintProfile,
+} from '../../services/product-constraints.js';
 
 // ============================================
 // GEMINI FUNCTION DECLARATIONS
@@ -122,19 +126,46 @@ export const toolDeclarations: any[] = [
  * countryId is threaded into every product/route lookup so the assistant never mixes
  * stores/prices across countries — same invariant enforced on the REST routes.
  *
+ * `profile` DİYET KISITINI SUNUCUDA UYGULAMAK İÇİN GEREKLİ. Sistem istemi
+ * modele "NEVER violate hard constraints" diyordu ama bu yalnızca bir RİCAYDI:
+ * `add_items_to_list` katalog aramasının ilk sonucunu körlemesine ekliyordu.
+ * Canlı denemede vejetaryen profilli bir kullanıcının listesine balıklı kraker
+ * eklendi. Uygulamada zaten saf ve test edilmiş bir değerlendirici var
+ * (`evaluateProductConstraints`, ürün rozetlerini de o çiziyor); asistan onu
+ * kullanmıyordu. Artık kullanıyor — kısıt modelin insafına bırakılmıyor.
+ *
+ * Değerlendirici KATEGORİ adına bakar, ürün adına değil: "Kırmızı Et",
+ * "Deniz Ürünleri", "Şarküteri" gibi net vakaları yakalar; balık AROMALI bir
+ * krakeri yakalayamaz. Eksiksiz bir sınıflandırıcı değil, ama modelin tek
+ * başına verdiği karardan kat kat güvenli ve yanlış pozitif üretmiyor.
+ *
  * Shape notes:
  * - getAllProducts returns { products: Product[], pagination: {...} } — we extract .products
  * - removeItemFromList signature: (listId, itemId, userId) — 3 args
  * - get_product_prices uses Products.getProductPrices (not store-prices service)
  */
-export function buildToolExecutor(userId: number, countryId?: number) {
+export function buildToolExecutor(
+  userId: number,
+  countryId?: number,
+  profile?: ConstraintProfile | null,
+) {
+  /** Profil kısıtına takılan ürünleri eler. Profil yoksa hiçbir şey elenmez. */
+  const allowed = (p: any): boolean => {
+    if (!profile) return true;
+    return !evaluateProductConstraints(p?.category?.name ?? null, profile).hidden;
+  };
+
   return async (name: string, args: any): Promise<any> => {
     try {
       switch (name) {
         case 'search_products': {
           // getAllProducts returns { products: [...], pagination: {...} }
-          const result = await Products.getAllProducts({ search: args.query, limit: args.limit ?? 10, countryId });
-          return result.products ?? result;
+          // Kısıt elemesi sonrası istenen sayıda sonuç kalsın diye fazladan çekilir.
+          const want = args.limit ?? 10;
+          const result = await Products.getAllProducts({ search: args.query, limit: want * 3, countryId });
+          const products: any[] = result.products ?? (result as any);
+          if (!Array.isArray(products)) return products;
+          return products.filter(allowed).slice(0, want);
         }
 
         case 'get_user_lists': {
@@ -158,13 +189,26 @@ export function buildToolExecutor(userId: number, countryId?: number) {
           const items = (args.items ?? []).slice(0, 50);
           for (const item of items as any[]) {
             // getAllProducts returns { products: [...], pagination: {...} }
-            const searchResult = await Products.getAllProducts({ search: item.query, limit: 1, countryId });
+            // limit:1 DEĞİL — ilk sonuç kullanıcının diyetine aykırıysa sıradaki
+            // uygun adaya geçebilmek için birkaç aday isteniyor.
+            const searchResult = await Products.getAllProducts({ search: item.query, limit: 8, countryId });
             const products: any[] = searchResult.products ?? (searchResult as any);
             if (!products || products.length === 0) {
-              results.push({ query: item.query, matched: false });
+              results.push({ query: item.query, matched: false, reason: 'not_found' });
               continue;
             }
-            const prod = products[0];
+            const prod = products.find(allowed);
+            if (!prod) {
+              // Modele NEDEN eklenmediği söyleniyor ki kullanıcıya açıklayabilsin
+              // ve aynı ürünü tekrar denemesin.
+              results.push({
+                query: item.query,
+                matched: false,
+                reason: 'diet_conflict',
+                note: `Bulunan ürünler kullanıcının diyetine (${profile?.diet}) uymuyor; eklenmedi.`,
+              });
+              continue;
+            }
             const added = await Lists.addItemToList(args.listId, userId, {
               product_id: prod.id,
               quantity: item.quantity ?? 1,

@@ -172,4 +172,50 @@ else
     report "tls" fail "api.cheep.live TLS sertifikası okunamadı."
 fi
 
+# 8) Zamanlanmış işler ÇÖKMÜŞ mü
+#
+# Bu kontrol, kaçırdığı bir arıza yüzünden eklendi: `cheep-taxonomy.service`
+# dört hafta boyunca her pazar çöktü, tek satır log üretmedi ve kimse fark
+# etmedi — kategori ikizleri o sürede birikti. Nöbetçi container'lara,
+# HTTPS'e, diske ve yedeğe bakıyordu ama systemd'nin KENDİ arıza kaydına
+# bakmıyordu; oysa arızalı birimi sormak tek komut.
+#
+# Birimler tek tek sorulur (topluca "systemctl --failed" yerine): böylece
+# hangi işin bozuk olduğu `report` durumunda ayrı ayrı izlenir ve biri
+# düzelirken diğeri bozuksa uyarı susmaz.
+for unit in cheep-fetcher cheep-fetcher-pl cheep-price-drops cheep-site-build \
+            cheep-taxonomy cheep-backup; do
+    # Oneshot birimler tetiklenmediği sürece "inactive" durur — bu normaldir.
+    # Sadece açıkça "failed" olan durumu arızadır.
+    if [ "$(systemctl is-failed "$unit.service" 2>/dev/null)" = "failed" ]; then
+        when=$(systemctl show "$unit.service" -p ExecMainExitTimestamp --value 2>/dev/null)
+        why=$(journalctl -u "$unit.service" -n 5 --no-pager 2>/dev/null | tail -5)
+        report "unit-$unit" fail "Zamanlanmış iş '$unit.service' ÇÖKTÜ (son: ${when:-bilinmiyor}).
+
+Son log satırları:
+$why"
+    else
+        report "unit-$unit" ok ""
+    fi
+done
+
+# 9) Fiyat verisi bayatladı mı
+#
+# Uygulama, veri donmuş olsa da SAĞLIKLI görünür: /health 200 döner, container
+# ayaktadır, sayfalar açılır — sadece fiyatlar yanlıştır. Kullanıcının gördüğü
+# tek şey budur, o yüzden izlenmesi gereken de budur.
+#
+# Eşik zincir rotasyonuna göre seçildi: TR daemon'ı her ürünü ~7 günde bir
+# tazeliyor, PL zincirleri haftada iki gün dönüyor. 3 gün hiçbir markette TEK
+# bir fiyat güncellenmemişse ingest hattı gerçekten durmuş demektir.
+stale_out=$(docker exec deploy-db-1 psql -U cheep -d cheep_db -tAc \
+    "SELECT count(*) FROM store_prices WHERE last_updated_at > now() - interval '3 days'" 2>/dev/null)
+if [ -z "$stale_out" ]; then
+    report "veri-tazeligi" fail "Fiyat tazeliği sorgulanamadı (veritabanına erişilemedi)."
+elif [ "$stale_out" -gt 0 ] 2>/dev/null; then
+    report "veri-tazeligi" ok ""
+else
+    report "veri-tazeligi" fail "Son 3 GÜNDE hiçbir fiyat güncellenmedi. Ingest hattı (fetch daemon / PL zamanlayıcı) durmuş olabilir — uygulama sağlıklı görünürken bayat fiyat gösteriyor."
+fi
+
 echo "[$(date -Is)] nöbetçi turu tamam"

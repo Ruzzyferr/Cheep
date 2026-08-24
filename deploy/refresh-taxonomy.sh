@@ -37,7 +37,16 @@ cd "$SCRAPER_DIR"
 [ -f venv/bin/activate ] && source venv/bin/activate
 
 # Ham veri yoksa taksonomi türetmek anlamsız — daemon henüz bir şey çekmemiş.
-RAW_COUNT=$(find "$RAW_DIR" -name '*.json' 2>/dev/null | head -1000 | wc -l)
+#
+# ⚠️ `set -o pipefail` BU SATIRDA ALT KABUKTA KAPATILIYOR — sebebi gerçek bir
+# arıza: `head -1000` bininci satırdan sonra boruyu kapatınca `find` SIGPIPE
+# alıp 141 ile ölüyor. `pipefail` bu 141'i borunun sonucu yapıyor, `set -e` de
+# betiği o anda öldürüyor. Ham dosya sayısı 1000'i aştığı günden itibaren
+# (bugün 18.000+) taksonomi tazelemesi HER HAFTA, hiçbir çıktı üretmeden,
+# 49 milisaniyede çöktü; `log` satırına bile varamadığı için log dosyası boş
+# kaldı ve arıza bir ay boyunca fark edilmedi. Kategori ikizleri
+# ("Et, Tavuk ve Balık" + "Et, Tavuk, Balık") bu yüzden birikti.
+RAW_COUNT=$(set +o pipefail; find "$RAW_DIR" -name '*.json' 2>/dev/null | head -1000 | wc -l)
 if [ "$RAW_COUNT" -lt 100 ]; then
   log "ham veri yetersiz ($RAW_COUNT dosya) — taksonomi tazeleme atlandı"
   exit 0
