@@ -60,7 +60,7 @@ interface MarketGroup {
     products: RawProductData[];
 }
 
-interface LLMBatchResponse {
+interface _LLMBatchResponse {
     products: ProcessedProduct[];
 }
 
@@ -291,7 +291,7 @@ class LLMProductMatcher {
         // Aynı ürün farklı marketlerdeyse birleştir
         const matched: ProcessedProduct[] = [];
 
-        for (const [key, group] of productMap.entries()) {
+        for (const group of productMap.values()) {
             if (group.length === 1) {
                 matched.push(group[0]);
             } else {

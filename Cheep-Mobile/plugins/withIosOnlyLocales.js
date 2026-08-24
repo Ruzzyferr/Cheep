@@ -71,7 +71,6 @@ module.exports = function withIosOnlyLocales(config) {
       );
       const touched = cleanAndroidLocaleStrings(resDir);
       for (const line of touched) {
-        // eslint-disable-next-line no-console
         console.log(`[withIosOnlyLocales] ${line}`);
       }
       return cfg;

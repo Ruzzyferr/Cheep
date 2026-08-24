@@ -309,6 +309,22 @@ export async function compareShoppingList(
     // 5. Özet bilgileri oluştur
     const summary = generateSummary(sortedStrategies);
 
+    // 6. `includeMissingProducts: false` → eksik ürün DETAYLARI gövdeden çıkarılır.
+    //
+    // Bu bayrak şemada doğrulanıyor, Swagger'da belgeleniyor, controller'dan
+    // buraya kadar taşınıyor ve yukarıda `includeMissing` değişkenine
+    // atanıyordu — ama HİÇBİR YERDE OKUNMUYORDU. Yani uç, sahip olmadığı bir
+    // yeteneği ilan ediyordu; `false` gönderen istemci sessizce yok sayılıyordu.
+    //
+    // SIRALAMADAN SONRA uygulanıyor: skorlamadaki eksik-ürün cezası
+    // (`missingProducts.length * 5`) ve kapsam yüzdesi bozulmasın. Bayrak
+    // yalnızca ÇIKTIYI etkiler, hangi rotanın kazandığını DEĞİL.
+    if (!includeMissing) {
+        for (const s of sortedStrategies) {
+            s.missingProducts = [];
+        }
+    }
+
     return {
         listId: list.id,
         listName: list.name,
@@ -779,7 +795,6 @@ function sortStrategies(
     // Tüm stratejilerden min/max değerleri bul (normalizasyon için)
     const allPrices = strategies.map(s => s.totalPrice);
     const allDistances = strategies.map(s => s.totalDistance).filter(d => d > 0);
-    const allCoverages = strategies.map(s => s.coveragePercentage);
     
     const minPrice = Math.min(...allPrices);
     const maxPrice = Math.max(...allPrices);

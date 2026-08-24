@@ -158,9 +158,6 @@ export function cleanProductText(name: string, brand?: string): string {
     return words.join(' ');
 }
 
-function normalizeProductName(name: string): string {
-    return cleanProductText(name);
-}
 
 // Yüzde/yağ oranı token'ı: "3,2%" / "3.2 %" (sayı sonra %) VE Türkçe "%3,5"
 // (% önce sayı) biçimlerini yakalar. Ondalık virgül noktaya çevrilir, gereksiz

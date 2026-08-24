@@ -15,7 +15,7 @@ if (!jwtSecretEnv || jwtSecretEnv.length < 32) {
             'JWT_SECRET ortam değişkeni production için zorunludur (min 32 karakter).'
         );
     }
-    // eslint-disable-next-line no-console
+     
     console.warn(
         '⚠️  JWT_SECRET ayarlanmadı veya çok kısa. SADECE development için güvensiz bir default kullanılıyor.'
     );
@@ -34,7 +34,7 @@ if (!jwtRefreshSecretEnv || jwtRefreshSecretEnv.length < 32) {
             'JWT_REFRESH_SECRET ortam değişkeni production için zorunludur (min 32 karakter).'
         );
     }
-    // eslint-disable-next-line no-console
+     
     console.warn(
         '⚠️  JWT_REFRESH_SECRET ayarlanmadı veya çok kısa. SADECE development için güvensiz bir default kullanılıyor.'
     );
@@ -102,7 +102,7 @@ const email = {
 const emailEnabled = Boolean(email.resendApiKey) || smtpEnabled;
 
 if (isProduction && !emailEnabled) {
-    // eslint-disable-next-line no-console
+     
     console.warn(
         '⚠️  E-posta taşıma yok (RESEND_API_KEY veya SMTP_*). Doğrulama kodları gönderilemeyecek.'
     );
@@ -143,7 +143,7 @@ function parseServiceAccount(): FcmServiceAccount | null {
         sa.private_key = sa.private_key.split(String.raw`\n`).join('\n');
         return sa;
     } catch (err) {
-        // eslint-disable-next-line no-console
+         
         console.warn(`⚠️  FCM_SERVICE_ACCOUNT çözümlenemedi (${(err as Error).message}). Push devre dışı.`);
         return null;
     }
@@ -170,7 +170,7 @@ function parseApnsKey(): string | null {
         ? raw.split(String.raw`\n`).join('\n')
         : Buffer.from(raw, 'base64').toString('utf8');
     if (!key.includes('BEGIN PRIVATE KEY')) {
-        // eslint-disable-next-line no-console
+         
         console.warn('⚠️  APNS_KEY çözümlenemedi (PEM değil). iOS push devre dışı.');
         return null;
     }
@@ -203,7 +203,7 @@ const revenuecatEnabled = Boolean(revenuecat.webhookSecret);
 
 if (isProduction && !revenuecatEnabled) {
     // Uygulama ayakta kalsin (abonelik disindaki her sey calisiyor) ama sessizce degil.
-    // eslint-disable-next-line no-console
+     
     console.warn(
         '⚠️  REVENUECAT_WEBHOOK_SECRET yok — abonelik webhook ucu devre disi. Premium haklari guncellenmeyecek.'
     );

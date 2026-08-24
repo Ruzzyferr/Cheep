@@ -10,7 +10,7 @@ export const errorHandler = (
     error: Error,
     req: Request,
     res: Response,
-    next: NextFunction
+    _next: NextFunction
 ) => {
     // Tam hata sadece loglara yazılır; HTTP yanıtında detay/stack sızdırılmaz.
     logger.error(error.stack || error.message || String(error));
@@ -92,7 +92,7 @@ export const errorHandler = (
 export const notFoundHandler = (
     req: Request,
     res: Response,
-    next: NextFunction
+    _next: NextFunction
 ) => {
     res.status(404).json({
         success: false,

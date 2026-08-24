@@ -56,7 +56,7 @@ export const resendVerification = async (req: Request, res: Response, next: Next
     }
 };
 
-export const refresh = async (req: Request, res: Response, next: NextFunction) => {
+export const refresh = async (req: Request, res: Response, _next: NextFunction) => {
     try {
         const { refreshToken } = req.body;
         if (!refreshToken) {

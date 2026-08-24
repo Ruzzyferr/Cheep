@@ -1,5 +1,4 @@
 import Joi from "joi";
-import {upsertStorePriceSchema} from "../store-prices/store-price.schema.js";
 
 export const createStoreSchema = Joi.object({
     name: Joi.string().min(2).max(100).required().messages({

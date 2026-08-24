@@ -85,7 +85,7 @@ export async function runConsumer<T>(opts: ConsumerOptions<T>): Promise<void> {
             }
 
             let attempt = 0;
-            // eslint-disable-next-line no-constant-condition
+             
             while (true) {
                 if (!isRunning() || isStale()) return;
                 try {

@@ -2,9 +2,6 @@ import { prisma } from '../../utils/prisma.client.js';
 import {
     STANDARD_CATEGORIES,
     findStandardCategoryByName,
-    findStandardCategoryBySlug,
-    type StandardCategory,
-    type StandardSubcategory,
 } from '../../config/standard-categories.js';
 
 /**

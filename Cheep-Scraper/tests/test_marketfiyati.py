@@ -11,17 +11,25 @@ from countries.turkey.marketfiyati import (
 
 
 def _product(pid, depots, title="Test Ürün 500 Gr", brand="TestBrand", refined="500 GR",
-             main_category="", menu_category=""):
+             main_category="", menu_category="",
+             image="https://cdn.marketfiyati.org.tr/carrefourimages/x.png"):
     return {
         "id": pid, "title": title, "brand": brand, "refinedVolumeOrWeight": refined,
-        "imageUrl": "https://cdn.marketfiyati.org.tr/carrefourimages/x.png",  # ATLANMALI (telif)
+        "imageUrl": image,
         "main_category": main_category, "menu_category": menu_category,
         "productDepotInfoList": depots,
     }
 
 
-def test_cross_store_key_and_no_image():
-    """Ürün id'si çapraz-mağaza anahtarı (mf-<id>); GÖRSEL ASLA payload'a girmez."""
+def test_cross_store_key_and_official_image():
+    """Ürün id'si çapraz-mağaza anahtarı (mf-<id>); DEVLET CDN'i görseli taşınır.
+
+    NOT — bu test eskiden "görsel ASLA payload'a girmez" diye yazılmıştı ve
+    politika değiştiğinde güncellenmediği için aylarca kırık kaldı. Kural artık
+    şu: görsel yalnızca devletin resmî CDN'inden (cdn.marketfiyati.org.tr)
+    alınır; oradan geldiği için telif sorunu yoktur. Perakendecinin kendi
+    sitesinden görsel çekilmez — o iş bu fonksiyonun kapsamında değil.
+    """
     products = {"2166": _product("2166", [
         {"marketAdi": "migros", "price": 46.95},
         {"marketAdi": "a101", "price": 44.50},
@@ -32,9 +40,30 @@ def test_cross_store_key_and_no_image():
         assert p["ean_barcode"] == "mf-2166"       # çapraz-mağaza birleştirme anahtarı
         assert p["store_sku"] == "mf-2166"
         assert p["source"] == "api"                # dürüst kaynak etiketi
-        assert "image_url" not in p                # RETAILER GÖRSELİ İNGEST EDİLMEZ (telif)
+        assert p["image_url"] == "https://cdn.marketfiyati.org.tr/carrefourimages/x.png"
     stores = {p["store_id"] for p in payloads}
     assert stores == {STORE_MAP["migros"], STORE_MAP["a101"]}
+
+
+def test_missing_or_invalid_image_is_omitted():
+    """Görsel yoksa ya da URL bozuksa alan HİÇ eklenmez — backend doğrulaması
+    boş/geçersiz image_url'i reddediyor, sessizce ingest'i düşürürdü."""
+    for bad in ("", "   ", "ftp://x/y.png", "not-a-url"):
+        products = {"7": _product("7", [{"marketAdi": "bim", "price": 10.0}], image=bad)}
+        payloads = build_price_payloads(products)
+        assert len(payloads) == 1
+        assert "image_url" not in payloads[0], f"bozuk URL taşındı: {bad!r}"
+
+
+def test_image_url_is_percent_encoded():
+    """Devlet CDN'inde boşluklu/Türkçe karakterli yollar var; encode edilmezse
+    hem URI doğrulaması düşer hem de RN Image görseli yükleyemez."""
+    products = {"8": _product("8", [{"marketAdi": "sok", "price": 5.0}],
+                              image="https://cdn.marketfiyati.org.tr/a b/çay ürünü.png")}
+    payloads = build_price_payloads(products)
+    url = payloads[0]["image_url"]
+    assert " " not in url
+    assert url.startswith("https://cdn.marketfiyati.org.tr/")
 
 
 def test_one_price_per_chain_takes_min():

@@ -87,6 +87,11 @@ export function ProductsPage() {
   const [categoriesOpen, setCategoriesOpen] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
 
+  // Market seçimi bir DİZİ; referansı her render'da değişir, o yüzden bağımlılık
+  // dizisine doğrudan konamaz (etki sonsuz döner). Sabit bir anahtara indiriliyor
+  // ve etki bu anahtara bağlanıyor — böylece lint de statik olarak doğrulayabilir.
+  const storesKey = state.stores.join(',')
+
   useEffect(() => {
     if (isPristine) {
       setResult(null)
@@ -108,7 +113,7 @@ export function ProductsPage() {
       {
         search: state.search || undefined,
         categorySlug: state.category ?? undefined,
-        storeSlugs: state.stores,
+        storeSlugs: storesKey ? storesKey.split(',') : [],
         sort: state.sort === 'relevance' ? undefined : state.sort,
         minPrice: state.minPrice ?? undefined,
         maxPrice: state.maxPrice ?? undefined,
@@ -131,9 +136,19 @@ export function ProductsPage() {
       })
 
     return () => controller.abort()
-  }, [locale, isPristine, state.search, state.category, state.stores.join(','), state.sort, state.minPrice, state.maxPrice, state.page, attempt])
+  }, [locale, isPristine, state.search, state.category, storesKey, state.sort, state.minPrice, state.maxPrice, state.page, attempt])
 
   useEffect(() => () => abortRef.current?.abort(), [])
+
+  // ⚠️ AŞAĞIDAKİ ERKEN ÇIKIŞTAN ÖNCE OLMAK ZORUNDA.
+  // Bu `useCallback` eskiden JSX'in içinde, `FilterBar`'ın onSearch prop'unda
+  // çağrılıyordu — yani `if (!initial) return null` satırının ALTINDA. React
+  // hook sırasını render'lar arasında sabit ister: `initial` null iken N hook,
+  // dolu iken N+1 hook çalışıyordu ve `initial` null'dan dolu hâle geçtiği
+  // anda React "Rendered more hooks than during the previous render" ile
+  // ağacı çökertiyordu. oxlint bunu `rules-of-hooks` HATASI olarak
+  // işaretliyordu ama lint hiçbir CI işinde koşmuyordu.
+  const onSearch = useCallback((value: string) => update({ search: value }), [update])
 
   if (!initial) return null
 
@@ -184,7 +199,7 @@ export function ProductsPage() {
         <div className="min-w-0 lg:col-start-2 lg:row-start-1">
           <FilterBar
             search={state.search}
-            onSearch={useCallback((value: string) => update({ search: value }), [update])}
+            onSearch={onSearch}
             stores={stores}
             selectedStores={state.stores}
             onToggleStore={toggleStore}

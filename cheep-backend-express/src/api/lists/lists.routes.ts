@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as ListController from './lists.controller.js';
 import * as ListCompareController from './lists-compare.controller.js';
-import { authenticate, optionalAuthenticate } from '../../middleware/auth.middleware.js';
+import { authenticate } from '../../middleware/auth.middleware.js';
 import { validate } from '../../schema/validation.middleware.js';
 import { validateIdParam } from '../../middleware/validate-id.middleware.js';
 import {

@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
 
+# NEDEN BU KADAR İŞ VAR: bu dosya uzun süre yalnızca backend'i gerçekten
+# koruyordu. Mobilin 76 testi ve scraper'ın 259 testi HİÇ koşmuyordu (mobilde
+# sadece tsc, scraper'da sadece `compileall` söz dizimi kontrolü vardı) ve
+# `cheep-website` için hiçbir iş yoktu — sitenin derlenmemesi ancak gecelik
+# yayın işi düştüğünde fark edilirdi. Kırık bir scraper testi bu yüzden
+# aylarca main'de kaldı.
 jobs:
   backend:
     name: Backend (typecheck + tests)
@@ -25,10 +31,13 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm db:generate
       - run: pnpm typecheck
+      # `lint` script'i vardı ama eslint KURULU DEĞİLDİ; komut çöküyordu ve
+      # CI onu hiç çağırmadığı için backend'de fiilen lint yoktu.
+      - run: pnpm lint
       - run: pnpm test
 
   mobile:
-    name: Mobile (typecheck)
+    name: Mobile (typecheck + lint + tests)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -42,9 +51,33 @@ jobs:
           cache-dependency-path: Cheep-Mobile/package-lock.json
       - run: npm ci
       - run: npx tsc --noEmit
+      # `expo lint` uyarıyla 0 döner; uyarı sayısı sıfıra indirildiği için
+      # --max-warnings 0 ile geri tırmanması engelleniyor.
+      - run: npx eslint . --max-warnings 0
+      - run: npx vitest run
+
+  website:
+    name: Website (typecheck + lint)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cheep-website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: cheep-website/package-lock.json
+      - run: npm ci
+      # Tam `npm run build` prerender adımında canlı API'ye gidiyor; CI'da ağ
+      # bağımlılığı testi kırılgan yapar. Tip kontrolü + lint, kırılmaların
+      # ezici çoğunluğunu ağ olmadan yakalar.
+      - run: npx tsc -b --noEmit
+      - run: npm run lint
 
   scraper:
-    name: Scraper (syntax check)
+    name: Scraper (syntax + tests)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -54,6 +87,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: pip
+          cache-dependency-path: Cheep-Scraper/requirements.txt
       # browser_data ve sanal ortam hariç tüm .py dosyalarını derleyerek söz dizimini doğrula
       - run: |
           python -m compileall -q $(git ls-files '*.py')
+      - run: pip install -r requirements.txt
+      # 259 test; ağ gerektirmiyor (hepsi sahte veriyle çalışıyor).
+      - run: python -m pytest tests -q
