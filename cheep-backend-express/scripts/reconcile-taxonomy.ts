@@ -59,12 +59,21 @@ function loadCanonical(countryId: number): ReconcileOptions {
         tops: Array<{ slug: string; children: Array<{ slug: string }> }>;
     };
     const slugs = new Set<string>();
+    // Alt kategori → ait olduğu ÜST kategori. Birleştirme sonrası yanlış
+    // yerleşimi yakalamak için gerekli (bkz. ReconcileOptions.canonicalParents).
+    const parents = new Map<string, string>();
     for (const top of tax.tops ?? []) {
         slugs.add(top.slug);
-        for (const child of top.children ?? []) slugs.add(child.slug);
+        for (const child of top.children ?? []) {
+            slugs.add(child.slug);
+            parents.set(child.slug, top.slug);
+        }
     }
-    console.log(`   📖 Kanonik taksonomi: ${path} (${slugs.size} slug)`);
-    return { canonicalSlugs: { [countryId]: slugs } };
+    console.log(`   📖 Kanonik taksonomi: ${path} (${slugs.size} slug, ${parents.size} alt→üst bağı)`);
+    return {
+        canonicalSlugs: { [countryId]: slugs },
+        canonicalParents: { [countryId]: parents },
+    };
 }
 
 async function loadNodes(): Promise<OwnedCategory[]> {
@@ -146,9 +155,14 @@ async function main() {
                     (op.reparentChildIds.length > 0 ? ` (+${op.reparentChildIds.length} alt kategori)` : ''),
             );
         } else if (op.kind === 'reparent') {
+            const target = typeof op.toRef === 'number' ? byId.get(op.toRef)?.slug : op.toRef;
+            const why =
+                op.reason === 'canonical-parent'
+                    ? `kanonik ağaçta "${target}" altında olmalı`
+                    : 'parent başka ülkedeydi';
             console.log(
                 `   🧬 [${countryCode.get(op.countryId)}] "${op.slug}" (#${op.categoryId}) ` +
-                    `kendi ülkesinin üst kategorisine bağlanacak (parent başka ülkedeydi)`,
+                    `→ "${target}" altına taşınacak (${why})`,
             );
         } else if (op.kind === 'renameSlug') {
             console.log(

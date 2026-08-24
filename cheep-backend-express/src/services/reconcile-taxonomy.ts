@@ -75,6 +75,11 @@ export type ReconcileOp =
           countryId: number;
           slug: string;
           toRef: CategoryRef;
+          /**
+           * Neden taşınıyor. Rapor iki durumu ayırt etmeli, yoksa kanonik
+           * yerleşim düzeltmesi "parent başka ülkedeydi" diye yanlış anlatılır.
+           */
+          reason: 'cross-country-parent' | 'canonical-parent';
       }
     | {
           /** ASCII olmayan slug'ı URL-güvenli karşılığına çevirir. */
@@ -119,6 +124,23 @@ export interface ReconcileOptions {
      * ikinci sınıf bir ölçüttür; prod çalıştırmasında dosyayı verin.
      */
     canonicalSlugs?: Record<number, Set<string>>;
+
+    /**
+     * Ülke başına ALT KATEGORİ → ÜST KATEGORİ slug eşlemesi (kanonik ağaçtan).
+     *
+     * NEDEN VAR: planlayıcı ikizleri birleştirirken çocukları TOPLUCA hedefe
+     * bağlıyor. Bu, içinde iki farklı konu barındıran bir üst kategoride yanlış
+     * sonuç verdi: "Temizlik ve Kişisel Bakım Ürünleri" → "Kişisel Bakım"
+     * birleşince çamaşır/bulaşık/genel temizlik (1.033 ürün) KİŞİSEL BAKIM
+     * altında kaldı; kullanıcı deterjanı "Kişisel Bakım"da arar oldu.
+     *
+     * Plan bunu "tutarlı" sayıyordu çünkü hiçbir adım alt kategorinin
+     * ebeveyninin kanonik ağaçla uyuşup uyuşmadığına BAKMIYORDU. Artık bakıyor.
+     *
+     * Verilmezse kontrol atlanır — dosyasız çalıştırmada tahmin yürütmek,
+     * doğru yerleşimi bozma riski taşır.
+     */
+    canonicalParents?: Record<number, Map<string, string>>;
 
     /**
      * Yalnızca DETERMİNİSTİK ONARIMLARI planla: ülke ayrıştırma, kırık parent
@@ -354,6 +376,7 @@ export function planReconciliation(
             countryId: node.country_id,
             slug: node.slug,
             toRef: ensureCopy(parent, node.country_id),
+            reason: 'cross-country-parent',
         });
     }
 
@@ -480,6 +503,55 @@ export function planReconciliation(
         .filter((n) => !doomedIds.has(n.id))
         .map((n) => ({ node: n, score: ownCountrySubtreeCount(n, nodes, remaining) }))
         .concat(planned);
+
+    // 4b) KANONİK EBEVEYN KONTROLÜ — alt kategori doğru üstün altında mı?
+    //
+    // Birleştirme adımı bir ikizin çocuklarını TOPLUCA hedefe bağlar. Hedef,
+    // kaynağın yalnızca bir yarısını karşılıyorsa diğer yarı yanlış yere düşer:
+    // "Temizlik ve Kişisel Bakım Ürünleri" → "Kişisel Bakım" birleşmesi
+    // çamaşır/bulaşık/genel temizliği Kişisel Bakım'ın altında bıraktı.
+    // Kanonik ağaç her alt kategorinin hangi üste ait olduğunu zaten biliyor;
+    // burada o bilgi kullanılıyor.
+    if (options.canonicalParents) {
+        // Birleştirmelerden SONRAKİ ebeveyn: bir kategori birleşen bir ikizin
+        // çocuğuysa artık kanonik hedefin altındadır.
+        const effectiveParent = new Map<number, number | null>(
+            nodes.map((n) => [n.id, n.parent_id] as const),
+        );
+        for (const op of ops) {
+            if (op.kind !== 'mergeCategory' || typeof op.toRef !== 'number') continue;
+            for (const childId of op.reparentChildIds) effectiveParent.set(childId, op.toRef);
+        }
+
+        // Hayatta kalan kategoriler, ülke+slug ile aranabilsin.
+        const survivorBySlug = new Map<string, OwnedCategory>();
+        for (const n of nodes) {
+            if (doomedIds.has(n.id)) continue;
+            survivorBySlug.set(key(n.country_id, n.slug), n);
+        }
+
+        for (const n of nodes) {
+            if (doomedIds.has(n.id)) continue;
+            const wantedParentSlug = options.canonicalParents[n.country_id]?.get(n.slug);
+            if (!wantedParentSlug) continue; // kanonik ağaçta yoksa karışma
+
+            const wantedParent = survivorBySlug.get(key(n.country_id, wantedParentSlug));
+            // Hedef üst kategori hayatta değilse taşıyacak yer yok.
+            if (!wantedParent || wantedParent.id === n.id) continue;
+
+            if (effectiveParent.get(n.id) === wantedParent.id) continue; // zaten doğru
+
+            ops.push({
+                kind: 'reparent',
+                categoryId: n.id,
+                countryId: n.country_id,
+                slug: n.slug,
+                toRef: wantedParent.id,
+                reason: 'canonical-parent',
+            });
+            effectiveParent.set(n.id, wantedParent.id);
+        }
+    }
 
     // 5) ASCII olmayan slug'ları URL-güvenli hale getir.
     //
