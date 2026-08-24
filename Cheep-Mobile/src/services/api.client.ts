@@ -9,6 +9,9 @@ import { authStorage, countryStorage } from '../utils/storage';
 import i18n from '../i18n';
 
 // Create axios instance
+// axios 1.19 `create`'i adlandırılmış dışa aktarım olarak da sunuyor; kural
+// bunu görüp uyarıyor ama `axios.create` axios'un KENDİ belgelenmiş kullanımı.
+// eslint-disable-next-line import/no-named-as-default-member
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
