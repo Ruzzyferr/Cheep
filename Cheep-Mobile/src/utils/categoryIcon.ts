@@ -60,7 +60,7 @@ const EXACT: Record<string, string> = {
 
 // Keyword fallback — checked IN ORDER, first hit wins. Ordered so that more
 // specific tokens (pet, bebek) come before broader ones (et) to avoid clashes.
-const KEYWORD_RULES: Array<[string[], string]> = [
+const KEYWORD_RULES: [string[], string][] = [
   [['pet', 'köpek', 'kedi', 'evcil'], 'paw'],
   [['bebek', 'mama', 'çocuk bezi'], 'baby-carriage'],
   [['kozmetik', 'makyaj', 'parfüm'], 'lipstick'],

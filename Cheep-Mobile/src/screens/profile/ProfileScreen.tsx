@@ -93,7 +93,7 @@ export function ProfileScreen({
   // headerShown:false — ust guvenli alani ekran kendisi birakmali.
   const topSpacing = useTopSpacing();
   const { t } = useTranslation();
-  const { country } = useLocale();
+  const { country, formatMoney } = useLocale();
   const { anchor, refresh: refreshAnchor } = useLocationAnchor();
   const currencySymbol = COUNTRY_CONFIG[country]?.symbol ?? COUNTRY_CONFIG.TR.symbol;
   // İstatistikler yüklenene kadar 0/0/0 göstermek "hiç listen yok" gibi
@@ -462,10 +462,14 @@ ${t('profile.delete_account_subscription_note')}`
           .join(', ')
       );
     }
-    const budget = weeklyBudget.trim();
-    if (budget) parts.push(`${budget} ${currencySymbol}`);
+    // Para BİÇİMLENDİRİLEREK yazılır. Ham metin birleştirme "2500 ₺" üretiyordu;
+    // uygulamanın geri kalanı aynı değeri "₺2.500,00" diye gösteriyor. Aynı
+    // ekranda iki farklı para biçimi, özenle yapılmamış izlenimi veriyor —
+    // üstelik binlik ayracı olmayan tutar hızlı okumada yanlış anlaşılıyor.
+    const budgetNum = Number.parseFloat(weeklyBudget.trim().replace(',', '.'));
+    if (Number.isFinite(budgetNum)) parts.push(formatMoney(budgetNum));
     return parts.length ? parts.join(' · ') : t('profile.prefs_empty_hint');
-  }, [householdSize, diet, allergies, weeklyBudget, currencySymbol, t]);
+  }, [householdSize, diet, allergies, weeklyBudget, formatMoney, t]);
 
   return (
     <View style={styles.container}>

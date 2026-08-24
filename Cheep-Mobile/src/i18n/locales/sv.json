@@ -177,7 +177,8 @@
     "category_empty": "Inga produkter hittades i den här kategorin",
     "check_label": "⚠️ kontrollera etikett",
     "diet_mismatch": "matchar inte dina matvanor",
-    "top_three_stores": "3 billigaste butikerna:",
+    "cheapest_stores_one": "Billigaste butiken:",
+    "cheapest_stores_other": "{{count}} billigaste butikerna:",
     "unknown_store": "Okänd butik",
     "target_list": "Läggs till i:",
     "price_history": {
@@ -229,6 +230,7 @@
   },
   "list": {
     "budget_label": "Budget (valfritt)",
+    "budget_display": "Budget",
     "added_to": "Tillagd i {{list}}",
     "item_count": "{{count}} varor",
     "last_compared": "Senast jämförd: {{date}}",

@@ -66,7 +66,7 @@ export function ListCard({ list, onPress, onDelete }: ListCardProps) {
 
       {budget && (
         <View style={styles.budget}>
-          <Text style={styles.budgetLabel}>{t('list.budget_label')}</Text>
+          <Text style={styles.budgetLabel}>{t('list.budget_display')}</Text>
           <Text style={styles.budgetAmount}>{formatMoney(budget)}</Text>
         </View>
       )}

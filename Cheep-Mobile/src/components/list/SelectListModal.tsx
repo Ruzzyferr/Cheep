@@ -69,7 +69,7 @@ export function SelectListModal({
     return () => {
       alive = false;
     };
-  }, [visible]);
+  }, [visible, t]);
 
   const handleSelectList = async (listId: number) => {
     try {
@@ -152,7 +152,7 @@ export function SelectListModal({
                         )}
                         {item.budget && Number.isFinite(parseFloat(item.budget)) && (
                           <Text style={styles.listBudget}>
-                            {t('list.budget_label')} {formatMoney(parseFloat(item.budget))}
+                            {t('list.budget_display')} {formatMoney(parseFloat(item.budget))}
                           </Text>
                         )}
                       </View>

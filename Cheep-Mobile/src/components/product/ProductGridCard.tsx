@@ -72,9 +72,14 @@ export function ProductGridCard({
           {productName}
         </Text>
 
-        {/* Top 3 Prices — sabit konum */}
+        {/* Top 3 Prices — sabit konum.
+            Etiket GERÇEKTEN çizilen satır sayısını söyler. Sabit "En ucuz 3
+            market:" yazıyordu ama ürün tek markette bulunuyorsa altında tek
+            satır çiziliyordu; başlık üç vaat edip bir tane gösteriyordu. */}
         <View style={styles.pricesContainer}>
-          <Text style={styles.pricesLabel}>{t('product.top_three_stores')}</Text>
+          <Text style={styles.pricesLabel}>
+            {t('product.cheapest_stores', { count: Math.min(topThreePrices.length, 3) })}
+          </Text>
           <View style={styles.pricesList}>
             {topThreePrices.slice(0, 3).map((priceInfo, index) => (
               <Text key={index} style={[styles.priceItem, index > 0 && { marginTop: 2 }]} numberOfLines={1}>

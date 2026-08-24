@@ -24,7 +24,7 @@ import { useBottomSpacing, useStickyBottomOffset } from '../../hooks/useScreenSp
 import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
 import { useListDetail, useListMutations } from '../../queries';
-import { RefreshBar } from '../../components/ui';
+import { RefreshBar , Button, ListSkeleton } from '../../components/ui';
 import { ProductThumb } from '../../components/product/ProductThumb';
 import { ListActionsSheet } from '../../components/list/ListActionsSheet';
 import { SelectSourceListModal } from '../../components/list/SelectSourceListModal';
@@ -32,11 +32,10 @@ import { ImportModeModal } from '../../components/list/ImportModeModal';
 import { NameInputModal } from '../../components/list/NameInputModal';
 import { useToast } from '../../context/ToastContext';
 import { useLocale } from '../../context/LocaleContext';
-import { Button, ListSkeleton } from '../../components/ui';
 import { EmptyState } from '../../components/common/EmptyState';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
-import type { ShoppingList, ListItem } from '../../types';
+import type { ListItem } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 import { appAlert } from '../../utils/dialog';
 
@@ -294,7 +293,7 @@ export function ListDetailScreen({
           <Text style={styles.itemCount}>{t('list.item_count', { count: items.length })}</Text>
           {list.budget && (
             <Text style={styles.budget}>
-              {t('list.budget_label')} {formatMoney(parseFloat(list.budget))}
+              {t('list.budget_display')} {formatMoney(parseFloat(list.budget))}
             </Text>
           )}
         </View>

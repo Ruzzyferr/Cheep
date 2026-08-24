@@ -64,7 +64,7 @@ export function SelectSourceListModal({
     return () => {
       alive = false;
     };
-  }, [visible, currentListId]);
+  }, [visible, currentListId, t]);
 
   return (
     <Modal
@@ -113,7 +113,7 @@ export function SelectSourceListModal({
                       )}
                       {item.budget && Number.isFinite(parseFloat(item.budget)) && (
                         <Text style={styles.listBudget}>
-                          {t('list.budget_label')} {formatMoney(parseFloat(item.budget))}
+                          {t('list.budget_display')} {formatMoney(parseFloat(item.budget))}
                         </Text>
                       )}
                     </View>

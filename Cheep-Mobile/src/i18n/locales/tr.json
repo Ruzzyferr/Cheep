@@ -177,7 +177,8 @@
     "category_empty": "Bu kategoride ürün bulunamadı",
     "check_label": "⚠️ etiketi kontrol et",
     "diet_mismatch": "diyetine uymuyor",
-    "top_three_stores": "En ucuz 3 market:",
+    "cheapest_stores_one": "En ucuz market:",
+    "cheapest_stores_other": "En ucuz {{count}} market:",
     "unknown_store": "Bilinmeyen Market",
     "target_list": "Eklenecek liste:",
     "price_history": {
@@ -229,6 +230,7 @@
   },
   "list": {
     "budget_label": "Bütçe (Opsiyonel)",
+    "budget_display": "Bütçe",
     "added_to": "{{list}} listesine eklendi",
     "item_count": "{{count}} ürün",
     "last_compared": "Son karşılaştırma: {{date}}",

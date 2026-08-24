@@ -77,7 +77,7 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
   // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
   const bottomSpacing = useBottomSpacing();
   const { t } = useTranslation();
-  const { country, formatMoney } = useLocale();
+  const { formatMoney } = useLocale();
   // Cache'li sorgu: ülke değişince key değiştiği için veri kendiliğinden
   // yenilenir; canlılık bayrağı (aliveRef) ve elle setState zinciri gerekmez.
   const productsQ = useProductsList({ limit: 200 });

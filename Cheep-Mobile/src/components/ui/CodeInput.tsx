@@ -27,7 +27,7 @@ export function CodeInput({
   autoFocus = true,
   error = false,
 }: CodeInputProps) {
-  const inputs = useRef<Array<TextInput | null>>([]);
+  const inputs = useRef<(TextInput | null)[]>([]);
   const chars = value.split('');
 
   const handleChange = (text: string, index: number) => {

@@ -9,24 +9,21 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
   TouchableOpacity,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { productService, categoryService, affiliateService } from '../../services';
 import { useQuery } from '@tanstack/react-query';
 import { useProduct, useScope, qk, STALE } from '../../queries';
-import { DetailSkeleton, ErrorState } from '../../components/ui';
-import { Card, Button } from '../../components/ui';
+import { DetailSkeleton, ErrorState , Card, Button } from '../../components/ui';
 import { PriceTrendCard } from '../../components/product/PriceTrendCard';
 import { ProductThumb } from '../../components/product/ProductThumb';
 import { SelectListModal } from '../../components/list/SelectListModal';
 import { getStoreTint, getStoreInitial } from '../../utils/storeLogo';
 import { openExternalUrl } from '../../utils/linking';
 import { useLocale } from '../../context/LocaleContext';
-import type { PriceHistoryResponse } from '../../services/product.service';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
-import type { Product, StorePrice } from '../../types';
+import type { StorePrice } from '../../types';
 import type { HomeStackScreenProps } from '../../navigation/types';
 import type { Category } from '../../services/category.service';
 import { useTranslation } from 'react-i18next';
@@ -40,7 +37,7 @@ export function ProductDetailScreen({
   const { productId } = route.params;
   // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
   const bottomSpacing = useBottomSpacing();
-  const { country, formatMoney } = useLocale();
+  const { formatMoney } = useLocale();
   const scope = useScope();
   const [openingStore, setOpeningStore] = useState(false);
   const [showListModal, setShowListModal] = useState(false);

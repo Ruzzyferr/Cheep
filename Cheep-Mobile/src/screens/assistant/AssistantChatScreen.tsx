@@ -30,9 +30,8 @@ import { colors, spacing, typography, borderRadius } from '../../theme';
 import type { AssistantStackScreenProps } from '../../navigation/types';
 import i18n from '../../i18n';
 import { usePremium } from '../../context/PremiumContext';
-import { showDialog } from '../../utils/dialog';
+import { showDialog , appAlert } from '../../utils/dialog';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
-import { appAlert } from '../../utils/dialog';
 
 // ============================================================
 // Types
@@ -305,7 +304,7 @@ export function AssistantChatScreen({
       setSending(false);
       setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
     }
-  }, [inputValue, threadId, sending, limitReached]);
+  }, [inputValue, threadId, sending, limitReached, qc]);
 
   // ─── Suggestion chip press ───────────────────────────────────
   const handleSuggestion = useCallback((text: string) => {

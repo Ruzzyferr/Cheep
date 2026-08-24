@@ -177,7 +177,8 @@
     "category_empty": "Nie znaleziono produktów w tej kategorii",
     "check_label": "⚠️ sprawdź etykietę",
     "diet_mismatch": "nie pasuje do Twojej diety",
-    "top_three_stores": "3 najtańsze sklepy:",
+    "cheapest_stores_one": "Najtańszy sklep:",
+    "cheapest_stores_other": "{{count}} najtańsze sklepy:",
     "unknown_store": "Nieznany sklep",
     "target_list": "Dodawane do:",
     "price_history": {
@@ -229,6 +230,7 @@
   },
   "list": {
     "budget_label": "Budżet (opcjonalnie)",
+    "budget_display": "Budżet",
     "added_to": "Dodano do {{list}}",
     "item_count": "{{count}} produktów",
     "last_compared": "Ostatnie porównanie: {{date}}",

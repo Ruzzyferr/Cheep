@@ -44,7 +44,7 @@ export function useProductsInfinite(params: ProductListParams) {
 
 /** Sayfaları düz bir ürün dizisine indirger ve tekilleştirir. */
 export function flattenProducts(
-    pages: Array<{ items: Product[] }> | undefined,
+    pages: { items: Product[] }[] | undefined,
 ): Product[] {
     if (!pages) return [];
     const seen = new Set<number>();

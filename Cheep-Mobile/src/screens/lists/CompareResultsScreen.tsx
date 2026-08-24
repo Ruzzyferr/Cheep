@@ -23,7 +23,7 @@ import { shadows } from '../../theme/shadows';
 import { compareInsights, rankStrategies, missingCount } from '../../utils/compareInsights';
 import { useLocationAnchor } from '../../context/LocationContext';
 import { shouldFilterByDistance, RADIUS_OPTIONS, DEFAULT_RADIUS_KM } from '../../utils/anchor';
-import type { CompareResponse, RouteStrategy } from '../../types';
+import type { RouteStrategy } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
 import { appAlert } from '../../utils/dialog';
@@ -408,7 +408,7 @@ export function CompareResultsScreen({
           </View>
           {results.budget && (
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>{t('list.budget_label')}</Text>
+              <Text style={styles.summaryLabel}>{t('list.budget_display')}</Text>
               <Text style={styles.summaryValue}>
                 {formatMoney(parseFloat(results.budget.toString()))}
               </Text>

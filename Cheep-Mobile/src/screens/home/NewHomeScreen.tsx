@@ -13,15 +13,13 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons , MaterialCommunityIcons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
-import { listService } from '../../services';
 import {
   useActiveList,
   useCompareList,
-  useLists,
   useParentCategories,
   useProductsList,
   useStores,
@@ -43,7 +41,6 @@ import { getCategoryIcon } from '../../utils/categoryIcon';
 import { compareInsights, rankStrategies } from '../../utils/compareInsights';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { Product } from '../../types';
 import type { HomeStackScreenProps } from '../../navigation/types';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
@@ -385,7 +382,13 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
                     color={colors.primary.main}
                   />
                 </View>
-                <Text style={styles.catName} numberOfLines={1}>
+                {/* İKİ SATIR: kategori adlarının çoğu tek satıra sığmıyor.
+                    Devletin kanonik ağacındaki adlar uzun ("Süt Ürünleri ve
+                    Kahvaltılık", "Atıştırmalık ve Tatlı") ve tek satırda
+                    "Süt Ürünleri …" diye kırpılıyordu — yan yana duran üç
+                    kategori aynı görünüyor, kullanıcı hangisi olduğunu
+                    ayırt edemiyordu. */}
+                <Text style={styles.catName} numberOfLines={2}>
                   {c.name}
                 </Text>
               </PressableScale>
@@ -678,7 +681,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border.light,
   },
-  catName: { ...typography.styles.caption, color: colors.text.secondary, textAlign: 'center' },
+  // height SABİT (2 satır × 16 lineHeight): tek satırlık ve iki satırlık adlar
+  // yan yana durduğunda şerit dişli görünmesin, tüm kartlar aynı yükseklikte
+  // kalsın.
+  catName: {
+    ...typography.styles.caption,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    height: 32,
+  },
 
   // Deal rail
   dealRail: { paddingHorizontal: layout.screenPadding, gap: spacing.md, paddingRight: spacing.xl },
