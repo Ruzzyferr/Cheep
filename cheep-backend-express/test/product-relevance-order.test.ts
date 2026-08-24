@@ -12,17 +12,25 @@ import { buildRelevanceOrder } from '../src/api/products/products.service.js';
 describe('buildRelevanceOrder', () => {
     const sqlText = (q: string) => buildRelevanceOrder(q).sql.replace(/\s+/g, ' ').trim();
 
-    it('dört basamağı da bu sırayla üretir: kelime-başı → kelime-içi → word_similarity → benzerlik kovası', () => {
+    it('dört basamağı da bu sırayla üretir: kelime-içi → word_similarity → benzerlik kovası → kelime-başı', () => {
         const s = sqlText('peynir');
-        const basIdx = s.indexOf("LIKE (' ' ||");
         const kelimeIdx = s.indexOf("LIKE ('% ' ||");
         const wsimIdx = s.indexOf('word_similarity');
         const kovaIdx = s.indexOf('least(floor(similarity');
+        const basIdx = s.indexOf("LIKE (' ' ||");
 
-        expect(basIdx).toBeGreaterThanOrEqual(0);
-        expect(kelimeIdx).toBeGreaterThan(basIdx);
+        expect(kelimeIdx).toBeGreaterThanOrEqual(0);
         expect(wsimIdx).toBeGreaterThan(kelimeIdx);
         expect(kovaIdx).toBeGreaterThan(wsimIdx);
+        expect(basIdx).toBeGreaterThan(kovaIdx);
+    });
+
+    it('kelime-BAŞI bonusu benzerlik kovasından SONRA gelir', () => {
+        // Kovadan önce gelirse adı sorguyla başlayan ama ürünü BAŞKA olan
+        // kayıtlar öne çıkıyor: "Peynir Dolgulu Biber Çeşitleri" (Hazır
+        // Yemekler) gerçek peynirlerin önüne geçiyordu.
+        const s = sqlText('peynir');
+        expect(s.indexOf("LIKE (' ' ||")).toBeGreaterThan(s.indexOf('least(floor(similarity'));
     });
 
     it('kelime sınırı REGEX ile değil boşluk dolgulu LIKE ile kurulur (ReDoS / 500 riski)', () => {

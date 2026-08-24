@@ -23,16 +23,21 @@ import { buildProductFilter, type SortMode } from './product-filter.js';
  *     HER ürün "süt" aramasında birinci lige çıkıyor.
  *
  * Basamaklar (sırası kanıta dayalı, keyfî değil):
- *  1. Ad, sorguyla TAM KELİME olarak BAŞLIYOR mu   ("Yumurta Gezen 10 Adet")
- *  2. Ad, sorguyu TAM KELİME olarak İÇERİYOR mu    ("Sütaş Süzme Peynir")
+ *  1. Ad, sorguyu TAM KELİME olarak İÇERİYOR mu    ("Sütaş Süzme Peynir")
  *     — "Peynirli Börek" bu basamağı geçemez; yalnızca önek benzeri.
- *  3. `word_similarity` — yazım hatası toleransı. Bu basamak olmadan
+ *  2. `word_similarity` — yazım hatası toleransı. Bu basamak olmadan
  *     "zeytınyagi" hiçbir sonuç bulamaz.
- *  4. Bütün-ad benzerliğinin KOVASI: sorgu, adın ne kadar büyük bir parçası?
+ *  3. Bütün-ad benzerliğinin KOVASI: sorgu, adın ne kadar büyük bir parçası?
  *     Uzun çöp adlar ("…Özlü Duş Sabunu 600 Gr") düşük alır. Kova TAVANLI
  *     (0.30 üstü hepsi eşit) — aksi halde bu SÜREKLİ değer her zaman ilk
  *     ayrımı yapar ve 1 markette bulunan ürün 2 markettekini geçer; oysa
  *     karşılaştırılabilirlik uygulamanın var oluş sebebi.
+ *  4. Ad, sorguyla TAM KELİME olarak BAŞLIYOR mu   ("Yumurta Gezen 10 Adet")
+ *     — KOVADAN SONRA geliyor, çünkü önce dener gibi kovadan önce konunca
+ *     "Peynir Dolgulu Biber Çeşitleri" (kategori: Hazır Yemekler) gerçek
+ *     peynirlerin önüne geçiyordu: adı "peynir" ile başlıyor ama peynir
+ *     değil. Kova onu dibe iter; aynı kovadaki adaylar arasında bu basamak
+ *     hâlâ karar verir ("Yumurta …" ürünleri "Ozmo Yumurta"nın önünde kalır).
  *  5. Sonrası çağırana ait: store_count DESC, min_price ASC.
  *
  * Kelime sınırı REGEX ile DEĞİL, boşlukla doldurulmuş LIKE ile yazıldı: sorgu
@@ -46,10 +51,10 @@ export function buildRelevanceOrder(nq: string): Prisma.Sql {
     const nqSql = Prisma.sql`cheep_normalize(${nq})`;
     const paddedName = Prisma.sql`(' ' || cheep_normalize(p.name) || ' ')`;
     return Prisma.sql`
-        (${paddedName} LIKE (' ' || ${nqSql} || ' %'))::int DESC,
         (${paddedName} LIKE ('% ' || ${nqSql} || ' %'))::int DESC,
         word_similarity(${nqSql}, cheep_normalize(p.name)) DESC,
         least(floor(similarity(${nqSql}, cheep_normalize(p.name)) / 0.10), 3) DESC,
+        (${paddedName} LIKE (' ' || ${nqSql} || ' %'))::int DESC,
     `;
 }
 
