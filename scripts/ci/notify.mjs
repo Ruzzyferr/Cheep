@@ -51,6 +51,9 @@ const p = {
     buildNumber: env('BUILD'),
     track: env('TRACK'),
     notes: env('NOTES'),
+    // Sürümü engellemeyen ama gözden kaçmaması gereken uyarı (ör. Apple
+    // sertifikası yakında doluyor). Koşu kaydında kalsa kimse görmez.
+    uyari: env('UYARI'),
     sha: env('SHA'),
     commitMsg: env('COMMIT_MSG').split('\n')[0],
     runUrl: env('RUN_URL'),
@@ -151,6 +154,11 @@ if (genel === 'success' && surumHatti) {
     satirlar.push(kismiMetin);
 }
 
+if (p.uyari) {
+    satirlar.push('');
+    satirlar.push(`⚠ DİKKAT: ${p.uyari}`);
+}
+
 if (p.notes) {
     satirlar.push('');
     satirlar.push('Sürüm notları:');
@@ -197,6 +205,8 @@ const html = `<!doctype html>
     Hat üretime kendiliğinden çıkmaz.</p>` : ''}
   ${genel === 'failure' ? `<p style="margin:0 0 20px;padding:12px 14px;background:#fef2f2;border-left:3px solid #b91c1c;font-size:13px;">
     ${esc(kismiMetin)}</p>` : ''}
+  ${p.uyari ? `<p style="margin:0 0 20px;padding:12px 14px;background:#fffbeb;border-left:3px solid #b45309;font-size:13px;">
+    <b>Dikkat:</b> ${esc(p.uyari)}</p>` : ''}
   ${p.notes ? `<p style="margin:0 0 6px;color:#6b7280;font-size:13px;">Sürüm notları</p>
   <pre style="margin:0 0 20px;padding:12px 14px;background:#f9fafb;border-radius:6px;font-size:13px;white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;">${esc(p.notes)}</pre>` : ''}
   <p style="margin:0;font-size:13px;color:#6b7280;">

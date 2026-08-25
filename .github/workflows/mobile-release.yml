@@ -55,6 +55,7 @@ jobs:
       build_number: ${{ steps.ver.outputs.build_number }}
       app_version: ${{ steps.app.outputs.app_version }}
       notes: ${{ steps.notes.outputs.notes }}
+      kimlik_uyarisi: ${{ steps.kimlik.outputs.uyari }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -77,6 +78,17 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
         run: node scripts/ci/next-version.mjs both
+
+      - name: Apple imzalama kimlikleri ne zaman doluyor
+        id: kimlik
+        # Sertifika ve profil süreli; dolduğu gün iOS derlemesi kırılır ve o
+        # ana kadar hiçbir şey uyarmaz. Yenileme elle yapılan bir iş, o yüzden
+        # 45 gün önceden haber veriliyor. Bu adım derlemeyi ASLA düşürmez.
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: node scripts/ci/check-credentials.mjs
 
       - name: Sürüm notlarını üret
         id: notes
@@ -417,6 +429,7 @@ jobs:
           NOTIFY_BUILD: ${{ needs.hazirlik.outputs.build_number }}
           NOTIFY_TRACK: ${{ inputs.android_track || 'alpha' }}
           NOTIFY_NOTES: ${{ needs.hazirlik.outputs.notes }}
+          NOTIFY_UYARI: ${{ needs.hazirlik.outputs.kimlik_uyarisi }}
           NOTIFY_SHA: ${{ github.sha }}
           NOTIFY_COMMIT_MSG: ${{ github.event.head_commit.message || '(elle tetiklendi)' }}
           NOTIFY_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
