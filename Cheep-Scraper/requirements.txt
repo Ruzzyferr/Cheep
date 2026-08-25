@@ -12,7 +12,7 @@ beautifulsoup4==4.12.0
 lxml>=5.1.0  # BeautifulSoup için parser (py3.12 wheel)
 
 # Scalable LLM Matcher için
-numpy>=1.26.0  # Cosine similarity hesaplamaları için (py3.12 wheel)
+numpy>=2.5.2  # Cosine similarity hesaplamaları için (py3.12 wheel)
 python-dotenv==1.2.3  # .env dosyası desteği için
 
 # Kafka producer (INGEST_MODE=kafka) — raw.products.v1'e Avro üretimi
