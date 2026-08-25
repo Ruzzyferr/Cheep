@@ -4,6 +4,7 @@
  */
 
 import apiClient from './api.client';
+import { ASSISTANT_TIMEOUT } from '../constants/api';
 import type { ApiResponse } from '../types';
 
 // ============================================
@@ -95,9 +96,14 @@ export const assistantService = {
     content: string
   ): Promise<SendMessageResponse> {
     try {
+      // Araç çağıran mesajlar üretimde 13–34 sn sürüyor; ortak 10 sn'lik
+      // zaman aşımı bunları sistematik olarak düşürüyordu (bkz.
+      // ASSISTANT_TIMEOUT). Sunucu isteği tamamladığı için kullanıcı hem
+      // hata görüyor hem günlük kotasından oluyordu.
       const response = await apiClient.post<ApiResponse<SendMessageResponse>>(
         `/assistant/threads/${id}/messages`,
-        { content }
+        { content },
+        { timeout: ASSISTANT_TIMEOUT }
       );
       return response.data.data!;
     } catch (e: any) {

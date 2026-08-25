@@ -119,8 +119,25 @@ export const API_ENDPOINTS = {
   },
 } as const;
 
-// Request timeout
-export const API_TIMEOUT = 10000; // 10 seconds
+// Request timeout — sıradan REST çağrıları için.
+export const API_TIMEOUT = 10000; // 10 saniye
+
+/**
+ * ASİSTAN mesajları için ayrı, çok daha uzun zaman aşımı.
+ *
+ * NEDEN AYRI: asistan bir REST çağrısı değil, araç çağıran bir LLM döngüsü —
+ * model çağrısı + katalog sorgusu + listeye yazma + ikinci model çağrısı.
+ * Üretimde gerçek kullanıcı mesajlarıyla ÖLÇÜLEN süreler: 33,8 sn / 25,4 sn /
+ * 18,0 sn / 12,9 sn. Yani 10 saniyelik ortak zaman aşımıyla, asistanın
+ * GERÇEKTEN İŞ YAPAN mesajları (araç çağıranlar) istemcide sistematik olarak
+ * düşüyordu: kullanıcı hata görüyor, oysa sunucu isteği tamamlıyor ve
+ * günlük kotadan (ücretsizde 5/gün) bir mesaj eksiliyordu. Ücretli katman
+ * TAM OLARAK bu kotayı sattığı için hata doğrudan gelire dokunuyor.
+ *
+ * 90 sn, ölçülen en kötü sürenin (33,8 sn) yaklaşık 2,5 katı — model yavaş
+ * olduğunda değil, GERÇEKTEN takıldığında düşsün diye.
+ */
+export const ASSISTANT_TIMEOUT = 90000; // 90 saniye
 
 // Retry configuration
 export const API_RETRY_CONFIG = {
