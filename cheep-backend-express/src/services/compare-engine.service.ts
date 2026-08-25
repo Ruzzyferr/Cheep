@@ -304,10 +304,19 @@ export async function compareShoppingList(
     const alternatives = await findAlternativeProducts(listItems, options.countryId);
 
     // 4. Stratejileri sırala ve skorla
-    const sortedStrategies = sortStrategies(strategies, options.favoriteStoreIds || []);
+    //
+    // Eksik ürünlerin "başka yerden alınsa ne tutardı" fiyatı olmadan farklı
+    // kapsamdaki sepetler kıyaslanamaz (bkz. imputedTotal). Bu harita hem
+    // sıralamada hem özette kullanılıyor ki ikisi aynı gerçeği anlatsın.
+    const cheapestUnitPrices = buildCheapestUnitPrices(listItems, itemOptions);
+    const sortedStrategies = sortStrategies(
+        strategies,
+        options.favoriteStoreIds || [],
+        cheapestUnitPrices
+    );
 
     // 5. Özet bilgileri oluştur
-    const summary = generateSummary(sortedStrategies);
+    const summary = generateSummary(sortedStrategies, cheapestUnitPrices);
 
     // 6. `includeMissingProducts: false` → eksik ürün DETAYLARI gövdeden çıkarılır.
     //
@@ -783,19 +792,72 @@ function generateCombinations<T>(arr: T[], k: number): T[][] {
     return combinations;
 }
 
+/** Eksik ürün cezasının tavanı (puan). Bkz. sortStrategies 7. madde. */
+const MISSING_PENALTY_MAX = 25;
+
+/**
+ * Liste kalemi → o kalemin HERHANGİ bir marketteki en ucuz birim fiyatı.
+ *
+ * Hiçbir markette bulunmayan kalem haritaya GİRMEZ: onu hiçbir strateji
+ * taşıyamaz, dolayısıyla stratejileri birbirinden ayırt edemez ve imputasyona
+ * katılırsa yalnızca bütün toplamları eşit miktarda şişirir.
+ */
+export function buildCheapestUnitPrices(
+    listItems: ProductInList[],
+    itemOptions: Map<number, Map<number, StoreOption>>
+): Map<number, number> {
+    const out = new Map<number, number>();
+    for (const item of listItems) {
+        const opts = itemOptions.get(item.id);
+        if (!opts || opts.size === 0) continue;
+        let min = Infinity;
+        opts.forEach(o => { if (o.price < min) min = o.price; });
+        if (Number.isFinite(min)) out.set(item.id, min);
+    }
+    return out;
+}
+
+/**
+ * Stratejinin KIYASLANABİLİR toplamı: kendi tutarı + eksik bıraktığı ürünleri
+ * başka bir yerden en ucuz haliyle almanın tutarı.
+ *
+ * Ham `totalPrice` farklı kapsamdaki sepetleri kıyaslamak için kullanılamaz:
+ * eksik ürünü olan sepet, taşımadığı şeyin parasını ödemediği için otomatik
+ * olarak "daha ucuz" görünür. İmputasyondan sonra bütün stratejiler AYNI
+ * sepeti temsil eder ve fiyatları gerçekten karşılaştırılabilir olur.
+ */
+export function imputedTotal(
+    strategy: RouteStrategy,
+    cheapestUnitPrices: Map<number, number>
+): number {
+    let total = strategy.totalPrice;
+    for (const m of strategy.missingProducts) {
+        const unit = cheapestUnitPrices.get(m.listItemId);
+        if (unit != null) total += unit * m.quantity;
+    }
+    return total;
+}
+
 /**
  * Stratejileri sırala ve skorla
  */
-function sortStrategies(
+export function sortStrategies(
     strategies: RouteStrategy[],
-    favoriteStoreIds: number[]
+    favoriteStoreIds: number[],
+    cheapestUnitPrices: Map<number, number>
 ): RouteStrategy[] {
     if (strategies.length === 0) return strategies;
 
-    // Tüm stratejilerden min/max değerleri bul (normalizasyon için)
-    const allPrices = strategies.map(s => s.totalPrice);
+    // Fiyat karşılaştırması KIYASLANABİLİR toplam üzerinden yapılır — ham
+    // totalPrice üzerinden DEĞİL. Nedeni bir üretim hatasıydı: 11 ürünün 7'sini
+    // taşımayan bir market otomatik olarak "en ucuz" oluyordu (taşımadığı şeyin
+    // parasını ödemiyor), fiyat kovasının 40 puanını tek başına süpürüyordu ve
+    // kapsam kovası en fazla 25 puan verebildiği için TAM sepeti geçiyordu.
+    // Kullanıcı "620 TL, Migros" görüp gidiyor, 11 üründen 4'üyle dönüyordu.
+    const priceOf = (s: RouteStrategy) => imputedTotal(s, cheapestUnitPrices);
+    const allPrices = strategies.map(priceOf);
     const allDistances = strategies.map(s => s.totalDistance).filter(d => d > 0);
-    
+
     const minPrice = Math.min(...allPrices);
     const maxPrice = Math.max(...allPrices);
     const priceRange = maxPrice - minPrice || 1;
@@ -817,8 +879,8 @@ function sortStrategies(
         };
 
         // 1. Fiyat skoru (0-40 puan) - Düşük fiyat = yüksek skor
-        const priceScore = priceRange > 0 
-            ? ((maxPrice - strategy.totalPrice) / priceRange) * 100 * weights.price
+        const priceScore = priceRange > 0
+            ? ((maxPrice - priceOf(strategy)) / priceRange) * 100 * weights.price
             : 100 * weights.price;
         score += priceScore;
 
@@ -855,22 +917,47 @@ function sortStrategies(
             score += 50 * weights.budget; // Bilinmiyorsa yarı puan
         }
 
-        // 7. Eksik ürün cezası (skordan düş)
-        const missingPenalty = strategy.missingProducts.length * 5; // Her eksik ürün -5 puan
-        score = Math.max(0, score - missingPenalty);
+        // 7. Eksik ürün cezası — ikinci bir durağın ZAHMETİ (parası değil; o
+        //    artık imputedTotal içinde). Sabit "adet × 5" ORANSIZDI: 20 ürünü
+        //    eksik olan 40 kalemlik bir listede -100 puan çıkıyor ve tüm
+        //    stratejiler 0'a yapışıp sıralama anlamsızlaşıyordu. Eksik ORANIYLA
+        //    ölçekleniyor ve tavanı var.
+        const missingRatio = strategy.missingProducts.length /
+            Math.max(1, strategy.missingProducts.length + countAllocatedItems(strategy));
+        score = Math.max(0, score - missingRatio * MISSING_PENALTY_MAX);
 
         // 0-100 arasına sınırla
         strategy.score = Math.round(Math.min(100, Math.max(0, score)));
     });
 
-    // Skora göre sırala (yüksekten düşüğe)
-    return strategies.sort((a, b) => b.score - a.score);
+    // Sıralama İKİ KADEMELİ.
+    //
+    // Birinci kademe belgelenmiş sözü uygular: "ürün atlayan ucuz bir rota, TAM
+    // sepeti asla geçemez." Bu söz skor toplamına bırakılamaz — mesafe ve market
+    // sayısı kovaları tek başına 25 puan taşıyor ve yakındaki eksik bir marketi
+    // uzaktaki tam sepetin üstüne çıkarabiliyor (üretimde tam olarak bu oldu).
+    // Tam kapsamlı stratejiler kendi bloklarında, eksik olanlar altında; her
+    // blok kendi içinde skora göre sıralanır.
+    return strategies.sort((a, b) => {
+        const aFull = a.coveragePercentage >= 100 ? 1 : 0;
+        const bFull = b.coveragePercentage >= 100 ? 1 : 0;
+        if (aFull !== bFull) return bFull - aFull;
+        return b.score - a.score;
+    });
+}
+
+/** Stratejinin tüm marketlerinde tahsis edilmiş kalem sayısı. */
+function countAllocatedItems(strategy: RouteStrategy): number {
+    return strategy.stores.reduce((n, s) => n + s.products.length, 0);
 }
 
 /**
  * Özet bilgileri oluştur
  */
-function generateSummary(strategies: RouteStrategy[]): CompareResult['summary'] {
+function generateSummary(
+    strategies: RouteStrategy[],
+    cheapestUnitPrices: Map<number, number>
+): CompareResult['summary'] {
     // Yakında market yoksa (yarıçap filtresi) strateji listesi boş olabilir — reduce'un
     // undefined döndürmesini önlemek için erken boş özet dön.
     if (strategies.length === 0) {
@@ -889,9 +976,17 @@ function generateSummary(strategies: RouteStrategy[]): CompareResult['summary'] 
     const bestSingleStore = singleStoreStrategies[0] || null;
     const bestMultiStore = multiStoreStrategies[0] || null;
 
-    // En ucuz seçenek
+    // En ucuz seçenek — KIYASLANABİLİR toplam üzerinden.
+    //
+    // Ham totalPrice ile hesaplanınca "listenin 10 ürününden yalnızca ekmeği
+    // taşıyan market" 20 TL ile en ucuz çıkıyor ve özet "480 TL tasarruf" diye
+    // manşet atıyordu — sepetin onda dokuzu alınmadan. Skorlama bunu zaten
+    // imputasyonla düzeltiyor; özet de aynı ölçüyü kullanmalı, yoksa aynı
+    // ekranda iki farklı "en ucuz" görünür.
     const cheapestOption = strategies.reduce((cheapest, current) => {
-        return current.totalPrice < cheapest.totalPrice ? current : cheapest;
+        return imputedTotal(current, cheapestUnitPrices) < imputedTotal(cheapest, cheapestUnitPrices)
+            ? current
+            : cheapest;
     }, strategies[0]);
 
     // En yakın seçenek (mesafe > 0 olanlar arasında)
@@ -902,8 +997,11 @@ function generateSummary(strategies: RouteStrategy[]): CompareResult['summary'] 
           }, strategiesWithDistance[0])
         : null;
 
-    // Maksimum tasarruf
-    const prices = strategies.map(s => s.totalPrice);
+    // Maksimum tasarruf — aynı sepetin en pahalı ve en ucuz alınış biçimi
+    // arasındaki fark. İmputasyondan sonra bütün stratejiler aynı sepeti
+    // temsil ettiği için bu çıkarma anlamlı; ham totalPrice ile yapılsaydı
+    // "eksik sepet ne kadar eksik" sayısını tasarruf diye gösterirdi.
+    const prices = strategies.map(s => imputedTotal(s, cheapestUnitPrices));
     const maxSavings = prices.length > 0
         ? Math.max(...prices) - Math.min(...prices)
         : 0;
