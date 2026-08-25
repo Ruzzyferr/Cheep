@@ -79,14 +79,32 @@ async function findCandidates(sinceHours: number): Promise<Candidate[]> {
             JOIN changed c ON c.product_id = sp.product_id
             ORDER BY sp.product_id, sp.price ASC, sp.store_id ASC
         ),
-        prev_best AS (
-            -- Aynı ürün için, mevcut en düşükten ÖNCEKİ en düşük fiyat.
-            SELECT DISTINCT ON (ph.product_id)
-                   ph.product_id, ph.price
+        prev_per_store AS (
+            -- Her (ürün, market) için pencereden ÖNCEKİ son bilinen fiyat.
+            --
+            -- Bu ara adım ŞART. Eskiden prev_best doğrudan "ürünün
+            -- pencereden önceki EN SON price_history satırı"ydı - market
+            -- ayrımı yapmadan. Oysa current_best marketler ARASI minimum.
+            -- Yani iki farklı büyüklük karşılaştırılıyordu ve drop_pct
+            -- uydurma çıkıyordu: ürün A marketinde 10 TL (asıl minimum),
+            -- B marketinde 100 TL olsun; pencereden önceki son yazma B'nin
+            -- 100 TL'si ise, A'nın 10 → 9,50 inişi (%5) kullanıcıya
+            -- "%90,5 düştü" diye bildiriliyordu. Ters yönü de aynı derecede
+            -- kötü: önceki son satır ucuz bir markete aitse gerçek bir
+            -- düşüş eşiğin altında kalıp HİÇ bildirilmiyordu.
+            SELECT DISTINCT ON (ph.product_id, ph.store_id)
+                   ph.product_id, ph.store_id, ph.price
             FROM price_history ph
-            JOIN current_best cb ON cb.product_id = ph.product_id
+            JOIN changed c ON c.product_id = ph.product_id
             WHERE ph.recorded_at < ${since}
-            ORDER BY ph.product_id, ph.recorded_at DESC
+            ORDER BY ph.product_id, ph.store_id, ph.recorded_at DESC
+        ),
+        prev_best AS (
+            -- Pencereden önceki MARKETLER ARASI en düşük fiyat - yani
+            -- current_best ile aynı türden bir büyüklük.
+            SELECT product_id, MIN(price) AS price
+            FROM prev_per_store
+            GROUP BY product_id
         )
         SELECT w.user_id,
                w.product_id,
