@@ -38,6 +38,34 @@ paths = [
     '''Cheep-Scraper/ENV_SETUP\.md''',
 ]
 
+# --- Aşağıdakiler CI'ın ilk koşusunda ÖLÇÜLDÜ, tahmin edilmedi. ---
+# Hepsi kural bazında dar tutuldu: yalnızca gürültü üreten kural susturuldu.
+# Komple dosya muafiyeti verilmiyor ki aynı dosyaya gerçek bir AWS/GCP
+# anahtarı yapıştırılsa kendi kuralıyla yine yakalansın.
+
+[[allowlists]]
+description = "Scraper fixture'ları: Auchan/Żabka gibi sitelerden ÇEKİLMİŞ ham HTML/JSON. İçindeki sayfalama token'ları (nextPageToken UUID'leri) o sitelere ait, bize ait bir kimlik bilgisi değil."
+targetRules = ["generic-api-key", "jwt"]
+paths = ['''Cheep-Scraper/countries/[^/]+/fixtures/.*''']
+
+[[allowlists]]
+description = "Scraper testlerindeki uydurma sayfalama token'ları."
+targetRules = ["generic-api-key"]
+paths = ['''Cheep-Scraper/tests/.*\.py$''']
+
+[[allowlists]]
+description = "off_bulk.py'de bir DOCSTRING: fonksiyonun döndürdüğü istatistik alan adlarını sayıyor, değer değil."
+targetRules = ["generic-api-key"]
+regexes = ['''ambiguous_keys1, unique_keys2''']
+
+[[allowlists]]
+description = "Backend README'sindeki .env örneği — Türkçe yer tutucu metinler."
+targetRules = ["generic-api-key"]
+regexes = [
+    '''en-az-32-karakterlik-gizli-deger''',
+    '''scraper-icin-paylasilan-anahtar''',
+]
+
 [[allowlists]]
 description = "Belgelerdeki yerel geliştirme veritabanı adresleri (postgres:postgres@localhost). Yalnızca geliştiricinin kendi makinesindeki docker kabına işaret ediyor."
 regexes = [
