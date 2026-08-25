@@ -33,8 +33,17 @@ const STORAGE_KEYS = {
   FAVORITE_STORES: 'favorite_stores',
   USER_LANGUAGE: 'user_language',
   LOCATION_CONSENT: 'kvkk_location_consent', // KVKK açık rıza: 'granted' | 'denied' | (yok=belirsiz)
-  NOTIFICATION_PROMPT_SNOOZE: '@cheep:notification_prompt_snooze',
-  PUSH_TOKEN: '@cheep:push_token',
+  // DİKKAT — expo-secure-store anahtarları `/^[\w.-]+$/` ile DOĞRULUYOR ve
+  // uymayan anahtarda native çağrıdan ÖNCE senkron `throw` atıyor.
+  // Bu iki anahtar bir süre `@cheep:` önekiyle yazılmıştı (AsyncStorage
+  // alışkanlığı); `@` ve `:` geçersiz olduğu için setItem/removeItem HER
+  // ZAMAN patlıyordu. Sonuç: `runNotificationGate` içindeki
+  // `notificationPromptStorage.clear()` reject ediyor, hemen ardından gelen
+  // `registerPushToken()` HİÇ çalışmıyordu → 49 kullanıcının hiçbirinde push
+  // token yoktu ve sunucu tek bir /push-token isteği bile görmedi.
+  // Yeni anahtar eklerken bu deseni koru; `storage-keys.test.ts` bunu sınıyor.
+  NOTIFICATION_PROMPT_SNOOZE: 'notification_prompt_snooze',
+  PUSH_TOKEN: 'push_token',
   LOCATION_PROMPT_SNOOZE: 'location_prompt_snooze_until', // ms epoch — bu ana kadar sorma
   LOCATION_MODE: 'location_mode',           // 'auto' | 'pinned'
   PINNED_ANCHOR: 'pinned_anchor',           // JSON: PinnedAnchor

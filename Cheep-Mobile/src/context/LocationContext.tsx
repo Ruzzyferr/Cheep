@@ -141,21 +141,28 @@ export function LocationProvider({ children }: { children: ReactNode }) {
             // SORMADAN null döner, dolayısıyla çapa doğru (koordinatsız) yayınlanır.
             if (!passSilent) {
               await runLocationGate();
-              // Bildirim kapısı KONUM KAPISINDAN SONRA, ardışık olarak çalışır:
-              // ikisi aynı anda tetiklenirse Android üst üste iki sistem modalı
-              // gösterir ve kullanıcı ikincisini okumadan kapatır.
-              //
-              // Neden burada: sıralamayı bilen tek yer burası — konum kapısının
-              // ne zaman ÇÖZÜMLENDİĞİNİ başka hiçbir bileşen bilmiyor. Oturumda
-              // yalnızca bir kez çalışır; kapının kendi erteleme mantığı zaten
-              // tekrar tekrar sormayı engelliyor.
-              if (!notificationGateRanRef.current) {
-                notificationGateRanRef.current = true;
-                void runNotificationGate().catch(() => {});
-              }
             }
             gps = await getUserLocation();
             if (gps) detectedCountry = await reverseGeocodeCountry(gps);
+          }
+
+          // Bildirim kapısı KONUM KAPISINDAN SONRA, ardışık olarak çalışır:
+          // ikisi aynı anda tetiklenirse Android üst üste iki sistem modalı
+          // gösterir ve kullanıcı ikincisini okumadan kapatır.
+          //
+          // Neden burada: sıralamayı bilen tek yer burası — konum kapısının
+          // ne zaman ÇÖZÜMLENDİĞİNİ başka hiçbir bileşen bilmiyor. Oturumda
+          // yalnızca bir kez çalışır; kapının kendi erteleme mantığı zaten
+          // tekrar tekrar sormayı engelliyor.
+          //
+          // OTOMATİK MOD DALININ DIŞINDA: eskiden yukarıdaki
+          // `mode !== 'pinned'` bloğunun içindeydi ve şehrini elle sabitlemiş
+          // kullanıcıya bildirim izni HİÇ sorulmuyordu — o kullanıcılar için
+          // fiyat düşüşü bildirimi kalıcı olarak ölüydü. Konum kipiyle
+          // bildirim izninin hiçbir ilgisi yok.
+          if (!passSilent && !notificationGateRanRef.current) {
+            notificationGateRanRef.current = true;
+            void runNotificationGate().catch(() => {});
           }
 
           const next = resolveAnchor({
