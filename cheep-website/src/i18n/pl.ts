@@ -167,7 +167,7 @@ export const pl: Dict = {
       },
       {
         q: 'Czy aplikacja jest darmowa?',
-        a: 'Tak. Pobranie i korzystanie z Cheep jest całkowicie bezpłatne. Bez abonamentu i bez opłat za podgląd cen.',
+        a: 'Tak. Pobranie i korzystanie z Cheep jest bezpłatne: porównywanie cen, listy, najtańsza trasa i powiadomienia o spadkach cen zawsze pozostają darmowe. Opcjonalna subskrypcja Cheep Premium zwiększa jedynie dzienny limit wiadomości asystenta AI; szczegóły w Regulaminie.',
       },
       {
         q: 'Skąd wiadomo, że to ten sam produkt?',
@@ -187,7 +187,7 @@ export const pl: Dict = {
     playAlt: 'Pobierz z Google Play',
     storeTop: 'Wkrótce',
     storeBottom: 'App Store',
-    note: 'Bezpłatnie · bez reklam · Android 8.0 lub nowszy',
+    note: 'Darmowa instalacja · bez reklam · opcjonalne Premium · Android 8.0 lub nowszy',
   },
 
   footer: {
@@ -296,7 +296,7 @@ export const pl: Dict = {
 
     terms: {
       title: 'Regulamin',
-      updated: '2 lipca 2026',
+      updated: '25 sierpnia 2026',
       blocks: [
         { p: 'Korzystając z Cheep, akceptujesz niniejszy regulamin. Cheep jest narzędziem informacyjnym służącym do porównywania cen w sklepach.' },
         { h2: 'Charakter usługi' },
@@ -315,6 +315,16 @@ export const pl: Dict = {
           'Wszystkie nazwy i logotypy sklepów oraz produktów są zastrzeżonymi znakami towarowymi ich właścicieli. Nazwy te są używane wyłącznie po to, by **wskazać, czyja cena jest prezentowana** (dozwolony użytek informacyjny).',
           'Cheep **nie jest oficjalnym partnerem wymienionych sieci, nie jest z nimi powiązany ani przez nie wspierany**.',
           'Informacje o cenach pochodzą z publicznie dostępnych źródeł. Właściciel marki, który chce zgłosić zastrzeżenia do treści, może napisać na [destek@cheep.live](mailto:destek@cheep.live) — na uzasadnione zgłoszenia reagujemy niezwłocznie.',
+        ] },
+        { h2: 'Subskrypcja Cheep Premium' },
+        { p: 'Porównywanie cen, listy zakupów, najtańsza trasa i powiadomienia o spadkach cen są i pozostaną bezpłatne. Cheep Premium to opcjonalna subskrypcja, która zwiększa wyłącznie limit wiadomości asystenta AI.' },
+        { ul: [
+          '**Zakres:** W wersji bezpłatnej można wysłać 5 wiadomości dziennie do asystenta. Premium daje 300 wiadomości miesięcznie (z dziennym limitem bezpieczeństwa 50). Wszystkie pozostałe funkcje są identyczne w obu wariantach.',
+          '**Okres i cena:** Subskrypcja jest oferowana w wariancie miesięcznym lub rocznym. Obowiązująca cena, waluta i długość okresu są wyraźnie pokazane na ekranie zakupu w aplikacji przed dokonaniem zakupu i mogą różnić się w zależności od kraju.',
+          '**Automatyczne odnawianie:** Subskrypcja odnawia się automatycznie, o ile nie zostanie anulowana co najmniej 24 godziny przed końcem bieżącego okresu. Opłata jest pobierana z konta w sklepie w ciągu 24 godzin poprzedzających odnowienie.',
+          '**Anulowanie:** Subskrypcję możesz anulować w dowolnym momencie w ustawieniach subskrypcji swojego konta w sklepie (App Store: Ustawienia → Apple ID → Subskrypcje; Google Play: Sklep Play → Subskrypcje). Anulowanie działa od końca opłaconego okresu — do tego czasu zachowujesz dostęp do Premium.',
+          '**Płatności i zwroty:** Płatność pobiera sklep, z którego pobrano aplikację (Apple App Store lub Google Play); Cheep nie widzi ani nie przechowuje danych karty. Zwroty podlegają polityce danego sklepu i należy je zgłaszać bezpośrednio do niego.',
+          '**Okres próbny:** Jeśli oferowany jest bezpłatny okres próbny, brak anulowania przed jego zakończeniem oznacza przejście na subskrypcję płatną. Niewykorzystana część okresu próbnego przepada w momencie zakupu subskrypcji.',
         ] },
         { h2: 'Ograniczenie odpowiedzialności' },
         { p: 'Cheep nie gwarantuje kompletności ani aktualności informacji o cenach i nie ponosi odpowiedzialności za skutki decyzji podjętych na ich podstawie.' },

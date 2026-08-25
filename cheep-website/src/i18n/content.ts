@@ -146,7 +146,7 @@ const tr: ContentDict = {
     similar: 'Aynı kategoriden',
     faqTitle: 'Sık sorulanlar',
     q1: '{name} en ucuz hangi markette?',
-    a1: 'Şu an en ucuz {store}: {price}. Fiyat {date} tarihinde güncellendi.',
+    a1: 'Şu an en ucuz {store}: {price}. Fiyat {date} güncellendi.',
     q2: '{name} fiyatları marketlere göre ne kadar değişiyor?',
     a2: 'En ucuz {min}, en pahalı {max}. Aradaki fark {abs} — yani doğru markete giderek {pct} tasarruf edebilirsin.',
     cta: 'Her üründe bu farkı gör',

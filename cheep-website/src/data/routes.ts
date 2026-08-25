@@ -84,5 +84,28 @@ export function comparePath(locale: Locale): string {
   return `${localePrefix(locale)}/${segment(locale, 'compare')}`
 }
 
+/**
+ * Bu yol bir İÇERİK sayfası mı? (ürün / kategori / market / şehir / rapor /
+ * karşılaştırma / ürünler hub'ı)
+ *
+ * NEDEN GEREKLİ: içerik sayfalarının diğer dilde KARŞILIĞI YOK — dosyanın
+ * başındaki nota bakın; TR ve PL katalogları farklı ürünler. Buna rağmen
+ * gezinti çubuğundaki dil değiştirici yalnızca `/pl` önekini takıp
+ * atıyordu, yani `/urun/koska-cikos...` → `/pl/urun/koska-cikos...` gibi
+ * ASLA var olmayan bir adres üretiyordu. Sonuç: ~7.600 içerik sayfasının
+ * her birinde dil düğmesi 404'e gidiyordu ve Googlebot da aynı bağlantıyı
+ * her sayfada izleyip tarama bütçesini ölü adreslere harcıyordu.
+ *
+ * Yol parçası HER İKİ dilin sözlüğüne göre sınanıyor: kullanıcı zaten
+ * `/pl/produkt/...` üzerindeyse de doğru cevabı vermeliyiz.
+ */
+export function isContentPath(pathname: string): boolean {
+  const first = pathname.replace(/^\/+/, '').split('/')[0]
+  if (!first) return false
+  return (Object.keys(SEGMENTS) as Locale[]).some((loc) =>
+    Object.values(SEGMENTS[loc]).includes(first),
+  )
+}
+
 /** Kategori sayfası başına ürün adedi (spec §5). */
 export const PAGE_SIZE = 60

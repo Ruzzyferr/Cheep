@@ -202,4 +202,8 @@ Key endpoints: auth (register / login / **refresh** / **logout** / **change-pass
 
 ## License
 
-MIT
+**Proprietary — all rights reserved.** See [`LICENSE`](LICENSE).
+
+This repository is publicly readable so the work can be inspected; public
+visibility is not a grant of any license. Copying, modifying, redistributing
+or running the Software is not permitted without the author's written consent.

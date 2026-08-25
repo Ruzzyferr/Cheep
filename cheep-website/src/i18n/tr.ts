@@ -168,7 +168,7 @@ export const tr: Dict = {
       },
       {
         q: 'Uygulama ücretsiz mi?',
-        a: 'Evet. Cheep’i indirmek ve kullanmak tamamen ücretsizdir. Abonelik yok, fiyat görmek için ödeme yok.',
+        a: 'Evet. Cheep’i indirmek ve kullanmak ücretsizdir: fiyat karşılaştırma, listeler, en ucuz rota ve fiyat düşüşü bildirimleri her zaman ücretsiz. İsteğe bağlı Cheep Premium aboneliği yalnızca yapay zekâ asistanının günlük mesaj kotasını artırır; koşulları Kullanım Şartları’nda.',
       },
       {
         q: 'Aynı ürün olduğundan nasıl emin oluyorsunuz?',
@@ -188,7 +188,7 @@ export const tr: Dict = {
     playAlt: 'Google Play’den indirin',
     storeTop: 'Yakında',
     storeBottom: 'App Store',
-    note: 'Ücretsiz · reklamsız · Android 8.0 ve üzeri',
+    note: 'Ücretsiz indirilir · reklamsız · isteğe bağlı Premium · Android 8.0 ve üzeri',
   },
 
   footer: {
@@ -298,7 +298,7 @@ export const tr: Dict = {
 
     terms: {
       title: 'Kullanım Şartları',
-      updated: '2 Temmuz 2026',
+      updated: '25 Ağustos 2026',
       blocks: [
         { p: 'Cheep’i kullanarak bu şartları kabul etmiş olursun. Cheep, market fiyatlarını karşılaştırman için bilgi amaçlı bir araçtır.' },
         { h2: 'Hizmetin niteliği' },
@@ -317,6 +317,16 @@ export const tr: Dict = {
           'Uygulamada geçen tüm market ve ürün marka adları ile logoları, ilgili sahiplerinin tescilli markalarıdır. Bu adlar yalnızca **hangi markete ait fiyatın gösterildiğini belirtmek** için, atıf amacıyla kullanılır (dürüst kullanım).',
           'Cheep, adı geçen marketlerle **resmi bir ortaklık, bağlantı veya iş birliği içinde değildir** ve onlar tarafından desteklenmez.',
           'Fiyat bilgileri herkese açık kaynaklardan derlenir. Herhangi bir marka sahibi içeriğiyle ilgili talepte bulunmak isterse [destek@cheep.live](mailto:destek@cheep.live) üzerinden bize ulaşabilir; haklı taleplere hızla yanıt veririz.',
+        ] },
+        { h2: 'Cheep Premium aboneliği' },
+        { p: 'Cheep’in fiyat karşılaştırma, alışveriş listesi, en ucuz rota ve fiyat düşüşü bildirimi özellikleri ücretsizdir ve ücretsiz kalacaktır. Cheep Premium yalnızca yapay zekâ asistanının mesaj kotasını artıran, isteğe bağlı bir aboneliktir.' },
+        { ul: [
+          '**Kapsam:** Ücretsiz kullanımda asistana günde 5 mesaj gönderilebilir. Premium ile ayda 300 mesaj (günlük 50 mesaj emniyet sınırıyla) gönderilebilir. Diğer tüm özellikler her iki durumda da aynıdır.',
+          '**Süre ve fiyat:** Abonelik aylık veya yıllık olarak sunulur. Geçerli fiyat, para birimi ve dönem uygulama içindeki satın alma ekranında, satın almadan önce açıkça gösterilir; ülkeye göre değişebilir.',
+          '**Otomatik yenileme:** Abonelik, süresi dolmadan en az 24 saat önce iptal edilmediği sürece kendiliğinden yenilenir. Ücret, yenilemeden önceki 24 saat içinde mağaza hesabından tahsil edilir.',
+          '**İptal:** Aboneliği dilediğin an, cihazındaki mağaza hesabının abonelik ayarlarından iptal edebilirsin (App Store: Ayarlar → Apple Kimliği → Abonelikler; Google Play: Play Store → Abonelikler). İptal, içinde bulunulan ödenmiş dönemin sonunda geçerli olur; o döneme kadar Premium haklarını kullanmaya devam edersin.',
+          '**Ödeme ve iade:** Ödeme, uygulamayı indirdiğin mağaza (Apple App Store veya Google Play) tarafından alınır; Cheep kart bilgilerini görmez ve saklamaz. İade talepleri ilgili mağazanın iade politikasına tabidir ve doğrudan mağazaya iletilir.',
+          '**Deneme süresi:** Ücretsiz deneme sunulduğu durumlarda, deneme süresi bitmeden iptal edilmezse abonelik ücretli olarak devam eder. Kullanılmayan deneme süresi, abonelik satın alındığında sona erer.',
         ] },
         { h2: 'Sorumluluk sınırı' },
         { p: 'Cheep, fiyat bilgilerinin eksiksizliği veya güncelliği konusunda garanti vermez; bu bilgilere dayanarak verdiğin kararlardan doğan sonuçlardan sorumlu tutulamaz.' },

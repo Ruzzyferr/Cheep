@@ -4,13 +4,26 @@ import { SiteLink as Link } from './SiteLink'
 import { CheepBird } from '../brand/CheepBird'
 import { cn } from '../../lib/utils'
 import { useT, useLocale, useHref, localeHref, stripLocale, LOCALES } from '../../i18n'
+import { isContentPath } from '../../data/routes'
 
-/** Aktif sayfanın diğer dildeki karşılığı. */
+/**
+ * Aktif sayfanın diğer dildeki karşılığı.
+ *
+ * İÇERİK sayfalarında karşılık YOKTUR (TR ve PL katalogları farklı ürünler —
+ * bkz. `data/routes.ts`), o yüzden yalnızca önek takmak ölü bir adres üretir.
+ * Orada diğer dilin ANASAYFASINA gönderiyoruz: kullanıcı dilini değiştirmiş
+ * olur ve var olan bir sayfaya iner. Yasal sayfalar ve anasayfa gerçekten
+ * çeviri çiftidir; onlarda eski davranış korunuyor.
+ */
 function useOtherLocale(): { locale: string; href: string } {
   const locale = useLocale()
   const { pathname } = useLocation()
   const other = LOCALES.find((l) => l !== locale) ?? locale
-  return { locale: other, href: localeHref(other, stripLocale(pathname)) }
+  const rest = stripLocale(pathname)
+  return {
+    locale: other,
+    href: localeHref(other, isContentPath(rest) ? '/' : rest),
+  }
 }
 
 export function Nav() {

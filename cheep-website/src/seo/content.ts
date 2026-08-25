@@ -4,7 +4,8 @@ import { CONTENT, fill } from '../i18n/content'
 import type { Head } from './pages'
 import type { PageData } from '../data/context'
 import { summarize, isStale } from '../data/types'
-import { formatMoney, formatPct } from '../lib/money'
+import { formatAge, formatMoney, formatPct } from '../lib/money'
+import { formatNumber } from '../lib/format'
 import { categoryPath, storePath } from '../data/routes'
 
 /**
@@ -88,10 +89,21 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
           ? `${p.name} fiyatları — ${s.storeCount} markette karşılaştır | Cheep`
           : `${p.name} — ceny w ${s.storeCount} sklepach | Cheep`
 
+      // Tasarruf cümlesi yalnızca GERÇEK bir tasarruf varsa yazılır.
+      // Koşulsuz eklendiğinde indekslenen ürün sayfalarının ~%18'i arama
+      // sonucunda "%0 tasarruf et" diye çağrıda bulunuyordu — bir fiyat
+      // karşılaştırma sitesi için hem tıklanma hem inandırıcılık kaybı.
+      // Sayfa gövdesinde bu kapı (`savingPct >= 1`) zaten vardı; açıklamaya
+      // konmamıştı.
+      const hasSaving = s.savingPct >= 1
       const description =
         locale === 'tr'
-          ? `${p.name} en ucuz ${s.cheapest.storeName}: ${money(s.min)}. ${s.storeCount} marketin güncel fiyatlarını karşılaştır, ${formatPct(locale, s.savingPct)} tasarruf et.`
-          : `${p.name} najtaniej w ${s.cheapest.storeName}: ${money(s.min)}. Porównaj ceny w ${s.storeCount} sklepach i oszczędź ${formatPct(locale, s.savingPct)}.`
+          ? hasSaving
+            ? `${p.name} en ucuz ${s.cheapest.storeName}: ${money(s.min)}. ${s.storeCount} marketin güncel fiyatlarını karşılaştır, ${formatPct(locale, s.savingPct)} tasarruf et.`
+            : `${p.name} en ucuz ${s.cheapest.storeName}: ${money(s.min)}. ${s.storeCount} marketin güncel fiyatlarını karşılaştır.`
+          : hasSaving
+            ? `${p.name} najtaniej w ${s.cheapest.storeName}: ${money(s.min)}. Porównaj ceny w ${s.storeCount} sklepach i oszczędź ${formatPct(locale, s.savingPct)}.`
+            : `${p.name} najtaniej w ${s.cheapest.storeName}: ${money(s.min)}. Porównaj aktualne ceny w ${s.storeCount} sklepach.`
 
       // Bayat fiyatlı sayfa indekslenmez (spec §9) — yanlış fiyat göstermek
       // güveni ve sıralamayı birlikte yakar.
@@ -134,10 +146,15 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
             name: fill(c.product.q1, { name: p.name }),
             acceptedAnswer: {
               '@type': 'Answer',
+              // DOM ile AYNI metin: sayfada `formatAge` ile göreli yaş
+              // ("15 gün önce") yazıyordu, JSON-LD ise ISO tarih. Google'ın
+              // yapılandırılmış veri kuralı cevabın sayfada GÖRÜNMESİNİ
+              // şart koşuyor; ayrışma her ürün sayfasında içerik uyuşmazlığı
+              // olarak işaretlenir ve FAQ işaretlemesi site geneli bastırılabilir.
               text: fill(c.product.a1, {
                 store: s.cheapest.storeName,
                 price: money(s.min),
-                date: new Date(s.cheapest.updatedAt).toISOString().slice(0, 10),
+                date: formatAge(locale, s.cheapest.updatedAt, now),
               }),
             },
           },
@@ -263,7 +280,21 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
         locale === 'tr'
           ? 'Ürünler — market fiyatlarını karşılaştır | Cheep'
           : 'Produkty — porównaj ceny w sklepach | Cheep'
-      const head = base(locale, path, title, c.products.lead.replace(/\{\w+\}/g, ''), INDEXABLE)
+      // Yer tutucular SİLİNMİYOR, DOLDURULUYOR. `.replace(/\{\w+\}/g, '')`
+      // sayıları atıyordu ve `priority 0.9` olan bu hub sayfasının açıklaması
+      // canlıda " ürünü  markette karşılaştır." diye çıkıyordu — baştaki
+      // boşlukla, sayısız, bozuk bir cümle. Aynı metin og:description olarak
+      // da yayınlandığı için her sosyal paylaşım da böyle görünüyordu.
+      const head = base(
+        locale,
+        path,
+        title,
+        fill(c.products.lead, {
+          products: formatNumber(locale, payload.totals.products),
+          stores: formatNumber(locale, payload.totals.stores),
+        }),
+        INDEXABLE,
+      )
       head.jsonLd.push(
         breadcrumbLd([{ name: c.breadcrumbHome, path: homePath }, { name: c.products.title }]),
       )
