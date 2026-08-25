@@ -53,9 +53,17 @@ async function lastSuccessfulRunSha() {
                 `?status=success&branch=main&per_page=10`,
             { headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: 'application/vnd.github+json' } },
         );
-        if (!r.ok) return null;
+        // SESSİZ DÜŞME YOK: ilk kurulumda yedek yola düşülüyordu ve sebebini
+        // ayırt etmek imkânsızdı — izin mi eksik, indeks mi geç, ağ mı bozuk?
+        // Sebep artık koşu kaydında yazıyor.
+        if (!r.ok) {
+            console.error(`  koşu geçmişi okunamadı: HTTP ${r.status}${r.status === 403 ? " (iş akışına 'actions: read' izni gerekli)" : ''}`);
+            return null;
+        }
         const d = await r.json();
-        return (d.workflow_runs || []).find((x) => String(x.id) !== String(GITHUB_RUN_ID))?.head_sha ?? null;
+        const bulunan = (d.workflow_runs || []).find((x) => String(x.id) !== String(GITHUB_RUN_ID))?.head_sha ?? null;
+        if (!bulunan) console.error(`  koşu geçmişi boş (${(d.workflow_runs || []).length} kayıt döndü)`);
+        return bulunan;
     };
 
     // KISA YENİDEN DENEME — sebebi ölçüldü, tahmin değil: eşzamanlılık grubu

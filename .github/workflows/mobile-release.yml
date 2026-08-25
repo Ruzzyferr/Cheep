@@ -50,6 +50,14 @@ jobs:
   hazirlik:
     name: Sürüm numarası ve notlar
     runs-on: ubuntu-latest
+    # `actions: read` ŞART. Repo varsayılanı olan "read" yalnızca contents,
+    # packages ve metadata veriyor — Actions API'sini KAPSAMIYOR. Bu izin
+    # olmadan release-notes.mjs koşu geçmişini okuyamıyor ve sessizce etiket
+    # yedeğine düşüyordu; etiket de atılamadığı durumda notlar son 30 commit'e
+    # kayardı.
+    permissions:
+      contents: read
+      actions: read
     outputs:
       version_code: ${{ steps.ver.outputs.version_code }}
       build_number: ${{ steps.ver.outputs.build_number }}
