@@ -1,7 +1,7 @@
 # Cheep Scraper - Gerekli Paketler
 
 # HTTP İstekleri (Migros API için)
-requests==2.31.0
+requests==2.34.2
 
 # Web Scraping (CarrefourSA için)
 # Not: Python 3.12 için minimum sürümler gevşetildi (eski pin'lerin cp312 wheel'i yok).
@@ -13,14 +13,14 @@ lxml>=5.1.0  # BeautifulSoup için parser (py3.12 wheel)
 
 # Scalable LLM Matcher için
 numpy>=1.26.0  # Cosine similarity hesaplamaları için (py3.12 wheel)
-python-dotenv==1.0.0  # .env dosyası desteği için
+python-dotenv==1.2.3  # .env dosyası desteği için
 
 # Kafka producer (INGEST_MODE=kafka) — raw.products.v1'e Avro üretimi
 confluent-kafka==2.5.3
 fastavro==1.9.7
 
 # Test
-pytest==8.3.3
+pytest==8.4.2
 
 
 
