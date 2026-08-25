@@ -629,7 +629,12 @@ export const getProductPriceHistory = async (id: number, days = 90, countryId?: 
     }
 
     const since = new Date();
-    since.setDate(since.getDate() - Math.max(1, Math.min(days, 365)));
+    // Kirpilmis deger AYRI tutuluyor: yanitin `days` alani eskiden HAM
+    // istegi yansitiyordu, yani `days=9999` sorulunca sunucu 365 gunluk
+    // veri donup basligina "9999 gun" yaziyordu. Grafik, sahip olmadigi
+    // bir araligi ilan ediyordu.
+    const effectiveDays = Math.max(1, Math.min(days, 365));
+    since.setDate(since.getDate() - effectiveDays);
 
     const rows = await prisma.priceHistory.findMany({
         where: { product_id: id, recorded_at: { gte: since } },
@@ -658,7 +663,7 @@ export const getProductPriceHistory = async (id: number, days = 90, countryId?: 
 
     return {
         product_id: id,
-        days,
+        days: effectiveDays,
         series,
         summary: {
             lowest: allPrices.length ? Math.min(...allPrices) : null,

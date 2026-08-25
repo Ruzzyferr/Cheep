@@ -95,13 +95,17 @@ export const getPriceFeedbacks = async (storePriceId: number) => {
     return await prisma.priceFeedback.findMany({
         where: { store_price_id: storePriceId },
         orderBy: { created_at: 'desc' },
-        include: {
-            user: {
-                select: {
-                    id: true,
-                    name: true,
-                },
-            },
+        // KULLANICI KIMLIGI DISARI VERILMEZ. Ekranda yalnizca "kac kisi dogru/
+        // yanlis dedi" gosteriliyor; kimin dedigi ne gerekli ne paylasilabilir.
+        // Yalnizca ISTEK SAHIBININ kendi satirini tanimasi icin user_id kaliyor.
+        select: {
+            id: true,
+            store_price_id: true,
+            is_accurate: true,
+            suggested_price: true,
+            comment: true,
+            created_at: true,
+            user_id: true,
         },
     });
 };

@@ -485,14 +485,22 @@ async function calculateMultiStoreStrategies(
     // C(N, k) çok marketli senaryolarda hızla büyür; en çok ürün taşıyan ilk N marketi seçeriz.
     const MAX_CANDIDATE_STORES = 8;
     if (allStores.length > MAX_CANDIDATE_STORES) {
+        // KAPSAMA `itemOptions`TAN SAYILIR, ham `product.store_prices`TAN DEĞİL.
+        //
+        // `allStores` zaten `itemOptions`tan türetiliyor; o harita muadil
+        // (marka-bağımsız) ürünlerin marketlerini İÇERİYOR ve yarıçap dışında
+        // kalanları ÇIKARIYOR. Sayım ham fiyat satırlarından yapılınca iki
+        // liste birbirini tutmuyordu: yalnızca muadilleri taşıyan bir indirim
+        // marketi `coverage` haritasında HİÇ görünmüyor (0 sayılıyor), sıralamada
+        // sona düşüyor ve `MAX_CANDIDATE_STORES` kesmesiyle aday kümesinden
+        // atılıyordu. Yani her kalemi "marka fark etmez" işaretlenmiş bir listede
+        // EN UCUZ çok-marketli rota hiç değerlendirilmiyordu.
         const coverage = new Map<number, number>();
         listItems.forEach(item => {
-            const seen = new Set<number>();
-            item.product.store_prices.forEach(sp => {
-                if (!seen.has(sp.store_id)) {
-                    seen.add(sp.store_id);
-                    coverage.set(sp.store_id, (coverage.get(sp.store_id) || 0) + 1);
-                }
+            const opts = itemOptions.get(item.id);
+            if (!opts) return;
+            opts.forEach((_opt, storeId) => {
+                coverage.set(storeId, (coverage.get(storeId) || 0) + 1);
             });
         });
         allStores = allStores
@@ -686,28 +694,46 @@ async function findAlternativeProducts(
 ): Promise<CompareResult['alternatives']> {
     const alternatives: CompareResult['alternatives'] = [];
 
+    // TEK SORGU — kalem başına bir sorgu DEĞİL.
+    //
+    // Eskiden döngünün içinde `prisma.product.findMany` vardı: muadil grubu
+    // olan her liste kalemi için ayrı bir gidiş-dönüş. 40 kalemlik bir liste
+    // 40 fazladan sorgu demekti ve bu, kodun kendisinin ağır kabul edip ayrı
+    // bir hız limiti (`compareLimiter`) koyduğu bir uç. Üstelik aynı grupların
+    // kardeşleri yukarıda (satır ~208) ZATEN toplu çekiliyordu.
+    const groupIds = Array.from(new Set(
+        listItems.map(i => i.product.muadil_grup_id).filter((g): g is string => !!g)
+    ));
+    if (groupIds.length === 0) return alternatives;
+
+    const siblingRows = await prisma.product.findMany({
+        where: {
+            muadil_grup_id: { in: groupIds },
+            ...(countryId ? { country_id: countryId } : {}),
+        },
+        include: {
+            store_prices: {
+                include: { store: true },
+                orderBy: { price: 'asc' },
+                take: 1, // En ucuz fiyat
+            },
+        },
+    });
+
+    const byGroup = new Map<string, typeof siblingRows>();
+    for (const row of siblingRows) {
+        const gid = row.muadil_grup_id as string;
+        const arr = byGroup.get(gid) ?? [];
+        arr.push(row);
+        byGroup.set(gid, arr);
+    }
+
     for (const item of listItems) {
         // Muadil grup ID'si varsa, aynı gruptaki diğer ürünleri bul
         if (!item.product.muadil_grup_id) continue;
 
-        const alternativeProducts = await prisma.product.findMany({
-            where: {
-                muadil_grup_id: item.product.muadil_grup_id,
-                id: { not: item.product.id }, // Kendisi hariç
-                ...(countryId ? { country_id: countryId } : {}),
-            },
-            include: {
-                store_prices: {
-                    include: {
-                        store: true,
-                    },
-                    orderBy: {
-                        price: 'asc',
-                    },
-                    take: 1, // En ucuz fiyat
-                },
-            },
-        });
+        const alternativeProducts = (byGroup.get(item.product.muadil_grup_id) ?? [])
+            .filter(alt => alt.id !== item.product.id); // Kendisi hariç
 
         // Orijinal ürünün en ucuz fiyatı
         const originalCheapestPrice = item.product.store_prices.length > 0

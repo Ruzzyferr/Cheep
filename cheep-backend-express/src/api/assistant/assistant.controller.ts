@@ -1,4 +1,5 @@
 import { intParam } from '../../utils/request-params.js';
+import logger from '../../utils/logger.js';
 import { type Request, type Response, type NextFunction } from 'express';
 import * as AssistantService from './assistant.service.js';
 
@@ -112,7 +113,7 @@ export const message = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (e: any) {
-    console.error('[assistant] message handler error:', e);
+    logger.error('[assistant] mesaj isleyici hatasi:', e);
     if (e?.code === 'DAILY_LIMIT') {
       res.status(429).json({
         success: false, code: 'DAILY_LIMIT', remaining: 0,
@@ -134,6 +135,24 @@ export const message = async (req: Request, res: Response) => {
       });
       return;
     }
+
+    // AI KATMANININ KENDİ 503'LERİ 503 OLARAK GEÇSİN.
+    //
+    // `llm.client` bütçe bitiminde (AI_BUDGET), zaman aşımında (AI_TIMEOUT),
+    // boş yanıtta (AI_EMPTY) ve upstream hatasında (AI_UPSTREAM) 503'lük
+    // AppError üretiyor. Bunların hepsi aşağıdaki genel dala düşüp istemciye
+    // 502 olarak gidiyordu: yani "asistan bütçesi doldu" ile "asistan çöktü"
+    // telemetride ayırt edilemiyordu — ilki bir faturalandırma olayı, ikincisi
+    // bir arıza.
+    if (typeof e?.code === 'string' && e.code.startsWith('AI_')) {
+      res.status((e.statusCode ?? e.status) === 429 ? 429 : 503).json({
+        success: false,
+        code: e.code,
+        message: e.message ?? 'Asistan şu an yanıt veremedi, lütfen tekrar dene.',
+      });
+      return;
+    }
+
     res.status(502).json({
       success: false,
       message: 'Asistan şu an yanıt veremedi, lütfen tekrar dene.',

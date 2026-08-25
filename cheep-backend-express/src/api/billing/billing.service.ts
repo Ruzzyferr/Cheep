@@ -85,11 +85,17 @@ export async function recordEvent(ev: NormalizedEvent): Promise<{ applied: boole
 
 /** Kullanıcının kayıtlı durumu — istemcinin paywall/rozet göstermesi için. */
 export async function getStatus(userId: number): Promise<BillingStatus> {
-    const [sub, user] = await Promise.all([
+    const [sub] = await Promise.all([
         prisma.subscription.findUnique({ where: { user_id: userId } }),
-        prisma.user.findUnique({ where: { id: userId }, select: { is_premium: true } }),
     ]);
-    const premium = user?.is_premium ?? false;
+    // ONBELLEKLENMIS `user.is_premium` OKUNMAZ — abonelik satirindan ZAMANA
+    // DUYARLI turetilir. O sutun yalnizca webhook ya da /billing/sync
+    // calistiginda yeniden hesaplaniyor; donem sessizce dolduysa (EXPIRATION
+    // webhook'u kaybolursa) sonsuza dek `true` kaliyor ve istemciye "hala
+    // premiumsun" deniyordu. `isEntitled` donem sonunu zaten kontrol ediyor.
+    const premium = isEntitled(
+        sub ? { status: sub.status as never, current_period_end: sub.current_period_end } : null
+    );
     return {
         isPremium: premium,
         status: sub?.status ?? null,
@@ -115,6 +121,20 @@ export async function syncUser(userId: number): Promise<BillingStatus> {
         if (mapped) {
             // Sync webhook ile yarışabilir; idempotans kontrolünü atlıyoruz —
             // RevenueCat o an için daha güncel gerçeği taşır.
+            // `last_event_id` / `last_event_at` BILEREK YAZILMIYOR.
+            //
+            // Bu iki alan WEBHOOK OLAY AKISINA ait ve `recordEvent`in sira-disi
+            // olay korumasi onlara bakiyor ("mevcut damga daha yeniyse olayi
+            // atla"). `mapSubscriberPayload` sync icin `last_event_at = now`
+            // uretiyordu; yani her sync damgayi SIMDIYE cekiyordu ve hemen
+            // ardindan gelen mesru bir webhook "eski olay" diye REDDEDILIYORDU.
+            // Somut: kullanici 14:00:00'da uygulamayi aciyor -> sync damgayi
+            // 14:00:00 yapiyor. RevenueCat 13:59:30'da uretilmis CANCELLATION'i
+            // 14:00:10'da teslim ediyor -> dusuruluyor. Iptal hic kaydedilmiyor,
+            // paywall yanlis durum gosteriyor.
+            //
+            // Sync bir MUTABAKAT, bir olay degil: durumu yaziyor, olay akisina
+            // dokunmuyor.
             const data = {
                 store: mapped.store,
                 product_id: mapped.product_id,
@@ -125,8 +145,6 @@ export async function syncUser(userId: number): Promise<BillingStatus> {
                 will_renew: mapped.will_renew,
                 environment: mapped.environment,
                 rc_app_user_id: mapped.rc_app_user_id,
-                last_event_id: mapped.last_event_id,
-                last_event_at: mapped.last_event_at,
             };
             await prisma.subscription.upsert({
                 where: { user_id: userId },

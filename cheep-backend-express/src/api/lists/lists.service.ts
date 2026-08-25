@@ -375,6 +375,18 @@ export const createFromTemplate = async (
         throw notFound('Şablon bulunamadı');
     }
 
+    // ÜLKE UYUŞMAZLIĞI REDDEDİLİR.
+    //
+    // Şablonun kalemleri `product_id`leri OLDUĞU GİBİ kopyalıyor, ama ürünler
+    // ülkeye özel (`@@unique([country_id, ean_barcode])`). Başka bir ülkenin
+    // şablonundan liste açılırsa `filterStorePricesByCountry` her fiyatı
+    // eliyor ve kullanıcı, HER KALEMİ "bu markette yok" çıkan bir listeyle
+    // kalıyordu — üstelik neden olduğunu anlamasının hiçbir yolu yok.
+    // Sessizce bozuk bir liste üretmektense açık bir hata iyidir.
+    if (template.country_id !== countryId) {
+        throw notFound('Şablon bulunamadı');
+    }
+
     // Yeni liste oluştur + şablon ürünlerini kopyala — atomik olmalı. Yeni liste
     // isteğin ülkesine bağlanır; aynı ülkedeki aktif liste pasife çekilir.
     const newListId = await prisma.$transaction(async (tx) => {

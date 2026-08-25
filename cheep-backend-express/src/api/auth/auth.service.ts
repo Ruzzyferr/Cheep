@@ -32,6 +32,16 @@ const REFRESH_TOKEN_TTL = '30d';
 interface AccessPayload {
     userId: number;
     type: 'access';
+    /**
+     * Kullanicinin o anki `token_version`i.
+     *
+     * ESKIDEN YALNIZCA REFRESH TOKEN TASIYORDU ve bu, belgelenen guvencenin
+     * ("logout/parola degisimi eski oturumlari sonlandirir") access token'lar
+     * icin GECERSIZ olmasi demekti: calinmis bir access token, kurban cikis
+     * yapsa ya da parolasini degistirse bile tam 1 saat daha calisiyordu.
+     * Parola degistirmenin asil amaci tam olarak bunu kesmek.
+     */
+    tv: number;
 }
 
 /**
@@ -40,7 +50,7 @@ interface AccessPayload {
  * bu sayede logout/parola değişiminde eski refresh token'lar geçersiz kılınabilir.
  */
 const generateTokens = (userId: number, tokenVersion: number) => {
-    const token = jwt.sign({ userId, type: 'access' } as AccessPayload, config.jwtSecret, {
+    const token = jwt.sign({ userId, type: 'access', tv: tokenVersion } as AccessPayload, config.jwtSecret, {
         expiresIn: ACCESS_TOKEN_TTL,
     });
     const refreshToken = jwt.sign(
@@ -51,8 +61,24 @@ const generateTokens = (userId: number, tokenVersion: number) => {
     return { token, refreshToken };
 };
 
+/**
+ * E-postayi KIMLIK olarak normallestirir: kirp + kucuk harfe cevir.
+ *
+ * NEDEN: kayit ve giris `email`i ham haliyle ariyordu, yani kimlik BUYUK/KUCUK
+ * HARFE DUYARLIYDI. `Ali@x.com` ile kaydolan kullanici ertesi gun `ali@x.com`
+ * yazinca "Gecersiz email veya sifre" aliyor ve neden oldugunu anlamiyordu;
+ * daha kotusu, ayni gercek posta kutusuna ikinci bir hesap acilabiliyordu.
+ * Hiz limiti zaten e-postayi kucuk harfe cevirerek anahtarliyor (rate-limit
+ * middleware) — yani sistem kendi icinde de tutarsizdi.
+ *
+ * Uretimde buyuk harfli veya bosluklu e-posta OLMADIGI olculdu (49/49 temiz),
+ * bu yuzden normallestirme mevcut hicbir hesabi disarida birakmiyor.
+ */
+const normalizeEmail = (email: string): string => email.trim().toLowerCase();
+
 // Kullanıcı kayıt servisi
-export const registerUser = async (email: string, pass: string, name: string) => {
+export const registerUser = async (rawEmail: string, pass: string, name: string) => {
+    const email = normalizeEmail(rawEmail);
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
         throw conflict('Bu email adresi zaten kullanılıyor.');
@@ -153,7 +179,8 @@ export const resendVerification = async (userId: number) => {
 };
 
 // Kullanıcı giriş servisi
-export const loginUser = async (email: string, pass: string) => {
+export const loginUser = async (rawEmail: string, pass: string) => {
+    const email = normalizeEmail(rawEmail);
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
         throw new AppError('Geçersiz email veya şifre.', 401);

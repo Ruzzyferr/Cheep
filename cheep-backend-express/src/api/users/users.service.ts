@@ -61,7 +61,11 @@ export const deleteUser = async (userId: number) => {
  * silebilmesi için. Bilinmeyen e-posta ve yanlış şifre AYNI 401'i döner
  * (hesap sıralama/enumeration'ı önlemek için).
  */
-export const deleteAccountByCredentials = async (email: string, pass: string) => {
+export const deleteAccountByCredentials = async (rawEmail: string, pass: string) => {
+    // Kimlik normallestirmesi auth ile AYNI olmali; yoksa `Ali@x.com` ile
+    // kaydolmus (ve artik `ali@x.com` olarak saklanan) bir kullanici kendi
+    // hesabini silemez. Play bu ozelligi zorunlu tutuyor.
+    const email = rawEmail.trim().toLowerCase();
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
         throw new AppError('Geçersiz e-posta veya şifre.', 401);

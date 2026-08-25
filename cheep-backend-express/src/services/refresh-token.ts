@@ -29,3 +29,27 @@ export function isRefreshTokenCurrent(
         tokenVersion === userTokenVersion
     );
 }
+
+/**
+ * Access token'in tasidigi surum kullanicinin guncel `token_version`i ile
+ * uyusuyor mu?
+ *
+ * REFRESH'TEN FARKLI KURAL — `tv` YOKSA GECERLI SAYILIR:
+ *
+ * Refresh token 30 gun yasiyor, bu yuzden orada tv'siz bir token'i reddetmek
+ * dogru (bir kez yeniden giris, sonra temiz). Access token 1 SAAT yasiyor.
+ * Bu kontrol eklendigi anda sahadaki butun access token'lar tv'siz oldugu icin,
+ * onlari reddetmek TUM kullanicilari ayni anda 401'e dusururdu. Tolerans
+ * kendiliginden kapaniyor: bir saat icinde her token ya suresi dolup yenileniyor
+ * ya da tv tasiyan yenisiyle degisiyor.
+ *
+ * Manipulasyona karsi: `tv` VARSA tam sayi ve esit olmak ZORUNDA; ondalikli,
+ * NaN ya da farkli bir deger reddedilir.
+ */
+export function isAccessTokenCurrent(
+    tokenVersion: number | undefined,
+    userTokenVersion: number
+): boolean {
+    if (tokenVersion === undefined) return true; // eski token — bkz. yukaridaki gerekce
+    return Number.isInteger(tokenVersion) && tokenVersion === userTokenVersion;
+}

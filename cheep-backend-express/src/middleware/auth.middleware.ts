@@ -1,4 +1,5 @@
 import { type Request, type Response, type NextFunction } from 'express';
+import { isAccessTokenCurrent } from '../services/refresh-token.js';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/index.js';
 import { prisma } from '../utils/prisma.client.js';
@@ -8,6 +9,8 @@ import logger from '../utils/logger.js';
 interface JwtPayload {
     userId: number;
     type?: string; // 'access' | 'refresh' — refresh token bearer olarak kullanılamaz
+    /** Uretildigi andaki `user.token_version`. Eski token'larda YOK. */
+    tv?: number;
 }
 
 /**
@@ -88,6 +91,7 @@ export const authenticate = async (
                 name: true,
                 created_at: true,
                 updated_at: true,
+                token_version: true,
             },
         });
 
@@ -95,6 +99,26 @@ export const authenticate = async (
             res.status(401).json({
                 success: false,
                 message: 'Kullanıcı bulunamadı.',
+            });
+            return;
+        }
+
+        // TOKEN SURUMU KONTROLU — access token'lar da iptal edilebilir olmali.
+        //
+        // Kullanici zaten her istekte veritabanindan cekiliyor, dolayisiyla bu
+        // kontrol EK SORGU MALIYETI GETIRMIYOR. Olmadiginda `token_version`
+        // mekanizmasi yalnizca refresh token'lari kapsiyordu ve calinmis bir
+        // access token, kurban cikis yapip parolasini degistirdikten sonra bile
+        // TTL'i (1 saat) boyunca gecerli kaliyordu.
+        //
+        // `tv` YOKSA kabul ediliyor: bu degisiklikten ONCE uretilmis token'lar
+        // alanı tasimiyor ve hepsini reddetmek butun oturumlari aninda
+        // dusururdu. Access TTL 1 saat oldugu icin bu tolerans kendiliginden
+        // kapaniyor.
+        if (!isAccessTokenCurrent(decoded.tv, user.token_version)) {
+            res.status(401).json({
+                success: false,
+                message: 'Oturum sonlandırılmış. Lütfen tekrar giriş yapın.',
             });
             return;
         }

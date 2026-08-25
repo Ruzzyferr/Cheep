@@ -85,7 +85,12 @@ router.get('/my', authenticate, FeedbackController.getUserFeedbacks);
  *       200:
  *         description: Feedback'ler başarıyla alındı
  */
-router.get('/price/:storePriceId', validateIdParam('storePriceId'), FeedbackController.getPriceFeedbacks);
+// `authenticate` EKLENDI. Uc kimliksizdi ve her geri bildirimi `user: {id, name}`
+// ile birlikte donuyordu; storePriceId 1..N taranarak hesapsiz bir
+// (kullanici kimligi, gorunen ad, serbest metin yorum) derlemesi
+// toplanabiliyordu. Geri bildirim yazmak zaten giris istiyor; okumak icin
+// de istemek tutarli ve bedava.
+router.get('/price/:storePriceId', authenticate, validateIdParam('storePriceId'), FeedbackController.getPriceFeedbacks);
 
 /**
  * @swagger
