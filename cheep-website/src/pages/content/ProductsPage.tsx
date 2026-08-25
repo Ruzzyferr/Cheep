@@ -85,6 +85,22 @@ export function ProductsPage() {
   // yine ekranın altına iner. Masaüstünde `lg:block` her zaman görünür kılar,
   // bu yüzden state yalnızca mobili etkiler (SSR ile de tutarlı).
   const [categoriesOpen, setCategoriesOpen] = useState(false)
+  /**
+   * HİDRASYON EŞİTLİĞİ — ilk istemci render'ı sunucununkiyle AYNI olmalı.
+   *
+   * Prerender yalnızca ÇIPLAK `/urunler` yolunu üretiyor, yani sunulan HTML
+   * her zaman filtresiz ilk 40 ürünü içeriyor. İstemcide ise `?ara=süt` gibi
+   * bir sorgu varsa `isPristine` daha ilk render'da false oluyor, `result`
+   * henüz null ve `loading` henüz false — ürünler `[]` çıkıp BOŞ DURUM
+   * çiziliyordu. React bunu "Minified React error #418" ile bildirip sunucu
+   * HTML'ini atıyor; kullanıcı paylaşılan bir filtre bağlantısını açtığında
+   * önce "Bu filtrelerle ürün bulunamadı" yazısını, sonra iskeleti görüyordu.
+   *
+   * Bayrak `useEffect` içinde çevriliyor — yani hidrasyon BİTTİKTEN sonra.
+   * İlk boyama sunucununkiyle birebir aynı, ardından gerçek sonuçlara geçilir.
+   */
+  const [hydrated, setHydrated] = useState(false)
+  useEffect(() => { setHydrated(true) }, [])
   const abortRef = useRef<AbortController | null>(null)
 
   // Market seçimi bir DİZİ; referansı her render'da değişir, o yüzden bağımlılık
@@ -152,8 +168,10 @@ export function ProductsPage() {
 
   if (!initial) return null
 
-  const products = isPristine ? initialProducts : (result?.items ?? [])
-  const total = isPristine ? initial.totals.products : (result?.total ?? 0)
+  // Hidrasyon tamamlanana kadar SUNUCUNUN verisi gösterilir (bkz. `hydrated`).
+  const sunucuGorunumu = !hydrated || isPristine
+  const products = sunucuGorunumu ? initialProducts : (result?.items ?? [])
+  const total = sunucuGorunumu ? initial.totals.products : (result?.total ?? 0)
   const categories = result?.facets?.categories ?? initialCategories
   const stores = result?.facets?.stores ?? initialStores
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))

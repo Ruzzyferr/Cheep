@@ -239,12 +239,19 @@ if (fs.existsSync(dataFile)) {
  * üretemez. İki dilde birden yazıyor, çünkü statik dosya ziyaretçinin dilini
  * bilemez.
  */
-{
-  const notFoundUrl = '/urun/__bulunamadi__'
+// İKİ DİLDE BİRDEN: yorum bunu zaten vaat ediyordu ama tek URL üretiliyordu
+// (`/urun/__bulunamadi__`, yalnızca TR rotasıyla eşleşir). Lehçe bir yoldan
+// gelen ziyaretçi — ki dil değiştiricinin ölü bağlantıları yüzünden GERÇEKTEN
+// oraya düşüyordu — baştan sona Türkçe bir hata sayfası ve TÜRKÇE anasayfaya
+// giden tek bir düğme görüyordu.
+for (const { url: notFoundUrl, lang, title, description, out } of [
+  { url: '/urun/__bulunamadi__', lang: 'tr', title: 'Sayfa bulunamadı — Cheep', description: 'Aradığın sayfa bulunamadı.', out: '404.html' },
+  { url: '/pl/produkt/__nie-znaleziono__', lang: 'pl', title: 'Nie znaleziono strony — Cheep', description: 'Nie znaleźliśmy tej strony.', out: 'pl/404.html' },
+]) {
   const head = {
-    lang: 'tr',
-    title: 'Sayfa bulunamadı — Cheep',
-    description: 'Aradığın sayfa bulunamadı.',
+    lang,
+    title,
+    description,
     meta: [{ name: 'robots', content: 'noindex, follow' }],
     links: [],
     jsonLd: [],
@@ -257,8 +264,10 @@ if (fs.existsSync(dataFile)) {
     .replace(/<script type="module"[^>]*><\/script>/g, '')
     .replace(/<link rel="modulepreload"[^>]*>/g, '')
 
-  fs.writeFileSync(path.join(dist, '404.html'), html)
-  console.log('404:         dist/404.html (hydrate edilmiyor)')
+  const outPath = path.join(dist, out)
+  fs.mkdirSync(path.dirname(outPath), { recursive: true })
+  fs.writeFileSync(outPath, html)
+  console.log(`404:         dist/${out} (hydrate edilmiyor)`)
 }
 
 // ---------------------------------------------------------------- sitemap

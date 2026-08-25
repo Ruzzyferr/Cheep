@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import { SiteLink as Link } from '../../components/ui/SiteLink'
 import { LocaleContext } from '../../i18n'
-import { CONTENT, fill } from '../../i18n/content'
+import { CONTENT, fillLocalized } from '../../i18n/content'
 import { usePageData } from '../../data/context'
 import { ContentLayout } from '../../components/content/ContentLayout'
 import { ProductGrid } from '../../components/price/ProductGrid'
@@ -28,7 +28,7 @@ export function StorePage() {
       <header className="max-w-3xl">
         <h1 className="text-3xl font-bold text-ink md:text-4xl">{store.name}</h1>
         <p className="mt-4 text-lg text-ink-soft">
-          {fill(c.store.intro, {
+          {fillLocalized(locale, c.store.intro, {
             name: store.name,
             products: n(store.productCount),
             branches: n(store.branchCount),

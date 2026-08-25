@@ -45,6 +45,11 @@ export interface ContentDict {
     empty: string
   }
 
+  /** Market x kategori sayfasi — aciklama MARKET ADINI da tasimali. */
+  storeCategory: {
+    intro: string
+  }
+
   store: {
     intro: string
     branches: string
@@ -129,6 +134,70 @@ export function fill(template: string, vars: Record<string, string | number>): s
   return template.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ''))
 }
 
+/**
+ * Lehce COGUL uyumu.
+ *
+ * `fill` duz bir {k} ikamesi; Lehce ise UC bicim istiyor ve metinler tek bir
+ * bicime (cogul-genitif "produktow") gomulmustu. Canliya cikan sonuc:
+ * "W kategorii Gabki i scierki porownujemy 1 produktow." — hicbir anadili
+ * konusanin yazmayacagi bir cumle. Sitenin Lehce iddiasi (URL'de bile Turkce
+ * kelime gormesin) tam da guven ve siralama uzerineyken bu kendi ayagina
+ * sikmak oluyordu.
+ *
+ * Kural:
+ *   1                      -> tekil        (produkt)
+ *   2-4, 22-24, 32-34...   -> az-cogul     (produkty)
+ *   digerleri (0, 5-21...) -> cogul-genitif(produktow)
+ */
+export function plForm(n: number, tekil: string, azCogul: string, genitif: string): string {
+  const mutlak = Math.abs(Math.trunc(n))
+  if (mutlak === 1) return tekil
+  const son = mutlak % 10
+  const sonIki = mutlak % 100
+  if (son >= 2 && son <= 4 && !(sonIki >= 12 && sonIki <= 14)) return azCogul
+  return genitif
+}
+
+/** Lehce "N produkt/produkty/produktow". */
+export const plUrun = (n: number): string => plForm(n, 'produkt', 'produkty', 'produktów')
+
+/** Lehce "N sklep/sklepy/sklepow". */
+export const plMarket = (n: number): string => plForm(n, 'sklep', 'sklepy', 'sklepów')
+
+/**
+ * Locale-farkinda doldurucu.
+ *
+ * Lehce sablonlarda sayidan sonra gelen isim, sayiya gore cekimlenmek zorunda.
+ * `fill` bunu bilemez; bu sarmalayici PL icin `{produkty}` ve `{sklepy}`
+ * degiskenlerini sayilardan TURETIP ekliyor, boylece sablonlar okunakli
+ * kaliyor ve cagrilan yerlerin cogu degismiyor.
+ *
+ * TR icin hicbir sey yapmaz (Turkcede sayidan sonra cogul eki gelmez).
+ */
+export function fillLocalized(
+  locale: 'tr' | 'pl',
+  template: string,
+  vars: Record<string, string | number>,
+): string {
+  if (locale !== 'pl') return fill(template, vars)
+  const sayi = (k: string): number | null => {
+    const v = vars[k]
+    if (typeof v === 'number') return v
+    if (typeof v === 'string') {
+      // "2.877" gibi bicimlenmis sayilardan da cikarabilmeli.
+      const n = Number(v.replace(/[^0-9-]/g, ''))
+      return Number.isFinite(n) ? n : null
+    }
+    return null
+  }
+  const ek: Record<string, string | number> = { ...vars }
+  const urunSayisi = sayi('count') ?? sayi('products')
+  if (urunSayisi !== null) ek.produkty = plUrun(urunSayisi)
+  const marketSayisi = sayi('stores') ?? sayi('branches')
+  if (marketSayisi !== null) ek.sklepy = plMarket(marketSayisi)
+  return fill(template, ek)
+}
+
 const tr: ContentDict = {
   breadcrumbHome: 'Ana sayfa',
 
@@ -164,6 +233,10 @@ const tr: ContentDict = {
     introSingle: '{name} kategorisinde {count} ürün karşılaştırılıyor.',
     byStore: 'Markete göre {name}',
     empty: 'Bu kategoride henüz karşılaştırılabilir ürün yok.',
+  },
+
+  storeCategory: {
+    intro: '{store} mağazasında {name} kategorisindeki {count} ürünün fiyatı, diğer marketlerle karşılaştırmalı olarak listeleniyor.',
   },
 
   store: {
@@ -278,15 +351,19 @@ const pl: ContentDict = {
 
   category: {
     intro:
-      'Porównaliśmy ceny {count} produktów z kategorii {name} w {stores} sklepach. Najtańsze opcje poniżej.',
-    introSingle: 'W kategorii {name} porównujemy {count} produktów.',
+      'Porównaliśmy ceny {count} {produkty} z kategorii {name} w {stores} {sklepy}. Najtańsze opcje poniżej.',
+    introSingle: 'W kategorii {name} porównujemy {count} {produkty}.',
     byStore: '{name} według sklepu',
     empty: 'W tej kategorii nie ma jeszcze produktów do porównania.',
   },
 
+  storeCategory: {
+    intro: 'Ceny {count} {produkty} z kategorii {name} w sklepie {store}, porównane z innymi sieciami.',
+  },
+
   store: {
     intro:
-      'Porównaj ceny w {name} z innymi sklepami. {products} produktów, {branches} sklepów, {cities} miast.',
+      'Porównaj ceny w {name} z innymi sklepami. {products} {produkty}, {branches} {sklepy}, {cities} miast.',
     branches: 'sklepów',
     cities: 'miast',
     products: 'produktów',
@@ -295,7 +372,7 @@ const pl: ContentDict = {
   },
 
   city: {
-    intro: 'W mieście {name} jest {branches} sklepów. Sprawdź, które sieci działają w okolicy i porównaj ceny.',
+    intro: 'W mieście {name} jest {branches} {sklepy}. Sprawdź, które sieci działają w okolicy i porównaj ceny.',
     branches: 'sklepów',
     stores: 'sieci handlowych',
     chains: 'Sieci w mieście',

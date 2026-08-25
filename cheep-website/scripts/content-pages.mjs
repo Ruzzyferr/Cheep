@@ -16,7 +16,22 @@ const REPORT_COUNT = 20
 /** Rapora girmek için gereken en az yüzde değişim — gürültüyü eler. */
 const REPORT_MIN_PCT = 3
 
-const cheapest = (p) => p.offers.reduce((min, o) => (o.price < min.price ? o : min), p.offers[0])
+/**
+ * Ürünün en ucuz teklifi — TEKLİFİ YOKSA `null`.
+ *
+ * Eskiden `p.offers[0]` başlangıç değeriyle çağrılıyordu; boş dizide `reduce`
+ * hata atmaz, `undefined` döner ve bir sonraki satırdaki
+ * `cheapestCounts[c.storeSlug]` "Cannot read properties of undefined" ile
+ * patlar. Bu, GECELİK DERLEMENİN TAMAMINI `buildPageList` aşamasında
+ * öldürür — tek bir sayfa bile yazılmadan. Site sessizce dünkü fiyatlarla
+ * yayında kalır ve kimse fark etmez.
+ *
+ * Bugün gizli kalıyor çünkü SQL export'u `HAVING COUNT(DISTINCT store) >= 2`
+ * ile süzüyor; o eşik gevşetildiği ya da bir ürünün fiyatları export
+ * sırasında düştüğü gün patlardı. Sıfır-teklifli ürün zaten her yerde
+ * bekleniyor (`summarize` null döner, ProductPage `noOffers` çizer).
+ */
+const cheapest = (p) => (p.offers?.length ? p.offers.reduce((min, o) => (o.price < min.price ? o : min)) : null)
 
 /**
  * Listelerde gösterilecek ürünün ince hali.
@@ -132,7 +147,7 @@ export function buildPageList(country, locale, routes) {
 
     // Öne çıkanlar: bu markette en ucuz olduğu ve farkın en büyük olduğu ürünler.
     const top = storeProducts
-      .filter((p) => cheapest(p).storeSlug === store.slug)
+      .filter((p) => cheapest(p)?.storeSlug === store.slug)
       .sort((a, b) => {
         const da = Math.max(...a.offers.map((o) => o.price)) - Math.min(...a.offers.map((o) => o.price))
         const db = Math.max(...b.offers.map((o) => o.price)) - Math.min(...b.offers.map((o) => o.price))
@@ -227,6 +242,7 @@ export function buildPageList(country, locale, routes) {
   const cheapestCounts = {}
   for (const p of products) {
     const c = cheapest(p)
+    if (!c) continue // teklifsiz ürün sayıma girmez (bkz. `cheapest`)
     cheapestCounts[c.storeSlug] = (cheapestCounts[c.storeSlug] || 0) + 1
   }
 
@@ -271,6 +287,7 @@ export function buildHomePayload(country) {
   const counts = {}
   for (const p of products) {
     const c = cheapest(p)
+    if (!c) continue // teklifsiz ürün sayıma girmez (bkz. `cheapest`)
     counts[c.storeSlug] = (counts[c.storeSlug] || 0) + 1
   }
 

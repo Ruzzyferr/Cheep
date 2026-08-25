@@ -32,7 +32,7 @@ export function Pagination({
         <Link
           to={hrefFor(current - 1)}
           rel="prev"
-          className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-clementine hover:text-clementine-deep"
+          className="inline-flex min-h-11 items-center rounded-full border border-line px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-clementine hover:text-clementine-deep"
         >
           {labels.prev}
         </Link>
@@ -63,7 +63,7 @@ export function Pagination({
         <Link
           to={hrefFor(current + 1)}
           rel="next"
-          className="rounded-full border border-line px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-clementine hover:text-clementine-deep"
+          className="inline-flex min-h-11 items-center rounded-full border border-line px-4 py-2 text-sm font-medium text-ink-soft transition-colors hover:border-clementine hover:text-clementine-deep"
         >
           {labels.next}
         </Link>

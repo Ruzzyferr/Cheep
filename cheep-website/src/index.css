@@ -44,7 +44,15 @@
   /* Ink + neutrals */
   --color-ink: #14211b;
   --color-ink-soft: #5b6b62;
-  --color-ink-hint: #93a29a;
+  /* ERİŞİLEBİLİRLİK: eskiden #93a29a idi ve --color-paper üzerinde yalnızca
+     2,67:1 veriyordu — WCAG AA'nın 4,5:1 tabanının, hatta büyük metnin 3:1
+     tabanının altında. Dekoratif olsa mesele değildi ama bu token GERÇEK VERİ
+     taşıyor: fiyat tazeliği sütunu ("3 gün önce"), "En düşük" fiyat etiketi,
+     canlı düşüşlerdeki EN UCUZ MARKET ADI ve filtre grubu başlıkları.
+     Bir fiyatın ne kadar eski olduğunu okuyamamak, güven meselesi.
+     #5f6e66 kullanılan ÜÇ zeminde de AA geçiyor (beyaz 5,37 · paper 5,14 ·
+     cream-deep 4,77) — hâlâ ikincil, ama okunur. */
+  --color-ink-hint: #5f6e66;
 
   /* Lilac — secondary cool accent, used sparingly */
   --color-lilac: #c9b8e8;

@@ -24,6 +24,15 @@
 	file_server
 
 	handle_errors {
+		# DİLE GÖRE 404. Tek bir Türkçe sayfa sunuluyordu; Lehçe bir yoldan
+		# gelen ziyaretçi baştan sona Türkçe bir hata sayfası ve TÜRKÇE
+		# anasayfaya giden tek bir düğme görüyordu. Prerender artık
+		# `dist/pl/404.html`i de üretiyor.
+		@pl path /pl /pl/*
+		handle @pl {
+			rewrite * /pl/404.html
+			file_server
+		}
 		rewrite * /404.html
 		file_server
 	}

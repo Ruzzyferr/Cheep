@@ -1,6 +1,6 @@
 import { SITE_URL } from '../config'
 import type { Locale } from '../i18n'
-import { CONTENT, fill } from '../i18n/content'
+import { CONTENT, fill, fillLocalized } from '../i18n/content'
 import type { Head } from './pages'
 import type { PageData } from '../data/context'
 import { summarize, isStale } from '../data/types'
@@ -193,9 +193,9 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
         locale === 'tr'
           ? `${cat.name} fiyatları${pageSuffix} | Cheep`
           : `${cat.name} — ceny${pageSuffix} | Cheep`
-      const description = fill(c.category.intro, {
+      const description = fillLocalized(locale, c.category.intro, {
         name: cat.name,
-        count: cat.productCount,
+        count: formatNumber(locale, cat.productCount),
         stores: payload.stores.length,
       })
 
@@ -210,11 +210,15 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
       const s = payload.store
       const title =
         locale === 'tr' ? `${s.name} fiyatları ve şubeleri | Cheep` : `${s.name} — ceny i sklepy | Cheep`
-      const description = fill(c.store.intro, {
+      // SAYILAR BICIMLENDIRILIR. Aciklama ham tam sayi basiyordu ("3067 sube")
+      // ama sayfanin govdesi ayni sayiyi `formatNumber` ile ("3.067") ciziyordu:
+      // arama snippet'i hem okunmasi zor bir sayi gosteriyor hem de tikladigi
+      // sayfayla GORUNUR bicimde celisiyordu.
+      const description = fillLocalized(locale, c.store.intro, {
         name: s.name,
-        products: s.productCount,
-        branches: s.branchCount,
-        cities: s.cityCount,
+        products: formatNumber(locale, s.productCount),
+        branches: formatNumber(locale, s.branchCount),
+        cities: formatNumber(locale, s.cityCount),
       })
       const head = base(locale, path, title, description, INDEXABLE)
       head.jsonLd.push(breadcrumbLd([{ name: c.breadcrumbHome, path: homePath }, { name: s.name }]))
@@ -227,11 +231,29 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
         locale === 'tr'
           ? `${store.name} ${category.name} fiyatları | Cheep`
           : `${store.name} — ${category.name} ceny | Cheep`
-      const description = fill(c.category.introSingle, {
+      // AÇIKLAMA MARKET ADINI DA TAŞIR. Eskiden yalnızca kategori adı ve
+      // sayı vardı, yani A101/BİM/ŞOK'un aynı kategori sayfaları BAYT BAYT
+      // AYNI açıklamayı paylaşıyordu — Google'ın "Duplicate, Google chose
+      // different canonical" dediği tam tablo.
+      const description = fillLocalized(locale, c.storeCategory.intro, {
+        store: store.name,
         name: category.name,
         count: payload.products.length,
       })
-      const head = base(locale, path, title, description, payload.products.length > 0 ? INDEXABLE : NOINDEX)
+
+      // İNCE İÇERİK EŞİĞİ: 1-2 ürünlük bir market×kategori sayfası arama
+      // sonucunda değer üretmiyor ama site geneli kalite sinyalini aşağı
+      // çekiyor (şehir sayfaları aynı sebeple zaten NOINDEX'e alınmıştı).
+      // Canlıda ölçüldü: 609 market×kategori URL'sinin ~%35'i ≤2 ürün.
+      // Sayfa yine ERİŞİLEBİLİR kalır, yalnızca indekslenmez.
+      const MIN_URUN_INDEKS = 3
+      const head = base(
+        locale,
+        path,
+        title,
+        description,
+        payload.products.length >= MIN_URUN_INDEKS ? INDEXABLE : NOINDEX,
+      )
       head.jsonLd.push(
         breadcrumbLd([
           { name: c.breadcrumbHome, path: homePath },
@@ -248,7 +270,7 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
         locale === 'tr'
           ? `${city.name} marketleri — en ucuz market ve şubeler | Cheep`
           : `${city.name} — sklepy i najtańsze ceny | Cheep`
-      const description = fill(c.city.intro, { name: city.name, branches: city.branchCount })
+      const description = fillLocalized(locale, c.city.intro, { name: city.name, branches: formatNumber(locale, city.branchCount) })
       // NOINDEX — bu sayfalar sablondan uretiliyor ve birbirine %84-91 benziyor.
       // Ozgun icerik sayfa basina ~300 karakter: sehir adi, sube sayisi, zincir
       // dagilimi. Gerisi menu + alt bilgi. Google bunlari zaten "Duplicate,

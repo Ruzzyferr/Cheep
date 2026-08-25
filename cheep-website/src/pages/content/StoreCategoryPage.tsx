@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { LocaleContext } from '../../i18n'
-import { CONTENT, fill } from '../../i18n/content'
+import { CONTENT, fillLocalized } from '../../i18n/content'
 import { usePageData } from '../../data/context'
 import { ContentLayout } from '../../components/content/ContentLayout'
 import { ProductGrid } from '../../components/price/ProductGrid'
@@ -30,7 +30,7 @@ export function StoreCategoryPage() {
       <header className="max-w-3xl">
         <h1 className="text-3xl font-bold text-ink md:text-4xl">{title}</h1>
         <p className="mt-4 text-lg text-ink-soft">
-          {fill(c.category.introSingle, { name: category.name, count: products.length })}
+          {fillLocalized(locale, c.category.introSingle, { name: category.name, count: products.length })}
         </p>
       </header>
 

@@ -97,7 +97,20 @@ export function summarize(offers: Offer[]): PriceSummary | null {
   const savingAbs = priciest.price - cheapest.price
   const savingPct = priciest.price > 0 ? (savingAbs / priciest.price) * 100 : 0
 
-  const updatedAt = offers.reduce((max, o) => (o.updatedAt > max ? o.updatedAt : max), offers[0].updatedAt)
+  // `updatedAt` EN TAZE teklifin değil, SAYFANIN ANLATTIĞI teklifin tarihidir.
+  //
+  // Eskiden bütün tekliflerin MAKSİMUMU alınıyordu. Bayat-fiyat noindex kapısı
+  // (`seo/content.ts`) buna baktığı için, HERHANGİ bir teklif taze olduğu
+  // sürece sayfa indekslenebilir kalıyordu — başlığı, açıklamayı ve
+  // `lowPrice`ı süren EN UCUZ teklif aylar öncesine ait olsa bile.
+  // Canlıda doğrulandı: bir ürün sayfası `index, follow` ile duruyor,
+  // açıklaması 16 GÜNLÜK bir fiyatı "en ucuz" diye ilan ediyor ve sayfanın
+  // kendi tablosu onun yanına "15 gün önce" yazıyordu. Google bu fiyatı zengin
+  // sonuçta gösteriyor, kullanıcı kasada başka bir rakamla karşılaşıyor —
+  // kuralın önlemek için yazıldığı zararın ta kendisi.
+  //
+  // Sayfanın manşeti en ucuz teklif olduğuna göre, tazeliği de onunkidir.
+  const updatedAt = cheapest.updatedAt
 
   return {
     cheapest,
