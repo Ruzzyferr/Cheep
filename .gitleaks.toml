@@ -54,9 +54,23 @@ targetRules = ["generic-api-key"]
 paths = ['''Cheep-Scraper/tests/.*\.py$''']
 
 [[allowlists]]
-description = "off_bulk.py'de bir DOCSTRING: fonksiyonun döndürdüğü istatistik alan adlarını sayıyor, değer değil."
+description = "off_bulk.py'de bir DOCSTRING: fonksiyonun döndürdüğü istatistik alan adlarını sayıyor, değer değil. (Yol ile muaf: gitleaks'in `regexes` alanı SATIRA değil BULUNAN DEĞERE uygulanıyor, o yüzden çevresindeki metne göre yazılan desen tutmuyor.)"
 targetRules = ["generic-api-key"]
-regexes = ['''ambiguous_keys1, unique_keys2''']
+paths = ['''Cheep-Scraper/countries/_common/off_bulk\.py$''']
+
+[[allowlists]]
+description = """eas.json — DOSYA SİLİNDİ, bu muafiyet yalnızca GEÇMİŞ için.
+Gitleaks çalışan ağacı değil git geçmişini tarıyor; silmek geçmişi
+değiştirmiyor. Geçmişi yeniden yazmak (filter-repo) 499 commit'in
+tamamının hash'ini değiştirir, droplet'in ve tüm kopyaların yeniden
+klonlanmasını gerektirir — ve karşılığında elde edilen şey bir SIR değil:
+içerdiği değerler Apple hesap KİMLİKLERİ (issuer ID, key ID, team ID).
+Yetkilendiren asıl parça .p8 özel anahtarı ve o hiçbir zaman repoda
+olmadı. Bedeli faydasından büyük olduğu için geçmiş olduğu gibi bırakıldı.
+Kural bazında dar: aynı yola gerçek bir özel anahtar konsa `private-key`
+kuralı yine yakalar."""
+targetRules = ["generic-api-key"]
+paths = ['''Cheep-Mobile/eas\.json$''']
 
 [[allowlists]]
 description = "Backend README'sindeki .env örneği — Türkçe yer tutucu metinler."
