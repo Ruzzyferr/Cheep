@@ -20,7 +20,12 @@ jobs:
         working-directory: cheep-backend-express
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      # Depodaki TEK üçüncü taraf eylem — bu yüzden etiketle değil SHA ile
+      # sabit. `@v4` taşınabilir bir işaretçi: eylemin deposu ele geçirilse
+      # saldırgan v4'ü kendi commit'ine kaydırır ve bir dahaki koşuda kendi
+      # kodu bizim secret'larımızın olduğu runner'da çalışır. SHA taşınamaz.
+      # Yükseltirken: SHA'yı değiştir, yorumdaki sürümü de güncelle.
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
         with:
           version: 10
       - uses: actions/setup-node@v4

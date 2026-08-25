@@ -189,7 +189,7 @@ jobs:
         with:
           name: android-aab
           path: Cheep-Mobile/android/app/build/outputs/bundle/release/app-release.aab
-          retention-days: 14
+          retention-days: 7
 
   ios:
     name: iOS → TestFlight
@@ -340,7 +340,7 @@ jobs:
         with:
           name: ios-ipa
           path: ${{ runner.temp }}/export/*.ipa
-          retention-days: 14
+          retention-days: 7
 
   etiket:
     name: Sürümü etiketle
