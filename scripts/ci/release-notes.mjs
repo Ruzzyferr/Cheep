@@ -46,7 +46,8 @@ async function lastSuccessfulRunSha() {
     if (!GITHUB_TOKEN || !GITHUB_REPOSITORY) return null;
     // "owner/repo/.github/workflows/dosya.yml@refs/heads/main" -> "dosya.yml"
     const wf = (GITHUB_WORKFLOW_REF || '').split('@')[0].split('/').pop() || 'mobile-release.yml';
-    try {
+
+    const sor = async () => {
         const r = await fetch(
             `https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/${wf}/runs` +
                 `?status=success&branch=main&per_page=10`,
@@ -54,11 +55,26 @@ async function lastSuccessfulRunSha() {
         );
         if (!r.ok) return null;
         const d = await r.json();
-        const onceki = (d.workflow_runs || []).find((x) => String(x.id) !== String(GITHUB_RUN_ID));
-        return onceki?.head_sha ?? null;
-    } catch {
-        return null;
+        return (d.workflow_runs || []).find((x) => String(x.id) !== String(GITHUB_RUN_ID))?.head_sha ?? null;
+    };
+
+    // KISA YENİDEN DENEME — sebebi ölçüldü, tahmin değil: eşzamanlılık grubu
+    // yüzünden bir koşu, bir öncekinin bitişinden ~2 saniye sonra başlıyor
+    // (ölçülen: bitiş 12:25:28, başlangıç 12:25:30) ve API'nin "başarılı
+    // koşular" indeksi o an henüz güncellenmemiş oluyor. Tek denemede bu
+    // yarış art arda gelen her sürümde kaybediliyor, yani birincil kaynak
+    // tam da en çok gerektiği durumda devre dışı kalıyordu.
+    // 25 dakikalık bir hatta 12 saniyelik bekleme bedeli yok sayılır.
+    for (let deneme = 0; deneme < 3; deneme++) {
+        try {
+            const sha = await sor();
+            if (sha) return sha;
+        } catch {
+            /* ağ hatası: yedek yola düşülecek */
+        }
+        if (deneme < 2) await new Promise((r) => setTimeout(r, 4000));
     }
+    return null;
 }
 
 /**
