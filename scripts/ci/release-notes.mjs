@@ -28,7 +28,56 @@ function lastTag() {
     }
 }
 
-const since = lastTag();
+/**
+ * Bir önceki BAŞARILI sürüm koşusunun derlediği commit.
+ *
+ * NEDEN ETİKETE GÜVENMİYORUZ: GITHUB_TOKEN, `.github/workflows/**` değiştiren
+ * bir commit'e etiket atamıyor — GitHub bunu "GitHub App'in workflows izni
+ * yok" diyerek reddediyor ve bu izin YAML'daki `permissions:` anahtarları
+ * arasında yok, yani izin ekleyerek çözülmüyor. Hattın kendisini
+ * güncellediğimizde etiket atılamıyor; etiket aralığın TEK kaynağı olsaydı
+ * notlar sessizce son 30 commit'e düşerdi.
+ *
+ * Koşu geçmişi bu bilgiyi zaten tutuyor ve okumak için hiçbir yazma izni
+ * gerekmiyor. Etiket artık yalnızca insan kolaylığı.
+ */
+async function lastSuccessfulRunSha() {
+    const { GITHUB_TOKEN, GITHUB_REPOSITORY, GITHUB_RUN_ID, GITHUB_WORKFLOW_REF } = process.env;
+    if (!GITHUB_TOKEN || !GITHUB_REPOSITORY) return null;
+    // "owner/repo/.github/workflows/dosya.yml@refs/heads/main" -> "dosya.yml"
+    const wf = (GITHUB_WORKFLOW_REF || '').split('@')[0].split('/').pop() || 'mobile-release.yml';
+    try {
+        const r = await fetch(
+            `https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/${wf}/runs` +
+                `?status=success&branch=main&per_page=10`,
+            { headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: 'application/vnd.github+json' } },
+        );
+        if (!r.ok) return null;
+        const d = await r.json();
+        const onceki = (d.workflow_runs || []).find((x) => String(x.id) !== String(GITHUB_RUN_ID));
+        return onceki?.head_sha ?? null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Commit yerelde var mı (sığ klonda olmayabilir).
+ *
+ * `git cat-file -e <sha>^{commit}` KULLANILMIYOR: execSync Windows'ta
+ * cmd.exe'ye düşüyor ve orada `^` kaçış karakteri — ifade sessizce bozuluyor,
+ * kontrol her zaman "yok" diyor. `-t` aynı işi özel karakter olmadan görüyor.
+ */
+const varMi = (sha) => {
+    try {
+        return sh(`git cat-file -t ${sha}`) === 'commit';
+    } catch {
+        return false;
+    }
+};
+
+const runSha = await lastSuccessfulRunSha();
+const since = runSha && varMi(runSha) ? runSha : lastTag();
 const range = since ? `${since}..HEAD` : '-30';
 
 // YALNIZCA MOBİL UYGULAMAYI DEĞİŞTİREN commit'ler.
@@ -82,7 +131,8 @@ function build(limit) {
 const notes = build(PLAY_LIMIT);
 const commitCount = subjects.length;
 
-console.error(`  aralık: ${since ?? '(etiket yok, son 30 commit)'} → HEAD  (${commitCount} commit)`);
+const kaynak = runSha && varMi(runSha) ? 'son başarılı koşu' : since ? 'etiket' : 'yedek (son 30)';
+console.error(`  aralık: ${since ?? '(kaynak yok)'} → HEAD  [${kaynak}]  (${commitCount} commit)`);
 console.error(`  ${yenilik.length} yenilik, ${duzeltme.length} düzeltme, ${notes.length} karakter`);
 
 if (process.env.GITHUB_OUTPUT) {

@@ -56,10 +56,10 @@ jobs:
       app_version: ${{ steps.app.outputs.app_version }}
       notes: ${{ steps.notes.outputs.notes }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0          # notlar için tüm geçmiş ve etiketler gerekli
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version: 20 }
 
       - name: Uygulama sürümü (app.json)
@@ -80,6 +80,10 @@ jobs:
 
       - name: Sürüm notlarını üret
         id: notes
+        env:
+          # Not aralığını bir önceki BAŞARILI koşudan okumak için (etiket
+          # yerine). Yalnızca okuma; varsayılan GITHUB_TOKEN izni zaten read.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/ci/release-notes.mjs
 
       - name: Özet
@@ -105,13 +109,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: Cheep-Mobile/package-lock.json
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with: { distribution: temurin, java-version: '17' }
 
       - name: İmzalama kasasını secret'lardan kur
@@ -185,7 +189,7 @@ jobs:
             "${{ needs.hazirlik.outputs.version_code }} (${{ needs.hazirlik.outputs.app_version }})" \
             "$RUNNER_TEMP/notes.txt"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: android-aab
           path: Cheep-Mobile/android/app/build/outputs/bundle/release/app-release.aab
@@ -197,8 +201,8 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
@@ -335,7 +339,7 @@ jobs:
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
           rm -f ~/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ios-ipa
@@ -349,18 +353,37 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - name: Etiket at
-        # Etiket bir sonraki koşunun not aralığını belirler. Atılmazsa notlar
-        # her seferinde son 30 commit'i tekrar listeler.
+        # Etiket artık YÜK TAŞIMIYOR: not aralığı bir önceki başarılı koşudan
+        # okunuyor (release-notes.mjs). Burada yalnızca insan kolaylığı için
+        # atılıyor — "build 21 hangi commit'ti" sorusuna cevap.
+        #
+        # Bu yüzden ENGELLENİRSE KOŞUYU DÜŞÜRMÜYOR. GITHUB_TOKEN,
+        # `.github/workflows/**` değiştiren bir commit'e etiket atamıyor
+        # ("refusing to allow a GitHub App to create or update workflow ...
+        # without workflows permission") ve bu izin YAML'da verilebilecek bir
+        # şey değil. Yani hattın kendisini güncellediğimiz her sürümde bu adım
+        # engellenir. Bir kez koşuyu kırmıştı: iki mağazaya da build gitmişken
+        # sonuç KIRMIZI göründü — insanı kırmızıyı ciddiye almamaya alıştıran
+        # tam olarak budur.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: mobil/v${{ needs.hazirlik.outputs.app_version }}-${{ needs.hazirlik.outputs.version_code }}
+          MESAJ: Android vc${{ needs.hazirlik.outputs.version_code }} · iOS build ${{ needs.hazirlik.outputs.build_number }}
         run: |
-          TAG="mobil/v${{ needs.hazirlik.outputs.app_version }}-${{ needs.hazirlik.outputs.version_code }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$TAG" -m "Android vc${{ needs.hazirlik.outputs.version_code }} · iOS build ${{ needs.hazirlik.outputs.build_number }}"
-          git push origin "$TAG"
-          echo "etiket: $TAG"
+          set -uo pipefail
+          OBJ=$(gh api -X POST "repos/$GITHUB_REPOSITORY/git/tags" \
+                  -f tag="$TAG" -f message="$MESAJ" \
+                  -f object="$GITHUB_SHA" -f type=commit --jq '.sha' 2>/dev/null) || OBJ=""
+          if [ -n "$OBJ" ] && gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
+               -f ref="refs/tags/$TAG" -f sha="$OBJ" >/dev/null 2>&1; then
+            echo "etiket atıldı: $TAG"
+          else
+            echo "::warning::Etiket '$TAG' atılamadı (bu commit iş akışı dosyası değiştiriyor olabilir)."
+            echo "Sürüm etkilenmedi: derlemeler mağazalara yüklendi ve not aralığı koşu geçmişinden okunuyor."
+          fi
 
   bildirim:
     name: Bildirim
@@ -372,8 +395,8 @@ jobs:
     needs: [hazirlik, android, ios, etiket]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 20 }
 
       - name: E-posta gönder

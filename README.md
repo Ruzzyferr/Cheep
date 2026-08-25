@@ -108,6 +108,11 @@ JWT **access + refresh** tokens with silent re-auth, where refresh tokens are **
 
 ## Quick Start
 
+> **Setting up on a new machine and want to ship a release?** Pushing to `main`
+> automatically builds and uploads to Play closed testing and TestFlight — no
+> certificates or signing keys are needed locally. See
+> [`docs/yeni-makinede-kurulum.md`](docs/yeni-makinede-kurulum.md) (Turkish).
+
 ### Prerequisites
 - Node.js 18+, Python 3.10+, PostgreSQL 14+ (Docker recommended for the DB)
 

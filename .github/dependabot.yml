@@ -1,0 +1,67 @@
+version: 2
+
+# Dependabot GÜVENLİK güncellemeleri repo ayarlarından zaten açık; bu dosya
+# rutin SÜRÜM güncellemelerini ekliyor. İkisi farklı: güvenlik güncellemesi
+# yalnızca bir açık duyurulduğunda gelir, sürüm güncellemesi bağımlılıklar
+# yaşlanmasın diye düzenli gelir.
+#
+# TASARIM KARARI — az ve gruplu PR. Beş ekosistemde haftalık, paket başına
+# ayrı PR açılsaydı haftada onlarca PR olurdu; iki hafta içinde hepsi
+# okunmadan kapatılır ve Dependabot güvenilirliğini kaybederdi. O yüzden:
+# aylık, gruplanmış, ve ana sürüm atlamaları HARİÇ. Ana sürümler
+# (React Native, Expo SDK, Prisma) kırılma riski taşıyor ve bilinçli bir
+# göç işi olarak ele alınmalı — otomatik PR'la değil.
+updates:
+  - package-ecosystem: npm
+    directory: /Cheep-Mobile
+    schedule: { interval: monthly }
+    open-pull-requests-limit: 3
+    groups:
+      mobil-kucuk-guncellemeler:
+        patterns: ['*']
+        update-types: [minor, patch]
+    ignore:
+      # Expo SDK ve React Native ana sürümleri: `expo install --fix` ve
+      # `expo-doctor` ile yürütülen ayrı bir göç işi.
+      - dependency-name: '*'
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: npm
+    directory: /cheep-backend-express
+    schedule: { interval: monthly }
+    open-pull-requests-limit: 3
+    groups:
+      backend-kucuk-guncellemeler:
+        patterns: ['*']
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: '*'
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: npm
+    directory: /cheep-website
+    schedule: { interval: monthly }
+    open-pull-requests-limit: 3
+    groups:
+      website-kucuk-guncellemeler:
+        patterns: ['*']
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: '*'
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: pip
+    directory: /Cheep-Scraper
+    schedule: { interval: monthly }
+    open-pull-requests-limit: 3
+    groups:
+      scraper-kucuk-guncellemeler:
+        patterns: ['*']
+        update-types: [minor, patch]
+
+  # GitHub Actions'ın kendisi. Eylemler ele geçirilebilir bir tedarik zinciri
+  # halkası; güncel kalmaları önemli. Az sayıda olduğu için gruplanmıyor.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: monthly }
+    open-pull-requests-limit: 3

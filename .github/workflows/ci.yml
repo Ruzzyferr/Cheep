@@ -19,7 +19,7 @@ jobs:
       run:
         working-directory: cheep-backend-express
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # Depodaki TEK üçüncü taraf eylem — bu yüzden etiketle değil SHA ile
       # sabit. `@v4` taşınabilir bir işaretçi: eylemin deposu ele geçirilse
       # saldırgan v4'ü kendi commit'ine kaydırır ve bir dahaki koşuda kendi
@@ -28,7 +28,7 @@ jobs:
       - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
         with:
           version: 10
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: pnpm
@@ -48,8 +48,8 @@ jobs:
       run:
         working-directory: Cheep-Mobile
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
@@ -68,8 +68,8 @@ jobs:
       run:
         working-directory: cheep-website
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           # Node 22 — üretim imajıyla AYNI (`cheep-website/Dockerfile`:
           # `FROM node:22-alpine`). `camera-controls` zaten node>=22 istiyor.
@@ -96,8 +96,8 @@ jobs:
       run:
         working-directory: Cheep-Scraper
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
           cache: pip
@@ -113,7 +113,7 @@ jobs:
     name: Sır taraması
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0        # geçmişin tamamı taranacak
 
@@ -148,8 +148,8 @@ jobs:
     needs: [backend, mobile, website, scraper, guvenlik]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 20 }
       - name: E-posta gönder
         env:
