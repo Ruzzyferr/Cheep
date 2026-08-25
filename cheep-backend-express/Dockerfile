@@ -13,7 +13,17 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-c
 RUN corepack enable
 
 # Bağımlılıklar (lockfile ile deterministik)
-COPY package.json pnpm-lock.yaml ./
+#
+# `pnpm-workspace.yaml` DA kopyalanmalı: pnpm 10 `overrides` bloğunu orada
+# tutuyor (package.json'da değil) ve `pnpm-lock.yaml` bu override'ları kendi
+# içine yazıyor. Dosya imaja girmezse `--frozen-lockfile` iki tarafı
+# karşılaştırıp ERR_PNPM_LOCKFILE_CONFIG_MISMATCH ile düşüyor.
+#
+# Bu tam olarak yaşandı: override dosyası CI'ı düzeltmek için depoya eklendi
+# ama buraya eklenmedi; o günden itibaren `deploy.sh` her çalıştırmada
+# derleme aşamasında kırıldı. Kimse deploy etmediği için fark edilmedi —
+# yani üretim, deploy yolu bozukken sessizce eski imajla çalışıyordu.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Kaynak + Prisma client üretimi + TypeScript derleme
