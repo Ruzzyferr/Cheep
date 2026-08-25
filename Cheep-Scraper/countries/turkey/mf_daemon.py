@@ -137,11 +137,16 @@ def run(raw_dir, api_url, api_key, category_map="category_map.json",
     pacer = Pacer(init=min_delay, lo=min_delay, hi=max(min_delay * 4, 120.0))
     sitemap_ids, sitemap_ts = fetch_all_ids(session), time.time()
     consec_block = 0
-    # BİR TAM ARALIK BEKLE. Eskiden 0.0 idi ve döngünün İLK turu her zaman
-    # prune ediyordu. Servis `Restart=always` olduğu için bir çökme döngüsü
-    # (ör. disk dolduğunda raw JSON yazılamıyor) saniyeler arayla prune
-    # tetikliyordu; her prune iki büyük deleteMany taraması demek.
-    last_prune = time.time()
+    # Son prune zamanı DİSKTE tutuluyor (kv tablosu), bellekte değil.
+    #
+    # Bellekte tutulunca iki uçtan da yanlış oluyordu: 0.0 ile başlarsa
+    # döngünün İLK turu her zaman prune ediyor ve `Restart=always` altındaki
+    # bir çökme döngüsü saniyeler arayla iki büyük deleteMany taraması
+    # tetikliyordu; time.time() ile başlarsa bu sefer her yeniden başlatma
+    # 24 saatlik aralığı sıfırlıyor ve deploy daemon'ı restart ettiği için
+    # sık deploy yapılan bir dönemde prune HİÇ koşmuyordu (bayat fiyatlar
+    # kullanıcıya gösterilmeye devam ederdi).
+    last_prune = st.get_float(conn, "last_prune", 0.0)
     # Son BAŞARILI ingest'ten bu yana geçen süre — prune'un ön koşulu.
     last_ingest_ok = 0.0
     pending = {}
@@ -196,6 +201,7 @@ def run(raw_dir, api_url, api_key, category_map="category_map.json",
             if last_ingest_ok > last_prune:
                 _prune(api_url, api_key, prune_ttl_days)
                 last_prune = time.time()
+                st.set_float(conn, "last_prune", last_prune)
             else:
                 logger.error(
                     "PRUNE ATLANDI — son prune'dan bu yana başarılı ingest yok. "
@@ -203,6 +209,7 @@ def run(raw_dir, api_url, api_key, category_map="category_map.json",
                     "durum=%s", st.counts(conn))
                 # Tekrar tekrar kayda basmasın diye sayacı ilerlet; koşul
                 # sağlanınca bir sonraki aralıkta normal akışına döner.
+                # DİSKE YAZILMIYOR: bu bir erteleme, gerçekleşmiş bir prune değil.
                 last_prune = time.time() - prune_interval + 3600
 
         if time.time() - sitemap_ts > sitemap_refresh:

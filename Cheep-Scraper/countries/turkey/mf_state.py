@@ -29,8 +29,34 @@ def connect(path: str = DEFAULT_DB) -> sqlite3.Connection:
             checks   INTEGER NOT NULL DEFAULT 1
         )""")
     conn.execute("CREATE INDEX IF NOT EXISTS ix_status_ts ON ids(status, last_ts)")
+    # Daemon omru boyunca degil, SURECLER ARASI yasamasi gereken kucuk degerler
+    # (ornegin son prune zamani). Bellekte tutulan bir zamanlayici her yeniden
+    # baslatmada sifirlaniyor; deploy daemon'i restart ettigi icin sik deploy
+    # yapilan bir donemde 24 saatlik prune araligi HIC dolmuyordu.
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS kv (
+            k TEXT PRIMARY KEY,
+            v TEXT NOT NULL
+        )""")
     conn.commit()
     return conn
+
+
+def get_float(conn: sqlite3.Connection, key: str, default: float = 0.0) -> float:
+    """kv tablosundan sayi okur. Yoksa/bozuksa `default`."""
+    row = conn.execute("SELECT v FROM kv WHERE k=?", (key,)).fetchone()
+    if not row:
+        return default
+    try:
+        return float(row[0])
+    except (TypeError, ValueError):
+        return default
+
+
+def set_float(conn: sqlite3.Connection, key: str, value: float) -> None:
+    conn.execute("INSERT INTO kv(k, v) VALUES(?, ?) "
+                 "ON CONFLICT(k) DO UPDATE SET v=excluded.v", (key, str(value)))
+    conn.commit()
 
 
 def mark(conn: sqlite3.Connection, pid: str, status: str, ts: int = None):
