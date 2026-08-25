@@ -161,7 +161,13 @@ export function buildToolExecutor(
         case 'search_products': {
           // getAllProducts returns { products: [...], pagination: {...} }
           // Kısıt elemesi sonrası istenen sayıda sonuç kalsın diye fazladan çekilir.
-          const want = args.limit ?? 10;
+          // SINIRLANDIRILIYOR. `args.limit` MODELİN verdiği bir değer; ham
+          // hâliyle sorguya giriyordu. Model 5000 yazarsa tüm katalog üzerinde
+          // LIMIT 15000'lik bir toplama sorgusu koşuyor; string yazarsa
+          // `want * 3` NaN olup Prisma hatasına ve 502'ye dönüşüyordu.
+          // REST tarafındaki Joi tavanı (max 500) bu yolda geçerli değil.
+          const rawWant = Number(args.limit);
+          const want = Number.isFinite(rawWant) ? Math.min(Math.max(Math.trunc(rawWant), 1), 25) : 10;
           const result = await Products.getAllProducts({ search: args.query, limit: want * 3, countryId });
           const products: any[] = result.products ?? (result as any);
           if (!Array.isArray(products)) return products;

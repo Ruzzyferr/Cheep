@@ -319,7 +319,14 @@ export const registerToken = async (
         update: { user_id: userId, platform, locale: locale ?? null },
     });
 
-/** Kullanıcı bildirimleri kapattığında veya çıkış yaptığında. */
-export const removeToken = async (token: string) => {
-    await prisma.userPushToken.deleteMany({ where: { token } });
+/**
+ * Kullanıcı bildirimleri kapattığında veya çıkış yaptığında.
+ *
+ * SAHİPLİK ŞART: eskiden yalnızca token'a göre siliniyordu, yani token'ı ele
+ * geçiren herhangi bir kimlik doğrulanmış kullanıcı BAŞKASININ cihazını
+ * bildirimlerden düşürebiliyordu. `user_id` koşulu bunu kapatıyor; kendi
+ * token'ını silen kullanıcı için davranış değişmiyor.
+ */
+export const removeToken = async (token: string, userId: number) => {
+    await prisma.userPushToken.deleteMany({ where: { token, user_id: userId } });
 };

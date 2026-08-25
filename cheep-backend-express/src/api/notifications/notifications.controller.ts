@@ -103,7 +103,7 @@ export const removePushToken = async (req: Request, res: Response, next: NextFun
             res.status(400).json({ success: false, message: 'token zorunludur' });
             return;
         }
-        await PushService.removeToken(token);
+        await PushService.removeToken(token, userId);
         res.status(200).json({ success: true });
     } catch (error) {
         next(error);

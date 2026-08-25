@@ -5,6 +5,7 @@ import { runAgentLoop } from './agent-loop.js';
 import { getProfile } from '../profile/profile.service.js';
 import { checkAssistantLimit, startOfTrDay, startOfTrMonth } from '../../services/assistant-limit.js';
 import { AppError, notFound } from '../../utils/app-error.js';
+import { isEntitled } from '../../services/entitlement.js';
 import type { ConstraintProfile } from '../../services/product-constraints.js';
 
 /** Modele yollanan azami geçmiş mesaj sayısı (maliyet tavanı). */
@@ -101,7 +102,7 @@ export const sendMessage = async (
   const now = new Date();
   const dayStart = startOfTrDay(now);
   const monthStart = startOfTrMonth(now);
-  const [history, profile, todayCount, monthCount, limitUser] = await Promise.all([
+  const [history, profile, todayCount, monthCount, limitUser, sub] = await Promise.all([
     // Geçmiş SON N mesajla sınırlı: agent-loop her turda tüm geçmişi tekrar
     // yolluyor, dolayısıyla sınırsız geçmiş girdi maliyetini sohbet uzadıkça
     // doğrusal büyütür. Son 20 mesaj bağlamı korumaya fazlasıyla yetiyor.
@@ -118,11 +119,26 @@ export const sendMessage = async (
       where: { role: 'user', thread: { user_id: userId }, created_at: { gte: monthStart } },
     }),
     prisma.user.findUnique({ where: { id: userId }, select: { is_premium: true, language: true } }),
+    prisma.subscription.findUnique({ where: { user_id: userId } }),
   ]);
+
+  // PREMIUM HAKKI ZAMANA DUYARLI TÜRETİLİYOR — önbelleklenmiş `is_premium`
+  // sütununa GÜVENİLMİYOR.
+  //
+  // O sütun yalnızca webhook ya da `/billing/sync` çalıştığında yeniden
+  // hesaplanıyordu. Yani abonelik dönemi sessizce dolduğunda (EXPIRATION
+  // webhook'u kaybolursa) `is_premium` sonsuza dek `true` kalıyor ve kullanıcı
+  // ücretsizken premium kotasını (300/ay) kullanmaya devam ediyordu; bunu
+  // düzeltecek bir zamanlanmış iş de yok. `isEntitled` dönem sonunu ZATEN
+  // kontrol ediyor, dolayısıyla burada türetmek kendini düzelten bir yol.
+  const premiumNow = isEntitled(
+    sub ? { status: sub.status as never, current_period_end: sub.current_period_end } : null,
+    now
+  );
   // Ucuz ön kontrol: kota zaten dolmuşsa aşağıdaki işlemi hiç başlatma.
   const preVerdict = checkAssistantLimit(
     { today: todayCount, month: monthCount },
-    limitUser?.is_premium ?? false
+    premiumNow
   );
   if (!preVerdict.allowed) {
     // İstemci bu kodu görüp doğru ekranı açıyor: ücretsiz kullanıcıya paywall,
@@ -159,7 +175,7 @@ export const sendMessage = async (
         where: { role: 'user', thread: { user_id: userId }, created_at: { gte: monthStart } },
       }),
     ]);
-    const v = checkAssistantLimit({ today, month }, limitUser?.is_premium ?? false);
+    const v = checkAssistantLimit({ today, month }, premiumNow);
     if (!v.allowed) {
       throw new AppError('Mesaj limitin doldu.', 429, 'DAILY_LIMIT');
     }
@@ -234,6 +250,6 @@ export const sendMessage = async (
     remaining: Math.max(0, verdict.remaining - 1),
     limit: verdict.limit,
     window: verdict.window,
-    isPremium: limitUser?.is_premium ?? false,
+    isPremium: premiumNow,
   };
 };
