@@ -104,6 +104,33 @@ jobs:
       # 259 test; ağ gerektirmiyor (hepsi sahte veriyle çalışıyor).
       - run: python -m pytest tests -q
 
+  guvenlik:
+    name: Sır taraması
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # geçmişin tamamı taranacak
+
+      - name: gitleaks kur
+        # Resmi eylem yerine ikili dosya: eylem sürüm etiketine bağlı
+        # (etiket taşınabilir), ayrıca kuruluşlarda lisans anahtarı istiyor.
+        # Sürüm burada sabit — yükseltme bilinçli bir commit olsun.
+        env:
+          GITLEAKS_VERSION: 8.30.1
+        run: |
+          set -euo pipefail
+          curl -sSLf -o /tmp/gl.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          tar -xzf /tmp/gl.tar.gz -C /tmp gitleaks
+          sudo mv /tmp/gitleaks /usr/local/bin/
+          gitleaks version
+
+      - name: Geçmişi tara
+        # --redact: bulunan sır CI kaydına DÜŞMESİN. Aksi hâlde sızıntıyı
+        # bildiren rapor sızıntının ikinci bir kopyasını üretmiş olurdu.
+        run: gitleaks detect --source . --config .gitleaks.toml --redact --verbose
+
   bildirim:
     name: Bildirim (yalnızca kırıkta)
     # SADECE BAŞARISIZLIKTA ve SADECE main'de.
@@ -113,7 +140,7 @@ jobs:
     # atmak kutuyu gürültüyle doldurur ve iki hafta içinde kimse okumaz —
     # yani asıl kırmızıyı da kaçırtır. PR'lar hariç: sonuç zaten PR sayfasında.
     if: failure() && github.event_name == 'push'
-    needs: [backend, mobile, website, scraper]
+    needs: [backend, mobile, website, scraper, guvenlik]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -128,6 +155,7 @@ jobs:
             Mobil|${{ needs.mobile.result }}
             Website|${{ needs.website.result }}
             Scraper|${{ needs.scraper.result }}
+            Sır taraması|${{ needs.guvenlik.result }}
           NOTIFY_SHA: ${{ github.sha }}
           NOTIFY_COMMIT_MSG: ${{ github.event.head_commit.message }}
           NOTIFY_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

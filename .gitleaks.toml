@@ -1,0 +1,46 @@
+# Sır taraması yapılandırması (gitleaks).
+#
+# NEDEN VAR: repo public'ken GitHub'ın ücretsiz secret scanning + push
+# protection'ı açıktı. Repo private olunca bu ikisi ücretli GitHub Secret
+# Protection'a bağlanıyor, yani kapanıyor. Yerine CI'da gitleaks koşuyor;
+# amaç aynı: bir sır yanlışlıkla commit'lenirse main'e girmeden yakalansın.
+
+[extend]
+useDefault = true
+
+# ---------------------------------------------------------------------------
+# İZİN LİSTESİ
+#
+# Buradaki her madde bilinçli bir karar. "Gürültüyü sustur" diye değil,
+# "bu değer TASARIM GEREĞİ istemcide" diye muaf. Üçü de uygulama paketinin
+# içinde kullanıcının cihazına gidiyor; APK'yı açan herkes zaten görüyor.
+# Repoda durmaları yeni bir maruziyet yaratmıyor.
+#
+# Buraya bir şey eklemeden önce sorulacak soru: bu değer sunucu tarafında bir
+# şeyi açıyor mu? Açıyorsa muaf DEĞİL, döndürülmesi gerekir.
+# ---------------------------------------------------------------------------
+[[allowlists]]
+description = "Firebase/Google istemci anahtarı — APK içinde taşınıyor, gizli değil. Kötüye kullanıma karşı korunma yolu gizlemek değil, Google Cloud Console'da kısıtlamak (paket adı + SHA-1 + yalnızca gereken API'ler)."
+paths = ['''Cheep-Mobile/google-services\.json''']
+
+[[allowlists]]
+description = "RevenueCat GENEL SDK anahtarları (appl_/goog_). Belgelerinde istemciye gömülmek üzere tasarlandıkları yazılı. Gizli olan v1 REST anahtarı (sk_...) ayrı ve repoda yok."
+regexes = [
+    '''appl_[A-Za-z0-9]{20,}''',
+    '''goog_[A-Za-z0-9]{20,}''',
+]
+
+[[allowlists]]
+description = "Örnek/şablon dosyaları: gerçek değer değil, doldurulacak yer tutucu."
+paths = [
+    '''.*\.env\.example$''',
+    '''.*\.env\.production\.example$''',
+    '''Cheep-Scraper/ENV_SETUP\.md''',
+]
+
+[[allowlists]]
+description = "Belgelerdeki yerel geliştirme veritabanı adresleri (postgres:postgres@localhost). Yalnızca geliştiricinin kendi makinesindeki docker kabına işaret ediyor."
+regexes = [
+    '''postgres(ql)?://postgres:postgres@(localhost|127\.0\.0\.1):\d+''',
+    '''postgres(ql)?://(USER|user):(PASSWORD|password|pass)@localhost''',
+]
