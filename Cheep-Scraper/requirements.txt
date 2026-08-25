@@ -20,7 +20,7 @@ confluent-kafka==2.5.3
 fastavro==1.9.7
 
 # Test
-pytest==8.4.2
+pytest==9.0.3
 
 
 
