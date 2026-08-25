@@ -81,10 +81,29 @@ export function ProductGridCard({
             {t('product.cheapest_stores', { count: Math.min(topThreePrices.length, 3) })}
           </Text>
           <View style={styles.pricesList}>
+            {/* İKİ SÜTUN — akan tek satır DEĞİL.
+                Eskiden "ŞOK: ₺28,00" tek bir metin akışıydı; market adları
+                farklı genişlikte olduğu için ₺ işareti her satırda BAŞKA bir
+                x'ten başlıyordu. Fiyat karşılaştırma uygulamasında sayılar
+                ürünün kendisi; hizalanamayan bir fiyat sütunu hem okumayı
+                zorlaştırıyor hem rakamların güvenilirliğini düşürüyor.
+                Ad solda esner, fiyat sağa yaslı ve tabular-nums ile sabit
+                genişlikte basılır; en ucuz satır ayrıca işaretlenir. */}
             {topThreePrices.slice(0, 3).map((priceInfo, index) => (
-              <Text key={index} style={[styles.priceItem, index > 0 && { marginTop: 2 }]} numberOfLines={1}>
-                {priceInfo.storeName}: <Text style={styles.priceValue}>{priceInfo.price}</Text>
-              </Text>
+              <View
+                key={index}
+                style={[styles.priceRow, index > 0 && { marginTop: 2 }]}
+              >
+                <Text
+                  style={[styles.priceStore, index === 0 && styles.priceStoreBest]}
+                  numberOfLines={1}
+                >
+                  {priceInfo.storeName}
+                </Text>
+                <Text style={[styles.priceValue, index === 0 && styles.priceValueBest]}>
+                  {priceInfo.price}
+                </Text>
+              </View>
             ))}
           </View>
         </View>
@@ -165,14 +184,36 @@ const styles = StyleSheet.create({
     // gap replaced with marginTop in render
   },
 
-  priceItem: {
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: spacing.xs,
+  },
+
+  priceStore: {
     ...typography.styles.caption,
     fontSize: 12,
+    color: colors.text.secondary,
+    flexShrink: 1,
+  },
+
+  priceStoreBest: {
     color: colors.text.primary,
+    fontWeight: '600',
   },
 
   priceValue: {
+    ...typography.styles.caption,
+    fontSize: 12,
     fontWeight: '600',
+    color: colors.text.primary,
+    // Rakam genişliklerini eşitler → fiyatlar sütun hâlinde okunur.
+    fontVariant: ['tabular-nums'],
+  },
+
+  priceValueBest: {
+    color: colors.primary.main,
   },
 
   warningBadge: {

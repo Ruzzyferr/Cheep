@@ -512,7 +512,11 @@ const styles = StyleSheet.create({
   savingsPercent: {
     ...typography.styles.caption,
     fontSize: 10,
-    color: colors.secondary.main,
+    // secondary.main (#2E9E78) DEĞİL: beyaz üzerinde 3,34:1 ve bu 10sp'lik
+    // bir metin — WCAG AA 4,5:1 istiyor. Üstelik taşıdığı bilgi ürünün
+    // vaadinin ta kendisi ("%11 tasarruf"); okunamaması kabul edilemez.
+    // primary.main 6,12:1 veriyor ve marka yeşilinin ta kendisi.
+    color: colors.primary.main,
     fontWeight: '600',
   },
 
