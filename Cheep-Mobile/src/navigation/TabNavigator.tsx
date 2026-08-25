@@ -6,7 +6,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import type { CompositeNavigationProp } from '@react-navigation/native';
@@ -17,12 +17,28 @@ import { HomeNavigator } from './HomeNavigator';
 import { ListsNavigator } from './ListsNavigator';
 import { DealsNavigator } from './DealsNavigator';
 import { ProfileNavigator } from './ProfileNavigator';
-import { CartProvider, useCart } from '../context/CartContext';
+import { CartProvider } from '../context/CartContext';
+import { useUnreadCount } from '../queries/useMisc';
 import { ToastProvider } from '../context/ToastContext';
 import { colors, spacing, shadows } from '../theme';
 import type { TabParamList, RootStackParamList } from './types';
 
 const Tab = createBottomTabNavigator<TabParamList>();
+
+// TEK IKON AILESI, TEK KURAL.
+//
+// Sekme cubugunda MaterialIcons'in DOLU (home, sell, person) ve CIZGI
+// (list-alt) glifleri KARISIYORDU; ayni satirda iki farkli agirlik, tasarimin
+// "toplanmis, tasarlanmamis" okunmasinin en gorunur sebeplerinden biriydi.
+// Kural: CIZGI = pasif, DOLU = yalnizca AKTIF sekme. MaterialCommunityIcons
+// her ikisinin de guvenilir ciftlerini tasidigi icin butun cubuk o aileye
+// alindi.
+const SEKME_IKONLARI = {
+  home: { dolu: 'home', cizgi: 'home-outline' },
+  lists: { dolu: 'clipboard-list', cizgi: 'clipboard-list-outline' },
+  deals: { dolu: 'tag', cizgi: 'tag-outline' },
+  profile: { dolu: 'account', cizgi: 'account-outline' },
+} as const;
 
 export function TabNavigator() {
   return (
@@ -37,7 +53,10 @@ export function TabNavigator() {
 function TabNavigatorInner() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { count } = useCart();
+  // Rozet kaynagi: OKUNMAMIS fiyat dususu (bkz. tabBarBadge gerekcesi).
+  // Sepet urun sayisi (`useCart().count`) artik rozette KULLANILMIYOR;
+  // liste ekrani onu zaten yaziyor.
+  const { data: unreadDrops = 0 } = useUnreadCount();
 
   return (
     <View style={styles.container}>
@@ -78,9 +97,9 @@ function TabNavigatorInner() {
           component={HomeNavigator}
           options={{
             tabBarLabel: t('tabs.home'),
-            tabBarIcon: ({ color }) => (
-              <MaterialIcons
-                name="home"
+            tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons
+                name={focused ? SEKME_IKONLARI.home.dolu : SEKME_IKONLARI.home.cizgi}
                 size={24}
                 color={color}
               />
@@ -97,18 +116,26 @@ function TabNavigatorInner() {
           component={ListsNavigator}
           options={{
             tabBarLabel: t('tabs.lists'),
-            // Aktif listedeki ürün sayısını rozet olarak göster — kullanıcı
-            // Listelerim'e girmeden sepetinde kaç ürün olduğunu görür.
-            tabBarBadge: count > 0 ? count : undefined,
+            // ROZET "DIKKAT GEREKIYOR" DEMEK, "envanterin bu" DEMEK DEGIL.
+            //
+            // Eskiden aktif listedeki URUN SAYISI basiliyordu; listesi olan
+            // herkeste rozet KALICI olarak yaniyordu ve hicbir zaman
+            // temizlenmiyordu. Kullanicilari butun rozetleri gormezden gelmeye
+            // alistiran tam olarak budur — gercekten haber verecegimiz gun
+            // (fiyat dustu) rozet artik bir sey anlatmiyor.
+            //
+            // Artik OKUNMAMIS fiyat dususu sayisi gosteriliyor; okununca sifira
+            // dusuyor. Urun sayisi zaten liste ekraninda yaziyor.
+            tabBarBadge: unreadDrops > 0 ? unreadDrops : undefined,
             tabBarBadgeStyle: {
               backgroundColor: colors.primary.main,
               color: colors.background.paper,
               fontSize: 10,
               fontWeight: '700',
             },
-            tabBarIcon: ({ color }) => (
-              <MaterialIcons
-                name="list-alt"
+            tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons
+                name={focused ? SEKME_IKONLARI.lists.dolu : SEKME_IKONLARI.lists.cizgi}
                 size={24}
                 color={color}
               />
@@ -148,9 +175,9 @@ function TabNavigatorInner() {
           component={DealsNavigator}
           options={{
             tabBarLabel: t('tabs.deals'),
-            tabBarIcon: ({ color }) => (
-              <MaterialIcons
-                name="sell"
+            tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons
+                name={focused ? SEKME_IKONLARI.deals.dolu : SEKME_IKONLARI.deals.cizgi}
                 size={24}
                 color={color}
               />
@@ -167,9 +194,9 @@ function TabNavigatorInner() {
           component={ProfileNavigator}
           options={{
             tabBarLabel: t('tabs.profile'),
-            tabBarIcon: ({ color }) => (
-              <MaterialIcons
-                name="person"
+            tabBarIcon: ({ color, focused }) => (
+              <MaterialCommunityIcons
+                name={focused ? SEKME_IKONLARI.profile.dolu : SEKME_IKONLARI.profile.cizgi}
                 size={24}
                 color={color}
               />
@@ -215,7 +242,7 @@ function TabFAB() {
     <View
       style={[
         styles.fabContainer,
-        { bottom: insets.bottom + 16 } // Tab bar içinde ortalamak için: (72 - 40) / 2 = 16
+        { bottom: insets.bottom + 12 } // Tab bar icinde ortalamak icin: (72 - 48) / 2 = 12
       ]}
       pointerEvents="box-none"
     >
@@ -246,9 +273,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   fabButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12, // Daha küçük border radius
+    // 48dp: Android dokunma hedefi tabani. 40dp altinda kaliyordu ve bu,
+    // sekme cubugundaki EN ONEMLI eylem (asistan) icin en kucuk hedefti.
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: colors.primary.main,
     justifyContent: 'center',
     alignItems: 'center',

@@ -204,7 +204,8 @@
     "no_price_info_desc": "No price has been added for this product yet.",
     "cheapest_label": "Cheapest",
     "difference": "Difference",
-    "average_price": "Average price:"
+    "average_price": "Average price:",
+    "saving_pct": "save {{pct}}%"
   },
   "home": {
     "greeting": "Hello",

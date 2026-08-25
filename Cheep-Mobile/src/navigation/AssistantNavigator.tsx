@@ -33,7 +33,11 @@ export function AssistantNavigator() {
       <Stack.Screen
         name="AssistantChat"
         component={AssistantChatScreen}
-        options={{ title: `✨ ${t('assistant.header_title')}` }}
+        // EMOJI YOK. Ayni ozellik tab bar'da vektor bir kivilcimla temsil
+        // ediliyordu; baslikta sistem emojisi kullanmak tek ozellige IKI
+        // farkli marka veriyor ve emojinin ciziminin platforma bagli olmasi
+        // (ustelik paletle ilgisiz bir altin ton) tasarimi dagitiyordu.
+        options={{ title: t('assistant.header_title') }}
       />
     </Stack.Navigator>
   );

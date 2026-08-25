@@ -204,7 +204,8 @@
     "no_price_info_desc": "Do tego produktu nie dodano jeszcze ceny.",
     "cheapest_label": "Najtaniej",
     "difference": "Różnica",
-    "average_price": "Cena średnia:"
+    "average_price": "Cena średnia:",
+    "saving_pct": "oszczędź {{pct}}%"
   },
   "home": {
     "greeting": "Cześć",

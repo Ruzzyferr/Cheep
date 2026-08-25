@@ -357,7 +357,8 @@ export function AssistantChatScreen({
   // ─── Header buttons ──────────────────────────────────────────
   useEffect(() => {
     navigation.setOptions({
-      title: `✨ ${i18n.t('assistant.header_title')}`,
+      // Bkz. AssistantNavigator: emoji yerine tab bar'daki vektor isaret.
+      title: i18n.t('assistant.header_title'),
       headerRight: () => (
         <View style={styles.headerButtons}>
           {/* remaining/5 indicator */}

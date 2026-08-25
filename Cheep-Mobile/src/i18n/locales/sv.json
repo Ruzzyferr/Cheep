@@ -204,7 +204,8 @@
     "no_price_info_desc": "Inget pris har lagts till för den här produkten än.",
     "cheapest_label": "Billigast",
     "difference": "Skillnad",
-    "average_price": "Snittpris:"
+    "average_price": "Snittpris:",
+    "saving_pct": "spara {{pct}}%"
   },
   "home": {
     "greeting": "Hej",

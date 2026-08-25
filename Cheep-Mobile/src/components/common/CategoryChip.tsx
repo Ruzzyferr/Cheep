@@ -31,6 +31,10 @@ const styles = StyleSheet.create({
   chip: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
+    // 44dp: cipler olculdugunde 38dp cikiyordu — Android'in dokunma hedefi
+    // tabaninin altinda. Kategori seridi ekranin en cok dokunulan yuzeyi.
+    minHeight: 44,
+    justifyContent: 'center',
     borderRadius: borderRadius.md, // Less rounded
     backgroundColor: colors.background.card,
     borderWidth: 1,

@@ -204,7 +204,8 @@
     "no_price_info_desc": "Bu ürün için henüz fiyat bilgisi eklenmemiş.",
     "cheapest_label": "En Ucuz",
     "difference": "Fark",
-    "average_price": "Ortalama Fiyat:"
+    "average_price": "Ortalama Fiyat:",
+    "saving_pct": "%{{pct}} tasarruf"
   },
   "home": {
     "greeting": "Merhaba",

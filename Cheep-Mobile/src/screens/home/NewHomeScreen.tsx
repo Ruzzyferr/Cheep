@@ -284,7 +284,10 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
           <View style={styles.hero}>
             <View style={styles.heroBody}>
               <Text style={styles.heroGreeting}>
-                {firstName ? t('home.greeting_named', { name: firstName }) : t('home.greeting')} 👋
+                {/* 👋 KALDIRILDI: hero'da bagirmasi gereken TEK oge tasarruf
+                    rakami. Emoji hem dikkati bolüyor hem platforma gore
+                    farkli ciziliyordu. */}
+                {firstName ? t('home.greeting_named', { name: firstName }) : t('home.greeting')}
               </Text>
               <Text style={styles.heroOverline}>
                 {hasSavings ? t('home.overline_saved') : t('home.overline_potential')}

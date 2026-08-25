@@ -266,9 +266,12 @@ const styles = StyleSheet.create({
   },
 
   addButton: {
-    width: 32,
-    height: 32,
-    borderRadius: borderRadius.sm,
+    // 44dp: kartin BIRINCIL eylemi 32dp ile Android'in dokunma hedefi
+    // tabaninin altindaydi ve kartin sag alt kosesindeki bosluga
+    // gomulmus, cekingen bir dugme gibi duruyordu.
+    width: 44,
+    height: 44,
+    borderRadius: borderRadius.md,
     backgroundColor: colors.primary.main,
     justifyContent: 'center',
     alignItems: 'center',

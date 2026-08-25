@@ -158,7 +158,7 @@ export function ProductDetailScreen({
                   {formatMoney(priceStats.priceDifference)}
                 </Text>
                 <Text style={styles.savingsPercent}>
-                  %{priceStats.savingsPercentage.toFixed(0)} tasarruf
+                  {t('product.saving_pct', { pct: priceStats.savingsPercentage.toFixed(0) })}
                 </Text>
               </View>
             </View>
@@ -491,16 +491,25 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs / 2,
   },
 
+  // RENK HIYERARSISI — ekranda TEK bir "cevap" olmali.
+  //
+  // Eskiden EN UCUZ ve FARK'in ikisi de YESILDI, yani hangisinin cevap oldugu
+  // renkten okunamiyordu; EN PAHALI ise paletin hicbir yerinde bulunmayan saf
+  // bir ALARM KIRMIZISIYLA (#EF4444) yaziliyordu. Rakip bir marketin fiyati
+  // bir hata durumu degil. Artik: en ucuz = marka yesili (tek vurgu), en
+  // pahali = notr, fark = ikincil yesil ve daha kucuk.
   cheapestPrice: {
-    color: colors.secondary.main,
+    color: colors.primary.main,
   },
 
   expensivePrice: {
-    color: colors.error?.main || '#EF4444',
+    color: colors.text.secondary,
   },
 
   differencePrice: {
-    color: colors.primary.main,
+    // EN UCUZ'dan bir kademe ASAGIDA: tek vurgu onda kalsin.
+    color: colors.text.secondary,
+    fontSize: 16,
   },
 
   statStore: {

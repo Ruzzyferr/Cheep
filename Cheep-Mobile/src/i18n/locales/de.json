@@ -204,7 +204,8 @@
     "no_price_info_desc": "Für dieses Produkt wurde noch kein Preis hinzugefügt.",
     "cheapest_label": "Günstigste",
     "difference": "Differenz",
-    "average_price": "Durchschnittspreis:"
+    "average_price": "Durchschnittspreis:",
+    "saving_pct": "{{pct}}% sparen"
   },
   "home": {
     "greeting": "Hallo",
