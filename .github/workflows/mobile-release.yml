@@ -153,7 +153,7 @@ jobs:
             echo "| Play kanalı | $ANDROID_TRACK |"
             echo ""
             echo '```'
-            # NOTLAR ENV ILE GELIR, ${{ }} ILE DEGIL.
+            # NOTLAR ENV ILE GELIR, ifade enterpolasyonuyla DEGIL.
             #
             # `steps.notes.outputs.notes` commit KONULARINDAN uretiliyor
             # (git log --pretty=%s) ve Actions onu kabuk ayristirmadan ONCE
