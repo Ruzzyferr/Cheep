@@ -2,6 +2,10 @@ import { Router } from 'express';
 import * as UserController from './users.controller.js';
 import { authenticate } from '../../middleware/auth.middleware.js';
 import { validateIdParam } from '../../middleware/validate-id.middleware.js';
+import {
+    accountDeletionLimiter,
+    accountDeletionIpLimiter,
+} from '../../middleware/rate-limit.middleware.js';
 
 const router = Router();
 
@@ -124,7 +128,16 @@ router.delete('/me', authenticate, UserController.deleteMe);
  *       401:
  *         description: Geçersiz e-posta veya şifre
  */
-router.post('/account-deletion', UserController.requestAccountDeletion);
+// Kimliksiz + parola dogrulayan + GERI DONUSSUZ silen uc. Login ile ayni
+// iki katmanli brute-force korumasi sart: bunlar olmadan tek koruma 600
+// istek/dk'lik genel kovaydi, yani tek hesaba saatte ~36.000 parola
+// denemesi -- ayni denemenin /auth/login uzerinden siniri saatte 40.
+router.post(
+    '/account-deletion',
+    accountDeletionIpLimiter,
+    accountDeletionLimiter,
+    UserController.requestAccountDeletion,
+);
 
 // ============================================
 // FAVORITE STORES

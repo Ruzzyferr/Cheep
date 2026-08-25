@@ -320,9 +320,16 @@ export const deleteList = async (listId: number, userId: number) => {
 /**
  * Şablon listeleri getir (public olabilir)
  */
-export const getTemplates = async () => {
-    return await prisma.list.findMany({
-        where: { is_template: true },
+export const getTemplates = async (countryId?: number) => {
+    const templates = await prisma.list.findMany({
+        where: {
+            is_template: true,
+            // ÜLKEYE GÖRE SÜZ: şablonun ürünleri o ülkenin kataloğundan
+            // geliyor. Bir TR şablonunu PL kullanıcısına vermek, sonra
+            // `createFromTemplate` product_id'leri olduğu gibi kopyaladığı
+            // için, karşılaştırmada HER kalemi "eksik" çıkan bir liste üretir.
+            ...(countryId ? { country_id: countryId } : {}),
+        },
         include: {
             list_items: {
                 include: {
@@ -337,7 +344,14 @@ export const getTemplates = async () => {
         orderBy: {
             created_at: 'desc',
         },
+        // Bu uç KİMLİK DOĞRULAMASIZ. Sınırsız bırakmak, her şablonu tüm
+        // kalemleri ve ürünleriyle döndüren açık bir uç demek.
+        take: 50,
     });
+
+    // `user_id` DIŞARI VERİLMEZ. Şablon galerisi herkese açık; kimin
+    // oluşturduğu bilgisi ne gerekli ne de paylaşılabilir.
+    return templates.map(({ user_id: _user_id, ...rest }) => rest);
 };
 
 /**

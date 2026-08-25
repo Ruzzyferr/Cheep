@@ -114,6 +114,50 @@ export const loginAccountLimiter = rateLimit({
 });
 
 /**
+ * Kimliksiz hesap silme (`POST /users/account-deletion`).
+ *
+ * Bu uç e-posta + parola alıp doğrularsa hesabı GERİ DÖNÜŞSÜZ siler
+ * (listeler, sohbetler, abonelik, profil cascade ile gider). Yani parola
+ * doğrulayan bir uç — ama `/auth/login`'in brute-force korumasının
+ * DIŞINDAYDI: tek koruması 600 istek/dk'lık genel kova olduğu için tek bir
+ * hesaba saatte ~36.000 parola denemesi yapılabiliyordu; aynı deneme
+ * `/auth/login` üzerinden saatte 40 ile sınırlı. Üstelik isabet hâlinde
+ * onay adımı yok, hesap anında siliniyor.
+ *
+ * Bu yüzden login ile AYNI iki katmana bağlanıyor: hesap başına ve IP
+ * başına. Play Store bu özelliği zorunlu tuttuğu için uç kaldırılamıyor;
+ * doğru çözüm onu login kadar sıkı korumak.
+ */
+export const accountDeletionLimiter = rateLimit({
+    ...base,
+    windowMs: 15 * 60 * 1000,
+    max: perEnv(5),
+    keyGenerator: (req) => {
+        const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+        return email ? `del:${email}` : `ip:${ipKeyGenerator(req.ip ?? '')}`;
+    },
+    // Başarılı silme kotadan düşmez; yalnızca başarısız denemeler sayılır.
+    skipSuccessfulRequests: true,
+    message: {
+        success: false,
+        message: 'Çok fazla hesap silme denemesi. Lütfen 15 dakika sonra tekrar deneyin.',
+    },
+});
+
+/** Kimliksiz hesap silme — IP başına ikinci katman (e-posta değiştiren saldırgan). */
+export const accountDeletionIpLimiter = rateLimit({
+    ...base,
+    windowMs: 15 * 60 * 1000,
+    max: perEnv(20),
+    keyGenerator: (req) => `delip:${ipKeyGenerator(req.ip ?? '')}`,
+    skipSuccessfulRequests: true,
+    message: {
+        success: false,
+        message: 'Çok fazla hesap silme denemesi. Lütfen 15 dakika sonra tekrar deneyin.',
+    },
+});
+
+/**
  * E-posta doğrulama (verify-email / resend-verification). Rotalarda
  * `authenticate` bu limiterden ÖNCE çalışıyor, dolayısıyla anahtar kullanıcı —
  * CGNAT sorunu yok.

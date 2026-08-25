@@ -217,7 +217,7 @@ export const getListStatistics = async (req: Request, res: Response, next: NextF
  */
 export const getTemplates = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const templates = await ListService.getTemplates();
+        const templates = await ListService.getTemplates(req.country?.id);
         
         res.status(200).json({
             success: true,

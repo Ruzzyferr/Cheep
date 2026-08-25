@@ -5,7 +5,15 @@ export const createListSchema = Joi.object({
         'string.empty': 'Liste adı boş olamaz',
         'any.required': 'Liste adı zorunludur',
     }),
-    is_template: Joi.boolean().default(false),
+    // `is_template` ISTEMCIDEN ALINMIYOR (bilerek kaldirildi).
+    //
+    // Bu bayrak listeyi `GET /lists/templates/all` ucuna dusuruyor; o uc
+    // KIMLIK DOGRULAMASIZ ve her sablonu list_items + product ile birlikte,
+    // ustelik `user_id` alanini da tasiyarak donduruyor. Yani herhangi bir
+    // kullanici tek bir PUT ile hem kendi listesini ve kullanici kimligini
+    // internete acabiliyor, hem de istedigi icerigi (spam, taciz) butun
+    // kullanicilarin gordugu galeriye koyabiliyordu -- hicbir moderasyon yok.
+    // Sablonlar kurulmus (seed) icerik olmali; kullanici uretimi degil.
     budget: Joi.alternatives()
         .try(
             Joi.number().positive(),
@@ -17,7 +25,7 @@ export const createListSchema = Joi.object({
 
 export const updateListSchema = Joi.object({
     name: Joi.string().min(2).max(100).optional(),
-    is_template: Joi.boolean().optional(),
+    // is_template: bkz. createListSchema -- istemciden kabul edilmiyor.
     budget: Joi.alternatives()
         .try(
             Joi.number().positive(),
