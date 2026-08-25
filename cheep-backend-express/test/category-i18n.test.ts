@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     CATEGORY_NAMES,
+    CATEGORY_SLUG_ALIASES,
     SUPPORTED_LANGS,
     defaultLangForCountry,
     localizeCategory,
@@ -69,13 +70,38 @@ describe('CATEGORY_NAMES sözlüğü', () => {
     });
 
     it('bir dil içinde iki kategori aynı slug\'a düşmez — sayfa yutulur', () => {
+        // Takma ad çiftleri istisna: bunlar AYNI kategorinin TR/PL adlandırma
+        // varyantları (bkz. CATEGORY_SLUG_ALIASES). Aynı yerelleştirilmiş
+        // slug'a düşmeleri hata değil, istenen davranış. Test asıl olarak
+        // FARKLI iki kategorinin tek URL'de birbirini yutmasını koruyor.
+        const aliasOf = new Map<string, string>();
+        for (const group of CATEGORY_SLUG_ALIASES) {
+            for (const s of group) aliasOf.set(s, group[0]);
+        }
+        const canonical = (s: string) => aliasOf.get(s) ?? s;
+
         for (const lang of SUPPORTED_LANGS) {
             const seen = new Map<string, string>();
             for (const slug of slugs) {
                 const produced = slugifyName(CATEGORY_NAMES[slug][lang]);
                 const clash = seen.get(produced);
+                if (clash && canonical(clash) === canonical(slug)) continue; // takma ad
                 expect(clash, `${lang}: "${slug}" ve "${clash}" ikisi de /${produced}`).toBeUndefined();
                 seen.set(produced, slug);
+            }
+        }
+    });
+
+    it('takma ad çiftleri AYNI çeviriyi verir — yoksa aynı kategori iki ada bölünür', () => {
+        // 'tr' HARİÇ: Türkçede ad veritabanından geldiği gibi döner ve
+        // varyantların Türkçe adları zaten farklıdır ("Meyve ve Sebze" ↔
+        // "Meyve & Sebze") — çeviri katmanının konusu değil.
+        const translated = SUPPORTED_LANGS.filter(l => l !== 'tr');
+        for (const group of CATEGORY_SLUG_ALIASES) {
+            for (const lang of translated) {
+                const names = group.map(s => localizeCategory(lang, `ham-${s}`, s).name);
+                const unique = new Set(names);
+                expect(unique.size, `${lang}: ${group.join(' / ')} → ${names.join(' | ')}`).toBe(1);
             }
         }
     });

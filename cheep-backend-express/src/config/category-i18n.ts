@@ -72,8 +72,84 @@ export function slugifyName(name: string): string {
 /** [en, de, pl, sv] — Türkçesi anahtarın kendisinden değil DB'den gelir. */
 type Row = readonly [en: string, de: string, pl: string, sv: string];
 
+/**
+ * AYNI kategorinin farklı slug varyantları.
+ *
+ * TR ve PL taksonomileri aynı üst kategoriyi farklı adlandırıyor ("Meyve ve
+ * Sebze" ↔ "Meyve & Sebze"), dolayısıyla iki ayrı slug üretiliyor. İkisi de
+ * aynı şeyi kastettiği için AYNI çeviriyi ve aynı yerelleştirilmiş slug'ı
+ * almaları DOĞRU: `/en/category/fruit-vegetables` her ikisine de hizmet eder.
+ *
+ * Burada açıkça yazılıyorlar çünkü "iki kategori aynı slug'a düşmesin"
+ * testinin bunu bir çakışma sanması gerekiyordu — o test gerçek bir tehlikeyi
+ * (iki FARKLI kategorinin tek URL'de birbirini yutması) koruyor ve takma ad
+ * çiftleri onun istisnası. Pratikte zaten aynı ülkede bir arada bulunmuyorlar.
+ */
+export const CATEGORY_SLUG_ALIASES: readonly (readonly string[])[] = [
+    // "ve"li / "&"li varyant (TR ağacı ↔ PL ağacı)
+    ['meyve-sebze', 'meyve-ve-sebze'],
+    ['et-tavuk-balik', 'et-tavuk-ve-balik'],
+    ['parfum-deodorant', 'parfum-ve-deodorant'],
+    // kelime sırası varyantı
+    ['deniz-urunleri-taze', 'taze-deniz-urunleri'],
+    // tekil / çoğul varyantı
+    ['islak-mendil', 'islak-mendiller'],
+    ['tuvalet-kagidi', 'tuvalet-kagitlari'],
+] as const;
+
+/**
+ * Alt kategori slug'larının sonuna eklenen ÜST kategori slug'ları.
+ * `lookupRow` bunları ayrıştırıp eksiz adı arar; sıralama uzundan kısaya,
+ * yoksa `temizlik` eki `temizlik-urunleri`den önce eşleşirdi.
+ */
+const PARENT_SLUGS = [
+    'temizlik-ve-kisisel-bakim-urunleri',
+    'sut-urunleri-ve-kahvaltilik',
+    'atistirmalik-ve-tatli',
+    'hazir-yemek-donuk',
+    'temizlik-urunleri',
+    'et-tavuk-ve-balik',
+    'diger-urunler',
+    'kisisel-bakim',
+    'meyve-ve-sebze',
+    'et-tavuk-balik',
+    'saglikli-yasam',
+    'firin-pastane',
+    'sut-urunleri',
+    'atistirmalik',
+    'kahvaltilik',
+    'meyve-sebze',
+    'temel-gida',
+    'pet-shop',
+    'ev-yasam',
+    'dondurma',
+    'temizlik',
+    'icecek',
+    'bebek',
+    'diger',
+] as const;
+
 const T: Record<string, Row> = {
     // ——— Üst kategoriler ———
+    // NOT: aynı üst kategorinin İKİ slug varyantı var; TR ağacı "ve"li,
+    // PL ağacı "&"li adla üretiliyor (`et-tavuk-ve-balik` ↔ `et-tavuk-balik`).
+    // İkisi de yazılı olmalı — biri eksik kaldığı için TÜRK kataloğunda
+    // "Et, Tavuk ve Balık" ve "Meyve ve Sebze" İngilizce/Almanca/İsveççe
+    // arayüzde ÇEVRİLMEDEN, ana kategori ızgarasının tam ortasında duruyordu.
+    'et-tavuk-ve-balik': ['Meat, Poultry & Fish', 'Fleisch, Geflügel & Fisch', 'Mięso, drób i ryby', 'Kött, fågel & fisk'],
+    'meyve-ve-sebze': ['Fruit & Vegetables', 'Obst & Gemüse', 'Owoce i warzywa', 'Frukt & grönt'],
+    // Lehçesi bilerek `temizlik`ten FARKLI ("Środki czystości" ona ait):
+    // ikisi aynı Lehçe adı alsaydı aynı slug'a düşer ve bir kategori
+    // sayfası diğerini yutardı (test bunu kilitliyor).
+    'temizlik-urunleri': ['Cleaning Products', 'Reinigungsmittel', 'Artykuły czystości', 'Rengöringsprodukter'],
+    'diger-siniflandirilamayanlar': ['Unclassified', 'Nicht klassifiziert', 'Niesklasyfikowane', 'Oklassificerat'],
+    // Taksonomide "ve"li varyantlar (eksiz karsiliklari asagida ayrica var).
+    'parfum-ve-deodorant': ['Perfume & Deodorant', 'Parfüm & Deodorant', 'Perfumy i dezodoranty', 'Parfym & deodorant'],
+    'islak-mendiller': ['Wet Wipes', 'Feuchttücher', 'Chusteczki nawilżane', 'Våtservetter'],
+    'tuvalet-kagitlari': ['Toilet Paper', 'Toilettenpapier', 'Papier toaletowy', 'Toalettpapper'],
+    'taze-deniz-urunleri': ['Fresh Seafood', 'Frische Meeresfrüchte', 'Świeże owoce morza', 'Färska skaldjur'],
+    'elektronik-ve-teknoloji': ['Electronics & Tech', 'Elektronik & Technik', 'Elektronika i technologia', 'Elektronik & teknik'],
+    'oyuncak-hobi-ve-kirtasiye': ['Toys, Hobby & Stationery', 'Spielzeug, Hobby & Schreibwaren', 'Zabawki, hobby i artykuły papiernicze', 'Leksaker, hobby & papper'],
     'sut-urunleri': ['Dairy', 'Milchprodukte', 'Nabiał', 'Mejeri'],
     'sut-urunleri-ve-kahvaltilik': ['Dairy & Breakfast', 'Molkerei & Frühstück', 'Nabiał i śniadanie', 'Mejeri & frukost'],
     'meyve-sebze': ['Fruit & Vegetables', 'Obst & Gemüse', 'Owoce i warzywa', 'Frukt & grönt'],
@@ -337,11 +413,39 @@ function turkishNameFor(slug: string): string {
  */
 export function localizeCategory(lang: Lang, name: string, slug: string): LocalizedCategory {
     if (lang === 'tr') return { name, slug };
-    const translated = T[slug];
+    const translated = lookupRow(slug);
     if (!translated) return { name, slug };
     const idx = { en: 0, de: 1, pl: 2, sv: 3 } as const;
     const localized = translated[idx[lang as Exclude<Lang, 'tr'>]];
     return { name: localized, slug: slugifyName(localized) };
+}
+
+/**
+ * Slug → çeviri satırı; bulunamazsa EBEVEYN EKİNİ atarak yeniden dener.
+ *
+ * NEDEN: taksonomi türetici alt kategori slug'ının sonuna ebeveyninkini
+ * ekliyor (`sac-bakim` → `sac-bakim-kisisel-bakim`), sözlük ise eksiz adlarla
+ * yazılmıştı. Sonuç: 18 gerçek kategori — saç bakımı, cilt bakımı, ağız
+ * bakımı, kağıt havlu… — beş dilin dördünde ÇEVRİLMEMİŞ görünüyordu; hepsi
+ * sözlükte zaten vardı, yalnızca anahtarları tutmuyordu. Eksik tek tek
+ * eklenseydi taksonomi bir daha değiştiğinde aynı sınıf hata geri gelirdi;
+ * ek ayrıştırılırsa sorun kalıcı olarak kapanır.
+ *
+ * Yalnızca ÜST kategori slug'ları ek olarak kabul edilir — rastgele bir son
+ * ek atmak `sut-urunleri`yi `sut`a indirip yanlış çeviri verebilirdi.
+ */
+function lookupRow(slug: string): Row | undefined {
+    const exact = T[slug];
+    if (exact) return exact;
+    for (const parent of PARENT_SLUGS) {
+        const suffix = `-${parent}`;
+        if (slug.length > suffix.length && slug.endsWith(suffix)) {
+            const base = slug.slice(0, -suffix.length);
+            const row = T[base];
+            if (row) return row;
+        }
+    }
+    return undefined;
 }
 
 const isLang = (v: string): v is Lang => (SUPPORTED_LANGS as readonly string[]).includes(v);
