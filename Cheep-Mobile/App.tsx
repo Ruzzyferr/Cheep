@@ -29,6 +29,7 @@ import { createQueryClient } from './src/queries/client';
 import { useAppStateFocus, useOnlineBridge } from './src/queries/focus';
 import { UpdateGate } from './src/components/update/UpdateGate';
 import { DialogHost } from './src/components/ui';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 
 // Tek istemci, uygulama ömrü boyunca. Render içinde yaratılırsa her render'da
 // cache sıfırlanır ve tüm sorgular baştan çalışır.
@@ -66,8 +67,14 @@ export default function App() {
         ? saved!
         : (SUPPORTED_LANGUAGES as readonly string[]).includes(device) ? device : 'en';
       await i18n.changeLanguage(initial);
-      setLangReady(true);
-    })();
+    })()
+      // `finally` ŞART: bu blok patlarsa (depo okuması, changeLanguage)
+      // `langReady` sonsuza dek false kalıyor ve `App` aşağıda `null`
+      // döndürüyordu — splash zaten kapanmış olduğu için kullanıcı KALICI
+      // boş ekran görüyordu. Dil çözülemezse i18n varsayılanıyla devam et;
+      // yanlış dilde bir uygulama, hiç açılmayan uygulamadan iyidir.
+      .catch(e => console.error('[App] dil başlatma hatası:', e))
+      .finally(() => setLangReady(true));
   }, []);
 
   if (!fontsLoaded || !langReady) return null;
@@ -76,6 +83,10 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <StatusBar barStyle="dark-content" backgroundColor={colors.background.default} />
+        {/* Hata sınırı SAĞLAYICILARIN DIŞINDA: bir context sağlayıcısının
+            kendisi render sırasında patlarsa da yakalanmalı. İçeride olsaydı
+            tam da en çok gereken durumda birlikte sökülürdü. */}
+        <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <QueryBridges>
             <I18nextProvider i18n={i18n}>
@@ -102,6 +113,7 @@ export default function App() {
             </I18nextProvider>
           </QueryBridges>
         </QueryClientProvider>
+        </ErrorBoundary>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

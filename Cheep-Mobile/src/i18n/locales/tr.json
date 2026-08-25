@@ -7,6 +7,7 @@
     "cancel": "İptal",
     "error": "Hata",
     "something_went_wrong": "Bir şeyler ters gitti",
+    "crash_body": "Uygulama beklenmedik bir hatayla karşılaştı. Tekrar denemek sorunu genellikle çözer.",
     "ok": "Tamam",
     "all": "Tümü",
     "loading": "Yükleniyor…",

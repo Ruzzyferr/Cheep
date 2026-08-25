@@ -50,11 +50,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Ağ kaynaklı bir hata mı? (bağlantı yok / zaman aşımı)
+   *
+   * api.client interceptor'ı ayrımı zaten yapıyor: taşıma katmanı hatalarında
+   * `code: 'NETWORK_ERROR'` ve `status` YOK; sunucu yanıt verdiyse `status` var.
+   * Bu ayrım kritik, çünkü "sunucuya ulaşamadım" ile "sunucu hayır dedi"
+   * birbirinin yerine geçerse kullanıcının oturumu ve verisi çöpe gidiyor.
+   */
+  const isNetworkError = (err: unknown): boolean => {
+    const e = err as { code?: string; status?: number } | null;
+    return e?.code === 'NETWORK_ERROR' || e?.status == null;
+  };
+
   const refreshOnboarding = async () => {
     try {
       const p = await profileService.getProfile();
       setOnboardingDone(!!p?.onboarding_done);
-    } catch {
+    } catch (error) {
+      // AĞ HATASINDA DOKUNMA. Eskiden her hata `false` yazıyordu; sonuç:
+      // metroda uygulamayı açan MEVCUT kullanıcı listeleri yerine onboarding
+      // sihirbazını görüyordu, sihirbazı bitirmeye çalışınca `updateProfile`
+      // de ağ yüzünden patlıyor ve kullanıcı sihirbazın içinde KİLİTLENİYORDU.
+      // Her çevrimdışı açılışta tekrarlıyordu.
+      if (isNetworkError(error)) return;
       setOnboardingDone(false);
     }
   };
@@ -79,7 +98,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Check auth error:', error);
-      await logout();
+      // Ağ hatasında oturumu KAPATMA — bkz. refreshUser'daki gerekçe.
+      if (!isNetworkError(error)) await logout();
     } finally {
       setIsLoading(false);
     }
@@ -142,6 +162,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (error) {
       console.error('Refresh user error:', error);
+      // AĞ HATASINDA OTURUMU KAPATMA — çıkış yapmak token'ı siler ve kullanıcı
+      // geri giremez, çünkü GİRİŞ DE ağ ister. Yani bir tünelden geçerken
+      // uygulamayı açmak, kullanıcıyı ağ geri gelene kadar dışarıda bırakıyordu.
+      // Oturumu yalnızca sunucu kimliği GERÇEKTEN reddettiyse kapat.
+      if (isNetworkError(error)) return;
       await logout();
     }
   };

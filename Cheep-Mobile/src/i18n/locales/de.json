@@ -7,6 +7,7 @@
     "cancel": "Abbrechen",
     "error": "Fehler",
     "something_went_wrong": "Etwas ist schiefgelaufen",
+    "crash_body": "Die App ist auf einen unerwarteten Fehler gestoßen. Ein erneuter Versuch hilft meistens.",
     "ok": "OK",
     "all": "Alle",
     "loading": "Wird geladen…",

@@ -7,6 +7,7 @@
     "cancel": "Cancel",
     "error": "Error",
     "something_went_wrong": "Something went wrong",
+    "crash_body": "The app hit an unexpected error. Trying again usually fixes it.",
     "ok": "OK",
     "all": "All",
     "loading": "Loading…",

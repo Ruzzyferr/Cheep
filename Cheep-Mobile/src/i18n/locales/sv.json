@@ -7,6 +7,7 @@
     "cancel": "Avbryt",
     "error": "Fel",
     "something_went_wrong": "Något gick fel",
+    "crash_body": "Appen stötte på ett oväntat fel. Att försöka igen brukar lösa det.",
     "ok": "OK",
     "all": "Alla",
     "loading": "Laddar…",
