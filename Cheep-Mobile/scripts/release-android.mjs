@@ -64,6 +64,63 @@ function certInfo(output) {
     return { sha256, owner };
 }
 
+/**
+ * SDK'daki en yeni build-tools içinden `apksigner` yolunu bulur.
+ * Bulunamazsa null — çağıran keytool'a düşer.
+ */
+function findApksigner() {
+    const sdk =
+        process.env.ANDROID_HOME ||
+        process.env.ANDROID_SDK_ROOT ||
+        path.join(os.homedir(), 'AppData/Local/Android/Sdk');
+    const dir = path.join(sdk, 'build-tools');
+    if (!fs.existsSync(dir)) return null;
+    const versions = fs
+        .readdirSync(dir)
+        .filter((v) => /^\d+/.test(v))
+        .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    for (const v of versions.reverse()) {
+        const exe = path.join(dir, v, process.platform === 'win32' ? 'apksigner.bat' : 'apksigner');
+        if (fs.existsSync(exe)) return exe;
+    }
+    return null;
+}
+
+/**
+ * Çıktının imzalayan sertifikasını okur.
+ *
+ * NEDEN İKİ YOL VAR: `keytool -printcert -jarfile` yalnızca **v1 (JAR)** imzasını
+ * görebilir. R8 açık modern bir APK yalnızca **v2** şemasıyla imzalanıyor ve
+ * keytool onu "imzasız" sanıp doğrulamayı düşürüyordu — derleme doğruyken
+ * script hata veriyordu. APK'lar için `apksigner` kullanılır (v1/v2/v3 hepsini
+ * okur); AAB bir JAR olduğu için keytool orada doğru araçtır.
+ */
+function readArtifactCert(artifact) {
+    if (artifact.endsWith('.apk')) {
+        const apksigner = findApksigner();
+        if (apksigner) {
+            // apksigner Windows'ta bir .bat sarmalayıcı; execFileSync onu
+            // doğrudan çalıştıramaz (EINVAL). `shell: true` işe yarar ama
+            // argümanları kaçışsız birleştirir (Node DEP0190). Bunun yerine
+            // cmd.exe AÇIKÇA çağrılıp argümanlar dizi olarak veriliyor —
+            // hem çalışır hem kaçış sorunu olmaz.
+            const [cmd, cmdArgs] =
+                process.platform === 'win32'
+                    ? ['cmd.exe', ['/d', '/s', '/c', apksigner, 'verify', '--print-certs', artifact]]
+                    : [apksigner, ['verify', '--print-certs', artifact]];
+            const out = execFileSync(cmd, cmdArgs, { encoding: 'utf8' });
+            // apksigner tireli değil düz hex basar; keystore çıktısıyla
+            // karşılaştırılabilmesi için aynı biçime getiriliyor.
+            const hex = out.match(/certificate SHA-256 digest:\s*([0-9a-f]+)/i)?.[1];
+            const sha256 = hex ? hex.toUpperCase().match(/../g).join(':') : undefined;
+            const owner = out.match(/certificate DN:\s*(.+)/)?.[1]?.trim();
+            return { sha256, owner };
+        }
+        console.log('    ⚠ apksigner bulunamadı, keytool ile deneniyor (v2-only imzayı göremeyebilir)');
+    }
+    return certInfo(execFileSync(keytool, ['-printcert', '-jarfile', artifact], { encoding: 'utf8' }));
+}
+
 function readProps(file) {
     const out = {};
     for (const raw of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
@@ -168,8 +225,8 @@ if (!fs.existsSync(artifact)) die(`çıktı bulunamadı: ${artifact}`);
 // ── 4) İmza doğrulaması ─────────────────────────────────────────────────────
 // Derlemenin başarılı olması imzanın doğru olduğunu göstermez.
 step('4/5', 'imza doğrulanıyor');
-const artifactCert = certInfo(execFileSync(keytool, ['-printcert', '-jarfile', artifact], { encoding: 'utf8' }));
-console.log(`    ${artifactCert.owner}`);
+const artifactCert = readArtifactCert(artifact);
+console.log(`    ${artifactCert.owner ?? '(sahip okunamadı)'}`);
 if (!artifactCert.sha256) die('çıktının sertifikası okunamadı — imzasız olabilir');
 if (artifactCert.sha256 !== keystoreCert.sha256) {
     die(

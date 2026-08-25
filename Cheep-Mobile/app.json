@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cheep",
     "slug": "cheep-mobile",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
@@ -19,7 +19,7 @@
       }
     },
     "android": {
-      "versionCode": 17,
+      "versionCode": 18,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundColor": "#1F6F4A"
@@ -48,7 +48,10 @@
         "expo-build-properties",
         {
           "android": {
-            "usesCleartextTraffic": false
+            "usesCleartextTraffic": false,
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "extraProguardRules": "# Yansimayla calisan siniflar R8 tarafindan yeniden adlandirilmamali.\n# Cogu kutuphane kendi consumer-rules.pro dosyasini gonderiyor; buradakiler\n# gecmiste R8 ile sorun cikardigi bilinen ve derlemede sessizce kaybolabilecek\n# yuzeyler icin ek guvence.\n-keep class com.facebook.react.turbomodule.** { *; }\n-keep class com.facebook.hermes.** { *; }\n-keep class com.revenuecat.purchases.** { *; }\n-keep class com.android.billingclient.** { *; }\n-keep class expo.modules.** { *; }\n-keep class com.swmansion.reanimated.** { *; }\n-keep class com.swmansion.gesturehandler.** { *; }\n# Uyarilari hataya cevirme: kullanilmayan optional baglantilar derlemeyi durdurmasin.\n-dontwarn okhttp3.**\n-dontwarn okio.**\n-dontwarn javax.annotation.**"
           }
         }
       ],
