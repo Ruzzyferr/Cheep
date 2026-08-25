@@ -89,7 +89,30 @@ Mobil sürüm hattının deploy ile ilgisi yok; ikisi bağımsız.
 
 ---
 
-## 5. Sık karşılaşılanlar
+## 5. Hattın dayandığı sırlar (envanter)
+
+Bunlar GitHub'da duruyor, yerel makinede **hiçbirine ihtiyaç yok**. Liste
+yalnızca bir rotasyon veya yeniden kurulum gerekirse lazım:
+
+| Sır | Ne için |
+|---|---|
+| `ANDROID_KEYSTORE_B64` + `_PASSWORD` + `KEY_ALIAS` + `KEY_PASSWORD` | AAB imzalama |
+| `PLAY_SERVICE_ACCOUNT_JSON` | Play'e yükleme ve sürüm numarası okuma |
+| `IOS_DIST_CERT_B64` + `_PASSWORD` | iOS dağıtım sertifikası (.p12) |
+| `IOS_PROVISIONING_PROFILE_B64` | iOS provisioning profili |
+| `ASC_KEY_P8` + `ASC_KEY_ID` + `ASC_ISSUER_ID` | TestFlight yükleme, build numarası, sertifika süresi kontrolü |
+| `RESEND_API_KEY` | Sonuç e-postaları |
+
+Değişken (sır değil, panelde görünür): `EXPO_PUBLIC_API_URL`.
+
+**Apple sertifikası ve profili 2027-08-21'de doluyor.** Hat her sürümde
+kontrol ediyor ve 45 gün kala e-postayla uyarıyor. Uyarı geldiğinde: yeni
+sertifika üretip `.p12` olarak dışa aktarın, profili yenileyin, iki secret'ı
+güncelleyin. Dolduğu gün iOS derlemesi imza hatasıyla durur.
+
+---
+
+## 6. Sık karşılaşılanlar
 
 **"Koşu kırmızı ama mağazalara build gitmiş."**
 Muhtemelen etiket adımı. `GITHUB_TOKEN`, iş akışı dosyası değiştiren bir
