@@ -35,6 +35,16 @@ concurrency:
 
 env:
   ANDROID_TRACK: ${{ inputs.android_track || 'alpha' }}
+  # Uygulamanın konuşacağı backend. SIR DEĞİL — zaten paketin içine gömülüyor,
+  # o yüzden secret değil repo değişkeni: panelde görünür ve düzenlenebilir.
+  #
+  # ⚠️ BUNSUZ DERLEME SESSİZCE BOZUK ÇIKAR. `src/constants/api.ts` bu değişken
+  # yoksa release build'de AÇILIŞTA hata fırlatıyor; ama derleme BAŞARILI
+  # oluyor, yani hiçbir şey yakalamıyor ve testçilere açılmayan bir uygulama
+  # gidiyor. EAS bu değeri kendi tarafında tutuyordu; hat EAS'ten çıkarken
+  # geride kalmıştı. Aşağıdaki "ortam kapısı" adımı artık bunu derlemeden
+  # ÖNCE durduruyor.
+  EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
 
 jobs:
   hazirlik:
@@ -132,6 +142,16 @@ jobs:
             fs.writeFileSync('app.json', JSON.stringify(j,null,2)+'\n');
             console.log('versionCode ->', j.expo.android.versionCode);
           "
+
+      - name: Ortam kapısı — API adresi tanımlı mı
+        run: |
+          if [ -z "${EXPO_PUBLIC_API_URL:-}" ]; then
+            echo "::error::EXPO_PUBLIC_API_URL tanımlı değil."
+            echo "Bu değişken olmadan derleme BAŞARILI olur ama uygulama açılışta çöker."
+            echo "Düzeltme: repo değişkenlerine EXPO_PUBLIC_API_URL ekleyin."
+            exit 1
+          fi
+          echo "API adresi: $EXPO_PUBLIC_API_URL"
 
       - run: npm ci --no-audit --no-fund
         working-directory: Cheep-Mobile
@@ -233,6 +253,16 @@ jobs:
             fs.writeFileSync('app.json', JSON.stringify(j,null,2)+'\n');
             console.log('buildNumber ->', j.expo.ios.buildNumber);
           "
+
+      - name: Ortam kapısı — API adresi tanımlı mı
+        run: |
+          if [ -z "${EXPO_PUBLIC_API_URL:-}" ]; then
+            echo "::error::EXPO_PUBLIC_API_URL tanımlı değil."
+            echo "Bu değişken olmadan derleme BAŞARILI olur ama uygulama açılışta çöker."
+            echo "Düzeltme: repo değişkenlerine EXPO_PUBLIC_API_URL ekleyin."
+            exit 1
+          fi
+          echo "API adresi: $EXPO_PUBLIC_API_URL"
 
       - run: npm ci --no-audit --no-fund
         working-directory: Cheep-Mobile
