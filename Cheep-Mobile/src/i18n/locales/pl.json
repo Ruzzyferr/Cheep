@@ -201,7 +201,10 @@
     "store_details": "Szczegóły sklepu",
     "price_disclaimer": "Ceny pochodzą z publicznie dostępnych źródeł urzędowych i mają charakter informacyjny; mogą się zmienić w każdej chwili. Wiążąca jest aktualna cena w kanale danego sklepu. Porównanie obejmuje wyłącznie wymienione sklepy.",
     "store_details_soon": "Ta funkcja będzie dostępna wkrótce.",
-    "no_price_info_desc": "Do tego produktu nie dodano jeszcze ceny."
+    "no_price_info_desc": "Do tego produktu nie dodano jeszcze ceny.",
+    "cheapest_label": "Najtaniej",
+    "difference": "Różnica",
+    "average_price": "Cena średnia:"
   },
   "home": {
     "greeting": "Cześć",
@@ -379,7 +382,8 @@
     "missing_in_route": "Brakuje {{n}} produktów na tej trasie",
     "missing_products": "Brakujące produkty",
     "store_link_error": "Nie udało się otworzyć linku do sklepu. Spróbuj ponownie.",
-    "single_store": "Jeden sklep"
+    "single_store": "Jeden sklep",
+    "total_distance_label": "Łączny dystans"
   },
   "intro": {
     "skip": "Pomiń",
@@ -534,7 +538,9 @@
     "limit_premium_month": "Wykorzystano limit {{limit}} wiadomości w tym miesiącu.",
     "header_title": "Asystent",
     "new_chat": "Nowy czat",
-    "new_list_fallback": "Nowa lista"
+    "new_list_fallback": "Nowa lista",
+    "delete_error": "Nie udało się usunąć czatu.",
+    "delete_chat": "Usuń czat"
   },
   "time": {
     "just_now": "przed chwilą",

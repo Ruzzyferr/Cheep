@@ -133,7 +133,7 @@ export function ProductDetailScreen({
           <Card padding="md" variant="elevated" style={styles.statsCard}>
             <View style={styles.statsRow}>
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>En Ucuz</Text>
+                <Text style={styles.statLabel}>{t('product.cheapest_label')}</Text>
                 <Text style={[styles.statValue, styles.cheapestPrice]}>
                   {formatMoney(parseFloat(priceStats.cheapest?.price || '0'))}
                 </Text>
@@ -153,7 +153,7 @@ export function ProductDetailScreen({
               </View>
               <View style={styles.statDivider} />
               <View style={styles.statItem}>
-                <Text style={styles.statLabel}>Fark</Text>
+                <Text style={styles.statLabel}>{t('product.difference')}</Text>
                 <Text style={[styles.statValue, styles.differencePrice]}>
                   {formatMoney(priceStats.priceDifference)}
                 </Text>
@@ -163,7 +163,7 @@ export function ProductDetailScreen({
               </View>
             </View>
             <View style={styles.avgPriceRow}>
-              <Text style={styles.avgPriceLabel}>Ortalama Fiyat:</Text>
+              <Text style={styles.avgPriceLabel}>{t('product.average_price')}</Text>
               <Text style={styles.avgPriceValue}>
                 {formatMoney(priceStats.averagePrice)}
               </Text>

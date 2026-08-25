@@ -15,8 +15,9 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
-  Image,
 } from 'react-native';
+// expo-image: bellek+disk önbelleği ve boyuta göre çözme (bkz. ProductThumb).
+import { Image } from 'expo-image';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { notificationService, type PriceDropNotification } from '../../services/notification.service';
@@ -56,12 +57,29 @@ export function NotificationsScreen({ navigation }: HomeStackScreenProps<'Notifi
       void qc.invalidateQueries({ queryKey: qk.notifications.all() });
       void qc.invalidateQueries({ queryKey: qk.notifications.unreadCount() });
     },
+    onError: (e) => {
+      // Mutasyonların varsayılan `retry: 0`ı burada bilinçli; ama hatanın
+      // SESSİZ kalması değil. Başarısız olursa rozet yanık kalır ve aşağıdaki
+      // efekt `items` her değiştiğinde yeniden denemeye çalışırdı.
+      console.warn('Bildirimler okundu işaretlenemedi:', e);
+    },
   });
 
+  /**
+   * Okundu işaretleme EKRAN BAŞINA BİR KEZ denenir.
+   *
+   * Eskiden koşul yalnızca "okunmamış var mı" idi ve `[items]` bağımlılığıyla
+   * çalışıyordu: istek başarısız olursa `read_at` sunucuda değişmiyor, liste
+   * her tazelendiğinde koşul yine sağlanıyor ve aynı başarısız mutasyon
+   * tekrar tekrar tetikleniyordu.
+   */
+  const markAttempted = React.useRef(false);
   useEffect(() => {
-    if (items.some((i) => !i.read_at) && !markAllRead.isPending) {
-      markAllRead.mutate();
-    }
+    if (markAttempted.current) return;
+    if (!items.some((i) => !i.read_at)) return;
+    if (markAllRead.isPending) return;
+    markAttempted.current = true;
+    markAllRead.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
@@ -82,7 +100,12 @@ export function NotificationsScreen({ navigation }: HomeStackScreenProps<'Notifi
       >
         <View style={styles.thumbWrap}>
           {item.product.image_url ? (
-            <Image source={{ uri: item.product.image_url }} style={styles.thumb} resizeMode="contain" />
+            <Image
+              source={{ uri: item.product.image_url }}
+              style={styles.thumb}
+              contentFit="contain"
+              cachePolicy="memory-disk"
+            />
           ) : (
             <MaterialIcons name="shopping-basket" size={24} color={colors.text.secondary} />
           )}

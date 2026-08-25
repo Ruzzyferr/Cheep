@@ -21,7 +21,7 @@ import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { StoreAllocation, ProductAllocation } from '../../types';
 import type { ListsStackScreenProps } from '../../navigation/types';
-import i18n from '../../i18n';
+import { useTranslation } from 'react-i18next';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
 import { appAlert } from '../../utils/dialog';
 
@@ -36,6 +36,10 @@ export function StrategyDetailScreen({
   route,
 }: ListsStackScreenProps<'StrategyDetail'>) {
   const { strategy, listId } = route.params;
+  // `useTranslation` — modül düzeyindeki `i18n.t` DEĞİL. Bu ekran dil
+  // değişikliğine abone olmadığı için, kullanıcı Profil'den dili
+  // değiştirip geri geldiğinde eski dilde kalabiliyordu.
+  const { t } = useTranslation();
   // Tab bar float: alt bosluk 72 + guvenli alan olmadan son ogeler cubugun arkasinda kalir.
   const bottomSpacing = useBottomSpacing();
   const { formatMoney } = useLocale();
@@ -52,21 +56,21 @@ export function StrategyDetailScreen({
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <Text style={styles.strategyType}>
-              {strategy.type === 'single_store' ? i18n.t('compare.single_store') : i18n.t('compare.multi_store')}
+              {strategy.type === 'single_store' ? t('compare.single_store') : t('compare.multi_store')}
             </Text>
             <View style={styles.scoreBadge}>
-              <Text style={styles.scoreText}>Skor: {num(strategy.score)}/100</Text>
+              <Text style={styles.scoreText}>{t('compare.score', { score: num(strategy.score) })}</Text>
             </View>
           </View>
 
           <View style={styles.priceRow}>
             <View>
-              <Text style={styles.priceLabel}>Toplam Tutar</Text>
+              <Text style={styles.priceLabel}>{t('compare.total_amount_label')}</Text>
               <Text style={styles.priceValue}>{formatMoney(num(strategy.totalPrice))}</Text>
             </View>
             {num(strategy.totalDistance) > 0 && (
               <View>
-                <Text style={styles.priceLabel}>Toplam Mesafe</Text>
+                <Text style={styles.priceLabel}>{t('compare.total_distance_label')}</Text>
                 <Text style={styles.priceValue}>{num(strategy.totalDistance).toFixed(1)} km</Text>
               </View>
             )}
@@ -86,7 +90,7 @@ export function StrategyDetailScreen({
                   withinBudget ? styles.budgetWithinText : styles.budgetOverText,
                 ]}
               >
-                {withinBudget ? i18n.t('compare.within_budget') : i18n.t('compare.over_budget')}
+                {withinBudget ? t('compare.within_budget') : t('compare.over_budget')}
                 {strategy.budgetRemaining !== null && (
                   <Text>
                     {' '}
@@ -109,7 +113,7 @@ export function StrategyDetailScreen({
                   color={full ? colors.success.dark : colors.warning.dark}
                 />
                 <Text style={[styles.covText, full ? styles.covTextFull : styles.covTextPartial]}>
-                  {full ? i18n.t('compare.all_in_route') : i18n.t('compare.missing_in_route', { n: missing })}
+                  {full ? t('compare.all_in_route') : t('compare.missing_in_route', { n: missing })}
                 </Text>
                 <Text style={[styles.covPct, full ? styles.covTextFull : styles.covTextPartial]}>
                   %{num(strategy.coveragePercentage)}
@@ -133,7 +137,7 @@ export function StrategyDetailScreen({
         {/* Missing Products */}
         {strategy.missingProducts.length > 0 && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{i18n.t('compare.missing_products')}</Text>
+            <Text style={styles.sectionTitle}>{t('compare.missing_products')}</Text>
             {strategy.missingProducts.map((missing, index) => (
               <Card key={index} padding="md" style={styles.missingCard}>
                 <Text style={styles.missingProductName}>
@@ -167,6 +171,7 @@ function StoreSection({
   listId: number;
 }) {
   const [opening, setOpening] = useState(false);
+  const { t } = useTranslation();
   const { formatMoney } = useLocale();
   const storeName = storeAllocation.store.name;
 
@@ -180,7 +185,7 @@ function StoreSection({
       });
       await openExternalUrl(res.url);
     } catch {
-      appAlert('Hata', i18n.t('compare.store_link_error'));
+      appAlert(t('common.error'), t('compare.store_link_error'));
     } finally {
       setOpening(false);
     }

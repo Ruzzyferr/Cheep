@@ -89,6 +89,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const savedUser = await userStorage.getUser<User>();
         if (savedUser) {
           setUser(savedUser);
+          // KAYITLI KULLANICI BAYAT OLABİLİR — özellikle `email_verified`.
+          //
+          // Doğrulama başka bir yerde tamamlanabiliyor (e-postadaki bağlantı,
+          // ikinci bir cihaz, destek). Depodaki kopya `false` kaldığı için
+          // uygulama açılışta doğrulama kapısında TAKILI kalıyor ve kullanıcı
+          // çıkış yapıp yeniden girmeden kurtulamıyordu. Sunucudan sessizce
+          // tazeliyoruz: hata olursa kayıtlı kullanıcı zaten ekranda, kimse
+          // kaybetmiyor (refreshUser ağ hatasında oturumu kapatmıyor).
+          void refreshUser();
         } else {
           // Fetch user if token exists but user data is missing
           await refreshUser();

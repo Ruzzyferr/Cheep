@@ -4,14 +4,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useCompareList } from '../../queries';
@@ -90,14 +83,44 @@ export function CompareResultsScreen({
   const results = compareQ.data ?? null;
   const loading = compareQ.isPending || compareQ.isFetching;
 
-  // Liste karşılaştırılamıyorsa (silinmiş ya da boş) geri dön.
+  // Liste karşılaştırılamıyorsa geri dön — AMA yalnızca kalıcı hatada.
+      // AĞ HATASINDA EKRANDAN ATMA.
+      //
+      // Eskiden her hata "uyar ve geri dön"dü. İki ayrı sorun:
+      // ① Ağ hatası ile "liste silinmiş" aynı muameleyi görüyordu; metroda
+      //    listesine dokunan kullanıcı hata kutusu görüp listeler ekranına
+      //    fırlatılıyordu, YENİDEN DENE düğmesi yoktu.
+      // ② `goBack()` odak kontrolü olmadan çağrılıyordu: kullanıcı bu arada
+      //    bir ürüne girdiyse ÜRÜN DETAYI kapanıyor ve hata kutusu okumakta
+      //    olduğu ürünün üstünde açılıyordu.
+      // Artık yalnızca sunucu gerçekten "yok/erişemezsin" dediğinde çıkılıyor
+      // ve yalnızca ekran odaktayken.
   useEffect(() => {
-    if (compareQ.isError) {
-      appAlert(t('common.error'), t('compare.load_error'));
-      navigation.goBack();
-    }
+    if (!compareQ.isError) return;
+    const e = compareQ.error as { code?: string; status?: number } | null;
+    const isNetwork = e?.code === 'NETWORK_ERROR' || e?.status == null;
+    if (isNetwork) return; // ekranda kal; aşağıdaki "yeniden dene" gösterilir
+    if (!navigation.isFocused()) return;
+    appAlert(t('common.error'), t('compare.load_error'));
+    navigation.goBack();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [compareQ.isError]);
+
+  // Ağ hatası + elde sonuç yok → yeniden denenebilir hata ekranı.
+  if (compareQ.isError && !results && !loading) {
+    return (
+      <View style={styles.retryWrap}>
+        <Text style={styles.retryTitle}>{t('common.error_loading')}</Text>
+        <Pressable
+          onPress={() => compareQ.refetch()}
+          accessibilityRole="button"
+          style={styles.retryBtn}
+        >
+          <Text style={styles.retryText}>{t('common.retry')}</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   // İlk yükleme: sonuç yokken tam ekran spinner. Yarıçap değişiminde eski sonuçlar
   // ekranda kalır (seçici kaybolmasın), üstte ince bir gösterge çıkar.
@@ -537,6 +560,24 @@ function RouteCard({
 }
 
 const styles = StyleSheet.create({
+  retryWrap: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.xl,
+    backgroundColor: colors.background.default,
+  },
+  retryTitle: { ...typography.styles.body1, color: colors.text.secondary, textAlign: 'center' },
+  retryBtn: {
+    marginTop: spacing.md,
+    minHeight: 48,
+    paddingHorizontal: spacing.xl,
+    justifyContent: 'center',
+    borderRadius: 999,
+    backgroundColor: colors.primary.main,
+  },
+  retryText: { ...typography.styles.subtitle2, color: '#FFFFFF' },
+
   container: {
     flex: 1,
     backgroundColor: colors.background.default,

@@ -201,7 +201,10 @@
     "store_details": "Marktdetails",
     "price_disclaimer": "Die Preise stammen aus öffentlich zugänglichen amtlichen Quellen und dienen nur zur Information; sie können sich jederzeit ändern. Verbindlich ist der aktuelle Preis im eigenen Kanal des Marktes. Der Vergleich umfasst nur die aufgeführten Märkte.",
     "store_details_soon": "Diese Funktion kommt bald.",
-    "no_price_info_desc": "Für dieses Produkt wurde noch kein Preis hinzugefügt."
+    "no_price_info_desc": "Für dieses Produkt wurde noch kein Preis hinzugefügt.",
+    "cheapest_label": "Günstigste",
+    "difference": "Differenz",
+    "average_price": "Durchschnittspreis:"
   },
   "home": {
     "greeting": "Hallo",
@@ -379,7 +382,8 @@
     "missing_in_route": "{{n}} Artikel fehlen auf dieser Route",
     "missing_products": "Fehlende Produkte",
     "store_link_error": "Der Markt-Link konnte nicht geöffnet werden. Bitte versuche es erneut.",
-    "single_store": "Ein Markt"
+    "single_store": "Ein Markt",
+    "total_distance_label": "Gesamtstrecke"
   },
   "intro": {
     "skip": "Überspringen",
@@ -534,7 +538,9 @@
     "limit_premium_month": "Du hast deine {{limit}} Nachrichten für diesen Monat aufgebraucht.",
     "header_title": "Assistent",
     "new_chat": "Neuer Chat",
-    "new_list_fallback": "Neue Liste"
+    "new_list_fallback": "Neue Liste",
+    "delete_error": "Der Chat konnte nicht gelöscht werden.",
+    "delete_chat": "Chat löschen"
   },
   "time": {
     "just_now": "gerade eben",

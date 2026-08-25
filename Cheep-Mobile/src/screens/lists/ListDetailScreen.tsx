@@ -85,12 +85,26 @@ export function ListDetailScreen({
     await invalidateLists();
   };
 
-  // Liste yüklenemiyorsa (silinmiş ya da başka kullanıcının) geri dön.
+  // Liste yüklenemiyorsa geri dön — AMA yalnızca kalıcı hatada.
+      // AĞ HATASINDA EKRANDAN ATMA.
+      //
+      // Eskiden her hata "uyar ve geri dön"dü. İki ayrı sorun:
+      // ① Ağ hatası ile "liste silinmiş" aynı muameleyi görüyordu; metroda
+      //    listesine dokunan kullanıcı hata kutusu görüp listeler ekranına
+      //    fırlatılıyordu, YENİDEN DENE düğmesi yoktu.
+      // ② `goBack()` odak kontrolü olmadan çağrılıyordu: kullanıcı bu arada
+      //    bir ürüne girdiyse ÜRÜN DETAYI kapanıyor ve hata kutusu okumakta
+      //    olduğu ürünün üstünde açılıyordu.
+      // Artık yalnızca sunucu gerçekten "yok/erişemezsin" dediğinde çıkılıyor
+      // ve yalnızca ekran odaktayken.
   React.useEffect(() => {
-    if (listQ.isError) {
-      appAlert(t('common.error'), t('list.select_modal.load_error'));
-      navigation.goBack();
-    }
+    if (!listQ.isError) return;
+    const e = listQ.error as { code?: string; status?: number } | null;
+    const isNetwork = e?.code === 'NETWORK_ERROR' || e?.status == null;
+    if (isNetwork) return;
+    if (!navigation.isFocused()) return;
+    appAlert(t('common.error'), t('list.select_modal.load_error'));
+    navigation.goBack();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listQ.isError]);
 
@@ -446,7 +460,7 @@ function ListItemCard({
         onPress={() => onDelete(item.id)}
         hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
         accessibilityRole="button"
-        accessibilityLabel="Sil"
+        accessibilityLabel={t('list.delete_action')}
         style={styles.deleteBtn}
       >
         <MaterialIcons name="delete-outline" size={22} color={colors.error.main} />

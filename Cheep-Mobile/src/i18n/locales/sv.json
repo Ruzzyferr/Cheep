@@ -201,7 +201,10 @@
     "store_details": "Butiksdetaljer",
     "price_disclaimer": "Priserna sammanställs från offentligt tillgängliga officiella källor och är endast informativa; de kan ändras när som helst. Bindande är det aktuella priset i butikens egen kanal. Jämförelsen omfattar endast de listade butikerna.",
     "store_details_soon": "Den här funktionen kommer snart.",
-    "no_price_info_desc": "Inget pris har lagts till för den här produkten än."
+    "no_price_info_desc": "Inget pris har lagts till för den här produkten än.",
+    "cheapest_label": "Billigast",
+    "difference": "Skillnad",
+    "average_price": "Snittpris:"
   },
   "home": {
     "greeting": "Hej",
@@ -379,7 +382,8 @@
     "missing_in_route": "{{n}} varor saknas på denna rutt",
     "missing_products": "Saknade produkter",
     "store_link_error": "Butikslänken kunde inte öppnas. Försök igen.",
-    "single_store": "En butik"
+    "single_store": "En butik",
+    "total_distance_label": "Total sträcka"
   },
   "intro": {
     "skip": "Hoppa över",
@@ -534,7 +538,9 @@
     "limit_premium_month": "Du har använt dina {{limit}} meddelanden för den här månaden.",
     "header_title": "Assistent",
     "new_chat": "Ny chatt",
-    "new_list_fallback": "Ny lista"
+    "new_list_fallback": "Ny lista",
+    "delete_error": "Chatten kunde inte raderas.",
+    "delete_chat": "Radera chatt"
   },
   "time": {
     "just_now": "nyss",

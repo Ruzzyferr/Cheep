@@ -15,16 +15,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  FlatList,
-  RefreshControl,
-  ActivityIndicator,
-  } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, RefreshControl, ActivityIndicator, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { CommonActions } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -94,6 +85,9 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
     category_id: effectiveCategoryId === ALL_CATEGORIES ? undefined : effectiveCategoryId,
   });
 
+  // `fetchNextPage`i burada sabitliyoruz: JSX içinde
+  // `isFetchNextPageError` dalında TS `productsQ`yu `never`e daraltıyor.
+  const fetchNextPage = productsQ.fetchNextPage;
   const products = flattenProducts(productsQ.data?.pages);
 
   const flatListRef = React.useRef<FlatList>(null);
@@ -303,7 +297,12 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
             </View>
           )}
           onEndReached={() => {
-            if (productsQ.hasNextPage && !productsQ.isFetchingNextPage) {
+            // `isFetchNextPageError` KONTROLÜ ŞART: bir sonraki sayfa isteği
+            // düştüğünde `hasNextPage` true kalıyordu, footer spinner'ı
+            // kayboluyordu ve kaydırmaya devam etmek AYNI başarısız isteği
+            // sonsuza dek yeniden tetikliyordu. Kullanıcı için liste sessizce
+            // "büyümeyi bırakmış" görünüyordu.
+            if (productsQ.hasNextPage && !productsQ.isFetchingNextPage && !productsQ.isFetchNextPageError) {
               void productsQ.fetchNextPage();
             }
           }}
@@ -312,6 +311,17 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
             productsQ.isFetchingNextPage ? (
               <View style={styles.footerLoading}>
                 <ActivityIndicator size="small" color={colors.primary.main} />
+              </View>
+            ) : productsQ.isFetchNextPageError ? (
+              <View style={styles.footerLoading}>
+                <Text style={styles.footerEnd}>{t('common.error_loading')}</Text>
+                <Pressable
+                  onPress={() => void fetchNextPage()}
+                  accessibilityRole="button"
+                  style={styles.footerRetry}
+                >
+                  <Text style={styles.footerRetryText}>{t('common.retry')}</Text>
+                </Pressable>
               </View>
             ) : !productsQ.hasNextPage && products.length > 0 ? (
               <Text style={styles.footerEnd}>{t('product.all_shown')}</Text>
@@ -442,6 +452,13 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     alignItems: 'center',
   },
+  footerRetry: {
+    marginTop: spacing.sm,
+    minHeight: 48,
+    paddingHorizontal: spacing.lg,
+    justifyContent: 'center',
+  },
+  footerRetryText: { ...typography.styles.subtitle2, color: colors.primary.main },
 
   footerEnd: {
     ...typography.styles.caption,

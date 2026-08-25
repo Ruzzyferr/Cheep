@@ -73,7 +73,7 @@ export function ThreadListSheet({
       setThreads(data);
     } catch (err) {
       console.error('listThreads error:', err);
-      appAlert('Hata', i18n.t('assistant.history_error'));
+      appAlert(i18n.t('common.error'), i18n.t('assistant.history_error'));
     } finally {
       setLoading(false);
     }
@@ -108,7 +108,7 @@ export function ThreadListSheet({
               setThreads((prev) => prev.filter((t) => t.id !== id));
             } catch (err) {
               console.error('deleteThread error:', err);
-              appAlert('Hata', 'Sohbet silinemedi.');
+              appAlert(i18n.t('common.error'), i18n.t('assistant.delete_error'));
             } finally {
               setDeleting(null);
             }
@@ -141,7 +141,7 @@ export function ThreadListSheet({
           />
           <View style={styles.rowInfo}>
             <Text style={[styles.rowTitle, isActive && styles.rowTitleActive]} numberOfLines={1}>
-              {item.title ?? 'Yeni sohbet'}
+              {item.title ?? i18n.t('assistant.new_chat')}
             </Text>
             <Text style={styles.rowDate}>{formatRelative(item.updated_at)}</Text>
           </View>
@@ -152,7 +152,7 @@ export function ThreadListSheet({
               onPress={() => handleDelete(item.id)}
               style={styles.deleteButton}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              accessibilityLabel="Sohbeti sil"
+              accessibilityLabel={i18n.t('assistant.delete_chat')}
             >
               <MaterialIcons name="delete-outline" size={20} color={colors.text.secondary} />
             </TouchableOpacity>
@@ -175,7 +175,7 @@ export function ThreadListSheet({
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>{i18n.t('assistant.history_title')}</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityLabel="Kapat">
+            <TouchableOpacity onPress={onClose} style={styles.closeButton} accessibilityLabel={i18n.t('common.close')}>
               <MaterialIcons name="close" size={22} color={colors.text.secondary} />
             </TouchableOpacity>
           </View>

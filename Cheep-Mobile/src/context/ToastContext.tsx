@@ -5,7 +5,7 @@
  * bildirim. Alert gibi akışı kesmez. Tab çubuğunun ve sistem navigasyon çubuğunun
  * ÜSTÜNDE konumlanır (safe-area) — nav bar arkasında kalmaz.
  */
-import React, { createContext, useContext, useRef, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useRef, useState, useCallback, ReactNode, useMemo } from 'react';
 import { Animated, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -34,8 +34,13 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     }, 1800);
   }, [anim]);
 
+  // Sağlayıcı değeri MEMO: satır içi `{{ show }}` her renderda yeni bir nesne
+  // üretiyordu ve toast belirip kaybolurken (iki render) `useToast()` kullanan
+  // HER tüketici — yani ürün ızgarası ekranları — yeniden çiziliyordu.
+  const value = useMemo(() => ({ show }), [show]);
+
   return (
-    <ToastContext.Provider value={{ show }}>
+    <ToastContext.Provider value={value}>
       {children}
       {message !== null && (
         <Animated.View

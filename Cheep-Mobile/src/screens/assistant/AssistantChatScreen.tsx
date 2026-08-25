@@ -113,6 +113,8 @@ export function AssistantChatScreen({
   const flatListRef = useRef<FlatList<LocalMessage>>(null);
 
   const [threadId, setThreadId] = useState<number | null>(null);
+  /** Sohbet başlatılamadı — giriş alanı kapalı olmalı, yoksa ölü bir input kalır. */
+  const [threadError, setThreadError] = useState(false);
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [sending, setSending] = useState(false);
@@ -161,11 +163,17 @@ export function AssistantChatScreen({
 
   const initThread = async () => {
     try {
+      setThreadError(false);
       const thread = await assistantService.createThread();
       setThreadId(thread.id);
     } catch (err) {
+      // BAYRAK ŞART: eskiden yalnızca bir uyarı çıkıyordu, `threadId` null
+      // kalıyor ve `handleSend` sessizce erken dönüyordu — giriş alanı AKTİF
+      // ve normal görünüyor ama her gönderim hiçbir şey yapmıyordu. Kullanıcı
+      // yazıyor, gönderiyor, hiçbir şey olmuyor; sonsuza dek.
       console.error('Failed to create thread:', err);
-      appAlert('Hata', i18n.t('assistant.start_error'));
+      setThreadError(true);
+      appAlert(i18n.t('common.error'), i18n.t('assistant.start_error'));
     }
   };
 
@@ -423,7 +431,9 @@ export function AssistantChatScreen({
         onChangeText={setInputValue}
         onSend={() => handleSend()}
         sending={sending}
-        disabled={limitReached}
+        // Sohbet açılamadıysa giriş KAPALI: aksi halde aktif görünen bir
+        // alana yazılan her mesaj sessizce yok oluyordu.
+        disabled={limitReached || threadError || threadId === null}
       />
 
       <ThreadListSheet

@@ -8,7 +8,14 @@
  * Parent, boyutlu bir kap (imageContainer) sağlar; bu bileşen onu %100 doldurur.
  */
 import React from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+// react-native'in `Image`i DEĞİL: o her görseli tam çözünürlükte çözüyor ve
+// disk önbelleği yok. Katalog görselleri ~1000px; 96dp'lik bir hücrede
+// çözüldüğünde her hücre birkaç MB bellek tutuyor ve 100+ ürün kaydıran
+// kullanıcıda jank/OS sonlandırması üretiyordu. Ayrıca ekrana her dönüşte
+// yeniden indiriliyordu. `expo-image` zaten bağımlılıktaydı ama hiçbir yerde
+// kullanılmıyordu.
+import { Image } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getCategoryIcon } from '../../utils/categoryIcon';
 import { colors } from '../../theme';
@@ -28,7 +35,20 @@ interface ProductThumbProps {
 
 export function ProductThumb({ imageUrl, categoryName, iconSize = 34 }: ProductThumbProps) {
   if (imageUrl) {
-    return <Image source={{ uri: imageUrl, headers: IMG_HEADERS }} style={styles.image} />;
+    return (
+      <Image
+        source={{ uri: imageUrl, headers: IMG_HEADERS }}
+        style={styles.image}
+        // Bellek + disk: aynı görsel ikinci kez indirilmez.
+        cachePolicy="memory-disk"
+        contentFit="contain"
+        // Kısa geçiş, kart "birden zıplamış" gibi görünmesin.
+        transition={120}
+        // Görsel yüklenemezse (CDN 403 / ölü URL) kap boş kalır; kategori
+        // ikonu zaten yalnızca imageUrl YOKKEN çiziliyor.
+        recyclingKey={imageUrl}
+      />
+    );
   }
   return (
     <View style={styles.placeholder}>

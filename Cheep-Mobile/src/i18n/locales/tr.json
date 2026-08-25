@@ -201,7 +201,10 @@
     "store_details": "Mağaza Detayları",
     "price_disclaimer": "Fiyatlar herkese açık resmi kaynaklardan derlenir ve bilgilendirme amaçlıdır; anlık olarak değişebilir. Bağlayıcı olan, marketin kendi kanalındaki güncel fiyattır. Karşılaştırma yalnızca listelenen marketler arasındadır.",
     "store_details_soon": "Bu özellik yakında kullanıma açılacak.",
-    "no_price_info_desc": "Bu ürün için henüz fiyat bilgisi eklenmemiş."
+    "no_price_info_desc": "Bu ürün için henüz fiyat bilgisi eklenmemiş.",
+    "cheapest_label": "En Ucuz",
+    "difference": "Fark",
+    "average_price": "Ortalama Fiyat:"
   },
   "home": {
     "greeting": "Merhaba",
@@ -379,7 +382,8 @@
     "missing_in_route": "{{n}} ürün bu rotada yok",
     "missing_products": "Bulunamayan Ürünler",
     "store_link_error": "Mağaza bağlantısı açılamadı. Lütfen tekrar deneyin.",
-    "single_store": "Tek Market"
+    "single_store": "Tek Market",
+    "total_distance_label": "Toplam Mesafe"
   },
   "intro": {
     "skip": "Atla",
@@ -534,7 +538,9 @@
     "limit_premium_month": "Bu ayki {{limit}} mesaj hakkın doldu.",
     "header_title": "Asistan",
     "new_chat": "Yeni sohbet",
-    "new_list_fallback": "Yeni Liste"
+    "new_list_fallback": "Yeni Liste",
+    "delete_error": "Sohbet silinemedi.",
+    "delete_chat": "Sohbeti sil"
   },
   "time": {
     "just_now": "az önce",

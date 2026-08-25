@@ -27,7 +27,15 @@ interface ProductGridCardProps {
   constraint?: ProductConstraint;
 }
 
-export function ProductGridCard({
+/**
+ * MEMO ŞART. Bu kart sanallaştırılmış bir ızgarada onlarca kez çiziliyor ve
+ * ekranın state'i sürekli değişiyor: sepete ekleme `['lists']`i
+ * geçersizleştiriyor, rozet sayısı güncelleniyor, toast beliriyor ve 1,8 sn
+ * sonra kayboluyor. Memo olmadan bunların HER BİRİ görünürdeki bütün
+ * hücreleri baştan çizdiriyordu; kullanıcı ne kadar çok kaydırmışsa `+`
+ * düğmesi o kadar geç tepki veriyordu.
+ */
+function ProductGridCardBase({
   productName,
   categoryName,
   imageUrl,
@@ -267,3 +275,4 @@ const styles = StyleSheet.create({
   },
 });
 
+export const ProductGridCard = React.memo(ProductGridCardBase);

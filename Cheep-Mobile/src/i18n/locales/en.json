@@ -201,7 +201,10 @@
     "store_details": "Store Details",
     "price_disclaimer": "Prices are compiled from publicly available official sources and are for information only; they may change at any time. The binding price is the current one in the store’s own channel. The comparison covers only the listed stores.",
     "store_details_soon": "This feature is coming soon.",
-    "no_price_info_desc": "No price has been added for this product yet."
+    "no_price_info_desc": "No price has been added for this product yet.",
+    "cheapest_label": "Cheapest",
+    "difference": "Difference",
+    "average_price": "Average price:"
   },
   "home": {
     "greeting": "Hello",
@@ -379,7 +382,8 @@
     "missing_in_route": "{{n}} items missing on this route",
     "missing_products": "Missing Products",
     "store_link_error": "Could not open the store link. Please try again.",
-    "single_store": "Single Store"
+    "single_store": "Single Store",
+    "total_distance_label": "Total distance"
   },
   "intro": {
     "skip": "Skip",
@@ -534,7 +538,9 @@
     "limit_premium_month": "You have used your {{limit}} messages for this month.",
     "header_title": "Assistant",
     "new_chat": "New chat",
-    "new_list_fallback": "New list"
+    "new_list_fallback": "New list",
+    "delete_error": "The chat could not be deleted.",
+    "delete_chat": "Delete chat"
   },
   "time": {
     "just_now": "just now",
