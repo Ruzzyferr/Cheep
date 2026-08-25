@@ -81,6 +81,14 @@ else
 fi
 
 docker image prune -f >/dev/null 2>&1 || true
+# BuildKit ÖNBELLEĞİ `image prune` ile TEMİZLENMEZ — ayrı bir depodur.
+# Bu betik her gece 04:00'te site imajını yeniden derliyor ve önbellek
+# katmanları hiç toplanmadığı için sessizce birikti: 48 GB'lık diskte
+# 31,17 GB build cache (19,26 GB geri alınabilir), disk %80 — nöbetçinin
+# %85 eşiğinin hemen altında. Dolduğunda Postgres yazamaz hale gelirdi.
+# 48 saatten eski katmanlar atılıyor: ardışık iki gecelik derleme hâlâ
+# önbellekten faydalanır, ötesi zaten çöp.
+docker builder prune -f --filter 'until=48h' >/dev/null 2>&1 || true
 
 # --- 3b) IndexNow: Bing/Yandex'e değişenleri bildir --------------------
 # Google'ın karşılığı yok (sitemap + Search Console ile ilerliyoruz) ama

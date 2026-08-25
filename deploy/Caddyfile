@@ -20,6 +20,27 @@ cheep.live {
 		file_server
 	}
 
+	# Güvenlik başlıkları — apex'te HİÇ YOKTU.
+	#
+	# Backend'de helmet var ama o yalnızca api.cheep.live'ı kapsıyor; bir alt
+	# alan adındaki HSTS apex'i korumaz. Oysa apex, Play'in zorunlu tuttuğu
+	# HESAP SİLME formunu (/delete) ve yasal metinleri sunuyor. Çerçeve
+	# koruması olmadan bir kimlik avı sayfası /delete'i iframe'e alıp
+	# kullanıcıya tıklattırabilir (clickjacking) — sonucu geri dönüşsüz.
+	header {
+		# İki katman: eski tarayıcılar X-Frame-Options, güncel olanlar CSP.
+		X-Frame-Options "DENY"
+		Content-Security-Policy "frame-ancestors 'none'"
+		# MIME tipi tahmini kapalı (yüklenen içeriğin script gibi çalışması).
+		X-Content-Type-Options "nosniff"
+		# Yalnızca HTTPS. preload BİLEREK yok: geri alınması aylar sürüyor.
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		# Dış sitelere tam URL sızdırma (SEO sayfaları arama sorgusu taşıyabilir).
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Sunucu parmak izini azalt.
+		-Server
+	}
+
 	handle {
 		reverse_proxy website:80
 	}

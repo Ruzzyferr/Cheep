@@ -15,7 +15,10 @@ echo "==> Servisler yeniden build + restart"
 cd "$APP_DIR/deploy"
 docker compose -f docker-compose.prod.yml up -d --build
 
-echo "==> Kullanılmayan imajlar temizleniyor"
+echo "==> Kullanılmayan imajlar ve build önbelleği temizleniyor"
 docker image prune -f >/dev/null 2>&1 || true
+# `image prune` BuildKit önbelleğine DOKUNMAZ; bkz. build-site.sh'teki
+# gerekçe (birikip diski %80'e çıkarmıştı).
+docker builder prune -f --filter 'until=48h' >/dev/null 2>&1 || true
 
 echo "==> Deploy tamam. API: http://$(curl -s ifconfig.me):3000/api/v1"
