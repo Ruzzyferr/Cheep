@@ -18,6 +18,8 @@ export interface ChatSessionResult { text: string; functionCalls: { name: string
 export interface ChatSession { sendMessage(parts: any): Promise<ChatSessionResult> }
 
 const GATEWAY_URL = process.env.AI_GATEWAY_URL || 'https://ai-gateway.vercel.sh/v1/chat/completions';
+/** Tek gateway turu için üst sınır (ms). Bkz. fetch çağrısındaki gerekçe. */
+const GATEWAY_TIMEOUT_MS = Number(process.env.AI_GATEWAY_TIMEOUT_MS) || 60_000;
 
 type OaiMessage = {
   role: 'system' | 'user' | 'assistant' | 'tool';
@@ -89,10 +91,29 @@ export function createChatSession(opts: {
         throw new Error('sendMessage: desteklenmeyen parametre tipi');
       }
 
+      // ZAMAN AŞIMI ŞART. Bu çağrı zaman aşımsızdı: gateway bağlantıyı kabul
+      // edip yanıt vermezse Express isteği SÜRESİZ asılı kalıyordu. Tek bir
+      // asistan mesajı bu çağrıyı araç döngüsünde 9 kez yapabiliyor ve kaç
+      // tane böyle isteğin birikeceğinin bir sınırı yok — takılan bir
+      // sağlayıcı, hızlı 503'ler yerine 1 vCPU'luk sunucuda sınırsız asılı
+      // istek yığını üretirdi. (Kardeş `revenuecat.client.ts` bunu 8 sn'lik
+      // AbortController ile zaten doğru yapıyor.)
+      //
+      // 60 sn tek TUR için: modelin kendisi ölçülen en kötü hâlde ~34 sn
+      // sürebiliyor, dolayısıyla eşik gerçek yavaşlığı kesmemeli.
       const res = await fetch(GATEWAY_URL, {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages, ...(tools ? { tools, tool_choice: 'auto' } : {}) }),
+        signal: AbortSignal.timeout(GATEWAY_TIMEOUT_MS),
+      }).catch((e: unknown) => {
+        const name = (e as { name?: string })?.name;
+        if (name === 'TimeoutError' || name === 'AbortError') {
+          logger.error(`AI Gateway zaman asimi (${GATEWAY_TIMEOUT_MS}ms, model=${model})`);
+          throw new AppError('Asistan yanıt vermedi, tekrar dene.', 503, 'AI_TIMEOUT');
+        }
+        logger.error(`AI Gateway aglatma hatasi (model=${model}): ${String(e)}`);
+        throw new AppError('Asistan servisine ulaşılamadı.', 503, 'AI_UPSTREAM');
       });
 
       if (!res.ok) {

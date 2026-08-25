@@ -133,6 +133,32 @@ export async function syncUser(userId: number): Promise<BillingStatus> {
                 create: { user_id: userId, ...data },
                 update: data,
             });
+        } else if (body) {
+            // RevenueCat CEVAP VERDİ ama `premium` hakkını hiç bildirmedi.
+            //
+            // Bu, tam olarak iade/süre-dolumu sonrası görülen yanıt. Eskiden
+            // burada HİÇBİR ŞEY yazılmıyordu ve hemen ardından gelen
+            // `applyEntitlement` dokunulmamış, hâlâ ACTIVE ve dönem sonu
+            // gelecekte olan satırdan yeniden türetiyordu. Sonuç: webhook
+            // kaçarsa (deploy sırasında yeniden başlatma, ağ) iade edilmiş
+            // kullanıcı 30 gün daha premium kalıyordu — üstelik `syncUser`
+            // TAM OLARAK bu kaçış için yazılmış yedek yol. Yani yedek yol,
+            // varlık sebebi olan durumda çalışmıyordu.
+            //
+            // "Hak verir" tarafta susmak güvenli, "hak keser" tarafta susmak
+            // değil: RevenueCat'in sessizliği burada gerçek bir cevaptır.
+            // Yalnızca kayıtlı satır hâlâ hak veriyorsa yazıyoruz.
+            const existing = await prisma.subscription.findUnique({ where: { user_id: userId } });
+            if (existing && isEntitled({ status: existing.status as never, current_period_end: existing.current_period_end })) {
+                logger.warn(
+                    `RevenueCat kullanici ${userId} icin premium hakki bildirmedi; ` +
+                    `kayitli durum ${existing.status} -> EXPIRED olarak duzeltiliyor.`
+                );
+                await prisma.subscription.update({
+                    where: { user_id: userId },
+                    data: { status: 'EXPIRED', will_renew: false, current_period_end: new Date() },
+                });
+            }
         }
         await applyEntitlement(userId);
     } catch (e) {

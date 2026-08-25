@@ -102,15 +102,55 @@ export const sendMessage = async (userId: number, threadId: number, content: str
     }),
     prisma.user.findUnique({ where: { id: userId }, select: { is_premium: true, language: true } }),
   ]);
-  const verdict = checkAssistantLimit(
+  // Ucuz ön kontrol: kota zaten dolmuşsa aşağıdaki işlemi hiç başlatma.
+  const preVerdict = checkAssistantLimit(
     { today: todayCount, month: monthCount },
     limitUser?.is_premium ?? false
   );
-  if (!verdict.allowed) {
+  if (!preVerdict.allowed) {
     // İstemci bu kodu görüp doğru ekranı açıyor: ücretsiz kullanıcıya paywall,
     // premium kullanıcıya "yarın devam" bilgisi.
     throw new AppError('Mesaj limitin doldu.', 429, 'DAILY_LIMIT');
   }
+
+  // ── KOTA REZERVASYONU ──────────────────────────────────────────────────
+  //
+  // Kullanıcının mesajı MODEL ÇAĞRISINDAN ÖNCE yazılıyor. İki ayrı hatayı
+  // birden kapatıyor:
+  //
+  // ① EŞZAMANLILIKLA AŞMA: kota, kalıcı `chat_message` satırları sayılarak
+  //    ölçülüyor ama satır eskiden model döndükten SONRA yazılıyordu. Aradaki
+  //    boşluk saniyelerle ölçülüyor; ücretsiz bir kullanıcı 40 isteği aynı
+  //    anda yollarsa kırkı da `today=0` okuyup kapıdan geçiyor ve kırk tam
+  //    araç döngüsü koşuyordu. Genel limiter (600/dk) bunu durdurmuyor.
+  //
+  // ② HATADA KOTANIN KAYBOLMASI: `runAgentLoop` patlarsa (sağlayıcı 429/503)
+  //    hiç satır yazılmıyordu — yani başarısız ama PARASI ÖDENMİŞ deneme
+  //    bedava oluyordu, üstelik kullanıcının yazdığı mesaj da sohbetten
+  //    sessizce siliniyordu.
+  //
+  // Danışmanlık kilidi (`pg_advisory_xact_lock`) aynı kullanıcının eşzamanlı
+  // isteklerini sıraya sokuyor; işlem bitince kendiliğinden bırakılıyor.
+  // Anahtar `user_id`; farklı kullanıcılar birbirini beklemiyor.
+  const verdict = await prisma.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(${userId}::bigint)`;
+    const [today, month] = await Promise.all([
+      tx.chatMessage.count({
+        where: { role: 'user', thread: { user_id: userId }, created_at: { gte: dayStart } },
+      }),
+      tx.chatMessage.count({
+        where: { role: 'user', thread: { user_id: userId }, created_at: { gte: monthStart } },
+      }),
+    ]);
+    const v = checkAssistantLimit({ today, month }, limitUser?.is_premium ?? false);
+    if (!v.allowed) {
+      throw new AppError('Mesaj limitin doldu.', 429, 'DAILY_LIMIT');
+    }
+    await tx.chatMessage.create({
+      data: { thread_id: threadId, role: 'user', content },
+    });
+    return v;
+  });
 
   const session = createChatSession({
     systemInstruction: buildSystemPrompt(profile, currency, limitUser?.language ?? 'tr'),
@@ -148,10 +188,8 @@ export const sendMessage = async (userId: number, threadId: number, content: str
     lang,
   );
 
-  // Persist user message then assistant reply
-  await prisma.chatMessage.create({
-    data: { thread_id: threadId, role: 'user', content },
-  });
+  // Kullanıcı mesajı yukarıda, kota rezervasyonuyla birlikte YAZILDI.
+  // Burada yalnızca asistan cevabı kalıcılaştırılıyor.
   await prisma.chatMessage.create({
     data: {
       thread_id: threadId,
