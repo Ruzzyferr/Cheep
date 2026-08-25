@@ -104,6 +104,7 @@ export const message = async (req: Request, res: Response) => {
       req.body.content,
       req.country?.currency ?? 'TRY',
       req.country?.id,
+      req.lang,
     );
 
     res.status(200).json({

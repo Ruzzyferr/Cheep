@@ -76,7 +76,24 @@ export function buildSystemPrompt(profile: any, currency: string = 'TRY', langua
 // SEND MESSAGE (agent orchestration)
 // ============================================
 
-export const sendMessage = async (userId: number, threadId: number, content: string, currency: string = 'TRY', countryId?: number) => {
+export const sendMessage = async (
+  userId: number,
+  threadId: number,
+  content: string,
+  currency: string = 'TRY',
+  countryId?: number,
+  /**
+   * İSTEĞİN dili (`x-lang` → Accept-Language → ülke varsayılanı; middleware
+   * çözüyor). Asistanın cevap dili ÖNCE buna bakar.
+   *
+   * Eskiden yalnızca `user.language` kullanılıyordu. O alan yalnızca kullanıcı
+   * profilinden dil seçtiğinde doluyor; boşsa 'tr'ye düşülüyordu. Sonuç:
+   * arayüzü İngilizce olan bir kullanıcı İngilizce soruyor, asistan TÜRKÇE
+   * cevap veriyordu — üretimde Lehçe ve İngilizce personalarla doğrulandı.
+   * İstek başlığı, kullanıcının O AN gördüğü arayüz dilidir; doğru kaynak odur.
+   */
+  requestLang?: string,
+) => {
   await assertOwner(threadId, userId);
 
   // Kota kontrolü (LLM çağrısından ÖNCE — reddedilen istek para harcamamalı).
@@ -152,8 +169,11 @@ export const sendMessage = async (userId: number, threadId: number, content: str
     return v;
   });
 
+  // Cevap dili: istek başlığı > kullanıcının kayıtlı tercihi > Türkçe.
+  const replyLang = requestLang ?? limitUser?.language ?? 'tr';
+
   const session = createChatSession({
-    systemInstruction: buildSystemPrompt(profile, currency, limitUser?.language ?? 'tr'),
+    systemInstruction: buildSystemPrompt(profile, currency, replyLang),
     // desc çekildi — modele kronolojik sırayla verilmeli.
     history: [...history].reverse().map(m => ({
       role: m.role === 'user' ? 'user' as const : 'model' as const,
@@ -179,7 +199,7 @@ export const sendMessage = async (userId: number, threadId: number, content: str
       }
     : null;
 
-  const lang = limitUser?.language ?? 'tr';
+  const lang = replyLang;
   const result = await runAgentLoop(
     session,
     content,
