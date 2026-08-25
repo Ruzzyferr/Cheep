@@ -50,6 +50,11 @@ class Pacer:
         time.sleep(self.delay)
 
 
+def ts_now() -> int:
+    """Simdi (epoch sn) — st.mark icin."""
+    return int(time.time())
+
+
 def _prune(api_url, api_key, ttl_days=21):
     """Bayat (kaldırılmış) fiyat/ürün süpürmesi — backend'e günlük çağrı."""
     try:
@@ -149,6 +154,8 @@ def run(raw_dir, api_url, api_key, category_map="category_map.json",
     last_prune = st.get_float(conn, "last_prune", 0.0)
     # Son BAŞARILI ingest'ten bu yana geçen süre — prune'un ön koşulu.
     last_ingest_ok = 0.0
+    # id -> ust uste basarisiz cekim sayisi (zehirli hap korumasi).
+    fail_streak: dict = {}
     pending = {}
     seen_branches: set = set()   # daemon ömrü boyunca gönderilen şube ref'leri (tekrar POST yok)
 
@@ -238,12 +245,35 @@ def run(raw_dir, api_url, api_key, category_map="category_map.json",
             if res is None:                                                 # (3) blok → yavaşla
                 pacer.blocked()
                 consec_block += 1
+                fail_streak[pid] = fail_streak.get(pid, 0) + 1
+
+                # ZEHİRLİ HAP KORUMASI — kalıcı olarak başarısız olan id'ler
+                # kuyruğun başını TIKIYORDU.
+                #
+                # `select_stale` `ORDER BY last_ts ASC` ile seçiyor ve başarısız
+                # bir çekim `st.mark()` çağırmadığı için `last_ts` HİÇ
+                # ilerlemiyordu. Sonuç: kalıcı 400 dönen 200 id, en eski
+                # kayıtlar oldukları için HER partide 200 slotun tamamını
+                # dolduruyor ve başka hiçbir ürün bir daha çekilmiyordu.
+                # 30 sn gecikmeyle bu, 200 ölü id üzerinde sonsuza dek dönen
+                # 100 dakikalık bir döngü demek — üstelik prune her gün koşmaya
+                # devam ediyor. Katalog aç kalırken silinme riski sürüyordu.
+                #
+                # Üst üste 3 kez başarısız olan id'nin `last_ts`i ilerletilir:
+                # sıranın SONUNA gider, kuyruk akmaya devam eder, id de tümden
+                # unutulmaz (rotasyonda yine sırası gelir).
+                if fail_streak[pid] >= 3:
+                    st.mark(conn, pid, "empty", ts_now())
+                    fail_streak.pop(pid, None)
+                    logger.warning("id=%s üst üste 3 kez çekilemedi — rotasyonun sonuna alındı", pid)
+
                 if consec_block >= 8:                                       # sert ban → sağlık-kapısı
                     logger.info("sert blok — API iyileşene kadar bekleniyor (gecikme=%.1fs)", pacer.delay)
                     while not health_ok(session):
                         time.sleep(min(pacer.hi, 60))
                     consec_block = 0
                 continue
+            fail_streak.pop(pid, None)
             consec_block = 0
             pacer.ok()
             ts = int(time.time())

@@ -403,6 +403,9 @@ class WoltVenueScraper(BaseScraper):
         `id` across the entire run; falls back to re-discovering a live venue
         slug (brand roll-up, then search) if the pinned one 404s/errors."""
         import requests
+        from countries._common.http_retry import (
+            with_retry, requests_status, requests_headers,
+        )
 
         venue_slug = venue_slug or self.venue_slug
         state = {"first_request": True}
@@ -411,9 +414,27 @@ class WoltVenueScraper(BaseScraper):
             if not state["first_request"]:
                 time.sleep(self.delay_between_requests)
             state["first_request"] = False
-            resp = requests.get(url, headers=HEADERS, params=params, timeout=self.timeout)
-            resp.raise_for_status()
-            return resp.json()
+
+            def _bir_deneme() -> dict:
+                resp = requests.get(url, headers=HEADERS, params=params, timeout=self.timeout)
+                resp.raise_for_status()
+                return resp.json()
+
+            # YENIDEN DENEME + GERI CEKILME (bkz. countries/_common/http_retry.py).
+            #
+            # Eskiden tek deneme vardi ve her hata bir seviye yukarida WARNING'e
+            # donusup crawler ayni hizla devam ediyordu. Wolt ~120. kategoriden
+            # sonra 429 vermeye baslarsa tarama kataloğun %40'iyla bitiyor, o
+            # kismi veri ice aktariliyor, kosum `successful` raporluyor ve
+            # ardindan prune tetikleniyordu.
+            return with_retry(
+                _bir_deneme,
+                max_denemeler=3,
+                taban_gecikme=max(self.delay_between_requests, 1.5),
+                aciklama=f"Wolt {url}",
+                status_of=requests_status,
+                headers_of=requests_headers,
+            )
 
         tree = None
         try:

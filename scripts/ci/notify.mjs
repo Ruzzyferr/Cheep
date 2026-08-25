@@ -229,7 +229,18 @@ const r = await fetch('https://api.resend.com/emails', {
 });
 const body = await r.text();
 if (!r.ok) {
-    console.error(`::error::Resend ${r.status}: ${body.slice(0, 300)}`);
-    process.exit(1);
+    // UYARI, HATA DEGIL — ve exit 0.
+    //
+    // Bu betik SURUM HATTININ SONUNDA calisiyor. `process.exit(1)` demek,
+    // her iki magazaya da derleme YUKLENMISKEN Resend bir dakika 429 verdi
+    // diye tum kosuyu KIRMIZI gostermek demekti. Etiket isindeki yorum tam
+    // olarak bu tuzagi anlatiyor ("iki magazaya da build gitmisken sonuc
+    // KIRMIZI gorundu -- insani kirmiziyi ciddiye almamaya alistiran tam
+    // olarak budur") ve orada duzeltilmis, bir is otede birakilmisti.
+    //
+    // Bildirim gonderilemedigi ::warning:: olarak kosu ozetinde gorunur.
+    console.warn(`::warning::Bildirim gonderilemedi — Resend ${r.status}: ${body.slice(0, 300)}`);
+    console.warn('::warning::Surumun kendisi ETKILENMEDI; yalnizca e-posta cikmadi.');
+    process.exit(0);
 }
 console.log(`bildirim gönderildi → ${TO} (${genel})`);

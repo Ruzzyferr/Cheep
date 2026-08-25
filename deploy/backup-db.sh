@@ -21,16 +21,40 @@ OUT="$BACKUP_DIR/cheep-$STAMP.dump"
 
 mkdir -p "$BACKUP_DIR"
 
-# -Fc: custom format — sıkıştırılmış ve pg_restore ile seçmeli geri yüklenebilir.
-# Kimlik bilgileri container'ın kendi ortamından okunur (.env'i kopyalamaya gerek yok).
-docker exec "$CONTAINER" sh -lc \
-  'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "$OUT"
+# ONCE GECICI DOSYAYA, SONRA ADINI KOY (atomik yayinlama).
+#
+# Eskiden dogrudan "$OUT"a yaziliyordu ve kabuk yonlendirmesi dosyayi
+# `docker exec` daha baslamadan ONCE olusturup sifirliyordu. Betik dump ile
+# dogrulama arasinda olurse (2 GB kutuda OOM, yeniden baslatma, systemd stop)
+# geriye TAZE ZAMAN DAMGALI ama YARIM bir dosya kaliyordu -- ve uc dogrulama
+# katmaninin ucu de onu saglikli sayiyordu:
+#   * watchdog yalnizca en yeni dosyanin mtime'ina bakiyor,
+#   * pull-backups.ps1 ilk 5 baytta PGDMP ariyor (kesik dosyada da var),
+#   * restore-drill yalnizca elle calisan bir betik.
+# Sonuc: haftalarca "yedek saglikli" raporlanirken geri yuklenebilir en yeni
+# dump sessizce 14 gunluk saklama penceresinden dusuyordu.
+#
+# Gecici dosya `.partial` uzantili: watchdog ve pull-backups `cheep-*.dump`
+# ariyor, yarim dosyayi GORMUYORLAR. Ad degistirme ayni dosya sisteminde
+# atomik -- ya tam dosya gorunur ya hicbiri.
+TMP="$OUT.partial"
+trap 'rm -f "$TMP"' EXIT
+
+# -Fc: custom format -- sikistirilmis ve pg_restore ile secmeli geri yuklenebilir.
+# Kimlik bilgileri container'in kendi ortamindan okunur.
+#
+# CIKIS KODU da sinaniyor: pg_dump yarida oldurulurse kabuk yonlendirmesi
+# yine de bir dosya birakir ama komut sifirdan farkli doner.
+if ! docker exec "$CONTAINER" sh -lc \
+  'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' > "$TMP"; then
+  echo "HATA: pg_dump basarisiz oldu, yarim dosya atiliyor." >&2
+  exit 1
+fi
 
 # Boş/bozuk dump'ı sessizce saklama — diskte yer kaplayıp güven yanılsaması yaratır.
-SIZE=$(stat -c %s "$OUT")
+SIZE=$(stat -c %s "$TMP")
 if [ "$SIZE" -lt 100000 ]; then
-  echo "HATA: yedek şüpheli derecede küçük ($SIZE bayt), siliniyor: $OUT" >&2
-  rm -f "$OUT"
+  echo "HATA: yedek supheli derecede kucuk ($SIZE bayt), atiliyor." >&2
   exit 1
 fi
 
@@ -42,11 +66,14 @@ fi
 # betikte: `bash deploy/restore-drill.sh` — en yeni dump'ı ayrı bir
 # veritabanına yükleyip satır sayılarını canlıyla karşılaştırır. Ayda bir
 # elle çalıştırın; felaket anında ilk kez denemek için çok geç olur.
-if ! docker exec -i "$CONTAINER" pg_restore -l > /dev/null < "$OUT"; then
-  echo "HATA: yedek pg_restore ile okunamadı, siliniyor: $OUT" >&2
-  rm -f "$OUT"
+if ! docker exec -i "$CONTAINER" pg_restore -l > /dev/null < "$TMP"; then
+  echo "HATA: yedek pg_restore ile okunamadi, atiliyor." >&2
   exit 1
 fi
+
+# Tum dogrulamalar gecti -- ancak SIMDI gorunur ada tasi.
+mv "$TMP" "$OUT"
+trap - EXIT
 
 find "$BACKUP_DIR" -name 'cheep-*.dump' -mtime "+$RETENTION_DAYS" -delete
 

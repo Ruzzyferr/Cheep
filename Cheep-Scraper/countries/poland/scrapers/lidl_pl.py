@@ -281,9 +281,25 @@ MAX_PAGES_PER_TERM = 15     # hard cap: pages within a single term/category (cra
 # "Packaging text quirk" note. Without this, the shared quantity parser (which
 # picks the LAST size-shaped token) can silently pick up the reference
 # per-unit clause instead of the real leading package size.
+# `$` ANKRAJI KALDIRILDI ve para birimi/parantez kuyruğu tolere ediliyor.
+#
+# Referans cümlesi YALNIZCA dizenin en sonundaysa siliniyordu. Gerçek Lidl
+# verisinde cümlenin ardından "zl" gelebiliyor ya da tamamı parantez içinde
+# olabiliyor; o hâllerde silinmiyordu ve paylaşılan miktar ayrıştırıcısı
+# (SON boyut-benzeri belirteci seçer) gerçek paket boyutu yerine REFERANS
+# birimini alıyordu:
+#     "400 g 1 kg = 18,73 zl"   -> (1.0, kg)      YANLIŞ, olması gereken (400, g)
+#     "500 g (1 kg = 43,98)"    -> (1.0, kg)      YANLIŞ
+# Miktar tam olarak 1.0 çıktığı için `foreign_import`ın "1 değilse szt'ye
+# düşür" koruması da devreye girmiyordu. Sonuç: PAKET FİYATI, KİLO FİYATI
+# olarak yayınlanıyordu — üretim çıktısında doğrulandı (PILOS Ser gouda XXL,
+# price 7.49, unit "kg", quantity 1.0). Lidl bu yüzden olduğundan çok daha
+# ucuz görünüyordu; bir fiyat karşılaştırma uygulamasında bu, doğrudan yanlış
+# tavsiye demek.
 _PACKAGING_REF_SUFFIX_RE = re.compile(
-    r"\s*\*?\s*(?:cena przed obniżk\w*\s*:\s*)?"
-    r"[\d.,]+\s*[a-ząćęłńóśźż]+\s*=\s*[\d.,]+\s*$",
+    r"\s*[(\[]?\s*\*?\s*(?:cena przed obniżk\w*\s*:\s*)?"
+    r"[\d.,]+\s*[a-ząćęłńóśźż]+\s*=\s*[\d.,]+\s*"
+    r"(?:z[lł])?\s*[)\]]?\s*$",
     re.IGNORECASE,
 )
 

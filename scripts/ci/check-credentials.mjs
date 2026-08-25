@@ -69,26 +69,45 @@ async function api(path) {
 const gunKaldi = (iso) => Math.round((new Date(iso) - Date.now()) / 86400000);
 
 try {
-    const [certs, profiles] = await Promise.all([
-        api('certificates?limit=50'),
-        api('profiles?limit=50&include=bundleId'),
-    ]);
-
-    const dagitim = (certs.data ?? []).filter((c) =>
-        String(c.attributes?.certificateType).includes('DISTRIBUTION'),
-    );
+    // `include=bundleId,certificates`: sertifikaları da profil üzerinden
+    // çekiyoruz ki Cheep'e AİT olanları ayırt edebilelim.
+    const profiles = await api('profiles?limit=50&include=bundleId,certificates');
 
     // Yalnızca BU uygulamanın profili ilgilendiriyor; hesapta başka
     // uygulamaların (Swiip, Conversa) profilleri de duruyor ve onların
     // süresi bu hattı etkilemiyor.
+    const included = profiles.included ?? [];
     const bundleAdlari = new Map(
-        (profiles.included ?? []).map((b) => [b.id, b.attributes?.identifier]),
+        included.filter((x) => x.type === 'bundleIds').map((b) => [b.id, b.attributes?.identifier]),
+    );
+    const sertifikalar = new Map(
+        included.filter((x) => x.type === 'certificates').map((c) => [c.id, c]),
     );
     const cheepProfilleri = (profiles.data ?? []).filter(
         (p) =>
             bundleAdlari.get(p.relationships?.bundleId?.data?.id) === 'com.cheep.mobile' &&
             p.attributes?.profileState === 'ACTIVE',
     );
+
+    // SERTİFİKALAR DA CHEEP'E DARALTILIYOR.
+    //
+    // Eskiden `certificates?limit=50` ile hesaptaki TÜM dağıtım sertifikaları
+    // alınıyordu. Hesap Swiip ve Conversa ile paylaşıldığı için, Cheep'in hiç
+    // kullanmadığı bir Swiip sertifikası dolduğunda her sürüm koşusu
+    // "Dağıtım sertifikası DOLDU, iOS imzalanamaz" diye kalıcı bir yanlış
+    // alarm veriyordu. Daha kötüsü: aşağıda yalnızca EN YAKIN dolan
+    // raporlandığı için, 10 gün sonra dolacak GERÇEK bir Cheep profili o
+    // çoktan dolmuş yabancı sertifikanın arkasında GİZLENİYORDU.
+    //
+    // Doğru kapsam: Cheep'in aktif profillerinin REFERANS VERDİĞİ sertifikalar.
+    const cheepSertifikaIds = new Set(
+        cheepProfilleri.flatMap((p) =>
+            (p.relationships?.certificates?.data ?? []).map((c) => c.id),
+        ),
+    );
+    const dagitim = [...cheepSertifikaIds]
+        .map((id) => sertifikalar.get(id))
+        .filter((c) => c && String(c.attributes?.certificateType).includes('DISTRIBUTION'));
 
     const adaylar = [
         ...dagitim.map((c) => ({
@@ -112,13 +131,21 @@ try {
         console.log(`  ${a.ne} — ${a.tarih} (${a.gun} gün, ${durum})`);
     }
 
-    // En yakın dolan hangisiyse uyarı onun üzerinden verilir.
-    const enYakin = adaylar.reduce((a, b) => (a.gun <= b.gun ? a : b));
-    if (enYakin.gun < 0) {
-        bitir(`${enYakin.ne} ${enYakin.tarih} tarihinde DOLDU. iOS derlemesi imzalanamaz — yenileyip GitHub secret'larını güncelleyin.`);
+    // TÜM sorunlular raporlanır, yalnızca en yakın olan değil.
+    //
+    // Eskiden `reduce` ile tek bir "en yakın" seçiliyordu; dolmuş bir kalem
+    // varsa 10 gün sonra dolacak İKİNCİ bir kalem hiç görünmüyordu.
+    const dolmus = adaylar.filter((a) => a.gun < 0);
+    const yaklasan = adaylar.filter((a) => a.gun >= 0 && a.gun < UYARI_ESIGI_GUN);
+
+    if (dolmus.length) {
+        const liste = dolmus.map((a) => `${a.ne} (${a.tarih})`).join('; ');
+        bitir(`DOLMUŞ: ${liste}. iOS derlemesi imzalanamaz — yenileyip GitHub secret'larını güncelleyin.` +
+              (yaklasan.length ? ` Ayrıca yakında dolacak: ${yaklasan.map((a) => `${a.ne} ${a.gun} gün`).join('; ')}.` : ''));
     }
-    if (enYakin.gun < UYARI_ESIGI_GUN) {
-        bitir(`${enYakin.ne} ${enYakin.gun} gün sonra doluyor (${enYakin.tarih}). Yenileyip GitHub secret'larını güncelleyin; dolduğu gün iOS hattı durur.`);
+    if (yaklasan.length) {
+        const liste = yaklasan.map((a) => `${a.ne} ${a.gun} gün sonra (${a.tarih})`).join('; ');
+        bitir(`Yakında doluyor: ${liste}. Yenileyip GitHub secret'larını güncelleyin; dolduğu gün iOS hattı durur.`);
     }
     bitir(null);
 } catch (e) {

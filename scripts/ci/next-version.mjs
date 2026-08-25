@@ -71,8 +71,33 @@ async function highestVersionCode(token) {
 
     const edit = await call('/edits', 'POST', {});
     try {
-        const { tracks = [] } = await call(`/edits/${edit.id}/tracks`);
+        // KAYNAK `bundles`, `tracks` DEGIL.
+        //
+        // Play, DAHA ONCE YUKLENMIS her versionCode'u reddeder. `tracks` ise
+        // yalnizca kanallarin O ANKI aktif surumlerini gosteriyor; bir surum
+        // durdurulur ya da geri alinirsa versionCode'u oradan KAYBOLUYOR.
+        // Ustelik `play-upload.mjs`in `PUT /tracks/{track}` cagrisi kanalin
+        // release listesini tek bir release ile DEGISTIRIYOR, yani bir onceki
+        // versionCode zaten goruntuden siliniyor.
+        //
+        // Somut: vc42 yuklenip atanir, sonra surum durdurulup vc41'e donulur.
+        // Sonraki kosu tracks'ten 41 okur, 42 uretir ve Play "Version code 42
+        // has already been used" ile REDDEDER — bu betigin dokumantasyonunun
+        // "kokten onler" dedigi tam o hata.
+        //
+        // `bundles` yuklenmis TUM AAB'leri listeler; dogru kaynak odur.
+        // Tracks yine de taraniyor: cok eski yuklemeler bundle listesinden
+        // dusmus olabilir, iki kaynagin maksimumu en guvenli sayidir.
         let max = 0;
+
+        try {
+            const { bundles = [] } = await call(`/edits/${edit.id}/bundles`);
+            for (const b of bundles) max = Math.max(max, Number(b.versionCode) || 0);
+        } catch (e) {
+            console.warn(`::warning::bundles okunamadi (${e.message}); tracks'e dusuluyor.`);
+        }
+
+        const { tracks = [] } = await call(`/edits/${edit.id}/tracks`);
         for (const t of tracks) {
             for (const r of t.releases ?? []) {
                 for (const v of r.versionCodes ?? []) max = Math.max(max, Number(v));
@@ -103,16 +128,27 @@ function ascToken(p8, keyId, issuerId) {
 
 /** ASC'deki en yüksek build numarası. Hiç build yoksa 0. */
 async function highestBuildNumber(jwt) {
-    const url =
+    // SAYFALAMA ŞART VE SIRALAMA KULLANILMAZ.
+    //
+    // `sort=-version` ASC'de STRING sıralaması yapıyor: "99" > "100" > "9".
+    // Tek sayfa (limit=200) ile birleşince, ~250 build'ten sonra ilk sayfa
+    // 1xx/2xx build'lerin TAMAMINI atlayıp yalnızca "9x"leri getirebiliyor ve
+    // betik ZATEN KULLANILMIŞ bir numarayı yeniden üretiyordu. Bunun yerine
+    // sayfaların hepsi dolaşılıp maksimum SAYISAL değer alınıyor.
+    let url =
         `https://api.appstoreconnect.apple.com/v1/builds?filter[app]=${ASC_APP_ID}` +
-        '&limit=200&fields[builds]=version&sort=-version';
-    const r = await fetch(url, { headers: { Authorization: `Bearer ${jwt}` } });
-    if (!r.ok) throw new Error(`ASC builds -> ${r.status}: ${(await r.text()).slice(0, 200)}`);
-    const { data = [] } = await r.json();
+        '&limit=200&fields[builds]=version';
     let max = 0;
-    for (const b of data) {
-        const n = Number.parseInt(b.attributes?.version ?? '0', 10);
-        if (Number.isFinite(n)) max = Math.max(max, n);
+    let guard = 0;
+    while (url && guard++ < 25) {
+        const r = await fetch(url, { headers: { Authorization: `Bearer ${jwt}` } });
+        if (!r.ok) throw new Error(`ASC builds -> ${r.status}: ${(await r.text()).slice(0, 200)}`);
+        const body = await r.json();
+        for (const b of body.data ?? []) {
+            const n = Number.parseInt(b.attributes?.version ?? '0', 10);
+            if (Number.isFinite(n)) max = Math.max(max, n);
+        }
+        url = body.links?.next ?? null;
     }
     return max;
 }

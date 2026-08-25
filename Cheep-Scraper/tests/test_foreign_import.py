@@ -7,15 +7,20 @@ sys.path.insert(0, str(ROOT))
 from countries._common.foreign_import import build_api_payloads, ForeignImporter
 
 
+# NOT: buradaki barkodlar GERCEK kontrol hanesine sahip olmak ZORUNDA.
+# `build_payloads` artik barkodu `is_globally_unique_ean` ile dogruluyor
+# (magaza-ici GS1 onekleri 20-29 ve bozuk kontrol hanesi reddediliyor), bu
+# yuzden "1" gibi yer tutucu degerler `ean_barcode` alanini hic uretmez.
+# Eski fixture'lar (7610200000001, "1") tam da bu yuzden dusuyordu.
 def test_barcode_maps_to_ean_barcode():
     products = [{
-        "name": "Bio Milch 1L", "brand": "Migros", "barcode": "7610200000001",
+        "name": "Bio Milch 1L", "brand": "Migros", "barcode": "7610200000002",
         "price": 1.55, "unit": "adet", "sku": "MIG-1",
     }]
     payloads = build_api_payloads(products, store_id=10, category_map=None)
     assert len(payloads) == 1
     p = payloads[0]
-    assert p["ean_barcode"] == "7610200000001"
+    assert p["ean_barcode"] == "7610200000002"
     assert p["store_id"] == 10
     assert p["store_sku"] == "MIG-1"
     assert p["price"] == "1.55"          # sent as decimal string
@@ -100,12 +105,12 @@ def test_importer_sends_country_and_key_headers(monkeypatch):
 
     importer = ForeignImporter("http://localhost:3000/api/v1", country_code="DE", api_key="secret")
     result = importer.import_products(
-        [{"name": "Milch", "price": 1.0, "sku": "M", "barcode": "1"}], store_id=30,
+        [{"name": "Milch", "price": 1.0, "sku": "M", "barcode": "5901234123457"}], store_id=30,
     )
     assert captured["url"].endswith("/store-prices/bulk-upsert")
     assert captured["headers"]["x-country"] == "DE"
     assert captured["headers"]["x-api-key"] == "secret"
-    assert captured["body"]["prices"][0]["ean_barcode"] == "1"
+    assert captured["body"]["prices"][0]["ean_barcode"] == "5901234123457"
     assert result["successful"] == 1
 
 
@@ -129,7 +134,7 @@ def test_importer_survives_malformed_json_body(monkeypatch):
 
     importer = ForeignImporter("http://localhost:3000/api/v1", country_code="DE", api_key="secret")
     result = importer.import_products(
-        [{"name": "Milch", "price": 1.0, "sku": "M", "barcode": "1"}], store_id=30,
+        [{"name": "Milch", "price": 1.0, "sku": "M", "barcode": "5901234123457"}], store_id=30,
     )
     assert result["failed"] == 1
     assert result["successful"] == 0

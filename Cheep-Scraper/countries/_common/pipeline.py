@@ -203,8 +203,11 @@ async def run_country_pipeline(
 
     # Eşlenemeyen kategoriler koşunun sonunda raporlanır: ürün kaydedildi ama
     # KATEGORİSİZ, yani hiçbir listede görünmüyor. Sessizce geçmesin.
-    from countries._common.foreign_import import report_unmapped_categories
+    from countries._common.foreign_import import report_unmapped_categories, report_import_counters
     summary["unmapped_categories"] = report_unmapped_categories(logger)
+    # Sessizce dusurulen satirlar (bozuk fiyat, adsiz urun, gecersiz barkod).
+    # Ozete de yaziliyor: bir sonraki kosum ne kadar kaybettigimizi gorebilsin.
+    summary["dropped_rows"] = report_import_counters(logger)
 
     return summary
 

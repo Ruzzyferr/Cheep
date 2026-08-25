@@ -35,7 +35,18 @@ fi
 
 echo "==> Firewall (ufw): 22 (SSH) + 3000 (API)"
 ufw allow OpenSSH || ufw allow 22/tcp
-ufw allow 3000/tcp
+# ufw allow 3000/tcp KALDIRILDI.
+#
+# `docker-compose.prod.yml` 19 satir boyunca 3000'in disariya ACILMAMASI
+# gerektigini anlatiyor: Express `trust proxy=1` ile calisiyor ve Caddy
+# atlanirsa sahte X-Forwarded-For ile hiz limiti kovasi degistirilebilir.
+# Buradaki kural o gerekceyle DOGRUDAN CELISIYORDU.
+#
+# Ayrica yaniltici: Docker portlari kendi nat/DOCKER zincirleriyle yayinliyor
+# ve ufw'yi ATLIYOR. 80/443 ufw'de hic izinli degil ama site calisiyor. Yani
+# bu kural ne koruma sagliyordu ne de gerekliydi; yalnizca "ufw yigini
+# koruyor" yanilsamasi uretiyordu. Gercek koruma compose'daki `127.0.0.1:`
+# oneki.
 ufw --force enable
 
 echo "==> Repo erişimi (deploy anahtarı)"
@@ -80,13 +91,31 @@ docker compose -f docker-compose.prod.yml up -d --build
 echo "==> Backend hazır olana (migration'lar bitene) kadar bekle"
 # Container açılışta `migrate deploy` çalıştırır; seed bundan ÖNCE koşarsa tablolar
 # henüz yoktur (yarış durumu). Health endpoint'i hazır olunca migration'lar bitmiştir.
+# HAZIRLIK BEKLEMESI GERCEKTEN BASARISIZ OLABILMELI.
+#
+# Eskiden dongu `break` ediyor ama dongu SONRASI kontrol yoktu: 180 saniye
+# boyunca saglik gelmese bile betik dumduz devam edip seed i calistiriyordu --
+# yani yorumun onledigini soyledigi migration YARISININ ta kendisi. 1 vCPU luk
+# kutuda Prisma migration lari 180 saniyeyi asabiliyor.
+hazir=0
 for i in $(seq 1 60); do
-  if curl -fsS http://localhost:3000/health >/dev/null 2>&1; then echo "backend hazır"; break; fi
+  if curl -fsS http://localhost:3000/health >/dev/null 2>&1; then hazir=1; echo "backend hazir"; break; fi
   sleep 3
 done
+if [ "$hazir" -ne 1 ]; then
+  echo "HATA: backend 180 saniyede saglikli olmadi; seed CALISTIRILMADI." >&2
+  docker compose -f docker-compose.prod.yml logs --tail 40 backend >&2
+  exit 1
+fi
 
 echo "==> Seed (tek sefer)"
-docker compose -f docker-compose.prod.yml exec -T backend pnpm db:seed || \
-  echo "(seed atlandı/zaten yapılmış olabilir)"
+# `|| echo` KALDIRILDI: her seed hatasini guven verici bir mesaja cevirip
+# exit 0 donuyordu. "Seed zaten yapilmis" ile "tablolar hic yok" ayni
+# muameleyi goruyor ve bootstrap BOS bir categories tablosunun uzerine
+# "Tamamlandi" yaziyordu.
+if ! docker compose -f docker-compose.prod.yml exec -T backend pnpm db:seed; then
+  echo "HATA: seed basarisiz oldu. Tablolar olusmus mu, .env dogru mu bakin." >&2
+  exit 1
+fi
 
 echo "==> Tamamlandı. API: http://$(curl -s ifconfig.me):3000/api/v1"

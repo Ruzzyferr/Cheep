@@ -98,14 +98,37 @@ CID=$(docker compose -f "$COMPOSE" ps -q backend 2>/dev/null || true)
 # ürün sayısı DEĞİL devletin taksonomisi kazanır. Dosya verilmezse veri konuşur
 # ve elle tutulan PL listesinden gelen bir slug, devletinkini yenebilir —
 # tam olarak temizlemeye çalıştığımız durum.
-docker cp taxonomy.json "$CID:/tmp/taxonomy.json" 2>/dev/null || \
-  log "     taxonomy.json kopyalanamadı — kanonik otorite olmadan devam"
+# KOPYALAMA BASARISIZSA RECONCILE HIC CALISMAZ.
+#
+# Eskiden `docker cp` dusunce "kanonik otorite olmadan devam" yazilip
+# `--taxonomy /tmp/taxonomy.json` YINE DE geciliyordu. Container da onceki
+# haftanin dosyasi duruyorsa `--apply` BAYAT bir kanonik agaca gore kategori
+# birlestirmeleri uyguluyordu -- yorumun onlemeye calistigi durumun ta kendisi.
+if ! docker cp taxonomy.json "$CID:/tmp/taxonomy.json" 2>/dev/null; then
+  log "     HATA: taxonomy.json kopyalanamadi -- reconcile ATLANDI (bayat agacla --apply yapilmaz)."
+  RECONCILE_ATLANDI=1
+else
+  RECONCILE_ATLANDI=0
+fi
 
-docker exec "$CID" npx tsx scripts/reconcile-taxonomy.ts \
-  --safe-only --apply --taxonomy /tmp/taxonomy.json 2>&1 | sed 's/^/     /' || \
-  log "     reconcile hata verdi — bir sonraki haftaya bırakılıyor"
+# HATA YUTULMUYOR: `|| log ...` her basarisizligi bir kayit satirina cevirip
+# exit 0 donduruyordu; birim `failed` olmuyor, nobetci de OK diyordu. Dort
+# hafta sessizce basarisiz olan tam olarak buydu.
+RECONCILE_HATA=0
+if [ "$RECONCILE_ATLANDI" -eq 0 ]; then
+  if ! docker exec "$CID" npx tsx scripts/reconcile-taxonomy.ts \
+      --safe-only --apply --taxonomy /tmp/taxonomy.json 2>&1 | sed 's/^/     /'; then
+    log "     HATA: reconcile basarisiz oldu."
+    RECONCILE_HATA=1
+  fi
+fi
 
 log "5/5 sağlık raporu"
 docker exec "$CID" npx tsx scripts/data-health.ts --taxonomy /tmp/taxonomy.json 2>&1 | sed 's/^/     /' || true
+
+if [ "${RECONCILE_ATLANDI:-0}" -ne 0 ] || [ "${RECONCILE_HATA:-0}" -ne 0 ]; then
+  log "taksonomi tazeleme BASARISIZ (reconcile atlandi=${RECONCILE_ATLANDI:-0}, hata=${RECONCILE_HATA:-0})"
+  exit 1
+fi
 
 log "taksonomi tazeleme bitti"

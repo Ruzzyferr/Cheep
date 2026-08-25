@@ -187,15 +187,46 @@ for unit in cheep-fetcher cheep-fetcher-pl cheep-price-drops cheep-site-build \
             cheep-taxonomy cheep-backup; do
     # Oneshot birimler tetiklenmediği sürece "inactive" durur — bu normaldir.
     # Sadece açıkça "failed" olan durumu arızadır.
-    if [ "$(systemctl is-failed "$unit.service" 2>/dev/null)" = "failed" ]; then
+    state=$(systemctl is-failed "$unit.service" 2>/dev/null)
+    active=$(systemctl is-active "$unit.service" 2>/dev/null)
+    nrestarts=$(systemctl show "$unit.service" -p NRestarts --value 2>/dev/null)
+
+    if [ "$state" = "failed" ]; then
         when=$(systemctl show "$unit.service" -p ExecMainExitTimestamp --value 2>/dev/null)
         why=$(journalctl -u "$unit.service" -n 5 --no-pager 2>/dev/null | tail -5)
-        report "unit-$unit" fail "Zamanlanmış iş '$unit.service' ÇÖKTÜ (son: ${when:-bilinmiyor}).
+        report "unit-$unit" fail "Zamanlanmis is '$unit.service' COKTU (son: ${when:-bilinmiyor}).
 
-Son log satırları:
+Son log satirlari:
+$why"
+    elif [ "${nrestarts:-0}" -gt 5 ] 2>/dev/null; then
+        # COKME DONGUSU -- "failed" DEGIL ama saglikli da degil.
+        #
+        # cheep-fetcher.service Restart=always + RestartSec=30 ve
+        # StartLimitBurst override'i yok; surekli cokup yeniden baslayan bir
+        # birim activating/auto-restart durumunda TAKILI kaliyor ve is-failed
+        # ASLA "failed" demiyordu. Nobetci bu yuzden 7/24 coken bir daemon'a
+        # "ok" diyordu. NRestarts sayaci bunu gorunur kiliyor.
+        why=$(journalctl -u "$unit.service" -n 8 --no-pager 2>/dev/null | tail -8)
+        report "unit-$unit" fail "Zamanlanmis is '$unit.service' COKME DONGUSUNDE olabilir (yeniden baslatma: $nrestarts, durum: ${active:-bilinmiyor}).
+
+Son log satirlari:
 $why"
     else
         report "unit-$unit" ok ""
+    fi
+done
+
+# 8b) Zamanlayicilar GERCEKTEN kurulu mu
+#
+# Yukaridaki dongu yalnizca SERVIS durumuna bakiyor. Oneshot bir servisin
+# timer'i devre disi birakilir ya da maskelenirse servis sonsuza dek
+# "inactive" kalir -- dongu bunu OK sayar. Yani "is hic calismiyor" durumu
+# nobetcinin tamamen kor oldugu bir yerdeydi.
+for timer in cheep-fetcher-pl cheep-price-drops cheep-site-build              cheep-taxonomy cheep-backup cheep-watchdog; do
+    if ! systemctl is-enabled "$timer.timer" >/dev/null 2>&1; then
+        report "timer-$timer" fail "Zamanlayici '$timer.timer' ETKIN DEGIL -- bu is hic calismiyor."
+    else
+        report "timer-$timer" ok ""
     fi
 done
 
@@ -208,14 +239,24 @@ done
 # Eşik zincir rotasyonuna göre seçildi: TR daemon'ı her ürünü ~7 günde bir
 # tazeliyor, PL zincirleri haftada iki gün dönüyor. 3 gün hiçbir markette TEK
 # bir fiyat güncellenmemişse ingest hattı gerçekten durmuş demektir.
-stale_out=$(docker exec deploy-db-1 psql -U cheep -d cheep_db -tAc \
-    "SELECT count(*) FROM store_prices WHERE last_updated_at > now() - interval '3 days'" 2>/dev/null)
-if [ -z "$stale_out" ]; then
-    report "veri-tazeligi" fail "Fiyat tazeliği sorgulanamadı (veritabanına erişilemedi)."
-elif [ "$stale_out" -gt 0 ] 2>/dev/null; then
-    report "veri-tazeligi" ok ""
-else
-    report "veri-tazeligi" fail "Son 3 GÜNDE hiçbir fiyat güncellenmedi. Ingest hattı (fetch daemon / PL zamanlayıcı) durmuş olabilir — uygulama sağlıklı görünürken bayat fiyat gösteriyor."
-fi
+# ULKE BAZINDA. Eskiden sorgu ulke filtresiz TEK bir toplam donduruyordu:
+# TR daemon'i tamamen olse bile PL'nin gecelik rotasyonu satir guncelledigi
+# icin toplam > 0 kaliyor ve nobetci "veri taze" diyordu. Turk fiyatlari
+# donmusken uyari HIC CIKMIYORDU. Her ulke ayri sinaniyor.
+for ulke in TR PL; do
+    taze=$(docker exec deploy-db-1 psql -U cheep -d cheep_db -tAc \
+        "SELECT count(*) FROM store_prices sp
+           JOIN stores s ON s.id = sp.store_id
+           JOIN countries co ON co.id = s.country_id
+          WHERE co.code = '$ulke'
+            AND sp.last_updated_at > now() - interval '3 days'" 2>/dev/null | tr -d '[:space:]')
+    if [ -z "$taze" ]; then
+        report "veri-tazeligi-$ulke" fail "$ulke fiyat tazeligi sorgulanamadi (veritabanina erisilemedi)."
+    elif [ "$taze" -gt 0 ] 2>/dev/null; then
+        report "veri-tazeligi-$ulke" ok ""
+    else
+        report "veri-tazeligi-$ulke" fail "$ulke: son 3 GUNDE hicbir fiyat guncellenmedi. Ingest hatti (fetch daemon / PL zamanlayici) durmus olabilir — uygulama saglikli gorunurken bayat fiyat gosteriyor."
+    fi
+done
 
 echo "[$(date -Is)] nöbetçi turu tamam"

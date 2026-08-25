@@ -64,12 +64,22 @@ def build_api_payloads(
     for product in products:
         name = (product.get("name") or "").strip()
         if not name:
+            IMPORT_COUNTERS["dropped_no_name"] = IMPORT_COUNTERS.get("dropped_no_name", 0) + 1
             continue
+        # BOZUK FIYAT ARTIK SAYILIYOR.
+        #
+        # Eskiden `except: continue` sessizdi: kaynak fiyat bicimini
+        # degistirirse (or. Biedronka GA4 yuku "4,99" ya da "4.99 zl" dondurmeye
+        # baslarsa) urunlerin TAMAMI dusuyor, `products == []` oluyor, market
+        # ozetten kayboluyor, saglik kapisi geciyor ve prune tetikleniyordu.
+        # Bu zincirin hicbir adiminda TEK BIR SAYI kayda gecmiyordu.
         try:
             price = float(product.get("price", 0))
         except (TypeError, ValueError):
+            IMPORT_COUNTERS["dropped_bad_price"] = IMPORT_COUNTERS.get("dropped_bad_price", 0) + 1
             continue
         if price <= 0:
+            IMPORT_COUNTERS["dropped_nonpositive_price"] = IMPORT_COUNTERS.get("dropped_nonpositive_price", 0) + 1
             continue
 
         sku = product.get("sku") or product.get("store_sku") or f"{store_id}-{_slugify(name)[:48]}"
@@ -99,8 +109,13 @@ def build_api_payloads(
             "name": name,
         }
         barcode = product.get("barcode")
-        if barcode:
+        if barcode and is_globally_unique_ean(barcode):
             payload["ean_barcode"] = str(barcode).strip()
+        elif barcode:
+            # Dogrulanamayan barkod DUSURULUR (bkz. is_globally_unique_ean).
+            # Urun yine ice aktarilir; yalnizca marketler-arasi birlestirmeye
+            # girmez. Yanlis birlestirmektense birlestirmemek dogru.
+            IMPORT_COUNTERS["dropped_barcodes"] = IMPORT_COUNTERS.get("dropped_barcodes", 0) + 1
         if product.get("brand"):
             payload["brand"] = str(product["brand"])
         image_url = product.get("image_url")
@@ -121,6 +136,20 @@ def build_api_payloads(
     return payloads
 
 
+def report_import_counters(logger=None) -> Dict[str, int]:
+    """Bu kosumda SESSIZCE dusurulen satirlarin dokumu.
+
+    Dusurmeler tek tek `continue` ile yapiliyor ve hicbiri gorunmuyordu.
+    Kaynak fiyat bicimini degistirdiginde tum katalog dusebilir ve zincir
+    "sifir urun" -> "ozetten kaybolma" -> "saglik kapisi gecer" -> "prune"
+    seklinde ilerleyip VERI SILEBILIR. Sayilar en azindan kayda gecsin.
+    """
+    if IMPORT_COUNTERS and logger is not None:
+        ozet = ", ".join(f"{k}={v}" for k, v in sorted(IMPORT_COUNTERS.items()))
+        logger.warning("ICE AKTARIMDA DUSURULEN SATIRLAR: %s", ozet)
+    return dict(IMPORT_COUNTERS)
+
+
 def report_unmapped_categories(logger=None) -> Dict[str, int]:
     """Bu koşuda eşlenemeyen ham kategori adları → ürün sayısı.
 
@@ -138,6 +167,54 @@ def report_unmapped_categories(logger=None) -> Dict[str, int]:
         for name, n in sorted(UNMAPPED_CATEGORIES.items(), key=lambda kv: -kv[1])[:20]:
             logger.warning('    "%s": "",   # %d ürün', name, n)
     return dict(UNMAPPED_CATEGORIES)
+
+
+# Kosum boyunca biriken sayaclar (sessiz kayiplari gorunur kilar).
+IMPORT_COUNTERS: Dict[str, int] = {}
+
+
+def is_globally_unique_ean(barcode) -> bool:
+    """GS1 barkodu KURESEL OLARAK BENZERSIZ mi? (birlestirme anahtari olarak
+    kullanilabilir mi?)
+
+    NEDEN: barkod, urunleri marketler ARASINDA birlestiren anahtar. Scraper'lar
+    `barcode_gtin` alanini hicbir dogrulama yapmadan aynen iletiyordu ve iki
+    ayri sinif deger araya siziyordu:
+
+    1) GS1 ONEKI 20-29 = MAGAZA-ICI / SINIRLI DOLASIM. Magazaya ozel, kuresel
+       olarak benzersiz DEGIL ve degisken agirlikli sarkuteri urunlerinde
+       haneler PAKET AGIRLIGINI kodluyor. Yakalanan Carrefour ornekleri:
+       2020228700009, 2030269600008, 2030612100001 (Targ Swiezosci reyonu).
+       Sonuc: ayni peynir ertesi gun yeniden tartilinca BASKA bir "EAN"
+       uretiyor (her gece yeni urun satiri + bolunmus fiyat gecmisi), ya da
+       baska bir zincirin magaza-ici numarasi ayni 13 haneye denk gelip
+       ALAKASIZ iki urun tek "en ucuz" karsilastirmasinda birlesiyor.
+
+    2) KONTROL HANESI TUTMAYAN barkodlar (or. 5900000000012). Bunlar ya yazim
+       hatasi ya da uydurma; birlestirme anahtari olamazlar.
+
+    Gecersizse barkod DUSURULUR, urun yine ice aktarilir (yalnizca
+    marketler-arasi birlestirmeye girmez). Yanlis birlestirmektense
+    birlestirmemek dogru.
+    """
+    if barcode is None:
+        return False
+    digits = str(barcode).strip()
+    if not digits.isdigit():
+        return False
+    # GTIN-8 / GTIN-12 / GTIN-13 / GTIN-14 disindaki uzunluklar kabul edilmez.
+    if len(digits) not in (8, 12, 13, 14):
+        return False
+    # GS1 oneki 02 ve 20-29: magaza-ici / sinirli dolasim.
+    if len(digits) == 13 and (digits.startswith("02") or digits[:2] in
+                              {"20", "21", "22", "23", "24", "25", "26", "27", "28", "29"}):
+        return False
+    # Kontrol hanesi (mod 10): sagdan sola 3,1,3,1... agirliklandirma.
+    govde, kontrol = digits[:-1], int(digits[-1])
+    toplam = 0
+    for i, ch in enumerate(reversed(govde)):
+        toplam += int(ch) * (3 if i % 2 == 0 else 1)
+    return (10 - (toplam % 10)) % 10 == kontrol
 
 
 def _is_clean_absolute_url(url: str) -> bool:

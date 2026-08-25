@@ -51,9 +51,27 @@ def run(api_url, api_key, taxonomy="taxonomy.json", out="category_map.json"):
             main_to_id[ch["name"]] = cid
             n_sub += 1
         print(f"  {top['name']} (#{tid}) → {len(top['children'])} alt")
-    json.dump({"main_to_id": main_to_id, "slug_to_id": slug_to_id,
-               "other_id": slug_to_id.get("diger-urunler") or slug_to_id.get("diger")},
-              open(out, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+    # ATOMIK YAZMA: once .tmp, sonra os.replace.
+    #
+    # `open(out, "w")` dosyayi YERINDE kirpiyordu. `cheep-fetcher.service`
+    # 7/24 calisiyor, bu dosyayi `--category-map` ile izliyor ve mtime
+    # degisince YENIDEN OKUYOR. Haftalik taksonomi tazelemesi (Pazar 01:30)
+    # tam da o daemon calisirken bu yazmayi yapiyor: daemon yarim yazilmis
+    # JSON'a denk gelirse ayristirma patliyor, `_mtime = None` kaliyor ve
+    # butun urunler koda gomulu ESKI kategori kimliklerine dusuyordu.
+    # os.replace ayni dosya sisteminde atomiktir -- okuyucu ya eski ya yeni
+    # dosyanin TAMAMINI gorur, asla yarisini gormez.
+    payload = {
+        "main_to_id": main_to_id,
+        "slug_to_id": slug_to_id,
+        "other_id": slug_to_id.get("diger-urunler") or slug_to_id.get("diger"),
+    }
+    tmp = f"{out}.tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, out)
     print(f"SEED BİTTİ: üst={n_top} alt={n_sub} → {out}")
 
 

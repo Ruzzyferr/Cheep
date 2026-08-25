@@ -40,6 +40,16 @@ _NUM = r"\d+(?:[.,]\d+)?"
 _MULTIPACK_RE = re.compile(
     rf"(\d+)\s*[x×*]\s*({_NUM})\s*({_UNIT_ALT})\b", re.IGNORECASE
 )
+# TERS YAZIM: "1 l x 6" / "500 ml x 4" / "180 g*6"
+#
+# Yalnizca "N x BOYUT" bicimi taniniyordu. Lehce ve Turkce urun adlarinda
+# carpanin SONA yazilmasi da yaygin ("Mleko Laciate 1 l x 6"). Bu bicimde
+# coklu paket hic gorulmuyor, boyut olarak tek birim (1 l) aliniyor ve
+# paketin ~17 zl lik TOPLAM fiyati LITRE fiyati gibi yayinlaniyordu: alti
+# litrelik bir koli, ulkenin en pahali sutu olarak siralaniyordu.
+_MULTIPACK_SUFFIX_RE = re.compile(
+    rf"({_NUM})\s*({_UNIT_ALT})\s*[x×*]\s*(\d+)", re.IGNORECASE
+)
 # 500 g  /  1,5 L  /  500ml
 _SIMPLE_RE = re.compile(rf"({_NUM})\s*({_UNIT_ALT})\b", re.IGNORECASE)
 # count packs: 10'lu / 32'li / 6 lı / 24'lük  -> count
@@ -93,6 +103,13 @@ def extract_size_and_pack(text):
         count = int(m.group(1))
         amount = _to_float(m.group(2))
         return (round(count * amount, 4), normalize_unit(m.group(3)), count)
+
+    # Ters yazim: "1 l x 6" (bkz. _MULTIPACK_SUFFIX_RE gerekcesi).
+    ms = _MULTIPACK_SUFFIX_RE.search(text)
+    if ms:
+        amount = _to_float(ms.group(1))
+        count = int(ms.group(3))
+        return (round(count * amount, 4), normalize_unit(ms.group(2)), count)
 
     size_matches = list(_SIMPLE_RE.finditer(text))
     cm = _COUNTPACK_RE.search(text)

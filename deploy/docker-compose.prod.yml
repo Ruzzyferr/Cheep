@@ -4,10 +4,20 @@
 # (compose, aynı dizindeki `.env` dosyasını hem değişken enterpolasyonu hem de backend
 #  env_file için kullanır.)
 
+# Docker json-file loglari da SINIRSIZDI: dort container'in stdout'u
+# /var/lib/docker/containers altinda sinirsiz buyuyordu. Backend her istegi
+# logluyor; 48 GB'lik diskte bu tek basina bir zaman bombasi.
+x-logging: &varsayilan-log
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+
 services:
   db:
     image: postgres:15.8-alpine
     restart: always
+    logging: *varsayilan-log
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -27,6 +37,7 @@ services:
     build:
       context: ../cheep-backend-express
     restart: always
+    logging: *varsayilan-log
     env_file: .env
     depends_on:
       db:
@@ -63,6 +74,7 @@ services:
     build:
       context: ../cheep-website
     restart: always
+    logging: *varsayilan-log
     expose:
       - "80"
 
@@ -72,6 +84,7 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: always
+    logging: *varsayilan-log
     depends_on:
       - backend
       - website

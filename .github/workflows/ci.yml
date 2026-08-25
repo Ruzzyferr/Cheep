@@ -15,6 +15,9 @@ jobs:
   backend:
     name: Backend (typecheck + tests)
     runs-on: ubuntu-latest
+    # En az yetki: bu isler yalnizca kodu okuyup test kosuyor.
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: cheep-backend-express
@@ -44,6 +47,9 @@ jobs:
   mobile:
     name: Mobile (typecheck + lint + tests)
     runs-on: ubuntu-latest
+    # En az yetki: bu isler yalnizca kodu okuyup test kosuyor.
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: Cheep-Mobile
@@ -64,6 +70,9 @@ jobs:
   website:
     name: Website (typecheck + lint)
     runs-on: ubuntu-latest
+    # En az yetki: bu isler yalnizca kodu okuyup test kosuyor.
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: cheep-website
@@ -92,6 +101,9 @@ jobs:
   scraper:
     name: Scraper (syntax + tests)
     runs-on: ubuntu-latest
+    # En az yetki: bu isler yalnizca kodu okuyup test kosuyor.
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: Cheep-Scraper
@@ -112,6 +124,9 @@ jobs:
   guvenlik:
     name: Sır taraması
     runs-on: ubuntu-latest
+    # En az yetki: bu isler yalnizca kodu okuyup test kosuyor.
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
         with:
@@ -147,6 +162,9 @@ jobs:
     if: failure() && github.event_name == 'push'
     needs: [backend, mobile, website, scraper, guvenlik]
     runs-on: ubuntu-latest
+    # En az yetki: bu isler yalnizca kodu okuyup test kosuyor.
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

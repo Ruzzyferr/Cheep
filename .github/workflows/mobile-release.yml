@@ -47,6 +47,38 @@ env:
   EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
 
 jobs:
+  # ── CI KAPISI ───────────────────────────────────────────────────────────
+  # Surum hatti CI'a BAGLI DEGILDI: ikisi de main'e push ile tetikleniyor ve
+  # PARALEL kosuyordu. `Cheep-Mobile/**` altindaki bir commit tsc'yi ya da bir
+  # testi kirdiginda, CI kirmiziya donerken AYNI ANDA imzali bir AAB Play kapali
+  # testine ve bir IPA TestFlight'a gidiyordu. Testciler bozuk derlemeyi aliyor,
+  # kirmizi CI e-postasi ARDINDAN geliyordu.
+  #
+  # Bu is CI'in mobil kapilarini (tsc + eslint + vitest) AYNEN tekrar kosuyor.
+  # Neden `workflow_run` degil: o, hatti ayri bir olay zincirine tasiyip
+  # `github.sha`yi degistirir ve surum notu araligi ile etiketleme mantigini
+  # bastan yazmayi gerektirirdi. Birkac dakikalik tekrar, bozuk bir derlemenin
+  # magazaya gitmesinden ucuz.
+  ci_kapisi:
+    name: CI kapısı (mobil)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: Cheep-Mobile
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Cheep-Mobile/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx eslint . --max-warnings 0
+      - run: npx vitest run
+
   hazirlik:
     name: Sürüm numarası ve notlar
     runs-on: ubuntu-latest
@@ -107,6 +139,8 @@ jobs:
         run: node scripts/ci/release-notes.mjs
 
       - name: Özet
+        env:
+          RELEASE_NOTES: ${{ steps.notes.outputs.notes }}
         run: |
           {
             echo "### Mobil sürüm"
@@ -119,13 +153,32 @@ jobs:
             echo "| Play kanalı | $ANDROID_TRACK |"
             echo ""
             echo '```'
-            echo "${{ steps.notes.outputs.notes }}"
+            # NOTLAR ENV ILE GELIR, ${{ }} ILE DEGIL.
+            #
+            # `steps.notes.outputs.notes` commit KONULARINDAN uretiliyor
+            # (git log --pretty=%s) ve Actions onu kabuk ayristirmadan ONCE
+            # satira gomuyordu. Ters tirnak ya da $( iceren bir Turkce commit
+            # konusu -- "fix(mobil): fiyat $(bakiye) alani duzeltildi" -- kabukta
+            # komut ikamesi calistiriyor; dengesiz tirnak ise sozdizimi hatasi
+            # verip `hazirlik` isini dusuruyor, yani BIR COMMIT MESAJI yuzunden
+            # hicbir derleme cikmiyordu. Kotu niyetli halde ise push yetkisi olan
+            # herkes secret'larin bulundugu runner'da kod calistirabilirdi.
+            # Dogru desen `bildirim` isinde zaten kullaniliyor: env uzerinden gec.
+            echo "$RELEASE_NOTES"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
   android:
     name: Android → Play ${{ inputs.android_track || 'alpha' }}
-    needs: hazirlik
+    # EN AZ YETKI. Bu is `npm ci`, `pod install`, `expo prebuild` gibi ucuncu
+    # taraf yasam dongusu betikleri calistiriyor VE imzalama malzemesini
+    # (ANDROID_KEYSTORE_B64 / IOS_DIST_CERT_B64) tasiyor. `permissions` blogu
+    # olmayan bir is deponun VARSAYILAN GITHUB_TOKEN kapsamini miras aliyor;
+    # ele gecirilmis bir bagimlilik o token'la depoya yazabilirdi. `hazirlik`
+    # ve `etiket` isleri bunu zaten dogru yapiyordu, digerlerine uygulanmamisti.
+    permissions:
+      contents: read
+    needs: [hazirlik, ci_kapisi]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -217,7 +270,15 @@ jobs:
 
   ios:
     name: iOS → TestFlight
-    needs: hazirlik
+    # EN AZ YETKI. Bu is `npm ci`, `pod install`, `expo prebuild` gibi ucuncu
+    # taraf yasam dongusu betikleri calistiriyor VE imzalama malzemesini
+    # (ANDROID_KEYSTORE_B64 / IOS_DIST_CERT_B64) tasiyor. `permissions` blogu
+    # olmayan bir is deponun VARSAYILAN GITHUB_TOKEN kapsamini miras aliyor;
+    # ele gecirilmis bir bagimlilik o token'la depoya yazabilirdi. `hazirlik`
+    # ve `etiket` isleri bunu zaten dogru yapiyordu, digerlerine uygulanmamisti.
+    permissions:
+      contents: read
+    needs: [hazirlik, ci_kapisi]
     runs-on: macos-latest
     timeout-minutes: 60
     steps:
@@ -407,6 +468,14 @@ jobs:
 
   bildirim:
     name: Bildirim
+    # EN AZ YETKI. Bu is `npm ci`, `pod install`, `expo prebuild` gibi ucuncu
+    # taraf yasam dongusu betikleri calistiriyor VE imzalama malzemesini
+    # (ANDROID_KEYSTORE_B64 / IOS_DIST_CERT_B64) tasiyor. `permissions` blogu
+    # olmayan bir is deponun VARSAYILAN GITHUB_TOKEN kapsamini miras aliyor;
+    # ele gecirilmis bir bagimlilik o token'la depoya yazabilirdi. `hazirlik`
+    # ve `etiket` isleri bunu zaten dogru yapiyordu, digerlerine uygulanmamisti.
+    permissions:
+      contents: read
     # HER DURUMDA çalışır — asıl değeri başarısızlıkta. `needs` listesi tüm
     # işleri kapsıyor ki her birinin sonucu `needs.<is>.result` üzerinden
     # okunabilsin; `always()` olmadan bu iş de düşen işle birlikte atlanır ve

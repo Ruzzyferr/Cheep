@@ -46,8 +46,35 @@ foreach ($rf in $remoteFiles) {
     $dest = Join-Path $LocalDir $name
     if (Test-Path $dest) { continue }          # zaten çekilmiş
     Log "  çekiliyor: $name"
-    & scp -i $SshKey -o StrictHostKeyChecking=accept-new "${Server}:$rf" $dest
-    if ($LASTEXITCODE -ne 0) { Log "  !! $name çekilemedi"; continue }
+
+    # ÖNCE .part'a İNDİR, SONRA ADINI KOY.
+    #
+    # Eskiden doğrudan $dest'e indiriliyordu. scp yarıda koparsa geriye KESİK
+    # bir dosya kalıyor ve hiç temizlenmiyordu; bir üstteki `Test-Path $dest`
+    # de onu "zaten çekilmiş" sayıp sonraki HER koşuda atlıyordu. Yalnızca en
+    # yeni dosya sihirli baytla sınandığı için daha eski bir kesik dosya bir
+    # daha hiç incelenmiyordu. Sonuç: droplet'in 14 günlük saklaması o günü
+    # sildikten sonra elimizdeki TEK kopya 1,2 MB'lık bir kırıntı oluyordu —
+    # ve bu betik tüm dış yedek hikâyesi.
+    $partial = "$dest.part"
+    if (Test-Path $partial) { Remove-Item $partial -Force }
+    & scp -i $SshKey -o StrictHostKeyChecking=accept-new "${Server}:$rf" $partial
+    if ($LASTEXITCODE -ne 0) {
+        Log "  !! $name çekilemedi — yarım dosya siliniyor"
+        if (Test-Path $partial) { Remove-Item $partial -Force }
+        continue
+    }
+
+    # Boyut doğrulaması: uzaktakiyle eşleşmiyorsa transfer eksik demektir.
+    $uzakBoyut = (& ssh -i $SshKey -o StrictHostKeyChecking=accept-new $Server "stat -c %s '$rf'") 2>$null
+    $yerelBoyut = (Get-Item $partial).Length
+    if ($uzakBoyut -and ([int64]$uzakBoyut -ne $yerelBoyut)) {
+        Log "  !! $name boyut uyuşmuyor (uzak=$uzakBoyut yerel=$yerelBoyut) — atılıyor"
+        Remove-Item $partial -Force
+        continue
+    }
+
+    Move-Item $partial $dest -Force
     $copied++
 }
 
