@@ -103,3 +103,32 @@ jobs:
       - run: pip install -r requirements.txt
       # 259 test; ağ gerektirmiyor (hepsi sahte veriyle çalışıyor).
       - run: python -m pytest tests -q
+
+  bildirim:
+    name: Bildirim (yalnızca kırıkta)
+    # SADECE BAŞARISIZLIKTA ve SADECE main'de.
+    #
+    # Sürüm hattı başarıda da haber veriyor çünkü orada haber DEĞERLİ: bir
+    # derleme mağazaya gitti. CI ise her push'ta koşuyor; her yeşilde e-posta
+    # atmak kutuyu gürültüyle doldurur ve iki hafta içinde kimse okumaz —
+    # yani asıl kırmızıyı da kaçırtır. PR'lar hariç: sonuç zaten PR sayfasında.
+    if: failure() && github.event_name == 'push'
+    needs: [backend, mobile, website, scraper]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: E-posta gönder
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NOTIFY_BASLIK: Cheep · main CI
+          NOTIFY_JOBS: |
+            Backend|${{ needs.backend.result }}
+            Mobil|${{ needs.mobile.result }}
+            Website|${{ needs.website.result }}
+            Scraper|${{ needs.scraper.result }}
+          NOTIFY_SHA: ${{ github.sha }}
+          NOTIFY_COMMIT_MSG: ${{ github.event.head_commit.message }}
+          NOTIFY_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node scripts/ci/notify.mjs

@@ -361,3 +361,41 @@ jobs:
           git tag -a "$TAG" -m "Android vc${{ needs.hazirlik.outputs.version_code }} · iOS build ${{ needs.hazirlik.outputs.build_number }}"
           git push origin "$TAG"
           echo "etiket: $TAG"
+
+  bildirim:
+    name: Bildirim
+    # HER DURUMDA çalışır — asıl değeri başarısızlıkta. `needs` listesi tüm
+    # işleri kapsıyor ki her birinin sonucu `needs.<is>.result` üzerinden
+    # okunabilsin; `always()` olmadan bu iş de düşen işle birlikte atlanır ve
+    # tam da haber vermesi gereken anda susardı.
+    if: always()
+    needs: [hazirlik, android, ios, etiket]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+
+      - name: E-posta gönder
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NOTIFY_BASLIK: Cheep · mobil sürüm hattı
+          # Çok satırlı değerler (notlar, commit mesajı) doğrudan ortam
+          # değişkeni olarak veriliyor; kabuk içinde tırnak/kaçış derdi yok.
+          NOTIFY_JOBS: |
+            Sürüm numarası ve notlar|${{ needs.hazirlik.result }}
+            Android → Play ${{ inputs.android_track || 'alpha' }}|${{ needs.android.result }}
+            iOS → TestFlight|${{ needs.ios.result }}
+            Sürümü etiketle|${{ needs.etiket.result }}
+          NOTIFY_ANDROID: ${{ needs.android.result }}
+          NOTIFY_IOS: ${{ needs.ios.result }}
+          NOTIFY_VERSION: ${{ needs.hazirlik.outputs.app_version }}
+          NOTIFY_VC: ${{ needs.hazirlik.outputs.version_code }}
+          NOTIFY_BUILD: ${{ needs.hazirlik.outputs.build_number }}
+          NOTIFY_TRACK: ${{ inputs.android_track || 'alpha' }}
+          NOTIFY_NOTES: ${{ needs.hazirlik.outputs.notes }}
+          NOTIFY_SHA: ${{ github.sha }}
+          NOTIFY_COMMIT_MSG: ${{ github.event.head_commit.message || '(elle tetiklendi)' }}
+          NOTIFY_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: node scripts/ci/notify.mjs
+
