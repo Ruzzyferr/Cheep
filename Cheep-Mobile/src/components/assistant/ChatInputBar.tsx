@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import i18n from '../../i18n';
@@ -26,9 +27,13 @@ interface ChatInputBarProps {
 
 export function ChatInputBar({ value, onChangeText, onSend, sending, disabled }: ChatInputBarProps) {
   const canSend = !sending && !disabled && value.trim().length > 0;
+  // GÜVENLİ ALAN: kompozer Android'in gesture çubuğunun ALTINDA kalıyordu —
+  // ölçüm, çubuğun giriş alanının üstüne çizildiğini ve altta yalnızca ~9dp
+  // boşluk kaldığını gösterdi. Alt inset yoksa da nefes payı bırakılıyor.
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
       <TextInput
         style={styles.input}
         value={value}
@@ -52,7 +57,10 @@ export function ChatInputBar({ value, onChangeText, onSend, sending, disabled }:
           <MaterialIcons
             name="send"
             size={20}
-            color={canSend ? colors.background.paper : colors.text.disabled}
+            // Devre dışı hâlde eskiden `text.disabled` (#C2CDC6) kullanılıyordu:
+            // aynı tondaki daire üzerinde 1,45:1, yani fiilen GÖRÜNMEZ —
+            // düğme bozuk sanılıyordu. Artık kapalı olduğu belli ama okunur.
+            color={canSend ? colors.background.paper : colors.text.hint}
           />
         )}
       </TouchableOpacity>
@@ -65,7 +73,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-end',
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingTop: spacing.sm,
     backgroundColor: colors.background.paper,
     borderTopWidth: 1,
     borderTopColor: colors.border.light,
@@ -86,8 +94,9 @@ const styles = StyleSheet.create({
     borderColor: colors.border.main,
   },
   sendButton: {
-    width: 40,
-    height: 40,
+    // 48dp: Android'in dokunma hedefi tabanı. 40dp altında kalıyordu.
+    width: 48,
+    height: 48,
     borderRadius: borderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
@@ -97,6 +106,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary.main,
   },
   sendButtonDisabled: {
-    backgroundColor: colors.background.input,
+    // Girdi alanıyla AYNI renk değil: ikisi aynı olunca düğme alanın içinde
+    // kayboluyordu. Belirgin biçimde daha koyu bir nötr.
+    backgroundColor: colors.border.main,
   },
 });

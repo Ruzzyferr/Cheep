@@ -99,6 +99,8 @@ export function ProfileScreen({
   // İstatistikler yüklenene kadar 0/0/0 göstermek "hiç listen yok" gibi
   // okunuyordu ve veri gelince rakamlar zıplıyordu. null = henüz bilmiyoruz.
   const [stats, setStats] = useState<{ active: number; lists: number; items: number } | null>(null);
+  /** Hero gradyanının ÖLÇÜLEN boyutu — bkz. header'daki onLayout gerekçesi. */
+  const [heroSize, setHeroSize] = useState({ width: 0, height: 0 });
 
   // ─── Language picker / konum sayfası state ─────────────────────────────────
   const [langPickerOpen, setLangPickerOpen] = useState(false);
@@ -474,20 +476,50 @@ ${t('profile.delete_account_subscription_note')}`
   return (
     <View style={styles.container}>
       {/* ─── Hero başlık ─────────────────────────────────────────────────── */}
-      <View style={[styles.header, { paddingTop: topSpacing }]}>
+      <View
+        style={[styles.header, { paddingTop: topSpacing }]}
+        onLayout={(e) => {
+          const { width, height } = e.nativeEvent.layout;
+          setHeroSize((prev) =>
+            prev.width === width && prev.height === height ? prev : { width, height },
+          );
+        }}
+      >
         {/* Düz koyu yeşil yerine çok hafif dikey geçiş: yüzey "boyanmış" değil
-            "aydınlatılmış" duruyor. react-native-svg zaten maskot için var. */}
-        <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
-          <Defs>
-            {/* Başlık bilerek premium kartından AÇIK: kart ekranın en koyu
-                yüzeyi kalsın, yoksa ikisi birbirine karışıyor. */}
-            <LinearGradient id="profileHero" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor={colors.primary.main} />
-              <Stop offset="1" stopColor={colors.primary.dark} />
-            </LinearGradient>
-          </Defs>
-          <Rect x="0" y="0" width="100%" height="100%" fill="url(#profileHero)" />
-        </Svg>
+            "aydınlatılmış" duruyor. react-native-svg zaten maskot için var.
+
+            ÖLÇÜLEN PİKSEL BOYUTU KULLANILIYOR, "100%" DEĞİL. react-native-svg'de
+            yüzde birimli width/height mutlak konumlu bir kapsayıcıya güvenilir
+            çözülmüyor: Android'de SVG kapsayıcıdan KÜÇÜK çiziliyordu (ölçülen
+            974×352'ye karşı 1080×~460) ve arkadaki `primary[900]` zemin sağ
+            kenar boyunca ve altta L şeklinde bir DİKİŞ olarak açıkta kalıyordu.
+            İstatistik satırı bu yüzden avatarın üstündeki yüzeyden görünür
+            biçimde daha koyu bir zeminde duruyordu — ekrandaki en göze batan
+            kusurdu. Boyut sıfırken hiç çizme; tek karelik yanlış boyutlu bir
+            gradyan yanıp sönmesin. */}
+        {heroSize.width > 0 && heroSize.height > 0 && (
+          <Svg
+            style={StyleSheet.absoluteFill}
+            width={heroSize.width}
+            height={heroSize.height}
+          >
+            <Defs>
+              {/* Başlık bilerek premium kartından AÇIK: kart ekranın en koyu
+                  yüzeyi kalsın, yoksa ikisi birbirine karışıyor. */}
+              <LinearGradient id="profileHero" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor={colors.primary.main} />
+                <Stop offset="1" stopColor={colors.primary.dark} />
+              </LinearGradient>
+            </Defs>
+            <Rect
+              x="0"
+              y="0"
+              width={heroSize.width}
+              height={heroSize.height}
+              fill="url(#profileHero)"
+            />
+          </Svg>
+        )}
 
         <View style={styles.identity}>
           <View style={styles.avatarRing}>

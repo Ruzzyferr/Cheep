@@ -662,7 +662,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   sectionTitle: { ...typography.styles.h4, color: colors.text.primary },
-  link: { ...typography.styles.subtitle2, color: colors.accent.main },
+  // accent.main DEĞİL: krem zeminde 2,99:1 ile okunmuyordu (bkz. colors.ts).
+  link: { ...typography.styles.subtitle2, color: colors.accent.text },
 
   // Category rail
   catRail: { paddingHorizontal: layout.screenPadding, gap: spacing.sm },

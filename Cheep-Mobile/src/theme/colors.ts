@@ -53,6 +53,14 @@ export const colors = {
     400: '#F0682B',
     500: '#D85B22',
     600: '#C8521E',
+    /**
+     * accent.main METİN OLARAK KULLANILMAZ — krem zeminde 2,99:1 veriyor,
+     * yani WCAG AA'nın 4,5:1 tabanının ve büyük metnin 3:1 tabanının bile
+     * altında. Bağlantılar ("Tümü", "Tümünü incele") bu yüzden okunması zor
+     * çıkıyordu. Dolgu olarak F0682B doğru ve marka rengi; metin için bu
+     * koyu ton kullanılmalı (krem 4,87:1 · beyaz 5,09:1).
+     */
+    text: '#C2440E',
   },
 
   // Backgrounds — warm cream paper
@@ -72,7 +80,14 @@ export const colors = {
     primary: '#14211B',   // ink
     secondary: '#5B6B62', // warm gray-green
     disabled: '#C2CDC6',
-    hint: '#93A29A',
+    // ERİŞİLEBİLİRLİK: eskiden '#93A29A' idi ve beyaz üzerinde yalnızca
+    // 2,67:1 veriyordu — WCAG AA'nın 4,5:1 tabanının çok altında. Dekoratif
+    // olsa mesele değildi ama bu token GERÇEK VERİ taşıyor: fırsat
+    // kartındaki üstü çizili ESKİ FİYAT, ürün kartındaki market alt
+    // etiketleri, fiyat tazeliği. Bir indirim iddiasının dayandığı sayının
+    // okunamaması erişilebilirlikten önce bir güven sorunu.
+    // '#6B7A72' beyazda 4,51:1 — hâlâ görsel olarak "ikincil", ama okunur.
+    hint: '#6B7A72',
     darkPrimary: '#F2F5F0',
     darkSecondary: '#C2CDC6',
   },
@@ -130,7 +145,7 @@ export const colors = {
   // Specific UI elements
   fab: '#1F6F4A',
   tabBarActive: '#1F6F4A',
-  tabBarInactive: '#93A29A',
+  tabBarInactive: '#6B7A72',  // bkz. text.hint — AA icin koyulastirildi
 
   // Store brand colors
   storeChips: {
