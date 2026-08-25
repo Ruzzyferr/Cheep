@@ -150,12 +150,28 @@ async def run_country_pipeline(
         from countries._common.off_enrich import OffEnricher
         enricher = OffEnricher(country_code, str(country_dir / "off_cache.sqlite"))
         enrich_fn = enricher.enrich
-    summary = {"country": country_code, "markets": []}
+    # Bu koşumda ÇALIŞTIRILMASI İSTENEN marketler. `summary_is_healthy` bunu
+    # "beklenen" listesi olarak kullanır: sıfır ürün çeken bir market
+    # `runner`'dan None döner ve `scrape_results`'a HİÇ girmez, dolayısıyla
+    # aşağıdaki döngüye de girmez ve özette görünmez. Sağlık kapısı yalnızca
+    # VAR OLAN girdilere baktığı için böyle bir market sessizce "yokmuş" gibi
+    # davranıyor, koşum sağlıklı sayılıyor ve ülke çapında prune tetikleniyordu.
+    summary = {
+        "country": country_code,
+        "markets": [],
+        "expected_markets": [m["name"] for m in selected_markets],
+    }
     for r in scrape_results:
         with open(r["output_file"], "r", encoding="utf-8") as f:
             products = json.load(f)
 
-        if not should_import(r["market"], len(products), prev_counts):
+        # HAM sayı filtreden ÖNCE saklanır. Eskiden kapı ham sayıyı ölçüyor
+        # ama taban çizgisine FİLTRELENMİŞ sayı yazılıyordu (aşağıda
+        # `products` yeniden bağlanıyor). Lidl'de ham ~6.300, filtreden sonra
+        # ~54 — yani ertesi gece test "ham >= 32" oluyordu ve kapı fiilen
+        # devre dışı kalıyordu. İkisi de artık ham sayı.
+        raw_count = len(products)
+        if not should_import(r["market"], raw_count, prev_counts):
             logger.error("%s %s: ürün sayısı çöktü (%s, önceki %s) — import atlandı",
                          country_code, r["market"], len(products), prev_counts.get(r["market"]))
             summary["markets"].append({"market": r["market"], "skipped": "count_collapse"})
@@ -180,7 +196,7 @@ async def run_country_pipeline(
         logger.info("%s %s: scraped=%s imported=%s failed=%s",
                     country_code, r["market"], r["product_count"], stats["successful"], stats["failed"])
         summary["markets"].append({"market": r["market"], **stats})
-        prev_counts[r["market"]] = len(products)
+        prev_counts[r["market"]] = raw_count
 
     counts_path.parent.mkdir(parents=True, exist_ok=True)
     counts_path.write_text(json.dumps(prev_counts), encoding="utf-8")
@@ -207,10 +223,27 @@ def summary_is_healthy(summary: Dict) -> bool:
     the nightly prune AND the EAN harvest even though 1,002 real prices had
     just been imported. The gate exists to stop prune after a *collapsed*
     run, not to demand perfection: tolerate up to max(1, 1%) failed imports
-    per market, as long as that market still imported something."""
+    per market, as long as that market still imported something.
+
+    MISSING-MARKET RULE (2026-08-25): a market that scraped ZERO products
+    returns None from the runner, never lands in `scrape_results`, and so
+    never appears in `summary["markets"]` at all. Inspecting only the
+    entries that ARE present therefore treated a totally failed chain as if
+    it had never been asked to run: the summary looked healthy, the caller
+    exited 0, and `run-daily.sh` fired the country-wide prune. Repeat that
+    past the 21-day TTL and the chain's entire catalog is deleted, cascading
+    into users' saved list items. So every EXPECTED market must be accounted
+    for. `expected_markets` is absent from older/synthetic summaries; there
+    the rule is skipped rather than failing closed on data we never had."""
     markets = summary.get("markets") or []
     if not markets:
         return False
+
+    expected = summary.get("expected_markets")
+    if expected:
+        reported = {m.get("market") for m in markets}
+        if any(name not in reported for name in expected):
+            return False
     for market in markets:
         if market.get("skipped"):
             return False

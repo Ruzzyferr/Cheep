@@ -162,3 +162,64 @@ def test_products_without_raw_category_are_always_kept():
     )
     assert len(kept) == 2
     assert stats == {"kept": 2, "dropped": 0}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# EKSİK MARKET KURALI (2026-08-25)
+#
+# Sıfır ürün çeken bir zincir `runner`'dan None döner, `scrape_results`'a hiç
+# girmez ve özette GÖRÜNMEZ. Kapı yalnızca var olan girdilere baktığı için
+# tamamen çökmüş bir zincir "hiç istenmemiş" gibi davranıyordu: koşum sağlıklı
+# sayılıyor, çıkış kodu 0 oluyor ve `run-daily.sh` ülke çapında prune'u
+# tetikliyordu. 21 günlük TTL aşıldığında o zincirin tüm kataloğu siliniyor ve
+# silme kullanıcıların liste kalemlerine CASCADE ediyor.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def test_summary_unhealthy_when_expected_market_missing():
+    """Çarşamba rotasyonu Lidl+Żabka+Carrefour istedi; iki Wolt zinciri sıfır
+    ürün çekip özetten düştü. Kapı bunu YAKALAMALI."""
+    summary = {
+        "country": "PL",
+        "expected_markets": ["Lidl", "Żabka", "Carrefour"],
+        "markets": [
+            {"market": "Lidl", "successful": 54, "failed": 0},
+        ],
+    }
+    assert summary_is_healthy(summary) is False
+
+
+def test_summary_healthy_when_all_expected_markets_reported():
+    summary = {
+        "country": "PL",
+        "expected_markets": ["Lidl", "Żabka"],
+        "markets": [
+            {"market": "Lidl", "successful": 54, "failed": 0},
+            {"market": "Żabka", "successful": 1990, "failed": 0},
+        ],
+    }
+    assert summary_is_healthy(summary) is True
+
+
+def test_missing_market_rule_skipped_when_expectation_absent():
+    """Eski/sentetik özetlerde `expected_markets` yok — kural o zaman
+    uygulanmaz; olmayan veriye dayanıp kapıyı kapatmak yanlış olurdu."""
+    summary = {
+        "country": "PL",
+        "markets": [{"market": "Lidl", "successful": 54, "failed": 0}],
+    }
+    assert summary_is_healthy(summary) is True
+
+
+def test_expected_market_that_collapsed_still_unhealthy():
+    """Sayı çöküşüyle atlanan market özette VAR ama `skipped` işaretli —
+    eksik-market kuralı bunu maskelememeli."""
+    summary = {
+        "country": "PL",
+        "expected_markets": ["Lidl", "Żabka"],
+        "markets": [
+            {"market": "Lidl", "successful": 54, "failed": 0},
+            {"market": "Żabka", "skipped": "count_collapse"},
+        ],
+    }
+    assert summary_is_healthy(summary) is False

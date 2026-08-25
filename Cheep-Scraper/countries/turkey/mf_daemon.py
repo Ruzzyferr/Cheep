@@ -137,32 +137,73 @@ def run(raw_dir, api_url, api_key, category_map="category_map.json",
     pacer = Pacer(init=min_delay, lo=min_delay, hi=max(min_delay * 4, 120.0))
     sitemap_ids, sitemap_ts = fetch_all_ids(session), time.time()
     consec_block = 0
-    last_prune = 0.0
+    # BİR TAM ARALIK BEKLE. Eskiden 0.0 idi ve döngünün İLK turu her zaman
+    # prune ediyordu. Servis `Restart=always` olduğu için bir çökme döngüsü
+    # (ör. disk dolduğunda raw JSON yazılamıyor) saniyeler arayla prune
+    # tetikliyordu; her prune iki büyük deleteMany taraması demek.
+    last_prune = time.time()
+    # Son BAŞARILI ingest'ten bu yana geçen süre — prune'un ön koşulu.
+    last_ingest_ok = 0.0
     pending = {}
     seen_branches: set = set()   # daemon ömrü boyunca gönderilen şube ref'leri (tekrar POST yok)
 
     def do_ingest():
-        nonlocal pending
+        nonlocal pending, last_ingest_ok
         if not pending:
             return
         for pid, d in pending.items():
             d["_cheep_cat"] = cat_map.resolve(d.get("main_category"))
         payloads = build_price_payloads(pending)
+        stats = {"total": 0, "successful": 0, "failed": 0}
         if payloads:
-            ingest(payloads, api_url, api_key)
+            # DÖNÜŞ DEĞERİ ARTIK OKUNUYOR. Eskiden atılıyordu ve `ingest()`
+            # her HTTP hatasını kendi içinde yutuyor; sonuç: INGEST_API_KEY
+            # döndükten sonra her upsert 401 alırken kayda hâlâ başarı
+            # görünümlü "ingest: ürün=N payload=M" satırı düşüyordu.
+            stats = ingest(payloads, api_url, api_key) or stats
         # Aynı üründen ŞUBELERİ de çıkar → store_branches sürekli tazelenir (mesafe için).
         branch_payloads = build_branch_payloads(pending, seen_branches)
         if branch_payloads:
             ingest_branches(branch_payloads, api_url, api_key)
-        logger.info("ingest: ürün=%d payload=%d yeni_şube=%d | durum=%s",
-                    len(pending), len(payloads), len(branch_payloads), st.counts(conn))
+        if stats["successful"] > 0:
+            last_ingest_ok = time.time()
+        if stats["failed"]:
+            logger.error("ingest: %d/%d payload BAŞARISIZ — prune ertelenecek",
+                         stats["failed"], stats["total"])
+        logger.info("ingest: ürün=%d payload=%d başarılı=%d başarısız=%d yeni_şube=%d | durum=%s",
+                    len(pending), len(payloads), stats["successful"], stats["failed"],
+                    len(branch_payloads), st.counts(conn))
         pending = {}
 
     while True:
         # (kaldırma) günlük bayat süpürmesi — tazelenmeyen fiyat/ürünleri sil
+        #
+        # ⚠️ SAĞLIK KAPISI — bu koşul olmadan prune KATALOĞU SİLEBİLİR.
+        # `prune-stale` 21 günden eski her fiyatı siler ve fiyatsız kalan
+        # `mf-` ürünlerini de siler; ürün silme `ListItem`'a CASCADE eder,
+        # yani KULLANICILARIN KAYITLI LİSTELERİ de gider.
+        #
+        # Eski hâlinde prune, hiçbir şey çekilmemiş/yüklenmemiş olsa bile
+        # her gün koşuyordu. Somut senaryo: marketfiyati'nin WAF'ı droplet
+        # IP'sini banlar, `fetch_product` sürekli None döner, hiçbir fiyat
+        # tazelenmez — ama prune yine de her gün çalışır ve 21. günde tüm
+        # TR kataloğu ile birlikte kullanıcı listeleri silinir.
+        #
+        # Kural: SON PRUNE'DAN BU YANA EN AZ BİR BAŞARILI INGEST OLMALI.
+        # "Veri tazeliyorsam eskiyeni silebilirim; tazelemiyorsam silemem."
+        # Kardeş PL hattı aynı korumayı `summary_is_healthy` ile yapıyor.
         if time.time() - last_prune > prune_interval:
-            _prune(api_url, api_key, prune_ttl_days)
-            last_prune = time.time()
+            if last_ingest_ok > last_prune:
+                _prune(api_url, api_key, prune_ttl_days)
+                last_prune = time.time()
+            else:
+                logger.error(
+                    "PRUNE ATLANDI — son prune'dan bu yana başarılı ingest yok. "
+                    "Veri tazelenmiyorken silme yapılmaz (katalog + kullanıcı listeleri risk altında). "
+                    "durum=%s", st.counts(conn))
+                # Tekrar tekrar kayda basmasın diye sayacı ilerlet; koşul
+                # sağlanınca bir sonraki aralıkta normal akışına döner.
+                last_prune = time.time() - prune_interval + 3600
 
         if time.time() - sitemap_ts > sitemap_refresh:
             try:
