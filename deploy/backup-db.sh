@@ -36,6 +36,12 @@ fi
 
 # Geri yüklenebilirliği doğrula: pg_restore -l arşivin içindekileri listeler,
 # bozuk dosyada hata verir. Yedeğin var olması yetmez, açılabilmesi de gerekir.
+#
+# DİKKAT — bu kontrolün SINIRI var: arşivin OKUNABİLİR olduğunu gösterir,
+# GERİ YÜKLENEBİLİR olduğunu değil. Gerçek geri yükleme tatbikatı ayrı bir
+# betikte: `bash deploy/restore-drill.sh` — en yeni dump'ı ayrı bir
+# veritabanına yükleyip satır sayılarını canlıyla karşılaştırır. Ayda bir
+# elle çalıştırın; felaket anında ilk kez denemek için çok geç olur.
 if ! docker exec -i "$CONTAINER" pg_restore -l > /dev/null < "$OUT"; then
   echo "HATA: yedek pg_restore ile okunamadı, siliniyor: $OUT" >&2
   rm -f "$OUT"
