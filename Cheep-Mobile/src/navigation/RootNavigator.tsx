@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { navigationRef, useNotificationRuntime } from '../utils/notificationRuntime';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useAuth } from '../context/AuthContext';
 import { AuthNavigator } from './AuthNavigator';
@@ -26,6 +27,11 @@ export function RootNavigator() {
   const { isAuthenticated, isLoading, emailVerified, onboardingDone, introSeen } = useAuth();
   const { t } = useTranslation();
 
+  // Bildirim çalışma zamanı: Android kanalı + bildirime dokununca yönlendirme.
+  // KOŞULLU DÖNÜŞTEN ÖNCE çağrılmalı — aşağıda `isLoading` erken return var ve
+  // hook'lar her renderda aynı sırayla çalışmak zorunda.
+  useNotificationRuntime();
+
   // Show loading screen while checking auth
   if (isLoading) {
     return (
@@ -36,7 +42,10 @@ export function RootNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    // ref: bildirim dinleyicisi bir bileşen değil, `useNavigation`
+    // kullanamaz — dokunulan bildirimden ekrana gidebilmesi için
+    // konteynere modül düzeyinde referans şart.
+    <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!introSeen ? (
           // İlk açılış: "nasıl kullanılır" tanıtımı (auth'tan önce)

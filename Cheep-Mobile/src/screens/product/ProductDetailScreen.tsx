@@ -64,6 +64,7 @@ export function ProductDetailScreen({
   });
   const priceHistory = historyQ.data ?? null;
   const historyLoading = historyQ.isPending;
+  const historyError = historyQ.isError;
 
   /** Ürünün fiyatları, ucuzdan pahalıya. */
   const prices: StorePrice[] = useMemo(() => {
@@ -300,7 +301,7 @@ export function ProductDetailScreen({
 
         {/* Price History Trend */}
         <View style={styles.detailsSection}>
-          <PriceTrendCard history={priceHistory} loading={historyLoading} />
+          <PriceTrendCard history={priceHistory} loading={historyLoading} error={historyError} />
         </View>
 
         {/* Product Details */}

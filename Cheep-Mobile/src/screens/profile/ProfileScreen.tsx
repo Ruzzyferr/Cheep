@@ -136,6 +136,13 @@ export function ProfileScreen({
     [householdSize, diet, avoid, allergies, weeklyBudget]
   );
   const dirty = pristine !== null && formKey !== pristine;
+  /**
+   * `formKey`in GÜNCEL değerine bağımlılık eklemeden ulaşmak için ref.
+   * Odak efektinin bağımlılıklarına form alanlarını koymak, her tuş vuruşunda
+   * profili yeniden çekmek demek olurdu.
+   */
+  const formKeyRef = React.useRef(formKey);
+  formKeyRef.current = formKey;
 
   // ─── KVKK konum açık-rıza durumu ───────────────────────────────────────────
   const [locConsent, setLocConsent] = useState<LocationConsent>(null);
@@ -213,8 +220,22 @@ export function ProfileScreen({
               })
             );
           }
-        } catch {
-          /* keep previous values */
+        } catch (e) {
+          // TABAN ÇİZGİSİNİ YİNE DE KUR.
+          //
+          // Eskiden burada hiçbir şey yapılmıyordu ve `pristine` `null`
+          // kalıyordu. `dirty = pristine !== null && ...` olduğu için Kaydet
+          // düğmesi BİR DAHA ASLA çizilmiyordu: kullanıcı diyetini değiştirip
+          // fındık alerjisi ekliyor, ortada Kaydet düğmesi olmadığı için
+          // otomatik kaydedildiğini varsayıp ekrandan çıkıyordu. Hiçbir şey
+          // kaydedilmiyor ve alerjen filtresi hiç uygulanmıyordu — sessiz
+          // veri kaybı, üstelik güvenlikle ilgili bir alanda.
+          //
+          // Sunucudan profil gelmediyse EKRANDAKİ mevcut değerleri taban
+          // çizgisi kabul ediyoruz: form yine düzenlenebilir ve kullanıcı bir
+          // şey değiştirdiğinde Kaydet çıkar.
+          console.warn('Profil alınamadı; yerel değerler taban alınıyor:', e);
+          if (alive) setPristine((prev) => prev ?? formKeyRef.current);
         } finally {
           if (alive) setPrefLoading(false);
         }

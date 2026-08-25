@@ -29,10 +29,14 @@ interface PremiumContextType {
    * Koşul: anahtar var VE mağazadan gerçek bir teklif geldi.
    */
   available: boolean;
+  /** Teklif çekilmeye çalışıldı ve BAŞARISIZ oldu → arayüz "yeniden dene" sunar. */
+  offeringFailed: boolean;
   loading: boolean;
   /** Satın alma/geri yükleme sürüyor. */
   busy: boolean;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<BillingStatus | null>;
+  /** Teklifi yeniden çeker (paywall'daki "yeniden dene"). */
+  reloadOffering: () => Promise<void>;
   buy: (pkg: PurchasesPackage) => Promise<boolean>;
   restore: () => Promise<boolean>;
 }
@@ -43,19 +47,26 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated } = useAuth();
   const [status, setStatus] = useState<BillingStatus | null>(null);
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
+  /** Teklif çekilmeye çalışıldı mı? (çekilemediyse "yeniden dene" gösterilir) */
+  const [offeringFailed, setOfferingFailed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
 
   /** Backend'i doğruluk kaynağı sayarak durumu tazeler. */
-  const refresh = useCallback(async () => {
-    if (!isAuthenticated) { setStatus(null); return; }
+  const refresh = useCallback(async (): Promise<BillingStatus | null> => {
+    if (!isAuthenticated) { setStatus(null); return null; }
     try {
       setLoading(true);
       // sync RevenueCat'e gider; ulaşılamazsa backend kayıtlı durumu döner.
-      setStatus(await billingService.sync());
+      const next = await billingService.sync();
+      setStatus(next);
+      return next;
     } catch (e) {
       // Ağ hatası premium rozetini düşürmemeli; elimizdeki değer kalsın.
+      // DÖNÜŞ null: çağıran (buy) "doğrulanamadı" ile "premium değil"i
+      // ayırt edebilsin.
       console.warn('Abonelik durumu alınamadı:', e);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -74,7 +85,7 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
       await identifyUser(user.id);
       if (cancelled) return;
       await refresh();
-      if (!cancelled) setOffering(await getCurrentOffering());
+      if (!cancelled) await loadOffering();
     })();
     return () => { cancelled = true; };
     // Bilerek yalnizca user.id: kullanicinin adi/dili degisince RevenueCat
@@ -82,12 +93,48 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, user?.id, refresh]);
 
+  /**
+   * Mağaza teklifini çeker.
+   *
+   * NEDEN AYRI VE YENİDEN ÇAĞRILABİLİR: eskiden oturum başına TEK KEZ, sessiz
+   * bir `setOffering(await getCurrentOffering())` vardı. Çağrı bir kez
+   * başarısız olursa (zayıf bağlantı, mağaza gecikmesi) `available` oturum
+   * boyunca `false` kalıyor ve premium'a giden BÜTÜN yüzeyler yok oluyordu:
+   * profil kartı çizilmiyor, asistan limit afişindeki yükseltme gizleniyor,
+   * paywall "şu anda kullanılamıyor" diyordu. Kullanıcının tek çaresi
+   * uygulamayı öldürüp açmaktı.
+   */
+  const loadOffering = useCallback(async (): Promise<void> => {
+    try {
+      const o = await getCurrentOffering();
+      setOffering(o);
+      setOfferingFailed(!o?.availablePackages?.length);
+    } catch (e) {
+      console.warn('Teklif alınamadı:', e);
+      setOffering(null);
+      setOfferingFailed(true);
+    }
+  }, []);
+
   const buy = useCallback(async (pkg: PurchasesPackage): Promise<boolean> => {
     setBusy(true);
     try {
       await purchasePackage(pkg);
       // Mağaza "tamam" dedi; hakkı backend'den doğrula.
-      await refresh();
+      //
+      // `refresh()` KENDİ hatasını yutuyor (ağ hatası premium rozetini
+      // düşürmesin diye — orada doğru). Ama satın alma akışında bu, ÖDEME
+      // ALINMIŞ ama hak senkronlanamamışken `true` dönmek demekti: ekran
+      // "teşekkürler" deyip geri gidiyor, kullanıcı hâlâ ücretsiz katman
+      // sınırını görüyordu. Bu yüzden burada durumu AÇIKÇA sınıyoruz.
+      const after = await refresh();
+      if (!after?.isPremium) {
+        // Bir kez daha dene: RevenueCat webhook'u backend'e ulaşana kadar
+        // kısa bir gecikme olabilir.
+        await new Promise((r) => setTimeout(r, 1500));
+        const retry = await refresh();
+        if (!retry?.isPremium) return false;
+      }
       return true;
     } catch (e) {
       if (e instanceof PurchaseCancelled) return false;
@@ -113,9 +160,12 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
     status,
     offering,
     available: purchasesAvailable() && Boolean(offering?.availablePackages?.length),
+    /** Teklif çekilemedi — arayüz "yeniden dene" sunmalı. */
+    offeringFailed,
     loading,
     busy,
     refresh,
+    reloadOffering: loadOffering,
     buy,
     restore,
   };

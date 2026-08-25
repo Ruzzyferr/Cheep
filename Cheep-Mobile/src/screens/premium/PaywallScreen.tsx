@@ -39,14 +39,20 @@ function savingPercent(monthly?: PurchasesPackage, yearly?: PurchasesPackage): n
 export function PaywallScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation<any>();
-  const { offering, isPremium, status, available, busy, buy, restore } = usePremium();
+  const { offering, isPremium, status, available, busy, buy, restore, reloadOffering } = usePremium();
   const [selected, setSelected] = useState<'monthly' | 'yearly'>('yearly');
   // Sekme disi ekran: tab bar payi yok ama sistem cubugu payi gerekli.
   const bottomSpacing = useBottomSpacing();
 
   const monthly = offering?.availablePackages.find((p) => p.packageType === 'MONTHLY');
   const yearly = offering?.availablePackages.find((p) => p.packageType === 'ANNUAL');
-  const chosen = selected === 'yearly' ? yearly ?? monthly : monthly ?? yearly;
+  // SEÇİLİ PLAN gerçekten VAR OLAN bir plan olmalı. Varsayılan 'yearly' ama
+  // teklifte yalnızca aylık varsa, eskiden aylık kart "seçili değil" görünüp
+  // buton yine aylığı satın alıyordu — kullanıcı ne aldığını ekrandan
+  // okuyamıyordu (Apple 3.1.2 netlik sorunu ve düpedüz yanıltıcı).
+  const effectiveSelected: 'monthly' | 'yearly' =
+    selected === 'yearly' ? (yearly ? 'yearly' : 'monthly') : (monthly ? 'monthly' : 'yearly');
+  const chosen = effectiveSelected === 'yearly' ? yearly ?? monthly : monthly ?? yearly;
   const saving = savingPercent(monthly, yearly);
 
   const onBuy = async () => {
@@ -115,12 +121,23 @@ export function PaywallScreen() {
       {!available || !offering ? (
         <View style={styles.unavailable}>
           <Text style={styles.unavailableText}>{t('premium.unavailable')}</Text>
+          {/* YENİDEN DENE: teklif oturum başına tek kez çekiliyordu; tek bir
+              başarısız çağrı premium'a giden bütün yolları oturum boyunca
+              kapatıyordu (tek çare uygulamayı öldürmekti). */}
+          <Pressable
+            onPress={reloadOffering}
+            disabled={busy}
+            accessibilityRole="button"
+            style={styles.retryBtn}
+          >
+            <Text style={styles.retryText}>{t('common.retry')}</Text>
+          </Pressable>
         </View>
       ) : (
         <>
           {yearly ? (
             <PlanCard
-              active={selected === 'yearly'}
+              active={effectiveSelected === 'yearly'}
               onPress={() => setSelected('yearly')}
               label={t('premium.yearly')}
               price={yearly.product.priceString}
@@ -129,7 +146,7 @@ export function PaywallScreen() {
           ) : null}
           {monthly ? (
             <PlanCard
-              active={selected === 'monthly'}
+              active={effectiveSelected === 'monthly'}
               onPress={() => setSelected('monthly')}
               label={t('premium.monthly')}
               price={monthly.product.priceString}
@@ -152,11 +169,19 @@ export function PaywallScreen() {
           {/* Apple ve Google bu bilgilendirmenin ekranda olmasını ister. */}
           <Text style={styles.renewNotice}>{t('premium.renew_notice')}</Text>
 
-          <Pressable onPress={onRestore} disabled={busy} accessibilityRole="button">
-            <Text style={styles.restore}>{t('premium.cta_restore')}</Text>
-          </Pressable>
         </>
       )}
+
+      {/* SATIN ALIMLARI GERİ YÜKLE — teklif dalının DIŞINDA, koşulsuz.
+          Eskiden `available && offering` dalının içindeydi, yani mağaza ürün
+          döndüremediği anda kaybolan bir düğmeydi. Oysa tam da o durumda
+          gerekiyor: aboneliği olan ama cihazı teklifi çekemeyen kullanıcı
+          hakkını geri yükleyemiyordu. App Review de paywall'ı çoğu zaman
+          StoreKit ürün döndürmezken açıyor — 1.5.0 reddinin (3.1.2(c))
+          yaşandığı tablo tam olarak buydu. */}
+      <Pressable onPress={onRestore} disabled={busy} accessibilityRole="button">
+        <Text style={styles.restore}>{t('premium.cta_restore')}</Text>
+      </Pressable>
 
       <View style={styles.legal}>
         <Pressable onPress={() => Linking.openURL(TERMS_URL)} accessibilityRole="link">
@@ -274,6 +299,13 @@ const styles = StyleSheet.create({
 
   unavailable: { padding: spacing.md, backgroundColor: colors.warning.bg, borderRadius: borderRadius.md },
   unavailableText: { ...typography.styles.body2, color: colors.warning.dark, textAlign: 'center' },
+  retryBtn: {
+    marginTop: spacing.sm,
+    minHeight: 48,          // Android dokunma hedefi tabanı
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  retryText: { ...typography.styles.subtitle2, color: colors.primary.main },
 
   legal: {
     flexDirection: 'row',

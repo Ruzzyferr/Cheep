@@ -194,7 +194,14 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
   // birleşince ekranda ₺3,35 → ₺0,00 → ₺10,00 gibi bir zıplamaya yol açıyordu:
   // kullanıcı yanlış rakamı okuyup sonra değiştiğini görüyor. İkisi de
   // yerleşene kadar rakam yerine sakin bir yer tutucu gösteriyoruz.
-  const heroReady = !monthlyQ.isPending && !compareQ.isPending;
+  // HATA da 'hazır değil' sayılır. Eskiden yalnızca `isPending` bakılıyordu;
+  // karşılaştırma isteği BAŞARISIZ olunca `insights` null kalıyor,
+  // `potentialSavings` 0 oluyor ve ekran "potansiyel tasarrufun" başlığı
+  // altında canlandırmalı bir ₺0,00 çiziyordu. Kullanıcı bunu "Cheep bana
+  // hiçbir şey bulamadı" diye okur; oysa istek düşmüştür. Yer tutucu (—)
+  // dürüst olan.
+  const heroReady =
+    !monthlyQ.isPending && !compareQ.isPending && !monthlyQ.isError && !compareQ.isError;
   const itemCount = activeList?.list_items?.length ?? 0;
 
   const goActiveList = () => {

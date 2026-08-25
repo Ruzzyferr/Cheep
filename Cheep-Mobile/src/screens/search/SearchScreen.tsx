@@ -1,6 +1,6 @@
 // Cheep-Mobile/src/screens/search/SearchScreen.tsx
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -37,6 +37,8 @@ export function SearchScreen({ navigation, route }: SearchScreenProps) {
   const [loading, setLoading] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
   const [addedIds, setAddedIds] = useState<Set<number>>(new Set());
+  /** Son aramanın HATA ile mi bittiği — "sonuç yok" ile karıştırılmamalı. */
+  const [searchError, setSearchError] = useState(false);
   const reqId = useRef(0);
   const creatingListRef = useRef<Promise<number> | null>(null);
 
@@ -45,16 +47,26 @@ export function SearchScreen({ navigation, route }: SearchScreenProps) {
   // Yazdıkça arama — 250ms debounce + stale istek koruması.
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 1) { reqId.current++; setResults([]); setLoading(false); return; }
+    if (q.length < 1) { reqId.current++; setResults([]); setLoading(false); setSearchError(false); return; }
     setLoading(true);
+    setSearchError(false);
     const myId = ++reqId.current;
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
         const data = await productService.getProducts({ search: q, limit: 30 });
-        if (!cancelled && myId === reqId.current) setResults(data);
-      } catch {
-        if (!cancelled && myId === reqId.current) setResults([]);
+        if (!cancelled && myId === reqId.current) { setResults(data); setSearchError(false); }
+      } catch (e) {
+        // HATAYI "SONUÇ YOK" DİYE GÖSTERME. Eskiden catch yalnızca
+        // `setResults([])` yapıyordu; çevrimdışı kullanıcı "süt" arayıp
+        // 33 saniye bekledikten sonra ekranda "\"süt\" için ürün bulunamadı"
+        // yazısını görüyordu. Bu, ürün düzeyinde kendinden emin ve YANLIŞ bir
+        // iddia — kataloğun 6 markette sütü var.
+        if (!cancelled && myId === reqId.current) {
+          console.warn('Arama başarısız:', e);
+          setResults([]);
+          setSearchError(true);
+        }
       } finally {
         if (!cancelled && myId === reqId.current) setLoading(false);
       }
@@ -98,8 +110,12 @@ export function SearchScreen({ navigation, route }: SearchScreenProps) {
       setAddedIds(prev => new Set(prev).add(product.id));
       toast.show(t('list.added_to', { list: listName ?? activeList?.name ?? '' }));
       if (query.trim()) addRecentSearch(query);
-    } catch {
-      // sessizce geç — kullanıcı tekrar deneyebilir
+    } catch (e) {
+      // SESSİZ GEÇME. Eskiden hiçbir şey olmuyordu: düğme tepkisiz görünüyor,
+      // kullanıcı ürünün eklendiğini mi eklenmediğini mi bilmiyordu.
+      // Kardeş ekran (CategoryProductsScreen) aynı işlemde zaten uyarı veriyor.
+      console.warn('Listeye eklenemedi:', e);
+      toast.show(t('common.error_loading'));
     }
   }, [targetListId, targetListName, activeList, addItem, addedIds, t, query, toast]);
 
@@ -152,6 +168,17 @@ export function SearchScreen({ navigation, route }: SearchScreenProps) {
         </View>
       ) : loading && results.length === 0 ? (
         <ActivityIndicator style={{ marginTop: spacing.xl }} color={colors.primary.main} />
+      ) : searchError ? (
+        <View style={styles.errorBox}>
+          <Text style={styles.hint}>{t('common.error_loading')}</Text>
+          <Pressable
+            onPress={() => setQuery((q) => q)}
+            accessibilityRole="button"
+            style={styles.retryBtn}
+          >
+            <Text style={styles.retryText}>{t('common.retry')}</Text>
+          </Pressable>
+        </View>
       ) : results.length === 0 ? (
         <Text style={styles.hint}>{t('search.no_results', { q: query.trim() })}</Text>
       ) : (
@@ -195,6 +222,9 @@ const styles = StyleSheet.create({
   row: { justifyContent: 'space-between', marginBottom: spacing.md },
   gridItem: { width: '48%' },
   empty: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
+  errorBox: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl, alignItems: 'center' },
+  retryBtn: { marginTop: spacing.md, minHeight: 48, justifyContent: 'center', paddingHorizontal: spacing.lg },
+  retryText: { ...typography.styles.subtitle2, color: colors.primary.main },
   emptyLabel: { ...typography.styles.body2, color: colors.text.secondary, fontWeight: '600', marginBottom: spacing.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   chip: { paddingHorizontal: spacing.md, paddingVertical: spacing.sm, borderRadius: 999, backgroundColor: colors.background.paper, borderWidth: 1, borderColor: colors.border.light },

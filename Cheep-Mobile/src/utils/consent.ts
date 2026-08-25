@@ -29,17 +29,39 @@ export async function promptLocationConsent(): Promise<boolean> {
         {
           text: i18n.t('consent.location_decline'),
           style: 'cancel',
+          // resolve() ÖNCE değil SONRA değil — try/finally İÇİNDE.
+          // Eskiden `resolve` await'lerin ARDINDAN geliyordu; depo yazması
+          // patlarsa (SecureStore hatası) resolve HİÇ çağrılmıyor ve promise
+          // sonsuza dek beklemede kalıyordu. Çağıran `runLocationGate` bu
+          // promise'i await ediyor ve `LocationContext.refresh` o sırada
+          // `runningRef=true` tutuyor → tüm konum alt sistemi oturum boyunca
+          // KİLİTLENİYORDU (sonraki her refresh birleştirilip hiç koşmuyor).
           onPress: async () => {
-            await consentStorage.setLocationConsent('denied');
-            await locationStorage.clearLocation();
-            resolve(false);
+            try {
+              await consentStorage.setLocationConsent('denied');
+              await locationStorage.clearLocation();
+            } catch (e) {
+              console.error('[consent] red kaydedilemedi:', e);
+            } finally {
+              resolve(false);
+            }
           },
         },
         {
           text: i18n.t('consent.location_accept'),
           onPress: async () => {
-            await consentStorage.setLocationConsent('granted');
-            resolve(true);
+            let ok = false;
+            try {
+              await consentStorage.setLocationConsent('granted');
+              ok = true;
+            } catch (e) {
+              // Rıza KALICI OLARAK yazılamadıysa "verildi" demek yanlış olur:
+              // KVKK açısından rıza kanıtlanabilir olmalı. Bu turda konum
+              // kapalı kalır, istem bir dahaki sefere tekrar çıkar.
+              console.error('[consent] rıza kaydedilemedi:', e);
+            } finally {
+              resolve(ok);
+            }
           },
         },
       ],

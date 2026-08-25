@@ -16,12 +16,14 @@ import type { PriceHistoryResponse } from '../../services/product.service';
 interface PriceTrendCardProps {
   history: PriceHistoryResponse | null;
   loading?: boolean;
+  /** İstek BAŞARISIZ mı? "geçmiş yok" ile karıştırılmamalı. */
+  error?: boolean;
 }
 
 const MAX_BARS = 24;
 const CHART_HEIGHT = 72;
 
-export function PriceTrendCard({ history, loading }: PriceTrendCardProps) {
+export function PriceTrendCard({ history, loading, error }: PriceTrendCardProps) {
   const { t } = useTranslation();
   const { formatMoney } = useLocale();
   // formatPrice is a thin alias kept local to this component so it can close
@@ -62,6 +64,13 @@ export function PriceTrendCard({ history, loading }: PriceTrendCardProps) {
 
       {loading ? (
         <Text style={styles.empty}>{t('common.loading')}</Text>
+      ) : error ? (
+        // HATAYI "geçmiş yok" DİYE GÖSTERME: ürünün fiyat geçmişi olabilir,
+        // biz getiremedik. Yanlış olan iddiayı yapmaktansa yüklenemediğini söyle.
+        <View style={styles.emptyWrap}>
+          <MaterialIcons name="cloud-off" size={28} color={colors.text.hint} />
+          <Text style={styles.empty}>{t('common.error_loading')}</Text>
+        </View>
       ) : !series || bars.length === 0 ? (
         <View style={styles.emptyWrap}>
           <MaterialIcons name="timeline" size={28} color={colors.text.hint} />
