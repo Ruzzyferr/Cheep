@@ -124,7 +124,13 @@ export async function ensureNotificationsReady(): Promise<NotificationReadyReaso
       return 'ready';
     }
 
-    if (!perm.canAskAgain) {
+    // `status === 'undetermined'` KONTROLÜ ŞART — bkz. locationGate'teki uzun
+    // gerekçe. Android'de `canAskAgain`, izin HİÇ İSTENMEMİŞKEN de `false`
+    // geliyor; bu satır olmadan temiz kurulumdaki kullanıcı sistem izin
+    // modalını hiç görmeden Ayarlar'a yollanıyordu. Android 13+ bildirimi
+    // çalışma zamanı izni yaptığı için bu, yeni cihazlarda push'un hiç
+    // açılamaması demekti.
+    if (perm.status !== 'undetermined' && !perm.canAskAgain) {
       const go = await confirm(
         t('notifications.os_blocked_title'),
         t('notifications.os_blocked_body'),

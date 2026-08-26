@@ -17,11 +17,11 @@ vi.mock('expo-secure-store', () => ({
 }));
 
 const gps = {
-  status: 'denied' as 'granted' | 'denied',
+  status: 'denied' as 'granted' | 'denied' | 'undetermined',
   canAskAgain: true,
   requestCalls: 0,
   /** Sistem modalı çağrılınca kullanıcının vereceği cevap. */
-  onRequest: { status: 'granted' as 'granted' | 'denied', canAskAgain: true },
+  onRequest: { status: 'granted' as 'granted' | 'denied' | 'undetermined', canAskAgain: true },
 };
 vi.mock('expo-location', () => ({
   Accuracy: { Low: 1, Balanced: 3 },
@@ -177,5 +177,55 @@ describe('getLocationStatus', () => {
 
     const s = await getLocationStatus();
     expect(s).toEqual({ consented: true, osGranted: false, canAskOs: true, ready: false });
+  });
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TEMİZ KURULUM (2026-08-26) — kullanıcı bildirdi: "modal çıkıyor, evet deyince
+// beni ayarlara yolluyor".
+//
+// expo-modules-core Android'de `canAskAgain`i doğrudan
+// `shouldShowRequestPermissionRationale()`den türetiyor ve o fonksiyon izin HİÇ
+// İSTENMEMİŞKEN de `false` döner. Kapı bunu "kalıcı engellenmiş" sanıp
+// Ayarlar'a yolluyordu; yani HİÇBİR YENİ KULLANICI izin veremiyordu.
+//
+// Bu testler o durumu sabitliyor. Eski mock `status`u yalnızca
+// 'granted' | 'denied' alabildiği için hata testlerden kaçmıştı — asıl ders bu.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('temiz kurulum: izin hiç istenmemiş (undetermined + canAskAgain=false)', () => {
+  it('SİSTEM MODALINI çıkarır, Ayarlara YOLLAMAZ', async () => {
+    await setLocationConsent('granted');
+    gps.status = 'undetermined';
+    gps.canAskAgain = false; // Android: hiç sorulmamışken de false
+    ui.accept = true;
+
+    expect(await runLocationGate()).toBe('ready');
+    expect(gps.requestCalls).toBe(1);   // ASIL SINAV
+    expect(ui.settingsOpened).toBe(0);  // Ayarlar'a gitmemeli
+  });
+
+  it('rıza da yokken: KVKK istemi + sistem modalı, Ayarlar yok', async () => {
+    gps.status = 'undetermined';
+    gps.canAskAgain = false;
+    ui.accept = true;
+
+    expect(await runLocationGate()).toBe('ready');
+    expect(ui.dialogs).toEqual(['consent.location_title']);
+    expect(gps.requestCalls).toBe(1);
+    expect(ui.settingsOpened).toBe(0);
+  });
+
+  it('GERÇEK kalıcı ret (denied + canAskAgain=false) hâlâ Ayarlara yollar', async () => {
+    // Ayrım korunmalı: sorulmuş VE artık sorulamıyorsa tek yol Ayarlar.
+    await setLocationConsent('granted');
+    gps.status = 'denied';
+    gps.canAskAgain = false;
+    ui.accept = true;
+
+    expect(await runLocationGate()).toBe('os_blocked');
+    expect(gps.requestCalls).toBe(0);
+    expect(ui.settingsOpened).toBe(1);
   });
 });

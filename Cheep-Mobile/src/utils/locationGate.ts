@@ -99,7 +99,24 @@ export async function ensureLocationReady(): Promise<LocationReadyReason> {
       return 'ready';
     }
 
-    if (!perm.canAskAgain) {
+    // `status === 'undetermined'` KONTROLÜ ŞART — bu satır olmadan HİÇBİR YENİ
+    // KULLANICI konum izni veremiyordu.
+    //
+    // expo-modules-core Android'de `canAskAgain`i doğrudan
+    // `shouldShowRequestPermissionRationale()`den türetiyor. Android'de o
+    // fonksiyon İKİ ayrı durumda `false` döner:
+    //   1) izin KALICI reddedildi ("bir daha sorma")
+    //   2) izin HİÇ İSTENMEDİ (temiz kurulum)
+    // Yani temiz kurulumda `canAskAgain` false geliyordu ve buradaki kapı onu
+    // "kalıcı engellenmiş" sanıp kullanıcıyı Ayarlar'a yolluyordu; sistem izin
+    // modalı HİÇ gösterilmiyordu. Kullanıcı Ayarlar'da ne yapacağını bilmiyor,
+    // izin hiç verilmiyordu.
+    //
+    // İki durumu ayıran sinyal `status`: expo `didAsk` bayrağını kendi
+    // SharedPreferences'ında tutuyor ve hiç sorulmamışsa `undetermined`,
+    // sorulup reddedilmişse `denied` döndürüyor. Dolayısıyla Ayarlar dalı
+    // yalnızca GERÇEKTEN sorulmuş VE artık sorulamaz olan izin için geçerli.
+    if (perm.status !== 'undetermined' && !perm.canAskAgain) {
       // Sistem modalı bir daha gösterilemez → tek yol uygulama ayarları.
       const go = await confirm(
         t('profile.location_os_blocked_title'),
