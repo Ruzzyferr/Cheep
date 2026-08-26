@@ -69,12 +69,27 @@ export const getNearbyStores = async (req: Request, res: Response, next: NextFun
             res.status(400).json({ success: false, message: 'lat ve lon zorunludur' });
             return;
         }
+        // `radius` (km) İSTEĞE BAĞLI. Verilmezse davranış eskisiyle birebir aynı
+        // kalır (mobil konum kapısı geniş kümeyi isteyip kendi süzer). Verilirse
+        // gerçek mesafeyle süzülür — daha önce parametre sessizce YOK SAYILIYORDU,
+        // yani `radius=1` diyen bir çağıran 4,6 km'deki şubeyi "yakın" sanıyordu.
+        // Geçersiz/negatif değer sessizce yok sayılmaz: 400 döner, çünkü sessiz
+        // yok sayma tam da bu hatanın kaynağıydı.
+        let radiusKm: number | undefined;
+        if (req.query.radius !== undefined) {
+            const r = Number(req.query.radius);
+            if (!Number.isFinite(r) || r <= 0) {
+                res.status(400).json({ success: false, message: 'radius pozitif bir sayı olmalıdır' });
+                return;
+            }
+            radiusKm = Math.min(r, StoreBranchService.MAX_BRANCH_DISTANCE_KM);
+        }
         const countryId = req.country?.id;
         if (!countryId) {
             res.status(200).json({ success: true, data: [] });
             return;
         }
-        const nearby = await StoreBranchService.getNearbyStores(countryId, { lat, lon });
+        const nearby = await StoreBranchService.getNearbyStores(countryId, { lat, lon }, undefined, radiusKm);
         res.status(200).json({
             success: true,
             data: nearby.map(n => ({

@@ -40,11 +40,27 @@ export function resolveNearestBranchCoords(
   return out;
 }
 
-/** DB: nearest branch per store near the user, widening the bbox until non-empty. */
+/** DB: nearest branch per store near the user, widening the bbox until non-empty.
+ *
+ *  `deltas` DERECE cinsindendir, kilometre değil — ±1° ≈ 111 km. Yani ilk geçiş
+ *  bile geniş bir alanı tarar ve kutu genişletme yalnızca "hiç şube yoksa daha
+ *  uzağa bak" içindir. Fonksiyon TASARIM GEREĞİ mesafe kesmesi uygulamaz:
+ *  çağıranların bir kısmı (mobil konum kapısı) "kullanıcının seçebileceği EN
+ *  GENİŞ yarıçapta hiç şube var mı?" sorusunu sorabilmek için geniş kümeyi
+ *  ister ve süzmeyi kendisi yapar.
+ *
+ *  `radiusKm` VERİLİRSE gerçek haversine mesafesiyle süzülür. Bu ekleme
+ *  bilerek YALNIZCA EKLEMELİDİR: parametre yokken davranış birebir eskisi
+ *  gibidir, yani mevcut çağıranların hiçbiri etkilenmez. Eklenme sebebi,
+ *  `/nearby` adlı bir ucun 4,6 km'deki (ve veri seyrekken teoride yüzlerce km
+ *  ötedeki) bir şubeyi "yakın" diye döndürmesinin çağıranı şaşırtması —
+ *  mobil istemcideki uzun savunma yorumu bu şaşkınlığın kanıtı.
+ */
 export async function getNearbyStores(
   countryId: number,
   user: { lat: number; lon: number },
   deltas: number[] = [1.0, 3.0, 8.0],
+  radiusKm?: number,
 ) {
   for (const delta of deltas) {
     const rows = await prisma.storeBranch.findMany({
@@ -55,7 +71,13 @@ export async function getNearbyStores(
       },
       select: { id: true, store_id: true, name: true, lat: true, lon: true, address: true, city: true },
     });
-    if (rows.length > 0) return nearestBranchPerStore(rows as BranchLite[], user);
+    if (rows.length === 0) continue;
+    const nearest = nearestBranchPerStore(rows as BranchLite[], user);
+    if (radiusKm === undefined) return nearest;
+    const inRadius = nearest.filter((n) => n.distanceKm <= radiusKm);
+    // Bu delta'da şube VARDI ama hiçbiri yarıçapta değilse daha geniş kutuya
+    // bakmanın anlamı yok: kutu büyüdükçe mesafeler yalnızca ARTAR.
+    return inRadius;
   }
   return [];
 }

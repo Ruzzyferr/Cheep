@@ -49,11 +49,21 @@ router.get('/', StoreController.getAllStores);
  *         required: true
  *         schema:
  *           type: number
+ *       - in: query
+ *         name: radius
+ *         required: false
+ *         description: >
+ *           Azami mesafe (km). VERİLMEZSE mesafe sınırı UYGULANMAZ — uç nokta
+ *           sınır kutusunu şube bulana kadar genişletir (±1° ≈ 111 km), yani
+ *           dönen en uzak şube onlarca km ötede olabilir. Mesafeye göre süzme
+ *           istiyorsan bu parametreyi GÖNDER. 60 km ile sınırlanır.
+ *         schema:
+ *           type: number
  *     responses:
  *       200:
  *         description: Yakın şubeler başarıyla alındı
  *       400:
- *         description: lat ve lon gerekli ve sonlu sayı olmalı
+ *         description: lat/lon gerekli ve sonlu sayı olmalı; radius verilirse pozitif olmalı
  */
 router.get('/nearby', StoreController.getNearbyStores);
 
