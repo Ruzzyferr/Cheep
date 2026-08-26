@@ -165,6 +165,30 @@ jobs:
         # bildiren rapor sızıntının ikinci bir kopyasını üretmiş olurdu.
         run: gitleaks detect --source . --config .gitleaks.toml --redact --verbose
 
+      - name: Yamasiz image-size acigini tetikleyen bicimler
+        # GHSA-5p2g-fcmc-qvqq ve GHSA-w3rx-r6r6-pgpr: `image-size` paketinin
+        # ICNS ve JXL/HEIF ayristiricilarinda sonsuz dongu. YUKARI AKISTA
+        # YAMA YOK — 2.0.2 en son yayinlanan surum ve aciklama <= 2.0.2'yi
+        # kapsiyor; ustelik metro paketleyicisi 1.2.1'e sabitliyor, yani
+        # yukseltme secenegi de yok.
+        #
+        # Acik yalnizca paketleyici BU BICIMLERDEN birini ayristirdiginda
+        # tetikleniyor. Depoda hicbiri yok ve varliklarimiz yalnizca PNG/SVG.
+        # Bu adim o kosulu bir inanc olmaktan cikarip ZORUNLU kiliyor: boyle
+        # bir dosya depoya girerse derleme durur ve karar bilincli olarak
+        # yeniden verilir. Aksi hâlde birinin gelecekte .heic bir ikon
+        # eklemesi, kimse fark etmeden aciklamayi tekrar canlandirirdi.
+        run: |
+          set -euo pipefail
+          bulunan=$(git ls-files | grep -iE '\.(icns|jxl|heic|heif|avif)$' || true)
+          if [ -n "$bulunan" ]; then
+            echo "HATA: image-size'in yamasiz acigini tetikleyen bicim(ler) bulundu:" >&2
+            echo "$bulunan" >&2
+            echo "Bu dosyalari PNG/WebP'ye cevirin ya da acigi yeniden degerlendirin." >&2
+            exit 1
+          fi
+          echo "Tetikleyici bicim yok — image-size acigi ulasilamaz durumda."
+
   bildirim:
     name: Bildirim (yalnızca kırıkta)
     # SADECE BAŞARISIZLIKTA ve SADECE main'de.
