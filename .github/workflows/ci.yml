@@ -28,7 +28,7 @@ jobs:
       # saldırgan v4'ü kendi commit'ine kaydırır ve bir dahaki koşuda kendi
       # kodu bizim secret'larımızın olduğu runner'da çalışır. SHA taşınamaz.
       # Yükseltirken: SHA'yı değiştir, yorumdaki sürümü de güncelle.
-      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
         with:
           version: 10
       - uses: actions/setup-node@v7

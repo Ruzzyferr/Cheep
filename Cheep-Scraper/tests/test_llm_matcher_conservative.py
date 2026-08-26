@@ -102,3 +102,48 @@ def test_normalize_size_ml_equiv_unblocks_true_match(matcher):
     # 1000 vs 1_000_000 -> wrongly "different". Now they match.
     assert matcher._compare_sizes("1 L", "1000 ml") is True
     assert matcher._compare_sizes("500 ml", "0,5 L") is True
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NUMPY YOLU (2026-08-26)
+#
+# `_cosine_similarity` numpy'ye dayanıyor (`np.array` / `np.dot` /
+# `np.linalg.norm`) ve gövdesi çıplak bir `except Exception: return 0.0` ile
+# bitiyor. Bu iki şeyi birleştirince sessiz bir arıza modu çıkıyor: numpy
+# içe aktarılabilir ama çalışmaz hale gelirse (numpy 2'nin C ABI kırılması bunu
+# tam olarak yapar — 1.x'e karşı derlenmiş bir paket 2.x altında patlar) her
+# karşılaştırma 0.0 döner, eşleştirici HİÇBİR ŞEYİ eşleştirmez ve hiçbir yerde
+# hata görünmez.
+#
+# Mevcut testlerin hiçbiri bu yolu çalıştırmıyordu; Dependabot'un numpy
+# `>=1.26` → `>=2.5.2` PR'ı bu yüzden "yeşil" görünüyordu. Aşağıdaki testler
+# gerçek sayısal sonucu iddia ediyor, dolayısıyla sessiz 0.0'a düşüş
+# GÜRÜLTÜLÜ bir başarısızlığa dönüşüyor.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def test_cosine_identical_vectors_is_one(matcher):
+    # ASIL SINAV: numpy bozulursa `except` 0.0 döndürür ve bu iddia düşer.
+    assert matcher._cosine_similarity([1.0, 2.0, 3.0], [1.0, 2.0, 3.0]) == pytest.approx(1.0)
+
+
+def test_cosine_orthogonal_vectors_is_zero(matcher):
+    assert matcher._cosine_similarity([1.0, 0.0], [0.0, 1.0]) == pytest.approx(0.0)
+
+
+def test_cosine_opposite_vectors_is_minus_one(matcher):
+    # Sıfırdan AYIRT EDİLEBİLİR olmalı: hem "zıt" hem "hesaplanamadı" 0.0
+    # dönseydi bu testin ayırt etme gücü kalmazdı.
+    assert matcher._cosine_similarity([1.0, 0.0], [-1.0, 0.0]) == pytest.approx(-1.0)
+
+
+def test_cosine_zero_vector_is_zero_not_nan(matcher):
+    # Sıfır norm açıkça ele alınıyor; numpy burada NaN üretirdi ve NaN her
+    # eşikten sessizce geçemez/kalır — davranış tanımlı kalmalı.
+    assert matcher._cosine_similarity([0.0, 0.0], [1.0, 1.0]) == 0.0
+
+
+def test_cosine_returns_builtin_float(matcher):
+    # `float()` sarmalayıcısı korunmalı: numpy skaları JSON serileştirmede
+    # ve eşik karşılaştırmalarında sürprize yol açıyor.
+    assert type(matcher._cosine_similarity([1.0, 2.0], [2.0, 4.0])) is float
