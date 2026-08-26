@@ -1,4 +1,6 @@
 from countries._common.pipeline import (
+    baseline_of,
+    next_baseline,
     should_import,
     summary_is_healthy,
     filter_products_by_category_domain,
@@ -223,3 +225,53 @@ def test_expected_market_that_collapsed_still_unhealthy():
         ],
     }
     assert summary_is_healthy(summary) is False
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CENDERE (RATCHET) — 2026-08-26
+#
+# Kapının karşılaştırma tabanı SON kabul edilen sayıydı ve her kabulde üzerine
+# yazılıyordu. 100 → 60 (geçer, taban 60) → 36 (geçer) → 21 → 12 … Her adım tek
+# başına "normal dalgalanma" görünürken katalog bir haftada sessizce boşalıyor
+# ve HİÇBİR adım alarm üretmiyordu. Artık kıyas tavan değerle (`hwm`) yapılıyor.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def test_baseline_reads_legacy_int_format():
+    """Eski `last_good_counts.json` market başına düz tamsayı tutuyordu;
+    göç betiği yazmadan okunabilmeli."""
+    assert baseline_of(100) == 100
+    assert baseline_of({"last": 60, "hwm": 100}) == 100
+    assert baseline_of(None) == 0
+    assert baseline_of({}) == 0
+
+
+def test_ratchet_cannot_walk_the_catalog_to_zero():
+    """ASIL SINAV: arka arkaya her biri tek başına 'geçerli' olan düşüşler
+    toplamda kataloğu boşaltamamalı."""
+    entry = 100
+    # Birinci gece 60: 100'ün %60'ı, sınırda geçer.
+    assert should_import("Lidl", 60, {"Lidl": entry}) is True
+    entry = next_baseline(entry, 60)
+    # İkinci gece 36 ESKİDEN geçiyordu (60'ın %60'ı). Artık taban hâlâ ~98,
+    # yani 36 reddedilmeli.
+    assert should_import("Lidl", 36, {"Lidl": entry}) is False
+
+
+def test_baseline_rises_freely_on_growth():
+    assert next_baseline({"last": 60, "hwm": 100}, 500)["hwm"] == 500
+
+
+def test_baseline_decays_slowly_so_real_shrink_is_eventually_accepted():
+    """Zincir gerçekten küçüldüyse kapı sonsuza dek yüksekte kalmamalı —
+    ama bu ~%2/koşum hızında olmalı, tek gecede değil."""
+    entry = {"last": 100, "hwm": 100}
+    entry = next_baseline(entry, 60)
+    assert entry["hwm"] == 98          # 100 -> 98, 60'a DÜŞMEZ
+    for _ in range(40):
+        entry = next_baseline(entry, 60)
+    assert entry["hwm"] == 60          # yeterince koşumda gerçeğe yakınsar
+
+
+def test_first_run_still_passes_with_new_format():
+    assert should_import("Yeni", 10, {}) is True
+    assert should_import("Yeni", 10, {"Yeni": {"last": 0, "hwm": 0}}) is True

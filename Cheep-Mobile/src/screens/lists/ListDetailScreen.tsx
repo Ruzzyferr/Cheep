@@ -341,7 +341,7 @@ export function ListDetailScreen({
             onToggleBrandIndependent={handleToggleBrandIndependent}
           />
         )}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ItemSeparatorComponent={Separator}
         contentContainerStyle={[
           styles.listContent,
           // Son kalemler hem alt aksiyon çubuğunun hem tab-bar'ın altında kalmasın.
@@ -468,6 +468,12 @@ function ListItemCard({
     </TouchableOpacity>
   );
 }
+
+// Modul kapsaminda TEK bir bilesen. Satir ici `() => <View/>` her render'da
+// YENI bir bilesen tipi uretiyordu; FlatList tipi degisince tum ayiricilari
+// sokup yeniden takiyor. Uzun listelerde bos yere is, ayrica ayiricilarin
+// yeniden monte edilmesi kaydirma sirasinda gorunur takilma yapabiliyor.
+const Separator = () => <View style={styles.separator} />;
 
 const styles = StyleSheet.create({
   container: {

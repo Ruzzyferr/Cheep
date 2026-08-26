@@ -257,6 +257,12 @@ for (const { url: notFoundUrl, lang, title, description, out } of [
     jsonLd: [],
   }
   const html = marketingTemplate
+    // `<html lang>` DE DEĞİŞMELİ. Normal sayfa yolu bunu yapıyor (yukarıda),
+    // ama 404 kendi zincirini kurduğu için o adım atlanmıştı: Lehçe 404
+    // doğru başlık ve doğru gövdeyle geliyor ama `<html lang="tr">` diyordu.
+    // Ekran okuyucu sayfayı Türkçe telaffuz ediyor, Google da dili yanlış
+    // okuyor — üstelik sayfa noindex olduğu için kimse fark etmiyordu.
+    .replace('<html lang="tr">', `<html lang="${lang}">`)
     .replace(/<title>[\s\S]*?<\/title>\s*/, '')
     .replace('<!--app-head-->', renderHead(head))
     .replace('<!--app-html-->', render(notFoundUrl, null))

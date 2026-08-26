@@ -78,13 +78,59 @@ def resolve_enrich_mode(config: Dict) -> Optional[str]:
     return None
 
 
+#: Kabul edilen bir koşumda taban çizgisinin düşebileceği EN BÜYÜK oran.
+#: Kataloğun gerçekten kalıcı küçüldüğü durumda (market ürün çekti, zincir
+#: kapandı) kapının sonsuza dek yüksekte kalmaması için gerekli; ama %40'lık
+#: bir düşüşün tek gecede taban çizgisi olmasına da izin vermiyor.
+_BASELINE_DECAY = 0.02
+
+
+def baseline_of(entry) -> int:
+    """Bir markete ait kayıttan karşılaştırma tabanını çıkarır.
+
+    GERİYE UYUMLU: eski `last_good_counts.json` market başına düz bir tamsayı
+    tutuyordu; yeni biçim `{"last": N, "hwm": M}`. İkisi de okunur, böylece
+    dosyayı silmeye ya da göç betiği yazmaya gerek kalmıyor.
+    """
+    if isinstance(entry, dict):
+        return int(entry.get("hwm") or entry.get("last") or 0)
+    return int(entry or 0)
+
+
+def next_baseline(entry, new_count: int) -> Dict:
+    """Kabul edilen bir koşumdan sonra saklanacak yeni kayıt.
+
+    Taban çizgisi YUKARI serbestçe, AŞAĞI en fazla `_BASELINE_DECAY` kadar
+    hareket eder.
+    """
+    hwm = baseline_of(entry)
+    if new_count >= hwm:
+        yeni_hwm = new_count
+    else:
+        yeni_hwm = max(new_count, int(hwm * (1 - _BASELINE_DECAY)))
+    return {"last": int(new_count), "hwm": int(yeni_hwm)}
+
+
 def should_import(market: str, new_count: int, prev_counts: Dict, min_ratio: float = 0.6) -> bool:
     """Ürün sayısı önceki başarılı koşuya göre çökmüşse (site yapısı değişti /
-    engellendi) import ETME — eski-ama-doğru veri, boşaltılmış katalogdan iyidir."""
-    prev = prev_counts.get(market)
-    if not prev:
+    engellendi) import ETME — eski-ama-doğru veri, boşaltılmış katalogdan iyidir.
+
+    CENDERE (ratchet) TUZAĞI — bu fonksiyonun asıl meselesi bu:
+    Karşılaştırma tabanı eskiden SON kabul edilen sayıydı ve her kabul edilen
+    koşumda üzerine yazılıyordu. Yani 100 → 60 (kapıdan geçer, taban 60 olur)
+    → 36 (60'ın %60'ı, geçer) → 21 → 12 … Her gece tek başına "normal
+    dalgalanma" görünürken katalog bir hafta içinde sessizce sıfıra iniyordu;
+    hiçbir adım alarm üretmiyordu çünkü kapı her seferinde bir önceki ADIMLA
+    kıyaslıyordu, sağlıklı halle değil.
+
+    Artık kıyas TAVAN DEĞERLE (`hwm`) yapılıyor ve tavan aşağı yalnızca koşum
+    başına %2 inebiliyor. 100'den 60'a meşru bir küçülme ~25 koşum sürer;
+    bir gecelik %40 çöküş ise ilk adımda yakalanır.
+    """
+    taban = baseline_of(prev_counts.get(market))
+    if not taban:
         return True
-    return new_count >= prev * min_ratio
+    return new_count >= taban * min_ratio
 
 
 def select_markets(config_markets: List[Dict], names: Optional[List[str]] = None) -> List[Dict]:
@@ -196,10 +242,19 @@ async def run_country_pipeline(
         logger.info("%s %s: scraped=%s imported=%s failed=%s",
                     country_code, r["market"], r["product_count"], stats["successful"], stats["failed"])
         summary["markets"].append({"market": r["market"], **stats})
-        prev_counts[r["market"]] = raw_count
+        # Ham sayıyı EZMEK yerine tavanı da taşıyan kaydı yaz — yoksa kapı her
+        # gece bir öncekiyle kıyaslar ve katalog cendereye girer (bkz.
+        # `should_import` docstring'i).
+        prev_counts[r["market"]] = next_baseline(prev_counts.get(r["market"]), raw_count)
 
     counts_path.parent.mkdir(parents=True, exist_ok=True)
-    counts_path.write_text(json.dumps(prev_counts), encoding="utf-8")
+    # ATOMİK YAZIM: bu dosya kapının hafızası. Yarıda kesilen bir yazım
+    # (disk dolu, süreç öldü) onu ayrıştırılamaz bırakır; bir sonraki koşum
+    # `prev_counts = {}` ile başlar ve KAPI TAMAMEN AÇILIR — tam da korunmak
+    # istenen çöküş anında koruma kalkar.
+    _tmp = counts_path.with_suffix(counts_path.suffix + ".tmp")
+    _tmp.write_text(json.dumps(prev_counts), encoding="utf-8")
+    os.replace(_tmp, counts_path)
 
     # Eşlenemeyen kategoriler koşunun sonunda raporlanır: ürün kaydedildi ama
     # KATEGORİSİZ, yani hiçbir listede görünmüyor. Sessizce geçmesin.
