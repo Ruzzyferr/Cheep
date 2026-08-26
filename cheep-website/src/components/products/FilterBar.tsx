@@ -65,9 +65,35 @@ export function FilterBar({
   const [localMax, setLocalMax] = useState(maxPrice?.toString() ?? '')
 
   // URL dışarıdan değişirse (geri tuşu, "filtreleri temizle") kutuları eşitle.
-  useEffect(() => setTerm(search), [search])
-  useEffect(() => setLocalMin(minPrice?.toString() ?? ''), [minPrice])
-  useEffect(() => setLocalMax(maxPrice?.toString() ?? ''), [maxPrice])
+  //
+  // Bu eskiden üç `useEffect(() => setX(prop), [prop])` idi. React'in kendi
+  // belgeleri bunu açıkça anti-desen sayıyor: efekt önce ESKİ değerle bir
+  // render'ı ekrana basıyor, sonra state'i düzeltip ikinci bir render
+  // tetikliyor — geri tuşuna basınca kutuda bir kare boyunca eski metin
+  // kalıyordu. Doğrusu değişimi RENDER SIRASINDA yakalamak; React bunu özel
+  // olarak ele alıp ekrana hiç basmadan yeniden render ediyor.
+  //
+  // ÜÇÜ AYRI TUTULUYOR — bilerek. Tek bir birleşik anahtar kullanılsaydı
+  // fiyat kutusuna dokunmak, kullanıcının O SIRADA YAZDIĞI arama metnini de
+  // sıfırlardı (arama 350 ms geciktirmeli, yani yazarken `search` prop'u
+  // henüz güncellenmemiş oluyor).
+  const [oncekiSearch, setOncekiSearch] = useState(search)
+  if (search !== oncekiSearch) {
+    setOncekiSearch(search)
+    setTerm(search)
+  }
+
+  const [oncekiMin, setOncekiMin] = useState(minPrice)
+  if (minPrice !== oncekiMin) {
+    setOncekiMin(minPrice)
+    setLocalMin(minPrice?.toString() ?? '')
+  }
+
+  const [oncekiMax, setOncekiMax] = useState(maxPrice)
+  if (maxPrice !== oncekiMax) {
+    setOncekiMax(maxPrice)
+    setLocalMax(maxPrice?.toString() ?? '')
+  }
 
   // Yazmayı bitirmesini bekle: her tuşta URL yazmak geçmişi çöpe çevirir.
   useEffect(() => {

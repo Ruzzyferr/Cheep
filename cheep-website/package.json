@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
-    "lint": "oxlint",
+    "lint": "oxlint --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
