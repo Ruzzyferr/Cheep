@@ -304,11 +304,37 @@ export const getAllProducts = async (params: GetAllProductsParams) => {
     // 🔎 `<%` operatörü GIN trigram index'lerini kullanabilir (bare word_similarity()
     // fonksiyonu kullanamaz), ama pg_trgm.word_similarity_threshold GUC'una bağlıdır
     // (varsayılan 0.6, yazım hataları için çok katı). Aynı bağlantıda SET LOCAL ile
-    // 0.35'e düşürüyoruz — bu yüzden her iki raw sorgu da tek bir transaction içinde.
+    // düşürüyoruz — bu yüzden her iki raw sorgu da tek bir transaction içinde.
+    //
+    // DEĞER 0.35 DEĞİL 0.45 (26 Ağu 2026, ÖLÇÜLEREK seçildi).
+    //
+    // 0.35 çok gevşekti: Türkçe katalogda `chicken` araması 53 alakasız sonuç
+    // döndürüyordu (Eti Crax **Chi**li Lime, Long **Chi**ps, M**chi**a) —
+    // eşleştirici "chi" alt dizesine takılıyordu.
+    //
+    // Eşiği yükseltmenin bedeli yazım hatası toleransıdır, o yüzden tahminle
+    // değil ölçümle seçildi. Değerlendirme seti UYDURMA DEĞİL: üretimdeki
+    // erişim loglarından çıkarılan 593 gerçek arama (307 benzersiz).
+    // Ölçüm ve set: `scripts/search-threshold-eval.sql`.
+    //
+    // 0.35 -> 0.45 sonucu:
+    //   • 12 gerçek TR + 10 gerçek PL sorgusunun tamamında İLK SONUÇ AYNI
+    //   • 5 yazım hatası (peynr, sut, yogurt, makarrna, ekemk) çalışmaya devam
+    //   • `chicken` 53 -> 0 (tek gerçek çöp vakası kapandı)
+    //   • hâlâ sonuç dönen İngilizce kelimeler GERÇEK eşleşme:
+    //     "Kinder Chocolate", "Coffee Mate", "Pınar Protein Süt"
+    //
+    // 0.55 DENENDİ VE REDDEDİLDİ: `ekemk` 41 -> 0, Lehçe `jajka` 195 -> 20.
+    //
+    // ÖNEMLİ: yazarken arama (`y`, `yu`, `yum`, `yumu`) bu eşikten
+    // ETKİLENMİYOR — onları yukarıdaki alt dize (token) dalı yakalıyor,
+    // `<%` değil. Ölçümde 7/7 önek her eşikte çalıştı.
+    //
+    // Eşiği yine değiştirecek olan: önce `search-threshold-eval.sql` çalıştır.
     const [products, totalRows, categoryFacetRows, storeFacetRows] = await prisma.$transaction(async (tx) => {
         if (search && nq) {
             // SET LOCAL transaction-scoped'tur; değer sabit (kullanıcı girdisi değil).
-            await tx.$executeRawUnsafe('SET LOCAL pg_trgm.word_similarity_threshold = 0.35');
+            await tx.$executeRawUnsafe('SET LOCAL pg_trgm.word_similarity_threshold = 0.45');
         }
 
         const products = await tx.$queryRaw<any[]>`
