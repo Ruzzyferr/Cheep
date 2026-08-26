@@ -1,5 +1,6 @@
 # Cheep — edge reverse proxy + otomatik HTTPS (Let's Encrypt)
 #   cheep.live       → website container (Vite SPA; /privacy /delete /terms SPA rotaları)
+#   www.cheep.live   → 301 → cheep.live (kanonik apex)
 #   api.cheep.live   → backend:3000 (API)
 # SSL sertifikaları ilk açılışta otomatik alınır/yenilenir. Alan adları droplet'e
 # (129.212.193.203) çözülmeli ve 80/443 açık olmalı.
@@ -57,6 +58,26 @@ cheep.live {
 		}
 		format json
 	}
+}
+
+# www → apex, kalıcı yönlendirme.
+#
+# Apex kanonik (sitemap, canonical etiketleri ve mağaza listelerinin tamamı
+# `https://cheep.live`). `www` daha önce DNS'te HİÇ YOKTU: adres çubuğuna
+# "www.cheep.live" yazan ziyaretçi alan adı bulunamadı hatası alıyordu.
+#
+# YÖNLENDİRME ŞART, ikinci bir kopya SUNMAK DEĞİL. Aynı içeriği iki adresten
+# 200 ile vermek Google için yinelenen içerik olur ve apex'te biriken sıralamayı
+# böler. 301 sinyali birleştirir.
+#
+# `{uri}` yolu ve sorgu dizesini KORUR — yoksa paylaşılan derin bağlantılar
+# (ör. www.cheep.live/urun/...) anasayfaya düşerdi.
+#
+# SIRA ÖNEMLİ: bu blok ancak `www` A/CNAME kaydı yayıldıktan SONRA
+# yüklenmeli. Kayıt yokken Caddy `www` için ACME sertifikası isteyip
+# başarısız olur ve yeniden deneme döngüsüne girer.
+www.cheep.live {
+	redir https://cheep.live{uri} permanent
 }
 
 api.cheep.live {
