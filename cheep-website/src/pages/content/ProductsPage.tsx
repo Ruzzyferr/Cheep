@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { SiteLink as Link } from '../../components/ui/SiteLink'
 import { LocaleContext } from '../../i18n'
 import { CONTENT, fill } from '../../i18n/content'
@@ -99,8 +99,16 @@ export function ProductsPage() {
    * Bayrak `useEffect` içinde çevriliyor — yani hidrasyon BİTTİKTEN sonra.
    * İlk boyama sunucununkiyle birebir aynı, ardından gerçek sonuçlara geçilir.
    */
-  const [hydrated, setHydrated] = useState(false)
-  useEffect(() => { setHydrated(true) }, [])
+  // `useEffect` + `setState` yerine `useSyncExternalStore`: React'in SSR ile
+  // istemciyi ayirt etmek icin resmi API'si. Sunucu anlik goruntusu `false`,
+  // istemci anlik goruntusu `true` dondugu icin ILK istemci render'i hala
+  // sunucununkiyle birebir ayni; fark hidrasyondan SONRA olusuyor. Efekt
+  // olmadigi icin fazladan bir render turu da yok.
+  const hydrated = useSyncExternalStore(
+    () => () => {},   // abone olunacak bir sey yok; deger hic degismez
+    () => true,       // istemci
+    () => false,      // sunucu
+  )
   const abortRef = useRef<AbortController | null>(null)
 
   // Market seçimi bir DİZİ; referansı her render'da değişir, o yüzden bağımlılık
@@ -109,11 +117,11 @@ export function ProductsPage() {
   const storesKey = state.stores.join(',')
 
   useEffect(() => {
-    if (isPristine) {
-      setResult(null)
-      setFailed(false)
-      return
-    }
+    // Pristine durumda hic istek atilmiyor. Eskiden burada `setResult(null)`
+    // ve `setFailed(false)` cagriliyordu; bu artik CIZIMDE turetiliyor
+    // (`aktifSonuc`) — efekt icinde senkron setState fazladan bir render turu
+    // baslatiyor ve durumun iki kaynagi olmasina yol aciyordu.
+    if (isPristine) return
 
     // Önceki isteği iptal et: kullanıcı yazarken üst üste binen yanıtların
     // eskisi yenisini ezip listeyi yanlış gösterebilirdi.
@@ -121,6 +129,16 @@ export function ProductsPage() {
     const controller = new AbortController()
     abortRef.current = controller
 
+    // BASTIRMA — gerekcesi: `set-state-in-effect` kurali "efekt icinde senkron
+    // setState" diyor ve cogu durumda haklı, ama BURADA turetilebilir bir sey
+    // yok. "Yukleniyor" imperatif bir agi cagrisinin durumu; render sirasinda
+    // hesaplanamaz, cunku istegin baslamis olmasi render'in bir fonksiyonu
+    // degil. Kurali kapatmak yerine yeniden yazmak, ya suspense'e gecmeyi ya
+    // da yukleme durumunu tamamen kaybetmeyi gerektirirdi.
+    //
+    // Diger uc uyari GERCEKTEN duzeltildi (bkz. `hydrated` ve FilterBar);
+    // yalnizca bu tek nokta bastiriliyor, kural dosya genelinde acik kaliyor.
+    // oxlint-disable-next-line react/set-state-in-effect
     setLoading(true)
     setFailed(false)
 
@@ -170,10 +188,17 @@ export function ProductsPage() {
 
   // Hidrasyon tamamlanana kadar SUNUCUNUN verisi gösterilir (bkz. `hydrated`).
   const sunucuGorunumu = !hydrated || isPristine
-  const products = sunucuGorunumu ? initialProducts : (result?.items ?? [])
-  const total = sunucuGorunumu ? initial.totals.products : (result?.total ?? 0)
-  const categories = result?.facets?.categories ?? initialCategories
-  const stores = result?.facets?.stores ?? initialStores
+  // Sunucu gorunumundeyken SAKLANMIS sonuc hic okunmamali. Facet'ler eskiden
+  // bunu atliyordu (`result?.facets ?? initial`), bu yuzden kullanici filtreyi
+  // TEMIZLEYINCE kategori/market sayilari filtreli hallerinde kaliyordu —
+  // efektteki `setResult(null)` tam da bunu ortmek icin vardi.
+  const aktifSonuc = sunucuGorunumu ? null : result
+  const products = sunucuGorunumu ? initialProducts : (aktifSonuc?.items ?? [])
+  const total = sunucuGorunumu ? initial.totals.products : (aktifSonuc?.total ?? 0)
+  const categories = aktifSonuc?.facets?.categories ?? initialCategories
+  const stores = aktifSonuc?.facets?.stores ?? initialStores
+  // Bayat hata bandi: pristine'e donunce "yuklenemedi" ekranda kalmamali.
+  const hataGoster = !sunucuGorunumu && failed
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
 
   const toggleStore = (slug: string) => {
@@ -291,14 +316,22 @@ export function ProductsPage() {
         </aside>
 
         <div className="min-w-0 lg:col-start-2 lg:row-start-2">
-          <p aria-live="polite" className="text-sm text-ink-soft">
-            {loading ? c.products.loading : fill(c.products.resultCount, { count: n(total) })}
-          </p>
+          {/* Yukleme BASARISIZ oldugunda sayi HIC gosterilmez. Eskiden burada
+              "0 urun" yaziyordu ve hemen altinda "Urunler yuklenemedi." bandi
+              duruyordu: iki celiskili iddia yan yana. "0 urun" bir OLCUM
+              iddiasidir ve istek hic donmediginde elimizde o olcum yok —
+              sessizce sifir demek, hicbir urun bulunmadigini soylemekle ayni
+              seydir. Bant zaten ne oldugunu ve ne yapilacagini anlatiyor. */}
+          {!hataGoster && (
+            <p aria-live="polite" className="text-sm text-ink-soft">
+              {loading ? c.products.loading : fill(c.products.resultCount, { count: n(total) })}
+            </p>
+          )}
 
           <div className="mt-4">
             {loading ? (
               <ProductsSkeleton />
-            ) : failed ? (
+            ) : hataGoster ? (
               <div className="rounded-2xl border border-line bg-paper p-10 text-center">
                 <p className="text-ink-soft">{c.products.error}</p>
                 <button
@@ -337,7 +370,7 @@ export function ProductsPage() {
             )}
           </div>
 
-          {!loading && !failed && totalPages > 1 && (
+          {!loading && !hataGoster && totalPages > 1 && (
             <ProductsPagination
               current={state.page}
               total={totalPages}

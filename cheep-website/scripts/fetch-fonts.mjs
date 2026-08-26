@@ -42,7 +42,14 @@ const css = await (await fetch(URL_CSS, { headers: { 'User-Agent': UA } })).text
 
 fs.mkdirSync(outDir, { recursive: true })
 
-/** Google CSS'i `/* subset *​/ @font-face {...}` blokları hâlinde verir. */
+// Google CSS'i şu blokları art arda verir: bir `/*` yorumunda subset adı
+// (`latin`, `latin-ext`...), hemen ardından o subset'in `@font-face` kuralı.
+//
+// Bu açıklama BİLEREK satır yorumu. Eskiden bir JSDoc bloğuydu ve örnekteki
+// yorum-kapatma dizisinin bloğu erken bitirmemesi için araya GÖRÜNMEZ bir
+// sıfır genişlikli boşluk (U+200B) konmuştu. Kaynakta görünmez karakter
+// başlı başına bir tuzak: kopyalanır, aranamaz ve lint'i tetikler.
+// Satır yorumunda böyle bir kaçışa hiç gerek yok.
 const blocks = css.split('/*').slice(1)
 const kept = []
 
