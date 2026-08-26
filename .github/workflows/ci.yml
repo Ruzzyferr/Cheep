@@ -66,6 +66,20 @@ jobs:
       # --max-warnings 0 ile geri tırmanması engelleniyor.
       - run: npx eslint . --max-warnings 0
       - run: npx vitest run
+      # EXPO SDK SURUM SAPMASI KAPISI.
+      #
+      # Yerel modullerin (react-native, reanimated, screens, svg, worklets...)
+      # surumunu Expo SDK sahiplenir; `bundledNativeModules.json` onlari
+      # pinler. Bir paket SDK'nin ustune cikarsa autolinking ve prebuild
+      # sablonlari sessizce uyusmaz hale gelir — hata DERLEME zamaninda,
+      # cogu zaman da ancak cihazda ortaya cikar.
+      #
+      # 26 Agu 2026: Dependabot'un "kucuk guncellemeler" PR'i react-native'i
+      # 0.81.5'ten 0.87.0'a cikardi. RN `0.x` yayinlandigi icin semver bunu
+      # MINOR sayiyor ve "ana surumleri hariç tut" kurali yakalamiyordu.
+      # dependabot.yml'a acik bir haric tutma listesi eklendi, ama o liste
+      # ELLE tutuluyor; bu kontrol listeye guvenmeden sapmayi yakalar.
+      - run: npx expo-doctor
 
   website:
     name: Website (typecheck + lint)

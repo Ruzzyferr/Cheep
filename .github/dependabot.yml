@@ -21,10 +21,45 @@ updates:
         patterns: ['*']
         update-types: [minor, patch]
     ignore:
-      # Expo SDK ve React Native ana sürümleri: `expo install --fix` ve
-      # `expo-doctor` ile yürütülen ayrı bir göç işi.
       - dependency-name: '*'
         update-types: [version-update:semver-major]
+
+      # ── EXPO SDK'NIN SAHİPLENDİĞİ PAKETLER — TAMAMEN HARİÇ ──────────────
+      #
+      # Yukarıdaki "ana sürüm hariç" kuralı bunları KORUMUYOR. React Native
+      # `0.x` şemasında yayınlanıyor ve semver'de `0.81 → 0.87` bir MINOR
+      # atlaması sayılıyor — oysa RN'de her minor kırıcı bir sürümdür.
+      # `react-native-worklets` (0.5 → 0.12) aynı tuzakta.
+      #
+      # 26 Ağu 2026'da bu tam olarak gerçekleşti: "küçük güncellemeler"
+      # başlıklı bir PR react-native'i 0.81.5'ten 0.87.0'a çıkardı. Expo
+      # SDK 54 `bundledNativeModules.json` içinde RN'i 0.81.5'e PİNLİYOR;
+      # bu paketlerin sürümü SDK'ya aittir, bağımsız yükseltilemez
+      # (autolinking, prebuild şablonları ve yerel modül ABI'si SDK ile
+      # birlikte gelir). CI tip hatalarıyla düştü, ama asıl kırılma derleme
+      # zamanında ve sessizce olurdu.
+      #
+      # Güncelleme yolu: `npx expo install --fix` + SDK yükseltmesi, ayrı ve
+      # bilinçli bir göç işi olarak. `npx expo-doctor` CI'da bunu bekliyor.
+      #
+      # LİSTE ELLE TUTULUYOR ama kaynağı yetkili: `expo/bundledNativeModules.json`
+      # ile projedeki bağımlılıkların kesişimi. `react-native-*` joker'i
+      # BİLEREK kullanılmadı — `react-native-purchases` (RevenueCat) Expo'ya
+      # ait DEĞİL ve faturalama için güncel kalmalı.
+      - dependency-name: 'expo'
+      - dependency-name: 'expo-*'
+      - dependency-name: '@expo/*'
+      - dependency-name: 'eslint-config-expo'
+      - dependency-name: 'react'
+      - dependency-name: 'react-dom'
+      - dependency-name: 'react-native'
+      - dependency-name: 'react-native-gesture-handler'
+      - dependency-name: 'react-native-reanimated'
+      - dependency-name: 'react-native-safe-area-context'
+      - dependency-name: 'react-native-screens'
+      - dependency-name: 'react-native-svg'
+      - dependency-name: 'react-native-web'
+      - dependency-name: 'react-native-worklets'
 
   - package-ecosystem: npm
     directory: /cheep-backend-express
