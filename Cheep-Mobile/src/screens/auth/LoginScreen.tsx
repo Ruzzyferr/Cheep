@@ -13,7 +13,7 @@ import {
   ScrollView,
   TouchableOpacity,
   } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Button, Input } from '../../components/ui';
 import { CheepMascot } from '../../components/brand/CheepMascot';
 import { FadeInUp, Float } from '../../components/anim';

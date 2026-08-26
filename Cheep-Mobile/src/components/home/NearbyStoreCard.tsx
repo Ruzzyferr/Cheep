@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 
 interface NearbyStoreCardProps {

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { colors, typography, spacing } from '../../theme';
 import type { HomeStackScreenProps } from '../../navigation/types';
 import { useTranslation } from 'react-i18next';

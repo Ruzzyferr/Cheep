@@ -14,7 +14,7 @@ import {
   TouchableOpacity,
   Pressable,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { CommonActions } from '@react-navigation/native';
 import { assistantService } from '../../services/assistant.service';
 import type { ToolCall } from '../../services/assistant.service';

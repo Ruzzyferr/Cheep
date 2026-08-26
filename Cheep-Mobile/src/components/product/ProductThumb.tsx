@@ -16,7 +16,7 @@ import { View, StyleSheet } from 'react-native';
 // yeniden indiriliyordu. `expo-image` zaten bağımlılıktaydı ama hiçbir yerde
 // kullanılmıyordu.
 import { Image } from 'expo-image';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getCategoryIcon } from '../../utils/categoryIcon';
 import { colors } from '../../theme';
 

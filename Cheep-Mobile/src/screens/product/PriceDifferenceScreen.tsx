@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useProductsList } from '../../queries';
 import { GridSkeleton, RefreshBar, ErrorState } from '../../components/ui';
 import { SmartDealCard } from '../../components/home';

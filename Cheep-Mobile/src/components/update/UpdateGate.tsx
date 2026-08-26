@@ -29,7 +29,7 @@ import {
   View,
 } from 'react-native';
 import Constants from 'expo-constants';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useTranslation } from 'react-i18next';
 import { useAppVersionPolicy } from '../../queries/useAppVersion';
 import { decideUpdateGate } from '../../utils/updateGate';

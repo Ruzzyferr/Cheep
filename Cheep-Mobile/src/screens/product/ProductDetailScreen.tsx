@@ -11,7 +11,7 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { productService, categoryService, affiliateService } from '../../services';
 import { useQuery } from '@tanstack/react-query';
 import { useProduct, useScope, qk, STALE } from '../../queries';

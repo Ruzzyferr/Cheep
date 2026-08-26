@@ -15,7 +15,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { listService } from '../../services';
 import { Button, Input } from '../ui';
 import { colors, typography, spacing, borderRadius } from '../../theme';

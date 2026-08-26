@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { colors, spacing, borderRadius, typography } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import { useTranslation } from 'react-i18next';

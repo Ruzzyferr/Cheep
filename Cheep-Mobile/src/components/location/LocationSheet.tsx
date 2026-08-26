@@ -40,7 +40,7 @@ import {
   Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocationAnchor } from '../../context/LocationContext';
 import { searchAddress, validateCandidate, type GeocodeCandidate } from '../../services/geocode.service';

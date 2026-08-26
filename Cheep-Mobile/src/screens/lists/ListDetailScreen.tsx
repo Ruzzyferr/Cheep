@@ -19,7 +19,7 @@ import {
   TouchableOpacity,
   Platform,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useBottomSpacing, useStickyBottomOffset } from '../../hooks/useScreenSpacing';
 import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';

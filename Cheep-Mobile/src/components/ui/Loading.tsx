@@ -14,7 +14,7 @@
 
 import React from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useTranslation } from 'react-i18next';
 import { colors, typography, spacing, borderRadius, layout } from '../../theme';
 import { Skeleton } from './Skeleton';

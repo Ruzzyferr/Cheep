@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   RefreshControl,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useTranslation } from 'react-i18next';
 import { useProductsList } from '../../queries';
 import { ListSkeleton, RefreshBar, ErrorState } from '../../components/ui';

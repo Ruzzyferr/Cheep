@@ -10,7 +10,7 @@ import {
   StyleSheet,
   ScrollView,
   } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Card, Button } from '../../components/ui';
 import { ProductThumb } from '../../components/product/ProductThumb';
 import { StoreChip } from '../../components/store/StoreChip';

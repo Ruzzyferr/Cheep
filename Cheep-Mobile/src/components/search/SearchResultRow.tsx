@@ -1,7 +1,7 @@
 // Cheep-Mobile/src/components/search/SearchResultRow.tsx
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { ProductThumb } from '../product/ProductThumb';
 import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, borderRadius } from '../../theme';

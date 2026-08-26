@@ -5,7 +5,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { Animated, View, Text, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Button } from '../ui';
 import { CheepMascot, type MascotExpression } from '../brand/CheepMascot';
 import { colors, typography, spacing } from '../../theme';
