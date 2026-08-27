@@ -26,11 +26,7 @@
     "location_title": "Konumun işlensin mi? (KVKK açık rıza)",
     "location_message": "Cheep, yalnızca sana en yakın market şubelerini ve gerçek mesafeleri göstermek için yaklaşık konumunu işler. Konumun cihazında kalır, arka planda toplanmaz ve üçüncü kişilerle paylaşılmaz.\n\nBu hizmetin zorunlu şartı DEĞİLDİR; reddetsen de Cheep’i kullanmaya devam edebilirsin. Rızanı istediğin an Profil › Gizlilik’ten geri alabilirsin.",
     "location_decline": "Hayır, teşekkürler",
-    "location_accept": "Evet, açık rıza veriyorum",
-    "gate_title": "Konum izni kapalı",
-    "gate_message": "En iyi sonuç için konum iznine ihtiyacımız var: sana en yakın market şubelerini ve gerçek yürüme/sürüş mesafelerini ancak böyle gösterebiliriz. İzin kapalıyken yakındaki marketleri sıralayamayız.",
-    "gate_allow": "İzin ver",
-    "gate_later": "Şimdi değil"
+    "location_accept": "Evet, açık rıza veriyorum"
   },
   "location": {
     "title": "Konum",
@@ -423,10 +419,8 @@
     "title": "Bildirimler",
     "empty_title": "Henüz bildirim yok",
     "empty_body": "Listendeki bir ürün ucuzladığında burada göreceksin.",
-    "gate_title": "Fiyat düşünce haber verelim mi?",
-    "gate_message": "Listendeki ürünler ucuzladığında sana bildirim gönderelim. İstemezsen kapatabilirsin.",
-    "gate_allow": "Haber ver",
-    "gate_later": "Şimdi değil",
+    "gate_title": "Fiyat düşünce haber verelim",
+    "gate_message": "Listendeki ürünler ucuzladığında sana bildirim gönderelim. İstemezsen istediğin an kapatabilirsin. Bir sonraki adımda cihazın bildirim izni soracak.",
     "os_blocked_title": "Bildirimler kapalı",
     "os_blocked_body": "Bildirim izni kapalı olduğu için sana haber veremiyoruz. Telefon ayarlarından açabilirsin.",
     "off_title": "Bildirimler kapatıldı",

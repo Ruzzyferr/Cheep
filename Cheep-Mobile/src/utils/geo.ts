@@ -107,15 +107,21 @@ export async function getUserLocation(): Promise<Coords | null> {
 }
 
 /**
- * AKTİF ülke tespiti — onboarding ülke adımı için: açık rıza istemini gösterir,
- * sonra OS izni ister. Reddedilirse null → manuel seçici devrede kalır.
+ * AKTİF ülke tespiti — onboarding ülke adımı için: ÖNCE OS izni ister, izin
+ * verilirse KVKK açık rızasını sorar. Biri bile reddedilirse null → manuel
+ * seçici devrede kalır.
+ *
+ * SIRA BİLEREK BÖYLE (App Store 5.1.1(iv)): sistem izin isteminin önüne,
+ * kullanıcının kapatıp isteği atlayabileceği kendi diyaloğumuzu koyamayız.
+ * Ayrıntılı gerekçe locationGate.ensureLocationReady başlığında.
  */
 export async function getCountryCodeInteractive(): Promise<string | null> {
   try {
-    const consented = await ensureLocationConsent();
-    if (!consented) return null;
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') return null;
+    // Koordinat OKUNMADAN ÖNCE açık rıza — KVKK m.5 işleme için rıza arar.
+    const consented = await ensureLocationConsent();
+    if (!consented) return null;
     const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Low });
     const places = await Location.reverseGeocodeAsync({
       latitude: pos.coords.latitude,

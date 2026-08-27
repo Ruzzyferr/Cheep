@@ -1,13 +1,16 @@
 /**
  * 📍 Konum kapısı — uygulama her açıldığında konumun gerçekten ÇALIŞIR durumda
- * olduğunu teyit eder; değilse önce NEDEN gerektiğini anlatır, sonra Android'in
- * kendi izin modalını çıkarır.
+ * olduğunu teyit eder; değilse sistemin kendi izin modalını çıkarır ve izin
+ * alınırsa KVKK açık rızasını sorar.
  *
  * İki ayrı durum var ve ikisi de "açık" olmalı:
- *   1) KVKK açık rızası  (uygulama içi, cihazda saklanır)
- *   2) OS konum izni     (Android/iOS sistem izni — kullanıcı ayarlardan kaldırabilir,
+ *   1) OS konum izni     (Android/iOS sistem izni — kullanıcı ayarlardan kaldırabilir,
  *                         Android kullanılmayan uygulamalarda kendisi de geri alabilir)
+ *   2) KVKK açık rızası  (uygulama içi, cihazda saklanır; İZİNDEN SONRA sorulur)
  * Biri eksikse konum özellikleri sessizce çalışmaz. Kapı bu sapmayı yakalar.
+ *
+ * Sistem izin isteminin ÖNÜNE kendi diyaloğumuzu koymuyoruz — App Store
+ * 5.1.1(iv). Ayrıntı `ensureLocationReady` başlığında.
  */
 import { Linking } from 'react-native';
 import * as Location from 'expo-location';
@@ -26,7 +29,6 @@ const SNOOZE_OS_BLOCKED_MS = 14 * 24 * 60 * 60 * 1000;
 export type LocationReadyReason =
   | 'ready'
   | 'consent_declined'
-  | 'dismissed'
   | 'os_denied'
   | 'os_blocked'
   | 'error';
@@ -71,33 +73,31 @@ function confirm(title: string, message: string, confirmText: string, cancelText
 
 /**
  * Konumu kullanılabilir hâle getirmeye çalışır. Sırasıyla:
- *   1) KVKK rızası yoksa açık-rıza istemini göster (reddederse dur).
- *   2) OS izni yoksa ve sistem modalı çıkabiliyorsa: NEDEN gerektiğini anlat,
- *      sonra Android'in izin modalını çıkar.
- *   3) İzin kalıcı reddedilmişse (canAskAgain=false) sistem modalı bir daha ÇIKMAZ —
+ *   1) OS izni yoksa ve sistem modalı çıkabiliyorsa: DOĞRUDAN sistem modalını çıkar.
+ *   2) İzin kalıcı reddedilmişse (canAskAgain=false) sistem modalı bir daha ÇIKMAZ —
  *      kullanıcıyı uygulama ayarlarına yönlendir.
+ *   3) OS izni alındıysa KVKK açık rızasını sor (reddederse konum İŞLENMEZ).
  *
- * Not: rıza istemi zaten neden gerektiğini anlatıyor; hemen ardından ikinci bir
- * açıklama göstermeyiz (üst üste 3 diyalog olurdu) — doğrudan sistem modalına geçilir.
+ * SIRA APPLE 5.1.1(iv) GEREĞİ BÖYLE — ÖNCE OS İZNİ, SONRA KVKK RIZASI.
+ * Önceden tam tersiydi: sistem isteminden ÖNCE "Evet, açık rıza veriyorum" /
+ * "Hayır, teşekkürler" düğmeli kendi diyaloğumuz çıkıyordu. App Review bunu
+ * 27 Ağustos 2026'da reddetti (gönderim bd4defce): izin isteğinin önüne konan
+ * özel mesajda (a) düğme metni onay dili taşıyamaz, (b) kullanıcı mesajı
+ * kapatıp sistem istemini ATLAYAMAMALI — mesajdan sonra HER ZAMAN sistem
+ * istemine geçilmeli.
+ *
+ * KVKK açısından sıra sorun değil: 6698 m.5 açık rızayı verinin İŞLENMESİ için
+ * arar, izin bayrağının varlığı için değil. Sistem izni alınmış olsa bile rıza
+ * yokken tek bir koordinat okunmaz/saklanmaz/gönderilmez (bkz. geo.ts) —
+ * yani "işleme" hâlâ yalnızca açık rızayla başlıyor. Rıza ayrı, opt-in ve
+ * iptal edilebilir kalmaya devam ediyor; OS izniyle birleştirilmedi (Kurul
+ * 2018/90: rıza başka bir beyanın içine gömülemez).
  */
 export async function ensureLocationReady(): Promise<LocationReadyReason> {
   const t = i18n.t.bind(i18n);
   try {
-    let justConsented = false;
-    if ((await getLocationConsent()) !== 'granted') {
-      const ok = await promptLocationConsent(); // KVKK açık-rıza istemi (5 dilde)
-      if (!ok) {
-        await locationPromptStorage.snooze(SNOOZE_DISMISSED_MS);
-        return 'consent_declined';
-      }
-      justConsented = true;
-    }
-
     let perm = await Location.getForegroundPermissionsAsync();
-    if (perm.status === 'granted') {
-      await locationPromptStorage.clear();
-      return 'ready';
-    }
+    if (perm.status === 'granted') return finishWithConsent();
 
     // `status === 'undetermined'` KONTROLÜ ŞART — bu satır olmadan HİÇBİR YENİ
     // KULLANICI konum izni veremiyordu.
@@ -129,26 +129,11 @@ export async function ensureLocationReady(): Promise<LocationReadyReason> {
       return 'os_blocked';
     }
 
-    if (!justConsented) {
-      // Rıza zaten vardı ama cihaz izni kapalı → önce nedenini anlat.
-      const proceed = await confirm(
-        t('consent.gate_title'),
-        t('consent.gate_message'),
-        t('consent.gate_allow'),
-        t('consent.gate_later'),
-      );
-      if (!proceed) {
-        await locationPromptStorage.snooze(SNOOZE_DISMISSED_MS);
-        return 'dismissed';
-      }
-    }
-
-    // Android/iOS'un kendi izin modalı.
+    // Android/iOS'un kendi izin modalı — ÖNÜNE hiçbir uygulama-içi diyalog
+    // konmaz. "Neden gerekiyor" sorusunu sistem isteminin kendi amaç metni
+    // yanıtlıyor (NSLocationWhenInUseUsageDescription, üç dilde yazılı).
     perm = await Location.requestForegroundPermissionsAsync();
-    if (perm.status === 'granted') {
-      await locationPromptStorage.clear();
-      return 'ready';
-    }
+    if (perm.status === 'granted') return finishWithConsent();
 
     await locationPromptStorage.snooze(
       perm.canAskAgain ? SNOOZE_OS_DENIED_MS : SNOOZE_OS_BLOCKED_MS,
@@ -157,6 +142,23 @@ export async function ensureLocationReady(): Promise<LocationReadyReason> {
   } catch {
     return 'error';
   }
+}
+
+/**
+ * OS izni ALINDIKTAN SONRA çalışır: KVKK açık rızası yoksa ister.
+ * Rıza verilmezse konum işlenmez — uygulama yine tam çalışır, kullanıcı
+ * şehrini elle seçer ve rızayı istediği an Profil'den açabilir.
+ */
+async function finishWithConsent(): Promise<LocationReadyReason> {
+  if ((await getLocationConsent()) !== 'granted') {
+    const ok = await promptLocationConsent(); // KVKK açık-rıza istemi (5 dilde)
+    if (!ok) {
+      await locationPromptStorage.snooze(SNOOZE_DISMISSED_MS);
+      return 'consent_declined';
+    }
+  }
+  await locationPromptStorage.clear();
+  return 'ready';
 }
 
 /**

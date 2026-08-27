@@ -26,11 +26,7 @@
     "location_title": "Ska din plats behandlas? (samtycke till platsdelning)",
     "location_message": "Cheep använder endast din ungefärliga plats för att visa dig de närmaste butikerna och verkliga avstånd. Din plats stannar på din enhet, samlas inte in i bakgrunden och delas inte med tredje part.\n\nDetta är INTE ett krav för att använda tjänsten; du kan fortsätta använda Cheep även om du tackar nej. Du kan när som helst återkalla ditt samtycke under Profil › Integritet.",
     "location_decline": "Nej tack",
-    "location_accept": "Ja, jag samtycker",
-    "gate_title": "Platsbehörigheten är avstängd",
-    "gate_message": "Vi behöver platsbehörighet för bästa resultat: bara så kan vi visa butikerna närmast dig och verkliga gång- och köravstånd. Utan den kan vi inte rangordna butiker i närheten.",
-    "gate_allow": "Tillåt",
-    "gate_later": "Inte nu"
+    "location_accept": "Ja, jag samtycker"
   },
   "location": {
     "title": "Plats",
@@ -423,10 +419,8 @@
     "title": "Aviseringar",
     "empty_title": "Inga aviseringar än",
     "empty_body": "Du ser det här när något på din lista blir billigare.",
-    "gate_title": "Vill du få veta om prissänkningar?",
-    "gate_message": "Vi meddelar dig när varor på din lista blir billigare. Du kan stänga av det när som helst.",
-    "gate_allow": "Meddela mig",
-    "gate_later": "Inte nu",
+    "gate_title": "Aviseringar om prissänkningar",
+    "gate_message": "Vi meddelar dig när varor på din lista blir billigare. Du kan stänga av det när som helst. I nästa steg frågar din enhet om aviseringstillstånd.",
     "os_blocked_title": "Aviseringar är avstängda",
     "os_blocked_body": "Behörigheten är avstängd, så vi kan inte nå dig. Du kan slå på den i telefonens inställningar.",
     "off_title": "Aviseringar avstängda",

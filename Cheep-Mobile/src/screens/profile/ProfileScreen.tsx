@@ -303,19 +303,19 @@ export function ProfileScreen({
       return;
     }
 
-    // AÇMA yolu: kullanıcının açık talebi → istem 'denied' olsa bile gösterilir.
-    // (ensureLocationConsent burada kullanılamaz: 'denied' ise sormadan false döner
-    //  ve rıza bir daha asla açılamazdı.)
-    const ok = await promptLocationConsent();
-    setLocConsent(ok ? 'granted' : 'denied');
-    if (!ok) return;
-
-    // Rıza tek başına yetmez — OS izni de gerekir. Kalıcı reddedilmişse
-    // (canAskAgain=false) sistem istemi bir daha çıkmaz; kullanıcıyı Ayarlar'a al.
+    // AÇMA yolu — SIRA ÖNEMLİ: ÖNCE OS izni, SONRA KVKK rızası.
+    // Sistem isteminin önüne, kullanıcının kapatıp istemi atlayabileceği kendi
+    // diyaloğumuzu koyamayız (App Store 5.1.1(iv); gerekçenin tamamı
+    // locationGate.ensureLocationReady başlığında). Eskiden burada da önce
+    // "Evet, açık rıza veriyorum / Hayır, teşekkürler" çıkıyordu.
+    let osOk = false;
     try {
       const perm = await Location.requestForegroundPermissionsAsync();
-      setOsLocationGranted(perm.status === 'granted');
-      if (perm.status !== 'granted' && !perm.canAskAgain) {
+      osOk = perm.status === 'granted';
+      setOsLocationGranted(osOk);
+      // Kalıcı reddedilmişse (canAskAgain=false) sistem istemi hiç çıkmaz;
+      // tek yol uygulama ayarları.
+      if (!osOk && !perm.canAskAgain) {
         appAlert(t('profile.location_os_blocked_title'), t('profile.location_os_blocked_body'), [
           { text: t('common.cancel'), style: 'cancel' },
           { text: t('profile.open_settings'), onPress: () => Linking.openSettings() },
@@ -324,17 +324,26 @@ export function ProfileScreen({
     } catch {
       setOsLocationGranted(null);
     }
+    // İzin yoksa işlenecek konum da yok — rızayı sormak anlamsız olurdu.
+    // Kullanıcı Ayarlar'dan izni açarsa açılış kapısı rızayı orada sorar.
+    if (!osOk) return;
 
-    // Rıza (ve varsa OS izni) yeniden verildi → çapayı HEMEN tazele: konum artık
-    // işlenebilir, kullanıcı bir sonraki soğuk açılışı beklemesin. Ülke yazımı
-    // yine tek sahibinden (LocationProvider) geçer — burada setCountry çağrılmaz.
+    // İzin var → KVKK açık rızası. Kullanıcının açık talebi olduğu için istem
+    // 'denied' kayıtlıyken de gösterilir (ensureLocationConsent burada
+    // kullanılamaz: 'denied' ise sormadan false döner ve rıza bir daha asla
+    // açılamazdı — tek yönlü kapı).
+    const ok = await promptLocationConsent();
+    setLocConsent(ok ? 'granted' : 'denied');
+    if (!ok) return;
+
+    // Rıza + OS izni verildi → çapayı HEMEN tazele: konum artık işlenebilir,
+    // kullanıcı bir sonraki soğuk açılışı beklemesin. Ülke yazımı yine tek
+    // sahibinden (LocationProvider) geçer — burada setCountry çağrılmaz.
     //
-    // Burada da SESSİZ: rıza istemini ve OS izin modalını bu ekran YUKARIDA zaten
-    // kendisi gösterdi. Düz refresh() izin kapısını çalıştırır, kapı da (OS izni
-    // verilmediyse) önce kendi gerekçe diyaloğunu, ardından İKİNCİ bir sistem izin
-    // modalını açardı — kullanıcının az önce cevapladığı istemlerin üstüne üstüne.
-    // silent:true kapıyı atlar; rıza + OS izni gerçekten verildiyse getUserLocation()
-    // GPS'i normal şekilde okur ve koordinatlı çapa yayınlanır.
+    // SESSİZ olmak ZORUNDA: sistem izin modalını ve rıza istemini bu ekran
+    // YUKARIDA zaten kendisi gösterdi. Düz refresh() izin kapısını çalıştırır,
+    // kapı da kullanıcının az önce cevapladığı istemleri tekrarlardı.
+    // silent:true kapıyı atlar; getUserLocation() GPS'i normal okur.
     await refreshAnchor({ silent: true });
   }, [t, refreshAnchor]);
 

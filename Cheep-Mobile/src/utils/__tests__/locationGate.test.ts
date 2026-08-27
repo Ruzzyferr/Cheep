@@ -1,10 +1,13 @@
 /**
  * Konum kapısı — uygulama her açıldığında konumun çalıştığını teyit eder,
- * kapalıysa önce nedenini anlatır, sonra sistem izin modalını çıkarır.
+ * kapalıysa SİSTEM izin modalını çıkarır ve izin alınırsa KVKK açık rızasını sorar.
  *
- * Buradaki testler asıl olarak kapının SESSİZ KALMASI gereken durumları kilitler:
- * konum zaten çalışıyorsa, kullanıcı yakında "şimdi değil" dediyse, ya da izin
- * kalıcı reddedilmişse (sistem modalı bir daha çıkmaz) diyalog yağmuru olmamalı.
+ * Buradaki testler iki şeyi kilitler:
+ *   1) SIRA (App Store 5.1.1(iv)): sistem isteminin ÖNÜNDE, kullanıcının
+ *      kapatıp istemi atlayabileceği hiçbir uygulama-içi diyalog OLMAMALI.
+ *   2) Kapının SESSİZ KALMASI gereken durumlar: konum zaten çalışıyorsa,
+ *      kullanıcı yakında reddettiyse (snooze) ya da izin kalıcı reddedilmişse
+ *      diyalog yağmuru olmamalı.
  */
 /* eslint-disable import/first -- vi.mock fabrikaları aşağıdaki sabitlere kapanır. */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -82,64 +85,78 @@ describe('konum zaten çalışıyorken', () => {
   });
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SIRA: SİSTEM İSTEMİ ÖNCE, KVKK RIZASI SONRA (App Store 5.1.1(iv)).
+//
+// 27 Ağustos 2026'da App Review tam tersi sırayı reddetti: sistem isteminin
+// önünde "Evet, açık rıza veriyorum" / "Hayır, teşekkürler" düğmeli kendi
+// diyaloğumuz vardı ve "Hayır" istemi tamamen atlatıyordu. Aşağıdaki testler o
+// sırayı geri gelemeyecek biçimde kilitliyor.
+// ─────────────────────────────────────────────────────────────────────────────
+
 describe('rıza yokken (ilk kez)', () => {
-  it('KVKK istemini gösterir, kabul edilince DOĞRUDAN sistem modalını çıkarır', async () => {
+  it('sistem modalını ÖNCE çıkarır; rıza istemi ANCAK izin alınınca gelir', async () => {
     ui.accept = true;
 
     expect(await runLocationGate()).toBe('ready');
 
-    // Tek uygulama-içi diyalog: KVKK istemi. Ardından ikinci bir "açıklama"
-    // diyalogu GÖSTERİLMEZ — üst üste üç diyalog olurdu.
+    // Sistem isteminden ÖNCE hiçbir uygulama-içi diyalog yok: gösterilen tek
+    // diyalog KVKK istemi ve o da izin ALINDIKTAN SONRA çıkıyor.
     expect(ui.dialogs).toEqual(['consent.location_title']);
-    expect(gps.requestCalls).toBe(1); // Android modalı çıktı
+    expect(gps.requestCalls).toBe(1);
     expect(await getLocationConsent()).toBe('granted');
   });
 
-  it('KVKK reddedilirse sistem modalı HİÇ çağrılmaz', async () => {
+  it('sistem modalı reddedilirse KVKK istemi HİÇ gösterilmez', async () => {
+    // Rıza, işlenecek veri olmadığında sorulmaz — izin yoksa konum okunamaz.
+    ui.accept = true;
+    gps.onRequest = { status: 'denied', canAskAgain: true };
+
+    expect(await runLocationGate()).toBe('os_denied');
+    expect(ui.dialogs).toEqual([]);
+    expect(await getLocationConsent()).toBe(null);
+  });
+
+  it('izin alınıp KVKK reddedilirse konum işlenmez ve bir süre sorulmaz', async () => {
     ui.accept = false;
 
     expect(await runLocationGate()).toBe('consent_declined');
-    expect(gps.requestCalls).toBe(0);
+    expect(gps.requestCalls).toBe(1); // izin istendi
+    expect(ui.dialogs).toEqual(['consent.location_title']);
+    expect(await getLocationConsent()).toBe('denied');
     expect(await locationPromptStorage.isSnoozed()).toBe(true);
-  });
-});
-
-describe('rıza var ama cihaz izni kapalı', () => {
-  it('önce nedenini anlatır, sonra sistem modalını çıkarır', async () => {
-    await setLocationConsent('granted');
-    ui.accept = true;
-
-    expect(await runLocationGate()).toBe('ready');
-
-    expect(ui.dialogs).toEqual(['consent.gate_title']); // "en iyi sonuç için..."
-    expect(gps.requestCalls).toBe(1);
-  });
-
-  it('"Şimdi değil" denirse sistem modalı çıkmaz ve bir süre tekrar sorulmaz', async () => {
-    await setLocationConsent('granted');
-    ui.accept = false;
-
-    expect(await runLocationGate()).toBe('dismissed');
-    expect(gps.requestCalls).toBe(0);
 
     // Sonraki açılış: sessiz.
     ui.dialogs = [];
     expect(await runLocationGate()).toBe('skipped');
     expect(ui.dialogs).toEqual([]);
   });
+});
+
+describe('rıza var ama cihaz izni kapalı', () => {
+  it('araya açıklama diyaloğu KOYMADAN doğrudan sistem modalını çıkarır', async () => {
+    await setLocationConsent('granted');
+    ui.accept = true;
+
+    expect(await runLocationGate()).toBe('ready');
+
+    expect(ui.dialogs).toEqual([]); // ASIL SINAV: hiçbir ön diyalog yok
+    expect(gps.requestCalls).toBe(1);
+  });
 
   it('erteleme süresi dolunca tekrar sorar', async () => {
     await setLocationConsent('granted');
-    ui.accept = false;
-    await runLocationGate(); // 7 gün ertelendi
+    ui.accept = true;
+    gps.onRequest = { status: 'denied', canAskAgain: true };
+    await runLocationGate(); // 3 gün ertelendi
 
     vi.useFakeTimers();
-    vi.setSystemTime(Date.now() + 8 * 24 * 60 * 60 * 1000);
+    vi.setSystemTime(Date.now() + 4 * 24 * 60 * 60 * 1000);
 
-    ui.dialogs = [];
-    ui.accept = true;
+    gps.onRequest = { status: 'granted', canAskAgain: true };
+    gps.requestCalls = 0;
     expect(await runLocationGate()).toBe('ready');
-    expect(ui.dialogs).toEqual(['consent.gate_title']);
+    expect(gps.requestCalls).toBe(1);
   });
 });
 
@@ -206,7 +223,7 @@ describe('temiz kurulum: izin hiç istenmemiş (undetermined + canAskAgain=false
     expect(ui.settingsOpened).toBe(0);  // Ayarlar'a gitmemeli
   });
 
-  it('rıza da yokken: KVKK istemi + sistem modalı, Ayarlar yok', async () => {
+  it('rıza da yokken: sistem modalı + ARDINDAN KVKK istemi, Ayarlar yok', async () => {
     gps.status = 'undetermined';
     gps.canAskAgain = false;
     ui.accept = true;

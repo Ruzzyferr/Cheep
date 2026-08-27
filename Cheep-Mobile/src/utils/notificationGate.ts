@@ -1,15 +1,20 @@
 /**
- * 🔔 Bildirim kapısı — konum kapısının (locationGate.ts) birebir kardeşi.
+ * 🔔 Bildirim kapısı — konum kapısının (locationGate.ts) kardeşi.
  *
  * Açılışta, KONUM KAPISI ÇÖZÜMLENDİKTEN SONRA çalışır (ardışık, eşzamanlı
  * değil): üst üste iki sistem modalı çıkmasın.
  *
- * En kritik davranış — sistem modalından ÖNCE kendi gerekçemizi göstermek:
- * Android'de izin iki kez reddedilirse kalıcı olarak kapanır ve bir daha
- * soramazsınız; yalnızca kullanıcı ayarlardan açabilir. Doğrudan sistem
- * modalını çıkarmak, kararsız bir kullanıcının ilk refleksle "hayır" demesiyle
- * o hakkı yakar. Kendi diyaloğumuzda "şimdi değil" denirse sistem modalı hiç
- * çağrılmaz — reddedilecek bir istem harcanmamış olur.
+ * Sistem modalından önce ne için kullanıldığını anlatan TEK DÜĞMELİ bir
+ * bilgi ekranı gösteririz ("Devam"). Bağlam, izne evet deme oranını belirgin
+ * biçimde artırıyor; özellikle Android'de değerli, çünkü izin iki kez
+ * reddedilince kalıcı kapanıyor ve bir daha sorulamıyor.
+ *
+ * DÜĞME TEK VE NÖTR OLMAK ZORUNDA. Eskiden "Haber ver" / "Şimdi değil" vardı
+ * ve "Şimdi değil" sistem istemini tamamen atlatıyordu; App Store bunun konum
+ * eşdeğerini 27 Ağustos 2026'da reddetti (5.1.1(iv), gönderim bd4defce):
+ * izin isteğinin önündeki özel mesaj onay dili taşıyamaz ve kullanıcı mesajı
+ * kapatıp istemi atlayamamalı — mesajdan sonra HER ZAMAN sistem istemine
+ * geçilmeli. Aynı kural burada da uygulanıyor.
  */
 import { Linking, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
@@ -19,8 +24,6 @@ import { notificationPromptStorage, pushTokenStorage } from './storage';
 import { notificationService } from '../services/notification.service';
 import { appAlert } from './dialog';
 
-/** "Şimdi değil" — kullanıcı istemi geri çevirdi; bir hafta sorma. */
-const SNOOZE_DISMISSED_MS = 7 * 24 * 60 * 60 * 1000;
 /** Sistem modalı gösterildi ve reddedildi — 3 gün sorma. */
 const SNOOZE_OS_DENIED_MS = 3 * 24 * 60 * 60 * 1000;
 /** Kalıcı reddedilmiş (sistem modalı bir daha çıkmaz) — 14 gün sorma. */
@@ -28,7 +31,6 @@ const SNOOZE_OS_BLOCKED_MS = 14 * 24 * 60 * 60 * 1000;
 
 export type NotificationReadyReason =
   | 'ready'
-  | 'dismissed'
   | 'os_denied'
   | 'os_blocked'
   | 'unsupported'
@@ -61,6 +63,18 @@ function confirm(title: string, message: string, confirmText: string, cancelText
         { text: cancelText, style: 'cancel', onPress: () => resolve(false) },
         { text: confirmText, onPress: () => resolve(true) },
       ],
+      { cancelable: false },
+    );
+  });
+}
+
+/** Tek düğmeli bilgi ekranı: kapatmanın TEK yolu "Devam" — çıkış yok. */
+function inform(title: string, message: string) {
+  return new Promise<void>((resolve) => {
+    appAlert(
+      title,
+      message,
+      [{ text: i18n.t('common.continue'), onPress: () => resolve() }],
       { cancelable: false },
     );
   });
@@ -108,7 +122,7 @@ export async function unregisterPushToken(): Promise<void> {
  * İzni ister. Sırasıyla:
  *   1) Zaten verilmişse → token'ı tazele ve çık.
  *   2) Kalıcı reddedilmişse → ayarlara yönlendir.
- *   3) Değilse: ÖNCE kendi gerekçemiz, kullanıcı onaylarsa sistem modalı.
+ *   3) Değilse: tek düğmeli bilgi ekranı, ARDINDAN her hâlükârda sistem modalı.
  */
 export async function ensureNotificationsReady(): Promise<NotificationReadyReason> {
   const t = i18n.t.bind(i18n);
@@ -142,17 +156,8 @@ export async function ensureNotificationsReady(): Promise<NotificationReadyReaso
       return 'os_blocked';
     }
 
-    // Gerekçe önce — reddedilecek bir sistem istemi harcanmasın.
-    const proceed = await confirm(
-      t('notifications.gate_title'),
-      t('notifications.gate_message'),
-      t('notifications.gate_allow'),
-      t('notifications.gate_later'),
-    );
-    if (!proceed) {
-      await notificationPromptStorage.snooze(SNOOZE_DISMISSED_MS);
-      return 'dismissed';
-    }
+    // Bağlam önce, ama ÇIKIŞSIZ: tek düğme ve ardından mutlaka sistem istemi.
+    await inform(t('notifications.gate_title'), t('notifications.gate_message'));
 
     perm = await Notifications.requestPermissionsAsync();
     if (perm.status === 'granted') {
