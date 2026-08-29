@@ -1,6 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
-import { STANDARD_CATEGORIES } from '../src/config/standard-categories.js';
+import {
+    CATEGORY_TREE_COUNTRIES,
+    seedCategoryTree,
+    seedCountriesAndStores,
+} from '../src/config/countries-seed.js';
 
 const prisma = new PrismaClient();
 
@@ -22,49 +26,24 @@ async function main() {
     });
     console.log('✅ Test kullanıcısı oluşturuldu:', testUser.email);
 
-    // 1b. Ülke (çok-ülke modeli) — Türkiye
-    const tr = await prisma.country.upsert({
-        where: { code: 'TR' },
-        update: {},
-        create: { code: 'TR', name: 'Türkiye', currency: 'TRY' },
-    });
-    const ch = await prisma.country.upsert({
-        where: { code: 'CH' },
-        update: {},
-        create: { code: 'CH', name: 'Schweiz', currency: 'CHF' },
-    });
-    const se = await prisma.country.upsert({
-        where: { code: 'SE' },
-        update: {},
-        create: { code: 'SE', name: 'Sverige', currency: 'SEK' },
-    });
-    const de = await prisma.country.upsert({
-        where: { code: 'DE' },
-        update: {},
-        create: { code: 'DE', name: 'Deutschland', currency: 'EUR' },
-    });
-    const pl = await prisma.country.upsert({
-        where: { code: 'PL' },
-        update: {},
-        create: { code: 'PL', name: 'Polska', currency: 'PLN' },
-    });
-    // Ülke adı KENDİ DİLİNDE yazılır (Türkçe karşılığı değil) — mevcut
-    // kayıtların (Türkiye/Polska/Deutschland/Sverige) izlediği kural bu.
-    const hr = await prisma.country.upsert({
-        where: { code: 'HR' },
-        update: {},
-        create: { code: 'HR', name: 'Hrvatska', currency: 'EUR' },
-    });
-    const hu = await prisma.country.upsert({
-        where: { code: 'HU' },
-        update: {},
-        create: { code: 'HU', name: 'Magyarország', currency: 'HUF' },
-    });
-    const ro = await prisma.country.upsert({
-        where: { code: 'RO' },
-        update: {},
-        create: { code: 'RO', name: 'România', currency: 'RON' },
-    });
+    // 1b. Ülkeler ve YENİ ülkelerin marketleri — PAYLAŞILAN tanımdan.
+    //
+    // Liste `src/config/countries-seed.ts`'te duruyor ve üretim tohumlama
+    // betiği de (scripts/seed-countries.ts) oradan okuyor. İki yerde ayrı
+    // liste tutmak, bugün defalarca düzeltilen sapma hatasının ta kendisi
+    // olurdu: biri güncellenir, diğeri unutulur ve fark ancak üretimde
+    // eksik bir ülke ya da yanlış store_id olarak ortaya çıkar.
+    const { idByCode } = await seedCountriesAndStores(prisma);
+    const countryRef = (code: string) => {
+        const id = idByCode.get(code);
+        if (id === undefined) throw new Error(`tohumlamada ülke yok: ${code}`);
+        return { id };
+    };
+    const tr = countryRef('TR');
+    const ch = countryRef('CH');
+    const se = countryRef('SE');
+    const de = countryRef('DE');
+    const pl = countryRef('PL');
     console.log('✅ Ülkeler oluşturuldu');
 
     // 2. Marketler oluştur
@@ -158,35 +137,6 @@ async function main() {
     const lidlPl = await prisma.store.upsert({ where: { id: 45 }, update: { lat: 52.2297, lon: 21.0122 }, create: { id: 45, name: 'Lidl', logo_url: null, address: 'Warszawa', lat: 52.2297, lon: 21.0122, country_id: pl.id } });
     const zabka = await prisma.store.upsert({ where: { id: 47 }, update: { lat: 52.2297, lon: 21.0122 }, create: { id: 47, name: 'Żabka', logo_url: null, address: 'Warszawa', lat: 52.2297, lon: 21.0122, country_id: pl.id } });
 
-    // HR 50–59 — store_id'ler Cheep-Scraper/countries/croatia/config.json ile
-    // BİREBİR aynı olmalı; uyuşmazlık fiyatları yanlış zincire yazar.
-    // `lat/lon` zincirin referans mağazasının konumu (bkz. cijene_base.py).
-    const konzum = await prisma.store.upsert({ where: { id: 50 }, update: { lat: 45.8150, lon: 15.9819 }, create: { id: 50, name: 'Konzum', logo_url: null, address: 'Zagreb', lat: 45.8150, lon: 15.9819, country_id: hr.id } });
-    const lidlHr = await prisma.store.upsert({ where: { id: 51 }, update: { lat: 45.8150, lon: 15.9819 }, create: { id: 51, name: 'Lidl', logo_url: null, address: 'Zagreb', lat: 45.8150, lon: 15.9819, country_id: hr.id } });
-    const sparHr = await prisma.store.upsert({ where: { id: 52 }, update: { lat: 45.8150, lon: 15.9819 }, create: { id: 52, name: 'Spar', logo_url: null, address: 'Zagreb', lat: 45.8150, lon: 15.9819, country_id: hr.id } });
-    const plodine = await prisma.store.upsert({ where: { id: 53 }, update: { lat: 45.8150, lon: 15.9819 }, create: { id: 53, name: 'Plodine', logo_url: null, address: 'Zagreb', lat: 45.8150, lon: 15.9819, country_id: hr.id } });
-    const kauflandHr = await prisma.store.upsert({ where: { id: 54 }, update: { lat: 45.8150, lon: 15.9819 }, create: { id: 54, name: 'Kaufland', logo_url: null, address: 'Zagreb', lat: 45.8150, lon: 15.9819, country_id: hr.id } });
-    const tommy = await prisma.store.upsert({ where: { id: 55 }, update: { lat: 43.5397, lon: 16.4979 }, create: { id: 55, name: 'Tommy', logo_url: null, address: 'Split', lat: 43.5397, lon: 16.4979, country_id: hr.id } });
-
-    // HU 60–69 — countries/hungary/config.json ile aynı.
-    const auchanHu = await prisma.store.upsert({ where: { id: 60 }, update: { lat: 47.4979, lon: 19.0402 }, create: { id: 60, name: 'Auchan', logo_url: null, address: 'Budapest', lat: 47.4979, lon: 19.0402, country_id: hu.id } });
-    const tescoHu = await prisma.store.upsert({ where: { id: 61 }, update: { lat: 47.4979, lon: 19.0402 }, create: { id: 61, name: 'Tesco', logo_url: null, address: 'Budapest', lat: 47.4979, lon: 19.0402, country_id: hu.id } });
-    const lidlHu = await prisma.store.upsert({ where: { id: 62 }, update: { lat: 47.4979, lon: 19.0402 }, create: { id: 62, name: 'Lidl', logo_url: null, address: 'Budapest', lat: 47.4979, lon: 19.0402, country_id: hu.id } });
-    const aldiHu = await prisma.store.upsert({ where: { id: 63 }, update: { lat: 47.4979, lon: 19.0402 }, create: { id: 63, name: 'Aldi', logo_url: null, address: 'Budapest', lat: 47.4979, lon: 19.0402, country_id: hu.id } });
-    const pennyHu = await prisma.store.upsert({ where: { id: 64 }, update: { lat: 47.4979, lon: 19.0402 }, create: { id: 64, name: 'Penny', logo_url: null, address: 'Budapest', lat: 47.4979, lon: 19.0402, country_id: hu.id } });
-
-    // RO 70–79 — countries/romania/config.json ile aynı.
-    const auchanRo = await prisma.store.upsert({ where: { id: 70 }, update: { lat: 44.4268, lon: 26.1025 }, create: { id: 70, name: 'Auchan', logo_url: null, address: 'București', lat: 44.4268, lon: 26.1025, country_id: ro.id } });
-    const carrefourRo = await prisma.store.upsert({ where: { id: 71 }, update: { lat: 44.4268, lon: 26.1025 }, create: { id: 71, name: 'Carrefour', logo_url: null, address: 'București', lat: 44.4268, lon: 26.1025, country_id: ro.id } });
-    const kauflandRo = await prisma.store.upsert({ where: { id: 72 }, update: { lat: 44.4268, lon: 26.1025 }, create: { id: 72, name: 'Kaufland', logo_url: null, address: 'București', lat: 44.4268, lon: 26.1025, country_id: ro.id } });
-    const lidlRo = await prisma.store.upsert({ where: { id: 73 }, update: { lat: 44.4268, lon: 26.1025 }, create: { id: 73, name: 'Lidl', logo_url: null, address: 'București', lat: 44.4268, lon: 26.1025, country_id: ro.id } });
-    const megaImage = await prisma.store.upsert({ where: { id: 74 }, update: { lat: 46.7712, lon: 23.6236 }, create: { id: 74, name: 'Mega Image', logo_url: null, address: 'Cluj-Napoca', lat: 46.7712, lon: 23.6236, country_id: ro.id } });
-    const pennyRo = await prisma.store.upsert({ where: { id: 75 }, update: { lat: 44.4268, lon: 26.1025 }, create: { id: 75, name: 'Penny', logo_url: null, address: 'București', lat: 44.4268, lon: 26.1025, country_id: ro.id } });
-
-    void konzum; void lidlHr; void sparHr; void plodine; void kauflandHr; void tommy;
-    void auchanHu; void tescoHu; void lidlHu; void aldiHu; void pennyHu;
-    void auchanRo; void carrefourRo; void kauflandRo; void lidlRo; void megaImage; void pennyRo;
-
     console.log('✅ Marketler oluşturuldu');
 
     // 3. POLONYA KATEGORİ AĞACINI OLUŞTUR
@@ -209,55 +159,13 @@ async function main() {
     // (Cheep-Scraper/countries/turkey/mf_taxonomy.py → mf_seed_categories.py).
     // Elle tutulan bu listeyi TR'ye de basmak bir kez ikiz kategorilere ve içi
     // boş ölü kabuklara yol açmıştı.
-    const categoryMap = new Map<string, number>(); // slug -> id (PL için; ürün seed'i kullanıyor)
-
-    async function seedCategoryTree(countryId: number, label: string, collect = false) {
-        for (const standardCategory of STANDARD_CATEGORIES) {
-            const parentCategory = await prisma.category.upsert({
-                where: { country_id_slug: { country_id: countryId, slug: standardCategory.slug } },
-                update: {
-                    name: standardCategory.name,
-                    display_order: standardCategory.displayOrder,
-                    icon_url: standardCategory.icon || null,
-                },
-                create: {
-                    name: standardCategory.name,
-                    slug: standardCategory.slug,
-                    country_id: countryId,
-                    parent_id: null,
-                    display_order: standardCategory.displayOrder,
-                    icon_url: standardCategory.icon || null,
-                },
-            });
-            if (collect) categoryMap.set(standardCategory.slug, parentCategory.id);
-
-            for (const subcategory of standardCategory.subcategories) {
-                const subCategory = await prisma.category.upsert({
-                    where: { country_id_slug: { country_id: countryId, slug: subcategory.slug } },
-                    update: {
-                        name: subcategory.name,
-                        parent_id: parentCategory.id,
-                        display_order: subcategory.displayOrder,
-                    },
-                    create: {
-                        name: subcategory.name,
-                        slug: subcategory.slug,
-                        country_id: countryId,
-                        parent_id: parentCategory.id,
-                        display_order: subcategory.displayOrder,
-                    },
-                });
-                if (collect) categoryMap.set(subcategory.slug, subCategory.id);
-            }
-        }
-        console.log(`✅ ${label} kategori ağacı oluşturuldu`);
-    }
-
     console.log('📋 Kategori ağaçları oluşturuluyor...');
-    await seedCategoryTree(pl.id, 'PL', true);
-    await seedCategoryTree(hr.id, 'HR');
-    await seedCategoryTree(hu.id, 'HU');
-    await seedCategoryTree(ro.id, 'RO');
+    let categoryMap = new Map<string, number>(); // slug -> id (PL; ürün seed'i kullanıyor)
+    for (const code of CATEGORY_TREE_COUNTRIES) {
+        const slugs = await seedCategoryTree(prisma, countryRef(code).id);
+        if (code === 'PL') categoryMap = slugs;
+        console.log(`✅ ${code} kategori ağacı (${slugs.size} slug)`);
+    }
 
     // Kategorileri değişkenlere atayalım (ürünler için)
     const sutId = categoryMap.get('sut')!;

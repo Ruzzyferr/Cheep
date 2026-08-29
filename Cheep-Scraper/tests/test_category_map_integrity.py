@@ -99,3 +99,63 @@ def test_category_maps_are_not_gitignored():
         "Bu kategori haritaları .gitignore'a takılıyor, yani deploy'a "
         f"ÇIKMAZLAR ve ülkenin tüm ürünleri kategorisiz kalır: {ignored}"
     )
+
+
+# ---------------------------------------------- store_id ↔ backend seed tutarlılığı
+
+SEED_TS = REPO / "cheep-backend-express" / "src" / "config" / "countries-seed.ts"
+
+#: Market satırları hâlâ `prisma/seed.ts`'te elle duran ülkeler.
+LEGACY_SEED_COUNTRIES = {"TR", "PL", "DE", "CH", "SE"}
+
+
+def _seeded_stores():
+    """`countries-seed.ts`'ten {store_id: ülke_kodu} (kaba ama yeterli ayrıştırma)."""
+    source = SEED_TS.read_text(encoding="utf-8")
+    rows = re.findall(
+        r"\{\s*id:\s*(\d+),\s*name:\s*'[^']*',\s*countryCode:\s*'([A-Z]{2})'", source,
+    )
+    return {int(sid): code for sid, code in rows}
+
+
+def test_seed_source_is_readable():
+    assert _seeded_stores(), f"backend market tohumu okunamadı: {SEED_TS}"
+
+
+@pytest.mark.parametrize("country,path,mapping", list(_category_maps()),
+                         ids=[c for c, _, _ in _category_maps()])
+def test_enabled_market_store_ids_exist_in_backend_seed(country, path, mapping):
+    """Scraper'ın yazdığı `store_id`, backend'de o ÜLKEYE ait bir market olmalı.
+
+    Uyuşmazlığın bedeli sessiz ve büyük: `store_id` yanlışsa fiyatlar BAŞKA
+    bir zincire (ya da başka bir ülkenin zincirine) yazılır ve hiçbir hata
+    çıkmaz — kullanıcı Konzum fiyatını Lidl'da görür.
+
+    ESKİ ÜLKELER BU KONTROLÜN DIŞINDA: TR/PL/DE/CH/SE'nin market satırları
+    hâlâ `prisma/seed.ts` içinde elle tanımlı (gerçek logo ve adres
+    verileriyle). Çalışan ve doğrulanmış tanımları yalnızca tekrarı gidermek
+    için taşımak, kazanılan faydadan büyük bir risk olurdu. Bir ülke
+    `countries-seed.ts`'e taşındığında bu listeden çıkarılmalı ve kontrol
+    kendiliğinden devreye girer.
+    """
+    config_path = path.parent / "config.json"
+    if not config_path.exists():
+        pytest.skip(f"{country}: config.json yok")
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    code = config.get("country_code")
+    if code in LEGACY_SEED_COUNTRIES:
+        pytest.skip(f"{code}: market satırları prisma/seed.ts'te elle tanımlı")
+
+    seeded = _seeded_stores()
+    problems = []
+    for market in config.get("markets", []):
+        if not market.get("enabled"):
+            continue
+        store_id = market.get("store_id")
+        if store_id not in seeded:
+            problems.append(f"{market['name']} -> store_id {store_id} backend'de YOK")
+        elif seeded[store_id] != code:
+            problems.append(
+                f"{market['name']} -> store_id {store_id} backend'de {seeded[store_id]} ülkesine ait, {code} değil"
+            )
+    assert not problems, f"{country}: {problems}"
