@@ -23,6 +23,23 @@ if [ -f venv/bin/activate ]; then source venv/bin/activate; fi
 
 API="${CHEEP_API_URL:-http://localhost:3000/api/v1}"
 
+# INGEST_API_KEY normalde systemd'nin `EnvironmentFile` yönergesiyle geliyor.
+# ELLE çalıştırıldığında (ilk kurulum, bir aksaklıktan sonra yeniden koşum)
+# ortam boş oluyor ve her istek HTTP 401 alıyor — üstelik betik "yüklendi=512"
+# yazmaya devam ettiği için başarılı görünüyor. Anahtar yoksa .env'den okunuyor.
+#
+# `.env` KABUKLA SOURCE EDİLMİYOR: içinde tırnaksız, özel karakterli değerler
+# var ve `. .env` onları KOMUT olarak çalıştırmaya kalkıyor. Yalnızca ihtiyaç
+# duyulan satır çekiliyor.
+if [ -z "${INGEST_API_KEY:-}" ] && [ -f "$(dirname "$0")/.env" ]; then
+  INGEST_API_KEY="$(grep -E '^INGEST_API_KEY=' "$(dirname "$0")/.env" | head -1 | cut -d= -f2- | tr -d '"'"'"'')"
+  export INGEST_API_KEY
+fi
+if [ -z "${INGEST_API_KEY:-}" ]; then
+  echo "HATA: INGEST_API_KEY yok — her istek 401 alır, koşum anlamsız." >&2
+  exit 1
+fi
+
 echo "=== şube tazeleme $(date -Iseconds) ==="
 
 # MODÜL OLARAK çağrılıyor (`python -m ...`), dosya yolu olarak DEĞİL.
