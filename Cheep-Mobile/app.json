@@ -72,8 +72,8 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "androidAppId": "ca-app-pub-2953141598487358~3738075155",
+          "iosAppId": "ca-app-pub-2953141598487358~6068725024",
           "userTrackingUsageDescription": "Cheep asks for this only to show more relevant ads. Declining changes nothing about price comparison, your shopping lists or your location — you will simply see less relevant ads.",
           "delayAppMeasurementInit": true,
           "optimizeInitialization": true,

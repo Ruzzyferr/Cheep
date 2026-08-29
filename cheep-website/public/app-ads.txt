@@ -1,0 +1,14 @@
+# app-ads.txt — Cheep (AdMob yayıncı doğrulaması)
+#
+# NE İŞE YARAR: reklam alıcılarına "bu uygulamanın envanterini satma yetkisi
+# gerçekten bu yayıncıda" der. Dosya yoksa AdMob uygulamayı DOĞRULANMAMIŞ
+# sayıyor ve reklam sunumunu kısıtlıyor ("Limited ad serving") — yani doğrudan
+# gelir kaybı. Ayrıca sahte envanter satışına karşı standart korumadır.
+#
+# NEREDE DURMALI: geliştirici web sitesinin KÖKÜNDE (https://cheep.live/app-ads.txt).
+# Adres, mağaza listelemesindeki "geliştirici web sitesi" alanıyla AYNI alan adı
+# olmak zorunda; farklıysa doğrulama sessizce başarısız olur.
+#
+# Biçim: <reklam sistemi>, <yayıncı kimliği>, <ilişki>, <sertifika kimliği>
+# Google'ın sertifika kimliği f08c47fec0942fa0 sabittir, yayıncıya göre değişmez.
+google.com, pub-2953141598487358, DIRECT, f08c47fec0942fa0

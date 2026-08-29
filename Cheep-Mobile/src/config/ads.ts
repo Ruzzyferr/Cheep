@@ -44,12 +44,31 @@ const TEST_BANNER_UNIT = Platform.select({
  *
  * Üçü AYRI birim: AdMob raporları birim bazında kırılıyor, tek birim
  * kullanılsa hangi yerleşimin çalıştığı hiç öğrenilemezdi.
+ *
+ * PLATFORM BAŞINA AYRI KİMLİK — AdMob birimleri platforma özeldir.
+ *
+ * Bir Android birimini iOS'ta kullanmak yapılandırma hatasıdır: reklam
+ * gelmez, rapor karışır. İlk yazımda tek bir değişken seti vardı ve iki
+ * platform aynı kimliği okuyordu; birimler AdMob'da oluşturulunca (Android
+ * uygulaması ve iOS uygulaması AYRI kayıtlar) bu hemen görünür oldu.
+ *
+ * `process.env.X` doğrudan yazılmak ZORUNDA: Expo bu değerleri derleme
+ * sırasında METİN OLARAK değiştiriyor. `process.env[degisken]` gibi dinamik
+ * bir erişim değiştirilmez ve çalışma anında `undefined` döner — yani
+ * kimlikler sessizce kaybolur ve uygulama test reklamına düşer.
  */
-const REAL_UNITS: Record<AdSlot, string | undefined> = {
-  home: process.env.EXPO_PUBLIC_ADMOB_BANNER_HOME,
-  search: process.env.EXPO_PUBLIC_ADMOB_BANNER_SEARCH,
-  list: process.env.EXPO_PUBLIC_ADMOB_BANNER_LIST,
-};
+const REAL_UNITS: Record<AdSlot, string | undefined> = Platform.select({
+  ios: {
+    home: process.env.EXPO_PUBLIC_ADMOB_BANNER_HOME_IOS,
+    search: process.env.EXPO_PUBLIC_ADMOB_BANNER_SEARCH_IOS,
+    list: process.env.EXPO_PUBLIC_ADMOB_BANNER_LIST_IOS,
+  },
+  default: {
+    home: process.env.EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID,
+    search: process.env.EXPO_PUBLIC_ADMOB_BANNER_SEARCH_ANDROID,
+    list: process.env.EXPO_PUBLIC_ADMOB_BANNER_LIST_ANDROID,
+  },
+}) as Record<AdSlot, string | undefined>;
 
 /**
  * Bu yerleşim için kullanılacak birim kimliği.

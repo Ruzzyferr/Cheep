@@ -1,17 +1,27 @@
 # AdMob kurulumu — banner reklamlar
 
-Kod tarafı hazır ve **Google'ın TEST reklam birimleriyle** çalışıyor. Gerçek
-gelir için aşağıdaki adımlar bir kez yapılmalı. Toplam ~15 dakika.
+> **DURUM (2026-08-29): KURULDU.** Uygulamalar, birimler ve kimlikler yerinde;
+> aşağıdaki adımlar tarihçe ve yeniden kurulum içindir.
 
-## Neden kod gerçek kimliklerle gelmiyor
+## Yerinde olanlar
 
-Google'ın politikası gereği geliştirme ve test sırasında **gerçek reklam birimi
-kullanılamaz**: kendi reklamlarını yükleyip tıklamak "geçersiz trafik" sayılıyor
-ve AdMob hesabının askıya alınmasına yol açıyor. Bu yüzden varsayılan test
-birimi; gerçek kimlikler dışarıdan veriliyor.
+| Ne | Değer |
+|---|---|
+| Yayıncı kimliği | `pub-2953141598487358` |
+| Android uygulaması | `ca-app-pub-2953141598487358~3738075155` (`app.json`) |
+| iOS uygulaması | `ca-app-pub-2953141598487358~6068725024` (`app.json`) |
+| Banner birimleri | 3 Android + 3 iOS; kimlikler GitHub **Variables**'ta |
+| `app-ads.txt` | `cheep-website/public/app-ads.txt` → https://cheep.live/app-ads.txt |
 
-Yapılandırmayı unutmanın bedeli **gelir kaybı**, hesap kaybı değil — iki risk
-arasında bilinçli olarak bu taraf seçildi.
+**Birimler PLATFORM BAŞINA AYRI.** AdMob birimi platforma özel; Android
+birimini iOS'ta kullanmak reklam gelmemesi ve raporun karışması demek. Değişken
+adları bu yüzden `_ANDROID` / `_IOS` ekli.
+
+⚠️ **iOS uygulaması AdMob'da mağazaya BAĞLI DEĞİL.** AdMob'un App Store araması
+uygulamayı bulamadı, çünkü listeleme yalnızca Polonya ve Türkiye'de yayında ve
+arama varsayılan vitrine bakıyor. Uygulama paket kimliğiyle oluşturuldu; App
+Store dağıtımı yeni ülkelere açıldıktan sonra AdMob'da "Add store" ile
+bağlanmalı — bağlanana kadar o uygulamada reklam sunumu kısıtlı kalır.
 
 ## 1. AdMob'da uygulamaları oluştur
 

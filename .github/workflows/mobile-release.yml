@@ -52,9 +52,15 @@ env:
   # çalışır, yalnızca gelir üretmez (bkz. Cheep-Mobile/src/config/ads.ts).
   # Derlemeyi burada durdurmuyoruz çünkü reklamsız bir derleme bozuk bir
   # derleme değil; API URL'sinin aksine uygulamayı açılışta çökertmez.
-  EXPO_PUBLIC_ADMOB_BANNER_HOME: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_HOME }}
-  EXPO_PUBLIC_ADMOB_BANNER_SEARCH: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_SEARCH }}
-  EXPO_PUBLIC_ADMOB_BANNER_LIST: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_LIST }}
+  #
+  # PLATFORM BAŞINA AYRI: AdMob birimleri platforma özel. Android birimini
+  # iOS'ta kullanmak reklam gelmemesi ve raporun karışması demek.
+  EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID }}
+  EXPO_PUBLIC_ADMOB_BANNER_SEARCH_ANDROID: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_SEARCH_ANDROID }}
+  EXPO_PUBLIC_ADMOB_BANNER_LIST_ANDROID: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_LIST_ANDROID }}
+  EXPO_PUBLIC_ADMOB_BANNER_HOME_IOS: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_HOME_IOS }}
+  EXPO_PUBLIC_ADMOB_BANNER_SEARCH_IOS: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_SEARCH_IOS }}
+  EXPO_PUBLIC_ADMOB_BANNER_LIST_IOS: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_LIST_IOS }}
 
 jobs:
   # ── CI KAPISI ───────────────────────────────────────────────────────────
