@@ -2,7 +2,7 @@
   "country": "Romania",
   "country_code": "RO",
   "default_unit": "buc",
-  "live": false,
+  "live": true,
   "markets": [
     {
       "name": "Auchan",

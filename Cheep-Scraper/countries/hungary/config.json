@@ -2,7 +2,7 @@
   "country": "Hungary",
   "country_code": "HU",
   "default_unit": "db",
-  "live": false,
+  "live": true,
   "markets": [
     {
       "name": "Auchan",

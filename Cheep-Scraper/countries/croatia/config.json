@@ -2,7 +2,7 @@
   "country": "Croatia",
   "country_code": "HR",
   "default_unit": "kom",
-  "live": false,
+  "live": true,
   "markets": [
     {
       "name": "Konzum",
@@ -95,6 +95,7 @@
   ],
   "output_dir": "output",
   "log_dir": "logs",
+  "upstream_note": "KAYNAK BAZI GÜNLER BAZI ZİNCİRLERİ YAYINLAMIYOR. Ölçüldü: 2026-08-28 arşivinde 26 zincir vardı, 2026-08-29'da 22 (konzum, dm, roto, branka, lorenco yoktu). Bu bir arıza DEĞİL, perakendecinin o günkü yayınını geciktirmesi. Böyle bir gecede pipeline koşumu SAĞLIKSIZ işaretlenir ve prune ÇALIŞMAZ — yani mevcut fiyatlar korunur ve zincir ertesi gün kendiliğinden tazelenir. Rotasyonda her zincir haftada ~2 kez geldiği için tek bir eksik gün fiyatları 21 günlük TTL'e yaklaştırmıyor.",
   "source_note": "Veri kaynağı: NN 75/2025 (2 Mayıs 2025) uyarınca her perakendecinin HER MAĞAZASI için günlük yayınlamak ZORUNDA olduğu fiyat listeleri; cijene.dev (github.com/senko/cijene-api) bunları tek günlük ZIP arşivinde topluyor. Kullanım şartları §4 verinin uygulamalarda serbestçe kullanılabileceğini açıkça belirtiyor. Yani bu ülkede scrape YAPILMIYOR — kamuya açık, yasal zorunlulukla yayınlanmış veri okunuyor ve bunlar tanımı gereği RAF fiyatları (Almanya'yı NO-GO yapan teslimat-platformu markup sorunu burada yok).",
   "off_note": "OFF zenginleştirmesi GEREKSİZ: barkod kapsamı zaten %92-100. Polonya'da OFF'a ihtiyaç duyulmasının sebebi Biedronka/Auchan'ın EAN'sız feed'leriydi."
 }

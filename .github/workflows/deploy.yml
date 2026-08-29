@@ -1,0 +1,82 @@
+name: Prod deploy (backend + site)
+
+# Sunucu tarafı değişince ÜRETİME otomatik çıkar.
+#
+# Buraya kadar hat yarım otomatikti: push CI'yı ve mobil derlemeyi tetikliyor
+# ama backend/website deploy'u ELLE (ssh + deploy.sh) yapılıyordu. Yani
+# "düzelttim, testler geçti, CI yeşil" demek üretimde hiçbir şeyin değişmediği
+# anlamına geliyordu ve aradaki fark ancak biri fark edince kapanıyordu.
+#
+# YOL FİLTRESİ ŞART: yalnızca mobil uygulamayı ilgilendiren bir commit sunucuya
+# deploy gerektirmiyor. Filtresiz her commit gereksiz bir yeniden derleme ve
+# kısa bir 502 penceresi üretirdi.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cheep-backend-express/**'
+      - 'cheep-website/**'
+      - 'Cheep-Scraper/**'
+      - 'deploy/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+# Aynı anda iki deploy koşmasın: ikisi de `git reset --hard` + `docker compose
+# up --build` yapıyor ve üst üste binerse yarım imajla ayağa kalkabilir.
+# `cancel-in-progress: false` — süren bir deploy'u ortasında kesmek, yarım
+# derlenmiş bir konteyner bırakmaktan daha kötü.
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: false
+
+jobs:
+  bekle-ci:
+    name: CI yeşil mi?
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: read
+      actions: read
+    steps:
+      # KAPI: testler kırmızıyken deploy ETME. Aynı commit'in CI koşusu
+      # bitene kadar bekler; düşerse bu iş de düşer ve deploy hiç başlamaz.
+      - name: Aynı commit'in CI koşusunu bekle
+        uses: lewagon/wait-on-check-action@v1.4.0
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Backend (typecheck + tests)'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 15
+          allowed-conclusions: success
+
+  deploy:
+    name: Droplet'e deploy
+    needs: bekle-ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: SSH anahtarını kur
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      # Anahtar sunucuda `command="..."` ile KISITLI: bu oturumun ne
+      # istediğinden bağımsız olarak yalnızca deploy.sh çalışır. Kabuk yok,
+      # port/agent/X11 yönlendirme kapalı. Sır sızsa bile yapılabilecek tek
+      # şey bir deploy tetiklemek — root kabuğu değil.
+      - name: Deploy
+        timeout-minutes: 25
+        run: ssh -o BatchMode=yes root@${{ secrets.DEPLOY_HOST }} true
+
+      - name: Sağlık kontrolü
+        run: |
+          for i in $(seq 1 12); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' https://api.cheep.live/health || true)
+            if [ "$code" = "200" ]; then echo "backend sağlıklı"; exit 0; fi
+            echo "  bekleniyor ($i/12, son kod: $code)"; sleep 10
+          done
+          echo "backend 2 dakikada sağlıklı olmadı"; exit 1

@@ -257,10 +257,23 @@ class CijeneChainScraper:
             needed = [f"{self.chain}/{f}.csv" for f in ("stores", "products", "prices")]
             missing = [m for m in needed if m not in members]
             if missing:
-                # Zincir arşivden düştü (kaynak yayını kesti). SESSİZ boş liste
-                # dönmek pipeline'ın çöküş kapısını atlatıp prune tetikleyebilir;
-                # açık hata daha güvenli.
-                raise KeyError(f"{self.chain}: arşivde eksik dosya {missing}")
+                # KAYNAK BU ZİNCİRİ BUGÜN YAYINLAMAMIŞ — bu bir hata DEĞİL,
+                # yukarı akıştaki normal bir değişkenlik. Gözlendi: 2026-08-28
+                # arşivinde 26 zincir vardı, 2026-08-29'da 22 (konzum, dm,
+                # roto, branka, lorenco yoktu). Perakendeci o gün yayınını
+                # geciktirdiğinde ya da atladığında oluyor.
+                #
+                # Yine de AÇIK HATA fırlatılıyor, sessiz boş liste değil:
+                # sessiz sıfır, pipeline'ın çöküş kapısını atlatıp prune'u
+                # tetikler ve 21 günlük TTL sonunda o zincirin TÜM kataloğu
+                # silinir. Hata sayesinde koşum "sağlıksız" işaretleniyor,
+                # prune ÇALIŞMIYOR ve mevcut fiyatlar olduğu gibi kalıyor —
+                # ertesi gün zincir geri geldiğinde kendiliğinden tazeleniyor.
+                available = sorted({n.split("/")[0] for n in members if "/" in n})
+                raise KeyError(
+                    f"{self.chain}: bugünkü arşivde YOK (kaynak yayınlamamış). "
+                    f"Arşivdeki zincirler: {available}"
+                )
 
             stores = {r["store_id"]: r for r in read_csv_rows(archive, f"{self.chain}/stores.csv")}
 
