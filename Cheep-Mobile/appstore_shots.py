@@ -109,6 +109,13 @@ with sync_playwright() as p:
         "localStorage.setItem('user_country','%s');"
         "localStorage.setItem('kvkk_location_consent','granted');"
         "localStorage.setItem('location_mode','auto');"
+        # BILDIRIM ISTEMI ERTELENIR. Aksi halde acilisin hemen ardindan
+        # "Bildirimler kapali" diyalogu aciliyor ve EKRAN GORUNTUSUNUN
+        # ORTASINDA duruyor — Hirvatca kosumunda kategoriler ve firsatlar
+        # bolumunu tamamen ortmustu. Butonu metinle kapatmak dile bagli
+        # olurdu; erteleme anahtari dilden bagimsiz ve kesin.
+        "localStorage.setItem('notification_prompt_snooze',String(Date.now()+864000000));"
+        "localStorage.setItem('location_prompt_snooze_until',String(Date.now()+864000000));"
         "localStorage.setItem('user_location',JSON.stringify({lat:%s,lon:%s,ts:Date.now()}));"
         "}catch(e){}" % (CFG["lang"], CFG["country"], CFG["lat"], CFG["lon"])
     )
