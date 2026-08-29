@@ -16,7 +16,10 @@
 # koşar (`|| echo`). Şube ithalatı upsert olduğu için tekrar çalıştırmak
 # güvenlidir; yarım kalan bir koşu bir sonraki ay tamamlanır.
 set -uo pipefail
-cd "$(dirname "$0")/../Cheep-Scraper"
+# Betik dizini `cd`'DEN ONCE ve MUTLAK olarak yakalanmali: $0 goreli
+# olabiliyor ve cd sonrasi `dirname "$0"` yanlis yeri gosteriyor.
+DEPLOY_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$DEPLOY_DIR/../Cheep-Scraper"
 export PYTHONIOENCODING=utf-8
 
 if [ -f venv/bin/activate ]; then source venv/bin/activate; fi
@@ -31,8 +34,9 @@ API="${CHEEP_API_URL:-http://localhost:3000/api/v1}"
 # `.env` KABUKLA SOURCE EDİLMİYOR: içinde tırnaksız, özel karakterli değerler
 # var ve `. .env` onları KOMUT olarak çalıştırmaya kalkıyor. Yalnızca ihtiyaç
 # duyulan satır çekiliyor.
-if [ -z "${INGEST_API_KEY:-}" ] && [ -f "$(dirname "$0")/.env" ]; then
-  INGEST_API_KEY="$(grep -E '^INGEST_API_KEY=' "$(dirname "$0")/.env" | head -1 | cut -d= -f2- | tr -d '"'"'"'')"
+if [ -z "${INGEST_API_KEY:-}" ] && [ -f "$DEPLOY_DIR/.env" ]; then
+  INGEST_API_KEY="$(grep -E '^INGEST_API_KEY=' "$DEPLOY_DIR/.env" | head -1 | cut -d= -f2- | tr -d '"'"'"'
+')"
   export INGEST_API_KEY
 fi
 if [ -z "${INGEST_API_KEY:-}" ]; then
