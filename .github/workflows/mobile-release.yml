@@ -45,6 +45,16 @@ env:
   # geride kalmıştı. Aşağıdaki "ortam kapısı" adımı artık bunu derlemeden
   # ÖNCE durduruyor.
   EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+  # AdMob banner birim kimlikleri. SIR DEĞİL (istemcide zaten görünürler), o
+  # yüzden secret değil repo değişkeni.
+  #
+  # ZORUNLU DEĞİL — tanımsızsa uygulama Google'ın TEST birimine düşer ve
+  # çalışır, yalnızca gelir üretmez (bkz. Cheep-Mobile/src/config/ads.ts).
+  # Derlemeyi burada durdurmuyoruz çünkü reklamsız bir derleme bozuk bir
+  # derleme değil; API URL'sinin aksine uygulamayı açılışta çökertmez.
+  EXPO_PUBLIC_ADMOB_BANNER_HOME: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_HOME }}
+  EXPO_PUBLIC_ADMOB_BANNER_SEARCH: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_SEARCH }}
+  EXPO_PUBLIC_ADMOB_BANNER_LIST: ${{ vars.EXPO_PUBLIC_ADMOB_BANNER_LIST }}
 
 jobs:
   # ── CI KAPISI ───────────────────────────────────────────────────────────

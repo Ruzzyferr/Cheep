@@ -1,11 +1,15 @@
 // Cheep-Mobile/src/screens/search/SearchScreen.tsx
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 import { SearchBar } from '../../components/common/SearchBar';
 import { ProductGridCard } from '../../components/product/ProductGridCard';
+import { CheepBanner } from '../../components/ads/CheepBanner';
+import { buildGridRows } from '../../utils/adRows';
+import { usePremium } from '../../context/PremiumContext';
+import { useAds } from '../../context/AdsContext';
 import { productService, listService } from '../../services';
 import { useCart } from '../../context/CartContext';
 import { useListMutations } from '../../queries';
@@ -123,6 +127,25 @@ export function SearchScreen({ navigation, route }: SearchScreenProps) {
 
   const onSubmit = () => { if (query.trim()) addRecentSearch(query).then(() => getRecentSearches().then(setRecent)); };
 
+  // Reklam satırı yalnızca gerçekten gösterilecekse listeye giriyor:
+
+  // premium kullanıcıda ya da rıza yokken boş bir satır ayırmak,
+
+  // kaydırma sırasında sebepsiz bir boşluk olarak görünürdü.
+
+  const { isPremium } = usePremium();
+
+  const { canRequestAds } = useAds();
+
+  const gridRows = useMemo(
+
+    () => buildGridRows(results, 2, !isPremium && canRequestAds),
+
+    [results, isPremium, canRequestAds],
+
+  );
+
+
   return (
     <View style={[styles.container, { paddingTop: insets.top + spacing.sm }]}>
       <View style={styles.searchRow}>
@@ -182,26 +205,42 @@ export function SearchScreen({ navigation, route }: SearchScreenProps) {
       ) : results.length === 0 ? (
         <Text style={styles.hint}>{t('search.no_results', { q: query.trim() })}</Text>
       ) : (
+        // SATIR TABANLI VERİ — `numColumns` DEĞİL.
+        //
+        // `numColumns` kullanan bir FlatList'e tam genişlikte bir satır
+        // sokulamaz: her öğe bir sütuna sıkışır, reklam da yarım genişlikte
+        // ezik bir kutuya dönerdi. Bu yüzden sonuçlar önce satırlara
+        // bölünüyor (bkz. utils/adRows.ts) ve reklam ARADA bir satır olarak
+        // duruyor — ürün kartlarının düzeni hiç değişmiyor.
         <FlatList
           style={styles.list}
-          data={results}
-          numColumns={2}
-          keyExtractor={(item) => item.id.toString()}
+          data={gridRows}
+          keyExtractor={(row) => row.key}
           keyboardShouldPersistTaps="handled"
-          columnWrapperStyle={styles.row}
-          renderItem={({ item }) => (
-            <View style={styles.gridItem}>
-              <ProductGridCard
-                productName={item.name}
-                categoryName={item.category?.name}
-                imageUrl={item.image_url || undefined}
-                topThreePrices={getTopThreePrices(item)}
-                constraint={item.constraint}
-                onPress={() => (navigation as any).navigate('ProductDetail', { productId: item.id })}
-                onAddToCart={() => handleAdd(item)}
-              />
-            </View>
-          )}
+          renderItem={({ item: row }) =>
+            row.kind === 'ad' ? (
+              <CheepBanner slot="search" />
+            ) : (
+              <View style={styles.row}>
+                {row.items.map((item) => (
+                  <View key={item.id} style={styles.gridItem}>
+                    <ProductGridCard
+                      productName={item.name}
+                      categoryName={item.category?.name}
+                      imageUrl={item.image_url || undefined}
+                      topThreePrices={getTopThreePrices(item)}
+                      constraint={item.constraint}
+                      onPress={() => (navigation as any).navigate('ProductDetail', { productId: item.id })}
+                      onAddToCart={() => handleAdd(item)}
+                    />
+                  </View>
+                ))}
+                {/* Tek öğeli son satır: boş sütun yer tutucusu, yoksa tek
+                    kart ekranın ortasına kayıp hizayı bozuyor. */}
+                {row.items.length < 2 && <View style={styles.gridItem} />}
+              </View>
+            )
+          }
           contentContainerStyle={[styles.gridContainer, { paddingBottom: bottomSpacing }]}
         />
       )}

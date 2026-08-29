@@ -38,6 +38,7 @@ import { CountryChangedBanner } from '../../components/location/CountryChangedBa
 import { FadeInUp, AnimatedNumber, PressableScale, Float } from '../../components/anim';
 import { getStoreLogoAsset } from '../../utils/storeLogo';
 import { ProductThumb } from '../../components/product/ProductThumb';
+import { CheepBanner } from '../../components/ads/CheepBanner';
 import { getCategoryIcon } from '../../utils/categoryIcon';
 import { compareInsights, rankStrategies } from '../../utils/compareInsights';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
@@ -450,6 +451,13 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
           </ScrollView>
         </FadeInUp>
 
+        {/* Banner — fırsat rayı ile market listesi ARASINDA, yani fold'un
+            altında. Ana sayfanın üst kısmı (aktif liste, kategoriler, fırsatlar)
+            kullanıcının uygulamayı açma sebebi; oraya reklam koymak açılış
+            deneyimini vergilendirirdi. Buraya inen kullanıcı zaten göz
+            gezdiriyor. */}
+        <CheepBanner slot="home" style={styles.homeBanner} />
+
         {/* Markets we compare (no fake distance) */}
         <FadeInUp delay={290}>
           <View style={styles.sectionHead}>
@@ -550,6 +558,10 @@ const styles = StyleSheet.create({
   },
 
   sectionPad: { paddingHorizontal: layout.screenPadding },
+  // Banner kenarlara YASLI (yatay padding yok): kendi ince ayırıcı
+  // çizgileri ekranı boydan boya kesince reklam, içerik kartlarından
+  // net biçimde ayrı bir blok olarak okunuyor.
+  homeBanner: { marginVertical: spacing.lg },
 
   // Anchor chip (sabit adres)
   anchorChip: {

@@ -33,6 +33,7 @@ import { NameInputModal } from '../../components/list/NameInputModal';
 import { useToast } from '../../context/ToastContext';
 import { useLocale } from '../../context/LocaleContext';
 import { EmptyState } from '../../components/common/EmptyState';
+import { CheepBanner } from '../../components/ads/CheepBanner';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import type { ListItem } from '../../types';
@@ -356,6 +357,14 @@ export function ListDetailScreen({
             onAction={handleAddProducts}
           />
         }
+        // Banner ÜRÜNLERİN ALTINDA, listeyle birlikte kayar. Sabit alt aksiyon
+        // çubuğuna ("Rotaları Göster") dokunmaz: o çubuk ekranın asıl eylemi ve
+        // reklam onu ne örtmeli ne de yerinden oynatmalı.
+        //
+        // Liste BOŞKEN gösterilmiyor: boş durumda ekranda yalnızca "ürün ekle"
+        // yönlendirmesi var; oraya reklam koymak, kullanıcı daha hiçbir değer
+        // almadan reklam göstermek olurdu.
+        ListFooterComponent={items.length > 0 ? <CheepBanner slot="list" /> : null}
       />
 
       {/* Alt aksiyon çubuğu tab-bar'ın ÜSTÜNE yerleşir, arkasında kalmaz.

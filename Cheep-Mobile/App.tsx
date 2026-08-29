@@ -18,9 +18,15 @@ import { I18nextProvider } from 'react-i18next';
 import * as Localization from 'expo-localization';
 import i18n, { SUPPORTED_LANGUAGES } from './src/i18n';
 import { LocaleProvider } from './src/context/LocaleContext';
+import {
+  loadCachedAvailableCountries,
+  refreshAvailableCountries,
+} from './src/utils/countryAvailability';
+import { fetchAvailableCountryCodes } from './src/services/appVersion.service';
 import { languageStorage } from './src/utils/storage';
 import { AuthProvider } from './src/context/AuthContext';
 import { PremiumProvider } from './src/context/PremiumContext';
+import { AdsProvider } from './src/context/AdsContext';
 import { LocationProvider } from './src/context/LocationContext';
 import { RootNavigator } from './src/navigation';
 import { colors } from './src/theme';
@@ -61,6 +67,22 @@ export default function App() {
     if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
   }, [fontsLoaded]);
 
+  // ÜLKE KULLANILABİLİRLİĞİ — önce diskteki son bilinen liste, sonra sunucu.
+  //
+  // Sıra önemli: diskten okuma anında biter ve ülke kapısı ilk render'dan
+  // itibaren doğru çalışır; sunucu yanıtı geldiğinde liste sessizce tazelenir.
+  // Ağ yoksa hiçbir şey olmaz, son bilinen liste geçerli kalır.
+  //
+  // AÇILIŞI BLOKLAMAZ: bu iş bitmeden de uygulama açılır — kapı en kötü
+  // ihtimalle bir an için yedek listeyi (TR/PL) kullanır, ki o da doğru bir
+  // cevaptır. Bkz. src/utils/countryAvailability.ts.
+  useEffect(() => {
+    (async () => {
+      await loadCachedAvailableCountries();
+      await refreshAvailableCountries(async () => (await fetchAvailableCountryCodes()) ?? []);
+    })().catch(e => console.error('[App] ülke listesi başlatma hatası:', e));
+  }, []);
+
   const [langReady, setLangReady] = React.useState(false);
   useEffect(() => {
     (async () => {
@@ -98,6 +120,11 @@ export default function App() {
                   {/* Abonelik durumu Auth'un ICINDE: kullanici kimligi olmadan
                       RevenueCat'e kimlik verilemez ve kota sorgulanamaz. */}
                   <PremiumProvider>
+                    {/* Reklam sağlayıcısı PremiumProvider'ın İÇİNDE: abonelik
+                        durumu bilinmeden reklam SDK'sı başlatılmamalı. Abone
+                        tam olarak "reklamsız" için ödedi ve SDK'yı başlatmanın
+                        kendisi veri topluyor (bkz. context/AdsContext.tsx). */}
+                    <AdsProvider>
                     <LocationProvider>
                     {/* Sürüm kapısı navigasyonu SARAR, yerine geçmez: kullanıcı
                         güncelledikten sonra giriş/sepet/gezinme durumu yerinde
@@ -110,6 +137,7 @@ export default function App() {
                           her ekranin ustunde cizilmeli. */}
                       <DialogHost />
                     </LocationProvider>
+                    </AdsProvider>
                   </PremiumProvider>
                 </AuthProvider>
               </LocaleProvider>
