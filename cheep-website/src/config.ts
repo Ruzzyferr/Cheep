@@ -31,9 +31,21 @@ export const PRIVACY_EMAIL = 'gizlilik@cheep.live'
  * Şube: prod Postgres store_branches, ülkeye göre.
  * DE/CH/SE henüz açılmadı; sayılar planlanan kapsamı gösterir.
  */
+/**
+ * Ülke kapsamı. `live` YALNIZCA veri gerçekten yayındaysa true olur —
+ * bu bir pazarlama vaadi değil, doğrulanabilir bir olgu.
+ *
+ * `branches` sayıları OSM/kaynak şube ithalatından gelen gerçek sayılardır;
+ * ülke canlıya alınırken ilk şube hasadının çıktısıyla güncellenir.
+ * HR/HU/RO için sayı henüz YAZILMADI (0) çünkü prod'da ilk hasat koşulmadı;
+ * uydurma bir sayı yazmak sitede yanlış bir iddia olurdu.
+ */
 export const COVERAGE = {
   TR: { branches: 10247, live: true },
   PL: { branches: 13422, live: true },
+  HR: { branches: 0, live: false },
+  HU: { branches: 0, live: false },
+  RO: { branches: 0, live: false },
   DE: { branches: 4925, live: false },
   CH: { branches: 2008, live: false },
   SE: { branches: 1554, live: false },

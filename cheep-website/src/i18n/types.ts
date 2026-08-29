@@ -22,13 +22,28 @@ export type Dict = {
   /** og:locale */
   ogLocale: string
 
+  /** Gerçek 404 sayfasının metinleri (prerender üretiyor, uygulama değil). */
+  notFound: {
+    title: string
+    description: string
+  }
+
   nav: {
     links: { label: string; href: string }[]
     download: string
     openMenu: string
     closeMenu: string
     home: string
-    langSwitchTo: string
+    /**
+     * Dil menüsünün erişilebilirlik etiketi ("Dil seç" / "Odaberi jezik").
+     *
+     * ESKİDEN farklı bir şeydi: DİĞER dilin kendi adını tutuyordu ('Polski')
+     * çünkü site iki dilliydi ve "diğer dil" tek ve belirliydi. Beş dille bu
+     * model çöktü — dillerin kendi adları artık dilden bağımsız tek bir
+     * tabloda (`i18n/index.ts` → LOCALE_NATIVE_NAMES), bu anahtar da menünün
+     * etiketi oldu.
+     */
+    langMenuLabel: string
   }
 
   hero: {
@@ -81,7 +96,7 @@ export type Dict = {
     titleLead: string
     titleAccent: string
     sub: string
-    countries: { code: 'TR' | 'PL' | 'DE' | 'CH' | 'SE'; name: string }[]
+    countries: { code: 'TR' | 'PL' | 'HR' | 'HU' | 'RO' | 'DE' | 'CH' | 'SE'; name: string }[]
     branchesUnit: string
     live: string
     soon: string

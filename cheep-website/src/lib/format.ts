@@ -8,8 +8,13 @@ import type { Locale } from '../i18n'
  * ile istemci render'ı bu yüzden birebir tutmuyor ve React hydration'ı
  * düşürüyordu (#418). Ayıraçları kendimiz seçince çıktı her ortamda aynı.
  */
-const GROUP: Record<Locale, string> = { tr: '.', pl: ' ' }
-const DECIMAL: Record<Locale, string> = { tr: ',', pl: ',' }
+// Binlik ve ondalik ayiraclari ELLE secili (yukaridaki nota bkz: Intl,
+// prerender ile istemci arasinda hydration farki uretiyordu).
+//   tr 1.234,56 · pl 1 234,56 · hr 1.234,56 · hu 1 234,56 · ro 1.234,56
+// pl ve hu ayiraci BOLUNMEZ BOSLUK (U+00A0) — sayinin satir sonunda
+// bolunmesini engelliyor.
+const GROUP: Record<Locale, string> = { tr: '.', pl: ' ', hr: '.', hu: ' ', ro: '.' }
+const DECIMAL: Record<Locale, string> = { tr: ',', pl: ',', hr: ',', hu: ',', ro: ',' }
 
 export function formatNumber(locale: Locale, value: number, decimals = 0): string {
   const fixed = Math.abs(value).toFixed(decimals)

@@ -41,10 +41,40 @@ const SEGMENTS: Record<Locale, Record<ContentKind, string>> = {
     compare: 'najtansze-sklepy',
     products: 'produkty',
   },
+  // URL parçaları AKSANSIZ yazılır (Lehçe satırın 'najtansze' yazması gibi):
+  // aksanlı karakter adres çubuğunda yüzde-kodlanmış görünür, paylaşılan
+  // bağlantıyı çirkinleştirir ve bazı istemcilerde bozulur.
+  hr: {
+    product: 'proizvod',
+    category: 'kategorija',
+    store: 'trgovina',
+    city: 'grad',
+    report: 'izvjestaj-cijena',
+    compare: 'najjeftinije-trgovine',
+    products: 'proizvodi',
+  },
+  hu: {
+    product: 'termek',
+    category: 'kategoria',
+    store: 'bolt',
+    city: 'varos',
+    report: 'arjelentes',
+    compare: 'legolcsobb-boltok',
+    products: 'termekek',
+  },
+  ro: {
+    product: 'produs',
+    category: 'categorie',
+    store: 'magazin',
+    city: 'oras',
+    report: 'raport-preturi',
+    compare: 'cele-mai-ieftine-magazine',
+    products: 'produse',
+  },
 }
 
 /** Hangi ülke verisi hangi dilde yayınlanıyor. */
-export const COUNTRY_LOCALE: Record<string, Locale> = { TR: 'tr', PL: 'pl' }
+export const COUNTRY_LOCALE: Record<string, Locale> = { TR: 'tr', PL: 'pl', HR: 'hr', HU: 'hu', RO: 'ro' }
 
 export function segment(locale: Locale, kind: ContentKind): string {
   return SEGMENTS[locale][kind]

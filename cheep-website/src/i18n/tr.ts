@@ -5,6 +5,15 @@ export const tr: Dict = {
   htmlLang: 'tr',
   ogLocale: 'tr_TR',
 
+  notFound: {
+
+    title: 'Sayfa bulunamadı — Cheep',
+
+    description: 'Aradığın sayfa bulunamadı.',
+
+  },
+
+
   nav: {
     links: [
       { label: 'Ürünler', href: '/urunler' },
@@ -18,7 +27,7 @@ export const tr: Dict = {
     openMenu: 'Menüyü aç',
     closeMenu: 'Menüyü kapat',
     home: 'Cheep ana sayfa',
-    langSwitchTo: 'Polski',
+    langMenuLabel: 'Dil seç',
   },
 
   hero: {

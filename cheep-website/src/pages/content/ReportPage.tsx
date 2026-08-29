@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { SiteLink as Link } from '../../components/ui/SiteLink'
-import { LocaleContext } from '../../i18n'
+import { LocaleContext, type Locale } from '../../i18n'
 import { CONTENT } from '../../i18n/content'
 import { usePageData } from '../../data/context'
 import type { Product } from '../../data/types'
@@ -74,7 +74,7 @@ function ChangeList({
   title: string
   items: { product: Product; changePct: number }[]
   tone: 'up' | 'down'
-  locale: 'tr' | 'pl'
+  locale: Locale
   currency: string
   changeLabel: string
 }) {

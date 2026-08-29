@@ -35,6 +35,7 @@ const {
   alternatesFor,
   LOCALES,
   localePrefix,
+  DICTS,
   serializeData,
   DATA_GLOBAL,
   routes,
@@ -239,15 +240,30 @@ if (fs.existsSync(dataFile)) {
  * üretemez. İki dilde birden yazıyor, çünkü statik dosya ziyaretçinin dilini
  * bilemez.
  */
-// İKİ DİLDE BİRDEN: yorum bunu zaten vaat ediyordu ama tek URL üretiliyordu
-// (`/urun/__bulunamadi__`, yalnızca TR rotasıyla eşleşir). Lehçe bir yoldan
-// gelen ziyaretçi — ki dil değiştiricinin ölü bağlantıları yüzünden GERÇEKTEN
-// oraya düşüyordu — baştan sona Türkçe bir hata sayfası ve TÜRKÇE anasayfaya
-// giden tek bir düğme görüyordu.
-for (const { url: notFoundUrl, lang, title, description, out } of [
-  { url: '/urun/__bulunamadi__', lang: 'tr', title: 'Sayfa bulunamadı — Cheep', description: 'Aradığın sayfa bulunamadı.', out: '404.html' },
-  { url: '/pl/produkt/__nie-znaleziono__', lang: 'pl', title: 'Nie znaleziono strony — Cheep', description: 'Nie znaleźliśmy tej strony.', out: 'pl/404.html' },
-]) {
+// HER DİLDE BİR 404 — liste artık ELLE YAZILMIYOR.
+//
+// Burada önce tek bir TR sayfası vardı; sonra Lehçe eklendi ve liste iki
+// satıra çıktı. Site beş dile geçince aynı hata ÜÇ dilde birden geri döndü:
+// Hırvatça/Macarca/Romence bir yoldan gelen ziyaretçi baştan sona TÜRKÇE bir
+// hata sayfası ve Türkçe anasayfaya giden tek bir düğme görüyordu.
+//
+// Liste artık `LOCALES` üzerinden türetiliyor: yeni bir dil eklendiğinde 404'ü
+// KENDİLİĞİNDEN geliyor. URL, o dilin ürün rota parçasından üretiliyor —
+// 404 şablonu var olmayan bir ürün yoluna basılıyor ki uygulama gerçekten
+// "bulunamadı" durumunu render etsin. Metinler sözlükten (`notFound`).
+for (const { url: notFoundUrl, lang, title, description, out } of LOCALES.map((locale) => {
+  const prefix = localePrefix(locale)
+  const productSegment = routes.segment(locale, 'product')
+  const dict = DICTS[locale]
+  return {
+    locale,
+    lang: locale,
+    url: `${prefix}/${productSegment}/__cheep-404__`,
+    title: dict.notFound.title,
+    description: dict.notFound.description,
+    out: prefix ? `${prefix.slice(1)}/404.html` : '404.html',
+  }
+})) {
   const head = {
     lang,
     title,
