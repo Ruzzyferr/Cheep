@@ -15,6 +15,29 @@ import { getCategoryIcon } from '../categoryIcon';
  */
 const DEFAULT_ICON = 'tag-outline';
 
+/**
+ * ÜRETİMDE GERÇEKTEN DÖNEN kanonik üst kategoriler.
+ *
+ * Elle tutuluyor çünkü test ağa çıkmıyor. Tazelemek için:
+ *   curl -s https://api.cheep.live/api/v1/categories/parent?country=HR  *     | jq -r '.data[].icon_key'
+ *
+ * Bu liste olmadan eksik bir anahtar SESSİZ kalıyor: `kisisel-bakim` ve
+ * `temizlik-urunleri` ilk yazımda atlanmıştı ve iki kategori üretimde genel
+ * etikete düşüyordu — hiçbir test kırılmadı, ancak üretim yanıtı elle
+ * karşılaştırılınca fark edildi.
+ */
+const CANONICAL_TOP_LEVEL = [
+  'sut-urunleri-ve-kahvaltilik',
+  'et-tavuk-ve-balik',
+  'meyve-ve-sebze',
+  'temel-gida',
+  'icecek',
+  'atistirmalik-ve-tatli',
+  'kisisel-bakim',
+  'temizlik-urunleri',
+  'diger-urunler',
+];
+
 // Aynı kategorinin beş dildeki görünen adı. Hepsi AYNI simgeyi vermeli.
 const SUT_URUNLERI = [
   'Süt Ürünleri ve Kahvaltılık',
@@ -58,14 +81,8 @@ describe('getCategoryIcon', () => {
   it('her kanonik üst kategori AYIRT EDİCİ bir simge alır', () => {
     // Tek bir simgeye düşen iki üst kategori, kullanıcı için "aynı şey"
     // demek — bu eşlemenin var olma sebebi tam olarak bunu önlemek.
-    const KEYS = [
-      'sut-urunleri-ve-kahvaltilik', 'et-tavuk-ve-balik', 'meyve-ve-sebze',
-      'temel-gida', 'firin-ve-pastane', 'icecek', 'atistirmalik-ve-tatli',
-      'dondurma', 'hazir-yemek-ve-donuk', 'temizlik-ve-kisisel-bakim-urunleri',
-      'bebek', 'ev-pet-ve-yasam', 'saglik-ve-kozmetik', 'diger-urunler',
-    ];
-    const icons = KEYS.map((k) => getCategoryIcon(null, k));
+    const icons = CANONICAL_TOP_LEVEL.map((k) => getCategoryIcon(null, k));
     expect(icons).not.toContain(DEFAULT_ICON);
-    expect(new Set(icons).size).toBe(KEYS.length);
+    expect(new Set(icons).size).toBe(CANONICAL_TOP_LEVEL.length);
   });
 });

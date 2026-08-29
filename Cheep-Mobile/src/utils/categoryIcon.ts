@@ -118,6 +118,12 @@ const BY_SLUG: Record<string, string> = {
   'ev-pet-ve-yasam': 'sofa-single',
   'saglik-ve-kozmetik': 'pill',
   'diger-urunler': 'dots-horizontal',
+  // Aşağıdaki ikisi canlı HR/HU/RO ağacında GERÇEKTEN dönüyor ama ilk yazımda
+  // atlanmıştı; ikisi de genel etikete düşüyordu. Üretim yanıtı
+  // (`/categories/parent`) ile bu tablo karşılaştırılınca çıktı. Ana sayfadaki
+  // beşlik şeritte görünmüyorlar ama "Tümü" ekranında görünüyorlar.
+  'kisisel-bakim': 'lotion',
+  'temizlik-urunleri': 'spray-bottle',
 };
 
 /**
