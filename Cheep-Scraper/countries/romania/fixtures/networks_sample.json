@@ -1,0 +1,72 @@
+{
+ "Items": [
+  {
+   "id": "AUCHAN",
+   "name": "AUCHAN",
+   "Logo": {
+    "logouri": "http://monitorulpreturilor.info/MonitorulPreturilor/Images/Auchan.png"
+   }
+  },
+  {
+   "id": "5940475006709",
+   "name": "CARREFOUR",
+   "Logo": {
+    "logouri": "http://monitorulpreturilor.info/MonitorulPreturilor/Images/Carrefour.png"
+   }
+  },
+  {
+   "id": "5948914999995",
+   "name": "CORA",
+   "Logo": {
+    "logouri": "http://monitorulpreturilor.info/MonitorulPreturilor/Images/Cora.png"
+   }
+  },
+  {
+   "id": "KAUFLAND",
+   "name": "KAUFLAND",
+   "Logo": {
+    "logouri": "http://monitorulpreturilor.info/MonitorulPreturilor/Images/Kaufland.png"
+   }
+  },
+  {
+   "id": "4055329000008",
+   "name": "LIDL DISCOUNT SRL",
+   "Logo": {
+    "logouri": "http://monitorulpreturilor.info/MonitorulPreturilor/Images/Lidl.png"
+   }
+  },
+  {
+   "id": "5940475870003",
+   "name": "MEGA IMAGE SRL",
+   "Logo": {
+    "logouri": "http://monitorulpreturilor.info/MonitorulPreturilor/Images/MegaImage.png"
+   }
+  },
+  {
+   "id": "PENNY",
+   "name": "PENNY",
+   "Logo": {
+    "logouri": "http://monitorulpreturilor.info/MonitorulPreturilor/Images/Penny.png"
+   }
+  },
+  {
+   "id": "PROFI",
+   "name": "PROFI",
+   "Logo": {
+    "logouri": "http://monitorulpreturilor.info/MonitorulPreturilor/Images/Profi.png"
+   }
+  },
+  {
+   "id": "SELGROS",
+   "name": "SELGROS",
+   "Logo": {
+    "logouri": "http://monitorulpreturilor.info/MonitorulPreturilor/Images/Selgros.png"
+   }
+  },
+  {
+   "id": "SUPECO",
+   "name": "SUPECO",
+   "Logo": {}
+  }
+ ]
+}

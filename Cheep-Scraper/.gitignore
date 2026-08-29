@@ -50,7 +50,15 @@ mf_done*.txt
 mf_state.db
 mf_state.db-*
 taxonomy*.json
-category_map.json
+# DIKKAT — bu desen KOK DIZINDEKI uretilen dosya icindir (marketfiyati akisi
+# yaziyor). Dosya ADINA gore yazildigi icin ELLE TUTULAN ulke haritalarini da
+# (countries/<ulke>/category_map.json) yutuyordu: PL/DE/SE/CH dosyalari ancak
+# `git add -f` ile girebilmis, yeni eklenen HR/HU/RO ise SESSIZCE disarida
+# kalmisti. O hâliyle deploy edilseydi uc ulkenin TUM urunleri kategorisiz
+# kaydedilir, hicbir listede ve hicbir kategori sayfasinda gorunmezdi.
+# Cozum: deseni koke sabitle + ulke haritalarini acikca haric tut.
+/category_map.json
+!countries/*/category_map.json
 countries/*/off_cache.sqlite
 *.tgz
 shots/

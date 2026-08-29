@@ -150,3 +150,8 @@ CheepKeys-yedek-*/
 # İnceleme videoları — depoya girmez (depo herkese açık, dosyalar büyük)
 *.mp4
 *.mov
+.aider*
+
+# Gunluk toplu artefakt onbellegi (countries/_common/daily_artifact.py).
+# HR arsivi TEK BASINA gunde ~81 MB; bunlar tureilebilir veri, repoya girmemeli.
+Cheep-Scraper/countries/**/cache/

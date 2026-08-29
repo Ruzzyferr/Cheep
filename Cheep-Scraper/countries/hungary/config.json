@@ -1,0 +1,92 @@
+{
+  "country": "Hungary",
+  "country_code": "HU",
+  "default_unit": "db",
+  "live": false,
+  "markets": [
+    {
+      "name": "Auchan",
+      "store_id": 60,
+      "scraper_path": "scrapers/arfigyelo.py",
+      "scraper_class": "AuchanHuScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "auchan_hu_products_{timestamp}.json",
+      "enabled": true,
+      "note": "çapa; dökümdeki en büyük zincir. Ölçüm (2026-08-28): 5.219 satır, %96,4 geçerli EAN, 159 farklı kategori, fiyatların %99,1'i ulusal (min=max). 26 hipermarket."
+    },
+    {
+      "name": "Tesco",
+      "store_id": 61,
+      "scraper_path": "scrapers/arfigyelo.py",
+      "scraper_class": "TescoHuScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "tesco_hu_products_{timestamp}.json",
+      "enabled": true,
+      "note": "çapa; 3.530 satır, %97,1 geçerli EAN, 197 mağaza. DİKKAT — dökümdeki zincirler arasında mağaza bazlı fiyat farkı EN YÜKSEK olan bu: satırların yalnızca %65,9'unda min=max. Yayınlanan MİNİMUM fiyat, yani Tesco'nun ülke genelindeki en ucuz mağazası; kullanıcının yakınındaki Tesco daha pahalı olabilir."
+    },
+    {
+      "name": "Lidl",
+      "store_id": 62,
+      "scraper_path": "scrapers/arfigyelo.py",
+      "scraper_class": "LidlHuScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "lidl_hu_products_{timestamp}.json",
+      "enabled": true,
+      "note": "indirimci — FİYAT ÇIPASI. 635 satır (dar ama derin çekirdek sepet), 220 mağaza, fiyat %99,2 ulusal. Geçerli EAN yalnızca %35,1: kendi markalı ürünler iç kod taşıyor, dolayısıyla bu zincir marketler-arası birleştirmeye az katkı verir ama kendi başına fiyat çıpası olarak değerlidir. Almanya'da tam da böyle bir çıpa YOKTU."
+    },
+    {
+      "name": "Aldi",
+      "store_id": 63,
+      "scraper_path": "scrapers/arfigyelo.py",
+      "scraper_class": "AldiHuScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "aldi_hu_products_{timestamp}.json",
+      "enabled": true,
+      "note": "indirimci; 698 satır, 188 mağaza, fiyat %100 ulusal, geçerli EAN %33,0 (Lidl ile aynı kendi-marka nedeni)."
+    },
+    {
+      "name": "Penny",
+      "store_id": 64,
+      "scraper_path": "scrapers/arfigyelo.py",
+      "scraper_class": "PennyHuScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "penny_hu_products_{timestamp}.json",
+      "enabled": true,
+      "note": "indirimci; 658 satır, 247 mağaza, fiyat %100 ulusal, geçerli EAN %45,3."
+    },
+    {
+      "name": "dm",
+      "store_id": 65,
+      "scraper_path": "scrapers/arfigyelo.py",
+      "scraper_class": "DmHuScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "dm_hu_products_{timestamp}.json",
+      "enabled": false,
+      "note": "KAPALI — drogeri, market değil. 3.142 satır / 259 mağaza ve verisi temiz (%99,6 EAN) ama kataloğu kozmetik ve kişisel bakımdan ibaret; Cheep bir MARKET fiyat uygulaması ve ilk sürümde ülke başına market zincirleriyle çıkılıyor. Kişisel bakım karşılaştırması ürün kararı olarak ayrıca değerlendirilebilir — veri hazır, tek yapılacak enabled=true."
+    },
+    {
+      "name": "Rossmann",
+      "store_id": 66,
+      "scraper_path": "scrapers/arfigyelo.py",
+      "scraper_class": "RossmannHuScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "rossmann_hu_products_{timestamp}.json",
+      "enabled": false,
+      "note": "KAPALI — drogeri (bkz. dm notu). 4.250 satır, 277 mağaza, %99,9 EAN."
+    },
+    {
+      "name": "Müller",
+      "store_id": 67,
+      "scraper_path": "scrapers/arfigyelo.py",
+      "scraper_class": "MullerHuScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "muller_hu_products_{timestamp}.json",
+      "enabled": false,
+      "note": "KAPALI — drogeri (bkz. dm notu). 4.213 satır, 34 mağaza, %95,9 EAN."
+    }
+  ],
+  "output_dir": "output",
+  "log_dir": "logs",
+  "source_note": "Veri kaynağı: GVH Árfigyelő (arfigyelo.gvh.hu) — Macar Rekabet Kurumu'nun yürüttüğü ZORUNLU fiyat bildirim sistemi. Zincirler temel gıda fiyatlarını her gün bildirmek zorunda; GVH bunu kimlik doğrulamasız bir JSON API'si ve her gece yenilenen tek bir XLSX dökümü olarak yayınlıyor. Ziyaretçi şartnamesinde otomatik erişim yasağı yok; yalnızca marka adları ve ÜRÜN GÖRSELLERİNİN ticari kullanımı sınırlı — bu yüzden scraper görsel URL'si iletmiyor. Fiyatlar RAF fiyatı (teslimat değil).",
+  "known_gaps": "① SPAR sisteme 375 mağazasıyla KAYITLI ama HİÇ fiyat bildirmiyor (22.345 satırın hiçbirinde geçmiyor) — Macaristan'ın en büyük market zinciri kapsamda yok. ② CBA ve Coop franchise ağları bildirim eşiğinin altında, tamamen yok. ③ Fiyat mağaza bazında değil zincir bazında (min/max bandı); Tesco'da bu bant belirgin (%34 satırda min≠max). ④ /api/shops'ta `openingTime` her mağaza için BOŞ — çalışma saatleri OSM'den gelmeli."
+}

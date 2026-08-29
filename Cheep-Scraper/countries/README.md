@@ -1,208 +1,109 @@
-# 🌍 Country-Based Architecture
+# 🌍 Ülke bazlı scraper mimarisi
 
-Ülke bazlı scraper ve matcher yapısı. Her ülke kendi klasöründe, config tabanlı yönetim.
-
-## 📁 Klasör Yapısı
+Her ülke kendi klasöründe, `config.json` ile yönetilir. Yeni market eklemek için
+kod değişikliği gerekmez — scraper'ı yaz, config'e ekle, bitti.
 
 ```
 countries/
-├── README.md                    # Bu dosya
-├── turkey/
-│   ├── config.json              # Türkiye marketleri config
-│   ├── run_scrapers.py          # Türkiye scraper runner
-│   ├── run_matcher.py           # Türkiye matcher runner
-│   ├── output/                  # Scraped JSON'lar
-│   └── logs/                    # Log dosyaları
-└── poland/
-    ├── config.json              # Polonya marketleri config
-    ├── run_scrapers.py          # Polonya scraper runner
-    ├── run_matcher.py           # Polonya matcher runner
-    ├── output/
-    └── logs/
+├── _common/                  # ülkeden BAĞIMSIZ ortak altyapı
+│   ├── pipeline.py           # scrape → filtre → zenginleştirme → import (+ canlı kapısı)
+│   ├── runner.py             # config'ten scraper'ları dinamik yükler
+│   ├── foreign_import.py     # backend'e bulk-upsert; EAN doğrulama, kategori eşleme
+│   ├── daily_artifact.py     # gün başına TEK indirme (toplu dosya kaynakları için)
+│   ├── osm_branches.py       # OpenStreetMap'ten şube konumları
+│   └── off_bulk.py           # Open Food Facts EAN zenginleştirmesi
+├── turkey/     (TR, canlı)   # devlet API'si (marketfiyati) + OSM şubeler
+├── poland/     (PL, canlı)   # doğrudan site + Wolt consumer-api
+├── croatia/    (HR)          # yasal zorunlu günlük fiyat listeleri (cijene.dev)
+├── hungary/    (HU)          # GVH Árfigyelő zorunlu bildirim (XLSX + JSON API)
+├── romania/    (RO)          # Consiliul Concurenței fiyat API'si
+├── germany/    (DE)          # hazır ama pilot NO-GO — bkz. docs/GERMANY-STATUS.md
+├── sweden/     (SE)          # taslak
+└── switzerland/(CH)          # taslak
 ```
 
-## 🎯 Özellikler
+## ⚠️ CANLI KAPISI — varsayılan KAPALI
 
-### ✅ Yeni Market Eklemek Çok Kolay
-
-1. Scraper'ı oluştur
-2. `config.json`'a ekle
-3. **Kod değişikliği gerektirmez!**
-
-### ✅ Ülke Bağımsız
-
-- Her ülke kendi klasöründe
-- Farklı scraper'lar, farklı formatlar
-- Kolayca yeni ülke eklenebilir
-
-### ✅ Otomatik Discovery
-
-- Script'ler config'ten marketleri otomatik bulur
-- Enabled/disabled market yönetimi
-- En son scraped dosyaları otomatik bulur
-
-## 🚀 Yeni Ülke Eklemek
-
-### 1. Klasör Yapısını Oluştur
+`config.json`'da **açıkça `"live": true` yazmayan** ülkenin verisi üretime
+AKMAZ; `pipeline.py` içe aktarmayı reddeder ve **1 ile çıkar** (yani
+`run-daily.sh` `set -e` ile durur, prune tetiklenmez).
 
 ```bash
-mkdir -p countries/poland
-cd countries/poland
+# Yerel doğrulama — YALNIZCA elle, zamanlayıcı bu bayrağı geçmez:
+python -m countries._common.pipeline countries/croatia/config.json --allow-unlive
 ```
 
-### 2. Script'leri Kopyala
+Neden: bir ülke üzerinde çalışırken yarım kalmış bir katalog üretime basılırsa
+kullanıcı eksik ve yanlış fiyat görür. Almanya bu yüzden kasten kapalı tutuldu.
 
-```bash
-cp ../turkey/run_scrapers.py .
-cp ../turkey/run_matcher.py .
-```
+## 🧭 Fiyat tabanı — ülke seçiminin BİRİNCİ kuralı
 
-### 3. Config Dosyasını Oluştur
+**Raf fiyatı çıpası olmayan ülke alınmaz.** Almanya'nın NO-GO gerekçesi buydu:
+devlet kaynağı yok → yalnızca teslimat platformu fiyatı → raf fiyatının medyan
+%12,5 üstü → indirimci yok → fiyat çıpası yok.
 
-`config.json` dosyasını oluştur ve marketleri ekle:
+Kaynak tercih sırası:
+1. **Devlet zorunluluğu / kamu kurumu yayını** (HR, HU, RO, TR) — tanımı gereği
+   raf fiyatı, hukuken temiz, bot koruması yok.
+2. **Perakendecinin kendi online mağazası** (PL) — raf fiyatına yakın.
+3. **Teslimat platformu** (Wolt) — yalnızca başka yol yoksa ve markup
+   ölçülüp belgelenerek.
 
-```json
-{
-  "country": "Poland",
-  "country_code": "PL",
-  "markets": [
-    {
-      "name": "CarrefourPL",
-      "store_id": 10,
-      "scraper_path": "scrapers/carrefour_pl/scraper.py",
-      "scraper_class": "CarrefourPLScraper",
-      "scraper_method": "fetch_products",
-      "output_pattern": "carrefour_pl_products_{timestamp}.json",
-      "enabled": true
-    }
-  ],
-  "output_dir": "output",
-  "log_dir": "logs"
-}
-```
+`robots.txt`'de açıkça yasaklanmış ya da bot koruması aşmayı gerektiren
+kaynaklar KULLANILMAZ (İspanya/Portekiz bu yüzden elendi).
 
-### 4. Çalıştır!
+## 🏪 Mağaza bazlı fiyat: referans mağaza modeli
 
-```bash
-python run_scrapers.py  # Tüm marketleri scrape et
-python run_matcher.py   # Match et
-```
+Şemada `StorePrice` (mağaza, ürün) çiftine bağlı ve bir zincir TEK satırdır.
+Ama bazı ülkelerde fiyat gerçekten mağazadan mağazaya değişiyor (HR Konzum:
+ürünlerin yalnızca %26,5'i tüm mağazalarda aynı fiyatta).
 
-## 📋 Market Scraper Gereksinimleri
+Kural: **zincir başına GERÇEK bir referans mağaza seç, onun gerçek raf
+fiyatlarını yayınla.** Ortalama/medyan almak, kullanıcının mağazaya gidip
+göremeyeceği UYDURMA bir sayı üretir. Seçim DETERMİNİSTİK olmalı — koşudan
+koşuya oynarsa fiyat geçmişi ve düşüş bildirimleri yalan söyler.
 
-Scraper class'ınız şu özelliklere sahip olmalı:
+## 📦 Toplu dosya kaynakları: `daily_artifact`
 
-1. **Class adı**: Config'teki `scraper_class` ile eşleşmeli
-2. **Method**: Config'teki `scraper_method` olmalı
-3. **Return**: List of Product objects veya dict listesi
-4. **Product format**: `to_dict()` method'u varsa kullanılır, yoksa dict beklenir
+HR ve HU'da tek bir günlük dosya TÜM zincirleri içeriyor. Zincir başına ayrı
+scraper tutuyoruz (store_id market başına atandığı için çöküş kapısı, kategori
+süzgeci ve rotasyon zincir bazında çalışsın), ama dosya gün başına **BİR KEZ**
+iniyor. Yoksa beş zincir aynı 81 MB'ı beş kez indirir ve — daha kötüsü — arşiv
+koşu ortasında güncellenirse zincirler FARKLI günlerin fiyatlarını karıştırır.
 
-### Örnek Scraper
+## 🔑 Barkodsuz ülkeler: `merge_key`
 
-```python
-from dataclasses import dataclass, asdict
+Marketler arası birleştirme normalde EAN ile yapılır. Romanya'da EAN yok ama
+devletin kendi kanonik ürün kimliği (`catprod.id`) var. Scraper bunu
+`merge_key` alanıyla iletir; `foreign_import` onu **önekli** olarak
+(`"catprod:1016498"`) `ean_barcode`'a yazar — kimse GTIN sanmasın diye.
+Benzersizlik kısıtı `(country_id, ean_barcode)` olduğu için başka ülkenin
+gerçek EAN'iyla çarpışamaz. Aynı konvansiyon TR'de `mf-` önekiyle kullanılıyor.
 
-@dataclass
-class Product:
-    name: str
-    brand: Optional[str]
-    price: float
-    # ...
+**Scraper kendi ürettiği bir hash'i ASLA merge_key olarak yazmamalı** — o zaman
+hiçbir şey birleşmez ama birleşmiş gibi görünür.
 
-    def to_dict(self):
-        return asdict(self)
+## ✅ Yeni ülke eklerken
 
-class MyMarketScraper:
-    def fetch_products(self):
-        # Scraping logic
-        return [Product(...), ...]
-```
+1. `countries/<ülke>/config.json` — `country_code`, `default_unit`,
+   `"live": false`, `markets[]` (her birine `store_id`).
+2. `scrapers/` — dönen dict: `name, brand, price, quantity, unit, barcode,
+   merge_key, image_url, raw_category, sku`.
+3. `category_map.json` — ham kategori → kanonik slug.
+   **`prefix:` anahtarı bir alt ağacın tamamını kapsar** ve en uzun eşleşen
+   önek kazanır; kaynak yeni yaprak eklediğinde ürün kategorisiz kalmaz.
+4. `fixtures/` — GERÇEK yakalanmış yanıtlar + `tests/test_<ülke>_*.py`.
+5. Şube konumları — kaynak koordinat veriyorsa ondan (`hungary/branches.py`,
+   `romania/branches.py`), yoksa OSM'den (`osm_branches.main_for`).
+6. `run-daily.sh` / `run-weekly.sh` + systemd timer.
+7. Backend: `prisma/seed.ts` (ülke + marketler + **kategori ağacı**),
+   `src/config/units.ts` (paket birimi), `category-i18n.ts` (dil),
+   `push-copy.ts` (bildirim metni).
+8. Uygulama: mobil `utils/geo.ts` `SUPPORTED_COUNTRY_CODES` **en son**, ve
+   ancak veri prod'da hazırsa (bkz. o dosyadaki sıra notu).
 
-## 🔄 Workflow
-
-### Normal Kullanım
-
-```bash
-# 1. Tüm marketleri scrape et
-cd countries/turkey
-python run_scrapers.py
-
-# 2. Scraped ürünleri match et
-python run_matcher.py
-```
-
-### Sadece Bir Market
-
-1. `config.json`'da diğer marketlerin `enabled` değerini `false` yap
-2. `run_scrapers.py` çalıştır
-
-### Yeni Market Ekleme
-
-1. Scraper'ı oluştur
-2. `config.json`'a ekle (`enabled: true`)
-3. `run_scrapers.py` çalıştır
-4. Otomatik olarak çalışır!
-
-## 📊 Output Format
-
-### Scraping Output
-
-Her market için:
-```json
-[
-  {
-    "name": "Ürün Adı",
-    "brand": "Marka",
-    "price": 25.90,
-    "category": "Süt Ürünleri",
-    ...
-  }
-]
-```
-
-### Matching Output
-
-Matched products:
-```json
-{
-  "timestamp": "2025-01-08T14:30:00",
-  "country": "Turkey",
-  "input": {
-    "total_products": 1000,
-    "markets": ["Migros", "CarrefourSA"]
-  },
-  "output": {
-    "unique_products": 850,
-    "total_price_entries": 1000
-  },
-  "products": [...]
-}
-```
-
-## 🔧 Özelleştirme
-
-### Scraper Path'leri
-
-- **Relative**: `scrapers/migros/scraper.py` (country_dir'den)
-- **Absolute**: `/full/path/to/scraper.py`
-- **Parent relative**: `../../migros/scraper.py` (country_dir'den yukarı)
-
-### Output Pattern
-
-`{timestamp}` placeholder'ı otomatik olarak değiştirilir:
-- `migros_products_{timestamp}.json` → `migros_products_20250108_143022.json`
-
-## 🐛 Troubleshooting
-
-### "Config dosyası bulunamadı"
-
-Script'i `countries/[country]/` klasöründe çalıştırın.
-
-### "Scraper bulunamadı"
-
-`config.json`'daki `scraper_path`'i kontrol edin. Relative path ise country_dir'den başlar.
-
-### "Class/Method bulunamadı"
-
-Scraper dosyasındaki class ve method adlarını `config.json` ile eşleştirin.
-
+### Otomatik korumalar
+- `tests/test_category_map_integrity.py` — her slug backend taksonomisinde var mı
+- `tests/test_common_osm_branches.py` — koordinat/dedup kenar durumları
+- `pipeline.should_import` — ürün sayısı çöküşünde import etmez (tavan değerle)
+- `pipeline.summary_is_healthy` — beklenen market eksikse prune tetiklenmez

@@ -1,0 +1,112 @@
+{
+  "country": "Romania",
+  "country_code": "RO",
+  "default_unit": "buc",
+  "live": false,
+  "markets": [
+    {
+      "name": "Auchan",
+      "store_id": 70,
+      "scraper_path": "scrapers/monitorul.py",
+      "scraper_class": "AuchanRoScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "auchan_ro_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["BAUTURI ALCOOLICE"],
+      "note": "çapa; ölçülen en derin katalog. Referans mağaza 2528 = AUCHAN COTROCENI (Bükreş); 12 kategorilik örneklemede 2.410 ürünle en yakın rakibinin (2551) önünde çıktı."
+    },
+    {
+      "name": "Carrefour",
+      "store_id": 71,
+      "scraper_path": "scrapers/monitorul.py",
+      "scraper_class": "CarrefourRoScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "carrefour_ro_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["BAUTURI ALCOOLICE"],
+      "note": "çapa; referans mağaza 540 = CARREFOUR VULCAN (Bükreş). ÖNEMLİ: carrefour.ro'nun KENDİ sitesi Cloudflare arkasında ve robots.txt dahil her yolda 403 veriyor — bu zincirin fiyatlarına ulaşmanın tek yolu devlet API'si. Aynısı Profi için de geçerli."
+    },
+    {
+      "name": "Kaufland",
+      "store_id": 72,
+      "scraper_path": "scrapers/monitorul.py",
+      "scraper_class": "KauflandRoScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "kaufland_ro_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["BAUTURI ALCOOLICE"],
+      "note": "referans mağaza 1408 = Kaufland Mihai Bravu (Bükreş)."
+    },
+    {
+      "name": "Lidl",
+      "store_id": 73,
+      "scraper_path": "scrapers/monitorul.py",
+      "scraper_class": "LidlRoScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "lidl_ro_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["BAUTURI ALCOOLICE"],
+      "note": "indirimci — FİYAT ÇIPASI. Referans mağaza 3230. Lidl koordinat keşfinde çıkmadı (uç nokta 50 kayıtla sınırlı ve Profi listeyi dolduruyor); id doğrudan doğrulandı."
+    },
+    {
+      "name": "Mega Image",
+      "store_id": 74,
+      "scraper_path": "scrapers/monitorul.py",
+      "scraper_class": "MegaImageRoScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "mega_image_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["BAUTURI ALCOOLICE"],
+      "note": "referans mağaza 9940 = MI HERCULANE (Cluj) — Bükreş'teki adaylardan daha derin katalog verdi."
+    },
+    {
+      "name": "Penny",
+      "store_id": 75,
+      "scraper_path": "scrapers/monitorul.py",
+      "scraper_class": "PennyRoScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "penny_ro_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["BAUTURI ALCOOLICE"],
+      "note": "indirimci; referans mağaza 6358 (Str. 23 August, Bükreş)."
+    },
+    {
+      "name": "Cora",
+      "store_id": 76,
+      "scraper_path": "scrapers/monitorul.py",
+      "scraper_class": "CoraRoScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "cora_products_{timestamp}.json",
+      "enabled": false,
+      "category_deny_prefixes": ["BAUTURI ALCOOLICE"],
+      "note": "KAPALI. Katalog iyi (2508 SUN PLAZA, örneklemede 1.283 ürün) AMA mağaza kaydındaki `lastupdate` 21.05.2025 — bir yıldan eski. Cora Romanya'dan çekiliyor (mağazaları Carrefour'a devredildi); bayat fiyat yayınlamak yanlış bilgi olur. Açmadan önce `pricedate` alanının güncelliği doğrulanmalı."
+    },
+    {
+      "name": "Supeco",
+      "store_id": 77,
+      "scraper_path": "scrapers/monitorul.py",
+      "scraper_class": "SupecoRoScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "supeco_products_{timestamp}.json",
+      "enabled": false,
+      "category_deny_prefixes": ["BAUTURI ALCOOLICE"],
+      "note": "KAPALI (ilk sürüme dahil değil); küçük zincir, keşifte yalnızca 2 mağaza görüldü."
+    },
+    {
+      "name": "Profi",
+      "store_id": 78,
+      "scraper_path": "scrapers/monitorul.py",
+      "scraper_class": "ProfiRoScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "profi_products_{timestamp}.json",
+      "enabled": false,
+      "category_deny_prefixes": ["BAUTURI ALCOOLICE"],
+      "note": "KAPALI. Profi ülkenin en YAYGIN zinciri (keşifte 169 mağaza) ama örneklenen mağazaların katalogları çok sığ (en iyisi 5227, 12 kategoride yalnızca 36 ürün — Auchan'ın 2.410'una karşılık). Sığ bir katalogla açmak, uygulamada 'Profi'de yok' izlenimi verir. Açmadan önce daha geniş bir mağaza taraması yapılıp gerçekten derin bir referans mağaza bulunmalı."
+    }
+  ],
+  "output_dir": "output",
+  "log_dir": "logs",
+  "source_note": "Veri kaynağı: Consiliul Concurenței (Romanya Rekabet Konseyi) 'Monitorul Prețurilor' portalı — monitorulpreturilor.info/pmonsvc/Retail. Uç noktalar belgelenmemiş ama tamamen açık: kimlik doğrulama/çerez/referer yok, robots.txt yok (404), hız sınırı gözlenmedi. Kamu kurumu + dinamik veri olduğu için AB Açık Veri Direktifi (2019/1024, RO: Legea 179/2022) kapsamında yeniden kullanılabilir. Fiyatlar zincirlerin kendi bildirimi, yani RAF fiyatı.",
+  "merge_note": "Bu ülkede EAN YOK. Eşleştirme, devletin zincirler-arası kanonik ürün kimliği `catprod.id` üzerinden yapılıyor; scraper bunu 'catprod:<id>' önekiyle `merge_key` olarak iletiyor (bkz. countries/_common/foreign_import.py). Önek şart: kimse onu GTIN sanmasın. Benzersizlik kısıtı (country_id, ean_barcode) ülkeye kapsamlı olduğu için başka ülkenin gerçek EAN'iyla çarpışamaz.",
+  "risk_note": "EN BÜYÜK RİSK: kaynak BELGELENMEMİŞ bir iç uç nokta ve SLA'sı yok — arayüz yenilenirse şema bir gecede değişebilir. Azaltma: yanıt şeması fixture testleriyle sabitlendi (tests/test_ro_monitorul.py) ve pipeline'ın ürün-sayısı çöküş kapısı zaten devrede."
+}

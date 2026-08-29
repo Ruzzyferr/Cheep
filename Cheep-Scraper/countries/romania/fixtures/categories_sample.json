@@ -1,0 +1,92 @@
+{
+ "Items": [
+  {
+   "id": "8",
+   "name": "ALIMENTE DE BAZA",
+   "parentId": "1",
+   "logo": {
+    "logouri": "http://monitorulpreturilor.info/MonitorulPreturilor/Images/0d5e0c90-768a-404b-83bc-68570ac3617a_alimente_baza.png"
+   }
+  },
+  {
+   "id": "2",
+   "name": "ALIMENTE SI BAUTURI PENTRU BEBELUSI",
+   "parentId": "1",
+   "logo": {
+    "logouri": "http://monitorulpreturilor.info/MonitorulPreturilor/Images/d8c1c456-5f90-45a5-863f-4a4466ab525f_alimente_bebelus.png"
+   }
+  },
+  {
+   "id": "158",
+   "name": "ALTELE",
+   "parentId": "83",
+   "logo": {}
+  },
+  {
+   "id": "163",
+   "name": "ALTELE",
+   "parentId": "72",
+   "logo": {}
+  },
+  {
+   "id": "116",
+   "name": "ALTELE",
+   "parentId": "52",
+   "logo": {}
+  },
+  {
+   "id": "103",
+   "name": "ALTELE",
+   "parentId": "2",
+   "logo": {}
+  },
+  {
+   "id": "144",
+   "name": "ALTELE",
+   "parentId": "92",
+   "logo": {}
+  },
+  {
+   "id": "155",
+   "name": "ALTELE",
+   "parentId": "82",
+   "logo": {}
+  },
+  {
+   "id": "183",
+   "name": "ALTELE",
+   "parentId": "17",
+   "logo": {}
+  },
+  {
+   "id": "124",
+   "name": "ALTELE",
+   "parentId": "54",
+   "logo": {}
+  },
+  {
+   "id": "169",
+   "name": "ALTELE",
+   "parentId": "32",
+   "logo": {}
+  },
+  {
+   "id": "128",
+   "name": "ALTELE",
+   "parentId": "7",
+   "logo": {}
+  },
+  {
+   "id": "120",
+   "name": "ALTELE",
+   "parentId": "53",
+   "logo": {}
+  },
+  {
+   "id": "173",
+   "name": "ALTELE",
+   "parentId": "4",
+   "logo": {}
+  }
+ ]
+}
