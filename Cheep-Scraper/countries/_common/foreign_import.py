@@ -15,7 +15,13 @@ CHUNK_SIZE = 900          # backend hard limit is 1000
 # HU "db" (darab). Listede OLMAYAN birim sessizce ulkenin default_unit'ine
 # dusuruluyor -- yani "kom" eklenmezse her Hirvat urunu Turkce "adet" olurdu.
 ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu", "szt", "opak",
-                 "kom", "db"}
+                 "kom", "db", "buc"}
+
+#: Backend'in `name` alani icin uyguladigi sinirlar (store-price.schema.ts).
+#: Burada tekrarlaniyor cunku ihlali ORADA yakalamak, 900 urunluk chunk'in
+#: tamamini kaybetmek demek (bkz. build_api_payloads).
+_MIN_NAME_LEN = 2
+_MAX_NAME_LEN = 255
 
 
 # Bu koşuda eşlenemeyen ham kategori adları → ürün sayısı (bkz.
@@ -70,6 +76,23 @@ def build_api_payloads(
         if not name:
             IMPORT_COUNTERS["dropped_no_name"] = IMPORT_COUNTERS.get("dropped_no_name", 0) + 1
             continue
+        # BACKEND'IN AD KURALINA UY — yoksa TEK satir 900 urunu birden dusurur.
+        #
+        # Joi semasi `name` icin min 2 / max 255 istiyor ve bulk-upsert
+        # dogrulamasi CHUNK BAZINDA: tek bir kural disi satir, o chunk'taki
+        # 900 urunun TAMAMINI HTTP 400 ile reddettiriyor. Uretimde tam olarak
+        # bu yasandi: Romanya Auchan kataloğunda adi sadece "1" olan bir urun
+        # yuzunden 900 urun ice aktarilamadi (koşum saglik kapisina takildi).
+        #
+        # Cok kisa ad DUSURULUR (kullanici icin zaten anlamsiz), cok uzun ad
+        # KISALTILIR (urun hala degerli, yalnizca adi kirpilir). Ikisi de
+        # sayilir; sessiz kayip olmasin.
+        if len(name) < _MIN_NAME_LEN:
+            IMPORT_COUNTERS["dropped_short_name"] = IMPORT_COUNTERS.get("dropped_short_name", 0) + 1
+            continue
+        if len(name) > _MAX_NAME_LEN:
+            IMPORT_COUNTERS["truncated_name"] = IMPORT_COUNTERS.get("truncated_name", 0) + 1
+            name = name[:_MAX_NAME_LEN]
         # BOZUK FIYAT ARTIK SAYILIYOR.
         #
         # Eskiden `except: continue` sessizdi: kaynak fiyat bicimini

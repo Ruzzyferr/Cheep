@@ -185,3 +185,44 @@ def test_no_merge_key_and_no_valid_ean_means_no_barcode_field():
         store_id=70,
     )
     assert "ean_barcode" not in payloads[0]
+
+
+# --------------------------------------------- ad uzunlugu: chunk'i kurtarma
+
+def test_single_character_name_is_dropped_not_sent():
+    """URETIMDE YASANDI: Romanya Auchan katalogunda adi sadece "1" olan TEK
+    bir urun, Joi'nin min-2 kuralina takildi ve bulk-upsert CHUNK BAZINDA
+    dogruladigi icin o chunk'taki 900 URUNUN TAMAMI HTTP 400 ile reddedildi
+    (kosum saglik kapisina takilip prune'u da iptal etti)."""
+    payloads = build_api_payloads(
+        [{"name": "1", "price": 7.99}, {"name": "Gecerli urun", "price": 1.0}],
+        store_id=70,
+    )
+    assert [p["name"] for p in payloads] == ["Gecerli urun"]
+
+
+def test_overlong_name_is_truncated_not_dropped():
+    """Cok uzun ad kirpilir: urun hala degerli, yalnizca adi kisalir.
+    Dusurmek, kaynagin uzun yazdigi tum urunleri kaybetmek olurdu."""
+    (p,) = build_api_payloads([{"name": "x" * 400, "price": 1.0}], store_id=70)
+    assert len(p["name"]) == 255
+
+
+def test_name_length_losses_are_counted():
+    from countries._common.foreign_import import IMPORT_COUNTERS
+    IMPORT_COUNTERS.clear()
+    build_api_payloads(
+        [{"name": "a", "price": 1.0}, {"name": "y" * 300, "price": 1.0}],
+        store_id=70,
+    )
+    assert IMPORT_COUNTERS.get("dropped_short_name") == 1
+    assert IMPORT_COUNTERS.get("truncated_name") == 1
+    IMPORT_COUNTERS.clear()
+
+
+def test_romanian_package_unit_is_accepted():
+    (p,) = build_api_payloads(
+        [{"name": "Lapte 1L", "price": 7.49, "unit": "buc"}],
+        store_id=70, default_unit="buc",
+    )
+    assert p["unit"] == "buc"

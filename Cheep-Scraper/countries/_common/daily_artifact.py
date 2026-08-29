@@ -24,7 +24,6 @@ sessizce sıfır ürün üretirdi — pipeline'ın en korktuğu senaryo (bkz.
 """
 import logging
 import os
-import shutil
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Callable, Optional
@@ -112,8 +111,21 @@ def fetch_daily(
     logger.info("günlük artefakt indiriliyor: %s", url)
     with http.get(url, stream=True, timeout=timeout, headers=hdrs) as r:
         r.raise_for_status()
+        declared = r.headers.get("Content-Length")
+        # `r.raw` DEĞİL `iter_content` — ikisi aynı şey değil.
+        #
+        # `r.raw`, sunucudan gelen HAM baytları verir; sunucu içeriği
+        # gzip'lediyse dosyaya SIKIŞTIRILMIŞ hâli yazılır ve zip/xlsx
+        # açılamaz. `iter_content` çözmeyi requests'e bırakır. Ayrıca
+        # `copyfileobj` bir dosya-benzeri nesne bekliyor; buraya bir üreteç
+        # (generator) verilirse "generator object has no attribute 'read'"
+        # ile patlar — eski yedek yol tam olarak bu yüzden hiç çalışmıyordu
+        # (üretimde `r.raw` hep var olduğu için de fark edilmiyordu).
+        content_encoding = (r.headers.get("Content-Encoding") or "").strip()
         with open(tmp, "wb") as f:
-            shutil.copyfileobj(r.raw if hasattr(r, "raw") and r.raw else _chunks(r), f)
+            for chunk in r.iter_content(chunk_size=1 << 20):
+                if chunk:
+                    f.write(chunk)
 
     size = tmp.stat().st_size
     if size < min_bytes:
@@ -123,20 +135,36 @@ def fetch_daily(
             "— kaynak 200 ile hata sayfası döndürmüş olabilir, önbelleğe yazılmadı"
         )
 
+    # YARIM İNDİRME KAPISI — `min_bytes` bunu YAKALAMAZ.
+    #
+    # Üretimde yaşandı: 81 MB'lık HR arşivinin indirmesi bağlantı koptuğu için
+    # 64 MB'da sessizce bitti. Akış hata vermedi, dosya `min_bytes` (10 MB)
+    # eşiğini rahatça geçti ve GEÇERLİ bir önbellek olarak yazıldı. Sonuç: ZIP
+    # okunabiliyordu ama İÇİNDEKİ zincirlerin bir kısmı (Konzum) yoktu —
+    # yani "eksik dosya" hatası, gerçek sebebi (yarım indirme) hiç
+    # göstermeden ortaya çıktı ve o zincir sessizce hiç tazelenmedi.
+    #
+    # Sunucu uzunluğu bildiriyorsa BİREBİR tutmak zorunda. Bildirmiyorsa
+    # (chunked encoding) bu kontrol atlanır — o durumda `min_bytes` tek
+    # savunma olarak kalır.
+    # İçerik kodlanmışsa (gzip/br) `Content-Length` SIKIŞTIRILMIŞ boyuttur;
+    # diskteki çözülmüş dosyayla karşılaştırmak yanlış alarm üretir.
+    if declared is not None and not content_encoding:
+        try:
+            expected = int(declared)
+        except ValueError:
+            expected = None
+        if expected is not None and size != expected:
+            tmp.unlink(missing_ok=True)
+            raise ValueError(
+                f"günlük artefakt YARIM indi ({size}/{expected} bayt): {url} "
+                "— önbelleğe yazılmadı, bir sonraki koşum yeniden indirir"
+            )
+
     os.replace(tmp, target)
     logger.info("günlük artefakt yazıldı: %s (%d bayt)", target.name, size)
     prune_cache(cache_dir, name)
     return target
-
-
-def _chunks(response, chunk_size: int = 1 << 20):
-    """`raw` yoksa (mock'lanmış oturumlar) parça parça okumaya düşer."""
-    class _Reader:
-        def read(self, n=-1):
-            return b""
-    for chunk in response.iter_content(chunk_size=chunk_size):
-        if chunk:
-            yield chunk
 
 
 def open_daily(
