@@ -74,7 +74,6 @@
         {
           "androidAppId": "ca-app-pub-2953141598487358~3738075155",
           "iosAppId": "ca-app-pub-2953141598487358~6068725024",
-          "userTrackingUsageDescription": "Cheep asks for this only to show more relevant ads. Declining changes nothing about price comparison, your shopping lists or your location — you will simply see less relevant ads.",
           "delayAppMeasurementInit": true,
           "optimizeInitialization": true,
           "optimizeAdLoading": true
