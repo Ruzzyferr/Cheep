@@ -148,12 +148,41 @@ export const colors = {
   tabBarInactive: '#6B7A72',  // bkz. text.hint — AA icin koyulastirildi
 
   // Store brand colors
+  // Market rozeti arka-plan renkleri.
+  //
+  // TELİFLİ LOGO KULLANILMIYOR (bkz. utils/storeLogo.ts) — rozet, markanın baş
+  // harfi + markanın bilinen kurumsal rengi. Renk, markayı tanımaya yarayan
+  // olgusal bir nitelik; logo değil.
+  //
+  // Eskiden yalnızca 5 Türk zinciri vardı ve geri kalan HER market aynı
+  // `primary.main` rengine düşüyordu: Polonya kullanıcısı Biedronka, Lidl,
+  // Żabka ve Auchan'ı birbirinden RENKLE ayırt edemiyordu.
   storeChips: {
+    // Türkiye
     bim: '#6B8E7F',
     migros: '#FF7A00',
     a101: '#00507D',
     sok: '#E31E24',
     carrefoursa: '#0066B2',
+    // Polonya
+    biedronka: '#E30613',
+    zabka: '#00A54F',
+    dino: '#0F7C3F',
+    // Çok ülkeli zincirler
+    auchan: '#D2001C',
+    lidl: '#0050AA',
+    kaufland: '#E10915',
+    spar: '#009A3D',
+    tesco: '#00539F',
+    aldi: '#00B0EA',
+    penny: '#D51130',
+    // Hırvatistan
+    konzum: '#C8102E',
+    plodine: '#E4002B',
+    tommy: '#008C45',
+    // Romanya
+    megaimage: '#005CA9',
+    profi: '#E2001A',
   },
 } as const;
 

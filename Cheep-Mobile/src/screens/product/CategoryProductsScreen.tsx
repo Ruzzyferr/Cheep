@@ -126,7 +126,13 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
    * sepet rozeti ve anasayfa kendiliğinden güncellenir.
    */
   const handleAddToCart = async (product: Product) => {
-    const unit = product.store_prices?.[0]?.unit || t('common.unit_default');
+    // Birim MAKİNE değeridir. `t('common.unit_default')`'a düşmek çeviri
+    // metnini ('piece', 'szt.', 'Stück', 'st') API'ye gönderir ve backend'in
+    // birim beyaz listesi bunları reddeder — Türkçe dışındaki her kullanıcı
+    // için hızlı-ekle 400 döner. Birim bilinmiyorsa alan GÖNDERİLMEZ, backend
+    // ülkeye uygun varsayılanı uygular (bkz. backend src/config/units.ts).
+    // Aynı hata SelectListModal'da da vardı.
+    const unit = product.store_prices?.[0]?.unit || undefined;
     try {
       let listId = targetListId ?? activeList?.id;
       let listName = targetListName ?? activeList?.name;

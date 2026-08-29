@@ -42,7 +42,20 @@ export function SelectListModal({
   const { t } = useTranslation();
   const { formatMoney } = useLocale();
   const insets = useSafeAreaInsets();
-  const effectiveUnit = unit ?? t('common.unit_default');
+  // BİRİM MAKİNE DEĞERİDİR, ETİKET DEĞİL.
+  //
+  // Burada eskiden `unit ?? t('common.unit_default')` vardı ve ürünün birimi
+  // bilinmediğinde ÇEVİRİ METNİ API'ye gönderiliyordu: en 'piece', pl 'szt.'
+  // (noktalı!), de 'Stück', sv 'st'. Backend'in `addListItemSchema`'sı yalnızca
+  // kanonik makine birimlerini kabul ettiği için bunların HİÇBİRİ geçerli
+  // değildi — yalnızca Türkçe'nin 'adet'i tesadüfen tutuyordu. Sonuç: uygulama
+  // dili Türkçe OLMAYAN her kullanıcı, birimi bilinmeyen bir ürünü listesine
+  // eklemeye çalıştığında 400 alıyor ve "eklenemedi" hatası görüyordu.
+  //
+  // Doğrusu: birim bilinmiyorsa alanı HİÇ GÖNDERME — backend ülkeye uygun
+  // varsayılanı zaten uyguluyor (bkz. cheep-backend-express/src/config/units.ts).
+  // `common.unit_default` yalnızca EKRANDA gösterim içindir.
+  const effectiveUnit = unit;
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState<number | null>(null);

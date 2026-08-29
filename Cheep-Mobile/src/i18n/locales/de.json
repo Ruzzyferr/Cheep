@@ -158,14 +158,20 @@
     "CH": "Schweiz",
     "SE": "Schweden",
     "DE": "Deutschland",
-    "PL": "Polen"
+    "PL": "Polen",
+    "HR": "Kroatien",
+    "HU": "Ungarn",
+    "RO": "Rumänien"
   },
   "languages": {
     "tr": "Türkçe",
     "en": "English",
     "de": "Deutsch",
     "pl": "Polski",
-    "sv": "Svenska"
+    "sv": "Svenska",
+    "hr": "Hrvatski",
+    "hu": "Magyar",
+    "ro": "Română"
   },
   "product": {
     "no_price_info": "Keine Preisangabe",
@@ -582,5 +588,8 @@
     "card_cta": "Premium entdecken",
     "card_active_title": "Cheep Premium ist aktiv",
     "card_active_body": "Danke! Hier kannst du dein Abo verwalten."
+  },
+  "ads": {
+    "label": "Anzeige"
   }
 }

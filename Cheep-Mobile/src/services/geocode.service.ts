@@ -12,7 +12,8 @@
  */
 import * as Location from 'expo-location';
 import { storeService } from './store.service';
-import { SUPPORTED_COUNTRY_CODES, type Coords } from '../utils/geo';
+import { type Coords } from '../utils/geo';
+import { isCountryAvailable } from '../utils/countryAvailability';
 import { MAX_RADIUS_KM, type PinnedAnchor } from '../utils/anchor';
 
 export interface GeocodeCandidate {
@@ -91,8 +92,7 @@ export async function searchAddress(query: string): Promise<SearchResult> {
       });
       const p = places[0];
       const iso = p?.isoCountryCode?.toUpperCase();
-      countryCode =
-        iso && (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(iso) ? iso : null;
+      countryCode = iso && isCountryAvailable(iso) ? iso : null;
       if (p) label = labelOf(p, query);
     } catch {
       /* ülke çözülemedi → countryCode null kalır, ülke kapısı reddeder */
@@ -106,7 +106,7 @@ export async function searchAddress(query: string): Promise<SearchResult> {
 export async function validateCandidate(c: GeocodeCandidate): Promise<Validation> {
   // 1. kapı — ülke. Kodun VARLIĞI yetmez, DESTEKLENEN bir ülke olmalı: kapı kendi
   // kararını versin, çağıranın ön-eleme yaptığına güvenmesin.
-  if (!c.countryCode || !(SUPPORTED_COUNTRY_CODES as readonly string[]).includes(c.countryCode)) {
+  if (!c.countryCode || !isCountryAvailable(c.countryCode)) {
     return { status: 'unsupported_country' };
   }
 

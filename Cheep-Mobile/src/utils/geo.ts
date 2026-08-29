@@ -6,6 +6,7 @@
 import * as Location from 'expo-location';
 import { locationStorage } from './storage';
 import { ensureLocationConsent, getLocationConsent } from './consent';
+import { isCountryAvailable } from './countryAvailability';
 
 export interface Coords {
   lat: number;
@@ -13,14 +14,18 @@ export interface Coords {
 }
 
 /**
- * Uygulamanın desteklediği ülke kodları. Ülke tespiti yapan her fonksiyon
- * (getCountryCodeInteractive, reverseGeocodeCountry) bu kümenin DIŞINDAKİ bir
- * tespit için null döner → çağıran taraf son bilinen ülkeye/kullanıcı seçimine
- * düşer, geçersiz kod asla x-country header'ına sızmaz. Konum sayfasındaki
- * ülke-yalnızca seçim de bu listeden üretilir.
- * (LocaleContext'i import ETME — döngü riski.)
+ * Uygulamanın PAKETİNDE karşılığı olan ülkeler.
+ *
+ * TANIM DEĞİŞTİ — burası artık "kullanılabilir ülkeler" DEĞİL, yalnızca ÜST
+ * SINIR. Bir ülkenin gerçekten gösterilip gösterilmeyeceğine sunucu karar
+ * veriyor (kataloğunda fiyat var mı?) — bkz. `utils/countryAvailability.ts`.
+ * Ülke tespiti ve seçiciler `isCountryAvailable()` kullanır.
+ *
+ * Tanım burada durmuyor çünkü `countryAvailability` bu dosyayı import etseydi
+ * döngü olurdu; oradan tanımlanıp burada yeniden dışa aktarılıyor (mevcut
+ * import yolları kırılmasın diye).
  */
-export const SUPPORTED_COUNTRY_CODES = ['TR', 'PL'] as const;
+export { SUPPORTED_COUNTRY_CODES } from './countryAvailability';
 
 function toRad(deg: number): number {
   return (deg * Math.PI) / 180;
@@ -128,7 +133,7 @@ export async function getCountryCodeInteractive(): Promise<string | null> {
       longitude: pos.coords.longitude,
     });
     const iso = places[0]?.isoCountryCode?.toUpperCase();
-    return iso && (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(iso) ? iso : null;
+    return iso && isCountryAvailable(iso) ? iso : null;
   } catch {
     return null;
   }
@@ -146,7 +151,7 @@ export async function reverseGeocodeCountry(coords: Coords): Promise<string | nu
       longitude: coords.lon,
     });
     const iso = places[0]?.isoCountryCode?.toUpperCase();
-    return iso && (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(iso) ? iso : null;
+    return iso && isCountryAvailable(iso) ? iso : null;
   } catch {
     return null;
   }

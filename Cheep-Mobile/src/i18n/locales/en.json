@@ -158,14 +158,20 @@
     "CH": "Switzerland",
     "SE": "Sweden",
     "DE": "Germany",
-    "PL": "Poland"
+    "PL": "Poland",
+    "HR": "Croatia",
+    "HU": "Hungary",
+    "RO": "Romania"
   },
   "languages": {
     "tr": "Türkçe",
     "en": "English",
     "de": "Deutsch",
     "pl": "Polski",
-    "sv": "Svenska"
+    "sv": "Svenska",
+    "hr": "Hrvatski",
+    "hu": "Magyar",
+    "ro": "Română"
   },
   "product": {
     "no_price_info": "No price info",
@@ -582,5 +588,8 @@
     "card_cta": "Explore Premium",
     "card_active_title": "Cheep Premium is active",
     "card_active_body": "Thank you! You can manage your subscription here."
+  },
+  "ads": {
+    "label": "Ad"
   }
 }

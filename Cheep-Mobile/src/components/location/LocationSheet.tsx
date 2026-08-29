@@ -45,7 +45,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocationAnchor } from '../../context/LocationContext';
 import { searchAddress, validateCandidate, type GeocodeCandidate } from '../../services/geocode.service';
 import type { PinnedAnchor } from '../../utils/anchor';
-import { SUPPORTED_COUNTRY_CODES } from '../../utils/geo';
+import { getAvailableCountryCodes } from '../../utils/countryAvailability';
 import { Button } from '../ui';
 import { colors, typography, spacing, borderRadius, layout } from '../../theme';
 
@@ -553,7 +553,7 @@ export function LocationSheet({ visible, onClose }: Props) {
                   <Text style={styles.countryTitle}>{t('location.country_only_title')}</Text>
                   <Text style={styles.countryHint}>{t('location.country_only_hint')}</Text>
                   <View style={styles.countryRow}>
-                    {SUPPORTED_COUNTRY_CODES.map((code) => {
+                    {getAvailableCountryCodes().map((code) => {
                       const active = anchor?.countryCode === code;
                       const writing = pinningCountry === code;
                       // Buton "seçili" görünüyor ama CANLI bir eylem: dokunmak
