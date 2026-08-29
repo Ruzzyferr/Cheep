@@ -119,3 +119,37 @@ export async function refreshAvailableCountries(
   }
   return getAvailableCountryCodes();
 }
+
+/**
+ * Cihazın BÖLGE ayarından ülke kodu — izin gerektirmeyen bedava sinyal.
+ *
+ * NEDEN VAR: ülke varsayılanı yalnızca GPS'ten geliyordu ve GPS başarısız
+ * olduğunda (izin reddedildi, kapalı mekân, emülatör) sabit `TR`'ye düşüyordu.
+ * Sonuç: konum iznini reddedip ülke adımını "şimdilik geç" ile atlayan bir
+ * HIRVAT kullanıcı Türk marketlerini ve ₺ fiyatlarını görüyordu — üstelik
+ * hiçbir hata mesajı olmadan. Bu üretimde bir emülatör oturumunda gözlendi:
+ * hesap HR olarak açıldı, kullanıcı TR olarak kaydedildi.
+ *
+ * Cihaz bölgesi GPS'ten zayıf ama İZİNSİZ bir sinyal, dolayısıyla sabit bir
+ * varsayılandan her zaman iyi. Sıralama: GPS → cihaz bölgesi → `TR`.
+ *
+ * Desteklenmeyen/kapalı bir ülke dönerse `null` — çağıran taraf mevcut
+ * değerinde kalır.
+ */
+export function getDeviceRegionCountry(): string | null {
+  try {
+    // Modül düzeyinde import EDİLMİYOR: bu dosya saf yardımcı olarak testlerden
+    // native modül kurmadan import ediliyor (`intersectWithSupported` testleri).
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { getLocales } = require('expo-localization');
+    for (const locale of getLocales() ?? []) {
+      const region = locale?.regionCode;
+      if (typeof region === 'string' && isCountryAvailable(region.toUpperCase())) {
+        return region.toUpperCase();
+      }
+    }
+  } catch {
+    /* native modül yok (test/web) → sinyal yok */
+  }
+  return null;
+}

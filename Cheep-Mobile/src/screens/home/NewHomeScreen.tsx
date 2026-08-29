@@ -221,17 +221,6 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
 
   return (
     <View style={styles.container}>
-      {/* DURUM ÇUBUĞU PERDESİ.
-          ScrollView içeriği kaydırıldığında durum çubuğunun ALTINDAN geçiyor
-          (normal davranış) ama arkasında opak bir zemin olmadığı için bölüm
-          başlıkları saatin ve pil simgesinin üstüne biniyor, ikisi de
-          okunmaz hale geliyordu. Sayfanın kendi arka planıyla aynı renkte
-          ince bir perde, içeriği çubuğun ARKASINDAN geçiriyor.
-          `pointerEvents="none"`: perde dokunmaları yutmamalı. */}
-      <View
-        pointerEvents="none"
-        style={[styles.statusScrim, { height: insets.top }]}
-      />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: insets.top + spacing.sm, paddingBottom: bottomSpacing }}
@@ -492,6 +481,19 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         </>
         )}
       </ScrollView>
+
+      {/* DURUM ÇUBUĞU PERDESİ — ScrollView'DAN SONRA, bilerek.
+          Kaydırılan içerik durum çubuğunun altından geçiyor (normal davranış)
+          ama arkasında opak zemin olmadığı için bölüm başlıkları saatin ve pil
+          simgesinin üstüne biniyor, ikisi de okunmaz hale geliyordu.
+
+          KARDEŞ SIRASI ÖNEMLİ: React Native'de kardeşler sırayla çiziliyor ve
+          Android'de `zIndex` tek başına yetmiyor (`elevation` gerekiyor).
+          Perde ÖNCE konduğunda ScrollView onun ÜSTÜNE çiziliyor ve hiçbir işe
+          yaramıyor — bu bir kez denendi, emülatörde örtüşme aynen kaldı.
+          LocationSheet'ten ÖNCE: o bir modal, perdenin altında kalmamalı.
+          `pointerEvents="none"`: perde dokunmaları yutmamalı. */}
+      <View pointerEvents="none" style={[styles.statusScrim, { height: insets.top }]} />
 
       <LocationSheet visible={locationSheetOpen} onClose={() => setLocationSheetOpen(false)} />
     </View>

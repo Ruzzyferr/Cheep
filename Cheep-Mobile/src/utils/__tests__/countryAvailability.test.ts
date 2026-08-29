@@ -19,6 +19,7 @@ import {
   isCountryAvailable,
   loadCachedAvailableCountries,
   refreshAvailableCountries,
+  getDeviceRegionCountry,
 } from '../countryAvailability';
 /* eslint-enable import/first */
 
@@ -99,5 +100,28 @@ describe('ülke kullanılabilirliği', () => {
     expect(SUPPORTED_COUNTRY_CODES).toEqual(
       expect.arrayContaining(['TR', 'PL', 'HR', 'HU', 'RO']),
     );
+  });
+});
+
+/**
+ * CİHAZ BÖLGESİ YEDEĞİ.
+ *
+ * Gerileme koruması: bu yedek yokken GPS'in başarısız olduğu her durumda ülke
+ * sabit `TR`ye düşüyordu ve konum iznini reddeden bir Hırvat kullanıcı Türk
+ * marketlerini ₺ fiyatlarıyla görüyordu. Emülatörde gözlendi.
+ */
+describe('getDeviceRegionCountry', () => {
+  it('native modül yokken null döner (test/web ortamı), patlamaz', () => {
+    // `expo-localization` bu test ortamında kurulu değil → require fırlatır.
+    expect(getDeviceRegionCountry()).toBeNull();
+  });
+
+  it('desteklenen her ülke kodu bölge sinyali olarak kabul edilebilir', () => {
+    // Fonksiyonun kabul kapısı `isCountryAvailable`; yeni bir ülke eklendiğinde
+    // bölge yedeği kendiliğinden o ülkeyi de tanımalı.
+    __resetAvailableCountries([...SUPPORTED_COUNTRY_CODES]);
+    for (const code of SUPPORTED_COUNTRY_CODES) {
+      expect(isCountryAvailable(code)).toBe(true);
+    }
   });
 });

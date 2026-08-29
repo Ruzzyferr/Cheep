@@ -28,7 +28,7 @@ import { ONBOARDING_QUESTIONS } from './onboardingConfig';
 import i18n, { SUPPORTED_LANGUAGES } from '../../i18n';
 import { languageStorage } from '../../utils/storage';
 import { getCountryCodeInteractive } from '../../utils/geo';
-import { getAvailableCountryCodes } from '../../utils/countryAvailability';
+import { getAvailableCountryCodes, getDeviceRegionCountry } from '../../utils/countryAvailability';
 import type { UserProfile } from '../../types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
@@ -231,8 +231,15 @@ export function OnboardingScreen() {
     if (!isCountryStep || geoAttemptedRef.current) return;
     geoAttemptedRef.current = true;
     getCountryCodeInteractive()
+      // GPS yoksa CİHAZ BÖLGESİNE düş. Bu adım eklenmeden önce GPS'in
+      // başarısız olduğu her durumda ülke sessizce `TR`ye kalıyordu ve konum
+      // iznini reddeden bir Hırvat/Macar/Romen kullanıcı Türk marketlerini ₺
+      // fiyatlarıyla görüyordu. Cihaz bölgesi zayıf ama İZİNSİZ bir sinyal —
+      // sabit varsayılandan her zaman iyi.
+      .catch(() => null)
+      .then((code) => code ?? getDeviceRegionCountry())
       .then((code) => {
-        if (code && !manualCountryPickedRef.current) return setCountry(code);
+        if (code && !manualCountryPickedRef.current) setCountry(code);
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
