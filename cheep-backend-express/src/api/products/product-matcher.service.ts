@@ -49,6 +49,63 @@ async function resolveCategorySlug(slug?: string, countryId?: number): Promise<n
     return id;
 }
 
+/**
+ * "Genel kova" kategorileri — daha ÖZEL bir öneri geldiğinde ÜSTÜNE YAZILABİLİR.
+ *
+ * NEDEN VAR: aşağıdaki eşleştirmede slug tabanlı kategori yalnızca ürünün
+ * kategorisi HİÇ YOKKEN uygulanıyordu. Bu, kategori taşımayan kaynakların
+ * mevcut veriyi ezmesini önlemek için doğruydu ama bir yan etkisi vardı:
+ * SINIFLANDIRICI SONRADAN İYİLEŞTİĞİNDE MEVCUT ÜRÜNLER ASLA KURTARILAMIYORDU.
+ *
+ * Üretimde ölçüldü (2026-08-29): Hırvat kataloğunun %21,3'ü kaynağın kaba
+ * "gıda" beyanından gelen genel kovada duruyordu. Sınıflandırıcı iyileştirilip
+ * 2.224 ürünü doğru kategoriye taşıyacak hâle getirildi, zincirler yeniden
+ * içe aktarıldı — ve HİÇBİR ÜRÜN YER DEĞİŞTİRMEDİ, çünkü hepsinin zaten bir
+ * kategorisi vardı.
+ *
+ * Kural DAR tutuldu: yalnızca ürün genel kovadayken ve kaynak DAHA ÖZEL bir
+ * kategori önerdiğinde geçerli. Ürün gerçekten temel gıdaysa sınıflandırıcı
+ * yine `temel-gida` döndürüyor ve hiçbir şey değişmiyor.
+ */
+const REFINABLE_FALLBACK_SLUGS = new Set(['temel-gida']);
+
+/**
+ * Kategori rafine edilmeli mi? (SAF — test edilebilir)
+ *
+ * Karar kuralı bilerek veritabanından ayrıldı: yanlış olduğunda sessiz ve
+ * pahalı. Üç durum var ve üçü de sınanıyor:
+ *   • mevcut kategori yok            → öneriyi al
+ *   • mevcut kategori GENEL KOVA     → daha özel öneriyi al
+ *   • mevcut kategori zaten özel     → DOKUNMA (kaynak onu ezmemeli)
+ */
+export function shouldRefineCategory(args: {
+    current: number | null;
+    proposed: number | null;
+    fallbackIds: ReadonlySet<number>;
+}): boolean {
+    const { current, proposed, fallbackIds } = args;
+    if (proposed === null || proposed === current) return false;
+    if (current === null) return true;
+    // Genel kovadan çıkış: öneri de genel kova ise bir şey kazanılmıyor.
+    return fallbackIds.has(current) && !fallbackIds.has(proposed);
+}
+
+const EMPTY_ID_SET: ReadonlySet<number> = new Set();
+
+/** Ülke başına genel kova kategori id'leri (bir kez çözülüp saklanır). */
+const fallbackIdCache = new Map<number, Set<number>>();
+async function fallbackCategoryIds(countryId: number): Promise<Set<number>> {
+    const hit = fallbackIdCache.get(countryId);
+    if (hit) return hit;
+    const rows = await prisma.category.findMany({
+        where: { country_id: countryId, slug: { in: [...REFINABLE_FALLBACK_SLUGS] } },
+        select: { id: true },
+    });
+    const ids = new Set(rows.map((r) => r.id));
+    fallbackIdCache.set(countryId, ids);
+    return ids;
+}
+
 // ============================================
 // 1. TEXT NORMALIZATION
 // ============================================
@@ -267,8 +324,25 @@ export class ProductMatcher {
                 if (providedCategoryId !== null && existingByEan.category_id !== providedCategoryId) {
                     patch.category_id = providedCategoryId;
                 }
-                if (slugCategoryId !== null && existingByEan.category_id == null) {
-                    patch.category_id = slugCategoryId;
+                // GENEL KOVA sorgusu YALNIZCA gerekince yapılıyor. Öneri yoksa,
+                // öneri mevcutla aynıysa ya da ürünün hiç kategorisi yoksa karar
+                // `fallbackIds`e bakmadan verilebiliyor (bkz. kuralın ilk iki
+                // satırı) — her ürün için bir sorgu atmak hem gereksiz hem de
+                // içe aktarmayı yavaşlatırdı.
+                if (slugCategoryId !== null && slugCategoryId !== existingByEan.category_id) {
+                    const fallbackIds =
+                        existingByEan.category_id === null
+                            ? EMPTY_ID_SET
+                            : await fallbackCategoryIds(resolvedCountryId);
+                    if (
+                        shouldRefineCategory({
+                            current: existingByEan.category_id,
+                            proposed: slugCategoryId,
+                            fallbackIds,
+                        })
+                    ) {
+                        patch.category_id = slugCategoryId;
+                    }
                 }
                 if (data.image_url && existingByEan.image_url !== data.image_url) {
                     patch.image_url = data.image_url;
