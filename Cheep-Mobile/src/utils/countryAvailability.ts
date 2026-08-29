@@ -121,35 +121,28 @@ export async function refreshAvailableCountries(
 }
 
 /**
- * Cihazın BÖLGE ayarından ülke kodu — izin gerektirmeyen bedava sinyal.
+ * Cihaz bölge kodları arasından kullanılabilir İLK ülkeyi seçer (SAF).
  *
  * NEDEN VAR: ülke varsayılanı yalnızca GPS'ten geliyordu ve GPS başarısız
- * olduğunda (izin reddedildi, kapalı mekân, emülatör) sabit `TR`'ye düşüyordu.
+ * olduğunda (izin reddedildi, kapalı mekân, emülatör) sabit `TR`ye düşüyordu.
  * Sonuç: konum iznini reddedip ülke adımını "şimdilik geç" ile atlayan bir
- * HIRVAT kullanıcı Türk marketlerini ve ₺ fiyatlarını görüyordu — üstelik
- * hiçbir hata mesajı olmadan. Bu üretimde bir emülatör oturumunda gözlendi:
- * hesap HR olarak açıldı, kullanıcı TR olarak kaydedildi.
+ * HIRVAT kullanıcı Türk marketlerini ve ₺ fiyatlarını görüyordu — hiçbir hata
+ * mesajı olmadan. Üretim veritabanında doğrulandı.
  *
- * Cihaz bölgesi GPS'ten zayıf ama İZİNSİZ bir sinyal, dolayısıyla sabit bir
- * varsayılandan her zaman iyi. Sıralama: GPS → cihaz bölgesi → `TR`.
+ * Cihaz bölgesi GPS'ten zayıf ama İZİN GEREKTİRMEYEN bir sinyal, dolayısıyla
+ * sabit bir varsayılandan her zaman iyi. Sıralama: GPS → cihaz bölgesi → `TR`.
  *
- * Desteklenmeyen/kapalı bir ülke dönerse `null` — çağıran taraf mevcut
- * değerinde kalır.
+ * Native okuma bilerek DIŞARIDA (`utils/deviceRegion.ts`): bu dosya testlerden
+ * native modül kurmadan import ediliyor ve buradaki bir `expo-localization`
+ * importu tüm dosyayı çökertirdi.
  */
-export function getDeviceRegionCountry(): string | null {
-  try {
-    // Modül düzeyinde import EDİLMİYOR: bu dosya saf yardımcı olarak testlerden
-    // native modül kurmadan import ediliyor (`intersectWithSupported` testleri).
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getLocales } = require('expo-localization');
-    for (const locale of getLocales() ?? []) {
-      const region = locale?.regionCode;
-      if (typeof region === 'string' && isCountryAvailable(region.toUpperCase())) {
-        return region.toUpperCase();
-      }
-    }
-  } catch {
-    /* native modül yok (test/web) → sinyal yok */
+export function pickRegionCountry(
+  regions: readonly (string | null | undefined)[],
+): string | null {
+  for (const region of regions) {
+    if (typeof region !== 'string') continue;
+    const code = region.trim().toUpperCase();
+    if (code && isCountryAvailable(code)) return code;
   }
   return null;
 }

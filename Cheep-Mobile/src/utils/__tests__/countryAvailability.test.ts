@@ -19,7 +19,7 @@ import {
   isCountryAvailable,
   loadCachedAvailableCountries,
   refreshAvailableCountries,
-  getDeviceRegionCountry,
+  pickRegionCountry,
 } from '../countryAvailability';
 /* eslint-enable import/first */
 
@@ -108,20 +108,34 @@ describe('ülke kullanılabilirliği', () => {
  *
  * Gerileme koruması: bu yedek yokken GPS'in başarısız olduğu her durumda ülke
  * sabit `TR`ye düşüyordu ve konum iznini reddeden bir Hırvat kullanıcı Türk
- * marketlerini ₺ fiyatlarıyla görüyordu. Emülatörde gözlendi.
+ * marketlerini ₺ fiyatlarıyla görüyordu. Üretim veritabanında doğrulandı.
  */
-describe('getDeviceRegionCountry', () => {
-  it('native modül yokken null döner (test/web ortamı), patlamaz', () => {
-    // `expo-localization` bu test ortamında kurulu değil → require fırlatır.
-    expect(getDeviceRegionCountry()).toBeNull();
+describe('pickRegionCountry', () => {
+  beforeEach(() => __resetAvailableCountries([...SUPPORTED_COUNTRY_CODES]));
+
+  it('kullanılabilir ilk bölgeyi seçer', () => {
+    expect(pickRegionCountry(['HR'])).toBe('HR');
   });
 
-  it('desteklenen her ülke kodu bölge sinyali olarak kabul edilebilir', () => {
-    // Fonksiyonun kabul kapısı `isCountryAvailable`; yeni bir ülke eklendiğinde
-    // bölge yedeği kendiliğinden o ülkeyi de tanımalı.
-    __resetAvailableCountries([...SUPPORTED_COUNTRY_CODES]);
-    for (const code of SUPPORTED_COUNTRY_CODES) {
-      expect(isCountryAvailable(code)).toBe(true);
-    }
+  it('küçük harf ve boşluğu tolere eder — cihaz bölgesi biçimi garanti değil', () => {
+    expect(pickRegionCountry([' hr '])).toBe('HR');
+  });
+
+  it('desteklenmeyen ülkeyi atlar, sonraki adaya bakar', () => {
+    expect(pickRegionCountry(['US', 'RO'])).toBe('RO');
+  });
+
+  it('hiçbiri kullanılamıyorsa null — çağıran mevcut değerinde kalır', () => {
+    expect(pickRegionCountry(['US', 'JP'])).toBeNull();
+  });
+
+  it('null/undefined/boş girdilerde patlamaz', () => {
+    expect(pickRegionCountry([null, undefined, ''])).toBeNull();
+  });
+
+  it('kapalı bir ülke bölge sinyaliyle AÇILAMAZ', () => {
+    // Sunucu HR'yi kapattıysa cihaz bölgesi onu geri getirmemeli.
+    __resetAvailableCountries(['TR', 'PL']);
+    expect(pickRegionCountry(['HR'])).toBeNull();
   });
 });
