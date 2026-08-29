@@ -713,7 +713,19 @@ const styles = StyleSheet.create({
   // Category rail
   catRail: { paddingHorizontal: layout.screenPadding, gap: spacing.sm },
   catCard: {
-    width: 78,
+    // 78 DEĞİL 96. Macarca "Alapélelmiszerek" ve Almanca'daki benzerleri tek
+    // parça bileşik kelime: 78px'e sığmayınca React Native onları tire
+    // koymadan ORTASINDAN bölüyordu ("Alapélelmisze / rek"). Emülatörde
+    // Macarca ekran görüntüsüyle görüldü.
+    //
+    // `adjustsFontSizeToFit` DENENDİ VE İŞE YARAMADI: Android'de yalnızca
+    // `numberOfLines={1}` ile çalışıyor, iki satırda sessizce etkisiz.
+    // Tek gerçek çözüm kelimenin BİR SATIRA sığması.
+    //
+    // Bedeli: şeritte aynı anda ~4,5 yerine ~4 kart görünüyor. Şerit zaten
+    // yatay kaydırmalı ve sonunda "Tümü" var, yani hiçbir kategori
+    // erişilemez hâle gelmiyor.
+    width: 96,
     alignItems: 'center',
     gap: spacing.xs,
   },
@@ -732,9 +744,13 @@ const styles = StyleSheet.create({
   // kalsın.
   catName: {
     ...typography.styles.caption,
+    // caption 12px; 11px uzun bileşik kelimeler için ek pay veriyor ve
+    // Türkçede de okunaklı kalıyor.
+    fontSize: 11,
+    lineHeight: 15,
     color: colors.text.secondary,
     textAlign: 'center',
-    height: 32,
+    height: 30,
   },
 
   // Deal rail
