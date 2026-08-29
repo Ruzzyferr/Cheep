@@ -61,6 +61,24 @@ updates:
       - dependency-name: 'react-native-web'
       - dependency-name: 'react-native-worklets'
 
+      # ── REKLAM SDK'SI — SÜRÜM SABİT, DEPENDABOT DOKUNMAMALI ─────────────
+      # `react-native-google-mobile-ads` 16.1+ sürümleri
+      # `play-services-ads` 25.x'i çekiyor ve o SDK **Kotlin 2.3.0** ile
+      # derlenmiş. Expo SDK 54'ün Kotlin derleyicisi 2.1.0 ve daha yeni
+      # metadata'yı OKUYAMIYOR:
+      #   "Module was compiled with an incompatible version of Kotlin.
+      #    The binary version of its metadata is 2.3.0, expected 2.1.0"
+      # Sonuç: AAB derlemesi düşer (üretimde tam olarak bu yaşandı, sürüm
+      # 1.6.0'ın ilk Android derlemesi bu yüzden kırıldı).
+      #
+      # 16.0.0 -> play-services-ads 24.6.0 ile geliyor ve Kotlin 2.1 ile
+      # uyumlu. `package.json`'da AÇIKÇA sabit sürüm yazılı (caret YOK) —
+      # ikisi birlikte durmalı.
+      #
+      # Expo SDK yükseltilip Kotlin 2.3+'a geçildiğinde bu satır kaldırılıp
+      # paket güncellenebilir.
+      - dependency-name: 'react-native-google-mobile-ads'
+
   - package-ecosystem: npm
     directory: /cheep-backend-express
     schedule: { interval: monthly }

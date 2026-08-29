@@ -93,6 +93,27 @@ pazarlarının tamamı AB. Uygulama açılışta `AdsConsent.gatherConsent()`
 çağırıyor; AdMob'da tanımlı mesaj yoksa rıza alınamaz, `canRequestAds` false
 kalır ve **hiçbir reklam gösterilmez** (sessizce, hatasız).
 
+## ⚠️ Paket sürümü SABİT — yükseltmeyin
+
+`react-native-google-mobile-ads` **16.0.0**'a tam sürümle sabitlendi (caret
+YOK) ve Dependabot'tan hariç tutuldu.
+
+Sebep: 16.1+ sürümleri `play-services-ads` 25.x'i çekiyor ve o SDK **Kotlin
+2.3.0** ile derlenmiş. Expo SDK 54'ün Kotlin derleyicisi **2.1.0** ve daha yeni
+metadata'yı okuyamıyor — AAB derlemesi şu hatayla düşüyor:
+
+```
+Module was compiled with an incompatible version of Kotlin.
+The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+```
+
+Bu üretimde yaşandı: 1.6.0'ın ilk Android derlemesi tam olarak bu yüzden
+kırıldı. 16.0.0 → `play-services-ads` 24.6.0 ile geliyor ve uyumlu.
+
+Expo SDK yükseltilip Kotlin 2.3+'a geçildiğinde paket güncellenebilir; o zaman
+`package.json`'daki sabit sürüm ve `dependabot.yml`'deki hariç tutma satırı
+BİRLİKTE kaldırılmalı.
+
 ## Uygulamada nerede ne var
 
 | Dosya | İş |
