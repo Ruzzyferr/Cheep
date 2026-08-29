@@ -1,0 +1,76 @@
+{
+  "_comment": "Monitorul Prețurilor kategori YOLU -> kanonik Cheep slug'ı. Yollar API'nin kategori ağacından üretiliyor (scrapers/monitorul.py category_paths). 'prefix:' anahtarları bir üst dalın TAMAMINI kapsar ve EN UZUN eşleşen önek kazanır — kaynak yeni bir yaprak eklediğinde ürün kategorisiz kalmaz, dalın slug'ını devralır. Slug'lar standard-categories.ts ile doğrulandı (2026-08-29).",
+
+  "prefix:LACTATE/LAPTE": "sut",
+  "prefix:LACTATE/BRANZETURI": "peynir",
+  "prefix:LACTATE/IAURTURI": "yogurt",
+  "prefix:LACTATE/SMANTANA": "krema-kaymak",
+  "prefix:LACTATE/FRISCA": "krema-kaymak",
+  "prefix:LACTATE/UNT": "tereyagi",
+  "prefix:LACTATE": "sut-urunleri",
+
+  "prefix:CARNE/CARNE PROAPSPATA/PASARE": "tavuk",
+  "prefix:CARNE/CARNE CONGELATA/PASARE": "tavuk",
+  "prefix:CARNE/CARNE PROCESATA/PASARE": "tavuk",
+  "prefix:CARNE/CARNE CONGELATA": "dondurulmus-et-urunleri",
+  "prefix:CARNE": "kirmizi-et",
+
+  "prefix:MEZELURI/SALAMURI": "salam",
+  "prefix:MEZELURI/CARNATI": "sucuk",
+  "prefix:MEZELURI/CRENWURSTI": "sucuk",
+  "prefix:MEZELURI": "sarkuteri",
+
+  "prefix:PESTE": "balik",
+  "prefix:PESTE/FRUCTE DE MARE/PROASPETE/FRUCTE DE MARE": "deniz-urunleri",
+  "prefix:PESTE/FRUCTE DE MARE/CONGELATE/FRUCTE DE MARE": "deniz-urunleri",
+
+  "prefix:FRUCTE": "meyve",
+  "prefix:LEGUME/CONGELATE": "dondurulmus-sebze",
+  "prefix:LEGUME": "sebze",
+  "prefix:MASLINE": "zeytin",
+
+  "prefix:PANIFICATIE/PAINE": "ekmek",
+  "prefix:PANIFICATIE/PASTE": "makarna",
+  "prefix:PANIFICATIE/PATISERIE": "firin-pastane",
+  "prefix:PANIFICATIE/ALUATURI": "firin-pastane",
+  "prefix:PANIFICATIE": "firin-pastane",
+
+  "prefix:ALIMENTE DE BAZA/FAINA": "un",
+  "prefix:ALIMENTE DE BAZA/MALAI": "un",
+  "prefix:ALIMENTE DE BAZA/OREZ": "pirinç",
+  "prefix:ALIMENTE DE BAZA/ZAHAR": "seker",
+  "prefix:ALIMENTE DE BAZA/ULEI": "yag",
+  "prefix:ALIMENTE DE BAZA/SOSURI/PROD TARTINABILE": "salca",
+  "prefix:ALIMENTE DE BAZA": "temel-gida",
+
+  "prefix:CEREALE": "kahvaltilik-gevrek",
+  "prefix:CONDIMENTE, CONSERVANTI": "baharat",
+  "prefix:CONSERVE/MURATURI": "sebze",
+  "prefix:CONSERVE": "temel-gida",
+
+  "prefix:COFETARIE, DESERT, DULCIURI/CIOCOLATA TABLETE": "cikolata",
+  "prefix:COFETARIE, DESERT, DULCIURI/GUMA DE MESTECAT": "sekerleme",
+  "prefix:COFETARIE, DESERT, DULCIURI/INGHETATA": "dondurma",
+  "prefix:COFETARIE, DESERT, DULCIURI": "atistirmalik",
+  "prefix:SNACKS": "atistirmalik",
+
+  "prefix:BAUTURI NEALCOOLICE/APA PLATA": "su",
+  "prefix:BAUTURI NEALCOOLICE/APA CARBOGAZOASA": "su",
+  "prefix:BAUTURI NEALCOOLICE/SUCURI": "meyve-suyu",
+  "prefix:BAUTURI NEALCOOLICE": "icecek",
+  "prefix:CAFEA, CEAI/CAFEA": "kahve",
+  "prefix:CAFEA, CEAI/CEAI": "cay",
+
+  "prefix:OUA": "yumurta",
+  "prefix:MANCARE GATITA, SEMIPREPARATA/SEMIPREPARATE CONGELATE": "dondurulmus-gida",
+  "prefix:MANCARE GATITA, SEMIPREPARATA": "hazir-yemek",
+
+  "prefix:ALIMENTE SI BAUTURI PENTRU BEBELUSI/LAPTE PRAF": "bebek-mamasi",
+  "prefix:ALIMENTE SI BAUTURI PENTRU BEBELUSI": "bebek",
+
+  "prefix:MASTI, MANUSI, DEZINFECTANTI/DEZINFECTANTI": "temizlik-malzemeleri",
+  "prefix:MASTI, MANUSI, DEZINFECTANTI/MANUSI": "eldiven-temizlik",
+  "prefix:MASTI, MANUSI, DEZINFECTANTI/MASTI": "maske",
+
+  "_alkol": "BAUTURI ALCOOLICE config'te category_deny_prefixes ile ELENİYOR (Polonya'daki Żabka/Carrefour ile aynı politika), bu yüzden burada bilerek eşlenmemiş."
+}

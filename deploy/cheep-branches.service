@@ -1,0 +1,18 @@
+[Unit]
+Description=Cheep market şube konumlarını tazeler (HR/HU/RO, aylık)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/cheep/deploy
+EnvironmentFile=/opt/cheep/deploy/.env
+Environment=CHEEP_API_URL=http://localhost:3000/api/v1
+ExecStart=/bin/bash /opt/cheep/deploy/run-branches.sh
+# Romanya'nın ızgara taraması ~1 saat sürebilir; systemd'nin varsayılan
+# zaman aşımı bunu keserdi.
+TimeoutStartSec=4h
+Nice=15
+IOSchedulingClass=idle
+StandardOutput=append:/opt/cheep/Cheep-Scraper/logs/branches.log
+StandardError=append:/opt/cheep/Cheep-Scraper/logs/branches.log

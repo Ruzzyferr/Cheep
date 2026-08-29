@@ -81,19 +81,26 @@ async function main() {
   for (const item of catalog) {
     const topSlug = slugify(item.category_top);
     if (!catId.has("t:" + topSlug)) {
+      // Kategoriler 2026'da ÜLKEYE KAPSAMLI hale geldi: `slug` artık global
+      // benzersiz değil, `(country_id, slug)` benzersiz. Ülkesiz upsert hem
+      // derlenmiyor hem de çalışsaydı TR kategorisini başka bir ülkeninkiyle
+      // karıştırırdı.
       const top = await prisma.category.upsert({
-        where: { slug: topSlug },
+        where: { country_id_slug: { country_id: country.id, slug: topSlug } },
         update: {},
-        create: { name: item.category_top, slug: topSlug },
+        create: { name: item.category_top, slug: topSlug, country_id: country.id },
       });
       catId.set("t:" + topSlug, top.id);
     }
     const subSlug = `${topSlug}--${slugify(item.category_sub)}`;
     if (!catId.has("s:" + subSlug)) {
       const sub = await prisma.category.upsert({
-        where: { slug: subSlug },
+        where: { country_id_slug: { country_id: country.id, slug: subSlug } },
         update: {},
-        create: { name: item.category_sub, slug: subSlug, parent_id: catId.get("t:" + topSlug)! },
+        create: {
+          name: item.category_sub, slug: subSlug, country_id: country.id,
+          parent_id: catId.get("t:" + topSlug)!,
+        },
       });
       catId.set("s:" + subSlug, sub.id);
     }

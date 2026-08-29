@@ -1,6 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
-import { STANDARD_CATEGORIES } from '../src/config/standard-categories.js';
+import {
+    CATEGORY_TREE_COUNTRIES,
+    seedCategoryTree,
+    seedCountriesAndStores,
+} from '../src/config/countries-seed.js';
 
 const prisma = new PrismaClient();
 
@@ -22,32 +26,24 @@ async function main() {
     });
     console.log('✅ Test kullanıcısı oluşturuldu:', testUser.email);
 
-    // 1b. Ülke (çok-ülke modeli) — Türkiye
-    const tr = await prisma.country.upsert({
-        where: { code: 'TR' },
-        update: {},
-        create: { code: 'TR', name: 'Türkiye', currency: 'TRY' },
-    });
-    const ch = await prisma.country.upsert({
-        where: { code: 'CH' },
-        update: {},
-        create: { code: 'CH', name: 'Schweiz', currency: 'CHF' },
-    });
-    const se = await prisma.country.upsert({
-        where: { code: 'SE' },
-        update: {},
-        create: { code: 'SE', name: 'Sverige', currency: 'SEK' },
-    });
-    const de = await prisma.country.upsert({
-        where: { code: 'DE' },
-        update: {},
-        create: { code: 'DE', name: 'Deutschland', currency: 'EUR' },
-    });
-    const pl = await prisma.country.upsert({
-        where: { code: 'PL' },
-        update: {},
-        create: { code: 'PL', name: 'Polska', currency: 'PLN' },
-    });
+    // 1b. Ülkeler ve YENİ ülkelerin marketleri — PAYLAŞILAN tanımdan.
+    //
+    // Liste `src/config/countries-seed.ts`'te duruyor ve üretim tohumlama
+    // betiği de (scripts/seed-countries.ts) oradan okuyor. İki yerde ayrı
+    // liste tutmak, bugün defalarca düzeltilen sapma hatasının ta kendisi
+    // olurdu: biri güncellenir, diğeri unutulur ve fark ancak üretimde
+    // eksik bir ülke ya da yanlış store_id olarak ortaya çıkar.
+    const { idByCode } = await seedCountriesAndStores(prisma);
+    const countryRef = (code: string) => {
+        const id = idByCode.get(code);
+        if (id === undefined) throw new Error(`tohumlamada ülke yok: ${code}`);
+        return { id };
+    };
+    const tr = countryRef('TR');
+    const ch = countryRef('CH');
+    const se = countryRef('SE');
+    const de = countryRef('DE');
+    const pl = countryRef('PL');
     console.log('✅ Ülkeler oluşturuldu');
 
     // 2. Marketler oluştur
@@ -150,51 +146,26 @@ async function main() {
     // mf_seed_categories.py) ve burada seed EDİLMEZ; elle tutulan bir listeyi
     // TR'ye de basmak, iki ağacın tek tabloda çakışmasına ve ikiz kategorilere
     // yol açmıştı.
-    console.log('📋 PL kategori ağacı oluşturuluyor...');
-    const categoryMap = new Map<string, number>(); // slug -> id mapping
-
-    for (const standardCategory of STANDARD_CATEGORIES) {
-        const parentCategory = await prisma.category.upsert({
-            where: { country_id_slug: { country_id: pl.id, slug: standardCategory.slug } },
-            update: {
-                name: standardCategory.name,
-                display_order: standardCategory.displayOrder,
-                icon_url: standardCategory.icon || null,
-            },
-            create: {
-                name: standardCategory.name,
-                slug: standardCategory.slug,
-                country_id: pl.id,
-                parent_id: null,
-                display_order: standardCategory.displayOrder,
-                icon_url: standardCategory.icon || null,
-            },
-        });
-
-        categoryMap.set(standardCategory.slug, parentCategory.id);
-
-        for (const subcategory of standardCategory.subcategories) {
-            const subCategory = await prisma.category.upsert({
-                where: { country_id_slug: { country_id: pl.id, slug: subcategory.slug } },
-                update: {
-                    name: subcategory.name,
-                    parent_id: parentCategory.id,
-                    display_order: subcategory.displayOrder,
-                },
-                create: {
-                    name: subcategory.name,
-                    slug: subcategory.slug,
-                    country_id: pl.id,
-                    parent_id: parentCategory.id,
-                    display_order: subcategory.displayOrder,
-                },
-            });
-
-            categoryMap.set(subcategory.slug, subCategory.id);
-        }
+    // KATEGORİ AĞACI — PL taksonomisi, artık ÜLKE BAŞINA kuruluyor.
+    //
+    // Bu döngü eskiden `pl.id`'ye SABİTLENMİŞTİ. Kategoriler ülkeye kapsamlı
+    // (`country_id_slug` benzersiz) olduğundan, yeni bir ülke eklenip ağacı
+    // kurulmazsa o ülkenin TÜM ürünleri kategorisiz kalır: hiçbir kategori
+    // sayfasında, hiçbir listede görünmezler. Scraper'lar aynı kanonik
+    // slug'ları gönderdiği için (bkz. her ülkenin category_map.json'ı) ağaç
+    // her ülkede AYNI olmalı.
+    //
+    // TÜRKİYE bilerek DIŞARIDA: TR taksonomisi devletin verisinden türetilir
+    // (Cheep-Scraper/countries/turkey/mf_taxonomy.py → mf_seed_categories.py).
+    // Elle tutulan bu listeyi TR'ye de basmak bir kez ikiz kategorilere ve içi
+    // boş ölü kabuklara yol açmıştı.
+    console.log('📋 Kategori ağaçları oluşturuluyor...');
+    let categoryMap = new Map<string, number>(); // slug -> id (PL; ürün seed'i kullanıyor)
+    for (const code of CATEGORY_TREE_COUNTRIES) {
+        const slugs = await seedCategoryTree(prisma, countryRef(code).id);
+        if (code === 'PL') categoryMap = slugs;
+        console.log(`✅ ${code} kategori ağacı (${slugs.size} slug)`);
     }
-
-    console.log('✅ PL kategori ağacı oluşturuldu');
 
     // Kategorileri değişkenlere atayalım (ürünler için)
     const sutId = categoryMap.get('sut')!;
@@ -445,6 +416,13 @@ async function main() {
     const testList = await prisma.list.create({
         data: {
             user_id: testUser.id,
+            // ZORUNLU ALAN: `List.country_id` 2026-07-15'te NOT NULL olarak
+            // eklendi (liste, oluşturulduğu ülkeye aittir ve yalnızca o
+            // ülkedeyken görünür) ama bu seed satırı güncellenmemişti —
+            // tohumlama tam burada patlıyor ve öncesindeki her şey yazılmış,
+            // sonrasındaki hiçbir şey yazılmamış oluyordu. Test kullanıcısı
+            // ve ürünleri TR kataloğundan.
+            country_id: tr.id,
             name: 'Haftalık Alışveriş',
             budget: 500,
             list_items: {

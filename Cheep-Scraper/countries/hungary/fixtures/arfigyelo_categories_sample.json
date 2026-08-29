@@ -1,0 +1,533 @@
+{
+ "categories": [
+  {
+   "id": 1001,
+   "name": "Tejtermék, sajt, tojás",
+   "path": "tejtermek_sajt_tojas",
+   "icon": null,
+   "categoryNodes": [
+    {
+     "id": 2001,
+     "name": "Tej",
+     "path": "tejtermek_sajt_tojas/tej",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 1,
+       "name": "Pasztőrözött ESL tej, 2,8% zsírtart.",
+       "path": "tejtermek_sajt_tojas/tej/esl_28",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 2,
+       "name": "Pasztőrözött ESL tej, 1,5% zsírtart.",
+       "path": "tejtermek_sajt_tojas/tej/esl_15",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 3,
+       "name": "UHT tej dobozban, 2,8% zsírtart.",
+       "path": "tejtermek_sajt_tojas/tej/uht_28",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 4,
+       "name": "UHT tej dobozban, 1,5% zsírtart.",
+       "path": "tejtermek_sajt_tojas/tej/uht_15",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2005,
+     "name": "Tejföl",
+     "path": "tejtermek_sajt_tojas/tejfol",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 5,
+       "name": "Tejföl 20% zsírtart.",
+       "path": "tejtermek_sajt_tojas/tejfol/tejfol_20",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 6,
+       "name": "Tejföl 12% zsírtart.",
+       "path": "tejtermek_sajt_tojas/tejfol/tejfol_12",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2007,
+     "name": "Joghurt, túró, kefír",
+     "path": "tejtermek_sajt_tojas/joghurt_turo_kefir",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 7,
+       "name": "Natúr joghurt",
+       "path": "tejtermek_sajt_tojas/joghurt_turo_kefir/natur_joghurt",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 8,
+       "name": "Kefir és kaukázusi kefir",
+       "path": "tejtermek_sajt_tojas/joghurt_turo_kefir/kefir",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 9,
+       "name": "Tehéntúró",
+       "path": "tejtermek_sajt_tojas/joghurt_turo_kefir/tehenturo",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 84,
+       "name": "Gyümölcsjoghurt",
+       "path": "tejtermek_sajt_tojas/joghurt_turo_kefir/gyumolcsjoghurt",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2010,
+     "name": "Sajt",
+     "path": "tejtermek_sajt_tojas/sajt",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 10,
+       "name": "Trappista tömbsajt",
+       "path": "tejtermek_sajt_tojas/sajt/trappista_tombsajt",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 105,
+       "name": "Trappista darabolt sajt",
+       "path": "tejtermek_sajt_tojas/sajt/trappista_darabolt_sajt",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 106,
+       "name": "Trappista szeletelt sajt",
+       "path": "tejtermek_sajt_tojas/sajt/trappista_szeletelt_sajt",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 107,
+       "name": "Ementáli",
+       "path": "tejtermek_sajt_tojas/sajt/ementali",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 108,
+       "name": "Cheddar",
+       "path": "tejtermek_sajt_tojas/sajt/cheddar",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 109,
+       "name": "Gouda",
+       "path": "tejtermek_sajt_tojas/sajt/gouda",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 110,
+       "name": "Edami",
+       "path": "tejtermek_sajt_tojas/sajt/edami",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 111,
+       "name": "Camambert",
+       "path": "tejtermek_sajt_tojas/sajt/camambert",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 112,
+       "name": "Brie",
+       "path": "tejtermek_sajt_tojas/sajt/brie",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 113,
+       "name": "Feta",
+       "path": "tejtermek_sajt_tojas/sajt/feta",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 114,
+       "name": "Mozzarella",
+       "path": "tejtermek_sajt_tojas/sajt/mozzarella",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 115,
+       "name": "Ömlesztett sajtok",
+       "path": "tejtermek_sajt_tojas/sajt/omlesztettsajtok",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2011,
+     "name": "Vajak, vajkrém, margarin",
+     "path": "tejtermek_sajt_tojas/vaj_vajkrem_margarin",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 11,
+       "name": "Margarin",
+       "path": "tejtermek_sajt_tojas/vaj_vajkrem_margarin/margarin",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 12,
+       "name": "Vaj",
+       "path": "tejtermek_sajt_tojas/vaj_vajkrem_margarin/vaj",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 13,
+       "name": "Vajkrém",
+       "path": "tejtermek_sajt_tojas/vaj_vajkrem_margarin/vajkrem",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 63,
+       "name": "Sütőmargarin",
+       "path": "tejtermek_sajt_tojas/vaj_vajkrem_margarin/sutomargarin",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2014,
+     "name": "Tojás",
+     "path": "tejtermek_sajt_tojas/tojasok",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 14,
+       "name": "Tojás",
+       "path": "tejtermek_sajt_tojas/tojasok/tojas",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2081,
+     "name": "Tejszín",
+     "path": "tejtermek_sajt_tojas/tejszin",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 81,
+       "name": "Főzőtejszín",
+       "path": "tejtermek_sajt_tojas/tejszin/fozotejszin",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 82,
+       "name": "Habtejszín",
+       "path": "tejtermek_sajt_tojas/tejszin/habtejszin",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2116,
+     "name": "Tejdesszert",
+     "path": "tejtermek_sajt_tojas/tejdesszert",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 116,
+       "name": "Túródesszert",
+       "path": "tejtermek_sajt_tojas/tejdesszert/turodesszert",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": 1015,
+   "name": "Hús, hal, felvágott",
+   "path": "hus_hal_felvagott",
+   "icon": null,
+   "categoryNodes": [
+    {
+     "id": 2015,
+     "name": "Sertés",
+     "path": "hus_hal_felvagott/sertes",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 15,
+       "name": "Sertéscomb",
+       "path": "hus_hal_felvagott/sertes/sertes_comb",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 16,
+       "name": "Sertéskaraj",
+       "path": "hus_hal_felvagott/sertes/sertes_karaj",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 85,
+       "name": "Darált sertéshús",
+       "path": "hus_hal_felvagott/sertes/daralt_serteshus",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 118,
+       "name": "Sertésoldalas",
+       "path": "hus_hal_felvagott/sertes/sertesoldalas",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 119,
+       "name": "Sertéstarja",
+       "path": "hus_hal_felvagott/sertes/sertestarja",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2017,
+     "name": "Szárnyasok",
+     "path": "hus_hal_felvagott/szarnyas",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 17,
+       "name": "Egész csirke és tyúk",
+       "path": "hus_hal_felvagott/szarnyas/csirke_egesz",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 18,
+       "name": "Csirkemellfilé",
+       "path": "hus_hal_felvagott/szarnyas/csirkemell",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 19,
+       "name": "Csirkecomb",
+       "path": "hus_hal_felvagott/szarnyas/csirkecomb",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 20,
+       "name": "Csirkeszárny",
+       "path": "hus_hal_felvagott/szarnyas/csirkeszarny",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 21,
+       "name": "Pulykamellfilé",
+       "path": "hus_hal_felvagott/szarnyas/pulykamell",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2064,
+     "name": "Marha",
+     "path": "hus_hal_felvagott/marha",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 64,
+       "name": "Marhalábszár",
+       "path": "hus_hal_felvagott/marha/marhalabszar",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 86,
+       "name": "Darált marhahús",
+       "path": "hus_hal_felvagott/marha/daralt_marhahus",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 87,
+       "name": "Fehérpecsenye",
+       "path": "hus_hal_felvagott/marha/feherpecsenye",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2022,
+     "name": "Egyéb húskészítmények",
+     "path": "hus_hal_felvagott/egyeb_huskeszitmeny",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 22,
+       "name": "Sertészsír",
+       "path": "hus_hal_felvagott/egyeb_huskeszitmeny/sertes_zsir",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 23,
+       "name": "Virsli",
+       "path": "hus_hal_felvagott/egyeb_huskeszitmeny/virsli",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2024,
+     "name": "Felvágottak",
+     "path": "hus_hal_felvagott/felvagott",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 24,
+       "name": "Párizsi",
+       "path": "hus_hal_felvagott/felvagott/parizsi",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 25,
+       "name": "Téliszalámi",
+       "path": "hus_hal_felvagott/felvagott/teliszalami",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 26,
+       "name": "Pulykamell sonka",
+       "path": "hus_hal_felvagott/felvagott/sonka_pulykamell",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 27,
+       "name": "Sonka, sertéscombból",
+       "path": "hus_hal_felvagott/felvagott/sonka_sertescomb",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2088,
+     "name": "Kolbász",
+     "path": "hus_hal_felvagott/kolbasz",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 88,
+       "name": "Szárazkolbász",
+       "path": "hus_hal_felvagott/kolbasz/szarazkolbasz",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2089,
+     "name": "Szalonna",
+     "path": "hus_hal_felvagott/szalonna",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 89,
+       "name": "Császárszalonna",
+       "path": "hus_hal_felvagott/szalonna/csaszarszalonna",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 90,
+       "name": "Kolozsvári szalonna",
+       "path": "hus_hal_felvagott/szalonna/kolozsvariszalonna",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    },
+    {
+     "id": 2091,
+     "name": "Halak",
+     "path": "hus_hal_felvagott/hal",
+     "icon": null,
+     "categoryNodes": [
+      {
+       "id": 91,
+       "name": "Pontyszelet",
+       "path": "hus_hal_felvagott/hal/pontyszelet",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 92,
+       "name": "Harcsafilé",
+       "path": "hus_hal_felvagott/hal/harcsafile",
+       "icon": null,
+       "categoryNodes": []
+      },
+      {
+       "id": 93,
+       "name": "Tengeri halfilé",
+       "path": "hus_hal_felvagott/hal/tengeri_halfile",
+       "icon": null,
+       "categoryNodes": []
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

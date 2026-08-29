@@ -14,8 +14,17 @@ const FLAGS: Record<string, { badge: string; flag: string }> = {
   DE: { badge: '#111111', flag: 'linear-gradient(to bottom, #000 33.3%, #DD0000 33.3% 66.6%, #FFCE00 66.6%)' },
   CH: { badge: '#D52B1E', flag: '#D52B1E' },
   SE: { badge: '#006AA7', flag: 'linear-gradient(to bottom, #006AA7 38%, #FECC00 38% 62%, #006AA7 62%)' },
+  HR: { badge: '#171796', flag: 'linear-gradient(to bottom, #FF0000 33.3%, #FFFFFF 33.3% 66.6%, #171796 66.6%)' },
+  HU: { badge: '#477050', flag: 'linear-gradient(to bottom, #CE2939 33.3%, #FFFFFF 33.3% 66.6%, #477050 66.6%)' },
+  RO: { badge: '#002B7F', flag: 'linear-gradient(to right, #002B7F 33.3%, #FCD116 33.3% 66.6%, #CE1126 66.6%)' },
 }
 
+/**
+ * Şeritte dönen market adları. YALNIZCA verisi gerçekten akan zincirler —
+ * burada bir marka göstermek "bu marketin fiyatları var" iddiasıdır.
+ * HR/HU/RO zincirleri (Konzum, Plodine, Tesco, Mega Image…) ülkeler canlıya
+ * alındığında eklenecek.
+ */
 const BRANDS = [
   'Migros', 'A101', 'BİM', 'ŞOK', 'CarrefourSA', 'Tarım Kredi',
   'Biedronka', 'Lidl', 'Żabka', 'Auchan', 'Carrefour',

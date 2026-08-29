@@ -1,0 +1,100 @@
+{
+  "country": "Croatia",
+  "country_code": "HR",
+  "default_unit": "kom",
+  "live": false,
+  "markets": [
+    {
+      "name": "Konzum",
+      "store_id": 50,
+      "scraper_path": "scrapers/chains.py",
+      "scraper_class": "KonzumScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "konzum_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["Alkohol"],
+      "note": "çapa; Hırvatistan'ın en büyük süpermarket zinciri. Ölçüm (2026-08-28 arşivi): 188 mağaza, 21.907 ürün, %94,8 gerçek EAN. DİKKAT — mağazalar arası fiyat farkı BÜYÜK: ürünlerin yalnızca %26,5'i tüm mağazalarda aynı fiyatta. Bu yüzden `cijene_base.pick_reference_store` en geniş kataloglu (Zagreb tercihli) TEK bir gerçek mağazayı seçer ve o mağazanın raf fiyatlarını yayınlar; ortalama almak kullanıcının mağazada göremeyeceği uydurma bir fiyat üretirdi. Kaynak yasal zorunluluk (NN 75/2025), cijene.dev üzerinden toplanıyor."
+    },
+    {
+      "name": "Lidl",
+      "store_id": 51,
+      "scraper_path": "scrapers/chains.py",
+      "scraper_class": "LidlHrScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "lidl_hr_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["Alkohol"],
+      "note": "indirimci — FİYAT ÇIPASI. Almanya'nın battığı yer tam olarak buydu: indirimci olmadan katalogda ucuz uç yok. 116 mağaza, 7.065 ürün, %97,4 EAN. Fiyatlandırma neredeyse ulusal (ürünlerin %98,4'ü tüm mağazalarda tek fiyat), dolayısıyla referans mağaza seçimi burada pratikte fark yaratmıyor."
+    },
+    {
+      "name": "Spar",
+      "store_id": 52,
+      "scraper_path": "scrapers/chains.py",
+      "scraper_class": "SparHrScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "spar_hr_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["Alkohol"],
+      "note": "145 mağaza, 23.264 ürün, %97,4 EAN. NOT: Macaristan'da SPAR devlet sistemine hiç fiyat bildirmiyor; Hırvatistan'da yasal zorunluluk mağaza bazında yayın istediği için burada tam veri var."
+    },
+    {
+      "name": "Plodine",
+      "store_id": 53,
+      "scraper_path": "scrapers/chains.py",
+      "scraper_class": "PlodineScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "plodine_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["Alkohol"],
+      "note": "arşivdeki EN GENİŞ katalog: 154 mağaza, 29.471 ürün, %92,8 EAN. Konzum gibi mağaza bazlı fiyat farkı yüksek (tek fiyatlı ürün oranı %47,0) — referans mağaza modeli burada da geçerli."
+    },
+    {
+      "name": "Kaufland",
+      "store_id": 54,
+      "scraper_path": "scrapers/chains.py",
+      "scraper_class": "KauflandHrScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "kaufland_hr_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["Alkohol"],
+      "note": "53 mağaza, 18.917 ürün, %100 EAN — arşivdeki en temiz barkod kapsamı, marketler arası birleştirmenin bel kemiği. Fiyat %97,0 ulusal."
+    },
+    {
+      "name": "Tommy",
+      "store_id": 55,
+      "scraper_path": "scrapers/chains.py",
+      "scraper_class": "TommyScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "tommy_products_{timestamp}.json",
+      "enabled": true,
+      "category_deny_prefixes": ["Alkohol"],
+      "note": "Dalmaçya ağırlıklı, 87 mağaza, 19.879 ürün, %100 EAN. Kaba kategori adları diğer zincirlerden FARKLI ('PAKIRANA HRANA I PIĆE', 'SVJEŽI ODJELI', 'HLAĐENO I SMRZNUTO') — classify.py'nin kaba-yedek tablosunda bunlar ayrıca karşılanıyor."
+    },
+    {
+      "name": "Studenac",
+      "store_id": 56,
+      "scraper_path": "scrapers/chains.py",
+      "scraper_class": "StudenacScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "studenac_products_{timestamp}.json",
+      "enabled": false,
+      "category_deny_prefixes": ["Alkohol"],
+      "note": "KAPALI (ilk sürüme dahil değil). 20.163 ürün ama arşivde yalnızca 20 mağaza görünüyor (zincirin gerçek mağaza sayısı çok daha yüksek) — yayın kapsamı doğrulanmadan açılmamalı. Ayrıca ince kategori oranı en düşük zincir (%53,7)."
+    },
+    {
+      "name": "Eurospin",
+      "store_id": 57,
+      "scraper_path": "scrapers/chains.py",
+      "scraper_class": "EurospinHrScraper",
+      "scraper_method": "fetch_products",
+      "output_pattern": "eurospin_hr_products_{timestamp}.json",
+      "enabled": false,
+      "category_deny_prefixes": ["Alkohol"],
+      "note": "KAPALI (ilk sürüme dahil değil). 43 mağaza, 3.911 ürün, %77,9 EAN — arşivin en düşük barkod kapsamı."
+    }
+  ],
+  "output_dir": "output",
+  "log_dir": "logs",
+  "source_note": "Veri kaynağı: NN 75/2025 (2 Mayıs 2025) uyarınca her perakendecinin HER MAĞAZASI için günlük yayınlamak ZORUNDA olduğu fiyat listeleri; cijene.dev (github.com/senko/cijene-api) bunları tek günlük ZIP arşivinde topluyor. Kullanım şartları §4 verinin uygulamalarda serbestçe kullanılabileceğini açıkça belirtiyor. Yani bu ülkede scrape YAPILMIYOR — kamuya açık, yasal zorunlulukla yayınlanmış veri okunuyor ve bunlar tanımı gereği RAF fiyatları (Almanya'yı NO-GO yapan teslimat-platformu markup sorunu burada yok).",
+  "off_note": "OFF zenginleştirmesi GEREKSİZ: barkod kapsamı zaten %92-100. Polonya'da OFF'a ihtiyaç duyulmasının sebebi Biedronka/Auchan'ın EAN'sız feed'leriydi."
+}

@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { SiteLink as Link } from '../../components/ui/SiteLink'
-import { LocaleContext } from '../../i18n'
+import { LocaleContext, type Locale } from '../../i18n'
 import { CONTENT, fill } from '../../i18n/content'
 import { usePageData } from '../../data/context'
 import { ContentLayout } from '../../components/content/ContentLayout'
@@ -417,7 +417,7 @@ function ApiProductCard({
   labels,
 }: {
   product: ApiProduct
-  locale: 'tr' | 'pl'
+  locale: Locale
   currency: string
   labels: { from: string; stores: string; save: string }
 }) {

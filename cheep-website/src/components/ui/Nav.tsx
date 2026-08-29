@@ -1,35 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { useLocation } from 'react-router-dom'
 import { SiteLink as Link } from './SiteLink'
 import { CheepBird } from '../brand/CheepBird'
 import { cn } from '../../lib/utils'
-import { useT, useLocale, useHref, localeHref, stripLocale, LOCALES } from '../../i18n'
-import { isContentPath } from '../../data/routes'
-
-/**
- * Aktif sayfanın diğer dildeki karşılığı.
- *
- * İÇERİK sayfalarında karşılık YOKTUR (TR ve PL katalogları farklı ürünler —
- * bkz. `data/routes.ts`), o yüzden yalnızca önek takmak ölü bir adres üretir.
- * Orada diğer dilin ANASAYFASINA gönderiyoruz: kullanıcı dilini değiştirmiş
- * olur ve var olan bir sayfaya iner. Yasal sayfalar ve anasayfa gerçekten
- * çeviri çiftidir; onlarda eski davranış korunuyor.
- */
-function useOtherLocale(): { locale: string; href: string } {
-  const locale = useLocale()
-  const { pathname } = useLocation()
-  const other = LOCALES.find((l) => l !== locale) ?? locale
-  const rest = stripLocale(pathname)
-  return {
-    locale: other,
-    href: localeHref(other, isContentPath(rest) ? '/' : rest),
-  }
-}
+import { useT, useHref } from '../../i18n'
+import { LanguageMenu } from './LanguageMenu'
 
 export function Nav() {
   const t = useT()
   const href = useHref()
-  const other = useOtherLocale()
   const [scrolled, setScrolled] = useState(false)
   const [hidden, setHidden] = useState(false)
   const [open, setOpen] = useState(false)
@@ -99,13 +77,7 @@ export function Nav() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            to={other.href}
-            hrefLang={other.locale}
-            className="hidden rounded-full border border-forest/20 px-3.5 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-forest-deep transition-colors hover:bg-mint-soft sm:inline-flex"
-          >
-            {t.nav.langSwitchTo}
-          </Link>
+          <LanguageMenu className="hidden sm:block" />
 
           <a
             href={href('#download')}
@@ -173,14 +145,7 @@ export function Nav() {
           >
             {t.nav.download}
           </a>
-          <Link
-            to={other.href}
-            hrefLang={other.locale}
-            onClick={() => setOpen(false)}
-            className="rounded-full border border-forest/25 px-6 py-4 text-center text-base font-semibold text-forest-deep"
-          >
-            {t.nav.langSwitchTo}
-          </Link>
+          <LanguageMenu className="self-center" onNavigate={() => setOpen(false)} />
         </div>
       </div>
     </header>

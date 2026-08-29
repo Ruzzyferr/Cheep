@@ -158,14 +158,20 @@
     "CH": "İsviçre",
     "SE": "İsveç",
     "DE": "Almanya",
-    "PL": "Polonya"
+    "PL": "Polonya",
+    "HR": "Hırvatistan",
+    "HU": "Macaristan",
+    "RO": "Romanya"
   },
   "languages": {
     "tr": "Türkçe",
     "en": "English",
     "de": "Deutsch",
     "pl": "Polski",
-    "sv": "Svenska"
+    "sv": "Svenska",
+    "hr": "Hrvatski",
+    "hu": "Magyar",
+    "ro": "Română"
   },
   "product": {
     "no_price_info": "Fiyat bilgisi yok",
@@ -582,5 +588,8 @@
     "card_cta": "Premium'u incele",
     "card_active_title": "Cheep Premium aktif",
     "card_active_body": "Teşekkürler! Aboneliğini buradan yönetebilirsin."
+  },
+  "ads": {
+    "label": "Reklam"
   }
 }

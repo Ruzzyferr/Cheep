@@ -7,6 +7,11 @@ export const COUNTRY_CONFIG: Record<string, { currency: string; symbol: string; 
   SE: { currency: 'SEK', symbol: 'kr', locale: 'sv-SE' },
   DE: { currency: 'EUR', symbol: '€', locale: 'de-DE' },
   PL: { currency: 'PLN', symbol: 'zł', locale: 'pl-PL' },
+  // Hırvatistan 2023'te euro'ya geçti — kuna (HRK) ARTIK KULLANILMIYOR.
+  HR: { currency: 'EUR', symbol: '€', locale: 'hr-HR' },
+  // Forint'in pratikte kuruşu yok; Intl `HUF` için zaten 0 ondalık kullanır.
+  HU: { currency: 'HUF', symbol: 'Ft', locale: 'hu-HU' },
+  RO: { currency: 'RON', symbol: 'lei', locale: 'ro-RO' },
 };
 const DEFAULT_CODE = 'TR';
 const cfg = (code: string) => COUNTRY_CONFIG[code] ?? COUNTRY_CONFIG[DEFAULT_CODE];

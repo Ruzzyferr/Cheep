@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { ALLOWED_UNITS_MUTABLE } from '../config/units.js';
 
 export const createListSchema = Joi.object({
     name: Joi.string().min(2).max(100).required().messages({
@@ -43,7 +44,7 @@ export const addListItemSchema = Joi.object({
         'number.positive': 'Miktar pozitif olmalıdır',
     }),
     unit: Joi.string()
-        .valid('adet', 'kg', 'g', 'l', 'ml', 'cl', 'paket', 'kutu')
+        .valid(...ALLOWED_UNITS_MUTABLE)
         .default('adet'),
     brand_independent: Joi.boolean().optional(),
 });
@@ -51,7 +52,7 @@ export const addListItemSchema = Joi.object({
 export const updateListItemSchema = Joi.object({
     quantity: Joi.number().positive().optional(),
     unit: Joi.string()
-        .valid('adet', 'kg', 'g', 'l', 'ml', 'cl', 'paket', 'kutu')
+        .valid(...ALLOWED_UNITS_MUTABLE)
         .optional(),
     brand_independent: Joi.boolean().optional(),
 }).min(1);

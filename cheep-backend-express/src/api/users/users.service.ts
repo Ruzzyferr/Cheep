@@ -3,8 +3,17 @@ import { prisma } from '../../utils/prisma.client.js';
 import { AppError, notFound, conflict, badRequest } from '../../utils/app-error.js';
 import { getCountryByCode } from '../../utils/country.js';
 
-/** Desteklenen arayüz dilleri. */
-export const SUPPORTED_LANGUAGES = ['tr', 'en', 'de', 'pl', 'sv'] as const;
+/**
+ * Desteklenen arayüz dilleri — `category-i18n.ts`'teki TEK KAYNAKTAN gelir.
+ *
+ * Burada eskiden AYRI bir kopya vardı (`['tr','en','de','pl','sv']`) ve
+ * yeni diller eklendiğinde güncellenmedi: kategori adları Hırvatça
+ * çevriliyordu ama kullanıcı dilini Hırvatça olarak KAYDEDEMİYORDU — istek
+ * "Desteklenmeyen dil: hr" ile 400 dönüyordu. Aynı sınıf hata birim
+ * listelerinde de vardı (bkz. src/config/units.ts). Kopya liste tutmuyoruz.
+ */
+export { SUPPORTED_LANGS as SUPPORTED_LANGUAGES } from '../../config/category-i18n.js';
+import { SUPPORTED_LANGS } from '../../config/category-i18n.js';
 
 /**
  * Kullanıcı bilgilerini günceller (ad, ülke, dil tercihi)
@@ -16,7 +25,7 @@ export const updateUser = async (
     const patch: { name?: string; country_id?: number; language?: string } = {};
     if (data.name !== undefined) patch.name = data.name;
     if (data.language !== undefined) {
-        if (!SUPPORTED_LANGUAGES.includes(data.language as any)) {
+        if (!(SUPPORTED_LANGS as readonly string[]).includes(data.language)) {
             throw badRequest(`Desteklenmeyen dil: ${data.language}`);
         }
         patch.language = data.language;

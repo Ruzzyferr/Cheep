@@ -4,6 +4,15 @@ export const pl: Dict = {
   htmlLang: 'pl',
   ogLocale: 'pl_PL',
 
+  notFound: {
+
+    title: 'Nie znaleziono strony — Cheep',
+
+    description: 'Nie znaleźliśmy tej strony.',
+
+  },
+
+
   nav: {
     links: [
       { label: 'Produkty', href: '/produkty' },
@@ -17,7 +26,7 @@ export const pl: Dict = {
     openMenu: 'Otwórz menu',
     closeMenu: 'Zamknij menu',
     home: 'Cheep — strona główna',
-    langSwitchTo: 'Türkçe',
+    langMenuLabel: 'Wybierz język',
   },
 
   hero: {

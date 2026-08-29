@@ -1,0 +1,17 @@
+[Unit]
+Description=Cheep Hırvatistan günlük scrape+ingest (chain-rotation; kaynak günlük ~81 MB ZIP (cijene.dev), gün başına TEK indirme)
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/cheep/Cheep-Scraper
+EnvironmentFile=/opt/cheep/deploy/.env
+Environment=CHEEP_API_URL=http://localhost:3000/api/v1
+ExecStart=/bin/bash countries/croatia/run-daily.sh
+# Droplet 1 vCPU / 2 GB ve üzerinde Postgres + Node + Caddy var. Scrape her
+# zaman İKİNCİL iş: kullanıcı isteklerini yavaşlatmasın.
+Nice=10
+IOSchedulingClass=idle
+StandardOutput=append:/opt/cheep/Cheep-Scraper/logs/fetcher-hr.log
+StandardError=append:/opt/cheep/Cheep-Scraper/logs/fetcher-hr.log

@@ -1,0 +1,232 @@
+{
+ "Items": [
+  {
+   "id": "10533975442",
+   "storeid": "1408",
+   "name": "ALBALACT CHEFIR 3%GR. 330G",
+   "unit": "BUC",
+   "brand": "Albalact",
+   "price": 5.59,
+   "retailcategname": "Băuturi lapte",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1010357",
+    "name": "ALBALACT CHEFIR 3%GR. 330G",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  },
+  {
+   "id": "10533975452",
+   "storeid": "1408",
+   "name": "Z ALPRO BAUTURA SOIA NEINDULCITA 1L",
+   "unit": "BUC",
+   "brand": "Alpro",
+   "price": 15.69,
+   "retailcategname": "Lapte UHT",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1010454",
+    "name": "Z ALPRO BAUTURA SOIA NEINDULCITA 1L",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  },
+  {
+   "id": "10533975501",
+   "storeid": "1408",
+   "name": "ACTIVIA IAURT DE BAUT 0.9% 320G",
+   "unit": "BUC",
+   "brand": "Activia",
+   "price": 5.29,
+   "retailcategname": "Băuturi lapte",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1010863",
+    "name": "ACTIVIA IAURT DE BAUT 0.9% 320G",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  },
+  {
+   "id": "10533975503",
+   "storeid": "1408",
+   "name": "OUG NAPOLACT LAPTE CUTIE 1.5% 1L",
+   "unit": "BUC",
+   "brand": "Napolact",
+   "price": 6.99,
+   "retailcategname": "Lapte refrigerat",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1010868",
+    "name": "OUG NAPOLACT LAPTE CUTIE 1.5% 1L",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  },
+  {
+   "id": "10533975512",
+   "storeid": "1408",
+   "name": "DANONE SANA 3.6%GR 320G",
+   "unit": "BUC",
+   "brand": "Danone",
+   "price": 5.09,
+   "retailcategname": "Băuturi lapte",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1010930",
+    "name": "DANONE SANA 3.6%GR 320G",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  },
+  {
+   "id": "10533975543",
+   "storeid": "1408",
+   "name": "Z MULLER KAFFE ESPRESSO MACCH.1.2% 250ML",
+   "unit": "BUC",
+   "brand": "Muller Kaffee",
+   "price": 7.99,
+   "retailcategname": "Băuturi lapte",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1011149",
+    "name": "Z MULLER KAFFE ESPRESSO MACCH.1.2% 250ML",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  },
+  {
+   "id": "10533975603",
+   "storeid": "1408",
+   "name": "Z STARBUCKS CAFFE LATTE 220ML",
+   "unit": "BUC",
+   "brand": "Starbucks",
+   "price": 13.99,
+   "retailcategname": "Băuturi lapte",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1011630",
+    "name": "Z STARBUCKS CAFFE LATTE 220ML",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  },
+  {
+   "id": "10533975605",
+   "storeid": "1408",
+   "name": "COVALACT DE TARA CHEFIR 3.3% 900G",
+   "unit": "BUC",
+   "brand": "COVALACT",
+   "price": 11.99,
+   "retailcategname": "Băuturi lapte",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1011634",
+    "name": "COVALACT DE TARA CHEFIR 3.3% 900G",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  },
+  {
+   "id": "10533975664",
+   "storeid": "1408",
+   "name": "OUG ZUZU LAPTE SEMIDEGRESAT 1.5% 1L",
+   "unit": "BUC",
+   "brand": "Zuzu",
+   "price": 6.69,
+   "retailcategname": "Lapte refrigerat",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1012187",
+    "name": "OUG ZUZU LAPTE SEMIDEGRESAT 1.5% 1L",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  },
+  {
+   "id": "10533975672",
+   "storeid": "1408",
+   "name": "Z ALPRO BARISTA BAUTURA MIGDALE 1L",
+   "unit": "BUC",
+   "brand": "Alpro Barista",
+   "price": 16.69,
+   "retailcategname": "Lapte UHT",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1012220",
+    "name": "Z ALPRO BARISTA BAUTURA MIGDALE 1L",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  },
+  {
+   "id": "10533975675",
+   "storeid": "1408",
+   "name": "Z COFFEETA PUDRA PT.CAFEA 400G",
+   "unit": "BUC",
+   "brand": "Coffeeta Classic",
+   "price": 13.69,
+   "retailcategname": "Lapte/frişca cafea",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1012254",
+    "name": "Z COFFEETA PUDRA PT.CAFEA 400G",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  },
+  {
+   "id": "10533975787",
+   "storeid": "1408",
+   "name": "COVALACT BRANZA FAGARAS 8% 2X185G-10%",
+   "unit": "BUC",
+   "brand": "Covalact",
+   "price": 13.59,
+   "retailcategname": "Lapte băt/Cr condim.",
+   "pricedate": "28.08.2026 04:00",
+   "catprod": {
+    "id": "1013234",
+    "name": "COVALACT BRANZA FAGARAS 8% 2X185G-10%",
+    "prodcateg": {
+     "id": "137",
+     "name": "LAPTE",
+     "logo": {}
+    }
+   }
+  }
+ ]
+}

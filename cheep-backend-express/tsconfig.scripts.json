@@ -1,0 +1,24 @@
+{
+  /*
+   * `prisma/` ve `scripts/` için AYRI tip denetimi.
+   *
+   * NEDEN AYRI BİR DOSYA: ana `tsconfig.json` yalnızca `src/**\/*` içeriyor
+   * (çünkü `rootDir: ./src` ve derleme çıktısı `dist/` oraya göre kuruluyor).
+   * Sonuç: `prisma/seed.ts` ve `scripts/*.ts` HİÇ tip denetiminden geçmiyordu
+   * — oysa ikisi de üretimde çalışıyor (`pnpm db:seed`, bakım betikleri).
+   *
+   * Bu boşluğun gerçek bedeli: `List.country_id` 2026-07-15'te NOT NULL olarak
+   * eklendi, `seed.ts`'teki `list.create` güncellenmedi ve tohumlama tam orada
+   * çöktü. Derleyici bunu ilk anda yakalayabilirdi ama dosyayı hiç görmüyordu.
+   *
+   * `noEmit` — burada hiçbir şey derlenmiyor, yalnızca denetleniyor; `dist/`
+   * çıktısı ana yapılandırmanın sorumluluğunda kalıyor.
+   */
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": ["prisma/**/*.ts", "scripts/**/*.ts", "src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

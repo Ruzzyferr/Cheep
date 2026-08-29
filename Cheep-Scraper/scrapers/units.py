@@ -24,6 +24,9 @@ _UNIT_MAP = {
     "szt": "szt", "szt.": "szt", "sztuk": "szt", "sztuki": "szt", "sztuka": "szt",
     "opak": "opak", "opak.": "opak", "opakowanie": "opak", "opakowania": "opak",
     "litr": "l", "litry": "l", "litrów": "l",
+    # Hirvatca (komad) ve Macarca (darab) paket birimi.
+    "kom": "kom", "kom.": "kom", "komad": "kom", "komada": "kom",
+    "db": "db", "db.": "db", "darab": "db",
 }
 
 # Unit tokens for regex, longest first so 'gram' wins over 'g', 'litre' over 'lt'/'l'.
@@ -31,6 +34,7 @@ _UNIT_TOKENS = [
     "kilogram", "mililitre", "milliliter", "kilo", "litre", "liter",
     "gram", "grams", "kg", "gr", "lt", "ml", "cl", "cc", "lit",
     "opakowanie", "opakowania", "sztuki", "sztuka", "sztuk", "litrów", "litry", "litr", "opak", "szt",
+    "komada", "komad", "darab", "kom", "db",
     "adet", "paket", "rulo", "g", "l",
 ]
 _UNIT_ALT = "|".join(_UNIT_TOKENS)

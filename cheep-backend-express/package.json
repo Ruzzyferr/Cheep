@@ -21,7 +21,7 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.scripts.json",
     "consume:ingest": "tsx src/consumers/ingest.ts",
     "consume:normalizer": "tsx src/consumers/normalizer.ts",
     "consume:matcher": "tsx src/consumers/matcher.ts",

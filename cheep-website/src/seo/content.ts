@@ -17,7 +17,11 @@ import { categoryPath, storePath } from '../data/routes'
  * ikisini hreflang ile eşlemek Google'a yanlış bilgi vermek olurdu.
  */
 
-const ISO: Record<Locale, string> = { tr: 'tr_TR', pl: 'pl_PL' }
+// og:locale etiketleri. Dil + ULKE cifti olmak zorunda (yalniz dil kodu
+// gecersiz); Hirvatca hr_HR, Macarca hu_HU, Romence ro_RO.
+const ISO: Record<Locale, string> = {
+  tr: 'tr_TR', pl: 'pl_PL', hr: 'hr_HR', hu: 'hu_HU', ro: 'ro_RO',
+}
 
 function base(locale: Locale, path: string, title: string, description: string, robots: string): Head {
   const url = `${SITE_URL}${path}`

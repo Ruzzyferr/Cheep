@@ -22,5 +22,5 @@ fastavro==1.12.2
 # Test
 pytest==9.1.1
 
-
-
+# Macaristan (Arfigyelo) gunluk dokumu XLSX olarak yayinlaniyor.
+openpyxl>=3.1

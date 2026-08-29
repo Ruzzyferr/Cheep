@@ -1,0 +1,15 @@
+[Unit]
+Description=Cheep Macaristan günlük pipeline zamanlayıcısı (her gece 02:30)
+
+[Timer]
+# ZAMANLAMA ŞEMASI (hepsi UTC, tek vCPU'da üst üste binmesinler diye):
+#   01:30 HR scrape   ·  02:00 DB yedeği  ·  02:30 HU scrape
+#   02:45 RO scrape   ·  03:00 PL scrape  ·  04:00 site build
+# Site build 04:00'te koşuyor ve o geceki TÜM ülkelerin verisini bekliyor —
+# bu yüzden hiçbir scrape 04:00'ü geçecek şekilde planlanmamalı.
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+RandomizedDelaySec=600
+
+[Install]
+WantedBy=timers.target

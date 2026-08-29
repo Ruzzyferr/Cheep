@@ -19,7 +19,7 @@ declare namespace Express {
          * uygulamayı İngilizce kullanan biri TR kataloğunu İngilizce kategori
          * adlarıyla görür.
          */
-        lang?: 'tr' | 'en' | 'de' | 'pl' | 'sv';
+        lang?: 'tr' | 'en' | 'de' | 'pl' | 'sv' | 'hr' | 'hu' | 'ro';
     }
 }
 

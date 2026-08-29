@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cheep",
     "slug": "cheep-mobile",
-    "version": "1.5.4",
+    "version": "1.6.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
@@ -68,7 +68,18 @@
           "defaultChannel": "price-drops"
         }
       ],
-      "./plugins/withIosOnlyLocales"
+      "./plugins/withIosOnlyLocales",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "userTrackingUsageDescription": "Cheep asks for this only to show more relevant ads. Declining changes nothing about price comparison, your shopping lists or your location — you will simply see less relevant ads.",
+          "delayAppMeasurementInit": true,
+          "optimizeInitialization": true,
+          "optimizeAdLoading": true
+        }
+      ]
     ],
     "extra": {
       "eas": {

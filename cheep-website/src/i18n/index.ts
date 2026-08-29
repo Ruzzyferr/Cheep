@@ -2,13 +2,34 @@ import { createContext, useContext } from 'react'
 import type { Dict } from './types'
 import { tr } from './tr'
 import { pl } from './pl'
+import { hr } from './hr'
+import { hu } from './hu'
+import { ro } from './ro'
 
-export type Locale = 'tr' | 'pl'
+export type Locale = 'tr' | 'pl' | 'hr' | 'hu' | 'ro'
 
-export const LOCALES: Locale[] = ['tr', 'pl']
+export const LOCALES: Locale[] = ['tr', 'pl', 'hr', 'hu', 'ro']
 export const DEFAULT_LOCALE: Locale = 'tr'
 
-export const DICTS: Record<Locale, Dict> = { tr, pl }
+export const DICTS: Record<Locale, Dict> = { tr, pl, hr, hu, ro }
+
+/**
+ * Dilin KENDİ adı, kendi dilinde.
+ *
+ * Dil seçicide her seçenek daima kendi dilinde yazılır ("Magyar", "Hrvatski")
+ * — arayüzü anlamayan bir kullanıcı kendi dilini ancak böyle bulabilir, ki
+ * seçicinin varlık sebebi tam olarak o durumdur. Bu yüzden tablo çeviri
+ * sözlüklerinde DEĞİL, dilden bağımsız olarak burada duruyor: aksi hâlde beş
+ * sözlüğün her biri diğer dört dilin adını tekrar yazardı (20 girdi, hepsi
+ * ayrışmaya açık).
+ */
+export const LOCALE_NATIVE_NAMES: Record<Locale, string> = {
+  tr: 'Türkçe',
+  pl: 'Polski',
+  hr: 'Hrvatski',
+  hu: 'Magyar',
+  ro: 'Română',
+}
 
 /**
  * Bir dile ait yol öneki. Varsayılan dil köke oturur (`/`), diğerleri

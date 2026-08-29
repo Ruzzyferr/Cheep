@@ -27,7 +27,8 @@ import { colors, typography, spacing, borderRadius, layout } from '../../theme';
 import { ONBOARDING_QUESTIONS } from './onboardingConfig';
 import i18n, { SUPPORTED_LANGUAGES } from '../../i18n';
 import { languageStorage } from '../../utils/storage';
-import { getCountryCodeInteractive, SUPPORTED_COUNTRY_CODES } from '../../utils/geo';
+import { getCountryCodeInteractive } from '../../utils/geo';
+import { getAvailableCountryCodes } from '../../utils/countryAvailability';
 import type { UserProfile } from '../../types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
@@ -418,7 +419,7 @@ export function OnboardingScreen() {
     label: t(`languages.${code}`),
   }));
   const countryOptions = Object.keys(COUNTRY_CONFIG)
-    .filter((code) => (SUPPORTED_COUNTRY_CODES as readonly string[]).includes(code))
+    .filter((code) => getAvailableCountryCodes().includes(code))
     .map((code) => ({
       value: code,
       label: t(`countries.${code}`),

@@ -47,6 +47,9 @@ const STORAGE_KEYS = {
   LOCATION_PROMPT_SNOOZE: 'location_prompt_snooze_until', // ms epoch — bu ana kadar sorma
   LOCATION_MODE: 'location_mode',           // 'auto' | 'pinned'
   PINNED_ANCHOR: 'pinned_anchor',           // JSON: PinnedAnchor
+  // Sunucunun bildirdiği, kataloğu dolu ülkeler (JSON dizi). Çevrimdışı
+  // açılışta ülke seçicinin boş kalmaması için diskte tutuluyor.
+  AVAILABLE_COUNTRIES: 'available_countries',
 } as const;
 
 // Generic storage functions

@@ -158,14 +158,20 @@
     "CH": "Schweiz",
     "SE": "Sverige",
     "DE": "Tyskland",
-    "PL": "Polen"
+    "PL": "Polen",
+    "HR": "Kroatien",
+    "HU": "Ungern",
+    "RO": "Rumänien"
   },
   "languages": {
     "tr": "Türkçe",
     "en": "English",
     "de": "Deutsch",
     "pl": "Polski",
-    "sv": "Svenska"
+    "sv": "Svenska",
+    "hr": "Hrvatski",
+    "hu": "Magyar",
+    "ro": "Română"
   },
   "product": {
     "no_price_info": "Ingen prisinformation",
@@ -582,5 +588,8 @@
     "card_cta": "Utforska Premium",
     "card_active_title": "Cheep Premium är aktivt",
     "card_active_body": "Tack! Här kan du hantera din prenumeration."
+  },
+  "ads": {
+    "label": "Annons"
   }
 }

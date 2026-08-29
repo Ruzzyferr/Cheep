@@ -25,7 +25,17 @@ describe('updateUser preferences', () => {
     await expect(updateUser(1, { language: 'zz' })).rejects.toThrow(/dil/i);
   });
 
-  it('exposes the supported language set', () => {
-    expect(SUPPORTED_LANGUAGES).toEqual(['tr', 'en', 'de', 'pl', 'sv']);
+  it('exposes the supported language set', async () => {
+    // SABİT LİSTE YERİNE DEĞİŞMEZ: burada eskiden ['tr','en','de','pl','sv']
+    // literal'i vardı. Literal, listenin büyümesini "hata" gibi gösterirken
+    // asıl tehlikeyi — profil listesinin kategori çevirisi listesinden
+    // AYRIŞMASINI — hiç yakalamıyordu. Ayrışma gerçekleşti de: yeni diller
+    // eklendiğinde kullanıcı dilini kaydedemiyordu (HTTP 400).
+    const { SUPPORTED_LANGS } = await import('../src/config/category-i18n.js');
+    expect([...SUPPORTED_LANGUAGES]).toEqual([...SUPPORTED_LANGS]);
+    // Kurulu diller en azından bunları içermeli (gerileme koruması).
+    expect(SUPPORTED_LANGUAGES).toEqual(
+      expect.arrayContaining(['tr', 'en', 'de', 'pl', 'sv', 'hr', 'hu', 'ro']),
+    );
   });
 });

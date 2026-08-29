@@ -158,14 +158,20 @@
     "CH": "Szwajcaria",
     "SE": "Szwecja",
     "DE": "Niemcy",
-    "PL": "Polska"
+    "PL": "Polska",
+    "HR": "Chorwacja",
+    "HU": "Węgry",
+    "RO": "Rumunia"
   },
   "languages": {
     "tr": "Türkçe",
     "en": "English",
     "de": "Deutsch",
     "pl": "Polski",
-    "sv": "Svenska"
+    "sv": "Svenska",
+    "hr": "Hrvatski",
+    "hu": "Magyar",
+    "ro": "Română"
   },
   "product": {
     "no_price_info": "Brak informacji o cenie",
@@ -582,5 +588,8 @@
     "card_cta": "Poznaj Premium",
     "card_active_title": "Cheep Premium jest aktywny",
     "card_active_body": "Dziękujemy! Tutaj możesz zarządzać subskrypcją."
+  },
+  "ads": {
+    "label": "Reklama"
   }
 }

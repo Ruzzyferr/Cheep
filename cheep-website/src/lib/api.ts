@@ -10,7 +10,7 @@ import { API_URL } from '../config'
 import type { Locale } from '../i18n'
 
 /** Site dili → katalog ülkesi. Ürün kataloğu ülkeye özel. */
-const COUNTRY_FOR_LOCALE: Record<Locale, string> = { tr: 'TR', pl: 'PL' }
+const COUNTRY_FOR_LOCALE: Record<Locale, string> = { tr: 'TR', pl: 'PL', hr: 'HR', hu: 'HU', ro: 'RO' }
 
 export interface ApiOffer {
   price: string
