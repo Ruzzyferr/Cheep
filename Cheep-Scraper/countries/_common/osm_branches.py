@@ -37,6 +37,12 @@ from typing import Dict, Iterable, List, Optional, Sequence
 
 import requests
 
+from countries._common.http_retry import (
+    requests_headers,
+    requests_status,
+    with_retry,
+)
+
 logger = logging.getLogger("osm_branches")
 
 OVERPASS_MIRRORS = (
@@ -200,15 +206,25 @@ def ingest_branches(
     for i in range(0, len(payloads), BRANCH_CHUNK):
         chunk = payloads[i:i + BRANCH_CHUNK]
         stats["total"] += len(chunk)
-        try:
-            resp = requests.post(
+        def _post():
+            r = requests.post(
                 f"{api_url}/store-branches/bulk-upsert",
                 json={"branches": chunk}, headers=headers, timeout=120,
             )
-            if not resp.ok:
-                logger.error("branch ingest HTTP %s: %s", resp.status_code, resp.text[:200])
-                stats["failed"] += len(chunk)
-                continue
+            r.raise_for_status()
+            return r
+
+        try:
+            # YENIDEN DENEME ŞART. Burada eskiden tek bir deneme vardı ve
+            # ANLIK bir ağ kesintisi bir zincirin TÜM şubelerini kaybettiriyordu:
+            # üretimde Plodine'nin 147 şubesi "Connection reset by peer" ile
+            # düştü, koşum devam etti ve toplam özet kısmi başarıyı normal
+            # gibi gösterdi. Şube kaybı uygulamada "yakında market yok" boş
+            # ekranı olarak görünüyor — sessiz ve teşhisi zor.
+            resp = with_retry(
+                _post, max_denemeler=3, aciklama="şube ingest",
+                status_of=requests_status, headers_of=requests_headers,
+            )
             body = resp.json() if resp.content else {}
             ok = body.get("successful", len(chunk))
             stats["successful"] += ok

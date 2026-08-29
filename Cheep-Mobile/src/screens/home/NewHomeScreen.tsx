@@ -221,6 +221,17 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
 
   return (
     <View style={styles.container}>
+      {/* DURUM ÇUBUĞU PERDESİ.
+          ScrollView içeriği kaydırıldığında durum çubuğunun ALTINDAN geçiyor
+          (normal davranış) ama arkasında opak bir zemin olmadığı için bölüm
+          başlıkları saatin ve pil simgesinin üstüne biniyor, ikisi de
+          okunmaz hale geliyordu. Sayfanın kendi arka planıyla aynı renkte
+          ince bir perde, içeriği çubuğun ARKASINDAN geçiriyor.
+          `pointerEvents="none"`: perde dokunmaları yutmamalı. */}
+      <View
+        pointerEvents="none"
+        style={[styles.statusScrim, { height: insets.top }]}
+      />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: insets.top + spacing.sm, paddingBottom: bottomSpacing }}
@@ -525,6 +536,10 @@ const badge = StyleSheet.create({
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background.default },
+  statusScrim: {
+    position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10,
+    backgroundColor: colors.background.default,
+  },
 
   // Header
   header: {

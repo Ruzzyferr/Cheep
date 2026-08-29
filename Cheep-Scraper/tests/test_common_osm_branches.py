@@ -6,8 +6,11 @@ durumlarına odaklanıyor.
 """
 import pytest
 
+import requests
+
 from countries._common.osm_branches import (
     Chain,
+    ingest_branches,
     build_overpass_query,
     build_payloads,
     dedupe_new,
@@ -130,6 +133,10 @@ class _Resp:
     def json(self):
         return self._payload
 
+    def raise_for_status(self):
+        if not self.ok:
+            raise requests.HTTPError(f"HTTP {self.status_code}", response=self)
+
 
 def test_html_error_page_is_not_treated_as_success(monkeypatch):
     """Overpass hız-sınırında JSON yerine HTML döner ve `ok` olabilir. Bunu
@@ -172,3 +179,45 @@ def test_dry_run_never_posts_to_backend(monkeypatch):
     monkeypatch.setattr("countries._common.osm_branches.ingest_branches", explode)
     stats = run("HU", [Chain(50, "Tesco", r"Tesco")], "http://x", dry_run=True, sleep=lambda _s: None)
     assert stats == {"total": 0, "successful": 0, "failed": 0}
+
+
+# ------------------------------------------------- ingest yeniden deneme
+
+def test_transient_network_error_is_retried(monkeypatch):
+    """URETIMDE YASANDI: Plodine'nin 147 subesi tek bir "Connection reset by
+    peer" ile dustu, kosum devam etti ve toplam ozet kismi basariyi normal
+    gibi gosterdi. Sube kaybi uygulamada "yakinda market yok" bos ekrani
+    olarak goruluyor — sessiz ve teshisi zor."""
+    denemeler = {"n": 0}
+
+    def flaky(url, **kw):
+        denemeler["n"] += 1
+        if denemeler["n"] == 1:
+            raise requests.ConnectionError("Connection reset by peer")
+        return _Resp(payload={"successful": 2})
+
+    monkeypatch.setattr("countries._common.osm_branches.requests.post", flaky)
+    monkeypatch.setattr("countries._common.http_retry.time.sleep", lambda _s: None)
+    stats = ingest_branches(
+        [{"store_id": 1, "external_ref": "osm:node/1", "name": "A", "lat": 1.0, "lon": 2.0,
+          "city": None, "source": "osm"}] * 2,
+        "http://x", "key", "HR",
+    )
+    assert denemeler["n"] == 2
+    assert stats["successful"] == 2
+    assert stats["failed"] == 0
+
+
+def test_persistent_failure_is_counted_not_hidden(monkeypatch):
+    monkeypatch.setattr(
+        "countries._common.osm_branches.requests.post",
+        lambda url, **kw: (_ for _ in ()).throw(requests.ConnectionError("kalici")),
+    )
+    monkeypatch.setattr("countries._common.http_retry.time.sleep", lambda _s: None)
+    stats = ingest_branches(
+        [{"store_id": 1, "external_ref": "osm:node/1", "name": "A", "lat": 1.0, "lon": 2.0,
+          "city": None, "source": "osm"}],
+        "http://x", "key", "HR",
+    )
+    assert stats["failed"] == 1
+    assert stats["successful"] == 0
