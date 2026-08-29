@@ -87,7 +87,29 @@ class CountryScraperRunner:
             raise ImportError(f"Modül yüklenemedi: {scraper_path}")
 
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        # sys.modules'E KAYDETMEK ŞART — atlanırsa `@dataclass` ÇÖKER.
+        #
+        # `dataclasses`, alan tipleri STRING olduğunda (yani modül
+        # `from __future__ import annotations` kullandığında) tipi çözmek için
+        # `sys.modules.get(cls.__module__).__dict__` yapıyor. Modül burada
+        # kayıtlı değilse `.get()` None döner ve dataclass tanımı
+        # "AttributeError: 'NoneType' object has no attribute '__dict__'"
+        # ile patlar.
+        #
+        # Arıza SİNSİ: hata scraper'ın İÇE AKTARIMINDA çıkıyor, yani runner
+        # o marketi "sıfır ürün" gibi görüyor, market özetten düşüyor ve
+        # koşum "hiç market taranmadı" diye biter. Yerelde `import` ile
+        # denenen aynı scraper sorunsuz çalıştığı için de fark edilmiyor —
+        # yalnızca config üzerinden, yani YALNIZCA ÜRETİMDE ortaya çıkıyor.
+        # (Üretimde ilk Macaristan koşusunda tam olarak böyle yakalandı.)
+        sys.modules[spec.name] = module
+        try:
+            spec.loader.exec_module(module)
+        except Exception:
+            # Yarım yüklenmiş modülü kayıtta BIRAKMA: sonraki market aynı adı
+            # kullanırsa bozuk modülü devralırdı.
+            sys.modules.pop(spec.name, None)
+            raise
 
         # Scraper class'ını al
         scraper_class = getattr(module, market['scraper_class'], None)
