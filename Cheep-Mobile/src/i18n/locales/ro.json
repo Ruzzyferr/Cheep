@@ -30,7 +30,7 @@
   },
   "location": {
     "title": "Locație",
-    "mode_auto": "Automat — folosește locația mea",
+    "mode_auto": "Automat",
     "mode_pinned": "Adresă fixată",
     "chip_pinned": "{{label}} · fixată",
     "address_placeholder": "Scrie o adresă sau un oraș",

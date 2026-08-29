@@ -30,7 +30,7 @@
   },
   "location": {
     "title": "Lokalizacja",
-    "mode_auto": "Automatycznie — użyj mojej lokalizacji",
+    "mode_auto": "Automatycznie",
     "mode_pinned": "Stały adres",
     "chip_pinned": "{{label}} · stały",
     "address_placeholder": "Wpisz adres lub miasto",

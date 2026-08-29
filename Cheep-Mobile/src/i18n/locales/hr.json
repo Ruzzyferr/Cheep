@@ -30,7 +30,7 @@
   },
   "location": {
     "title": "Lokacija",
-    "mode_auto": "Automatski — koristi moju lokaciju",
+    "mode_auto": "Automatski",
     "mode_pinned": "Fiksna adresa",
     "chip_pinned": "{{label}} · fiksno",
     "address_placeholder": "Upiši adresu ili grad",

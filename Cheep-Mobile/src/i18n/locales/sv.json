@@ -30,7 +30,7 @@
   },
   "location": {
     "title": "Plats",
-    "mode_auto": "Automatiskt — använd min plats",
+    "mode_auto": "Automatiskt",
     "mode_pinned": "Fast adress",
     "chip_pinned": "{{label}} · fast",
     "address_placeholder": "Skriv en adress eller stad",

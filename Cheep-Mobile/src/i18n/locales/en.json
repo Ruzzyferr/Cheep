@@ -30,7 +30,7 @@
   },
   "location": {
     "title": "Location",
-    "mode_auto": "Automatic — use my location",
+    "mode_auto": "Automatic",
     "mode_pinned": "Pinned address",
     "chip_pinned": "{{label}} · pinned",
     "address_placeholder": "Type an address or city",

@@ -410,7 +410,17 @@ export function LocationSheet({ visible, onClose }: Props) {
                   size={16}
                   color={selectedMode === 'auto' ? colors.background.paper : colors.text.secondary}
                 />
-                <Text style={[styles.modeBtnText, selectedMode === 'auto' && styles.modeBtnTextActive]}>
+                <Text
+                  // TEK SATIR ZORUNLU. Bu bir segment kontrolü ve butonlar
+                  // `flex: 1` ile ekranı paylaşıyor. Etiket sarınca ikinci
+                  // satıra taşıyor, satır yüksekliği büyüyor ve 16px'lik
+                  // simge butonun DIŞINA, sayfanın kenarına itiliyordu —
+                  // Türkçede birebir gözlendi, Macarca/Almanca daha uzun.
+                  // Etiketler kısaltıldı; bu ayrıca gelecekteki uzun bir
+                  // çeviriye karşı koruma.
+                  numberOfLines={1}
+                  style={[styles.modeBtnText, selectedMode === 'auto' && styles.modeBtnTextActive]}
+                >
                   {t('location.mode_auto')}
                 </Text>
               </TouchableOpacity>
@@ -430,11 +440,85 @@ export function LocationSheet({ visible, onClose }: Props) {
                   size={16}
                   color={selectedMode === 'pinned' ? colors.background.paper : colors.text.secondary}
                 />
-                <Text style={[styles.modeBtnText, selectedMode === 'pinned' && styles.modeBtnTextActive]}>
+                <Text
+                  // TEK SATIR ZORUNLU. Bu bir segment kontrolü ve butonlar
+                  // `flex: 1` ile ekranı paylaşıyor. Etiket sarınca ikinci
+                  // satıra taşıyor, satır yüksekliği büyüyor ve 16px'lik
+                  // simge butonun DIŞINA, sayfanın kenarına itiliyordu —
+                  // Türkçede birebir gözlendi, Macarca/Almanca daha uzun.
+                  // Etiketler kısaltıldı; bu ayrıca gelecekteki uzun bir
+                  // çeviriye karşı koruma.
+                  numberOfLines={1}
+                  style={[styles.modeBtnText, selectedMode === 'pinned' && styles.modeBtnTextActive]}
+                >
                   {t('location.mode_pinned')}
                 </Text>
               </TouchableOpacity>
             </View>
+
+            {/* ÜLKE SEÇİCİ HER İKİ MODDA DA GÖRÜNÜR.
+                Eskiden yalnızca "Sabit adres" modunun içindeydi ve varsayılan
+                mod "Otomatik" olduğu için sayfa açıldığında ekranda SADECE iki
+                mod düğmesi vardı — ülkeyi değiştirmenin hiçbir görünür yolu
+                yoktu. Oysa bu satıra Profil'de "Ülke / Marketler" adıyla
+                giriliyor ve altında ülke yazıyor; kullanıcı tam olarak bunu
+                değiştirmeye geliyor.
+
+                Bu, blokun kendi amacına da aykırıydı: aşağıdaki yorumun dediği
+                gibi burası "yanlış ülkeye düşmüş kullanıcının çıkış kapısı" —
+                ülkesi yanlış tahmin edilen (GPS yok, cihaz bölgesi de
+                tutmadı) bir kullanıcının önce "Sabit adres"e dokunmayı
+                keşfetmesi gerekiyordu. Çıkış kapısı saklanmaz. */}
+              {/* Ülke-yalnızca seçim. Geocoder çalışmasa bile (3. kapı) kullanıcı
+                  ülkesini seçebilir; yanlış ülkeye sabitlenmiş kullanıcı da buradan
+                  geri dönebilir. Koordinat YOK → mesafe filtresi kapalı → boş ekran
+                  riski yok. Sessiz kabul değil: dokunmak açık bir kullanıcı seçimidir. */}
+              <View style={styles.countrySection}>
+                <Text style={styles.countryTitle}>{t('location.country_only_title')}</Text>
+                <Text style={styles.countryHint}>{t('location.country_only_hint')}</Text>
+                <View style={styles.countryRow}>
+                  {getAvailableCountryCodes().map((code) => {
+                    const active = anchor?.countryCode === code;
+                    const writing = pinningCountry === code;
+                    // Buton "seçili" görünüyor ama CANLI bir eylem: dokunmak
+                    // pin({ coords: null }) yazar. Çapa ZATEN bu ülkedeyse VE
+                    // GERÇEKTEN SABİTLENMİŞ (mode:'pinned') koordinatlı bir
+                    // adresse (doğrulanmış adres, mesafeler çalışıyor), dokunuş
+                    // yalnızca AŞAĞI ÇEKEBİLİR: adres etiketi ve mesafe filtresi,
+                    // no-op gibi görünen bir dokunuşla SESSİZCE gider. Böyle bir
+                    // dokunuşu hiç başlatmıyoruz. mode kontrolü KASITLI: OTOMATİK
+                    // moddaki koordinatlı bir GPS fix'i korumaya değer bir "pin"
+                    // DEĞİLDİR — o kullanıcı sabit bir adres seçmemiştir, en
+                    // yakın şube her yarıçapın dışındaysa koordinatsız pin'e geçiş
+                    // TEK çıkış kapısıdır ve bu buton onu engellememelidir.
+                    // Çapanın koordinatı YOKSA (ya da mode 'auto' ise) buton
+                    // AÇIK KALIR — yanlış ülkeye sabitlenmiş kullanıcının ya da
+                    // kırık geocoder'lı otomatik-mod kullanıcısının çıkış kapısı
+                    // odur (bkz. dosya başı) ve kaybedecek bir şey yoktur.
+                    const wouldOnlyDowngrade =
+                      active && anchor?.mode === 'pinned' && anchor.coords != null;
+                    return (
+                      <TouchableOpacity
+                        key={code}
+                        style={[styles.countryBtn, active && styles.countryBtnActive]}
+                        onPress={() => handleSelectCountry(code)}
+                        disabled={busy || wouldOnlyDowngrade}
+                        activeOpacity={0.8}
+                      >
+                        {writing ? (
+                          <ActivityIndicator size="small" color={colors.primary.main} />
+                        ) : (
+                          <Text
+                            style={[styles.countryBtnText, active && styles.countryBtnTextActive]}
+                          >
+                            {t(`countries.${code}`)}
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
 
             {selectedMode === 'pinned' && (
               <View style={styles.pinnedSection}>
@@ -544,57 +628,6 @@ export function LocationSheet({ visible, onClose }: Props) {
                     </View>
                   </View>
                 )}
-
-                {/* Ülke-yalnızca seçim. Geocoder çalışmasa bile (3. kapı) kullanıcı
-                    ülkesini seçebilir; yanlış ülkeye sabitlenmiş kullanıcı da buradan
-                    geri dönebilir. Koordinat YOK → mesafe filtresi kapalı → boş ekran
-                    riski yok. Sessiz kabul değil: dokunmak açık bir kullanıcı seçimidir. */}
-                <View style={styles.countrySection}>
-                  <Text style={styles.countryTitle}>{t('location.country_only_title')}</Text>
-                  <Text style={styles.countryHint}>{t('location.country_only_hint')}</Text>
-                  <View style={styles.countryRow}>
-                    {getAvailableCountryCodes().map((code) => {
-                      const active = anchor?.countryCode === code;
-                      const writing = pinningCountry === code;
-                      // Buton "seçili" görünüyor ama CANLI bir eylem: dokunmak
-                      // pin({ coords: null }) yazar. Çapa ZATEN bu ülkedeyse VE
-                      // GERÇEKTEN SABİTLENMİŞ (mode:'pinned') koordinatlı bir
-                      // adresse (doğrulanmış adres, mesafeler çalışıyor), dokunuş
-                      // yalnızca AŞAĞI ÇEKEBİLİR: adres etiketi ve mesafe filtresi,
-                      // no-op gibi görünen bir dokunuşla SESSİZCE gider. Böyle bir
-                      // dokunuşu hiç başlatmıyoruz. mode kontrolü KASITLI: OTOMATİK
-                      // moddaki koordinatlı bir GPS fix'i korumaya değer bir "pin"
-                      // DEĞİLDİR — o kullanıcı sabit bir adres seçmemiştir, en
-                      // yakın şube her yarıçapın dışındaysa koordinatsız pin'e geçiş
-                      // TEK çıkış kapısıdır ve bu buton onu engellememelidir.
-                      // Çapanın koordinatı YOKSA (ya da mode 'auto' ise) buton
-                      // AÇIK KALIR — yanlış ülkeye sabitlenmiş kullanıcının ya da
-                      // kırık geocoder'lı otomatik-mod kullanıcısının çıkış kapısı
-                      // odur (bkz. dosya başı) ve kaybedecek bir şey yoktur.
-                      const wouldOnlyDowngrade =
-                        active && anchor?.mode === 'pinned' && anchor.coords != null;
-                      return (
-                        <TouchableOpacity
-                          key={code}
-                          style={[styles.countryBtn, active && styles.countryBtnActive]}
-                          onPress={() => handleSelectCountry(code)}
-                          disabled={busy || wouldOnlyDowngrade}
-                          activeOpacity={0.8}
-                        >
-                          {writing ? (
-                            <ActivityIndicator size="small" color={colors.primary.main} />
-                          ) : (
-                            <Text
-                              style={[styles.countryBtnText, active && styles.countryBtnTextActive]}
-                            >
-                              {t(`countries.${code}`)}
-                            </Text>
-                          )}
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                </View>
 
                 <TouchableOpacity onPress={handleUseAuto} disabled={busy} style={styles.backLink}>
                   <Text style={styles.backLinkText}>{t('location.back_to_auto')}</Text>

@@ -30,7 +30,7 @@
   },
   "location": {
     "title": "Hely",
-    "mode_auto": "Automatikus — a saját helyem használata",
+    "mode_auto": "Automatikus",
     "mode_pinned": "Rögzített cím",
     "chip_pinned": "{{label}} · rögzítve",
     "address_placeholder": "Írj be egy címet vagy várost",

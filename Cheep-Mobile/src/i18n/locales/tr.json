@@ -30,7 +30,7 @@
   },
   "location": {
     "title": "Konum",
-    "mode_auto": "Otomatik — konumumu kullan",
+    "mode_auto": "Otomatik",
     "mode_pinned": "Sabit adres",
     "chip_pinned": "{{label}} · sabit",
     "address_placeholder": "Adres veya şehir yaz",
