@@ -44,6 +44,22 @@ if [ -z "${INGEST_API_KEY:-}" ]; then
   exit 1
 fi
 
+# TEK KOŞUM KİLİDİ.
+#
+# Aylık timer ile ELLE başlatılan bir koşum üst üste binebiliyor ve bu
+# üretimde oldu: Romanya taraması aynı anda İKİ süreçle koştu, ikisi de aynı
+# uzak uca istek attı, birbirlerini yavaşlattı ve 34 dakika boyunca tek satır
+# log üretmedi. Şube ithalatı upsert olduğu için sonuç BOZULMUYOR — bozulan
+# şey süre ve karşı tarafa gösterilen nezaket.
+#
+# `-n`: bekleme, ikinci koşum hemen çıksın. Bekleseydi timer'ın koşumu saatler
+# boyunca asılı kalırdı ve systemd onu "hâlâ çalışıyor" sayardı.
+exec 9>/var/lock/cheep-branches.lock
+if ! flock -n 9; then
+  echo "Bir şube koşumu zaten sürüyor — bu koşum atlandı."
+  exit 0
+fi
+
 echo "=== şube tazeleme $(date -Iseconds) ==="
 
 # MODÜL OLARAK çağrılıyor (`python -m ...`), dosya yolu olarak DEĞİL.

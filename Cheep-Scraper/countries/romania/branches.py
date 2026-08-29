@@ -137,6 +137,11 @@ def build_uat_index(session: requests.Session, cities: Iterable[str] = RO_CITIES
     return index
 
 
+# Kaç noktada bir ilerleme satırı yazılsın.
+# ~200 nokta ≈ birkaç dakika: log'u boğmadan "hâlâ çalışıyor" demeye yeter.
+PROGRESS_EVERY = 200
+
+
 def grid_points(bbox: Tuple[float, float, float, float], step: float) -> List[Tuple[float, float]]:
     """Sınır kutusunu tarayan (lat, lon) noktaları (SAF).
 
@@ -236,9 +241,28 @@ def sweep(
             found.setdefault(p["external_ref"], p)
         return len(items)
 
+    # İLERLEME SAYACI — süslemeye benzer ama değil.
+    #
+    # Tarama 5.600+ nokta sürüyor ve önceden tek satır bile yazmıyordu:
+    # başlangıçtaki "ızgara: N nokta" satırından sonra saatlerce sessizlik.
+    # Sonuç: koşan bir iş ile ASILI KALMIŞ bir işi ayırt etmenin hiçbir yolu
+    # yoktu. Üretimde tam olarak bu yaşandı — 34 dakika sessizlikten sonra
+    # aynı anda İKİ sürecin koştuğu ancak `ps` ile fark edildi.
+    progress = {"done": 0}
+    started = time.monotonic()
+
     def walk(points: Iterable[Tuple[float, float]], current_step: float, depth: int) -> None:
         for lat, lon in points:
             n = probe(lat, lon)
+            progress["done"] += 1
+            if progress["done"] % PROGRESS_EVERY == 0:
+                elapsed = time.monotonic() - started
+                rate = progress["done"] / elapsed if elapsed else 0
+                remaining = (total_points - progress["done"]) / rate if rate else 0
+                logger.info(
+                    "ilerleme: %d/%d nokta, %d şube, %.0f dk geçti, ~%.0f dk kaldı",
+                    progress["done"], total_points, len(found), elapsed / 60, remaining / 60,
+                )
             time.sleep(delay)
             if n >= STORE_QUERY_LIMIT and depth < max_depth:
                 # Hücre doldu → daha ince tara (yarım adım, 4 alt nokta).
@@ -250,7 +274,10 @@ def sweep(
                 )
 
     points = grid_points(bbox, step)
-    logger.info("ızgara: %d nokta (adım %.3f°)", len(points), step)
+    # Alt bölünmeler (`walk` derinliği) bu sayıya dahil değil — tahmini süre
+    # bu yüzden İYİMSER. Kaba bir gidişat göstergesi olarak yeterli.
+    total_points = len(points)
+    logger.info("ızgara: %d nokta (adım %.3f°)", total_points, step)
     walk(points, step, 0)
     return found
 

@@ -19,7 +19,7 @@
  * olarak AYRI duruyor. Bir fiyat karşılaştırma uygulamasında reklamın "sonuç"
  * sanılması yalnızca kötü UX değil, tüketiciyi yanıltma riski.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { BannerAd, BannerAdSize } from 'react-native-google-mobile-ads';
 import { useTranslation } from 'react-i18next';
@@ -34,12 +34,36 @@ interface Props {
   style?: object;
 }
 
+/**
+ * Bir yüzeyin pes etmeden önce yapacağı deneme sayısı.
+ *
+ * Reklam isteğinin başarısız olması İSTİSNA DEĞİL: "no fill" (o an envanter
+ * yok) tamamen normal ve GEÇİCİ. Tek denemede kalıcı olarak vazgeçmek, bir
+ * anlık dolgusuzluğun o yüzeydeki reklamı OTURUM BOYUNCA bitirmesi demekti —
+ * emülatörde birebir gözlendi: banner bir açılışta geliyor, sonraki açılışta
+ * hiç gelmiyordu ve arayüzde bunun hiçbir izi yoktu.
+ *
+ * Üst sınır var çünkü sonsuz yeniden deneme, reklam gerçekten gelmeyen bir
+ * kullanıcıda (rıza reddi, envanter yok) boşuna pil ve veri harcar.
+ */
+const MAX_ATTEMPTS = 3;
+
+/** Denemeler arası bekleme — kısa, ama art arda istek yağmuru değil. */
+const RETRY_DELAY_MS = 8000;
+
 export function CheepBanner({ slot, style }: Props) {
   const { t } = useTranslation();
   const { isPremium } = usePremium();
   const { canRequestAds } = useAds();
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  /** `key` değişimi BannerAd'i yeniden kurar → yeni istek. */
+  const [attempt, setAttempt] = useState(0);
+  const attemptsRef = useRef(0);
+
+  // Bileşen ekrandan kalkarken bekleyen zamanlayıcıyı iptal et.
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
   if (!shouldShowBanner({ isPremium, canRequestAds, failed })) return null;
 
@@ -49,6 +73,8 @@ export function CheepBanner({ slot, style }: Props) {
     <View style={loaded ? [styles.wrap, style] : undefined}>
       {loaded && <Text style={styles.label}>{t('ads.label')}</Text>}
       <BannerAd
+        // `key`: yeniden denemede bileşeni baştan kurup yeni istek attırır.
+        key={attempt}
         unitId={bannerUnitId(slot)}
         // ANCHORED_ADAPTIVE: yüksekliği cihaz genişliğine göre Google
         // belirliyor. Sabit 320x50 dar telefonlarda taşıyor, geniş
@@ -56,10 +82,15 @@ export function CheepBanner({ slot, style }: Props) {
         size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
         onAdLoaded={() => setLoaded(true)}
         onAdFailedToLoad={() => {
-          // Kalıcı olarak kaldır. Yeniden denemek, listede aniden beliren
-          // bir reklamla kullanıcının okuduğu yeri kaydırır.
-          setFailed(true);
           setLoaded(false);
+          attemptsRef.current += 1;
+          if (attemptsRef.current >= MAX_ATTEMPTS) {
+            // Pes: bu yüzeyde bir daha denenmiyor ve arayüzde hiçbir iz
+            // kalmıyor (yer kaplamıyordu, kaplamayacak).
+            setFailed(true);
+            return;
+          }
+          timerRef.current = setTimeout(() => setAttempt((a) => a + 1), RETRY_DELAY_MS);
         }}
       />
     </View>

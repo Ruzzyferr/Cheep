@@ -258,7 +258,13 @@ const styles = StyleSheet.create({
   targetStripText: { ...typography.styles.body2, color: colors.primary.main, fontWeight: '600' },
   list: { flex: 1 },
   gridContainer: { padding: layout.screenPadding },
-  row: { justifyContent: 'space-between', marginBottom: spacing.md },
+  // `flexDirection: 'row'` ZORUNLU ve kolayca unutuluyor: React Native'in
+  // varsayılanı `column`, dolayısıyla eksik olduğunda iki kart yan yana
+  // DEĞİL alt alta diziliyor ve her biri %48 genişlikte kaldığı için ızgara
+  // ekranın sol yarısına sıkışmış tek sütuna dönüyor. Bu bir kez üretilen
+  // derlemede gözlendi; `numColumns`'tan satır tabanlı düzene geçerken
+  // FlatList'in kendi sardığı satırın yerini bu stil aldı.
+  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: spacing.md },
   gridItem: { width: '48%' },
   empty: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
   errorBox: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl, alignItems: 'center' },

@@ -31,7 +31,7 @@ interface AdsValue {
 const Ctx = createContext<AdsValue>({ canRequestAds: false });
 
 export function AdsProvider({ children }: { children: ReactNode }) {
-  const { isPremium, loading: premiumLoading } = usePremium();
+  const { isPremium, resolved: premiumResolved } = usePremium();
   const [ready, setReady] = useState(false);
   /** Bir kez başlatıldıysa tekrar başlatma (SDK idempotent değil sayılır). */
   const startedRef = useRef(false);
@@ -39,7 +39,12 @@ export function AdsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Premium durumu henüz bilinmiyor → BEKLE. Aceleyle başlatmak, abonenin
     // cihazında reklam SDK'sı çalıştırmak demek.
-    if (premiumLoading) return;
+    //
+    // BURADA ÖNCE `loading` KULLANILIYORDU VE BEKLEME HİÇ GERÇEKLEŞMİYORDU:
+    // `loading` false olarak başlıyor, yani ilk render'da bu koşul zaten
+    // geçiliyor, `startedRef` kilitleniyor ve SDK premium abonede de
+    // başlatılıyordu. `resolved` "en az bir kez belirlendi" demek.
+    if (!premiumResolved) return;
     // Abone → SDK'ya hiç dokunma.
     if (isPremium) return;
     if (startedRef.current) return;
@@ -68,7 +73,7 @@ export function AdsProvider({ children }: { children: ReactNode }) {
     })();
 
     return () => { alive = false; };
-  }, [isPremium, premiumLoading]);
+  }, [isPremium, premiumResolved]);
 
   const value = useMemo<AdsValue>(
     () => ({ canRequestAds: ready && !isPremium }),

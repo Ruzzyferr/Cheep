@@ -32,6 +32,16 @@ interface PremiumContextType {
   /** Teklif çekilmeye çalışıldı ve BAŞARISIZ oldu → arayüz "yeniden dene" sunar. */
   offeringFailed: boolean;
   loading: boolean;
+  /**
+   * Premium durumu EN AZ BİR KEZ belirlendi mi? (başarılı ya da başarısız)
+   *
+   * `loading` bu soruyu YANITLAMIYOR ve yerine kullanılamaz: `loading` false
+   * olarak başlıyor, yani "henüz hiç sorulmadı" ile "soruldu, cevap hayır"
+   * aynı görünüyor. AdsContext bu ayrımı yapmak zorunda — premium durumu
+   * bilinmeden reklam SDK'sını başlatmak, abonenin cihazında reklam SDK'sı
+   * çalıştırmak demek ve kullanıcı tam olarak bunun OLMAMASI için ödedi.
+   */
+  resolved: boolean;
   /** Satın alma/geri yükleme sürüyor. */
   busy: boolean;
   refresh: () => Promise<BillingStatus | null>;
@@ -50,6 +60,8 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
   /** Teklif çekilmeye çalışıldı mı? (çekilemediyse "yeniden dene" gösterilir) */
   const [offeringFailed, setOfferingFailed] = useState(false);
   const [loading, setLoading] = useState(false);
+  /** bkz. PremiumContextType.resolved */
+  const [resolved, setResolved] = useState(false);
   const [busy, setBusy] = useState(false);
 
   /** Backend'i doğruluk kaynağı sayarak durumu tazeler. */
@@ -78,13 +90,18 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
     (async () => {
       if (!isAuthenticated || !user) {
         await forgetUser();
-        if (!cancelled) { setStatus(null); setOffering(null); }
+        // Oturum yok → çözülecek bir abonelik de yok; bu DA bir cevap.
+        if (!cancelled) { setStatus(null); setOffering(null); setResolved(true); }
         return;
       }
       await configurePurchases();
       await identifyUser(user.id);
       if (cancelled) return;
       await refresh();
+      // `refresh` kendi hatasını yutuyor, dolayısıyla buraya BAŞARISIZLIKTA
+      // da geliniyor — ve bu doğru: durum "premium değil" olarak belirlendi.
+      // İşaretlemezsek reklamlar hiç başlamaz ve gelir sessizce sıfırlanır.
+      if (!cancelled) setResolved(true);
       if (!cancelled) await loadOffering();
     })();
     return () => { cancelled = true; };
@@ -163,6 +180,7 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
     /** Teklif çekilemedi — arayüz "yeniden dene" sunmalı. */
     offeringFailed,
     loading,
+    resolved,
     busy,
     refresh,
     reloadOffering: loadOffering,
