@@ -4,7 +4,7 @@
  * kullanıcıya Türkçe bildirim göndermek, İngilizce'den daha kötü).
  */
 
-export type Locale = 'tr' | 'en' | 'de' | 'pl' | 'sv';
+export type Locale = 'tr' | 'en' | 'de' | 'pl' | 'sv' | 'hr' | 'hu' | 'ro';
 
 const COPY: Record<Locale, { title: (n: number) => string; single: (p: string, pct: number) => string; many: (n: number) => string }> = {
     tr: {
@@ -31,6 +31,21 @@ const COPY: Record<Locale, { title: (n: number) => string; single: (p: string, p
         title: (n) => (n === 1 ? 'En vara på din lista blev billigare' : 'Priser sjönk på din lista'),
         single: (p, pct) => `${p} är ${pct}% billigare. Tryck för att se nya priset.`,
         many: (n) => `${n} varor har sjunkit i pris. Kolla din lista.`,
+    },
+    hr: {
+        title: (n) => (n === 1 ? 'Proizvod s tvog popisa je pojeftinio' : 'Cijene na tvom popisu su pale'),
+        single: (p, pct) => `${p} je jeftiniji za ${pct}%. Dodirni za novu cijenu.`,
+        many: (n) => `Cijene su pale za ${n} proizvoda. Provjeri svoj popis.`,
+    },
+    hu: {
+        title: (n) => (n === 1 ? 'Olcsóbb lett egy termék a listádon' : 'Csökkentek az árak a listádon'),
+        single: (p, pct) => `${p} ${pct}%-kal olcsóbb. Koppints az új árért.`,
+        many: (n) => `${n} termék ára csökkent. Nézd meg a listádat.`,
+    },
+    ro: {
+        title: (n) => (n === 1 ? 'Un produs din lista ta s-a ieftinit' : 'Prețurile din lista ta au scăzut'),
+        single: (p, pct) => `${p} este mai ieftin cu ${pct}%. Atinge pentru noul preț.`,
+        many: (n) => `Prețurile au scăzut la ${n} produse. Verifică-ți lista.`,
     },
 };
 

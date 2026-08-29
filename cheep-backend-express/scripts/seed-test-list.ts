@@ -18,7 +18,10 @@ async function main() {
   // clear old active lists for a clean demo
   await prisma.list.deleteMany({ where: { user_id: user.id, is_template: false } });
   const list = await prisma.list.create({
-    data: { user_id: user.id, name: "Haftalık Market", status: "active", budget: 750 },
+    // `country_id` 2026-07-15'te NOT NULL oldu (liste oluşturulduğu ülkeye
+    // aittir); bu betik güncellenmemişti ve çalıştırıldığında patlıyordu.
+    // Ürünler yukarıda country_id: 1 (TR) ile seçiliyor, liste de TR'ye ait.
+    data: { user_id: user.id, country_id: 1, name: "Haftalık Market", status: "active", budget: 750 },
   });
   for (const p of multi) {
     await prisma.listItem.create({
