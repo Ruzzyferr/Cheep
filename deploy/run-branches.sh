@@ -25,14 +25,19 @@ API="${CHEEP_API_URL:-http://localhost:3000/api/v1}"
 
 echo "=== şube tazeleme $(date -Iseconds) ==="
 
-for entry in "HR:countries/croatia/osm_branches.py" \
-             "HU:countries/hungary/branches.py" \
-             "RO:countries/romania/branches.py"; do
+# MODÜL OLARAK çağrılıyor (`python -m ...`), dosya yolu olarak DEĞİL.
+#
+# Doğrudan `python countries/romania/branches.py` çalıştırmak dosyanın kendi
+# klasörünü sys.path'e koyuyor, proje kökünü değil — ve modül `countries.` ile
+# başlayan kardeş modülleri import ettiği için "ModuleNotFoundError: No module
+# named 'countries'" ile düşüyor. Betik ilk kez AYLIK TIMER'da koşacaktı; hata
+# orada, kimse bakmazken ortaya çıkacak ve üç ülke de şubesiz kalacaktı
+# (uygulamada "yakında market yok" boş ekranı).
+for entry in "HR:countries.croatia.osm_branches"              "HU:countries.hungary.branches"              "RO:countries.romania.branches"; do
   code="${entry%%:*}"
-  script="${entry##*:}"
-  echo "--- $code ($script) ---"
-  python "$script" --api-url "$API" --api-key "${INGEST_API_KEY:-}" \
-    || echo "UYARI: $code şube ithalatı başarısız — diğer ülkeler etkilenmedi"
+  module="${entry##*:}"
+  echo "--- $code ($module) ---"
+  python -m "$module" --api-url "$API" --api-key "${INGEST_API_KEY:-}"     || echo "UYARI: $code şube ithalatı başarısız — diğer ülkeler etkilenmedi"
 done
 
 echo "=== done $(date -Iseconds) ==="

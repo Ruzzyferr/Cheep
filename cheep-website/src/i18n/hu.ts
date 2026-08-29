@@ -30,7 +30,7 @@ export const hu: Dict = {
   },
 
   hero: {
-    badge: 'Élesben Törökországban és Lengyelországban · 5 ország',
+    badge: 'Élesben 5 országban · 120 000+ termék',
     titleLine1: 'Ugyanaz a termék.',
     titleLine2: 'A legolcsóbb ár.',
     sub: 'A Cheep sorra összeveti a boltok árait, és a bevásárlólistádat a legolcsóbb kosárba teszi át. Valódi, naponta frissülő árak — gondolkodás nélkül spórolsz.',
@@ -109,15 +109,15 @@ export const hu: Dict = {
 
   coverage: {
     eyebrow: 'Lefedettség',
-    titleLead: 'Törökországban és Lengyelországban élesben,',
-    titleAccent: 'Európa úton van',
-    sub: 'Ugyanaz a motor öt országban dolgozik. Az árakat vonalkód alapján párosítjuk, és minden nap valódi bolti adatokkal frissítjük.',
+    titleLead: 'Élesben öt országban,',
+    titleAccent: 'Európa következik',
+    sub: 'Törökország, Lengyelország, Horvátország, Magyarország és Románia. Az árak vonalkód alapján párosulnak, és minden nap valós bolti adatokból frissülnek.',
     countries: [
       { code: 'TR', name: 'Törökország' },
       { code: 'PL', name: 'Lengyelország' },
-      { code: 'DE', name: 'Németország' },
-      { code: 'CH', name: 'Svájc' },
-      { code: 'SE', name: 'Svédország' },
+      { code: 'HR', name: 'Horvátország' },
+      { code: 'HU', name: 'Magyarország' },
+      { code: 'RO', name: 'Románia' },
     ],
     branchesUnit: 'üzlet',
     live: 'Élesben',

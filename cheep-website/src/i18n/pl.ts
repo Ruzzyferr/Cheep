@@ -30,7 +30,7 @@ export const pl: Dict = {
   },
 
   hero: {
-    badge: 'Działa w Polsce i Turcji · 5 krajów',
+    badge: 'Na żywo w 5 krajach · 120 000+ produktów',
     titleLine1: 'Ten sam produkt.',
     titleLine2: 'Najniższa cena.',
     sub: 'Cheep porównuje ceny w sklepach spożywczych i przenosi Twoją listę zakupów do najtańszego koszyka. Prawdziwe ceny aktualizowane codziennie — oszczędzasz bez zastanawiania się.',
@@ -109,15 +109,15 @@ export const pl: Dict = {
 
   coverage: {
     eyebrow: 'Zasięg',
-    titleLead: 'Działamy w Polsce i Turcji,',
+    titleLead: 'Na żywo w pięciu krajach,',
     titleAccent: 'Europa w drodze',
-    sub: 'Ten sam silnik działa w pięciu krajach. Ceny dopasowujemy po kodzie kreskowym i aktualizujemy codziennie prawdziwymi danymi ze sklepów.',
+    sub: 'Turcja, Polska, Chorwacja, Węgry i Rumunia. Ceny dopasowywane po kodzie kreskowym, aktualizowane codziennie z prawdziwych danych sklepowych.',
     countries: [
       { code: 'TR', name: 'Turcja' },
       { code: 'PL', name: 'Polska' },
-      { code: 'DE', name: 'Niemcy' },
-      { code: 'CH', name: 'Szwajcaria' },
-      { code: 'SE', name: 'Szwecja' },
+      { code: 'HR', name: 'Chorwacja' },
+      { code: 'HU', name: 'Węgry' },
+      { code: 'RO', name: 'Rumunia' },
     ],
     branchesUnit: 'sklepów',
     live: 'Na żywo',

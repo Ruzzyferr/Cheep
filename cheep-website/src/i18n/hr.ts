@@ -30,7 +30,7 @@ export const hr: Dict = {
   },
 
   hero: {
-    badge: 'Uživo u Turskoj i Poljskoj · 5 država',
+    badge: 'Uživo u 5 zemalja · 120.000+ proizvoda',
     titleLine1: 'Isti proizvod.',
     titleLine2: 'Najniža cijena.',
     sub: 'Cheep uspoređuje cijene trgovačkih lanaca jednu po jednu i tvoj popis za kupnju prebacuje u najpovoljniju košaricu. Stvarne cijene, osvježene svaki dan — štediš bez razmišljanja.',
@@ -109,15 +109,15 @@ export const hr: Dict = {
 
   coverage: {
     eyebrow: 'Pokrivenost',
-    titleLead: 'Uživo u Turskoj i Poljskoj,',
-    titleAccent: 'Europa stiže',
-    sub: 'Isti motor radi u pet država. Cijene uparujemo po barkodu i svaki dan osvježavamo stvarnim podacima iz trgovina.',
+    titleLead: 'Uživo u pet zemalja,',
+    titleAccent: 'Europa slijedi',
+    sub: 'Turska, Poljska, Hrvatska, Mađarska i Rumunjska. Cijene se povezuju preko barkoda i osvježavaju svaki dan stvarnim podacima trgovina.',
     countries: [
       { code: 'TR', name: 'Turska' },
       { code: 'PL', name: 'Poljska' },
-      { code: 'DE', name: 'Njemačka' },
-      { code: 'CH', name: 'Švicarska' },
-      { code: 'SE', name: 'Švedska' },
+      { code: 'HR', name: 'Hrvatska' },
+      { code: 'HU', name: 'Mađarska' },
+      { code: 'RO', name: 'Rumunjska' },
     ],
     branchesUnit: 'poslovnica',
     live: 'Uživo',

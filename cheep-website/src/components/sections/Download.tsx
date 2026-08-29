@@ -3,6 +3,9 @@ import { CheepBird } from '../brand/CheepBird'
 import { useT, useLocale } from '../../i18n'
 import { PLAY_URL } from '../../config'
 
+/** Rozet dosyası GERÇEKTEN var olan diller (public/playbadge-*.png). */
+const BADGE_LOCALES = new Set<string>(['tr', 'pl', 'hr', 'hu', 'ro'])
+
 export function Download() {
   const t = useT()
   const locale = useLocale()
@@ -30,7 +33,16 @@ export function Download() {
 
               <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                 {/* Resmi Google Play rozeti — Google'ın marka kılavuzu gereği asset
-                    değiştirilmeden, dile göre yerelleştirilmiş sürümüyle kullanılır. */}
+                    değiştirilmeden, dile göre yerelleştirilmiş sürümüyle kullanılır.
+
+                    YEDEK ŞART: rozet dosyası dile göre adlandırılıyor
+                    (`playbadge-<locale>.png`) ve yeni bir dil eklendiğinde
+                    dosyayı koymayı unutmak KIRIK GÖRSEL bırakıyor — indirme
+                    bölümünün tam ortasında, yani dönüşümün en kritik yerinde.
+                    Tam olarak bu yaşandı: hr/hu/ro eklendi, rozetleri
+                    eklenmedi ve üç dilde de 404 döndü. `BADGE_LOCALES` bilinen
+                    dosyaları listeliyor; listede olmayan dil İngilizce rozete
+                    düşüyor (Google'ın kendi yayınladığı, kılavuza uygun asset). */}
                 <a
                   href={PLAY_URL}
                   target="_blank"
@@ -38,7 +50,7 @@ export function Download() {
                   className="inline-block rounded-xl transition-transform duration-300 hover:-translate-y-0.5"
                 >
                   <img
-                    src={`/playbadge-${locale}.png`}
+                    src={`/playbadge-${BADGE_LOCALES.has(locale) ? locale : 'en'}.png`}
                     alt={t.download.playAlt}
                     width={440}
                     height={170}

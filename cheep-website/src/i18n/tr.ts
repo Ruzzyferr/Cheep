@@ -31,7 +31,7 @@ export const tr: Dict = {
   },
 
   hero: {
-    badge: 'Türkiye ve Polonya’da canlı · 5 ülke',
+    badge: '5 ülkede canlı · 120.000+ ürün',
     titleLine1: 'Aynı ürün.',
     titleLine2: 'En ucuz fiyat.',
     sub: 'Cheep, marketlerin fiyatlarını tek tek karşılaştırır; alışveriş listeni en uygun sepete taşır. Her gün güncellenen gerçek fiyatlarla, hiç düşünmeden tasarruf et.',
@@ -110,15 +110,15 @@ export const tr: Dict = {
 
   coverage: {
     eyebrow: 'Kapsam',
-    titleLead: 'Türkiye ve Polonya’da canlı,',
+    titleLead: 'Beş ülkede canlı,',
     titleAccent: 'Avrupa yolda',
-    sub: 'Aynı motor beş ülkede çalışıyor. Fiyatlar barkod bazında eşleşiyor, her gün gerçek mağaza verisiyle güncelleniyor.',
+    sub: 'Türkiye, Polonya, Hırvatistan, Macaristan ve Romanya. Fiyatlar barkod bazında eşleşiyor, her gün gerçek mağaza verisiyle güncelleniyor.',
     countries: [
       { code: 'TR', name: 'Türkiye' },
       { code: 'PL', name: 'Polonya' },
-      { code: 'DE', name: 'Almanya' },
-      { code: 'CH', name: 'İsviçre' },
-      { code: 'SE', name: 'İsveç' },
+      { code: 'HR', name: 'Hırvatistan' },
+      { code: 'HU', name: 'Macaristan' },
+      { code: 'RO', name: 'Romanya' },
     ],
     branchesUnit: 'şube',
     live: 'Canlı',

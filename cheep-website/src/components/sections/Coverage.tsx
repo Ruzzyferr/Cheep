@@ -28,6 +28,8 @@ const FLAGS: Record<string, { badge: string; flag: string }> = {
 const BRANDS = [
   'Migros', 'A101', 'BİM', 'ŞOK', 'CarrefourSA', 'Tarım Kredi',
   'Biedronka', 'Lidl', 'Żabka', 'Auchan', 'Carrefour',
+  'Konzum', 'Plodine', 'Spar', 'Tommy', 'Kaufland',
+  'Tesco', 'Aldi', 'Penny', 'Mega Image',
 ]
 
 export function Coverage() {
@@ -68,9 +70,17 @@ export function Coverage() {
                   {c.code}
                 </div>
                 <p className="font-display text-lg font-bold text-ink">{c.name}</p>
-                <p className="mt-1 font-mono text-xs text-ink-soft">
-                  {formatNumber(locale, data.branches)} {t.coverage.branchesUnit}
-                </p>
+                {/* ŞUBE SAYISI 0 İKEN HİÇ GÖSTERİLMİYOR.
+                    "0 şube" yazmak, hiç yazmamaktan kötü: kullanıcıya o
+                    ülkede hiçbir market yokmuş izlenimi veriyor, oysa
+                    FİYATLAR akıyor — eksik olan yalnızca konum verisi
+                    (şube ithalatı ayda bir koşuyor). Sayı geldiğinde satır
+                    kendiliğinden beliriyor. */}
+                {data.branches > 0 && (
+                  <p className="mt-1 font-mono text-xs text-ink-soft">
+                    {formatNumber(locale, data.branches)} {t.coverage.branchesUnit}
+                  </p>
+                )}
                 <span
                   className={
                     'mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[0.65rem] font-bold uppercase tracking-wider ' +

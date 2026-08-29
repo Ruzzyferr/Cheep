@@ -43,9 +43,11 @@ export const PRIVACY_EMAIL = 'gizlilik@cheep.live'
 export const COVERAGE = {
   TR: { branches: 10247, live: true },
   PL: { branches: 13422, live: true },
-  HR: { branches: 0, live: false },
-  HU: { branches: 0, live: false },
-  RO: { branches: 0, live: false },
+  // Şube sayıları ilk şube ithalatından sonra yazılacak; 0 iken arayüz
+  // sayı göstermiyor, "Canlı" rozeti yine doğru (fiyatlar akıyor).
+  HR: { branches: 0, live: true },
+  HU: { branches: 0, live: true },
+  RO: { branches: 0, live: true },
   DE: { branches: 4925, live: false },
   CH: { branches: 2008, live: false },
   SE: { branches: 1554, live: false },
@@ -53,8 +55,10 @@ export const COVERAGE = {
 
 /** Ana sayfadaki sayaçlar. Yuvarlanmış — "+" ekiyle gösterilir. */
 export const HEADLINE_STATS = {
-  products: 55000, // TR 15.619 + PL 39.743
-  branches: 23500, // TR 10.247 + PL 13.422
+  // Ölçüm 2026-08-29 (fiyatı OLAN ürünler):
+  //   TR 14.126 · PL 20.590 · HR 43.633 · HU 7.989 · RO 34.452 = 120.790
+  products: 120000,
+  branches: 23500, // TR 10.247 + PL 13.422 (HR/HU/RO ithalatı sonrası artacak)
   countries: 5,
   avgSavingPct: 23,
 }

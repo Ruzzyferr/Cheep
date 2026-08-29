@@ -30,7 +30,7 @@ export const ro: Dict = {
   },
 
   hero: {
-    badge: 'Activ în Turcia și Polonia · 5 țări',
+    badge: 'Live în 5 țări · 120.000+ produse',
     titleLine1: 'Același produs.',
     titleLine2: 'Cel mai mic preț.',
     sub: 'Cheep compară prețurile din magazine, unul câte unul, și îți mută lista de cumpărături în cel mai ieftin coș. Prețuri reale, actualizate zilnic — economisești fără să stai pe gânduri.',
@@ -109,15 +109,15 @@ export const ro: Dict = {
 
   coverage: {
     eyebrow: 'Acoperire',
-    titleLead: 'Activ în Turcia și Polonia,',
-    titleAccent: 'Europa e pe drum',
-    sub: 'Același motor funcționează în cinci țări. Prețurile se potrivesc după codul de bare și se actualizează zilnic cu date reale din magazine.',
+    titleLead: 'Live în cinci țări,',
+    titleAccent: 'Europa urmează',
+    sub: 'Turcia, Polonia, Croația, Ungaria și România. Prețurile se potrivesc după codul de bare și se actualizează zilnic din date reale din magazine.',
     countries: [
       { code: 'TR', name: 'Turcia' },
       { code: 'PL', name: 'Polonia' },
-      { code: 'DE', name: 'Germania' },
-      { code: 'CH', name: 'Elveția' },
-      { code: 'SE', name: 'Suedia' },
+      { code: 'HR', name: 'Croația' },
+      { code: 'HU', name: 'Ungaria' },
+      { code: 'RO', name: 'România' },
     ],
     branchesUnit: 'magazine',
     live: 'Activ',
