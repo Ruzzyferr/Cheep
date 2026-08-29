@@ -88,7 +88,52 @@ const KEYWORD_RULES: [string[], string][] = [
 
 const DEFAULT_ICON = 'tag-outline';
 
-export function getCategoryIcon(categoryName: string | null | undefined): string {
+/**
+ * Kanonik slug → simge. DİLDEN BAĞIMSIZ ve bu yüzden BİRİNCİL yol.
+ *
+ * Aşağıdaki `EXACT`/`KEYWORD_RULES` tabloları TÜRKÇE ADLARA bakıyor, oysa
+ * kategori adı istemcinin diline çevriliyor. Sonuç: Türkçe dışındaki YEDİ
+ * dilin hepsinde bütün kategoriler tek bir genel etikete düşüyordu — ana
+ * sayfada üst üste aynı simgeden bir duvar. Hırvatça ekran görüntüsüyle
+ * doğrulandı; Lehçe/Almanca/İngilizce dahil hepsi aynı durumdaydı.
+ *
+ * `icon_key` sunucudan geliyor ve çeviriden ÖNCEKİ kanonik slug (bkz.
+ * backend `localizeRows`). Ad tabanlı tablolar SİLİNMEDİ: sunucu eski bir
+ * sürümdeyse (`icon_key` yok) ve dil Türkçeyse eskisi gibi çalışmaya devam
+ * ediyor.
+ */
+const BY_SLUG: Record<string, string> = {
+  'sut-urunleri-ve-kahvaltilik': 'cheese',
+  'et-tavuk-ve-balik': 'food-steak',
+  'meyve-ve-sebze': 'fruit-watermelon',
+  'temel-gida': 'rice',
+  'firin-ve-pastane': 'bread-slice',
+  icecek: 'bottle-soda-classic',
+  'icecekler': 'bottle-soda-classic',
+  'atistirmalik-ve-tatli': 'cookie',
+  dondurma: 'ice-cream',
+  'hazir-yemek-ve-donuk': 'fridge-outline',
+  'temizlik-ve-kisisel-bakim-urunleri': 'spray-bottle',
+  bebek: 'baby-carriage',
+  'ev-pet-ve-yasam': 'sofa-single',
+  'saglik-ve-kozmetik': 'pill',
+  'diger-urunler': 'dots-horizontal',
+};
+
+/**
+ * @param categoryName görünen ad (çevrilmiş olabilir) — yalnızca yedek yol
+ * @param iconKey      sunucudan gelen dilden bağımsız kanonik slug
+ */
+export function getCategoryIcon(
+  categoryName: string | null | undefined,
+  iconKey?: string | null,
+): string {
+  // 1) Dilden bağımsız anahtar — tek güvenilir yol.
+  if (iconKey && BY_SLUG[iconKey]) return BY_SLUG[iconKey];
+
+  // 2) Ad tabanlı yedek. Yalnızca Türkçede işe yarıyor ama zarar da vermiyor:
+  //    tutmazsa varsayılana düşüyor, yani bu adımın olmaması hiçbir dili
+  //    düzeltmez, olması Türkçeyi eski sunucuda ayakta tutar.
   const name = norm(categoryName ?? '');
   if (!name) return DEFAULT_ICON;
   if (EXACT[name]) return EXACT[name];

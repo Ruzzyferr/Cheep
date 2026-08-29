@@ -452,7 +452,12 @@ function ListItemCard({
       style={styles.itemRow}
     >
       <View style={styles.itemThumb}>
-        <ProductThumb imageUrl={product.image_url} categoryName={product.category?.name} iconSize={18} />
+        <ProductThumb
+          imageUrl={product.image_url}
+          categoryName={product.category?.name}
+          iconKey={product.category?.icon_key}
+          iconSize={18}
+        />
       </View>
       <View style={styles.itemInfo}>
         <View style={styles.itemNameRow}>

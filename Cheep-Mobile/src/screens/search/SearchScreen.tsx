@@ -227,6 +227,7 @@ export function SearchScreen({ navigation, route }: SearchScreenProps) {
                     <ProductGridCard
                       productName={item.name}
                       categoryName={item.category?.name}
+                      iconKey={item.category?.icon_key}
                       imageUrl={item.image_url || undefined}
                       topThreePrices={getTopThreePrices(item)}
                       constraint={item.constraint}

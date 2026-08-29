@@ -117,7 +117,12 @@ export function ProductDetailScreen({
       >
         {/* Product Image — görsel yoksa kategori-ikonlu placeholder */}
         <View style={styles.imageContainer}>
-          <ProductThumb imageUrl={product.image_url} categoryName={product.category?.name} iconSize={56} />
+          <ProductThumb
+            imageUrl={product.image_url}
+            categoryName={product.category?.name}
+            iconKey={product.category?.icon_key}
+            iconSize={56}
+          />
         </View>
 
       {/* Product Info */}

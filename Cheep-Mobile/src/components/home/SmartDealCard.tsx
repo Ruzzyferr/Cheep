@@ -17,6 +17,8 @@ interface SmartDealCardProps {
   storeName: string;
   imageUrl?: string;
   categoryName?: string;
+  /** Dilden bağımsız kategori anahtarı — simge seçimi buna bakar. */
+  iconKey?: string | null;
   discountPercent?: number;
   onPress: () => void;
 }
@@ -27,6 +29,7 @@ export function SmartDealCard({
   unit,
   storeName,
   categoryName,
+  iconKey,
   imageUrl,
   discountPercent,
   onPress,
@@ -35,7 +38,7 @@ export function SmartDealCard({
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.95}>
       <View style={styles.imageContainer}>
-        <ProductThumb imageUrl={imageUrl} categoryName={categoryName} iconSize={36} />
+        <ProductThumb imageUrl={imageUrl} categoryName={categoryName} iconKey={iconKey} iconSize={36} />
         {discountPercent !== undefined && (
           <View style={styles.discountBadge}>
             <Text style={styles.discountText}>-{discountPercent}%</Text>

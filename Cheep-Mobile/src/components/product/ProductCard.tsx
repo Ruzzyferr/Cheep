@@ -33,7 +33,12 @@ export function ProductCard({ product, onPress, showStore = false }: ProductCard
     <Card onPress={onPress} padding="sm" style={styles.card}>
       {/* Product Image — görsel yoksa kategori-ikonlu placeholder */}
       <View style={styles.imageContainer}>
-        <ProductThumb imageUrl={product.image_url} categoryName={product.category?.name} iconSize={40} />
+        <ProductThumb
+          imageUrl={product.image_url}
+          categoryName={product.category?.name}
+          iconKey={product.category?.icon_key}
+          iconSize={40}
+        />
       </View>
 
       {/* Product Info */}

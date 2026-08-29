@@ -37,6 +37,15 @@ export interface CategoryRow {
     display_order: number;
     icon_url: string | null;
     product_count: number;
+    /**
+     * Dilden BAĞIMSIZ kategori kimliği (çeviriden önceki kanonik slug).
+     * İstemci simgeyi buna göre seçiyor — `name` ve `slug` çevrildiği için
+     * ikisi de bu iş için kullanılamaz. Bkz. `localizeRows`.
+     *
+     * İsteğe bağlı: veritabanından okunan ham satırlarda henüz yok, yalnızca
+     * `localizeRows`'tan geçmiş yanıtlarda dolu.
+     */
+    icon_key?: string;
 }
 
 export interface CategoryTreeNode extends CategoryRow {
@@ -91,7 +100,22 @@ export const getCategoriesWithCounts = async (countryId: number): Promise<Catego
  * ki mobil, website ve SEO aynı sözlükten beslensin.
  */
 export const localizeRows = <T extends { name: string; slug: string }>(rows: T[], lang: Lang): T[] =>
-    rows.map((r) => ({ ...r, ...localizeCategory(lang, r.name, r.slug) }));
+    rows.map((r) => ({
+        ...r,
+        ...localizeCategory(lang, r.name, r.slug),
+        // ÇEVİRİDEN ÖNCEKİ (kanonik) slug, dilden BAĞIMSIZ kimlik olarak
+        // korunuyor. İstemci kategori SİMGESİNİ buna göre seçiyor.
+        //
+        // Neden gerekli: mobilde simge eşlemesi kategorinin GÖRÜNEN ADINA
+        // bakıyordu ve o ad çevriliyor. Sonuç: Türkçe dışındaki YEDİ dilin
+        // hepsinde bütün kategoriler tek bir genel etiket simgesine düşüyordu
+        // (Hırvatçada ekran görüntüsüyle doğrulandı). `slug` de çevriliyor,
+        // dolayısıyla o da anahtar olamaz; veritabanı `id`'si sabit ama
+        // istemciye gömülmesi yeniden tohumlamada kırılır.
+        //
+        // Kimliği taksonominin SAHİBİ olan sunucu veriyor — doğru yer burası.
+        icon_key: r.slug,
+    }));
 
 /** Yalnızca kökler (parent_id = null). */
 export const onlyParents = (rows: CategoryRow[]): CategoryRow[] => {

@@ -20,6 +20,8 @@ interface PriceInfo {
 interface ProductGridCardProps {
   productName: string;
   categoryName?: string;
+  /** Dilden bağımsız kategori anahtarı — simge seçimi buna bakar. */
+  iconKey?: string | null;
   imageUrl?: string;
   topThreePrices: PriceInfo[];
   onPress: () => void;
@@ -38,6 +40,7 @@ interface ProductGridCardProps {
 function ProductGridCardBase({
   productName,
   categoryName,
+  iconKey,
   imageUrl,
   topThreePrices,
   onPress,
@@ -53,7 +56,7 @@ function ProductGridCardBase({
     >
       {/* Product Image — görsel yoksa kategori-ikonlu placeholder */}
       <View style={styles.imageContainer}>
-        <ProductThumb imageUrl={imageUrl} categoryName={categoryName} iconSize={40} />
+        <ProductThumb imageUrl={imageUrl} categoryName={categoryName} iconKey={iconKey} iconSize={40} />
 
         {/* Constraint rozetleri görselin ÜSTÜNDE (overlay) — dikey akışı bozmaz,
             böylece aşağıdaki fiyat bloğu her kartta aynı hizada sabit kalır. */}

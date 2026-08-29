@@ -87,6 +87,8 @@ export interface Category {
   id: number;
   name: string;
   slug: string;
+  /** Dilden bağımsız kanonik slug — SİMGE seçimi buna bakar (ad çevriliyor). */
+  icon_key?: string;
   parent_id: number | null;
   display_order: number;
   icon_url: string | null;

@@ -24,7 +24,12 @@ export function SearchResultRow({ product, onAdd, added, onPress }: SearchResult
 
   return (
     <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.7}>
-      <ProductThumb imageUrl={product.image_url} categoryName={product.category?.name} iconSize={26} />
+      <ProductThumb
+        imageUrl={product.image_url}
+        categoryName={product.category?.name}
+        iconKey={product.category?.icon_key}
+        iconSize={26}
+      />
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={2}>{product.name}</Text>
         <View style={styles.meta}>

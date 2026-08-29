@@ -30,10 +30,12 @@ const IMG_HEADERS = {
 interface ProductThumbProps {
   imageUrl?: string | null;
   categoryName?: string | null;
+  /** Dilden bağımsız kategori anahtarı; ad çevrildiği için simge buna bakar. */
+  iconKey?: string | null;
   iconSize?: number;
 }
 
-export function ProductThumb({ imageUrl, categoryName, iconSize = 34 }: ProductThumbProps) {
+export function ProductThumb({ imageUrl, categoryName, iconKey, iconSize = 34 }: ProductThumbProps) {
   if (imageUrl) {
     return (
       <Image
@@ -53,7 +55,7 @@ export function ProductThumb({ imageUrl, categoryName, iconSize = 34 }: ProductT
   return (
     <View style={styles.placeholder}>
       <MaterialCommunityIcons
-        name={getCategoryIcon(categoryName) as any}
+        name={getCategoryIcon(categoryName, iconKey) as any}
         size={iconSize}
         color={colors.primary[600]}
       />

@@ -389,7 +389,7 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
               >
                 <View style={styles.catIcon}>
                   <MaterialCommunityIcons
-                    name={getCategoryIcon(c.name) as any}
+                    name={getCategoryIcon(c.name, c.icon_key) as any}
                     size={26}
                     color={colors.primary.main}
                   />
@@ -428,7 +428,12 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
                   onPress={() => navigation.navigate('ProductDetail', { productId: p.id })}
                 >
                   <View style={styles.dealImageWrap}>
-                    <ProductThumb imageUrl={p.image_url} categoryName={p.category?.name} iconSize={32} />
+                    <ProductThumb
+                      imageUrl={p.image_url}
+                      categoryName={p.category?.name}
+                      iconKey={p.category?.icon_key}
+                      iconSize={32}
+                    />
                     {disc > 0 && (
                       <View style={styles.dealBadge}>
                         <Text style={styles.dealBadgeText}>-%{disc}</Text>

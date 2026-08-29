@@ -19,11 +19,19 @@ function localizeProductCategory<T extends { category?: { name: string; slug: st
     products: T[],
     lang: Lang,
 ): T[] {
-    if (lang === 'tr') return products;
+    // `tr`de de geçiyoruz: `icon_key` DİLDEN BAĞIMSIZ ve her dilde gerekli.
+    // Eskiden burada erken dönülüyordu; o zaman Türkçe yanıtlarda `icon_key`
+    // hiç bulunmaz, istemci ad tabanlı yedeğe düşerdi — çalışırdı ama iki
+    // farklı yol demek olurdu ve ikisinden biri sessizce bozulabilirdi.
     return products.map((p) => {
         if (!p.category?.slug) return p;
-        const localized = localizeCategory(lang, p.category.name, p.category.slug);
-        return { ...p, category: { ...p.category, ...localized } };
+        const localized = lang === 'tr' ? {} : localizeCategory(lang, p.category.name, p.category.slug);
+        return {
+            ...p,
+            // `icon_key`: çeviriden ÖNCEKİ kanonik slug — simge seçimi buna
+            // bakıyor. `name`/`slug` çevrildiği için ikisi de kullanılamaz.
+            category: { ...p.category, icon_key: p.category.slug, ...localized },
+        };
     });
 }
 
