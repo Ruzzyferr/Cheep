@@ -20,10 +20,30 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="repla
 # ui_lang: uygulama ICI dil secicisinden secilecek secenegin etiketi.
 # Tarayici locale'i arayuz dilini DEGISTIRMIYOR (i18n `lng: 'tr'` ile sabit
 # baslatiliyor), o yuzden Profil > Uygulama dili uzerinden gecmek sart.
+# `login`/`route`/`show` ETIKETLERI PRESET'TE, koda gomulu DEGIL.
+#
+# Bu adimlar metinle tiklaniyor ve arayuz cevrildi: sabit Turkce yazmak
+# Turkce disi her kosuda ISKA demek. Iskalar sessiz (tap() yalnizca uyari
+# basiyor), dolayisiyla eksik ekran goruntusu ancak ciktiya bakilirsa fark
+# ediliyor. Giris etiketi bir kez bu yuzden duzeltilmisti; rota butonlari
+# Turkce kalmisti ve pl/en kosularinda son iki gorsel uretilmiyordu.
+#
+# Arama terimi de dile gore: her dilde sonuc dolu bir sorgu secildi.
 PRESETS = {
-    "tr":    dict(locale="tr-TR", lat=41.01, lon=28.98, out="appstore-screenshots",    lang="tr", country="TR", login="Giriş Yap"),
-    "en":    dict(locale="en-US", lat=41.01, lon=28.98, out="appstore-screenshots-en", lang="en", country="TR", login="Log In"),
-    "pl":    dict(locale="pl-PL", lat=52.23, lon=21.01, out="appstore-screenshots-pl", lang="pl", country="PL", login="Zaloguj się"),
+    "tr":    dict(locale="tr-TR", lat=41.01,  lon=28.98,  out="appstore-screenshots",    lang="tr", country="TR",
+                  login="Giriş Yap",     search="çay",   route="En Ucuz Rotayı Gör",              show="Rotaları Göster"),
+    "en":    dict(locale="en-US", lat=41.01,  lon=28.98,  out="appstore-screenshots-en", lang="en", country="TR",
+                  login="Log In",        search="tea",   route="View Cheapest Route",             show="Show Routes"),
+    "pl":    dict(locale="pl-PL", lat=52.23,  lon=21.01,  out="appstore-screenshots-pl", lang="pl", country="PL",
+                  login="Zaloguj się",   search="mleko", route="Zobacz najtańszą trasę",          show="Pokaż trasy"),
+    # Yeni pazarlar. Koordinatlar baskentler: Zagreb, Budapeste, Bukres —
+    # vitrindeki market adlari ve para birimi o ulkenin olmali.
+    "hr":    dict(locale="hr-HR", lat=45.815, lon=15.982, out="appstore-screenshots-hr", lang="hr", country="HR",
+                  login="Prijavi se",    search="mlijeko", route="Pogledaj najjeftiniju rutu",    show="Prikaži rute"),
+    "hu":    dict(locale="hu-HU", lat=47.498, lon=19.040, out="appstore-screenshots-hu", lang="hu", country="HU",
+                  login="Bejelentkezés", search="tej",     route="Legolcsóbb útvonal megtekintése", show="Útvonalak megjelenítése"),
+    "ro":    dict(locale="ro-RO", lat=44.427, lon=26.103, out="appstore-screenshots-ro", lang="ro", country="RO",
+                  login="Autentifică-te", search="lapte",  route="Vezi ruta cea mai ieftină",     show="Arată rutele"),
 }
 ap = argparse.ArgumentParser()
 ap.add_argument("preset", nargs="?", default="tr", choices=sorted(PRESETS))
@@ -127,7 +147,7 @@ with sync_playwright() as p:
     pg.wait_for_timeout(4000)
     sins = pg.locator("input")
     if sins.count() >= 1:
-        sins.nth(0).fill("çay")
+        sins.nth(0).fill(CFG["search"])
         pg.wait_for_timeout(5500)
     shot(pg, "03-arama-sonuclari")
 
@@ -149,10 +169,10 @@ with sync_playwright() as p:
     pg.wait_for_timeout(4000)
     pg.evaluate(SET_SCROLL, 0)                  # sekme degisiminden sonra kaydirma
     pg.wait_for_timeout(2500)                   # konumu bozuk kaliyor, basa sar
-    if tap(pg, "En Ucuz Rotayı Gör", exact=False, to=8000):
+    if tap(pg, CFG["route"], exact=False, to=8000):
         pg.wait_for_timeout(7000)
         shot(pg, "06-liste-detay")
-        if tap(pg, "Rotaları Göster", exact=False, to=8000):
+        if tap(pg, CFG["show"], exact=False, to=8000):
             pg.wait_for_timeout(11000)
             shot(pg, "07-rota-karsilastirma")
 
