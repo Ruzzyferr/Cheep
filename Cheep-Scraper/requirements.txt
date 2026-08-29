@@ -9,7 +9,7 @@ playwright>=1.62.0
 beautifulsoup4==4.15.0
 
 # Veri İşleme
-lxml>=5.1.0  # BeautifulSoup için parser (py3.12 wheel)
+lxml>=6.1.2  # BeautifulSoup için parser (py3.12 wheel)
 
 # Scalable LLM Matcher için
 numpy>=2.5.2  # Cosine similarity hesaplamaları için (py3.12 wheel)
