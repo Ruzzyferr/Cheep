@@ -1,6 +1,7 @@
 {
   "country": "Turkey",
   "country_code": "TR",
+  "live": true,
   "markets": [
     {
       "name": "Migros",

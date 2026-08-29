@@ -138,3 +138,50 @@ def test_importer_survives_malformed_json_body(monkeypatch):
     )
     assert result["failed"] == 1
     assert result["successful"] == 0
+
+
+# --------------------------------------------- acik, GTIN olmayan birlestirme anahtari
+
+def test_merge_key_is_forwarded_when_there_is_no_valid_ean():
+    """Romanya'da barkod yok ama devletin kanonik urun kimligi (`catprod.id`)
+    var. Onu atmak, elimizdeki en iyi eslestirme sinyalini bulanik isim
+    benzerligiyle degistirmek olurdu."""
+    payloads = build_api_payloads(
+        [{"name": "LAPTE ZUZU 1.5% 1L", "price": 7.49, "merge_key": "catprod:1016498"}],
+        store_id=70,
+    )
+    assert payloads[0]["ean_barcode"] == "catprod:1016498"
+
+
+def test_real_ean_wins_over_merge_key():
+    """Gercek GTIN kuresel olarak benzersiz; ulkeye kapsamli bir anahtardan
+    her zaman ustundur (urun sinirlar otesinde de birlesebilir)."""
+    payloads = build_api_payloads(
+        [{
+            "name": "Milka 100g", "price": 1.99,
+            "barcode": "7622210043931", "merge_key": "catprod:999",
+        }],
+        store_id=70,
+    )
+    assert payloads[0]["ean_barcode"] == "7622210043931"
+
+
+def test_merge_key_is_used_when_barcode_is_invalid():
+    """Gecersiz barkod (magaza-ici 2x oneki ya da kontrol hanesi tutmayan)
+    dusuruluyor; merge_key varsa devreye girmeli."""
+    payloads = build_api_payloads(
+        [{
+            "name": "BRANZA CANTAR", "price": 12.0,
+            "barcode": "2030269600008", "merge_key": "catprod:42",
+        }],
+        store_id=70,
+    )
+    assert payloads[0]["ean_barcode"] == "catprod:42"
+
+
+def test_no_merge_key_and_no_valid_ean_means_no_barcode_field():
+    payloads = build_api_payloads(
+        [{"name": "Isimsiz urun", "price": 5.0, "barcode": "2030269600008"}],
+        store_id=70,
+    )
+    assert "ean_barcode" not in payloads[0]

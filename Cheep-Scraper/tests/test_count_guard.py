@@ -5,6 +5,7 @@ from countries._common.pipeline import (
     summary_is_healthy,
     filter_products_by_category_domain,
     resolve_enrich_mode,
+    is_live,
 )
 
 
@@ -275,3 +276,25 @@ def test_baseline_decays_slowly_so_real_shrink_is_eventually_accepted():
 def test_first_run_still_passes_with_new_format():
     assert should_import("Yeni", 10, {}) is True
     assert should_import("Yeni", 10, {"Yeni": {"last": 0, "hwm": 0}}) is True
+
+
+# ---------------------------------------------------------------- canlı kapısı
+
+def test_country_is_not_live_by_default():
+    """VARSAYILAN KAPALI. Bir ülke klasörü açmak, scraper yazmak ve config
+    doldurmak — hepsi ülkeyi canlıya almadan yapılabilmeli. Almanya tam da bu
+    yüzden kasten kapalı tutulmuştu (pilot NO-GO) ama o koruma birleştirilmemiş
+    bir dalda kalmıştı; main'de hiçbir kapı yoktu."""
+    assert is_live({"country_code": "XX"}) is False
+
+
+def test_explicit_true_opens_the_gate():
+    assert is_live({"country_code": "PL", "live": True}) is True
+
+
+def test_only_boolean_true_counts():
+    """Config'te "live": "true" (metin) ya da 1 yazmak kapıyı AÇMAMALI —
+    yanlışlıkla doğru görünen bir değerle üretime veri akıtmak, kapının var
+    olma sebebini ortadan kaldırır."""
+    for value in ("true", "yes", 1, "1", None, 0, ""):
+        assert is_live({"live": value}) is False

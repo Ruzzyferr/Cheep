@@ -11,7 +11,11 @@ from typing import List, Dict, Optional
 logger = logging.getLogger(__name__)
 
 CHUNK_SIZE = 900          # backend hard limit is 1000
-ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu", "szt", "opak"}
+# Ulke basina paket birimi: TR "adet", PL "szt"/"opak", HR "kom" (komad),
+# HU "db" (darab). Listede OLMAYAN birim sessizce ulkenin default_unit'ine
+# dusuruluyor -- yani "kom" eklenmezse her Hirvat urunu Turkce "adet" olurdu.
+ALLOWED_UNITS = {"adet", "kg", "g", "l", "ml", "cl", "paket", "kutu", "szt", "opak",
+                 "kom", "db"}
 
 
 # Bu koşuda eşlenemeyen ham kategori adları → ürün sayısı (bkz.
@@ -109,8 +113,31 @@ def build_api_payloads(
             "name": name,
         }
         barcode = product.get("barcode")
+        merge_key = product.get("merge_key")
         if barcode and is_globally_unique_ean(barcode):
             payload["ean_barcode"] = str(barcode).strip()
+        elif merge_key:
+            # ACIK, GTIN OLMAYAN BIRLESTIRME ANAHTARI.
+            #
+            # Bazi ulkelerde barkod yok ama DEVLETIN kendi tuttugu, zincirler
+            # arasi kanonik bir urun kimligi var (Romanya: Rekabet Konseyi'nin
+            # `catprod.id` alani). Bu kimlik EAN degil -- kontrol hanesi
+            # tutmaz, `is_globally_unique_ean` onu hakli olarak reddeder --
+            # ama ULKE ICINDE tam olarak EAN'in isini gorur ve onu atmak,
+            # elimizdeki en iyi eslestirme sinyalini bulanik isim
+            # benzerligiyle degistirmek olurdu.
+            #
+            # `ean_barcode` alanina ONEKLI yaziliyor ("catprod:1016498"):
+            # kimse onu GTIN sanmasin. Benzersizlik kisiti (country_id,
+            # ean_barcode) ULKEYE KAPSAMLI oldugu icin baska bir ulkenin
+            # gercek EAN'iyla carpisamaz. Ayni konvansiyon Turkiye'de
+            # zaten kullaniliyor ("mf-" onekli marketfiyati anahtarlari).
+            #
+            # Scraper bu alani ancak kaynak GERCEKTEN kararli ve kanonik bir
+            # kimlik veriyorsa doldurmali; kendi urettigi bir hash ASLA
+            # buraya yazilmamali (o zaman zincirler arasi hicbir sey birlesmez
+            # ama birlesmis gibi gorunur).
+            payload["ean_barcode"] = str(merge_key).strip()
         elif barcode:
             # Dogrulanamayan barkod DUSURULUR (bkz. is_globally_unique_ean).
             # Urun yine ice aktarilir; yalnizca marketler-arasi birlestirmeye

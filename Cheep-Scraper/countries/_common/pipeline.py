@@ -133,6 +133,25 @@ def should_import(market: str, new_count: int, prev_counts: Dict, min_ratio: flo
     return new_count >= taban * min_ratio
 
 
+def is_live(config: Dict) -> bool:
+    """Bu ülkenin verisi ÜRETİME akıtılabilir mi? (SAF karar)
+
+    VARSAYILAN KAPALI. Bir ülke klasörü oluşturmak, scraper yazmak ve config'i
+    doldurmak — hepsi ülkeyi CANLIYA ALMADAN yapılabilmeli: yeni bir ülke
+    üzerinde çalışırken zamanlayıcının ya da elle çalıştırılan bir koşunun
+    yarım kalmış kataloğu üretim veritabanına basması, kullanıcıya eksik ve
+    yanlış fiyat gösterir. Almanya bu yüzden kasten kapalı tutuldu (pilot
+    NO-GO: Wolt aynı EAN'ı hem tek ürüne hem çoklu pakete veriyordu ve
+    fiyatlar eziliyordu) ama o koruma yalnızca birleştirilmemiş bir dalda
+    kaldı; main'de hiçbir kapı yoktu.
+
+    Bir ülke ancak `config.json`'ında AÇIKÇA `"live": true` yazdığında akar.
+    Yerel geliştirme/doğrulama için `--allow-unlive` bayrağı var; o bayrak
+    yalnızca elle verilebilir, zamanlayıcı betikleri onu geçmez.
+    """
+    return config.get("live") is True
+
+
 def select_markets(config_markets: List[Dict], names: Optional[List[str]] = None) -> List[Dict]:
     """Pure decision: which of a country's configured markets should this
     pipeline invocation scrape? Backs the `--markets` CLI flag used for
@@ -167,12 +186,18 @@ async def run_country_pipeline(
     config_path: str,
     api_url: str = "http://localhost:3000/api/v1",
     markets: Optional[List[str]] = None,
+    allow_unlive: bool = False,
 ) -> Dict:
     config_path = Path(config_path)
     country_dir = config_path.parent
     with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
     country_code = config["country_code"]
+    if not is_live(config) and not allow_unlive:
+        raise PermissionError(
+            f"{country_code}: config.json'da \"live\": true YOK — ülke canlı değil, "
+            "içe aktarım yapılmadı. Yerel doğrulama için --allow-unlive kullanın."
+        )
     default_unit = config.get("default_unit", "adet")
     category_map = _load_category_map(country_dir)
     market_configs = {m["name"]: m for m in config.get("markets", [])}
@@ -327,12 +352,20 @@ def main():
              "chain-rotation scheduling -- an unknown or disabled name is a "
              "hard error, this never silently falls back to running everything.",
     )
+    parser.add_argument(
+        "--allow-unlive", action="store_true",
+        help="config.json'da \"live\": true olmasa bile içe aktarımı çalıştır. "
+             "YALNIZCA yerel geliştirme/doğrulama içindir — zamanlayıcı "
+             "betikleri bu bayrağı ASLA geçmemeli.",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
     market_names = [m.strip() for m in args.markets.split(",")] if args.markets else None
     try:
-        summary = asyncio.run(run_country_pipeline(args.config, args.api_url, markets=market_names))
-    except ValueError as e:
+        summary = asyncio.run(run_country_pipeline(
+            args.config, args.api_url, markets=market_names, allow_unlive=args.allow_unlive,
+        ))
+    except (ValueError, PermissionError) as e:
         logger.error("%s", e)
         sys.exit(1)
     if not summary_is_healthy(summary):

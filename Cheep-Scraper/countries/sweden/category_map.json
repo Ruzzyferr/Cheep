@@ -1,7 +1,8 @@
 {
-  "Mejeri & Ost": "dairy-eggs",
-  "Frukt & Grönt": "fruit-veg",
-  "Dryck": "beverages",
-  "Bröd & Kakor": "bakery",
-  "Kött & Fågel": "meat-fish"
+  "_slug_fix_note": "Slug'lar 2026-08-29'da DUZELTILDI: bu harita Ingilizce yer-tutucu slug'lar (dairy-eggs, fruit-veg, beverages, bakery, meat-fish) kullaniyordu ve bunlarin HICBIRI backend taksonomisinde YOK. Bu ulke acilsaydi HER urun kategorisiz kaydedilir, hicbir listede gorunmezdi. tests/test_category_map_integrity.py artik bu sinifi kalici olarak engelliyor.",
+  "Mejeri & Ost": "sut-urunleri",
+  "Frukt & Grönt": "meyve-sebze",
+  "Dryck": "icecek",
+  "Bröd & Kakor": "firin-pastane",
+  "Kött & Fågel": "et-tavuk-balik"
 }

@@ -1,6 +1,7 @@
 {
   "country": "Poland",
   "country_code": "PL",
+  "live": true,
   "default_unit": "szt",
   "markets": [
     {
