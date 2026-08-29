@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 
 // Depodaki desen (bkz. anchor.test.ts, geocode.test.ts): react-native taklit
 // edilir, native ortam gerekmez. `Platform.select` de gerekiyor çünkü test
@@ -11,7 +11,7 @@ vi.mock('react-native', () => ({
 }));
 
 /* eslint-disable import/first */
-import { shouldShowBanner, bannerUnitId, hasRealAdUnits } from '../../config/ads';
+import { shouldShowBanner } from '../../config/ads';
 import { buildGridRows, AD_AFTER_ROW, MIN_RESULTS_FOR_AD } from '../adRows';
 /* eslint-enable import/first */
 
@@ -46,24 +46,91 @@ describe('banner gösterim kararı', () => {
   });
 });
 
+/**
+ * Birim kimliği seçimi.
+ *
+ * ORTAMI TEST KENDİSİ KURUYOR. Bu testler eskiden ortamda hiçbir AdMob
+ * değişkeni OLMADIĞINI varsayıyordu; yerelde doğruydu ama CI'da gerçek
+ * kimlikler repo değişkeni olarak tanımlanınca "kimlik yoksa test birimine
+ * düşer" testi kırıldı — kod değil, testin varsayımı yanlıştı. Değişkenler
+ * modül YÜKLENİRKEN okunduğu için her senaryoda modül yeniden import ediliyor.
+ */
 describe('reklam birimi kimliği', () => {
-  it('gerçek kimlik yokken GOOGLE TEST birimine düşer', () => {
+  const ANAHTARLAR = [
+    'EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID',
+    'EXPO_PUBLIC_ADMOB_BANNER_SEARCH_ANDROID',
+    'EXPO_PUBLIC_ADMOB_BANNER_LIST_ANDROID',
+    'EXPO_PUBLIC_ADMOB_BANNER_HOME_IOS',
+    'EXPO_PUBLIC_ADMOB_BANNER_SEARCH_IOS',
+    'EXPO_PUBLIC_ADMOB_BANNER_LIST_IOS',
+  ];
+
+  async function tazeModul(ortam: Record<string, string | undefined>) {
+    for (const k of ANAHTARLAR) delete process.env[k];
+    for (const [k, v] of Object.entries(ortam)) if (v) process.env[k] = v;
+    vi.resetModules();
+    return import('../../config/ads');
+  }
+
+  afterEach(() => {
+    for (const k of ANAHTARLAR) delete process.env[k];
+    vi.resetModules();
+  });
+
+  it('gerçek kimlik yokken GOOGLE TEST birimine düşer', async () => {
     // Geliştirmede GERÇEK birim kullanmak "geçersiz trafik" sayılıp AdMob
     // hesabını askıya aldırır. Yapılandırmayı unutmanın bedeli gelir kaybı
     // olmalı, hesap kaybı değil.
+    const { bannerUnitId: f } = await tazeModul({});
     for (const slot of ['home', 'search', 'list'] as const) {
-      expect(bannerUnitId(slot)).toBe('ca-app-pub-3940256099942544/6300978111');
+      expect(f(slot)).toBe('ca-app-pub-3940256099942544/6300978111');
     }
   });
 
-  it('her yerleşim kendi birimini ister (AdMob raporu birim bazında)', () => {
-    // Üçü aynı ortam değişkenine bakmıyor olmalı; tek birim kullanılsa hangi
-    // yerleşimin çalıştığı hiç öğrenilemezdi.
-    expect(new Set(['home', 'search', 'list'])).toHaveProperty('size', 3);
+  it('gerçek kimlikler tanımlıysa ONLARI kullanır', async () => {
+    const { bannerUnitId: f } = await tazeModul({
+      EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID: 'ca-app-pub-1/11',
+      EXPO_PUBLIC_ADMOB_BANNER_SEARCH_ANDROID: 'ca-app-pub-1/22',
+      EXPO_PUBLIC_ADMOB_BANNER_LIST_ANDROID: 'ca-app-pub-1/33',
+    });
+    expect(f('home')).toBe('ca-app-pub-1/11');
+    expect(f('search')).toBe('ca-app-pub-1/22');
+    expect(f('list')).toBe('ca-app-pub-1/33');
+    // Üçü AYRI olmak zorunda: AdMob raporu birim bazında kırılıyor, tek birim
+    // kullanılsa hangi yerleşimin çalıştığı hiç öğrenilemezdi.
+    expect(new Set([f('home'), f('search'), f('list')]).size).toBe(3);
   });
 
-  it('gerçek birimler yapılandırılmamışken bunu bildirir', () => {
-    expect(hasRealAdUnits()).toBe(false);
+  it('PLATFORMUN kendi kimliğini okur — diğer platformunkini DEĞİL', async () => {
+    // AdMob birimi platforma özel; Android birimini iOS'ta kullanmak reklam
+    // gelmemesi ve raporun karışması demek. Bu mock Android.
+    const { bannerUnitId: f } = await tazeModul({
+      EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID: 'ca-app-pub-1/android',
+      EXPO_PUBLIC_ADMOB_BANNER_HOME_IOS: 'ca-app-pub-1/ios',
+    });
+    expect(f('home')).toBe('ca-app-pub-1/android');
+  });
+
+  it('bozuk bir değer test birimine düşürür (sessizce yanlış kimlik kullanmaz)', async () => {
+    const { bannerUnitId: f } = await tazeModul({
+      EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID: 'bozuk-deger',
+    });
+    expect(f('home')).toBe('ca-app-pub-3940256099942544/6300978111');
+  });
+
+  it('hasRealAdUnits yapılandırmanın TAM olup olmadığını bildirir', async () => {
+    const bos = await tazeModul({});
+    expect(bos.hasRealAdUnits()).toBe(false);
+
+    const yarim = await tazeModul({ EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID: 'ca-app-pub-1/11' });
+    expect(yarim.hasRealAdUnits()).toBe(false);   // üçü de dolu olmalı
+
+    const tam = await tazeModul({
+      EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID: 'ca-app-pub-1/11',
+      EXPO_PUBLIC_ADMOB_BANNER_SEARCH_ANDROID: 'ca-app-pub-1/22',
+      EXPO_PUBLIC_ADMOB_BANNER_LIST_ANDROID: 'ca-app-pub-1/33',
+    });
+    expect(tam.hasRealAdUnits()).toBe(true);
   });
 });
 
