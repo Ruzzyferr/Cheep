@@ -30,32 +30,39 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  bekle-ci:
-    name: CI yeşil mi?
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      checks: read
-      actions: read
-    steps:
-      # KAPI: testler kırmızıyken deploy ETME. Aynı commit'in CI koşusu
-      # bitene kadar bekler; düşerse bu iş de düşer ve deploy hiç başlamaz.
-      - name: Aynı commit'in CI koşusunu bekle
-        uses: lewagon/wait-on-check-action@v1.4.0
-        with:
-          ref: ${{ github.sha }}
-          check-name: 'Backend (typecheck + tests)'
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          wait-interval: 15
-          allowed-conclusions: success
-
   deploy:
     name: Droplet'e deploy
-    needs: bekle-ci
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      # KAPI — testler kırmızıyken deploy ETME.
+      #
+      # Kapı ayrı bir workflow'u BEKLEMEK yerine burada, aynı iş içinde
+      # koşuyor. Sebebi: iş akışları arası bekleme üçüncü taraf bir action ya
+      # da `workflow_run` tetikleyicisi gerektiriyor; ikincisi yol filtresini
+      # kaybettiriyor (CI her push'ta koşuyor, deploy ise yalnızca sunucu
+      # değişince koşmalı). Burada kapı, deploy edilecek commit'in TA
+      # KENDİSİNİ doğruluyor — bir yarış durumu kalmıyor. Maliyeti ~1 dakika.
+      - name: Bağımlılıklar (backend)
+        working-directory: cheep-backend-express
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Kapı — backend typecheck + testler
+        working-directory: cheep-backend-express
+        run: |
+          pnpm db:generate
+          pnpm typecheck
+          pnpm test
+
       - name: SSH anahtarını kur
         run: |
           mkdir -p ~/.ssh
@@ -77,6 +84,8 @@ jobs:
           for i in $(seq 1 12); do
             code=$(curl -s -o /dev/null -w '%{http_code}' https://api.cheep.live/health || true)
             if [ "$code" = "200" ]; then echo "backend sağlıklı"; exit 0; fi
-            echo "  bekleniyor ($i/12, son kod: $code)"; sleep 10
+            echo "  bekleniyor ($i/12, son kod: $code)"
+            sleep 10
           done
-          echo "backend 2 dakikada sağlıklı olmadı"; exit 1
+          echo "backend 2 dakikada sağlıklı olmadı"
+          exit 1
