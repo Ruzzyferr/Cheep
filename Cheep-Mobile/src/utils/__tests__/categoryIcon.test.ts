@@ -86,3 +86,70 @@ describe('getCategoryIcon', () => {
     expect(new Set(icons).size).toBe(CANONICAL_TOP_LEVEL.length);
   });
 });
+
+/**
+ * YAPRAK KATEGORİLER.
+ *
+ * Ürün kartları kategoriyi yaprak düzeyinde taşıyor (`gofret`, `dus-jeli`,
+ * `kirmizi-et`…) ve bunlar üst-kategori tablosunda YOK. HR/HU/RO
+ * kaynaklarında ÜRÜN GÖRSELİ olmadığı için kartların tamamı simge gösteriyor;
+ * hepsi aynı simgeye düşünce katalog ölü görünüyordu.
+ *
+ * Aşağıdaki sluglar üretim veritabanındaki EN ÇOK ÜRÜNLÜ yapraklardan
+ * alındı (ürün sayısına göre ilk ~40).
+ */
+describe('getCategoryIcon — yaprak kategoriler', () => {
+  const CASES: [string, string][] = [
+    ['peynir', 'cheese'],
+    ['yogurt', 'cheese'],
+    ['sut', 'cheese'],
+    ['sebze', 'fruit-watermelon'],
+    ['meyve', 'fruit-watermelon'],
+    ['zeytin', 'fruit-watermelon'],
+    ['sarkuteri', 'food-steak'],
+    ['kirmizi-et', 'food-steak'],
+    ['tavuk', 'food-steak'],
+    ['balik', 'food-steak'],
+    ['cikolata', 'cookie'],
+    ['gofret', 'cookie'],
+    ['biskuvi-ve-kraker', 'cookie'],
+    ['cips', 'cookie'],
+    ['kahve', 'bottle-soda-classic'],
+    ['cay', 'bottle-soda-classic'],
+    ['meyve-suyu', 'bottle-soda-classic'],
+    ['su', 'bottle-soda-classic'],
+    ['ekmek', 'bread-slice'],
+    ['kek', 'bread-slice'],
+    ['makarna', 'rice'],
+    ['baharat', 'rice'],
+    ['salca', 'rice'],
+    ['bakliyat', 'rice'],
+    ['dus-jeli', 'lotion'],
+    ['sampuan', 'lotion'],
+    ['deodorant', 'lotion'],
+    ['cilt-bakim', 'lotion'],
+    ['yuzey-temizleyici', 'spray-bottle'],
+    ['camasir-deterjani', 'spray-bottle'],
+    ['bebek-mamasi', 'baby-carriage'],
+    ['dondurma', 'ice-cream'],
+    ['dondurulmus-gida', 'fridge-outline'],
+    ['dondurulmus-sebze', 'fridge-outline'],
+    ['hazir-yemek', 'fridge-outline'],
+  ];
+
+  it.each(CASES)('%s -> %s', (slug, icon) => {
+    expect(getCategoryIcon(null, slug)).toBe(icon);
+  });
+
+  it('dondurulmus-* ile dondurma KARISMAZ', () => {
+    // İkisi de "dondur" ile başlıyor ama farklı şeyler: biri donuk reyon,
+    // diğeri tatlı. Sıra yanlış olsa dondurulmuş sebze dondurma sayılırdı.
+    expect(getCategoryIcon(null, 'dondurma')).toBe('ice-cream');
+    expect(getCategoryIcon(null, 'dondurulmus-sebze')).toBe('fridge-outline');
+  });
+
+  it('hiçbir yaprak varsayılana düşmüyor', () => {
+    const icons = CASES.map(([slug]) => getCategoryIcon(null, slug));
+    expect(icons).not.toContain(DEFAULT_ICON);
+  });
+});

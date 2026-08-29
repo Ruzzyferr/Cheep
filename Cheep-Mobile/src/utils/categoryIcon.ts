@@ -127,6 +127,66 @@ const BY_SLUG: Record<string, string> = {
 };
 
 /**
+ * Kanonik slug PARÇALARI → simge. Sırayla denenir, ilk eşleşen kazanır.
+ *
+ * NEDEN GEREKLİ: `BY_SLUG` yalnızca ÜST kategorileri tanıyor, ama ürün
+ * kartları kategoriyi YAPRAK düzeyinde taşıyor (`gofret`, `dus-jeli`,
+ * `kirmizi-et`…). Yaprak eşleşmeyince her kart aynı genel etikete düşüyordu.
+ *
+ * Bu üç yeni pazarda özellikle kötü: HR/HU/RO kaynaklarında ÜRÜN GÖRSELİ YOK,
+ * yani kartların TAMAMI simge gösteriyor. Hepsi aynı simge olunca katalog
+ * ölü ve ayırt edilemez görünüyordu.
+ *
+ * Slug DİLDEN BAĞIMSIZ (çeviriden önceki kanonik hâli), dolayısıyla bu tablo
+ * sekiz dilin hepsinde çalışıyor — ad tabanlı `KEYWORD_RULES`ın aksine.
+ *
+ * PARÇA EŞLEŞMESİ, ALT-DİZE DEĞİL. Düz `includes` denendi ve YANLIŞ SONUÇ
+ * VERDİ: `sut` içinde `su` geçtiği için süt, içeceğe düşüyordu; aynı şekilde
+ * `sucuk` da. Slug tirelerden bölünüp PARÇA olarak karşılaştırılıyor, yani
+ * `su` yalnızca gerçekten `su` olan parçayla eşleşiyor. Tireli anahtarlar
+ * (`meyve-suyu`) bütün slug'a karşı sınanıyor.
+ *
+ * SIRA ÖNEMLİ: dar olan geniş olandan önce (örn. `meyve-suyu` içecek kuralı,
+ * `meyve` meyve kuralından önce gelmeli).
+ */
+const SLUG_RULES: [string[], string][] = [
+  [['dondurulmus', 'donuk', 'hazir-yemek'], 'fridge-outline'],
+  [['dondurma'], 'ice-cream'],
+  [['bebek', 'bebek-mamasi', 'mama'], 'baby-carriage'],
+  [['pet', 'kedi', 'kopek', 'evcil'], 'paw'],
+  [['makyaj', 'parfum', 'kozmetik', 'oje', 'ruj'], 'lipstick'],
+  [['deodorant', 'sampuan', 'dus-jeli', 'cilt-bakim', 'sac-bakim', 'agiz-bakim',
+    'kisisel-bakim', 'tras', 'sabun', 'bakim'], 'lotion'],
+  [['kagit', 'pecete', 'tuvalet', 'havlu', 'hijyen', 'ped'], 'paper-roll'],
+  [['deterjan', 'deterjani', 'temizleyici', 'temizlik', 'camasir', 'bulasik',
+    'yumusatici', 'camasir-deterjani', 'yuzey-temizleyici'], 'spray-bottle'],
+  [['ilac', 'vitamin', 'takviye', 'saglik'], 'pill'],
+  [['ekmek', 'firin', 'pastane', 'firin-pastane', 'unlu', 'kek', 'pasta', 'borek'], 'bread-slice'],
+  [['cikolata', 'gofret', 'biskuvi', 'kraker', 'cips', 'sekerleme', 'atistirmalik',
+    'kuruyemis', 'sakiz'], 'cookie'],
+  [['kahve', 'cay', 'meyve-suyu', 'icecek', 'gazoz', 'maden-suyu', 'soda', 'su'],
+    'bottle-soda-classic'],
+  [['peynir', 'yogurt', 'sut', 'sutlu-tatlilar', 'tereyag', 'krema', 'kaymak',
+    'krema-kaymak', 'yumurta', 'kahvaltilik', 'kahvaltilik-gevrek'], 'cheese'],
+  [['sebze', 'meyve', 'manav', 'zeytin'], 'fruit-watermelon'],
+  [['tavuk', 'balik', 'et', 'kirmizi-et', 'sarkuteri', 'sucuk', 'salam', 'kiyma'], 'food-steak'],
+  [['makarna', 'pirinc', 'bakliyat', 'un', 'yag', 'salca', 'baharat', 'konserve',
+    'temel-gida', 'seker'], 'rice'],
+  [['ev', 'yasam', 'ev-yasam', 'mutfak', 'mobilya'], 'sofa-single'],
+];
+
+/**
+ * Slug bir kurala uyuyor mu?
+ *
+ * Tireli anahtar bütün slug'a karşı sınanır; tiresiz anahtar yalnızca bir
+ * PARÇAYA eşitse sayılır (bkz. `SLUG_RULES` başındaki `sut`/`su` tuzağı).
+ */
+function slugMatches(slug: string, keys: string[]): boolean {
+  const parts = slug.split('-');
+  return keys.some((k) => (k.includes('-') ? slug === k || slug.includes(k) : parts.includes(k)));
+}
+
+/**
  * @param categoryName görünen ad (çevrilmiş olabilir) — yalnızca yedek yol
  * @param iconKey      sunucudan gelen dilden bağımsız kanonik slug
  */
@@ -134,10 +194,18 @@ export function getCategoryIcon(
   categoryName: string | null | undefined,
   iconKey?: string | null,
 ): string {
-  // 1) Dilden bağımsız anahtar — tek güvenilir yol.
+  // 1) Dilden bağımsız TAM eşleşme (üst kategoriler).
   if (iconKey && BY_SLUG[iconKey]) return BY_SLUG[iconKey];
 
-  // 2) Ad tabanlı yedek. Yalnızca Türkçede işe yarıyor ama zarar da vermiyor:
+  // 2) Dilden bağımsız ANAHTAR KELİME (yaprak kategoriler). Ürün kartları
+  //    kategoriyi yaprak düzeyinde taşıyor ve yapraklar `BY_SLUG`ta yok.
+  if (iconKey) {
+    for (const [keys, icon] of SLUG_RULES) {
+      if (slugMatches(iconKey, keys)) return icon;
+    }
+  }
+
+  // 3) Ad tabanlı yedek. Yalnızca Türkçede işe yarıyor ama zarar da vermiyor:
   //    tutmazsa varsayılana düşüyor, yani bu adımın olmaması hiçbir dili
   //    düzeltmez, olması Türkçeyi eski sunucuda ayakta tutar.
   const name = norm(categoryName ?? '');

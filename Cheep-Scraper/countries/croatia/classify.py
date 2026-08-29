@@ -71,10 +71,13 @@ RULES: List[Tuple[str, Tuple[str, ...]]] = [
     ("Puding", ("PUDING", "DESERT")),
 
     # --- et, riba
-    ("Meso", ("JUN", "JUNETINA", "SV", "SVINJETINA", "GOVEDINA", "JANJETINA",
+    ("Meso", ("JUN", "JUNE", "JUNETINA", "SV", "SVINJ", "SVINJETINA", "TELEC",
+              "GOVEDINA", "JANJE", "JANJETINA", "ODRESC", "PECENIC", "BUDOL",
+              "VRAT", "BUT", "MLJEVENO", "PANCETA", "POLOVICA",
               "TELETINA", "MLJEVENO", "ODREZAK", "BIFTEK")),
-    ("Piletina", ("PILETINA", "PILECI", "PILECA", "PURETINA", "PURECI")),
-    ("Riba", ("RIBA", "BRANCIN", "ORADA", "LOSOS", "TUNJ", "TUNA", "SKUSA",
+    ("Piletina", ("PILETINA", "PILEC", "PURETINA", "PUREC", "PRSA", "BATAK")),
+    ("Riba", ("RIBA", "BAKALAR", "KOZIC", "SKAMP", "LIGNJ", "DAGNJ", "SRDEL",
+              "PLODOVI MORA", "FILET", "BRANCIN", "ORADA", "LOSOS", "TUNJ", "TUNA", "SKUSA",
               "SRDELA", "OSLIC", "SKAMPI", "LIGNJE", "DAGNJE")),
     ("Suhomesnato", ("SUNKA", "PRSUT", "SALAMA", "PASTETA", "SLANINA", "KULEN",
                      "PANCETA", "MORTADELA")),
@@ -84,23 +87,30 @@ RULES: List[Tuple[str, Tuple[str, ...]]] = [
     ("Voce", ("JABUKA", "BANANA", "NARANCA", "LIMUN", "GROZDE", "KRUSKA",
               "BRESKVA", "JAGODA", "LUBENICA", "DINJA", "SLJIVA", "MANDARINA",
               "AVOKADO", "ANANAS", "KIVI")),
-    ("Povrce", ("RAJCICA", "KRUMPIR", "LUK", "MRKVA", "PAPRIKA", "KRASTAVAC",
+    ("Povrce", ("SAMPINJON", "KRASTAVC", "TIKVIC", "BROKUL", "SPINAT", "KUPUS",
+                "SALATA", "POVRCE", "RAJCICA", "KRUMPIR", "LUK", "MRKVA", "PAPRIKA", "KRASTAVAC",
                 "KUPUS", "SALATA", "TIKVICA", "PATLIDZAN", "CESNJAK", "BROKULA",
                 "CVJETACA", "SPINAT", "GRASAK")),
     ("Masline", ("MASLINE",)),
 
     # --- osnovne namirnice
     ("Kruh", ("KRUH", "PECIVO", "BAGUETTE", "TOST")),
-    ("Kolac", ("KOLAC", "TORTA", "KREMSNITA", "STRUDLA")),
-    ("Keks", ("KEKS", "BISKVIT")),
-    ("Vafl", ("VAFL", "NAPOLITANKE")),
+    # "PISKOT" BİLEREK BURADA DEĞİL: piškote (kedidili bisküvi) bir KEKS,
+    # pasta değil — aşağıdaki Keks kuralına bırakılıyor. Kolac önce geldiği
+    # için buraya konsaydı sessizce pastaya giderdi.
+    ("Kolac", ("KOLAC", "TORTA", "KREMSNITA", "STRUDLA", "PANETTONE", "PITA",
+               "STRU")),
+    ("Keks", ("KEKS", "BISKVIT", "PISKOT")),
+    ("Vafl", ("VAFL", "VAFEL", "NAPOLITANKE")),
     ("Kreker", ("KREKER", "SLANI STAPICI")),
     ("Cips", ("CIPS", "FLIPS", "SMOKI", "GRICKALICE")),
     ("Cokolada", ("COKOLADA", "COKOL", "PLOCICA", "BAJADERA")),
-    ("Bomboni", ("BOMBON", "BOMBONI", "ZELE", "GUMENI", "LIZALICA", "KARAMELA")),
+    ("Bomboni", ("BOMBON", "BOMBONI", "BOMBONJER", "PRALIN", "ZVAKE", "ZELE",
+                 "GUMENI", "LIZALICA", "KARAMELA")),
     ("Orasasti plodovi", ("KIKIRIKI", "BADEM", "ORAH", "LJESNJAK", "INDIJSKI",
                           "PISTACIJA", "SJEMENKE")),
-    ("Tjestenina", ("TJESTENINA", "TJEST", "SPAGETI", "MAKARONI", "LAZANJE",
+    ("Tjestenina", ("TJESTENINA", "TJEST", "TJ.", "FIDELINI", "GARGANELLI",
+                    "SPAGETI", "MAKARONI", "LAZANJE",
                     "NJOKI", "REZANCI")),
     ("Riza", ("RIZA",)),
     ("Brasno", ("BRASNO",)),
@@ -108,7 +118,7 @@ RULES: List[Tuple[str, Tuple[str, ...]]] = [
     ("Ulje", ("ULJE",)),
     ("Ocat", ("OCAT",)),
     ("Zacin", ("ZACIN", "PAPAR", "SOL", "CIMET", "VEGETA")),
-    ("Umak", ("UMAK", "KECAP", "MAJONEZA", "SENF", "AJVAR")),
+    ("Umak", ("UMAK", "KECAP", "KETCHUP", "PESTO", "MAJONEZA", "SENF", "AJVAR")),
     ("Juha", ("JUHA",)),
     ("Mahunarke", ("GRAH", "LECA", "SLANUTAK", "BOB")),
     ("Konzerva", ("KONZERVA", "PASIRANA", "PELATI")),
@@ -221,16 +231,70 @@ COARSE_RULES: List[Tuple[str, Tuple[str, ...], Tuple[str, ...]]] = [
      ("PICE", "PICA", "PAKIRANA HRANA I PICE")),
     ("Sok", ("SMOOTHIE",), ("PICE", "PICA", "PAKIRANA HRANA I PICE")),
     ("Negazirano pice", ("NEGAZ",), ("PICE", "PICA", "PAKIRANA HRANA I PICE")),
+
+    # --- GIDA KOVASINA SINIRLI kısaltmalar (2026-08-29 ölçümü) ------------
+    #
+    # Bu anahtarlar gıda dışında BAŞKA bir anlama geliyor ve genel kural
+    # listesine konsalardı sessizce yanlış kategoriye taşarlardı. Örnekler:
+    #   • "PLOC" — çikolata "pločica"sı AMA banyo "pločice"si (fayans) da var
+    #   • "PASTA" — makarna AMA "zubna pasta" (diş macunu) da var
+    #   • "MRVICE" — galeta unu AMA deterjan "mrvice"si de olabilir
+    # Kaba kategori filtresi bu belirsizliği kaynağın kendi beyanıyla çözüyor.
+    ("Cokolada", ("COKO", "CHOCO", "COKOLADNI", "PLOC", "PLOCICE"),
+     ("HRANA", "PAKIRANA HRANA I PICE", "SVJEZI ODJELI")),
+    ("Mlijeko", ("MLIJ",), ("HRANA", "PAKIRANA HRANA I PICE", "SVJEZI ODJELI")),
+    ("Suhomesnato", ("NAREZAK", "MESNI", "SUHOMESNAT"),
+     ("HRANA", "PAKIRANA HRANA I PICE", "SVJEZI ODJELI")),
+    ("Piletina", ("PILE",), ("HRANA", "PAKIRANA HRANA I PICE", "SVJEZI ODJELI")),
+    ("Voce", ("MARELICA", "MANGO", "VOCE", "ANANAS", "BRESKVA", "SLJIVA"),
+     ("HRANA", "PAKIRANA HRANA I PICE", "SVJEZI ODJELI")),
+    ("Povrce", ("CIKLA", "MRKVICE", "GRASAK", "KELJ", "BLITVA"),
+     ("HRANA", "PAKIRANA HRANA I PICE", "SVJEZI ODJELI")),
+    ("Tjestenina", ("TJES", "PASTA"),
+     ("HRANA", "PAKIRANA HRANA I PICE")),
+    ("Kava", ("KAPSULE", "KAPSULA", "INSTANT"),
+     ("HRANA", "PAKIRANA HRANA I PICE", "PICE", "PICA")),
+    ("Cips", ("STAPICI", "GRICKALIC"),
+     ("HRANA", "PAKIRANA HRANA I PICE")),
+    ("Brasno", ("MRVICE", "PREZLE"), ("HRANA", "PAKIRANA HRANA I PICE")),
+    ("Gotovo jelo", ("BURGER", "PLJESKAVIC", "NUGGETS", "STAPICI OD RIBE"),
+     ("HRANA", "PAKIRANA HRANA I PICE", "HLADENO I SMRZNUTO")),
 ]
 
 LABELS: Tuple[str, ...] = tuple(label for label, _ in RULES)
 
+#: KÖK (prefix) olarak eşleşecek anahtarlar — sonuna ek gelebilir.
+#:
+#: NEDEN GEREKLİ: Hırvatça yoğun çekimli ve market adları çekimli hâli
+#: kullanıyor. Tam-kelime eşleşmesi bu yüzden ıskalıyordu; üretimde ölçüldü
+#: (2026-08-29): Hırvat kataloğundaki ürünlerin %21,3'ü hiçbir kurala uymayıp
+#: genel "Temel Gıda" kovasına düşüyordu — Macaristan'da bu oran %0,6,
+#: Polonya'da %2,3. Yani sorun kaynakta değil, buradaki eşleşmedeydi.
+#: Isıklamayan örnekler: JUNEĆA/JUNEĆI (JUN kuralı vardı), KREKERI (KREKER),
+#: ŠAMPINJONI, SVINJSKA/SVINJSKI (SV kısaltması vardı ama tam kelime).
+#:
+#: KÖKLER YALNIZCA BURADA, çünkü prefix eşleşmesi TEHLİKELİ: "SIR" kökü
+#: "SIRUP"u (şurup) peynir yapardı, "MED" kökü "MEDENI"yi bal yapardı — bu
+#: yüzden varsayılan hâlâ tam kelime. Her kök en az 5 harf ve tek anlamlı
+#: olacak şekilde seçildi.
+_PREFIX_KEYS: frozenset = frozenset({
+    "JUNE", "SVINJ", "TELEC", "JANJE", "PILEC", "PUREC",   # etler
+    "KOZIC", "SKAMP", "LIGNJ", "DAGNJ", "SRDEL", "BAKALAR",  # deniz ürünleri
+    "SAMPINJON", "KRASTAVC", "TIKVIC", "BROKUL", "SPINAT", "KUPUS",  # sebzeler
+    "KREKER", "PANETTONE", "PISKOT", "BOMBONJER", "PRALIN",  # tatlı/atıştırmalık
+    "SMRZNUT", "PANIRAN",                                     # donuk/panelenmiş
+})
+
+
 #: Anahtar kelimeler kelime sınırıyla eşleşir — "SIR" 'SIRUP'u, "MED" 'MEDENI'yi
-#: yakalamasın. Kurallar bir kez derlenir (katalog başına ~20 bin ürün taranıyor).
+#: yakalamasın. `_PREFIX_KEYS` içindekiler için SAĞ sınır kaldırılır (ek gelebilir).
+#: Kurallar bir kez derlenir (katalog başına ~20 bin ürün taranıyor).
 def _compile(keys: Tuple[str, ...]) -> "re.Pattern[str]":
-    return re.compile(
-        r"(?<![A-Z0-9])(?:" + "|".join(re.escape(k) for k in keys) + r")(?![A-Z0-9])"
-    )
+    parts = [
+        re.escape(k) + ("[A-Z]*" if k in _PREFIX_KEYS else "")
+        for k in keys
+    ]
+    return re.compile(r"(?<![A-Z0-9])(?:" + "|".join(parts) + r")(?![A-Z0-9])")
 
 
 _COMPILED: List[Tuple[str, "re.Pattern[str]"]] = [

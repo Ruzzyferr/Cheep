@@ -107,3 +107,52 @@ def test_coarse_only_rule_does_not_leak_into_wrong_bucket():
     """'SPREJ' kozmetikte deodorant; temizlikte deodorant OLMAMALI."""
     assert classify("SPREJ NIVEA 150ML", "KOZMETIKA") == "Dezodorans"
     assert classify("SPREJ ZA STAKLO 500ML", "SREDSTVA ZA ČIŠĆENJE") != "Dezodorans"
+
+
+# --- ÇEKİMLİ BİÇİMLER (2026-08-29 üretim ölçümü) --------------------------
+#
+# Hırvatça yoğun çekimli ve market adları çekimli hâli kullanıyor. Tam-kelime
+# eşleşmesi bunları ıskalıyordu: üretimde HR kataloğunun %21,3'ü hiçbir
+# kurala uymayıp genel "Temel Gıda" kovasına düşüyordu (HU %0,6, PL %2,3) —
+# yani 9.312 ürün kategori sayfalarında BULUNAMIYORDU. Aşağıdaki adlar
+# doğrudan o kovadan, en sık ilk kelimelere göre alındı.
+INFLECTED_CASES = [
+    ("SVINJSKA POLOVICA KLASIČNA", "Meso"),
+    ("JUNEĆI ODRESCI", "Meso"),
+    ("TELEĆA PRSA", "Meso"),
+    ("S F DIMLJENA PUREĆA PRSA 1,8 KG", "Piletina"),
+    ("ŠAMPINJONI SVJ.SMEĐI 400 g", "Povrce"),
+    ("KRASTAVCI II KLASA 680 G", "Povrce"),
+    ("JADRANSKE KOZICE MESO 250 G", "Riba"),
+    ("BAKALAR FILET", "Riba"),
+    ("Panettone classico", "Kolac"),
+    ("Piškote XXL", "Keks"),
+    ("BOMBONJERA LINDOR CORNET", "Bomboni"),
+    ("ŽVAKE ORBIT", "Bomboni"),
+    ("KETCHUP HEINZ 500 g", "Umak"),
+    ("PESTO DESPAR GENOVESE 190 g", "Umak"),
+    ("TJ.GARGANELLI 500 G, CAMERINO", "Tjestenina"),
+    ("KREKERI SLANI", "Kreker"),
+]
+
+
+@pytest.mark.parametrize("name,expected", INFLECTED_CASES)
+def test_inflected_forms_classify(name, expected):
+    assert classify(name, "HRANA") == expected
+
+
+# --- KÖK EŞLEŞMESİ YAN ETKİ YAPMAMALI -------------------------------------
+#
+# Prefix eşleşmesi tehlikeli olduğu için yalnızca seçilmiş köklerde açık.
+# Bu test o sınırın korunduğunu doğruluyor: aşağıdakiler prefix açılsaydı
+# YANLIŞ kategoriye giderdi ve hata sessiz olurdu.
+@pytest.mark.parametrize(
+    "name,not_expected",
+    [
+        ("SIRUP MALINA 1 L", "Sir"),        # şurup ≠ peynir
+        ("MEDENI KOLAČ 400 g", "Med"),      # ballı kek ≠ bal
+        ("SOLARIJ KREMA", "Zacin"),         # SOL (tuz) kökü taşmamalı
+    ],
+)
+def test_prefix_matching_does_not_overreach(name, not_expected):
+    assert classify(name, "HRANA") != not_expected
