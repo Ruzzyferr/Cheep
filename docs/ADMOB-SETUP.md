@@ -90,9 +90,23 @@ Bu adım atlanırsa uygulama mağazadan kaldırılabilir.
   konum topluyor; "Reklamcılık veya pazarlama" amacıyla beyan edilmeli.
 - **App Store Connect → App Privacy**: "Identifiers → Device ID" ve "Usage
   Data" kalemleri, "Third-Party Advertising" kullanımıyla işaretlenmeli.
-- **iOS ATT**: izleme izni metni `app.json`'da tanımlı
-  (`userTrackingUsageDescription`). Kullanıcı reddederse SDK
-  kişiselleştirilmemiş reklama düşer — gelir azalır ama uygulama çalışır.
+- **iOS ATT (izleme izni) BİLEREK YOK.** `userTrackingUsageDescription`
+  `app.json`'dan KALDIRILDI ve uygulama ATT izni istemiyor.
+
+  Sebep: anahtar Info.plist'te duruyordu ama izin hiçbir yerde İSTENMİYORDU.
+  Apple bu tutarsızlığı yakaladı ve 1.6.0'ı incelemeye almadı:
+  `STATE_ERROR.BINARY_INDICATES_APP_TRACKS_USERS` — "ikili, uygulamanın
+  kullanıcıları izlediğini bildiriyor", oysa gizlilik etiketinde izleme yok.
+
+  İki tutarlı seçenek vardı; anahtarı kaldırmak seçildi çünkü ATT eklemek
+  açılışta ÜÇÜNCÜ bir sistem istemi demek (konum izni ve KVKK açık rızası
+  zaten var) ve iOS'ta ATT onay oranı düşük. Bedeli: iOS'ta reklamlar
+  KİŞİSELLEŞTİRİLMEMİŞ, yani daha düşük gelir.
+
+  Geri almak isterseniz ÜÇÜ BİRLİKTE gerekir, biri eksik kalırsa Apple yine
+  reddeder: (1) `userTrackingUsageDescription`'ı geri ekle, (2) reklam SDK'sı
+  başlatılmadan ÖNCE ATT iznini iste, (3) App Store gizlilik etiketinde
+  Device ID'yi "izleme için kullanılıyor" olarak işaretle.
 
 ## 6. GDPR rıza mesajını AdMob'da tanımla
 
