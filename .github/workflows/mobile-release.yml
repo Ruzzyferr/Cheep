@@ -27,6 +27,17 @@ on:
       # başlatıyordu; macOS koşucusu dakikayı 10 katıyla yazdığından bu,
       # hiçbir çıktısı olmayan en pahalı koşu oluyordu.
       - '!scripts/ci/release-notes-production.json'
+      # Magaza vitrini ve onu ureten betikler DERLEMEYI TETIKLEMEZ.
+      #
+      # `Cheep-Mobile/**` cok genis: bir PNG eklemek ya da .gitignore'a
+      # satir yazmak iOS+Android surum hattini bastan calistiriyordu.
+      # Bugun bu iki kez oldu ve iki kosu da elle iptal edildi; macOS
+      # kosucusu dakikayi 10 katiyla yaziyor, yani bu hatanin faturasi
+      # dogrudan aylik CI butcesinden cikiyor.
+      - '!Cheep-Mobile/appstore-screenshots*/**'
+      - '!Cheep-Mobile/play-screenshots*/**'
+      - '!Cheep-Mobile/*_shots.py'
+      - '!Cheep-Mobile/.gitignore'
   workflow_dispatch:
     inputs:
       android_track:
