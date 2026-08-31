@@ -82,9 +82,18 @@ async function call(method, path, body) {
   return d;
 }
 
-const notlar = JSON.parse(
-  readFileSync(new URL('./release-notes-production.json', import.meta.url), 'utf8'),
+// `_` ile başlayan anahtarlar DİL DEĞİL, dosyanın kendi açıklaması.
+//
+// Notlar dosyası artık neden öyle yazıldığını (hangi sürümden hangi sürüme
+// fark olduğunu) `_not` alanında taşıyor — bayat not yazmak somut bir hata
+// olduğu için bu açıklama dosyanın yanında durmalı. Süzmezsek Play'e
+// `language: "_not"` diye bir sürüm notu gönderilir.
+const notlar = Object.fromEntries(
+  Object.entries(
+    JSON.parse(readFileSync(new URL('./release-notes-production.json', import.meta.url), 'utf8')),
+  ).filter(([anahtar]) => !anahtar.startsWith('_')),
 );
+if (Object.keys(notlar).length === 0) throw new Error('sürüm notu dosyasında hiç dil yok');
 for (const [dil, metin] of Object.entries(notlar)) {
   if ([...metin].length > 500) throw new Error(`${dil}: sürüm notu ${[...metin].length}/500 karakter`);
 }
