@@ -75,9 +75,26 @@ jobs:
       # istediğinden bağımsız olarak yalnızca deploy.sh çalışır. Kabuk yok,
       # port/agent/X11 yönlendirme kapalı. Sır sızsa bile yapılabilecek tek
       # şey bir deploy tetiklemek — root kabuğu değil.
+      # KEEPALIVE ŞART — bunsuz deploy sessizce yarıda kalıyor.
+      #
+      # Sitenin prerender adımı 5.800'den fazla sayfa üretiyor ve bu sürede
+      # SSH kanalına TEK BİR BAYT bile akmıyor. 31 Ağustos'ta deploy tam
+      # orada `client_loop: send disconnect: Broken pipe` ile öldü (exit 255):
+      # aradaki NAT boştaki bağlantıyı düşürdü. Adım "başarısız" göründü ama
+      # asıl tehlike şu: derleme sunucuda sürüyordu, site ise eski sürümde
+      # kaldı — yani yeşil olmayan ama zararsız sanılabilecek bir hata değil,
+      # yayınlanmamış bir sürüm.
+      #
+      # 30 saniyede bir canlılık paketi, 20 kez cevapsızlığa tolerans: on
+      # dakikalık sessizlik artık bağlantıyı düşürmüyor.
       - name: Deploy
         timeout-minutes: 25
-        run: ssh -o BatchMode=yes root@${{ secrets.DEPLOY_HOST }} true
+        run: |
+          ssh -o BatchMode=yes \
+              -o ServerAliveInterval=30 \
+              -o ServerAliveCountMax=20 \
+              -o TCPKeepAlive=yes \
+              root@${{ secrets.DEPLOY_HOST }} true
 
       - name: Sağlık kontrolü
         run: |
