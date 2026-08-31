@@ -10,7 +10,7 @@ import { Sparkline } from '../../components/price/Sparkline'
 import { ProductCard } from '../../components/price/ProductCard'
 import { formatAge, formatMoney, formatPct } from '../../lib/money'
 import { categoryPath } from '../../data/routes'
-import { PLAY_URL } from '../../config'
+import { StoreBadges } from '../../components/ui/StoreBadges'
 
 /**
  * Ürün karşılaştırma sayfası — sitedeki 6.471 sayfanın şablonu ve
@@ -116,17 +116,17 @@ export function ProductPage() {
             />
           </div>
 
+          {/* İKİ MAĞAZA DA BURADA OLMALI.
+              Burası sitenin organik trafiğinin ana kapısı: 5.800'den fazla
+              ürün sayfasının her birinde tek indirme çağrısı vardı ve o da
+              yalnızca Google Play'e gidiyordu. iOS beş mağazada yayına
+              girdikten sonra bile öyle kaldı — yani arama sonucundan gelen
+              her iPhone kullanıcısı, uygulama kendi mağazasında dururken
+              indirecek bir yer bulamıyordu. */}
           <div className="mt-8 rounded-2xl border border-clementine/30 bg-paper p-6">
             <h2 className="text-lg font-bold text-ink">{t.cta}</h2>
             <p className="mt-2 text-sm text-ink-soft">{t.ctaBody}</p>
-            <a
-              href={PLAY_URL}
-              target="_blank"
-              rel="noopener"
-              className="mt-4 inline-flex min-h-11 items-center rounded-full bg-clementine-deep px-6 py-3 font-semibold text-white transition-colors hover:bg-clementine-dark"
-            >
-              Google Play
-            </a>
+            <StoreBadges className="mt-4 [--rozet-h:40px] md:[--rozet-h:44px]" />
           </div>
         </div>
       </div>
