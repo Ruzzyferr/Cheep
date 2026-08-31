@@ -3,8 +3,44 @@ import { CheepBird } from '../brand/CheepBird'
 import { useT, useLocale } from '../../i18n'
 import { APP_STORE_URL, PLAY_URL } from '../../config'
 
-/** Rozet dosyası GERÇEKTEN var olan diller (public/playbadge-*.png). */
-const BADGE_LOCALES = new Set<string>(['tr', 'pl', 'hr', 'hu', 'ro'])
+/** Play rozeti GERÇEKTEN var olan diller (public/playbadge-*.png). */
+const PLAY_BADGE_LOCALES = new Set<string>(['tr', 'pl', 'hr', 'hu', 'ro'])
+
+/**
+ * App Store rozeti olan diller (public/appstorebadge-*.svg).
+ *
+ * HIRVATÇA YOK — Apple Hırvatça rozet YAYIMLAMIYOR; `hr` bilerek İngilizce
+ * rozete düşüyor. Bu bir eksiklik değil, Apple'ın kendi kuralı: rozetin
+ * bulunmadığı dilde İngilizcesi kullanılır. Buraya 'hr' eklemek dosya
+ * olmadığı için indirme bölümünün ortasında kırık görsel bırakır.
+ */
+const APPLE_BADGE_LOCALES = new Set<string>(['tr', 'pl', 'hu', 'ro'])
+
+/**
+ * Google'ın rozet DOSYASININ ne kadarı gerçekten rozet.
+ *
+ * Play rozetleri şeffaf bir "temiz alan" payıyla geliyor, Apple'ınkiler ise
+ * kutuyu tamamen dolduruyor. İkisine aynı yüksekliği vermek bu yüzden
+ * çalışmaz: Play rozeti gözle görülür biçimde KÜÇÜK kalır — asıl şikâyet
+ * konusu olan "derme çatma" görüntü tam olarak budur.
+ *
+ * Sayılar dosyaların alfa kanalından ölçüldü (31 Ağu 2026); dil başına
+ * değişiyorlar çünkü Google rozetleri farklı tuvallerde yayımlamış:
+ * tr/pl 440x170 (pay 17px), hr/hu/ro 646x250 (pay 29px), en ise dört
+ * yanında 41px payla geliyor.
+ *
+ * Kullanımı: Play görselinin yüksekliği hedef/oran olarak veriliyor, böylece
+ * GÖRÜNEN rozet tam olarak hedef yüksekliğinde çıkıyor. Dosyalara
+ * dokunulmuyor — Google'ın marka kılavuzu rozeti değiştirmeyi yasaklıyor.
+ */
+const PLAY_BADGE_FILL: Record<string, number> = {
+  tr: 0.8,
+  pl: 0.8,
+  hr: 0.768,
+  hu: 0.768,
+  ro: 0.768,
+  en: 0.672,
+}
 
 export function Download() {
   const t = useT()
@@ -31,7 +67,13 @@ export function Download() {
               </h2>
               <p className="mx-auto mt-5 max-w-xl text-lg text-cream/70">{t.download.sub}</p>
 
-              <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+              {/* İKİ RESMİ ROZET, AYNI GÖRÜNEN YÜKSEKLİKTE.
+                  `--rozet-h` GÖRÜNEN rozet yüksekliği; Play görseli kendi
+                  şeffaf payı kadar büyütülüyor (bkz. PLAY_BADGE_FILL), Apple
+                  rozeti payı olmadığı için doğrudan o yüksekliği alıyor.
+                  Böylece ikisi yan yana eşit duruyor ve hiçbir dosya
+                  değiştirilmiyor. */}
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-4 [--rozet-h:44px] md:[--rozet-h:52px]">
                 {/* Resmi Google Play rozeti — Google'ın marka kılavuzu gereği asset
                     değiştirilmeden, dile göre yerelleştirilmiş sürümüyle kullanılır.
 
@@ -40,46 +82,52 @@ export function Download() {
                     dosyayı koymayı unutmak KIRIK GÖRSEL bırakıyor — indirme
                     bölümünün tam ortasında, yani dönüşümün en kritik yerinde.
                     Tam olarak bu yaşandı: hr/hu/ro eklendi, rozetleri
-                    eklenmedi ve üç dilde de 404 döndü. `BADGE_LOCALES` bilinen
-                    dosyaları listeliyor; listede olmayan dil İngilizce rozete
-                    düşüyor (Google'ın kendi yayınladığı, kılavuza uygun asset). */}
+                    eklenmedi ve üç dilde de 404 döndü. `PLAY_BADGE_LOCALES`
+                    bilinen dosyaları listeliyor; listede olmayan dil İngilizce
+                    rozete düşüyor (Google'ın kendi yayınladığı asset). */}
                 <a
                   href={PLAY_URL}
                   target="_blank"
                   rel="noopener"
-                  className="inline-block rounded-xl transition-transform duration-300 hover:-translate-y-0.5"
+                  aria-label={t.download.playAlt}
+                  className="inline-block transition-transform duration-300 hover:-translate-y-0.5"
                 >
                   <img
-                    src={`/playbadge-${BADGE_LOCALES.has(locale) ? locale : 'en'}.png`}
+                    src={`/playbadge-${PLAY_BADGE_LOCALES.has(locale) ? locale : 'en'}.png`}
                     alt={t.download.playAlt}
-                    width={440}
-                    height={170}
                     loading="lazy"
                     decoding="async"
-                    className="h-auto w-[200px] md:w-[220px]"
+                    className="w-auto max-w-none"
+                    style={{
+                      height: `calc(var(--rozet-h) / ${PLAY_BADGE_FILL[locale] ?? PLAY_BADGE_FILL.en})`,
+                    }}
                   />
                 </a>
 
-                {/* iOS ARTIK CANLI — bu dugme uzun sure "Yakinda" yazan, tiklanamayan
-                    bir <span> idi. Uygulama bes magazada yayina girdikten sonra da
-                    oyle kaldi: indirme bolumunun tam ortasinda, ziyaretcinin
-                    yarisini olusturan iPhone kullanicisina "bizde yok" diyordu.
-                    Artik gercek bir baglanti. */}
+                {/* Resmi Apple rozeti (siyah sürüm — Play rozeti de siyah, ikisi
+                    koyu zeminde birlikte duruyor).
+
+                    iOS uzun süre "Yakında" yazan, TIKLANAMAYAN bir <span>'di:
+                    uygulama beş mağazada yayına girdikten sonra bile öyle kaldı
+                    ve indirme bölümünün ortasında iPhone kullanıcısına "bizde
+                    yok" dedi. Sonra gerçek bağlantı oldu ama elde çizilmiş bir
+                    kutuydu; Play'in resmi rozetinin yanında derme çatma
+                    duruyordu. Artık Apple'ın kendi yayımladığı rozet. */}
                 <a
                   href={APP_STORE_URL}
                   target="_blank"
                   rel="noopener"
-                  className="inline-flex items-center gap-3 rounded-2xl border border-cream/25 px-6 py-4 text-left text-cream transition-transform duration-300 hover:-translate-y-0.5"
+                  aria-label={t.download.appStoreAlt}
+                  className="inline-block transition-transform duration-300 hover:-translate-y-0.5"
                 >
-                  <span aria-hidden className="text-2xl"></span>
-                  <span>
-                    <span className="block font-mono text-[0.6rem] uppercase tracking-widest text-cream/65">
-                      {t.download.storeTop}
-                    </span>
-                    <span className="block font-display text-lg font-bold leading-tight">
-                      {t.download.storeBottom}
-                    </span>
-                  </span>
+                  <img
+                    src={`/appstorebadge-${APPLE_BADGE_LOCALES.has(locale) ? locale : 'en'}.svg`}
+                    alt={t.download.appStoreAlt}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-auto max-w-none"
+                    style={{ height: 'var(--rozet-h)' }}
+                  />
                 </a>
               </div>
 

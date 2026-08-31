@@ -194,8 +194,7 @@ export const ro: Dict = {
     titleAccent: 'mai ieftin',
     sub: 'Descarcă Cheep, creează-ți lista și vezi economia. Gratuit în cinci țări.',
     playAlt: 'Descarcă din Google Play',
-    storeTop: 'Descarcă din',
-    storeBottom: 'App Store',
+    appStoreAlt: 'Descarcă din App Store',
     note: 'Descărcare gratuită · fără reclame cu Premium opțional · Android 8.0 și iOS 15.1 sau mai nou',
   },
 

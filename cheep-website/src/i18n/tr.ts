@@ -195,8 +195,7 @@ export const tr: Dict = {
     titleAccent: 'daha ucuz',
     sub: 'Cheep’i indir, listeni oluştur, tasarrufu gör. Beş ülkede ücretsiz.',
     playAlt: 'Google Play’den indirin',
-    storeTop: 'İndir',
-    storeBottom: 'App Store',
+    appStoreAlt: 'App Store’dan indirin',
     note: 'Ücretsiz indirilir · isteğe bağlı Premium ile reklamsız · Android 8.0 ve iOS 15.1 ve üzeri',
   },
 

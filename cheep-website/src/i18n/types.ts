@@ -122,8 +122,15 @@ export type Dict = {
     sub: string
     /** Resmi Play rozeti bir görsel — alt metni burada. */
     playAlt: string
-    storeTop: string
-    storeBottom: string
+    /**
+     * Resmi App Store rozetinin alt metni.
+     *
+     * `storeTop`/`storeBottom`ın yerini aldı: onlar rozet yerine elde çizilmiş
+     * iki satırlık bir kutuyu ("Yakında" / "App Store") besliyordu. Rozet
+     * resmi görsele dönünce iki satır anlamsız kaldı; metin artık tek bir alt
+     * metin, çünkü görselin İÇİNDE zaten yazıyor.
+     */
+    appStoreAlt: string
     note: string
   }
 

@@ -194,8 +194,7 @@ export const hr: Dict = {
     titleAccent: 'jeftinija',
     sub: 'Preuzmi Cheep, izradi popis, vidi uštedu. Besplatno u pet zemalja.',
     playAlt: 'Preuzmi s Google Playa',
-    storeTop: 'Preuzmi s',
-    storeBottom: 'App Store',
+    appStoreAlt: 'Preuzmi s App Storea',
     note: 'Besplatno preuzimanje · bez oglasa uz neobavezni Premium · Android 8.0 i iOS 15.1 ili noviji',
   },
 

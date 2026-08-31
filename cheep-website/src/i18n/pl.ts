@@ -194,8 +194,7 @@ export const pl: Dict = {
     titleAccent: 'tańszy',
     sub: 'Pobierz Cheep, stwórz listę, zobacz oszczędność. Bezpłatnie w pięciu krajach.',
     playAlt: 'Pobierz z Google Play',
-    storeTop: 'Pobierz z',
-    storeBottom: 'App Store',
+    appStoreAlt: 'Pobierz z App Store',
     note: 'Darmowa instalacja · bez reklam z opcjonalnym Premium · Android 8.0 i iOS 15.1 lub nowszy',
   },
 

@@ -194,8 +194,7 @@ export const hu: Dict = {
     titleAccent: 'olcsóbb lesz',
     sub: 'Töltsd le a Cheepet, állítsd össze a listád, és nézd meg a megtakarítást. Öt országban ingyenes.',
     playAlt: 'Letöltés a Google Playről',
-    storeTop: 'Letöltés az',
-    storeBottom: 'App Store',
+    appStoreAlt: 'Letöltés az App Store-ból',
     note: 'Ingyenes letöltés · hirdetésmentes az opcionális Premiummal · Android 8.0 és iOS 15.1 vagy újabb',
   },
 
