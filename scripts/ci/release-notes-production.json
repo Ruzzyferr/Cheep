@@ -1,8 +1,9 @@
 {
-  "tr-TR": "Premium ekranı netleşti: aboneliğin ne kattığı — reklamsız kullanım ve ayda 300 asistan mesajı — artık açıkça yazıyor. Ücretsiz sürümde de çalışan özellikler premium avantajı olarak sayılmıyor.\n\nAyrıca küçük iyileştirmeler ve düzeltmeler.",
-  "en-US": "Clearer Premium screen: the subscription now spells out what it actually adds — an ad-free app and 300 assistant messages a month. Features that also work on the free tier are no longer listed as Premium benefits.\n\nPlus small improvements and fixes.",
-  "pl-PL": "Przejrzysty ekran Premium: subskrypcja jasno pokazuje, co naprawdę daje — brak reklam i 300 wiadomości asystenta miesięcznie. Funkcje dostępne także w wersji bezpłatnej nie są już wymieniane jako korzyści Premium.\n\nDodatkowo drobne poprawki.",
-  "hr": "Jasniji zaslon Premiuma: pretplata sada izravno navodi što doista donosi — aplikaciju bez oglasa i 300 poruka asistentu mjesečno. Značajke koje rade i u besplatnoj verziji više se ne navode kao pogodnosti Premiuma.\n\nUz to, sitni popravci i poboljšanja.",
-  "hu-HU": "Áttekinthetőbb Premium képernyő: az előfizetés mostantól pontosan megmondja, mit ad — hirdetésmentes alkalmazást és havi 300 asszisztensüzenetet. Az ingyenes változatban is működő funkciók már nem szerepelnek Premium előnyként.\n\nEmellett apró javítások.",
-  "ro": "Ecran Premium mai clar: abonamentul arată acum exact ce oferă — aplicație fără reclame și 300 de mesaje către asistent pe lună. Funcțiile care merg și în varianta gratuită nu mai sunt trecute ca avantaje Premium.\n\nÎn plus, mici corecții și îmbunătățiri."
+  "_not": "Play ÜRETİMİ 1.6.2'de. Bu notlar 1.6.2 -> 1.6.3 farkını anlatır; premium metni 1.6.2'de zaten duyuruldu, tekrar edilmiyor. iOS'un notları AYRI (App Store üretimi 1.6.1'de, yani oradaki fark daha büyük).",
+  "tr-TR": "Kararlılık düzeltmeleri ve küçük iyileştirmeler.",
+  "en-US": "Stability fixes and small improvements.",
+  "pl-PL": "Poprawki stabilności i drobne ulepszenia.",
+  "hr": "Ispravci stabilnosti i manja poboljšanja.",
+  "hu-HU": "Stabilitási javítások és apró fejlesztések.",
+  "ro": "Corecții de stabilitate și mici îmbunătățiri."
 }
