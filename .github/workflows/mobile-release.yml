@@ -19,6 +19,14 @@ on:
       - 'Cheep-Mobile/**'
       - 'scripts/ci/**'
       - '.github/workflows/mobile-release.yml'
+      # ÜRETİM SÜRÜM NOTU DERLEMEYİ TETİKLEMEZ.
+      #
+      # Bu dosyayı yalnızca `play-promote.mjs` okuyor ve o betik ELLE
+      # çalıştırılıyor — içeriği hiçbir derlemeye girmiyor. `scripts/ci/**`
+      # kalıbı içinde kaldığı için notu güncellemek koca bir mobil derleme
+      # başlatıyordu; macOS koşucusu dakikayı 10 katıyla yazdığından bu,
+      # hiçbir çıktısı olmayan en pahalı koşu oluyordu.
+      - '!scripts/ci/release-notes-production.json'
   workflow_dispatch:
     inputs:
       android_track:
