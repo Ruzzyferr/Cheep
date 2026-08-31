@@ -552,10 +552,10 @@
   },
   "premium": {
     "title": "Cheep Premium",
-    "subtitle": "Koristi AI asistenta gotovo bez ograničenja i prepusti mu planiranje kupnje.",
+    "subtitle": "Koristi asistenta gotovo bez ograničenja — i bez ijednog oglasa.",
     "benefit_1": "300 poruka asistentu mjesečno (besplatno: 5 dnevno)",
-    "benefit_2": "Pretvori običnu rečenicu u popis — proizvode pronalazi asistent",
-    "benefit_3": "Izračunaj najjeftiniju rutu koliko god puta želiš",
+    "benefit_2": "Bez oglasa: svi banneri nestaju",
+    "benefit_3": "Slaži popise i najjeftinije rute bez dnevnog ograničenja",
     "monthly": "Mjesečno",
     "yearly": "Godišnje",
     "save_badge": "{{percent}}% uštede",
@@ -584,7 +584,7 @@
     "upsell_cta": "Pogledaj Premium",
     "upsell_later": "Ne sada",
     "card_title": "Koristi asistenta gotovo bez ograničenja",
-    "card_body": "300 poruka mjesečno, popis iz obične rečenice, neograničene najjeftinije rute.",
+    "card_body": "300 poruka mjesečno, bez oglasa, bez dnevnog ograničenja.",
     "card_cta": "Istraži Premium",
     "card_active_title": "Cheep Premium je aktivan",
     "card_active_body": "Hvala! Ovdje možeš upravljati svojom pretplatom."

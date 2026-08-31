@@ -552,10 +552,10 @@
   },
   "premium": {
     "title": "Cheep Premium",
-    "subtitle": "Folosește asistentul AI aproape fără limite și lasă-l să îți planifice cumpărăturile.",
+    "subtitle": "Folosește asistentul aproape fără limite — și fără nicio reclamă.",
     "benefit_1": "300 de mesaje către asistent pe lună (gratuit: 5 pe zi)",
-    "benefit_2": "Transformă o simplă frază în listă — asistentul găsește produsele",
-    "benefit_3": "Calculează ruta către cel mai ieftin magazin de câte ori vrei",
+    "benefit_2": "Fără reclame: toate bannerele dispar",
+    "benefit_3": "Fă liste și rute către cel mai ieftin magazin fără limită zilnică",
     "monthly": "Lunar",
     "yearly": "Anual",
     "save_badge": "{{percent}}% economie",
@@ -584,7 +584,7 @@
     "upsell_cta": "Vezi Premium",
     "upsell_later": "Nu acum",
     "card_title": "Folosește asistentul aproape fără limite",
-    "card_body": "300 de mesaje pe lună, liste dintr-o simplă frază, rute către cel mai ieftin magazin fără limită.",
+    "card_body": "300 de mesaje pe lună, fără reclame, fără limită zilnică.",
     "card_cta": "Descoperă Premium",
     "card_active_title": "Cheep Premium este activ",
     "card_active_body": "Mulțumim! Îți poți gestiona abonamentul de aici."

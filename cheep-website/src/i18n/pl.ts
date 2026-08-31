@@ -168,15 +168,15 @@ export const pl: Dict = {
       },
       {
         q: 'Skąd pochodzą ceny i jak często są aktualizowane?',
-        a: 'W Polsce ceny zbieramy z publicznie dostępnych źródeł sieci handlowych, a w Turcji z oficjalnego, publicznego źródła tureckiego Ministerstwa Handlu. Ceny aktualizujemy codziennie. Mają charakter informacyjny i mogą różnić się od ceny przy kasie.',
+        a: 'W Polsce i Chorwacji ceny zbieramy z publicznie dostępnych cenników sieci handlowych, w Turcji z oficjalnego, publicznego źródła tureckiego Ministerstwa Handlu, na Węgrzech z oficjalnego monitora cen urzędu antymonopolowego (GVH), a w Rumunii z państwowego systemu Monitorul Prețurilor. Ceny aktualizujemy codziennie. Mają charakter informacyjny i mogą różnić się od ceny przy kasie.',
       },
       {
         q: 'Ceny których sklepów porównujecie?',
-        a: 'W Polsce: Biedronka, Lidl, Żabka, Auchan i Carrefour. W Turcji: Migros, A101, BİM, ŞOK, CarrefourSA i Tarım Kredi. Łącznie obejmujemy ponad 23 500 sklepów.',
+        a: 'W Polsce: Biedronka, Lidl, Żabka, Auchan i Carrefour. W Turcji: Migros, A101, BİM, ŞOK, CarrefourSA i Tarım Kredi. W Chorwacji: Konzum, Lidl, Spar, Plodine, Kaufland i Tommy. Na Węgrzech: Tesco, Lidl, Aldi, Auchan i Penny. W Rumunii: Kaufland, Lidl, Carrefour, Auchan, Mega Image i Penny. Łącznie obejmujemy ponad 27 500 sklepów.',
       },
       {
         q: 'Czy aplikacja jest darmowa?',
-        a: 'Tak. Pobranie i korzystanie z Cheep jest bezpłatne: porównywanie cen, listy, najtańsza trasa i powiadomienia o spadkach cen zawsze pozostają darmowe. Opcjonalna subskrypcja Cheep Premium zwiększa jedynie dzienny limit wiadomości asystenta AI; szczegóły w Regulaminie.',
+        a: 'Tak. Pobranie i korzystanie z Cheep jest bezpłatne: porównywanie cen, listy, najtańsza trasa i powiadomienia o spadkach cen zawsze pozostają darmowe. W wersji bezpłatnej wyświetlamy w kilku miejscach niewielkie reklamy. Opcjonalna subskrypcja Cheep Premium całkowicie je usuwa i zwiększa limit wiadomości asystenta AI; szczegóły w Regulaminie.',
       },
       {
         q: 'Skąd wiadomo, że to ten sam produkt?',
@@ -184,7 +184,7 @@ export const pl: Dict = {
       },
       {
         q: 'W jakich krajach mogę korzystać? Czy jest wersja na iPhone’a?',
-        a: 'Cheep działa obecnie w Polsce i Turcji; Niemcy, Szwajcaria i Szwecja są w drodze. Aplikację na Androida pobierzesz z Google Play, a wersja na iOS jest w przygotowaniu.',
+        a: 'Cheep działa obecnie w Polsce, Turcji, Chorwacji, na Węgrzech i w Rumunii; Niemcy, Szwajcaria i Szwecja są w drodze. Aplikację pobierzesz zarówno z Google Play, jak i z App Store.',
       },
     ],
   },
@@ -192,11 +192,11 @@ export const pl: Dict = {
   download: {
     titleLead: 'Niech następny koszyk będzie',
     titleAccent: 'tańszy',
-    sub: 'Pobierz Cheep, stwórz listę, zobacz oszczędność. Bezpłatnie w Polsce i Turcji.',
+    sub: 'Pobierz Cheep, stwórz listę, zobacz oszczędność. Bezpłatnie w pięciu krajach.',
     playAlt: 'Pobierz z Google Play',
-    storeTop: 'Wkrótce',
+    storeTop: 'Pobierz z',
     storeBottom: 'App Store',
-    note: 'Darmowa instalacja · bez reklam · opcjonalne Premium · Android 8.0 lub nowszy',
+    note: 'Darmowa instalacja · bez reklam z opcjonalnym Premium · Android 8.0 i iOS 15.1 lub nowszy',
   },
 
   footer: {
@@ -236,9 +236,9 @@ export const pl: Dict = {
       },
     ],
     disclaimer:
-      'Wszystkie nazwy i logotypy marek są zastrzeżonymi znakami towarowymi ich właścicieli. Cheep nie jest oficjalnym partnerem tych sieci handlowych ani z nimi nie współpracuje; nazwy marek służą wyłącznie wskazaniu, czyja cena jest prezentowana. W Polsce ceny zbieramy z publicznie dostępnych źródeł sieci handlowych, a w Turcji z oficjalnego, publicznego źródła tureckiego Ministerstwa Handlu (marketfiyati.org.tr); mają charakter informacyjny i mogą różnić się od ceny przy kasie.',
+      'Wszystkie nazwy i logotypy marek są zastrzeżonymi znakami towarowymi ich właścicieli. Cheep nie jest oficjalnym partnerem tych sieci handlowych ani z nimi nie współpracuje; nazwy marek służą wyłącznie wskazaniu, czyja cena jest prezentowana. W Polsce i Chorwacji ceny zbieramy z publicznie dostępnych cenników sieci handlowych, w Turcji z oficjalnego, publicznego źródła tureckiego Ministerstwa Handlu (marketfiyati.org.tr), na Węgrzech z oficjalnego monitora cen urzędu antymonopolowego (GVH), a w Rumunii z systemu Monitorul Prețurilor; mają charakter informacyjny i mogą różnić się od ceny przy kasie.',
     copyright: '© 2026 Cheep. Wszelkie prawa zastrzeżone.',
-    madeIn: 'Zrobione z myślą o Polsce i Turcji',
+    madeIn: 'Zrobione z myślą o Polsce, Turcji, Chorwacji, Węgrzech i Rumunii',
   },
 
   legal: {
@@ -326,9 +326,9 @@ export const pl: Dict = {
           'Informacje o cenach pochodzą z publicznie dostępnych źródeł. Właściciel marki, który chce zgłosić zastrzeżenia do treści, może napisać na [destek@cheep.live](mailto:destek@cheep.live) — na uzasadnione zgłoszenia reagujemy niezwłocznie.',
         ] },
         { h2: 'Subskrypcja Cheep Premium' },
-        { p: 'Porównywanie cen, listy zakupów, najtańsza trasa i powiadomienia o spadkach cen są i pozostaną bezpłatne. Cheep Premium to opcjonalna subskrypcja, która zwiększa wyłącznie limit wiadomości asystenta AI.' },
+        { p: 'Porównywanie cen, listy zakupów, najtańsza trasa i powiadomienia o spadkach cen są i pozostaną bezpłatne. Wersja bezpłatna wyświetla reklamy. Cheep Premium to opcjonalna subskrypcja, która usuwa reklamy i zwiększa limit wiadomości asystenta AI.' },
         { ul: [
-          '**Zakres:** W wersji bezpłatnej można wysłać 5 wiadomości dziennie do asystenta. Premium daje 300 wiadomości miesięcznie (z dziennym limitem bezpieczeństwa 50). Wszystkie pozostałe funkcje są identyczne w obu wariantach.',
+          '**Zakres:** W wersji bezpłatnej można wysłać 5 wiadomości dziennie do asystenta, a w aplikacji wyświetlane są reklamy. Premium daje 300 wiadomości miesięcznie (z dziennym limitem bezpieczeństwa 50) i całkowicie usuwa reklamy. Wszystkie pozostałe funkcje są identyczne w obu wariantach.',
           '**Okres i cena:** Subskrypcja jest oferowana w wariancie miesięcznym lub rocznym. Obowiązująca cena, waluta i długość okresu są wyraźnie pokazane na ekranie zakupu w aplikacji przed dokonaniem zakupu i mogą różnić się w zależności od kraju.',
           '**Automatyczne odnawianie:** Subskrypcja odnawia się automatycznie, o ile nie zostanie anulowana co najmniej 24 godziny przed końcem bieżącego okresu. Opłata jest pobierana z konta w sklepie w ciągu 24 godzin poprzedzających odnowienie.',
           '**Anulowanie:** Subskrypcję możesz anulować w dowolnym momencie w ustawieniach subskrypcji swojego konta w sklepie (App Store: Ustawienia → Apple ID → Subskrypcje; Google Play: Sklep Play → Subskrypcje). Anulowanie działa od końca opłaconego okresu — do tego czasu zachowujesz dostęp do Premium.',

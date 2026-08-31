@@ -1,7 +1,7 @@
 import { Reveal } from '../ui/Reveal'
 import { CheepBird } from '../brand/CheepBird'
 import { useT, useLocale } from '../../i18n'
-import { PLAY_URL } from '../../config'
+import { APP_STORE_URL, PLAY_URL } from '../../config'
 
 /** Rozet dosyası GERÇEKTEN var olan diller (public/playbadge-*.png). */
 const BADGE_LOCALES = new Set<string>(['tr', 'pl', 'hr', 'hu', 'ro'])
@@ -60,9 +60,16 @@ export function Download() {
                   />
                 </a>
 
-                <span
-                  aria-disabled="true"
-                  className="inline-flex cursor-default items-center gap-3 rounded-2xl border border-cream/25 px-6 py-4 text-left text-cream/60"
+                {/* iOS ARTIK CANLI — bu dugme uzun sure "Yakinda" yazan, tiklanamayan
+                    bir <span> idi. Uygulama bes magazada yayina girdikten sonra da
+                    oyle kaldi: indirme bolumunun tam ortasinda, ziyaretcinin
+                    yarisini olusturan iPhone kullanicisina "bizde yok" diyordu.
+                    Artik gercek bir baglanti. */}
+                <a
+                  href={APP_STORE_URL}
+                  target="_blank"
+                  rel="noopener"
+                  className="inline-flex items-center gap-3 rounded-2xl border border-cream/25 px-6 py-4 text-left text-cream transition-transform duration-300 hover:-translate-y-0.5"
                 >
                   <span aria-hidden className="text-2xl"></span>
                   <span>
@@ -73,7 +80,7 @@ export function Download() {
                       {t.download.storeBottom}
                     </span>
                   </span>
-                </span>
+                </a>
               </div>
 
               <p className="mt-8 font-mono text-xs text-cream/65">{t.download.note}</p>

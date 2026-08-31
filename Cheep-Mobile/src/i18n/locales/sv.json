@@ -552,10 +552,10 @@
   },
   "premium": {
     "title": "Cheep Premium",
-    "subtitle": "Använd AI-assistenten nästan utan gränser och låt den planera dina inköp.",
+    "subtitle": "Använd assistenten nästan utan gränser — och helt utan annonser.",
     "benefit_1": "300 assistentmeddelanden per månad (gratis: 5 per dag)",
-    "benefit_2": "Gör en vanlig mening till en lista — assistenten hittar varorna",
-    "benefit_3": "Räkna ut den billigaste butiksrundan hur ofta du vill",
+    "benefit_2": "Annonsfritt: alla banners försvinner",
+    "benefit_3": "Skapa listor och billigaste rundor utan daglig gräns",
     "monthly": "Månadsvis",
     "yearly": "Årsvis",
     "save_badge": "Spara {{percent}} %",
@@ -584,7 +584,7 @@
     "upsell_cta": "Se Premium",
     "upsell_later": "Inte nu",
     "card_title": "Använd assistenten nästan utan gränser",
-    "card_body": "300 meddelanden i månaden, listor från vanliga meningar, obegränsade billigaste rundor.",
+    "card_body": "300 meddelanden i månaden, inga annonser, ingen daglig gräns.",
     "card_cta": "Utforska Premium",
     "card_active_title": "Cheep Premium är aktivt",
     "card_active_body": "Tack! Här kan du hantera din prenumeration."

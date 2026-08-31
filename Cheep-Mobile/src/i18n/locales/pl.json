@@ -552,10 +552,10 @@
   },
   "premium": {
     "title": "Cheep Premium",
-    "subtitle": "Korzystaj z asystenta AI niemal bez ograniczeń i pozwól mu zaplanować zakupy.",
+    "subtitle": "Korzystaj z asystenta niemal bez ograniczeń — i bez żadnych reklam.",
     "benefit_1": "300 wiadomości asystenta miesięcznie (za darmo: 5 dziennie)",
-    "benefit_2": "Zamień zwykłe zdanie w listę — asystent sam znajdzie produkty",
-    "benefit_3": "Wyliczaj najtańszą trasę zakupową bez ograniczeń",
+    "benefit_2": "Bez reklam: wszystkie banery znikają",
+    "benefit_3": "Twórz listy i najtańsze trasy bez dziennego limitu",
     "monthly": "Miesięcznie",
     "yearly": "Rocznie",
     "save_badge": "Oszczędzasz {{percent}}%",
@@ -584,7 +584,7 @@
     "upsell_cta": "Zobacz Premium",
     "upsell_later": "Nie teraz",
     "card_title": "Korzystaj z asystenta niemal bez ograniczeń",
-    "card_body": "300 wiadomości miesięcznie, listy ze zwykłych zdań, nielimitowane najtańsze trasy.",
+    "card_body": "300 wiadomości miesięcznie, bez reklam, bez dziennego limitu.",
     "card_cta": "Poznaj Premium",
     "card_active_title": "Cheep Premium jest aktywny",
     "card_active_body": "Dziękujemy! Tutaj możesz zarządzać subskrypcją."

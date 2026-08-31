@@ -552,10 +552,10 @@
   },
   "premium": {
     "title": "Cheep Premium",
-    "subtitle": "Yapay zekâ asistanını neredeyse sınırsız kullan, alışverişini o planlasın.",
+    "subtitle": "Asistanı neredeyse sınırsız kullan, üstelik hiç reklam görmeden.",
     "benefit_1": "Ayda 300 asistan mesajı (ücretsiz: günde 5)",
-    "benefit_2": "Düz cümleyi listeye çevir — ürünleri asistan bulsun",
-    "benefit_3": "En ucuz market rotasını istediğin kadar hesapla",
+    "benefit_2": "Reklamsız: tüm banner’lar kapanır",
+    "benefit_3": "Listeni ve en ucuz rotanı günlük sınıra takılmadan hazırla",
     "monthly": "Aylık",
     "yearly": "Yıllık",
     "save_badge": "%{{percent}} tasarruf",
@@ -584,7 +584,7 @@
     "upsell_cta": "Premium'a göz at",
     "upsell_later": "Şimdi değil",
     "card_title": "Asistanı sınırsıza yakın kullan",
-    "card_body": "Ayda 300 mesaj, düz cümleyle liste, sınırsız en ucuz rota.",
+    "card_body": "Ayda 300 mesaj, reklamsız kullanım, günlük sınır yok.",
     "card_cta": "Premium'u incele",
     "card_active_title": "Cheep Premium aktif",
     "card_active_body": "Teşekkürler! Aboneliğini buradan yönetebilirsin."

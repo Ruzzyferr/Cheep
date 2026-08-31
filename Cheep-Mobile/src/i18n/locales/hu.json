@@ -552,10 +552,10 @@
   },
   "premium": {
     "title": "Cheep Premium",
-    "subtitle": "Használd az MI-asszisztenst szinte korlátlanul, és bízd rá a bevásárlásod megtervezését.",
+    "subtitle": "Használd az asszisztenst szinte korlátlanul — és egyetlen hirdetés nélkül.",
     "benefit_1": "Havi 300 asszisztensüzenet (ingyenesen: napi 5)",
-    "benefit_2": "Egyetlen mondatból lista lesz — a termékeket az asszisztens keresi ki",
-    "benefit_3": "Számold ki a legolcsóbb útvonalat, ahányszor csak akarod",
+    "benefit_2": "Hirdetésmentes: minden banner eltűnik",
+    "benefit_3": "Készíts listákat és legolcsóbb útvonalakat napi limit nélkül",
     "monthly": "Havi",
     "yearly": "Éves",
     "save_badge": "{{percent}}% megtakarítás",
@@ -584,7 +584,7 @@
     "upsell_cta": "Nézd meg a Premiumot",
     "upsell_later": "Most nem",
     "card_title": "Használd az asszisztenst szinte korlátlanul",
-    "card_body": "Havi 300 üzenet, lista egyetlen mondatból, korlátlan legolcsóbb útvonal.",
+    "card_body": "Havi 300 üzenet, hirdetésmentesen, napi limit nélkül.",
     "card_cta": "Premium megtekintése",
     "card_active_title": "A Cheep Premium aktív",
     "card_active_body": "Köszönjük! Az előfizetésedet itt kezelheted."

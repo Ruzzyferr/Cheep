@@ -53,7 +53,7 @@ export const hu: Dict = {
     titleLead: 'Ugyanaz a termék,',
     titleAccent: 'minden boltban más ár.',
     body: 'Egyetlen doboz tejért boltról boltra 10–15%-kal is többet fizethetsz. A Cheep egymás mellé teszi ugyanannak a terméknek az árát a láncoknál, és másodpercek alatt megmutatja a legolcsóbbat — találgatás és felesleges kör nélkül.',
-    sourceNote: 'Az áruházláncok nyilvános forrásaiból · naponta frissül',
+    sourceNote: 'A GVH hivatalos Árfigyelő rendszeréből · naponta frissül',
     card: {
       name: 'Tartós tej 2,8%',
       unit: '1 l · ugyanaz a márka, ugyanaz a termék',
@@ -168,15 +168,15 @@ export const hu: Dict = {
       },
       {
         q: 'Honnan származnak az árak, és milyen gyakran frissülnek?',
-        a: 'Törökországban a Török Köztársaság Kereskedelmi Minisztériumának nyilvános, hivatalos forrásából (marketfiyati.org.tr), Lengyelországban pedig az áruházláncok nyilvánosan elérhető forrásaiból gyűjtjük az árakat. Az árakat naponta frissítjük. Tájékoztató jellegűek, és eltérhetnek a pénztárnál fizetendő ártól.',
+        a: 'Magyarországon a Gazdasági Versenyhivatal (GVH) hivatalos Árfigyelő rendszeréből, Romániában az állami Monitorul Prețurilor rendszerből, Törökországban a Kereskedelmi Minisztérium nyilvános, hivatalos forrásából (marketfiyati.org.tr), Lengyelországban és Horvátországban pedig az áruházláncok nyilvánosan közzétett árlistáiból gyűjtjük az árakat. Az árakat naponta frissítjük. Tájékoztató jellegűek, és eltérhetnek a pénztárnál fizetendő ártól.',
       },
       {
         q: 'Melyik boltok árait hasonlítjátok össze?',
-        a: 'Törökországban a Migros, az A101, a BİM, a ŞOK, a CarrefourSA és a Tarım Kredi; Lengyelországban a Biedronka, a Lidl, a Żabka, az Auchan és a Carrefour árait. Összesen több mint 23 500 üzletet fedünk le.',
+        a: 'Magyarországon a Tesco, a Lidl, az Aldi, az Auchan és a Penny; Törökországban a Migros, az A101, a BİM, a ŞOK, a CarrefourSA és a Tarım Kredi; Lengyelországban a Biedronka, a Lidl, a Żabka, az Auchan és a Carrefour; Horvátországban a Konzum, a Lidl, a Spar, a Plodine, a Kaufland és a Tommy; Romániában a Kaufland, a Lidl, a Carrefour, az Auchan, a Mega Image és a Penny árait. Összesen több mint 27 500 üzletet fedünk le.',
       },
       {
         q: 'Ingyenes az alkalmazás?',
-        a: 'Igen. A Cheep letöltése és használata ingyenes: az összehasonlítás, a listák, a legolcsóbb útvonal és az árcsökkenési értesítések mindig ingyenesek maradnak. Az opcionális Cheep Premium előfizetés kizárólag az MI-asszisztens üzenetkeretét növeli; a részletek a Felhasználási feltételekben olvashatók.',
+        a: 'Igen. A Cheep letöltése és használata ingyenes: az összehasonlítás, a listák, a legolcsóbb útvonal és az árcsökkenési értesítések mindig ingyenesek maradnak. Az ingyenes változatban néhány helyen kisebb hirdetések jelennek meg. Az opcionális Cheep Premium előfizetés ezeket teljesen eltávolítja, és megnöveli az MI-asszisztens üzenetkeretét; a részletek a Felhasználási feltételekben olvashatók.',
       },
       {
         q: 'Honnan tudjátok, hogy ugyanarról a termékről van szó?',
@@ -184,7 +184,7 @@ export const hu: Dict = {
       },
       {
         q: 'Mely országokban használhatom? Van iPhone-os verzió?',
-        a: 'A Cheep jelenleg Törökországban és Lengyelországban él; Németország, Svájc és Svédország úton van. Az Android-alkalmazás a Google Playről tölthető le, az iOS-verzió pedig készül.',
+        a: 'A Cheep jelenleg Magyarországon, Törökországban, Lengyelországban, Horvátországban és Romániában él; Németország, Svájc és Svédország úton van. Az alkalmazás a Google Playről és az App Store-ból is letölthető.',
       },
     ],
   },
@@ -192,11 +192,11 @@ export const hu: Dict = {
   download: {
     titleLead: 'A következő kosarad',
     titleAccent: 'olcsóbb lesz',
-    sub: 'Töltsd le a Cheepet, állítsd össze a listád, és nézd meg a megtakarítást. Törökországban és Lengyelországban ingyenes.',
+    sub: 'Töltsd le a Cheepet, állítsd össze a listád, és nézd meg a megtakarítást. Öt országban ingyenes.',
     playAlt: 'Letöltés a Google Playről',
-    storeTop: 'Hamarosan',
+    storeTop: 'Letöltés az',
     storeBottom: 'App Store',
-    note: 'Ingyenes letöltés · reklámok nélkül · opcionális Premium · Android 8.0 vagy újabb',
+    note: 'Ingyenes letöltés · hirdetésmentes az opcionális Premiummal · Android 8.0 és iOS 15.1 vagy újabb',
   },
 
   footer: {
@@ -236,9 +236,9 @@ export const hu: Dict = {
       },
     ],
     disclaimer:
-      'Minden márkanév és logó a jogosultja bejegyzett védjegye. A Cheep nem áll hivatalos partneri kapcsolatban vagy együttműködésben ezekkel az áruházláncokkal; a márkaneveket kizárólag annak jelölésére használjuk, melyik bolt árát mutatjuk. Törökországban az árakat a Kereskedelmi Minisztérium nyilvános, hivatalos forrásából (marketfiyati.org.tr), Lengyelországban pedig a boltok nyilvános forrásaiból gyűjtjük; tájékoztató jellegűek, és eltérhetnek a pénztárnál fizetendő ártól.',
+      'Minden márkanév és logó a jogosultja bejegyzett védjegye. A Cheep nem áll hivatalos partneri kapcsolatban vagy együttműködésben ezekkel az áruházláncokkal; a márkaneveket kizárólag annak jelölésére használjuk, melyik bolt árát mutatjuk. Magyarországon az árakat a GVH hivatalos Árfigyelő rendszeréből, Romániában a Monitorul Prețurilor rendszerből, Törökországban a Kereskedelmi Minisztérium nyilvános, hivatalos forrásából (marketfiyati.org.tr), Lengyelországban és Horvátországban pedig a boltok nyilvánosan közzétett árlistáiból gyűjtjük; tájékoztató jellegűek, és eltérhetnek a pénztárnál fizetendő ártól.',
     copyright: '© 2026 Cheep. Minden jog fenntartva.',
-    madeIn: 'Törökországnak és Lengyelországnak, szeretettel',
+    madeIn: 'Magyarországnak, Törökországnak, Lengyelországnak, Horvátországnak és Romániának, szeretettel',
   },
 
   legal: {
@@ -326,9 +326,9 @@ export const hu: Dict = {
           'Az árinformációk nyilvános forrásokból származnak. Ha egy védjegyjogosult kifogást szeretne emelni a tartalommal kapcsolatban, a [destek@cheep.live](mailto:destek@cheep.live) címen érhet el minket; a megalapozott megkeresésekre gyorsan reagálunk.',
         ] },
         { h2: 'Cheep Premium előfizetés' },
-        { p: 'A Cheep árösszehasonlítás, bevásárlólista, legolcsóbb útvonal és árcsökkenési értesítés funkciói ingyenesek, és azok is maradnak. A Cheep Premium egy opcionális előfizetés, amely kizárólag az MI-asszisztens üzenetkeretét növeli.' },
+        { p: 'A Cheep árösszehasonlítás, bevásárlólista, legolcsóbb útvonal és árcsökkenési értesítés funkciói ingyenesek, és azok is maradnak. Az ingyenes változat hirdetéseket jelenít meg. A Cheep Premium egy opcionális előfizetés, amely eltávolítja a hirdetéseket, és megnöveli az MI-asszisztens üzenetkeretét.' },
         { ul: [
-          '**Tartalom:** Az ingyenes használat során naponta 5 üzenet küldhető az asszisztensnek. A Premiummal havi 300 üzenet küldhető (napi 50 üzenetes biztonsági korláttal). Minden más funkció mindkét esetben azonos.',
+          '**Tartalom:** Az ingyenes használat során naponta 5 üzenet küldhető az asszisztensnek, és az alkalmazás hirdetéseket jelenít meg. A Premiummal havi 300 üzenet küldhető (napi 50 üzenetes biztonsági korláttal), a hirdetések pedig teljesen eltűnnek. Minden más funkció mindkét esetben azonos.',
           '**Időtartam és ár:** Az előfizetés havi vagy éves konstrukcióban érhető el. Az érvényes árat, a pénznemet és az időszakot az alkalmazás vásárlási képernyője a vásárlás előtt egyértelműen megmutatja; ezek országonként eltérhetnek.',
           '**Automatikus megújulás:** Az előfizetés automatikusan megújul, kivéve, ha az aktuális időszak vége előtt legalább 24 órával lemondod. A díjat a megújulást megelőző 24 órában terheljük az áruházi fiókodra.',
           '**Lemondás:** Az előfizetést bármikor lemondhatod a készüléked áruházi fiókjának előfizetési beállításaiban (App Store: Beállítások → Apple-fiók → Előfizetések; Google Play: Play Áruház → Előfizetések). A lemondás a kifizetett időszak végén lép életbe; addig továbbra is használhatod a Premium előnyeit.',

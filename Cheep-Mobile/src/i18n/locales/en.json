@@ -552,10 +552,10 @@
   },
   "premium": {
     "title": "Cheep Premium",
-    "subtitle": "Use the AI assistant almost without limits and let it plan your shopping.",
+    "subtitle": "Use the assistant almost without limits — and without a single ad.",
     "benefit_1": "300 assistant messages per month (free: 5 per day)",
-    "benefit_2": "Turn a plain sentence into a list — the assistant finds the products",
-    "benefit_3": "Work out the cheapest store route as often as you like",
+    "benefit_2": "Ad-free: every banner disappears",
+    "benefit_3": "Build lists and cheapest routes without hitting a daily limit",
     "monthly": "Monthly",
     "yearly": "Yearly",
     "save_badge": "Save {{percent}}%",
@@ -584,7 +584,7 @@
     "upsell_cta": "See Premium",
     "upsell_later": "Not now",
     "card_title": "Use the assistant almost without limits",
-    "card_body": "300 messages a month, lists from plain sentences, unlimited cheapest routes.",
+    "card_body": "300 messages a month, no ads, no daily limit.",
     "card_cta": "Explore Premium",
     "card_active_title": "Cheep Premium is active",
     "card_active_body": "Thank you! You can manage your subscription here."

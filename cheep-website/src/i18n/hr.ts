@@ -168,15 +168,15 @@ export const hr: Dict = {
       },
       {
         q: 'Odakle dolaze cijene i koliko se često osvježavaju?',
-        a: 'U Turskoj cijene preuzimamo iz službenog, javno dostupnog izvora turskog Ministarstva trgovine (marketfiyati.org.tr), a u Poljskoj iz javno dostupnih izvora trgovačkih lanaca. Cijene osvježavamo svaki dan. Informativne su naravi i mogu se razlikovati od cijene na blagajni.',
+        a: 'U Hrvatskoj i Poljskoj cijene preuzimamo iz javno objavljenih cjenika trgovačkih lanaca, u Turskoj iz službenog, javno dostupnog izvora turskog Ministarstva trgovine (marketfiyati.org.tr), u Mađarskoj iz službenog sustava za praćenje cijena Agencije za zaštitu tržišnog natjecanja (GVH), a u Rumunjskoj iz državnog sustava Monitorul Prețurilor. Cijene osvježavamo svaki dan. Informativne su naravi i mogu se razlikovati od cijene na blagajni.',
       },
       {
         q: 'Cijene kojih trgovina uspoređujete?',
-        a: 'U Turskoj: Migros, A101, BİM, ŞOK, CarrefourSA i Tarım Kredi. U Poljskoj: Biedronka, Lidl, Żabka, Auchan i Carrefour. Ukupno pokrivamo više od 23.500 poslovnica.',
+        a: 'U Hrvatskoj: Konzum, Lidl, Spar, Plodine, Kaufland i Tommy. U Turskoj: Migros, A101, BİM, ŞOK, CarrefourSA i Tarım Kredi. U Poljskoj: Biedronka, Lidl, Żabka, Auchan i Carrefour. U Mađarskoj: Tesco, Lidl, Aldi, Auchan i Penny. U Rumunjskoj: Kaufland, Lidl, Carrefour, Auchan, Mega Image i Penny. Ukupno pokrivamo više od 27.500 poslovnica.',
       },
       {
         q: 'Je li aplikacija besplatna?',
-        a: 'Jest. Preuzimanje i korištenje Cheepa je besplatno: usporedba cijena, popisi, najjeftinija ruta i obavijesti o padu cijena zauvijek ostaju besplatni. Neobavezna pretplata Cheep Premium povećava samo dnevnu kvotu poruka AI asistenta; uvjeti su u Uvjetima korištenja.',
+        a: 'Jest. Preuzimanje i korištenje Cheepa je besplatno: usporedba cijena, popisi, najjeftinija ruta i obavijesti o padu cijena zauvijek ostaju besplatni. U besplatnoj se verziji na nekoliko mjesta prikazuju manji oglasi. Neobavezna pretplata Cheep Premium u potpunosti ih uklanja i povećava kvotu poruka AI asistenta; uvjeti su u Uvjetima korištenja.',
       },
       {
         q: 'Kako znate da je riječ o istom proizvodu?',
@@ -184,7 +184,7 @@ export const hr: Dict = {
       },
       {
         q: 'U kojim državama mogu koristiti aplikaciju? Postoji li verzija za iPhone?',
-        a: 'Cheep je trenutačno uživo u Turskoj i Poljskoj; Njemačka, Švicarska i Švedska su na putu. Aplikacija se za Android preuzima s Google Playa, a verzija za iOS je u pripremi.',
+        a: 'Cheep je trenutačno uživo u Hrvatskoj, Turskoj, Poljskoj, Mađarskoj i Rumunjskoj; Njemačka, Švicarska i Švedska su na putu. Aplikacija se preuzima i s Google Playa i s App Storea.',
       },
     ],
   },
@@ -192,11 +192,11 @@ export const hr: Dict = {
   download: {
     titleLead: 'Neka ti sljedeća košarica bude',
     titleAccent: 'jeftinija',
-    sub: 'Preuzmi Cheep, izradi popis, vidi uštedu. Besplatno u Turskoj i Poljskoj.',
+    sub: 'Preuzmi Cheep, izradi popis, vidi uštedu. Besplatno u pet zemalja.',
     playAlt: 'Preuzmi s Google Playa',
-    storeTop: 'Uskoro',
+    storeTop: 'Preuzmi s',
     storeBottom: 'App Store',
-    note: 'Besplatno preuzimanje · bez reklama · neobavezni Premium · Android 8.0 ili noviji',
+    note: 'Besplatno preuzimanje · bez oglasa uz neobavezni Premium · Android 8.0 i iOS 15.1 ili noviji',
   },
 
   footer: {
@@ -236,9 +236,9 @@ export const hr: Dict = {
       },
     ],
     disclaimer:
-      'Svi nazivi marki i logotipi registrirani su žigovi svojih vlasnika. Cheep nije službeni partner tih trgovačkih lanaca niti s njima surađuje; nazivi marki koriste se isključivo kako bi se naznačilo čija je cijena prikazana. U Turskoj cijene preuzimamo iz službenog, javno dostupnog izvora turskog Ministarstva trgovine (marketfiyati.org.tr), a u Poljskoj iz javno dostupnih izvora trgovačkih lanaca; informativne su naravi i mogu se razlikovati od cijene na blagajni.',
+      'Svi nazivi marki i logotipi registrirani su žigovi svojih vlasnika. Cheep nije službeni partner tih trgovačkih lanaca niti s njima surađuje; nazivi marki koriste se isključivo kako bi se naznačilo čija je cijena prikazana. U Hrvatskoj i Poljskoj cijene preuzimamo iz javno objavljenih cjenika trgovačkih lanaca, u Turskoj iz službenog izvora turskog Ministarstva trgovine (marketfiyati.org.tr), u Mađarskoj iz službenog sustava GVH-a, a u Rumunjskoj iz sustava Monitorul Prețurilor; informativne su naravi i mogu se razlikovati od cijene na blagajni.',
     copyright: '© 2026 Cheep. Sva prava pridržana.',
-    madeIn: 'Stvoreno s ljubavlju za Tursku i Poljsku',
+    madeIn: 'Stvoreno s ljubavlju za Hrvatsku, Tursku, Poljsku, Mađarsku i Rumunjsku',
   },
 
   legal: {
@@ -326,9 +326,9 @@ export const hr: Dict = {
           'Podaci o cijenama prikupljaju se iz javno dostupnih izvora. Vlasnik marke koji želi uputiti primjedbu na sadržaj može pisati na [destek@cheep.live](mailto:destek@cheep.live) — na opravdane zahtjeve reagiramo bez odgode.',
         ] },
         { h2: 'Pretplata Cheep Premium' },
-        { p: 'Usporedba cijena, popisi za kupnju, najjeftinija ruta i obavijesti o padu cijena jesu i ostat će besplatni. Cheep Premium neobavezna je pretplata koja povećava isključivo kvotu poruka AI asistenta.' },
+        { p: 'Usporedba cijena, popisi za kupnju, najjeftinija ruta i obavijesti o padu cijena jesu i ostat će besplatni. Besplatna verzija prikazuje oglase. Cheep Premium neobavezna je pretplata koja uklanja oglase i povećava kvotu poruka AI asistenta.' },
         { ul: [
-          '**Opseg:** U besplatnoj verziji asistentu se može poslati 5 poruka dnevno. Premium donosi 300 poruka mjesečno (uz sigurnosno ograničenje od 50 poruka dnevno). Sve su ostale značajke u oba slučaja identične.',
+          '**Opseg:** U besplatnoj verziji asistentu se može poslati 5 poruka dnevno i u aplikaciji se prikazuju oglasi. Premium donosi 300 poruka mjesečno (uz sigurnosno ograničenje od 50 poruka dnevno) i u potpunosti uklanja oglase. Sve su ostale značajke u oba slučaja identične.',
           '**Razdoblje i cijena:** Pretplata se nudi u mjesečnoj ili godišnjoj varijanti. Važeća cijena, valuta i trajanje razdoblja jasno su prikazani na zaslonu za kupnju u aplikaciji prije same kupnje i mogu se razlikovati ovisno o državi.',
           '**Automatsko obnavljanje:** Pretplata se obnavlja automatski, osim ako se otkaže najmanje 24 sata prije isteka tekućeg razdoblja. Naknada se naplaćuje s računa u trgovini aplikacijama unutar 24 sata prije obnove.',
           '**Otkazivanje:** Pretplatu možeš otkazati u bilo kojem trenutku u postavkama pretplata svog računa u trgovini aplikacijama (App Store: Postavke → Apple ID → Pretplate; Google Play: Trgovina Play → Pretplate). Otkazivanje počinje vrijediti od kraja plaćenog razdoblja — do tada zadržavaš pristup Premiumu.',

@@ -22,6 +22,16 @@ export const PLAY_URL =
   `https://play.google.com/store/apps/details?id=${PLAY_PACKAGE}` +
   '&utm_source=cheep_website&utm_medium=web&utm_campaign=site_download'
 
+/**
+ * App Store kimligi ve baglantisi.
+ *
+ * Ulke kodu BILEREK yok: `apps.apple.com/app/id...` ziyaretciyi kendi
+ * magazasina yonlendiriyor. Sabit bir `/tr/` yazmak, Hirvat bir ziyaretciyi
+ * Turk magazasina dusurup "bu urun bolgenizde yok" ekrani gosterirdi.
+ */
+export const APP_STORE_ID = '6803882626'
+export const APP_STORE_URL = `https://apps.apple.com/app/id${APP_STORE_ID}`
+
 export const SUPPORT_EMAIL = 'destek@cheep.live'
 export const PRIVACY_EMAIL = 'gizlilik@cheep.live'
 

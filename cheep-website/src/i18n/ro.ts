@@ -53,7 +53,7 @@ export const ro: Dict = {
     titleLead: 'Același produs,',
     titleAccent: 'alt preț în fiecare magazin.',
     body: 'Pentru un singur litru de lapte poți plăti cu 10–15% mai mult, de la un magazin la altul. Cheep pune prețurile aceluiași produs din toate lanțurile unul lângă altul și îți arată în câteva secunde cel mai ieftin — fără presupuneri și fără drumuri în plus.',
-    sourceNote: 'Date din surse publice ale lanțurilor de magazine · actualizate zilnic',
+    sourceNote: 'Date din sistemul de stat Monitorul Prețurilor · actualizate zilnic',
     card: {
       name: 'Lapte integral 3,5%',
       unit: '1 l · aceeași marcă, același produs',
@@ -168,15 +168,15 @@ export const ro: Dict = {
       },
       {
         q: 'De unde vin prețurile și cât de des se actualizează?',
-        a: 'În Turcia, prețurile provin din sursa oficială publică a Ministerului Comerțului (marketfiyati.org.tr), iar în Polonia din sursele publice ale lanțurilor de magazine. Prețurile se actualizează zilnic. Au caracter informativ și pot diferi de prețul de la casă.',
+        a: 'În România, prețurile provin din sistemul de stat Monitorul Prețurilor, în Ungaria din sistemul oficial de monitorizare a prețurilor al autorității de concurență (GVH), în Turcia din sursa oficială publică a Ministerului Comerțului (marketfiyati.org.tr), iar în Polonia și Croația din listele de prețuri publicate de lanțurile de magazine. Prețurile se actualizează zilnic. Au caracter informativ și pot diferi de prețul de la casă.',
       },
       {
         q: 'Prețurile căror magazine le comparați?',
-        a: 'În Turcia: Migros, A101, BİM, ŞOK, CarrefourSA și Tarım Kredi. În Polonia: Biedronka, Lidl, Żabka, Auchan și Carrefour. În total acoperim peste 23.500 de magazine.',
+        a: 'În România: Kaufland, Lidl, Carrefour, Auchan, Mega Image și Penny. În Turcia: Migros, A101, BİM, ŞOK, CarrefourSA și Tarım Kredi. În Polonia: Biedronka, Lidl, Żabka, Auchan și Carrefour. În Croația: Konzum, Lidl, Spar, Plodine, Kaufland și Tommy. În Ungaria: Tesco, Lidl, Aldi, Auchan și Penny. În total acoperim peste 27.500 de magazine.',
       },
       {
         q: 'Aplicația este gratuită?',
-        a: 'Da. Descărcarea și folosirea Cheep sunt gratuite: compararea prețurilor, listele, ruta cea mai ieftină și notificările de scădere a prețului rămân mereu gratuite. Abonamentul opțional Cheep Premium mărește doar cota zilnică de mesaje către asistentul AI; condițiile sunt în Termenii de utilizare.',
+        a: 'Da. Descărcarea și folosirea Cheep sunt gratuite: compararea prețurilor, listele, ruta cea mai ieftină și notificările de scădere a prețului rămân mereu gratuite. În varianta gratuită afișăm în câteva locuri reclame mici. Abonamentul opțional Cheep Premium le elimină complet și mărește cota de mesaje către asistentul AI; condițiile sunt în Termenii de utilizare.',
       },
       {
         q: 'De unde știți că este exact același produs?',
@@ -184,7 +184,7 @@ export const ro: Dict = {
       },
       {
         q: 'În ce țări pot folosi aplicația? Există versiune pentru iPhone?',
-        a: 'Cheep este activ momentan în Turcia și Polonia; Germania, Elveția și Suedia urmează. Aplicația se descarcă pentru Android din Google Play, iar versiunea pentru iOS este în pregătire.',
+        a: 'Cheep este activ momentan în România, Turcia, Polonia, Croația și Ungaria; Germania, Elveția și Suedia urmează. Aplicația se descarcă atât din Google Play, cât și din App Store.',
       },
     ],
   },
@@ -192,11 +192,11 @@ export const ro: Dict = {
   download: {
     titleLead: 'Următorul tău coș,',
     titleAccent: 'mai ieftin',
-    sub: 'Descarcă Cheep, creează-ți lista și vezi economia. Gratuit în Turcia și Polonia.',
+    sub: 'Descarcă Cheep, creează-ți lista și vezi economia. Gratuit în cinci țări.',
     playAlt: 'Descarcă din Google Play',
-    storeTop: 'În curând',
+    storeTop: 'Descarcă din',
     storeBottom: 'App Store',
-    note: 'Descărcare gratuită · fără reclame · Premium opțional · Android 8.0 sau mai nou',
+    note: 'Descărcare gratuită · fără reclame cu Premium opțional · Android 8.0 și iOS 15.1 sau mai nou',
   },
 
   footer: {
@@ -236,9 +236,9 @@ export const ro: Dict = {
       },
     ],
     disclaimer:
-      'Toate denumirile și siglele de marcă sunt mărci înregistrate ale deținătorilor lor. Cheep nu are un parteneriat oficial și nu colaborează cu aceste lanțuri de magazine; denumirile mărcilor sunt folosite exclusiv pentru a indica al cărui magazin este prețul afișat. În Turcia, prețurile provin din sursa oficială publică a Ministerului Comerțului (marketfiyati.org.tr), iar în Polonia din sursele publice ale magazinelor; au caracter informativ și pot diferi de prețul de la casă.',
+      'Toate denumirile și siglele de marcă sunt mărci înregistrate ale deținătorilor lor. Cheep nu are un parteneriat oficial și nu colaborează cu aceste lanțuri de magazine; denumirile mărcilor sunt folosite exclusiv pentru a indica al cărui magazin este prețul afișat. În România, prețurile provin din sistemul Monitorul Prețurilor, în Ungaria din sistemul oficial al GVH, în Turcia din sursa oficială publică a Ministerului Comerțului (marketfiyati.org.tr), iar în Polonia și Croația din listele de prețuri publicate de magazine; au caracter informativ și pot diferi de prețul de la casă.',
     copyright: '© 2026 Cheep. Toate drepturile rezervate.',
-    madeIn: 'Făcut cu drag pentru Turcia și Polonia',
+    madeIn: 'Făcut cu drag pentru România, Turcia, Polonia, Croația și Ungaria',
   },
 
   legal: {
@@ -326,9 +326,9 @@ export const ro: Dict = {
           'Informațiile despre prețuri sunt colectate din surse publice. Orice deținător de marcă ce dorește să ridice o pretenție legată de conținut ne poate contacta la [destek@cheep.live](mailto:destek@cheep.live); răspundem prompt solicitărilor întemeiate.',
         ] },
         { h2: 'Abonamentul Cheep Premium' },
-        { p: 'Compararea prețurilor, lista de cumpărături, ruta cea mai ieftină și notificările de scădere a prețului din Cheep sunt gratuite și vor rămâne gratuite. Cheep Premium este un abonament opțional care mărește exclusiv cota de mesaje a asistentului AI.' },
+        { p: 'Compararea prețurilor, lista de cumpărături, ruta cea mai ieftină și notificările de scădere a prețului din Cheep sunt gratuite și vor rămâne gratuite. Varianta gratuită afișează reclame. Cheep Premium este un abonament opțional care elimină reclamele și mărește cota de mesaje a asistentului AI.' },
         { ul: [
-          '**Ce include:** În varianta gratuită se pot trimite asistentului 5 mesaje pe zi. Cu Premium se pot trimite 300 de mesaje pe lună (cu o limită de siguranță de 50 de mesaje pe zi). Toate celelalte funcții sunt identice în ambele situații.',
+          '**Ce include:** În varianta gratuită se pot trimite asistentului 5 mesaje pe zi, iar aplicația afișează reclame. Cu Premium se pot trimite 300 de mesaje pe lună (cu o limită de siguranță de 50 de mesaje pe zi), iar reclamele dispar complet. Toate celelalte funcții sunt identice în ambele situații.',
           '**Durată și preț:** Abonamentul este oferit lunar sau anual. Prețul valabil, moneda și perioada sunt afișate clar pe ecranul de achiziție din aplicație, înainte de cumpărare, și pot varia în funcție de țară.',
           '**Reînnoire automată:** Abonamentul se reînnoiește automat, dacă nu este anulat cu cel puțin 24 de ore înainte de expirare. Suma este încasată din contul de magazin în cele 24 de ore dinaintea reînnoirii.',
           '**Anulare:** Poți anula abonamentul oricând, din setările de abonamente ale contului de magazin de pe dispozitivul tău (App Store: Setări → Apple ID → Abonamente; Google Play: Magazin Play → Abonamente). Anularea intră în vigoare la sfârșitul perioadei plătite în curs; până atunci continui să beneficiezi de drepturile Premium.',

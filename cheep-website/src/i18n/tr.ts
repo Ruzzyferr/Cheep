@@ -169,15 +169,15 @@ export const tr: Dict = {
       },
       {
         q: 'Fiyatlar nereden geliyor ve ne sıklıkla güncelleniyor?',
-        a: 'Türkiye’de fiyatlar T.C. Ticaret Bakanlığı’nın herkese açık resmi kaynağından (marketfiyati.org.tr), Polonya’da ise market zincirlerinin herkese açık kaynaklarından derlenir. Fiyatlar her gün güncellenir. Bilgilendirme amaçlıdır; kasadaki güncel fiyattan farklı olabilir.',
+        a: 'Türkiye’de fiyatlar T.C. Ticaret Bakanlığı’nın herkese açık resmi kaynağından (marketfiyati.org.tr), Macaristan’da Rekabet Kurumu’nun (GVH) resmi fiyat izleme sisteminden, Romanya’da devletin Monitorul Prețurilor sisteminden, Polonya ve Hırvatistan’da ise market zincirlerinin herkese açık fiyat listelerinden derlenir. Fiyatlar her gün güncellenir. Bilgilendirme amaçlıdır; kasadaki güncel fiyattan farklı olabilir.',
       },
       {
         q: 'Hangi marketlerin fiyatlarını karşılaştırıyor?',
-        a: 'Türkiye’de Migros, A101, BİM, ŞOK, CarrefourSA ve Tarım Kredi Kooperatif; Polonya’da Biedronka, Lidl, Żabka, Auchan ve Carrefour. Toplam 23.500’den fazla market şubesini kapsıyoruz.',
+        a: 'Türkiye’de Migros, A101, BİM, ŞOK, CarrefourSA ve Tarım Kredi Kooperatif; Polonya’da Biedronka, Lidl, Żabka, Auchan ve Carrefour; Hırvatistan’da Konzum, Lidl, Spar, Plodine, Kaufland ve Tommy; Macaristan’da Tesco, Lidl, Aldi, Auchan ve Penny; Romanya’da Kaufland, Lidl, Carrefour, Auchan, Mega Image ve Penny. Toplam 27.500’den fazla market şubesini kapsıyoruz.',
       },
       {
         q: 'Uygulama ücretsiz mi?',
-        a: 'Evet. Cheep’i indirmek ve kullanmak ücretsizdir: fiyat karşılaştırma, listeler, en ucuz rota ve fiyat düşüşü bildirimleri her zaman ücretsiz. İsteğe bağlı Cheep Premium aboneliği yalnızca yapay zekâ asistanının günlük mesaj kotasını artırır; koşulları Kullanım Şartları’nda.',
+        a: 'Evet. Cheep’i indirmek ve kullanmak ücretsizdir: fiyat karşılaştırma, listeler, en ucuz rota ve fiyat düşüşü bildirimleri her zaman ücretsiz. Ücretsiz sürümde birkaç yerde küçük reklam gösterilir. İsteğe bağlı Cheep Premium aboneliği reklamları tümüyle kaldırır ve yapay zekâ asistanının mesaj kotasını artırır; koşulları Kullanım Şartları’nda.',
       },
       {
         q: 'Aynı ürün olduğundan nasıl emin oluyorsunuz?',
@@ -185,7 +185,7 @@ export const tr: Dict = {
       },
       {
         q: 'Hangi ülkelerde kullanabilirim? iPhone sürümü var mı?',
-        a: 'Cheep şu anda Türkiye ve Polonya’da canlı; Almanya, İsviçre ve İsveç yolda. Uygulama Android’de Google Play’den indirilebilir; iOS sürümü hazırlanıyor.',
+        a: 'Cheep şu anda Türkiye, Polonya, Hırvatistan, Macaristan ve Romanya’da canlı; Almanya, İsviçre ve İsveç yolda. Uygulama hem Google Play’den hem de App Store’dan indirilebilir.',
       },
     ],
   },
@@ -193,11 +193,11 @@ export const tr: Dict = {
   download: {
     titleLead: 'Bir sonraki sepetin',
     titleAccent: 'daha ucuz',
-    sub: 'Cheep’i indir, listeni oluştur, tasarrufu gör. Türkiye ve Polonya’da ücretsiz.',
+    sub: 'Cheep’i indir, listeni oluştur, tasarrufu gör. Beş ülkede ücretsiz.',
     playAlt: 'Google Play’den indirin',
-    storeTop: 'Yakında',
+    storeTop: 'İndir',
     storeBottom: 'App Store',
-    note: 'Ücretsiz indirilir · reklamsız · isteğe bağlı Premium · Android 8.0 ve üzeri',
+    note: 'Ücretsiz indirilir · isteğe bağlı Premium ile reklamsız · Android 8.0 ve iOS 15.1 ve üzeri',
   },
 
   footer: {
@@ -237,10 +237,10 @@ export const tr: Dict = {
       },
     ],
     disclaimer:
-      'Tüm marka adları ve logoları ilgili sahiplerinin tescilli markalarıdır. Cheep bu marketlerle resmi bir ortaklık veya iş birliği içinde değildir; marka adları yalnızca hangi markete ait fiyatın gösterildiğini belirtmek için kullanılır. Türkiye’de fiyatlar T.C. Ticaret Bakanlığı’nın herkese açık resmi kaynağından (marketfiyati.org.tr), Polonya’da ise marketlerin herkese açık kaynaklarından derlenir; bilgilendirme amaçlıdır ve kasadaki güncel fiyattan farklı olabilir.',
+      'Tüm marka adları ve logoları ilgili sahiplerinin tescilli markalarıdır. Cheep bu marketlerle resmi bir ortaklık veya iş birliği içinde değildir; marka adları yalnızca hangi markete ait fiyatın gösterildiğini belirtmek için kullanılır. Türkiye’de fiyatlar T.C. Ticaret Bakanlığı’nın herkese açık resmi kaynağından (marketfiyati.org.tr), Macaristan’da Rekabet Kurumu’nun (GVH) resmi fiyat izleme sisteminden, Romanya’da Monitorul Prețurilor sisteminden, Polonya ve Hırvatistan’da ise marketlerin herkese açık fiyat listelerinden derlenir; bilgilendirme amaçlıdır ve kasadaki güncel fiyattan farklı olabilir.',
     copyright: '© 2026 Cheep. Tüm hakları saklıdır.',
     // Bayrak emojileri Windows'ta harf çiftine düşüyor ("TR PL") — metin kullan.
-    madeIn: 'Türkiye ve Polonya için sevgiyle yapıldı',
+    madeIn: 'Türkiye, Polonya, Hırvatistan, Macaristan ve Romanya için sevgiyle yapıldı',
   },
 
   legal: {
@@ -328,9 +328,9 @@ export const tr: Dict = {
           'Fiyat bilgileri herkese açık kaynaklardan derlenir. Herhangi bir marka sahibi içeriğiyle ilgili talepte bulunmak isterse [destek@cheep.live](mailto:destek@cheep.live) üzerinden bize ulaşabilir; haklı taleplere hızla yanıt veririz.',
         ] },
         { h2: 'Cheep Premium aboneliği' },
-        { p: 'Cheep’in fiyat karşılaştırma, alışveriş listesi, en ucuz rota ve fiyat düşüşü bildirimi özellikleri ücretsizdir ve ücretsiz kalacaktır. Cheep Premium yalnızca yapay zekâ asistanının mesaj kotasını artıran, isteğe bağlı bir aboneliktir.' },
+        { p: 'Cheep’in fiyat karşılaştırma, alışveriş listesi, en ucuz rota ve fiyat düşüşü bildirimi özellikleri ücretsizdir ve ücretsiz kalacaktır. Ücretsiz sürüm reklam gösterir. Cheep Premium, reklamları kaldıran ve yapay zekâ asistanının mesaj kotasını artıran, isteğe bağlı bir aboneliktir.' },
         { ul: [
-          '**Kapsam:** Ücretsiz kullanımda asistana günde 5 mesaj gönderilebilir. Premium ile ayda 300 mesaj (günlük 50 mesaj emniyet sınırıyla) gönderilebilir. Diğer tüm özellikler her iki durumda da aynıdır.',
+          '**Kapsam:** Ücretsiz kullanımda asistana günde 5 mesaj gönderilebilir ve uygulamada reklam gösterilir. Premium ile ayda 300 mesaj (günlük 50 mesaj emniyet sınırıyla) gönderilebilir ve reklamlar tümüyle kalkar. Diğer tüm özellikler her iki durumda da aynıdır.',
           '**Süre ve fiyat:** Abonelik aylık veya yıllık olarak sunulur. Geçerli fiyat, para birimi ve dönem uygulama içindeki satın alma ekranında, satın almadan önce açıkça gösterilir; ülkeye göre değişebilir.',
           '**Otomatik yenileme:** Abonelik, süresi dolmadan en az 24 saat önce iptal edilmediği sürece kendiliğinden yenilenir. Ücret, yenilemeden önceki 24 saat içinde mağaza hesabından tahsil edilir.',
           '**İptal:** Aboneliği dilediğin an, cihazındaki mağaza hesabının abonelik ayarlarından iptal edebilirsin (App Store: Ayarlar → Apple Kimliği → Abonelikler; Google Play: Play Store → Abonelikler). İptal, içinde bulunulan ödenmiş dönemin sonunda geçerli olur; o döneme kadar Premium haklarını kullanmaya devam edersin.',
