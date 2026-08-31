@@ -904,4 +904,126 @@ const ro: ContentDict = {
   },
 }
 
-export const CONTENT: Record<Locale, ContentDict> = { tr, pl, hr, hu, ro }
+const en: ContentDict = {
+  breadcrumbHome: 'Home',
+
+  product: {
+    priceTableCaption: 'Current prices by store',
+    store: 'Store',
+    price: 'Price',
+    updated: 'Updated',
+    cheapest: 'Cheapest',
+    savingHeadline: '{store} is cheapest — {pct} below the most expensive, a {abs} difference',
+    savingNone: 'Same price in {count} stores',
+    availability: 'Available in {count} stores',
+    trend: 'Last 28 days',
+    trendLabel: 'Lowest price of {name} over the last 28 days',
+    similar: 'From the same category',
+    faqTitle: 'Common questions',
+    q1: 'Which store has the cheapest {name}?',
+    a1: 'Right now {store} is cheapest: {price}. The price was updated {date}.',
+    q2: 'How much do {name} prices vary between stores?',
+    a2: 'The cheapest is {min}, the most expensive {max}. The difference is {abs} — so going to the right store saves you {pct}.',
+    cta: 'See this difference on every product',
+    ctaBody:
+      'Cheep compares your shopping list across every store and moves your basket to the cheapest one. Free.',
+    from: 'From',
+    stores: 'stores',
+    save: 'Saving',
+    noOffers: 'There is no price information for this product right now.',
+  },
+
+  category: {
+    intro:
+      'We compared the price of {count} products in {name} across {stores} stores. The cheapest options are below.',
+    introSingle: '{count} products are being compared in {name}.',
+    byStore: '{name} by store',
+    empty: 'There are no comparable products in this category yet.',
+  },
+
+  storeCategory: {
+    intro: 'Prices of {count} products in {name} at {store}, listed side by side with other stores.',
+  },
+
+  store: {
+    intro:
+      'Compare {name} prices with other stores. {products} products, {branches} branches, {cities} cities.',
+    branches: 'branches',
+    cities: 'cities',
+    products: 'products',
+    categories: 'Categories',
+    topDrops: 'Cheaper this week',
+  },
+
+  city: {
+    intro: 'There are {branches} store branches in {name}. See which chain is where and compare prices.',
+    branches: 'branches',
+    stores: 'store chains',
+    chains: 'Chains in the city',
+  },
+
+  report: {
+    title: 'Price report',
+    lead: 'The products that rose and fell the most over the last 28 days. Updated automatically every night.',
+    risers: 'Biggest increases',
+    fallers: 'Biggest drops',
+    noData: 'Not enough price history has built up for a report yet.',
+    change: 'Change',
+  },
+
+  compare: {
+    title: 'Which store is cheapest?',
+    lead: 'Compare stores by product count, branch network and how many products they are cheapest on.',
+    table: 'Store comparison',
+    store: 'Store',
+    products: 'Products',
+    branches: 'Branches',
+    cheapestCount: 'Products where cheapest',
+  },
+
+  products: {
+    title: 'Products',
+    lead: 'Compare {products} products across {stores} stores. Filter by category, store and price.',
+    navLabel: 'Products',
+    searchPlaceholder: 'Search for a product or brand…',
+    allCategories: 'All categories',
+    filters: 'Filters',
+    stores: 'Stores',
+    sort: 'Sort',
+    sortRelevance: 'Recommended',
+    sortPriceAsc: 'Lowest price',
+    sortPriceDesc: 'Highest price',
+    sortSavings: 'Biggest saving',
+    sortName: 'By name',
+    priceRange: 'Price range',
+    priceMin: 'Min',
+    priceMax: 'Max',
+    resultCount: '{count} products',
+    empty: 'No products found with these filters.',
+    clearFilters: 'Clear filters',
+    error: 'Products could not be loaded.',
+    retry: 'Try again',
+    loading: 'Loading…',
+    apply: 'Apply',
+    close: 'Close',
+    directoryTitle: 'All categories, stores and cities',
+  },
+
+  browse: {
+    title: 'Supermarket prices',
+    lead: 'We compare the price of {products} products across {stores} stores and {branches} branches. Browse by category, store or city.',
+    categories: 'Categories',
+    stores: 'Stores',
+    cities: 'Cities',
+    navLabel: 'Prices',
+  },
+
+  pagination: {
+    nav: 'Pages',
+    prev: 'Previous',
+    next: 'Next',
+    page: 'Page',
+  },
+}
+
+export const CONTENT: Record<Locale, ContentDict> = { tr, en, pl, hr, hu, ro }

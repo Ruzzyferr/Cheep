@@ -118,7 +118,7 @@ export function Hero() {
           </div>
           {/* floating price tags around the bird — kept clear of the face */}
           <div className="absolute -left-6 top-2 hidden rotate-[-8deg] rounded-2xl bg-paper px-4 py-2 font-mono text-sm font-bold text-forest shadow-lift lg:block">
-            ₺27,90 <span className="text-mint-deep">{t.hero.tagCheapest}</span>
+            {t.hero.tagCheapestPrice} <span className="text-mint-deep">{t.hero.tagCheapest}</span>
           </div>
           <div className="absolute -left-4 bottom-6 hidden rotate-[5deg] rounded-2xl bg-forest px-4 py-2 font-mono text-sm font-bold text-cream shadow-lift lg:block">
             {t.hero.tagSaving}

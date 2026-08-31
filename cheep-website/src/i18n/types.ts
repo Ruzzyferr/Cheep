@@ -54,6 +54,14 @@ export type Dict = {
     ctaPrimary: string
     ctaSecondary: string
     ticker: TickerRow[]
+    /**
+     * Kus rozetindeki ornek fiyat.
+     *
+     * SOZLUKTE cunku ondalik ayiraci dile gore degisiyor: bes dil VIRGUL
+     * kullaniyor, Ingilizce NOKTA. Hero.tsx'te `₺27,90` diye sabit
+     * yaziliydi ve Ingilizce sayfada yanlis bicimde gorunuyordu.
+     */
+    tagCheapestPrice: string
     tagCheapest: string
     tagSaving: string
   }

@@ -44,6 +44,7 @@ export const hu: Dict = {
       { product: 'Kenyér 1 kg', prices: ['Tesco 699 Ft', 'Auchan 649 Ft', 'Aldi 599 Ft'] },
       { product: 'Trappista sajt 1 kg', prices: ['Auchan 2 899 Ft', 'Tesco 2 699 Ft', 'Lidl 2 499 Ft'] },
     ],
+    tagCheapestPrice: '₺27,90',
     tagCheapest: '✓ legolcsóbb',
     tagSaving: '18% megtakarítás',
   },

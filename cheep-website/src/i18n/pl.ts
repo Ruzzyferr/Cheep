@@ -44,6 +44,7 @@ export const pl: Dict = {
       { product: 'Chleb', prices: ['Żabka 5,49 zł', 'Lidl 4,49 zł', 'Biedronka 4,29 zł'] },
       { product: 'Kawa 500 g', prices: ['Biedronka 27,49 zł', 'Carrefour 26,99 zł', 'Lidl 24,99 zł'] },
     ],
+    tagCheapestPrice: '₺27,90',
     tagCheapest: '✓ najtaniej',
     tagSaving: '18% taniej',
   },

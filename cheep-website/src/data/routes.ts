@@ -32,6 +32,18 @@ const SEGMENTS: Record<Locale, Record<ContentKind, string>> = {
     compare: 'en-ucuz-market',
     products: 'urunler',
   },
+  // Ingilizce yol parcalari: ICERIK SAYFASI URETILMIYOR (bkz. en.ts basligi),
+  // ama `SEGMENTS` tipi Locale'in tamamini istiyor ve tanitim sayfalarindaki
+  // gezinme baglantilari (`/products`) bu tablodan cozuluyor.
+  en: {
+    product: 'product',
+    category: 'category',
+    store: 'store',
+    city: 'city',
+    report: 'price-report',
+    compare: 'cheapest-stores',
+    products: 'products',
+  },
   pl: {
     product: 'produkt',
     category: 'kategoria',

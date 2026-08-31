@@ -10,7 +10,10 @@ import { API_URL } from '../config'
 import type { Locale } from '../i18n'
 
 /** Site dili → katalog ülkesi. Ürün kataloğu ülkeye özel. */
-const COUNTRY_FOR_LOCALE: Record<Locale, string> = { tr: 'TR', pl: 'PL', hr: 'HR', hu: 'HU', ro: 'RO' }
+// `en` icin TR: Ingilizce bir pazar degil, bir dil yedegi. Kendi katalogu
+// yok, oldugu icin de anasayfasi TR verisini gosteriyor — App Store'un
+// Ingilizce ekran goruntuleri de ayni sekilde TR magazalarini gosteriyor.
+const COUNTRY_FOR_LOCALE: Record<Locale, string> = { tr: 'TR', en: 'TR', pl: 'PL', hr: 'HR', hu: 'HU', ro: 'RO' }
 
 export interface ApiOffer {
   price: string

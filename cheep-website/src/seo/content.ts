@@ -20,7 +20,7 @@ import { categoryPath, storePath } from '../data/routes'
 // og:locale etiketleri. Dil + ULKE cifti olmak zorunda (yalniz dil kodu
 // gecersiz); Hirvatca hr_HR, Macarca hu_HU, Romence ro_RO.
 const ISO: Record<Locale, string> = {
-  tr: 'tr_TR', pl: 'pl_PL', hr: 'hr_HR', hu: 'hu_HU', ro: 'ro_RO',
+  tr: 'tr_TR', en: 'en_US', pl: 'pl_PL', hr: 'hr_HR', hu: 'hu_HU', ro: 'ro_RO',
 }
 
 function base(locale: Locale, path: string, title: string, description: string, robots: string): Head {

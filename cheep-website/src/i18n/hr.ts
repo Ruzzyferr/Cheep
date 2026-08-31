@@ -44,6 +44,7 @@ export const hr: Dict = {
       { product: 'Kruh', prices: ['Konzum 1,59 €', 'Plodine 1,39 €', 'Lidl 1,29 €'] },
       { product: 'Kava 250 g', prices: ['Spar 3,99 €', 'Konzum 3,69 €', 'Kaufland 3,49 €'] },
     ],
+    tagCheapestPrice: '₺27,90',
     tagCheapest: '✓ najjeftinije',
     tagSaving: '18 % jeftinije',
   },

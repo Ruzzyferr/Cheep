@@ -123,6 +123,16 @@ if (seoData) {
       payload: buildHomePayload(country),
     }
   }
+
+  // INGILIZCE ANASAYFA TR VERISINI GOSTERIR.
+  //
+  // `en` bir PAZAR degil, bir dil yedegi: `COUNTRY_LOCALE` icinde karsiligi
+  // yok, dolayisiyla dongu ona bir payload uretmiyor. Bos birakilsaydi
+  // anasayfanin urun/fiyat bolumleri veri olmadan cizilecekti — App Store'un
+  // Ingilizce listelemesinden gelen ziyaretcinin gordugu ILK ekran bu.
+  // TR'yi secmek tutarli: magazadaki Ingilizce ekran goruntuleri de TR
+  // magazalarini ve TL fiyatlarini gosteriyor.
+  if (!homePayloads.en && homePayloads.tr) homePayloads.en = homePayloads.tr
 }
 
 // ------------------------------------------------------- tanıtım sayfaları

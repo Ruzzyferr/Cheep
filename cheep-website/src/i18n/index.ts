@@ -1,17 +1,18 @@
 import { createContext, useContext } from 'react'
 import type { Dict } from './types'
 import { tr } from './tr'
+import { en } from './en'
 import { pl } from './pl'
 import { hr } from './hr'
 import { hu } from './hu'
 import { ro } from './ro'
 
-export type Locale = 'tr' | 'pl' | 'hr' | 'hu' | 'ro'
+export type Locale = 'tr' | 'en' | 'pl' | 'hr' | 'hu' | 'ro'
 
-export const LOCALES: Locale[] = ['tr', 'pl', 'hr', 'hu', 'ro']
+export const LOCALES: Locale[] = ['tr', 'en', 'pl', 'hr', 'hu', 'ro']
 export const DEFAULT_LOCALE: Locale = 'tr'
 
-export const DICTS: Record<Locale, Dict> = { tr, pl, hr, hu, ro }
+export const DICTS: Record<Locale, Dict> = { tr, en, pl, hr, hu, ro }
 
 /**
  * Dilin KENDİ adı, kendi dilinde.
@@ -25,6 +26,7 @@ export const DICTS: Record<Locale, Dict> = { tr, pl, hr, hu, ro }
  */
 export const LOCALE_NATIVE_NAMES: Record<Locale, string> = {
   tr: 'Türkçe',
+  en: 'English',
   pl: 'Polski',
   hr: 'Hrvatski',
   hu: 'Magyar',

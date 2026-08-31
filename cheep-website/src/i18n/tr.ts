@@ -45,6 +45,7 @@ export const tr: Dict = {
       { product: 'Ekmek', prices: ['A101 ₺8,00', 'BİM ₺7,90', 'Halk ₺7,50'] },
       { product: 'Çay 1kg', prices: ['Migros ₺214', 'ŞOK ₺199', 'BİM ₺189'] },
     ],
+    tagCheapestPrice: '₺27,90',
     tagCheapest: '✓ en ucuz',
     tagSaving: '%18 tasarruf',
   },

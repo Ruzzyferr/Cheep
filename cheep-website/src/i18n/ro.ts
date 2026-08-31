@@ -44,6 +44,7 @@ export const ro: Dict = {
       { product: 'Pâine', prices: ['Mega Image 6,49 lei', 'Carrefour 5,49 lei', 'Lidl 4,99 lei'] },
       { product: 'Cafea 250 g', prices: ['Auchan 28,99 lei', 'Carrefour 26,49 lei', 'Penny 24,99 lei'] },
     ],
+    tagCheapestPrice: '₺27,90',
     tagCheapest: '✓ cel mai ieftin',
     tagSaving: '18% economie',
   },
