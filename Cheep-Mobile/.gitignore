@@ -86,3 +86,8 @@ credentials.json
 appstore-screenshots/
 appstore-screenshots-en/
 appstore-screenshots-pl/
+# Play olcusune cevrilmis kopyalar (play_shots.py uretiyor) — turetilmis
+# dosya, kaynak degil. Repoda tutmak hem sisiriyor hem de `Cheep-Mobile/**`
+# yol filtresi yuzunden bir GORSEL degisikligi iOS+Android surum hattini
+# tetikliyor; macOS kosucusu dakikayi 10 katiyla yaziyor.
+play-screenshots-*/
