@@ -21,7 +21,7 @@
  *     kırmızı. Yıkıcı eylem asla birincil buton ağırlığında olmamalı.
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -45,6 +45,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 import { usePremium } from '../../context/PremiumContext';
+import { useAds } from '../../context/AdsContext';
 import { PremiumBadge } from '../../components/premium/PremiumBadge';
 import { PremiumCard } from '../../components/premium/PremiumCard';
 import { useLocale, COUNTRY_CONFIG } from '../../context/LocaleContext';
@@ -87,6 +88,7 @@ export function ProfileScreen({
   const qc = useQueryClient();
   const { user, logout } = useAuth();
   const { isPremium } = usePremium();
+  const { testAds, setTestAds } = useAds();
   // Tab bar float: icerigin altina 72 + guvenli alan birakilmazsa son dugme
   // (hesap silme) cubugun arkasinda kalir ve asagi kaydirilamaz.
   const bottomSpacing = useBottomSpacing();
@@ -414,7 +416,44 @@ ${t('profile.delete_account_subscription_note')}`
     ]);
   };
 
+  /**
+   * GİZLİ REKLAM TANILAMA ANAHTARI — sürüm satırına 7 kez dokun.
+   *
+   * NEDEN GEREKLİ: "banner görünmüyor"un iki sebebi ekranda AYNI görünüyor.
+   * Entegrasyon bozuk olabilir, ya da Google o an dolum vermemiş olabilir
+   * (yeni reklam birimi, düşük trafik, iOS'ta "limited ad serving"). İkisini
+   * ayırmanın tek kesin yolu, dolumu GARANTİ olan test birimini istemek:
+   * test reklamı her zaman gelir, gelmiyorsa hata bizdedir.
+   *
+   * NEDEN GİZLİ: normal kullanıcının bulmaması gerek — test reklamı gelir
+   * üretmez ve tıklanması AdMob'da geçersiz trafik sayılır.
+   *
+   * 7 dokunuş, Android'in "geliştirici seçenekleri" alışkanlığından; kazayla
+   * ulaşılamayacak kadar çok, tarif etmesi kolay olacak kadar az.
+   */
+  const adTapsRef = useRef(0);
+  const adTapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (adTapTimerRef.current) clearTimeout(adTapTimerRef.current); }, []);
+
   const handleAbout = () => {
+    adTapsRef.current += 1;
+    // Sayaç 2 saniye sessizlikten sonra sıfırlanır: art arda dokunuş
+    // gerekiyor, günler içine yayılmış 7 dokunuş değil.
+    if (adTapTimerRef.current) clearTimeout(adTapTimerRef.current);
+    adTapTimerRef.current = setTimeout(() => { adTapsRef.current = 0; }, 2000);
+
+    if (adTapsRef.current >= 7) {
+      adTapsRef.current = 0;
+      const yeni = !testAds;
+      setTestAds(yeni);
+      appAlert(
+        'Reklam tanılama',
+        yeni
+          ? 'Test reklamları AÇIK. Ana sayfa, arama ve liste detayında banner görmelisin; gelmiyorsa sorun entegrasyondadır.\n\nBu reklamlar gelir üretmez, tıklama.'
+          : 'Test reklamları kapatıldı; gerçek reklam birimlerine dönüldü.',
+      );
+      return;
+    }
     appAlert(t('profile.about_title'), t('profile.about_body', { version: APP_VERSION }));
   };
 

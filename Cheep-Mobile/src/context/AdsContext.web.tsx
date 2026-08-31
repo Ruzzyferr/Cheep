@@ -15,12 +15,17 @@ import React, { createContext, useContext, type ReactNode } from 'react';
 
 interface AdsValue {
   canRequestAds: boolean;
+  /** Native tarafla imza eşliği için var; web'de daima false. */
+  testAds: boolean;
+  setTestAds: (v: boolean) => void;
 }
 
-const Ctx = createContext<AdsValue>({ canRequestAds: false });
+const SABIT: AdsValue = { canRequestAds: false, testAds: false, setTestAds: () => {} };
+
+const Ctx = createContext<AdsValue>(SABIT);
 
 export function AdsProvider({ children }: { children: ReactNode }) {
-  return <Ctx.Provider value={{ canRequestAds: false }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={SABIT}>{children}</Ctx.Provider>;
 }
 
 export function useAds(): AdsValue {

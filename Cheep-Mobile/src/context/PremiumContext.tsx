@@ -88,21 +88,37 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (!isAuthenticated || !user) {
-        await forgetUser();
-        // Oturum yok → çözülecek bir abonelik de yok; bu DA bir cevap.
-        if (!cancelled) { setStatus(null); setOffering(null); setResolved(true); }
-        return;
+      // `resolved` HER YOLDA true olmalı — `finally` tam olarak bunun için.
+      //
+      // Önceden `configurePurchases()` ve `identifyUser()` korumasız
+      // bekleniyordu. İkisi de RevenueCat SDK'sına gidiyor ve fırlatabiliyor
+      // (anahtar yok, mağaza yok, ağ yok, emülatör). Fırlatınca aşağıdaki
+      // `setResolved(true)` HİÇ çalışmıyordu; `resolved` sonsuza dek false
+      // kalıyor, `AdsContext` onu beklediği için reklam SDK'sı hiç
+      // başlamıyor ve tek bir reklam isteği bile çıkmıyordu.
+      //
+      // Hatanın kötü tarafı sessiz olması: ekranda banner'ın olmaması ile
+      // "dolum gelmedi" ayırt edilemiyor, kullanıcı uygulamayı normal
+      // kullanmaya devam ediyor ve gelir sıfır kalıyor.
+      try {
+        if (!isAuthenticated || !user) {
+          await forgetUser();
+          // Oturum yok → çözülecek bir abonelik de yok; bu DA bir cevap.
+          if (!cancelled) { setStatus(null); setOffering(null); }
+          return;
+        }
+        await configurePurchases();
+        await identifyUser(user.id);
+        if (cancelled) return;
+        // `refresh` kendi hatasını yutuyor; başarısızlıkta da devam edilir ve
+        // durum "premium değil" olarak belirlenir.
+        await refresh();
+        if (!cancelled) await loadOffering();
+      } catch (e) {
+        console.warn('Abonelik kurulumu tamamlanamadı:', e);
+      } finally {
+        if (!cancelled) setResolved(true);
       }
-      await configurePurchases();
-      await identifyUser(user.id);
-      if (cancelled) return;
-      await refresh();
-      // `refresh` kendi hatasını yutuyor, dolayısıyla buraya BAŞARISIZLIKTA
-      // da geliniyor — ve bu doğru: durum "premium değil" olarak belirlendi.
-      // İşaretlemezsek reklamlar hiç başlamaz ve gelir sessizce sıfırlanır.
-      if (!cancelled) setResolved(true);
-      if (!cancelled) await loadOffering();
     })();
     return () => { cancelled = true; };
     // Bilerek yalnizca user.id: kullanicinin adi/dili degisince RevenueCat

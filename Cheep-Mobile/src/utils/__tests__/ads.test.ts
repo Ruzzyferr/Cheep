@@ -87,6 +87,23 @@ describe('reklam birimi kimliği', () => {
     }
   });
 
+  it('tanılama kipi gerçek kimlikleri EZER (test birimine düşer)', async () => {
+    // "Banner görünmüyor"un iki sebebi ekranda aynı görünüyor: entegrasyon
+    // bozuk olabilir ya da Google dolum vermemiş olabilir. Tanılama kipi
+    // ikisini ayırıyor — ve bunu YAPABİLMESİ için gerçek kimlikler
+    // tanımlıyken bile test birimini döndürmesi şart.
+    const { bannerUnitId: f } = await tazeModul({
+      EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID: 'ca-app-pub-1/11',
+      EXPO_PUBLIC_ADMOB_BANNER_SEARCH_ANDROID: 'ca-app-pub-1/22',
+      EXPO_PUBLIC_ADMOB_BANNER_LIST_ANDROID: 'ca-app-pub-1/33',
+    });
+    for (const slot of ['home', 'search', 'list'] as const) {
+      expect(f(slot, true)).toBe('ca-app-pub-3940256099942544/6300978111');
+      // Kip kapalıyken hiçbir şey değişmemeli.
+      expect(f(slot, false)).not.toBe('ca-app-pub-3940256099942544/6300978111');
+    }
+  });
+
   it('gerçek kimlikler tanımlıysa ONLARI kullanır', async () => {
     const { bannerUnitId: f } = await tazeModul({
       EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID: 'ca-app-pub-1/11',

@@ -50,6 +50,9 @@ const STORAGE_KEYS = {
   // Sunucunun bildirdiği, kataloğu dolu ülkeler (JSON dizi). Çevrimdışı
   // açılışta ülke seçicinin boş kalmaması için diskte tutuluyor.
   AVAILABLE_COUNTRIES: 'available_countries',
+  // Reklam tanılama kipi: 'on' iken banner'lar Google'ın TEST birimlerini
+  // kullanır. Gizli bir geliştirici anahtarı, bkz. src/config/ads.ts.
+  DEBUG_TEST_ADS: 'debug_test_ads',
 } as const;
 
 // Generic storage functions

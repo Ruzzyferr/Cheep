@@ -78,7 +78,8 @@ const REAL_UNITS: Record<AdSlot, string | undefined> = Platform.select({
  * "sessizce para kaybetmek" olur, "sessizce hesabı kaybetmek" değil. İkisi
  * arasında doğru takas bu.
  */
-export function bannerUnitId(slot: AdSlot): string {
+export function bannerUnitId(slot: AdSlot, forceTest = false): string {
+  if (forceTest) return TEST_BANNER_UNIT as string;
   const real = REAL_UNITS[slot]?.trim();
   return real && real.startsWith('ca-app-pub-') ? real : (TEST_BANNER_UNIT as string);
 }

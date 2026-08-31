@@ -54,7 +54,7 @@ const RETRY_DELAY_MS = 8000;
 export function CheepBanner({ slot, style }: Props) {
   const { t } = useTranslation();
   const { isPremium } = usePremium();
-  const { canRequestAds } = useAds();
+  const { canRequestAds, testAds } = useAds();
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   /** `key` değişimi BannerAd'i yeniden kurar → yeni istek. */
@@ -65,6 +65,18 @@ export function CheepBanner({ slot, style }: Props) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
+  // TANILAMA KİPİ AÇILINCA PES ETME DURUMU SIFIRLANMALI.
+  //
+  // `failed` true iken bileşen hiç çizilmiyor. Tanılama kipi tam olarak
+  // "reklam gelmiyor" durumunda açılacağı için, sıfırlamazsak kip açılır ama
+  // ekranda yine hiçbir şey olmaz — yani aracın işe yaradığı tek an
+  // çalışmazdı.
+  useEffect(() => {
+    attemptsRef.current = 0;
+    setFailed(false);
+    setLoaded(false);
+  }, [testAds]);
+
   if (!shouldShowBanner({ isPremium, canRequestAds, failed })) return null;
 
   return (
@@ -74,8 +86,11 @@ export function CheepBanner({ slot, style }: Props) {
       {loaded && <Text style={styles.label}>{t('ads.label')}</Text>}
       <BannerAd
         // `key`: yeniden denemede bileşeni baştan kurup yeni istek attırır.
-        key={attempt}
-        unitId={bannerUnitId(slot)}
+        // `testAds` de anahtarın parçası: tanılama kipi açılıp kapandığında
+        // birim kimliği değişiyor ve BannerAd'in baştan kurulması gerekiyor,
+        // yoksa eski birimle yüklenmiş reklam ekranda kalırdı.
+        key={`${attempt}-${testAds ? 'test' : 'canli'}`}
+        unitId={bannerUnitId(slot, testAds)}
         // ANCHORED_ADAPTIVE: yüksekliği cihaz genişliğine göre Google
         // belirliyor. Sabit 320x50 dar telefonlarda taşıyor, geniş
         // ekranlarda küçücük kalıyordu.

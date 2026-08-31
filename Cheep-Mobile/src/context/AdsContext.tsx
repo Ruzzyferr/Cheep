@@ -19,20 +19,52 @@
  * bozmasına asla izin verilmemeli.
  */
 import React, {
-  createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode,
+  createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode,
 } from 'react';
 import { usePremium } from './PremiumContext';
+import { storage, STORAGE_KEYS } from '../utils/storage';
 
 interface AdsValue {
   /** Reklam isteği atılabilir mi? (rıza alındı + SDK hazır + premium değil) */
   canRequestAds: boolean;
+  /**
+   * Tanılama kipi: banner'lar Google'ın TEST birimlerini kullanır.
+   *
+   * NEDEN VAR: "reklam görünmüyor"un iki ayrı sebebi ekranda AYNI görünüyor —
+   * entegrasyon bozuk olabilir ya da Google o an dolum vermemiş olabilir.
+   * İkisini ayırmanın tek güvenilir yolu, dolumu garanti olan test birimini
+   * istemek. Test reklamı HER ZAMAN gelir; gelmiyorsa hata bizdedir.
+   *
+   * Gizli: yalnızca Profil'de sürüm satırına arka arkaya dokunarak açılıyor,
+   * cihazda kalıcı ve gerçek gelir üretmez.
+   */
+  testAds: boolean;
+  setTestAds: (v: boolean) => void;
 }
 
-const Ctx = createContext<AdsValue>({ canRequestAds: false });
+const Ctx = createContext<AdsValue>({ canRequestAds: false, testAds: false, setTestAds: () => {} });
 
 export function AdsProvider({ children }: { children: ReactNode }) {
   const { isPremium, resolved: premiumResolved } = usePremium();
   const [ready, setReady] = useState(false);
+  const [testAds, setTestAdsState] = useState(false);
+
+  // Diskteki tanılama bayrağını oku (bir kez).
+  useEffect(() => {
+    let alive = true;
+    storage.getItem(STORAGE_KEYS.DEBUG_TEST_ADS)
+      .then((v) => { if (alive && v === 'on') setTestAdsState(true); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  const setTestAds = useCallback((v: boolean) => {
+    setTestAdsState(v);
+    (v
+      ? storage.setItem(STORAGE_KEYS.DEBUG_TEST_ADS, 'on')
+      : storage.removeItem(STORAGE_KEYS.DEBUG_TEST_ADS)
+    ).catch(() => {});
+  }, []);
   /** Bir kez başlatıldıysa tekrar başlatma (SDK idempotent değil sayılır). */
   const startedRef = useRef(false);
 
@@ -76,8 +108,8 @@ export function AdsProvider({ children }: { children: ReactNode }) {
   }, [isPremium, premiumResolved]);
 
   const value = useMemo<AdsValue>(
-    () => ({ canRequestAds: ready && !isPremium }),
-    [ready, isPremium],
+    () => ({ canRequestAds: ready && !isPremium, testAds, setTestAds }),
+    [ready, isPremium, testAds, setTestAds],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
