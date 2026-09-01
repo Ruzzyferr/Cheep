@@ -38,7 +38,8 @@ export type RootStackScreenProps<T extends keyof RootStackParamList> =
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
-  ForgotPassword: undefined;
+  /** Giriş ekranında yazılmış e-posta taşınır — kullanıcı ikinci kez yazmasın. */
+  ForgotPassword: { email?: string } | undefined;
 };
 
 export type AuthStackScreenProps<T extends keyof AuthStackParamList> =

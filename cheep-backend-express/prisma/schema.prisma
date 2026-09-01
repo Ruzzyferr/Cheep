@@ -31,6 +31,18 @@ model User {
   email_verification_code    String? // bcrypt hash'lenmiş 6 haneli kod
   email_verification_expires DateTime? // kodun son geçerlilik anı
 
+  // Parola sıfırlama ("şifremi unuttum" — 6 haneli kod, e-postaya gider)
+  //
+  // Doğrulama kodundan AYRI alanlar, bilerek: ikisi aynı anda açık olabiliyor
+  // (doğrulanmamış bir kullanıcı da parolasını unutabilir) ve tek alan
+  // paylaşsalardı biri diğerini sessizce ezerdi.
+  password_reset_code     String? // bcrypt hash'lenmiş 6 haneli kod
+  password_reset_expires  DateTime? // kodun son geçerlilik anı
+  // Bu koda yapılan HATALI deneme sayısı. IP hız limiti tek başına yetmez:
+  // 6 haneli kodun 1.000.000 olasılığı var ve saldırgan IP değiştirebilir.
+  // Sayaç KODA bağlı olduğu için değiştirilemez — N denemede kod yanar.
+  password_reset_attempts Int       @default(0)
+
   // İlişkiler
   country          Country?            @relation(fields: [country_id], references: [id], onDelete: SetNull)
   lists            List[]

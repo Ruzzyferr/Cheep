@@ -511,7 +511,20 @@
     "verify_title": "Erősítsd meg az e-mail-címed",
     "verify_subtitle": "Írd be a 6 jegyű kódot, amelyet a(z) {{email}} címre küldtünk.",
     "no_code": "Nem érkezett meg a kód?",
-    "use_other_account": "Másik fiók használata"
+    "use_other_account": "Másik fiók használata",
+    "forgot_link": "Elfelejtett jelszó",
+    "forgot_title": "Elfelejtetted a jelszavad?",
+    "forgot_subtitle": "Add meg az e-mail címed, és küldünk egy 6 jegyű visszaállítási kódot.",
+    "forgot_code_subtitle": "Írd be a(z) {{email}} címre küldött kódot és az új jelszavad.",
+    "forgot_send": "Kód küldése",
+    "forgot_sent": "Ha ez a cím regisztrálva van, a kódot elküldtük. Nézd meg a bejövő és a spam mappát is — a kód 15 percig érvényes.",
+    "forgot_submit": "Jelszó módosítása",
+    "forgot_resend": "Nem érkezett meg a kód? Küldés újra",
+    "back_to_login": "Vissza a bejelentkezéshez",
+    "new_password": "Új jelszó",
+    "new_password_confirm": "Új jelszó (újra)",
+    "password_mismatch": "A jelszavak nem egyeznek",
+    "reset_error": "A kód hibás vagy lejárt. Kérj újat."
   },
   "assistant": {
     "title": "A bevásárlóasszisztensed",

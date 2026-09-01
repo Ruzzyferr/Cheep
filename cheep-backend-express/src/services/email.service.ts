@@ -136,6 +136,118 @@ export const sendVerificationEmail = async (
     return sendMail({ to, subject, html, text });
 };
 
+/**
+ * Parola sıfırlama kodu — 6 haneli, e-postaya gider.
+ *
+ * DOĞRULAMA E-POSTASINDAN FARKLI OLARAK ÇEVİRİLİ.
+ *
+ * `sendVerificationEmail` Türkçe sabit metinle yazılmış ve öyle kaldı: onu
+ * okuyan kullanıcı uygulamanın İÇİNDE, kod giriş ekranına bakıyor — metni
+ * anlamasa bile ne yapacağı ekranda yazıyor. Parola sıfırlamada durum tam
+ * tersi: kullanıcı hesabına GİREMİYOR, tek yönlendirmesi bu e-posta. Altı
+ * pazarın beşinde Türkçe okunmuyor, dolayısıyla çevirisiz bir sıfırlama
+ * e-postası o pazarlarda özelliğin hiç olmamasıyla aynı kapıya çıkardı.
+ *
+ * Bilinmeyen/eksik dil İNGİLİZCEYE düşer (Türkçeye değil): İngilizce altı
+ * pazarın hepsinde ikinci dil, Türkçe yalnızca birinde.
+ */
+type ResetCopy = {
+    subject: string;
+    greeting: (name: string) => string;
+    lead: string;
+    ttl: string;
+    ignore: string;
+    footer: string;
+};
+
+const RESET_COPY: Record<string, ResetCopy> = {
+    tr: {
+        subject: 'Cheep — Parola sıfırlama kodun',
+        greeting: (n) => `Merhaba ${n},`,
+        lead: 'Parolanı sıfırlamak için aşağıdaki kodu uygulamaya gir:',
+        ttl: 'Kod <b>15 dakika</b> geçerlidir.',
+        ignore: 'Bu isteği sen yapmadıysan hiçbir şey yapman gerekmiyor — parolan değişmedi.',
+        footer: '© Cheep · Akıllı Alışveriş Asistanı',
+    },
+    en: {
+        subject: 'Cheep — Your password reset code',
+        greeting: (n) => `Hi ${n},`,
+        lead: 'Enter the code below in the app to reset your password:',
+        ttl: 'The code is valid for <b>15 minutes</b>.',
+        ignore: "If you didn't request this, no action is needed — your password hasn't changed.",
+        footer: '© Cheep · Smart Shopping Assistant',
+    },
+    pl: {
+        subject: 'Cheep — Kod resetowania hasła',
+        greeting: (n) => `Cześć ${n},`,
+        lead: 'Wpisz poniższy kod w aplikacji, aby zresetować hasło:',
+        ttl: 'Kod jest ważny przez <b>15 minut</b>.',
+        ignore: 'Jeśli to nie Ty wysłałeś tę prośbę, nie musisz nic robić — hasło pozostaje bez zmian.',
+        footer: '© Cheep · Inteligentny asystent zakupów',
+    },
+    hr: {
+        subject: 'Cheep — Kôd za ponovno postavljanje lozinke',
+        greeting: (n) => `Bok ${n},`,
+        lead: 'Unesi kôd u aplikaciju kako bi postavio novu lozinku:',
+        ttl: 'Kôd vrijedi <b>15 minuta</b>.',
+        ignore: 'Ako ovo nisi zatražio ti, ne moraš ništa poduzeti — lozinka nije promijenjena.',
+        footer: '© Cheep · Pametni pomoćnik u kupnji',
+    },
+    hu: {
+        subject: 'Cheep — Jelszó-visszaállítási kódod',
+        greeting: (n) => `Szia ${n},`,
+        lead: 'Írd be az alábbi kódot az alkalmazásba a jelszavad visszaállításához:',
+        ttl: 'A kód <b>15 percig</b> érvényes.',
+        ignore: 'Ha nem te kérted, nincs teendőd — a jelszavad nem változott.',
+        footer: '© Cheep · Okos bevásárlóasszisztens',
+    },
+    ro: {
+        subject: 'Cheep — Codul tău de resetare a parolei',
+        greeting: (n) => `Salut ${n},`,
+        lead: 'Introdu codul de mai jos în aplicație pentru a-ți reseta parola:',
+        ttl: 'Codul este valabil <b>15 minute</b>.',
+        ignore: 'Dacă nu tu ai făcut această cerere, nu trebuie să faci nimic — parola nu s-a schimbat.',
+        footer: '© Cheep · Asistentul inteligent de cumpărături',
+    },
+};
+
+/** Kullanıcının diline en yakın metin; bilinmiyorsa İngilizce. */
+const resetCopyFor = (language?: string | null): ResetCopy =>
+    RESET_COPY[(language ?? '').slice(0, 2).toLowerCase()] ?? RESET_COPY.en!;
+
+/** 6 haneli parola sıfırlama kodunu gönderir. */
+export const sendPasswordResetEmail = async (
+    to: string,
+    name: string,
+    code: string,
+    language?: string | null
+): Promise<boolean> => {
+    const c = resetCopyFor(language);
+    // `ttl` içinde <b> var — düz metin sürümünde etiketleri temizliyoruz.
+    const plain = (s: string) => s.replace(/<[^>]+>/g, '');
+    const text = `${c.greeting(name)}
+
+${plain(c.lead)} ${code}
+
+${plain(c.ttl)} ${plain(c.ignore)}`;
+    const html = `
+  <div style="background:#F6F8FA;padding:24px;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
+    <div style="max-width:460px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(15,23,42,.06);">
+      ${brandHeader}
+      <div style="padding:8px 32px 32px;color:#0F172A;">
+        <p style="font-size:16px;margin:0 0 8px;">${escapeHtml(c.greeting(name))}</p>
+        <p style="font-size:14px;color:#64748B;margin:0 0 24px;">${c.lead}</p>
+        <div style="text-align:center;background:#F0FDFA;border:1px dashed #0D9488;border-radius:12px;padding:18px;margin-bottom:20px;">
+          <span style="font-size:34px;font-weight:800;letter-spacing:10px;color:#0D9488;">${code}</span>
+        </div>
+        <p style="font-size:13px;color:#94A3B8;margin:0;">${c.ttl} ${c.ignore}</p>
+      </div>
+    </div>
+    <p style="text-align:center;color:#94A3B8;font-size:12px;margin-top:16px;">${c.footer}</p>
+  </div>`;
+    return sendMail({ to, subject: c.subject, html, text });
+};
+
 const escapeHtml = (s: string): string =>
     s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 

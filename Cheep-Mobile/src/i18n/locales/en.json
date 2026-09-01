@@ -511,7 +511,20 @@
     "verify_title": "Verify your email",
     "verify_subtitle": "Enter the 6-digit code we sent to {{email}}.",
     "no_code": "Didn't get the code?",
-    "use_other_account": "Use a different account"
+    "use_other_account": "Use a different account",
+    "forgot_link": "Forgot password?",
+    "forgot_title": "Forgot your password?",
+    "forgot_subtitle": "Enter your email address and we'll send you a 6-digit reset code.",
+    "forgot_code_subtitle": "Enter the code we sent to {{email}} and your new password.",
+    "forgot_send": "Send code",
+    "forgot_sent": "If this address is registered, the code has been sent. Check your inbox and spam folder — the code is valid for 15 minutes.",
+    "forgot_submit": "Change password",
+    "forgot_resend": "Didn't get the code? Send again",
+    "back_to_login": "Back to sign in",
+    "new_password": "New password",
+    "new_password_confirm": "New password (again)",
+    "password_mismatch": "Passwords don't match",
+    "reset_error": "The code is wrong or has expired. Request a new one."
   },
   "assistant": {
     "title": "Your shopping assistant",

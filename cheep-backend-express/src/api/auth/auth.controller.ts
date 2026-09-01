@@ -100,3 +100,39 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
         next(error);
     }
 };
+
+/**
+ * "Şifremi unuttum" — e-postaya 6 haneli kod gönderir.
+ *
+ * HESAP OLMASA DA 200 döner ve mesaj DEĞİŞMEZ. Yanıtı ayırmak, ucu bedava bir
+ * "bu adres kayıtlı mı?" sorgusuna çevirirdi (bkz. `requestPasswordReset`).
+ */
+export const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        await AuthService.requestPasswordReset(req.body.email);
+        res.status(200).json({
+            success: true,
+            message: 'Bu adres kayıtlıysa sıfırlama kodu gönderildi.',
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Sıfırlama kodunu doğrulayıp yeni parolayı yazar; taze token çifti döner.
+ */
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, code, newPassword } = req.body;
+        const result = await AuthService.resetPassword(email, String(code), newPassword);
+        res.status(200).json({
+            success: true,
+            token: result.token,
+            refreshToken: result.refreshToken,
+            user: result.user,
+        });
+    } catch (error) {
+        next(error);
+    }
+};

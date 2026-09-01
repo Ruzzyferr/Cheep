@@ -511,7 +511,20 @@
     "verify_title": "Potvrdi svoju e-mail adresu",
     "verify_subtitle": "Unesi šesteroznamenkasti kôd koji smo poslali na {{email}}.",
     "no_code": "Kôd nije stigao?",
-    "use_other_account": "Koristi drugi račun"
+    "use_other_account": "Koristi drugi račun",
+    "forgot_link": "Zaboravljena lozinka",
+    "forgot_title": "Zaboravili ste lozinku?",
+    "forgot_subtitle": "Unesite svoju e-mail adresu i poslat ćemo vam 6-znamenkasti kôd za ponovno postavljanje.",
+    "forgot_code_subtitle": "Unesite kôd koji smo poslali na {{email}} i novu lozinku.",
+    "forgot_send": "Pošalji kôd",
+    "forgot_sent": "Ako je ova adresa registrirana, kôd je poslan. Provjerite pristiglu poštu i mapu neželjene pošte — kôd vrijedi 15 minuta.",
+    "forgot_submit": "Promijeni lozinku",
+    "forgot_resend": "Kôd nije stigao? Pošalji ponovno",
+    "back_to_login": "Natrag na prijavu",
+    "new_password": "Nova lozinka",
+    "new_password_confirm": "Nova lozinka (ponovite)",
+    "password_mismatch": "Lozinke se ne podudaraju",
+    "reset_error": "Kôd je netočan ili je istekao. Zatražite novi."
   },
   "assistant": {
     "title": "Tvoj asistent za kupnju",

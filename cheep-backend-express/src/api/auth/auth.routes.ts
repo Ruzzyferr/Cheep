@@ -6,10 +6,20 @@ import {
     loginAccountLimiter,
     verifyLimiter,
     changePasswordLimiter,
+    passwordResetRequestLimiter,
+    passwordResetIpLimiter,
+    passwordResetSubmitLimiter,
 } from '../../middleware/rate-limit.middleware.js';
 import { validate } from '../../schema/validation.middleware.js';
 import { authenticate } from '../../middleware/auth.middleware.js';
-import { registerSchema, loginSchema, changePasswordSchema, verifyEmailSchema } from './auth.schema.js';
+import {
+    registerSchema,
+    loginSchema,
+    changePasswordSchema,
+    verifyEmailSchema,
+    forgotPasswordSchema,
+    resetPasswordSchema,
+} from './auth.schema.js';
 
 const router = Router();
 
@@ -184,6 +194,74 @@ router.post(
     changePasswordLimiter,
     validate(changePasswordSchema),
     AuthController.changePassword
+);
+
+/**
+ * @swagger
+ * /api/v1/auth/forgot-password:
+ *   post:
+ *     summary: Parola sıfırlama kodu ister (kimliksiz)
+ *     description: >
+ *       Adres kayıtlı OLSA DA OLMASA DA 200 ve aynı mesaj döner. Farklı yanıt
+ *       vermek, ucu bir hesap varlığı sorgusuna çevirirdi.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email: { type: string, format: email }
+ *     responses:
+ *       200:
+ *         description: Adres kayıtlıysa kod gönderildi
+ *       429:
+ *         description: Çok fazla istek
+ */
+router.post(
+    '/forgot-password',
+    passwordResetIpLimiter,
+    passwordResetRequestLimiter,
+    validate(forgotPasswordSchema),
+    AuthController.forgotPassword
+);
+
+/**
+ * @swagger
+ * /api/v1/auth/reset-password:
+ *   post:
+ *     summary: Sıfırlama koduyla yeni parola belirler; taze token çifti döner
+ *     description: >
+ *       Başarıda `token_version` artar — dağıtılmış tüm oturumlar (varsa
+ *       saldırganınki dahil) geçersiz olur. `email_verified` de true olur:
+ *       kodu okumak posta kutusuna erişimi zaten kanıtlıyor.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, code, newPassword]
+ *             properties:
+ *               email: { type: string, format: email }
+ *               code: { type: string, example: "123456" }
+ *               newPassword: { type: string, format: password, minLength: 6 }
+ *     responses:
+ *       200:
+ *         description: Parola değiştirildi; token ve refreshToken
+ *       400:
+ *         description: Kod hatalı veya süresi dolmuş
+ *       429:
+ *         description: Çok fazla deneme
+ */
+router.post(
+    '/reset-password',
+    passwordResetSubmitLimiter,
+    validate(resetPasswordSchema),
+    AuthController.resetPassword
 );
 
 export default router;

@@ -511,7 +511,20 @@
     "verify_title": "Verifiera din e-post",
     "verify_subtitle": "Ange den 6-siffriga koden vi skickade till {{email}}.",
     "no_code": "Fick du ingen kod?",
-    "use_other_account": "Använd ett annat konto"
+    "use_other_account": "Använd ett annat konto",
+    "forgot_link": "Glömt lösenord",
+    "forgot_title": "Har du glömt ditt lösenord?",
+    "forgot_subtitle": "Ange din e-postadress så skickar vi en 6-siffrig återställningskod.",
+    "forgot_code_subtitle": "Ange koden vi skickade till {{email}} och ditt nya lösenord.",
+    "forgot_send": "Skicka kod",
+    "forgot_sent": "Om adressen är registrerad har koden skickats. Kolla inkorgen och skräpposten — koden gäller i 15 minuter.",
+    "forgot_submit": "Ändra lösenord",
+    "forgot_resend": "Fick du ingen kod? Skicka igen",
+    "back_to_login": "Tillbaka till inloggning",
+    "new_password": "Nytt lösenord",
+    "new_password_confirm": "Nytt lösenord (igen)",
+    "password_mismatch": "Lösenorden stämmer inte överens",
+    "reset_error": "Koden är fel eller har gått ut. Begär en ny."
   },
   "assistant": {
     "title": "Din shoppingassistent",

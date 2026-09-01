@@ -129,6 +129,19 @@ export function LoginScreen({ navigation }: any) {
             required
           />
 
+          {/* ŞİFREMİ UNUTTUM — parola alanının hemen ALTINDA, giriş
+              düğmesinin ÜSTÜNDE. Kullanıcı buna, parolayı yazmayı denedikten
+              sonra ihtiyaç duyuyor; sayfanın en altına ya da kayıt
+              bağlantısının yanına konsaydı tam da aranan anda görünmezdi.
+              Yazılmış e-posta beraberinde taşınıyor. */}
+          <TouchableOpacity
+            style={styles.forgotLink}
+            onPress={() => navigation.navigate('ForgotPassword', { email: email.trim() })}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.forgotLinkText}>{t('auth.forgot_link')}</Text>
+          </TouchableOpacity>
+
           <Button
             title={t('auth.login')}
             onPress={handleLogin}
@@ -153,6 +166,8 @@ export function LoginScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
+  forgotLink: { alignSelf: 'flex-end', marginTop: spacing.xs, paddingVertical: spacing.xs },
+  forgotLinkText: { ...typography.styles.body2, color: colors.primary.main, fontWeight: '600' },
   supportLink: { alignItems: 'center', marginTop: 8, paddingVertical: 8 },
   supportLinkText: { fontSize: 13, color: colors.text.secondary, textDecorationLine: 'underline' },
   container: {

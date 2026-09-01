@@ -1,11 +1,11 @@
 /**
  * 🔐 Auth Navigator
- * Login & Register screens
+ * Giriş, kayıt ve parola sıfırlama.
  */
 
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import { LoginScreen, RegisterScreen } from '@/src/screens';
+import { LoginScreen, RegisterScreen, ForgotPasswordScreen } from '@/src/screens';
 import type { AuthStackParamList } from './types';
 
 const Stack = createStackNavigator<AuthStackParamList>();
@@ -19,6 +19,7 @@ export function AuthNavigator() {
     >
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
     </Stack.Navigator>
   );
 }

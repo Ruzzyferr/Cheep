@@ -173,6 +173,68 @@ export const verifyLimiter = rateLimit({
     },
 });
 
+/**
+ * "Şifremi unuttum" kod İSTEĞİ — HESAP başına.
+ *
+ * Burada korunan şey hesabın kendisi değil, KURBANIN POSTA KUTUSU: uç
+ * kimliksiz ve tek girdisi bir e-posta adresi, yani sınırsız bırakılsa
+ * herhangi biri başkasının adresine istediği kadar Cheep e-postası
+ * yağdırabilirdi (taciz + bizim gönderim kotamızın tükenmesi + alan adının
+ * spam olarak işaretlenmesi). Anahtar e-posta olduğu için saldırganın IP
+ * değiştirmesi işe yaramaz.
+ *
+ * `skipSuccessfulRequests` YOK, bilerek: bu uç hesap olsa da olmasa da
+ * başarı dönüyor (bkz. `requestPasswordReset`), dolayısıyla "başarılı"
+ * istekleri saymamak limiti tamamen etkisiz kılardı.
+ */
+export const passwordResetRequestLimiter = rateLimit({
+    ...base,
+    windowMs: 60 * 60 * 1000,
+    max: perEnv(5),
+    keyGenerator: (req) => {
+        const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+        return email ? `pwreset:${email}` : `ip:${ipKeyGenerator(req.ip ?? '')}`;
+    },
+    message: {
+        success: false,
+        message: 'Çok fazla sıfırlama isteği. Lütfen bir süre sonra tekrar deneyin.',
+    },
+});
+
+/** Aynı uç, IP başına geniş kova — tek IP'den birçok adrese yağdırmayı keser. */
+export const passwordResetIpLimiter = rateLimit({
+    ...base,
+    windowMs: 60 * 60 * 1000,
+    max: perEnv(30),
+    keyGenerator: (req) => `ip:${ipKeyGenerator(req.ip ?? '')}`,
+    message: {
+        success: false,
+        message: 'Çok fazla sıfırlama isteği. Lütfen bir süre sonra tekrar deneyin.',
+    },
+});
+
+/**
+ * Kodu GÖNDERME ucu — hesap başına, kod tahminine karşı ikinci katman.
+ *
+ * Birinci katman kodun kendi deneme sayacı (`MAX_RESET_ATTEMPTS`); bu kova
+ * onun ağ tarafındaki eşi ve asıl işi, sayacı sıfırlamak için sürekli yeni
+ * kod isteyip deneyen bir döngüyü de yavaşlatmak.
+ */
+export const passwordResetSubmitLimiter = rateLimit({
+    ...base,
+    windowMs: 15 * 60 * 1000,
+    max: perEnv(10),
+    keyGenerator: (req) => {
+        const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+        return email ? `pwset:${email}` : `ip:${ipKeyGenerator(req.ip ?? '')}`;
+    },
+    skipSuccessfulRequests: true,
+    message: {
+        success: false,
+        message: 'Çok fazla deneme. Lütfen 15 dakika sonra tekrar deneyin.',
+    },
+});
+
 /** Parola değiştirme — kullanıcı başına, kimliği doğrulanmış uç. */
 export const changePasswordLimiter = rateLimit({
     ...base,

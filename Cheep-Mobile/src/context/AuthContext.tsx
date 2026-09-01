@@ -6,7 +6,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService, profileService } from '../services';
 import { authStorage, userStorage, introStorage } from '../utils/storage';
-import type { User, LoginRequest, RegisterRequest } from '../types';
+import type { User, LoginRequest, RegisterRequest, AuthResponse } from '../types';
 
 interface AuthContextType {
   user: User | null;
@@ -23,6 +23,8 @@ interface AuthContextType {
   refreshOnboarding: () => Promise<void>;
   verifyEmail: (code: string) => Promise<void>;
   resendVerification: () => Promise<void>;
+  /** "Şifremi unuttum" — kodu doğrular, yeni parolayı yazar ve OTURUM AÇAR. */
+  resetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -114,19 +116,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  /**
+   * Sunucudan gelen token+kullanıcı çiftini oturuma alır.
+   *
+   * Giriş, kayıt ve parola sıfırlama AYNI şeyi yapmak zorunda; üçü ayrı ayrı
+   * yazıldığında birinde `refreshToken` kaydını atlamak ya da
+   * `refreshOnboarding`i unutmak sessizce farklı davranan üç akış üretir.
+   * Tek yerde tutulduğunda böyle bir sapma imkânsız.
+   */
+  const adoptSession = async (response: AuthResponse) => {
+    await authStorage.saveToken(response.token);
+    if (response.refreshToken) {
+      await authStorage.saveRefreshToken(response.refreshToken);
+    }
+    await userStorage.saveUser(response.user);
+
+    setUser(response.user);
+    await refreshOnboarding();
+  };
+
   const login = async (data: LoginRequest) => {
     try {
-      const response = await authService.login(data);
-
-      // Save tokens and user
-      await authStorage.saveToken(response.token);
-      if (response.refreshToken) {
-        await authStorage.saveRefreshToken(response.refreshToken);
-      }
-      await userStorage.saveUser(response.user);
-
-      setUser(response.user);
-      await refreshOnboarding();
+      await adoptSession(await authService.login(data));
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -135,21 +146,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (data: RegisterRequest) => {
     try {
-      const response = await authService.register(data);
-
-      // Save tokens and user
-      await authStorage.saveToken(response.token);
-      if (response.refreshToken) {
-        await authStorage.saveRefreshToken(response.refreshToken);
-      }
-      await userStorage.saveUser(response.user);
-
-      setUser(response.user);
-      await refreshOnboarding();
+      await adoptSession(await authService.register(data));
     } catch (error) {
       console.error('Register error:', error);
       throw error;
     }
+  };
+
+  /**
+   * Parola sıfırlama. Sunucu `token_version`'ı artırdığı için ESKİ oturumlar
+   * (bu cihazdakiler dahil) geçersiz; dönen taze çifti benimsemek şart,
+   * yoksa kullanıcı parolasını değiştirdikten hemen sonra 401 yerdi.
+   */
+  const resetPassword = async (email: string, code: string, newPassword: string) => {
+    await adoptSession(await authService.resetPassword({ email, code, newPassword }));
   };
 
   const logout = async () => {
@@ -209,6 +219,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshOnboarding,
     verifyEmail,
     resendVerification,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

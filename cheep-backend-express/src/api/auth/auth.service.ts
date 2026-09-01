@@ -10,17 +10,29 @@ import {
     isCodeExpired,
     isValidCodeFormat,
 } from '../../services/email-verification.js';
-import { sendVerificationEmail } from '../../services/email.service.js';
+import { sendVerificationEmail, sendPasswordResetEmail } from '../../services/email.service.js';
 import logger from '../../utils/logger.js';
 
 type UserRecord = { password_hash: string;[k: string]: unknown };
 
-/** Kullanıcı nesnesinden hassas/iç alanları çıkarır (client'a dönmeden önce). */
+/**
+ * Kullanıcı nesnesinden hassas/iç alanları çıkarır (client'a dönmeden önce).
+ *
+ * PAROLA SIFIRLAMA ALANLARI DA BURADAN GEÇMEK ZORUNDA. `password_reset_code`
+ * bcrypt hash'i ama koruduğu sır yalnızca 6 HANELİ: bir milyon olasılık,
+ * sızdığı anda çevrimdışı denemeyle saniyeler içinde çözülür. Yani bu alanı
+ * yanıtta bırakmak, sıfırlama kodunu düz metin göndermekten farksız olurdu —
+ * ve `sanitizeUser` login/register dahil HER yanıtta çalıştığı için sızıntı
+ * tek bir uçla sınırlı kalmazdı.
+ */
 const sanitizeUser = (user: UserRecord) => {
     const {
         password_hash: _pw,
         email_verification_code: _c,
         email_verification_expires: _e,
+        password_reset_code: _rc,
+        password_reset_expires: _re,
+        password_reset_attempts: _ra,
         ...safe
     } = user;
     return safe;
@@ -261,3 +273,149 @@ export const changePassword = async (
     // Eski refresh token'lar artık geçersiz; çağırana yeni geçerli çift verilir.
     return generateTokens(updated.id, updated.token_version);
 };
+
+/**
+ * Bir sıfırlama kodunun yanmadan önce dayanacağı HATALI deneme sayısı.
+ *
+ * IP bazlı hız limiti tek başına yetmiyor: kod 6 haneli (1.000.000 olasılık)
+ * ve saldırgan IP'sini değiştirebilir, kullanıcı hesabı ise elinde değil.
+ * Sayaç KODUN KENDİSİNE bağlı olduğu için ağ tarafından dolaşılamaz —
+ * beşinci hatalı denemede kod geçersiz olur ve saldırgan sıfırdan başlamak
+ * için kurbanın posta kutusuna erişmek zorunda kalır.
+ *
+ * 5, gerçek kullanıcıyı (kodu yanlış kopyalayan, eski e-postaya bakan)
+ * cezalandırmayacak kadar yüksek; kaba kuvveti anlamsız kılacak kadar düşük.
+ */
+const MAX_RESET_ATTEMPTS = 5;
+
+/**
+ * "Şifremi unuttum": e-postaya 6 haneli sıfırlama kodu gönderir.
+ *
+ * HESAP OLSA DA OLMASA DA AYNI ŞEY OLUR ve çağırana hiçbir şey dönmez.
+ * Aksi hâlde bu uç bedava bir "bu e-posta kayıtlı mı?" sorgusuna dönerdi:
+ * saldırgan bir liste yükleyip hangi adreslerin Cheep hesabı olduğunu
+ * öğrenir, o adresleri hedefli oltalamada kullanırdı. Bu yüzden kullanıcı
+ * yoksa sessizce çıkılıyor — kayıt akışının aksine burada `conflict`
+ * fırlatmak GÜVENLİK AÇIĞI olurdu.
+ *
+ * Aynı sebeple e-posta gönderimi de akışı bozmuyor: gönderim hatası da
+ * "kullanıcı yok" ile aynı görünmeli.
+ */
+export const requestPasswordReset = async (rawEmail: string): Promise<void> => {
+    const email = normalizeEmail(rawEmail);
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+        // Zamanlama farkını da küçültmek için loglayıp çıkıyoruz; bcrypt
+        // maliyeti burada zaten yok, asıl koruma tek tip yanıt.
+        logger.info(`[auth] parola sıfırlama: kayıtlı olmayan adres (${email})`);
+        return;
+    }
+
+    const code = generateVerificationCode();
+    const codeHash = await bcrypt.hash(code, 10);
+    await prisma.user.update({
+        where: { id: user.id },
+        data: {
+            password_reset_code: codeHash,
+            password_reset_expires: verificationExpiry(),
+            // Yeni kod = temiz sayfa. Sıfırlanmasaydı, önceki koda yapılmış
+            // 5 hatalı deneme yeni kodu daha doğmadan yakardı ve kullanıcı
+            // "kod gelmiyor" değil "kod hep hatalı" döngüsüne girerdi.
+            password_reset_attempts: 0,
+        },
+    });
+
+    void sendPasswordResetEmail(user.email, user.name, code, user.language).catch((err) =>
+        logger.error('[auth] parola sıfırlama e-postası gönderilemedi:', err)
+    );
+    if (!config.emailEnabled) {
+        logger.warn(`[auth] (DEV) ${user.email} için parola sıfırlama kodu: ${code}`);
+    }
+};
+
+/**
+ * Sıfırlama kodunu doğrular ve yeni parolayı yazar.
+ *
+ * BAŞARIDA `token_version` ARTIYOR — bu, özelliğin asıl güvenlik değeri.
+ * Parolasını unutan kullanıcıların önemli bir kısmı aslında hesabının ele
+ * geçirildiğinden şüphelendiği için sıfırlama yapıyor; saldırganın açık
+ * oturumu sürerken parolayı değiştirmek hiçbir işe yaramazdı. Artış, dağıtılmış
+ * bütün access/refresh token'ları anında geçersiz kılıyor.
+ *
+ * `email_verified` de true yapılıyor: kullanıcı, kodu ancak o posta kutusuna
+ * erişerek okuyabildi — doğrulamanın kanıtlamak istediği tam olarak bu. Kodu
+ * girip parolasını değiştiren ama hâlâ "e-postanı doğrula" duvarına çarpan bir
+ * kullanıcı, sistemin elinde kanıt varken sorulan anlamsız bir soruyla
+ * karşılaşırdı.
+ *
+ * Çağırana taze token çifti dönüyor (otomatik giriş): kodu okuyan kişi posta
+ * kutusuna sahip ve yeni parolayı zaten kendi belirledi, dolayısıyla ardından
+ * giriş ekranına yollamak güvenliğe hiçbir şey katmaz, yalnızca zaten sıkışmış
+ * kullanıcıya bir adım daha ekler.
+ */
+export const resetPassword = async (
+    rawEmail: string,
+    code: string,
+    newPassword: string
+) => {
+    // Tek tip hata: "kod yanlış" ile "böyle bir kod hiç istenmemiş" ayırt
+    // edilebilseydi, uç yine bir hesap varlığı sızdırırdı.
+    const invalid = () =>
+        new AppError('Kod hatalı veya süresi dolmuş. Yeni kod isteyin.', 400, 'RESET_CODE_INVALID');
+
+    if (!isValidCodeFormat(code)) {
+        throw badRequest('Sıfırlama kodu 6 haneli olmalıdır.');
+    }
+
+    const email = normalizeEmail(rawEmail);
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || !user.password_reset_code) {
+        throw invalid();
+    }
+
+    if (isCodeExpired(user.password_reset_expires)) {
+        await clearResetCode(user.id);
+        throw invalid();
+    }
+
+    if (user.password_reset_attempts >= MAX_RESET_ATTEMPTS) {
+        // Kod yanmış: temizleyip kullanıcıyı yeni kod istemeye zorluyoruz.
+        await clearResetCode(user.id);
+        throw invalid();
+    }
+
+    const ok = await bcrypt.compare(code, user.password_reset_code);
+    if (!ok) {
+        await prisma.user.update({
+            where: { id: user.id },
+            data: { password_reset_attempts: { increment: 1 } },
+        });
+        throw invalid();
+    }
+
+    const password_hash = await bcrypt.hash(newPassword, 10);
+    const updated = await prisma.user.update({
+        where: { id: user.id },
+        data: {
+            password_hash,
+            password_reset_code: null,
+            password_reset_expires: null,
+            password_reset_attempts: 0,
+            email_verified: true,
+            token_version: { increment: 1 },
+        },
+    });
+
+    return { user: sanitizeUser(updated), ...generateTokens(updated.id, updated.token_version) };
+};
+
+/** Sıfırlama kodunu (ve sayacını) temizler — süre dolumu/yanma sonrası. */
+const clearResetCode = (userId: number) =>
+    prisma.user.update({
+        where: { id: userId },
+        data: {
+            password_reset_code: null,
+            password_reset_expires: null,
+            password_reset_attempts: 0,
+        },
+    });

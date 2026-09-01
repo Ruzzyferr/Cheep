@@ -67,5 +67,37 @@ export const authService = {
     );
     return response.data;
   },
+
+  /**
+   * "Şifremi unuttum": e-postaya 6 haneli sıfırlama kodu ister.
+   *
+   * ADRES KAYITLI OLMASA DA BAŞARILI DÖNER — sunucu bilerek ayrım yapmıyor,
+   * yoksa uç "bu e-posta Cheep'te kayıtlı mı?" sorgusuna dönerdi. Bu yüzden
+   * arayüz de "kod gönderildi" diyemez; "kayıtlıysa gönderildi" demek
+   * zorunda (bkz. `auth.forgot_sent`).
+   */
+  async forgotPassword(email: string): Promise<{ success: boolean; message: string }> {
+    const response = await apiClient.post<{ success: boolean; message: string }>(
+      API_ENDPOINTS.AUTH.FORGOT_PASSWORD,
+      { email }
+    );
+    return response.data;
+  },
+
+  /**
+   * Kodu doğrulayıp yeni parolayı yazar. Sunucu taze token çifti döner —
+   * kullanıcı ayrıca giriş yapmak zorunda kalmaz.
+   */
+  async resetPassword(data: {
+    email: string;
+    code: string;
+    newPassword: string;
+  }): Promise<AuthResponse> {
+    const response = await apiClient.post<AuthResponse>(
+      API_ENDPOINTS.AUTH.RESET_PASSWORD,
+      data
+    );
+    return response.data;
+  },
 };
 

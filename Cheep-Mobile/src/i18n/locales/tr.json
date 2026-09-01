@@ -511,7 +511,20 @@
     "verify_title": "E-postanı doğrula",
     "verify_subtitle": "{{email}} adresine gönderdiğimiz 6 haneli kodu gir.",
     "no_code": "Kod gelmedi mi?",
-    "use_other_account": "Farklı bir hesap kullan"
+    "use_other_account": "Farklı bir hesap kullan",
+    "forgot_link": "Şifremi unuttum",
+    "forgot_title": "Şifreni mi unuttun?",
+    "forgot_subtitle": "E-posta adresini gir, sana 6 haneli bir sıfırlama kodu gönderelim.",
+    "forgot_code_subtitle": "{{email}} adresine gönderdiğimiz kodu ve yeni şifreni gir.",
+    "forgot_send": "Kod gönder",
+    "forgot_sent": "Bu adres kayıtlıysa kod gönderildi. Gelen kutunu ve spam klasörünü kontrol et — kod 15 dakika geçerli.",
+    "forgot_submit": "Şifreyi değiştir",
+    "forgot_resend": "Kod gelmedi mi? Tekrar gönder",
+    "back_to_login": "Girişe dön",
+    "new_password": "Yeni şifre",
+    "new_password_confirm": "Yeni şifre (tekrar)",
+    "password_mismatch": "Şifreler eşleşmiyor",
+    "reset_error": "Kod hatalı veya süresi dolmuş. Yeni kod isteyin."
   },
   "assistant": {
     "title": "Alışveriş asistanın",

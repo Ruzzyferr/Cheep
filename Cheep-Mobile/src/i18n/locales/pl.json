@@ -511,7 +511,20 @@
     "verify_title": "Zweryfikuj swój e-mail",
     "verify_subtitle": "Wpisz 6-cyfrowy kod, który wysłaliśmy na {{email}}.",
     "no_code": "Nie otrzymałeś kodu?",
-    "use_other_account": "Użyj innego konta"
+    "use_other_account": "Użyj innego konta",
+    "forgot_link": "Nie pamiętam hasła",
+    "forgot_title": "Nie pamiętasz hasła?",
+    "forgot_subtitle": "Podaj swój adres e-mail, a wyślemy Ci 6-cyfrowy kod resetujący.",
+    "forgot_code_subtitle": "Wpisz kod wysłany na adres {{email}} oraz nowe hasło.",
+    "forgot_send": "Wyślij kod",
+    "forgot_sent": "Jeśli ten adres jest zarejestrowany, kod został wysłany. Sprawdź skrzynkę odbiorczą i folder spam — kod jest ważny 15 minut.",
+    "forgot_submit": "Zmień hasło",
+    "forgot_resend": "Kod nie dotarł? Wyślij ponownie",
+    "back_to_login": "Wróć do logowania",
+    "new_password": "Nowe hasło",
+    "new_password_confirm": "Nowe hasło (powtórz)",
+    "password_mismatch": "Hasła nie są takie same",
+    "reset_error": "Kod jest nieprawidłowy lub wygasł. Poproś o nowy."
   },
   "assistant": {
     "title": "Twój asystent zakupów",

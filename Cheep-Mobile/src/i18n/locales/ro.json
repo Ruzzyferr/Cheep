@@ -511,7 +511,20 @@
     "verify_title": "Verifică-ți adresa de e-mail",
     "verify_subtitle": "Introdu codul din 6 cifre trimis la {{email}}.",
     "no_code": "Nu ai primit codul?",
-    "use_other_account": "Folosește alt cont"
+    "use_other_account": "Folosește alt cont",
+    "forgot_link": "Am uitat parola",
+    "forgot_title": "Ți-ai uitat parola?",
+    "forgot_subtitle": "Introdu adresa ta de e-mail și îți trimitem un cod de resetare din 6 cifre.",
+    "forgot_code_subtitle": "Introdu codul trimis la {{email}} și noua parolă.",
+    "forgot_send": "Trimite codul",
+    "forgot_sent": "Dacă această adresă este înregistrată, codul a fost trimis. Verifică inbox-ul și folderul spam — codul este valabil 15 minute.",
+    "forgot_submit": "Schimbă parola",
+    "forgot_resend": "Nu ai primit codul? Trimite din nou",
+    "back_to_login": "Înapoi la autentificare",
+    "new_password": "Parolă nouă",
+    "new_password_confirm": "Parolă nouă (din nou)",
+    "password_mismatch": "Parolele nu se potrivesc",
+    "reset_error": "Codul este greșit sau a expirat. Cere unul nou."
   },
   "assistant": {
     "title": "Asistentul tău de cumpărături",

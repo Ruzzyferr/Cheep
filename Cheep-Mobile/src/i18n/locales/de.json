@@ -511,7 +511,20 @@
     "verify_title": "Bestätige deine E-Mail",
     "verify_subtitle": "Gib den 6-stelligen Code ein, den wir an {{email}} gesendet haben.",
     "no_code": "Keinen Code erhalten?",
-    "use_other_account": "Anderes Konto verwenden"
+    "use_other_account": "Anderes Konto verwenden",
+    "forgot_link": "Passwort vergessen",
+    "forgot_title": "Passwort vergessen?",
+    "forgot_subtitle": "Gib deine E-Mail-Adresse ein, wir senden dir einen 6-stelligen Code zum Zurücksetzen.",
+    "forgot_code_subtitle": "Gib den an {{email}} gesendeten Code und dein neues Passwort ein.",
+    "forgot_send": "Code senden",
+    "forgot_sent": "Falls diese Adresse registriert ist, wurde der Code gesendet. Sieh im Posteingang und im Spam-Ordner nach — der Code gilt 15 Minuten.",
+    "forgot_submit": "Passwort ändern",
+    "forgot_resend": "Code nicht erhalten? Erneut senden",
+    "back_to_login": "Zurück zur Anmeldung",
+    "new_password": "Neues Passwort",
+    "new_password_confirm": "Neues Passwort (wiederholen)",
+    "password_mismatch": "Die Passwörter stimmen nicht überein",
+    "reset_error": "Der Code ist falsch oder abgelaufen. Fordere einen neuen an."
   },
   "assistant": {
     "title": "Dein Einkaufsassistent",
