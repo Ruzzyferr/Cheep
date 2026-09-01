@@ -357,14 +357,20 @@ export function ListDetailScreen({
             onAction={handleAddProducts}
           />
         }
-        // Banner ÜRÜNLERİN ALTINDA, listeyle birlikte kayar. Sabit alt aksiyon
-        // çubuğuna ("Rotaları Göster") dokunmaz: o çubuk ekranın asıl eylemi ve
-        // reklam onu ne örtmeli ne de yerinden oynatmalı.
+        // Banner ÜRÜNLERİN ÜSTÜNDE, listeyle birlikte kayar.
+        //
+        // ESKİDEN `ListFooterComponent`ti: uzun bir alışveriş listesinde
+        // kullanıcı sonuna kadar inmedikçe reklam hiç görünmüyordu ve reklam
+        // isteği bile atılmıyordu (banner ekranda değilken kurulmuyor).
+        // Başa alınca her açılışta görünür oluyor. Sabit alt aksiyon çubuğuna
+        // ("Rotaları Göster") dokunmuyor: o çubuk ekranın asıl eylemi ve
+        // reklam onu ne örtmeli ne de yerinden oynatmalı — üstte olması bu
+        // güvenceyi ayrıca güçlendiriyor.
         //
         // Liste BOŞKEN gösterilmiyor: boş durumda ekranda yalnızca "ürün ekle"
         // yönlendirmesi var; oraya reklam koymak, kullanıcı daha hiçbir değer
         // almadan reklam göstermek olurdu.
-        ListFooterComponent={items.length > 0 ? <CheepBanner slot="list" /> : null}
+        ListHeaderComponent={items.length > 0 ? <CheepBanner slot="list" /> : null}
       />
 
       {/* Alt aksiyon çubuğu tab-bar'ın ÜSTÜNE yerleşir, arkasında kalmaz.

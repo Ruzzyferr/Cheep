@@ -23,6 +23,10 @@ import { shadows } from '../../theme/shadows';
 import type { Product } from '../../types';
 import type { DealsStackScreenProps } from '../../navigation/types';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
+import { CheepBanner } from '../../components/ads/CheepBanner';
+import { buildGridRows } from '../../utils/adRows';
+import { usePremium } from '../../context/PremiumContext';
+import { useAds } from '../../context/AdsContext';
 
 interface Deal {
   product: Product;
@@ -132,6 +136,13 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
     </TouchableOpacity>
   );
 
+  const { isPremium } = usePremium();
+  const { canRequestAds } = useAds();
+  const dealRows = useMemo(
+    () => buildGridRows(deals, 1, !isPremium && canRequestAds),
+    [deals, isPremium, canRequestAds],
+  );
+
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: topSpacing }]}>
@@ -152,10 +163,16 @@ export function DealsScreen({ navigation }: DealsStackScreenProps<'DealsMain'>) 
           description={t('deals.empty_description')}
         />
       ) : (
+        // TEK SÜTUNLU IZGARA — reklam ilk fırsattan SONRA bir satır olarak
+        // giriyor (bkz. utils/adRows.ts). `ListHeaderComponent` kullanılmadı:
+        // o, reklamı ilk fırsatın da ÜSTÜNE koyar ve ekranın verdiği cevabın
+        // önüne geçerdi. Böyle, kullanıcı önce bir fırsat görüyor.
         <FlatList
-          data={deals}
-          keyExtractor={(item) => String(item.product.id)}
-          renderItem={renderDeal}
+          data={dealRows}
+          keyExtractor={(row) => row.key}
+          renderItem={({ item: row }) =>
+            row.kind === 'ad' ? <CheepBanner slot="deals" /> : renderDeal({ item: row.items[0]! })
+          }
           contentContainerStyle={[styles.list, { paddingBottom: bottomSpacing }]}
           showsVerticalScrollIndicator={false}
           refreshControl={

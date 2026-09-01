@@ -14,7 +14,7 @@
  * kendiliğinden güncelleniyor.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, RefreshControl, ActivityIndicator, Pressable } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { CommonActions } from '@react-navigation/native';
@@ -32,6 +32,10 @@ import {
 } from '../../queries';
 import { useToast } from '../../context/ToastContext';
 import { useLocale } from '../../context/LocaleContext';
+import { CheepBanner } from '../../components/ads/CheepBanner';
+import { buildGridRows, type GridRow } from '../../utils/adRows';
+import { usePremium } from '../../context/PremiumContext';
+import { useAds } from '../../context/AdsContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { Product } from '../../types';
 import type { HomeStackScreenProps, ListsStackScreenProps } from '../../navigation/types';
@@ -90,7 +94,21 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
   const fetchNextPage = productsQ.fetchNextPage;
   const products = flattenProducts(productsQ.data?.pages);
 
-  const flatListRef = React.useRef<FlatList>(null);
+  const flatListRef = React.useRef<FlatList<GridRow<Product>>>(null);
+
+  const { isPremium } = usePremium();
+  const { canRequestAds } = useAds();
+  // SATIR TABANLI VERİ — `numColumns` DEĞİL.
+  //
+  // `numColumns` kullanan bir FlatList'e tam genişlikte bir satır sokulamaz:
+  // her öğe bir sütuna sıkışır ve reklam yarım genişlikte ezik bir kutuya
+  // dönerdi. Ürünler önce satırlara bölünüyor, reklam ARADA bir satır olarak
+  // duruyor; kartların düzeni hiç değişmiyor. (Arama ekranı da aynı yolu
+  // izliyor — bkz. SearchScreen.)
+  const gridRows = useMemo(
+    () => buildGridRows(products, 2, !isPremium && canRequestAds),
+    [products, isPremium, canRequestAds],
+  );
 
   // Kategori değişince listeyi başa sar. Sorgu key'i değiştiği için veri
   // zaten yenilenir; burada yalnızca kaydırma konumu düzeltilir.
@@ -276,12 +294,10 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
       ) : (
         <FlatList
           ref={flatListRef}
-          data={products}
-          numColumns={2}
-          keyExtractor={(item) => item.id.toString()}
+          data={gridRows}
+          keyExtractor={(row) => row.key}
           style={styles.list}
           contentContainerStyle={[styles.gridContainer, { paddingBottom: bottomSpacing }]}
-          columnWrapperStyle={styles.row}
           refreshControl={
             <RefreshControl
               refreshing={productsQ.isRefetching}
@@ -289,20 +305,31 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
               tintColor={colors.primary.main}
             />
           }
-          renderItem={({ item }) => (
-            <View style={styles.gridItem}>
-              <ProductGridCard
-                productName={item.name}
-                categoryName={item.category?.name}
-                iconKey={item.category?.icon_key}
-                imageUrl={item.image_url || undefined}
-                topThreePrices={getTopThreePrices(item)}
-                constraint={item.constraint}
-                onPress={() => (navigation as any).navigate('ProductDetail', { productId: item.id })}
-                onAddToCart={() => handleAddToCart(item)}
-              />
-            </View>
-          )}
+          renderItem={({ item: row }) =>
+            row.kind === 'ad' ? (
+              <CheepBanner slot="category" />
+            ) : (
+              <View style={styles.row}>
+                {row.items.map((item) => (
+                  <View key={item.id} style={styles.gridItem}>
+                    <ProductGridCard
+                      productName={item.name}
+                      categoryName={item.category?.name}
+                      iconKey={item.category?.icon_key}
+                      imageUrl={item.image_url || undefined}
+                      topThreePrices={getTopThreePrices(item)}
+                      constraint={item.constraint}
+                      onPress={() => (navigation as any).navigate('ProductDetail', { productId: item.id })}
+                      onAddToCart={() => handleAddToCart(item)}
+                    />
+                  </View>
+                ))}
+                {/* Tek öğeli son satır: boş sütun yer tutucusu, yoksa tek kart
+                    ekranın ortasına kayıp hizayı bozuyor. */}
+                {row.items.length < 2 && <View style={styles.gridItem} />}
+              </View>
+            )
+          }
           onEndReached={() => {
             // `isFetchNextPageError` KONTROLÜ ŞART: bir sonraki sayfa isteği
             // düştüğünde `hasNextPage` true kalıyordu, footer spinner'ı
@@ -446,7 +473,13 @@ const styles = StyleSheet.create({
     padding: layout.screenPadding,
   },
 
+  // `flexDirection: 'row'` ZORUNLU. Bu stil eskiden `columnWrapperStyle` idi
+  // ve FlatList'in kendi satır View'ı zaten yatay diziliyordu; satırları artık
+  // biz kurduğumuz için React Native'in varsayılanı (`column`) geçerli olurdu
+  // ve iki kart yan yana DEĞİL alt alta dizilip %48 genişlikle ekranın sol
+  // yarısına sıkışırdı.
   row: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: spacing.md,
   },

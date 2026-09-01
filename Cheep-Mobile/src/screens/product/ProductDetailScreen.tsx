@@ -16,6 +16,7 @@ import { productService, categoryService, affiliateService } from '../../service
 import { useQuery } from '@tanstack/react-query';
 import { useProduct, useScope, qk, STALE } from '../../queries';
 import { DetailSkeleton, ErrorState , Card, Button } from '../../components/ui';
+import { CheepBanner } from '../../components/ads/CheepBanner';
 import { PriceTrendCard } from '../../components/product/PriceTrendCard';
 import { ProductThumb } from '../../components/product/ProductThumb';
 import { SelectListModal } from '../../components/list/SelectListModal';
@@ -303,6 +304,16 @@ export function ProductDetailScreen({
             }
           />
         ) : null}
+
+        {/* Banner — FİYAT TABLOSUNUN ALTINDA, "en ucuzdan al" düğmesinden
+            sonra.
+            Tablonun İÇİNE ya da özet kartı ile market listesi arasına
+            konmadı, bilerek: bir fiyat karşılaştırma uygulamasında iki fiyat
+            bloğunun arasındaki bir kutu FİYAT sanılır ve bu yalnızca kötü UX
+            değil, tüketiciyi yanıltma riski. Burada kullanıcı cevabını
+            (en ucuz market + fiyatlar + eylem) çoktan almış durumda ve reklam
+            kendi çerçevesinde ayrı bir blok olarak duruyor. */}
+        <CheepBanner slot="detail" />
 
         {/* Price History Trend */}
         <View style={styles.detailsSection}>

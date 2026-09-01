@@ -11,9 +11,31 @@ vi.mock('react-native', () => ({
 }));
 
 /* eslint-disable import/first */
-import { shouldShowBanner } from '../../config/ads';
+import { shouldShowBanner, type AdSlot } from '../../config/ads';
 import { buildGridRows, AD_AFTER_ROW, MIN_RESULTS_FOR_AD } from '../adRows';
 /* eslint-enable import/first */
+
+/**
+ * Uygulamadaki TÜM banner yerleşimleri.
+ *
+ * ELLE TUTULAN LİSTE, bilerek: `AdSlot` bir tip, çalışma anında
+ * numaralandırılamıyor. Buraya eklemeyi unutmak testlerin yuvayı atlamasına
+ * yol açardı — bunu engelleyen şey aşağıdaki `satisfies`: `AdSlot`a yeni bir
+ * değer eklenip buraya eklenmezse `eksiksizMi` DERLENMEZ.
+ */
+const TUM_YUVALAR = ['home', 'search', 'list', 'detail', 'category', 'lists', 'deals'] as const;
+
+/** `AdSlot`un her üyesi listede var mı? Eksikse tip hatası verir. */
+const _eksiksizMi: Record<AdSlot, true> = Object.fromEntries(
+  TUM_YUVALAR.map((s) => [s, true]),
+) as Record<(typeof TUM_YUVALAR)[number], true>;
+void _eksiksizMi;
+
+/** Her yuvası dolu, geçerli bir Android ortamı. */
+const tamOrtam = (): Record<string, string> =>
+  Object.fromEntries(
+    TUM_YUVALAR.map((s) => [`EXPO_PUBLIC_ADMOB_BANNER_${s.toUpperCase()}_ANDROID`, `ca-app-pub-1/${s}`]),
+  );
 
 /**
  * Reklam gösterim kararı. Yanlış karar pahalı: premium kullanıcıya reklam
@@ -56,14 +78,13 @@ describe('banner gösterim kararı', () => {
  * modül YÜKLENİRKEN okunduğu için her senaryoda modül yeniden import ediliyor.
  */
 describe('reklam birimi kimliği', () => {
-  const ANAHTARLAR = [
-    'EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID',
-    'EXPO_PUBLIC_ADMOB_BANNER_SEARCH_ANDROID',
-    'EXPO_PUBLIC_ADMOB_BANNER_LIST_ANDROID',
-    'EXPO_PUBLIC_ADMOB_BANNER_HOME_IOS',
-    'EXPO_PUBLIC_ADMOB_BANNER_SEARCH_IOS',
-    'EXPO_PUBLIC_ADMOB_BANNER_LIST_IOS',
-  ];
+  // TÜRETİLMİŞ, elle yazılmış DEĞİL: liste sabit kaldığında yeni bir yuvanın
+  // değişkeni testler arasında temizlenmiyor ve önceki testten SIZIYOR —
+  // sonraki test yanlış yere "yapılandırma tam" görüyordu.
+  const ANAHTARLAR = TUM_YUVALAR.flatMap((s) => [
+    `EXPO_PUBLIC_ADMOB_BANNER_${s.toUpperCase()}_ANDROID`,
+    `EXPO_PUBLIC_ADMOB_BANNER_${s.toUpperCase()}_IOS`,
+  ]);
 
   async function tazeModul(ortam: Record<string, string | undefined>) {
     for (const k of ANAHTARLAR) delete process.env[k];
@@ -82,7 +103,7 @@ describe('reklam birimi kimliği', () => {
     // hesabını askıya aldırır. Yapılandırmayı unutmanın bedeli gelir kaybı
     // olmalı, hesap kaybı değil.
     const { bannerUnitId: f } = await tazeModul({});
-    for (const slot of ['home', 'search', 'list'] as const) {
+    for (const slot of TUM_YUVALAR) {
       expect(f(slot)).toBe('ca-app-pub-3940256099942544/6300978111');
     }
   });
@@ -105,17 +126,13 @@ describe('reklam birimi kimliği', () => {
   });
 
   it('gerçek kimlikler tanımlıysa ONLARI kullanır', async () => {
-    const { bannerUnitId: f } = await tazeModul({
-      EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID: 'ca-app-pub-1/11',
-      EXPO_PUBLIC_ADMOB_BANNER_SEARCH_ANDROID: 'ca-app-pub-1/22',
-      EXPO_PUBLIC_ADMOB_BANNER_LIST_ANDROID: 'ca-app-pub-1/33',
-    });
-    expect(f('home')).toBe('ca-app-pub-1/11');
-    expect(f('search')).toBe('ca-app-pub-1/22');
-    expect(f('list')).toBe('ca-app-pub-1/33');
-    // Üçü AYRI olmak zorunda: AdMob raporu birim bazında kırılıyor, tek birim
-    // kullanılsa hangi yerleşimin çalıştığı hiç öğrenilemezdi.
-    expect(new Set([f('home'), f('search'), f('list')]).size).toBe(3);
+    const { bannerUnitId: f } = await tazeModul(tamOrtam());
+    for (const slot of TUM_YUVALAR) {
+      expect(f(slot)).toBe(`ca-app-pub-1/${slot}`);
+    }
+    // Her yuva AYRI birim olmak zorunda: AdMob raporu birim bazında kırılıyor,
+    // tek birim paylaşılsa hangi yerleşimin gelir ürettiği hiç öğrenilemezdi.
+    expect(new Set(TUM_YUVALAR.map((s) => f(s))).size).toBe(TUM_YUVALAR.length);
   });
 
   it('PLATFORMUN kendi kimliğini okur — diğer platformunkini DEĞİL', async () => {
@@ -140,14 +157,25 @@ describe('reklam birimi kimliği', () => {
     expect(bos.hasRealAdUnits()).toBe(false);
 
     const yarim = await tazeModul({ EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID: 'ca-app-pub-1/11' });
-    expect(yarim.hasRealAdUnits()).toBe(false);   // üçü de dolu olmalı
+    expect(yarim.hasRealAdUnits()).toBe(false); // HEPSİ dolu olmalı
 
-    const tam = await tazeModul({
-      EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID: 'ca-app-pub-1/11',
-      EXPO_PUBLIC_ADMOB_BANNER_SEARCH_ANDROID: 'ca-app-pub-1/22',
-      EXPO_PUBLIC_ADMOB_BANNER_LIST_ANDROID: 'ca-app-pub-1/33',
-    });
-    expect(tam.hasRealAdUnits()).toBe(true);
+    expect((await tazeModul(tamOrtam())).hasRealAdUnits()).toBe(true);
+  });
+
+  it('YENİ BİR YUVA ortam değişkenini unutturamaz', async () => {
+    // Bu testin tek işi: `AdSlot`a yuva eklenip ortam değişkeni eklenmediğinde
+    // KIRILMAK. Yapılandırılmamış bir yuva sessizce Google'ın test birimine
+    // düşer — yani gerçek kullanıcıya "Test Ad" yazan bir kutu gösterir ve
+    // hiç gelir üretmez. Derleyici bunu yakalamaz, çünkü değer `undefined`
+    // olmaya zaten izinli.
+    const tam = tamOrtam();
+    for (const slot of TUM_YUVALAR) {
+      const eksik = { ...tam };
+      delete eksik[`EXPO_PUBLIC_ADMOB_BANNER_${slot.toUpperCase()}_ANDROID`];
+      const m = await tazeModul(eksik);
+      expect(m.hasRealAdUnits()).toBe(false);
+      expect(m.bannerUnitId(slot)).toBe('ca-app-pub-3940256099942544/6300978111');
+    }
   });
 });
 

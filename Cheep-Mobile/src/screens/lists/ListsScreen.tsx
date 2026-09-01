@@ -3,7 +3,7 @@
  * Shopping lists management
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,10 @@ import { colors, typography, spacing, layout } from '../../theme';
 import type { ListsStackScreenProps } from '../../navigation/types';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 import { appAlert } from '../../utils/dialog';
+import { CheepBanner } from '../../components/ads/CheepBanner';
+import { buildGridRows } from '../../utils/adRows';
+import { usePremium } from '../../context/PremiumContext';
+import { useAds } from '../../context/AdsContext';
 
 export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsMain'>) {
   // headerShown:false — ust guvenli alani ekran kendisi birakmali.
@@ -38,7 +42,10 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
   // liste değiştiğinde kendiliğinden tazelenir; elle loadLists() zinciri yok.
   const listsQ = useLists();
   const { deleteList } = useListMutations();
-  const lists = listsQ.data ?? [];
+  // `useMemo` ŞART, süsleme değil: `?? []` her renderda YENİ bir dizi üretiyor
+  // ve aşağıdaki `listRows` memo'su bu diziye bağlı — sabitlenmezse memo hiç
+  // tutmaz, her renderda satırlar (ve reklam satırı) baştan kurulur.
+  const lists = useMemo(() => listsQ.data ?? [], [listsQ.data]);
 
   // Reload lists when screen comes into focus
   useFocusEffect(
@@ -99,6 +106,13 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
     />
   );
 
+  const { isPremium } = usePremium();
+  const { canRequestAds } = useAds();
+  const listRows = useMemo(
+    () => buildGridRows(lists, 1, !isPremium && canRequestAds),
+    [lists, isPremium, canRequestAds],
+  );
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -121,17 +135,26 @@ export function ListsScreen({ navigation, route }: ListsStackScreenProps<'ListsM
       ) : listsQ.isError ? (
         <ErrorState onRetry={handleRefresh} />
       ) : (
+        // Reklam İLK LİSTENİN ALTINDA. `ListHeaderComponent` olsaydı kullanıcı
+        // kendi listelerinden önce reklam görürdü — bu ekranın tamamı
+        // kullanıcının kendi verisi ve onun üstüne reklam koymak en rahatsız
+        // edici yerleşim olurdu. Boş durumda hiç reklam yok: `buildGridRows`
+        // en az 3 öğe istiyor (bkz. MIN_RESULTS_FOR_AD).
         <FlatList
           style={styles.list}
-          data={lists}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <ListCard
-              list={item}
-              onPress={() => navigation.navigate('ListDetail', { listId: item.id })}
-              onDelete={handleDeleteList}
-            />
-          )}
+          data={listRows}
+          keyExtractor={(row) => row.key}
+          renderItem={({ item: row }) =>
+            row.kind === 'ad' ? (
+              <CheepBanner slot="lists" />
+            ) : (
+              <ListCard
+                list={row.items[0]!}
+                onPress={() => navigation.navigate('ListDetail', { listId: row.items[0]!.id })}
+                onDelete={handleDeleteList}
+              />
+            )
+          }
           contentContainerStyle={[styles.listContent, { paddingBottom: bottomSpacing }]}
           refreshControl={
             <RefreshControl

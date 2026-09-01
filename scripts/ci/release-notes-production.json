@@ -1,9 +1,9 @@
 {
-  "_not": "Play ÜRETİMİ 1.6.2'de. Bu notlar 1.6.2 -> 1.6.3 farkını anlatır; premium metni 1.6.2'de zaten duyuruldu, tekrar edilmiyor. iOS'un notları AYRI (App Store üretimi 1.6.1'de, yani oradaki fark daha büyük).",
-  "tr-TR": "Kararlılık düzeltmeleri ve küçük iyileştirmeler.",
-  "en-US": "Stability fixes and small improvements.",
-  "pl-PL": "Poprawki stabilności i drobne ulepszenia.",
-  "hr": "Ispravci stabilnosti i manja poboljšanja.",
-  "hu-HU": "Stabilitási javítások és apró fejlesztések.",
-  "ro": "Corecții de stabilitate și mici îmbunătățiri."
+  "_not": "Play ÜRETİMİ 1.6.3'te. Bu notlar 1.6.3 -> 1.6.4 farkını anlatır: parola sıfırlama (yeni özellik) + genişletilmiş reklam yerleşimi. Reklam yerleşimi KULLANICIYA DUYURULMUYOR: sürüm notunda 'daha fazla reklam ekledik' demek indirmeyi düşürür ve mağaza notu bir pazarlama alanı, değişiklik günlüğü değil. iOS'un notları AYRI (App Store üretimi 1.6.1'de, yani oradaki fark daha büyük).",
+  "tr-TR": "• Şifreni unuttuysan artık e-postana gelen kodla yeni şifre belirleyebilirsin.\n• Çeşitli iyileştirmeler ve hata düzeltmeleri.",
+  "en-US": "• Forgot your password? You can now set a new one with a code sent to your email.\n• Various improvements and bug fixes.",
+  "pl-PL": "• Nie pamiętasz hasła? Możesz teraz ustawić nowe za pomocą kodu wysłanego na e-mail.\n• Różne ulepszenia i poprawki błędów.",
+  "hr": "• Zaboravili ste lozinku? Sada možete postaviti novu pomoću koda poslanog na e-mail.\n• Razna poboljšanja i ispravci grešaka.",
+  "hu-HU": "• Elfelejtetted a jelszavad? Mostantól beállíthatsz újat az e-mailben kapott kóddal.\n• Különféle fejlesztések és hibajavítások.",
+  "ro": "• Ți-ai uitat parola? Acum poți seta una nouă cu un cod trimis pe e-mail.\n• Diverse îmbunătățiri și corecții de erori."
 }

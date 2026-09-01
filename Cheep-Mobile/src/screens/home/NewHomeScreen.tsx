@@ -367,6 +367,15 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
         </FadeInUp>
 
         {/* Categories */}
+        {/* Banner — AKTİF LİSTE KARTININ HEMEN ALTINDA.
+            ESKİDEN fırsat rayı ile market listesi arasındaydı, yani altı
+            bölümün beşincisi: pratikte kimsenin inmediği bir yer. AdMob'da
+            yedi günde 0 gösterim çıkmasının sebeplerinden biri buydu.
+            Kullanıcının uygulamayı açma sebebi (selamlama + aktif liste)
+            hâlâ reklamdan ÖNCE geliyor — reklam cevabın önüne geçmiyor, ama
+            artık ilk kaydırmada görünüyor. */}
+        <CheepBanner slot="home" style={styles.homeBanner} />
+
         <FadeInUp delay={170}>
           <View style={styles.sectionHead}>
             <Text style={styles.sectionTitle}>{t('home.categories_title')}</Text>
@@ -455,13 +464,6 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
             })}
           </ScrollView>
         </FadeInUp>
-
-        {/* Banner — fırsat rayı ile market listesi ARASINDA, yani fold'un
-            altında. Ana sayfanın üst kısmı (aktif liste, kategoriler, fırsatlar)
-            kullanıcının uygulamayı açma sebebi; oraya reklam koymak açılış
-            deneyimini vergilendirirdi. Buraya inen kullanıcı zaten göz
-            gezdiriyor. */}
-        <CheepBanner slot="home" style={styles.homeBanner} />
 
         {/* Markets we compare (no fake distance) */}
         <FadeInUp delay={290}>

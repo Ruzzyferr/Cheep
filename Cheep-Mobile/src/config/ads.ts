@@ -7,21 +7,59 @@
  * ödediği şeyi geri almak, rıza alınmadan istek atmak GDPR ihlali.
  *
  * YERLEŞİM POLİTİKASI — nereye reklam KOYMUYORUZ ve neden:
- *   • Karşılaştırma sonucu ekranı — uygulamanın değerini kanıtladığı an;
- *     oraya reklam koymak tam güven kazanılan anda vergi almak olur.
- *   • Ürün detayındaki fiyat tablosu — reklam FİYAT sanılabilir. Bir fiyat
- *     karşılaştırma uygulamasında bu yalnızca kötü UX değil, tüketiciyi
- *     yanıltma riski.
- *   • Onboarding ve izin ekranları — aktivasyonu düşürür, ayrıca mağaza
- *     inceleme riski.
+ *   • Karşılaştırma sonucu ve strateji ekranı — uygulamanın değerini
+ *     kanıtladığı an; oraya reklam koymak tam güven kazanılan anda vergi
+ *     almak olur.
+ *   • Ürün detayındaki FİYAT TABLOSUNUN İÇİ — reklam FİYAT sanılabilir. Bir
+ *     fiyat karşılaştırma uygulamasında bu yalnızca kötü UX değil, tüketiciyi
+ *     yanıltma riski. (Tablonun ALTI serbest: orada reklam bir satır değil,
+ *     kendi çerçevesinde ayrı bir blok.)
+ *   • Onboarding, giriş/kayıt ve izin ekranları — aktivasyonu düşürür, ayrıca
+ *     mağaza inceleme riski.
+ *   • Paywall — reklamsızlığı satan ekranda reklam göstermek.
+ *   • Market detayı — ekran henüz "yakında" yer tutucusu; içeriği olmayan bir
+ *     sayfada tek görünen şey reklam olurdu. Ekran doldurulduğunda burası
+ *     yeniden değerlendirilmeli.
+ *   • Asistan sohbeti — konuşmanın ortasına giren reklam mesaj sanılır.
  * Tam ekran (interstitial) reklam da BİLEREK yok: uygulamada henüz doğal bir
  * "iş bitti" anı yok, ve değer teslim edilmeden gösterilen tam ekran reklam
  * kaldırılma sebeplerinin başında geliyor.
+ *
+ * KONUM: her yerleşim, o ekranın İLK içerik bloğundan hemen sonra duruyor —
+ * başlığın hemen altında değil (kullanıcı aradığı şeyi önce görmeli), ama
+ * sayfanın dibinde de değil. İlk üç yerleşim uzun süre ekranların ALT
+ * yarısındaydı; AdMob'da yedi günde 0 gösterim çıkmasının sebeplerinden biri
+ * buydu — kullanıcıların çoğu o noktaya hiç inmiyor. Yeni bir yerleşim
+ * eklerken kural: ilk kaydırmada görünebilecek kadar yukarıda, ekranın asıl
+ * cevabının önüne geçmeyecek kadar aşağıda.
  */
 import { Platform } from 'react-native';
 
-/** Banner gösterilen yerler. Yeni yer eklemeden önce yukarıdaki politikayı oku. */
-export type AdSlot = 'home' | 'search' | 'list';
+/**
+ * Banner gösterilen yerler. Yeni yer eklemeden önce yukarıdaki politikayı oku.
+ *
+ * HER YERLEŞİM AYRI BİR ADMOB BİRİMİ demek (platform başına). Tek birim
+ * paylaşılsaydı AdMob raporunda hangi ekranın gelir ürettiği hiç
+ * öğrenilemezdi — ve hangi yerleşimin kaldırılacağına karar vermek için
+ * gereken tek veri bu.
+ *
+ * Buraya bir değer eklemek DERLEME HATASI ÜRETİR (`REAL_UNITS` Record'u
+ * eksik kalır) — bilerek: ortam değişkeni tanımlanmadan eklenen bir yerleşim
+ * sessizce test reklamına düşer, yani gerçek kullanıcıya "Test Ad" yazan bir
+ * kutu gösterir ve hiç gelir üretmez.
+ */
+export type AdSlot =
+  | 'home'
+  | 'search'
+  | 'list'
+  /** Ürün detayı — fiyat tablosunun ALTINDA, tablonun içinde değil. */
+  | 'detail'
+  /** Kategori ürün ızgarası. */
+  | 'category'
+  /** Listelerim (liste dizini). */
+  | 'lists'
+  /** Fırsatlar sekmesi. */
+  | 'deals';
 
 /**
  * GOOGLE'IN RESMİ TEST BANNER BİRİMLERİ.
@@ -62,11 +100,19 @@ const REAL_UNITS: Record<AdSlot, string | undefined> = Platform.select({
     home: process.env.EXPO_PUBLIC_ADMOB_BANNER_HOME_IOS,
     search: process.env.EXPO_PUBLIC_ADMOB_BANNER_SEARCH_IOS,
     list: process.env.EXPO_PUBLIC_ADMOB_BANNER_LIST_IOS,
+    detail: process.env.EXPO_PUBLIC_ADMOB_BANNER_DETAIL_IOS,
+    category: process.env.EXPO_PUBLIC_ADMOB_BANNER_CATEGORY_IOS,
+    lists: process.env.EXPO_PUBLIC_ADMOB_BANNER_LISTS_IOS,
+    deals: process.env.EXPO_PUBLIC_ADMOB_BANNER_DEALS_IOS,
   },
   default: {
     home: process.env.EXPO_PUBLIC_ADMOB_BANNER_HOME_ANDROID,
     search: process.env.EXPO_PUBLIC_ADMOB_BANNER_SEARCH_ANDROID,
     list: process.env.EXPO_PUBLIC_ADMOB_BANNER_LIST_ANDROID,
+    detail: process.env.EXPO_PUBLIC_ADMOB_BANNER_DETAIL_ANDROID,
+    category: process.env.EXPO_PUBLIC_ADMOB_BANNER_CATEGORY_ANDROID,
+    lists: process.env.EXPO_PUBLIC_ADMOB_BANNER_LISTS_ANDROID,
+    deals: process.env.EXPO_PUBLIC_ADMOB_BANNER_DEALS_ANDROID,
   },
 }) as Record<AdSlot, string | undefined>;
 
