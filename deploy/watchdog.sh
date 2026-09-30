@@ -101,22 +101,62 @@ Sunucu: $(hostname) · $(date -Is)"
     fi
 }
 
+# nadiren <ad> <saniye> — bu kontrol son <saniye> içinde koştuysa 1 döner.
+#
+# NEDEN VAR: `docker exec` ve `docker inspect` çağrılarının HER BİRİ dockerd'nin
+# heap'inde kalıcı iz bırakıyor. Canlıda ölçüldü (Docker 29.6.1): 200 exec
+# +26,9 MB (~134 kB/çağrı), 200 inspect +4,5 MB (~23 kB/çağrı). Nöbetçi 5
+# dakikada bir 4 inspect + 4 exec yapıyordu: günde ~177 MB. 16 günde dockerd
+# 969 MB'a (2 GB RAM'in %48'i) çıkmış, sunucu swap'e düşmüş ve DigitalOcean
+# "bellek dolu" uyarıları göndermeye başlamıştı. Yani sessiz arızaları yakalasın
+# diye kurulan nöbetçi, sunucunun kendisini boğan şeydi.
+#
+# Ucuz kontroller (curl, /proc, df) her turda koşmaya devam ediyor. PAHALI
+# olanlar — psql gerektirenler — saatte bire indirildi. Bu bir taviz değil:
+# veri tazeliği eşiği 3 GÜN, onu 5 dakikada bir sormanın hiçbir karşılığı yoktu.
+nadiren() {
+    local ad="$1" aralik="$2" f="$STATE_DIR/son-$1" son=0 now
+    [ -f "$f" ] && son=$(cat "$f" 2>/dev/null || echo 0)
+    now=$(date +%s)
+    if [ $(( now - son )) -ge "$aralik" ]; then
+        echo "$now" > "$f"
+        return 0
+    fi
+    return 1
+}
+
+# Atlanan kontrol `report` ÇAĞIRMAZ — durumu olduğu gibi kalır. Atlamayı "ok"
+# saymak, arızalı bir durumu sessizce temizlerdi.
+SAATLIK=3600
+
 # ---------------------------------------------------------------- kontroller
 
-# 1) Container'lar ayakta mı
+# 1) Container'lar ayakta mı — TEK `docker ps` ile.
+#
+# Eskiden container başına bir `docker inspect` vardı (4 çağrı/tur). `docker ps`
+# hepsini tek çağrıda veriyor; dockerd'ye binen yük dörtte bire iniyor ve
+# karşılığında hiçbir bilgi kaybedilmiyor.
+calisanlar=$(docker ps --format '{{.Names}}' 2>/dev/null)
 for c in $CONTAINERS; do
-    if [ "$(docker inspect -f '{{.State.Running}}' "$c" 2>/dev/null)" = "true" ]; then
+    if printf '%s
+' "$calisanlar" | grep -qx "$c"; then
         report "container-$c" ok ""
     else
         report "container-$c" fail "Container '$c' çalışmıyor."
     fi
 done
 
-# 2) API sağlığı — önce iç ağdan (uygulama mı bozuk, ağ mı belli olsun)
-if docker exec deploy-backend-1 sh -lc 'node -e "fetch(\"http://127.0.0.1:3000/health\").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"' >/dev/null 2>&1; then
+# 2) API sağlığı — yayınlanmış loopback portundan, `docker exec` OLMADAN.
+#
+# Backend `127.0.0.1:3000` adresini yayınlıyor, yani host'tan doğrudan
+# sorulabiliyor. Kontrolün amacı korunuyor: bu istek DNS, TLS ve Caddy'ye
+# UĞRAMIYOR, dolayısıyla "uygulama mı bozuk, ağ mı" ayrımı aynen duruyor —
+# ama tur başına bir `docker exec` (≈134 kB kalıcı dockerd heap'i) gitti.
+code=$(curl -s -m 10 -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/health 2>/dev/null)
+if [ "$code" = "200" ]; then
     report "api-internal" ok ""
 else
-    report "api-internal" fail "Backend /health iç ağdan yanıt vermiyor (uygulama seviyesinde sorun)."
+    report "api-internal" fail "Backend /health loopback'ten '$code' döndü (uygulama seviyesinde sorun)."
 fi
 
 # 3) Dışarıdan HTTPS (Caddy + TLS + yönlendirme zinciri)
@@ -130,11 +170,17 @@ for url in https://api.cheep.live/health https://cheep.live/; do
     fi
 done
 
-# 4) Veritabanı
-if docker exec deploy-db-1 sh -lc 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"' >/dev/null 2>&1; then
-    report "postgres" ok ""
-else
-    report "postgres" fail "Postgres pg_isready yanıt vermiyor."
+# 4) Veritabanı — SAATTE BİR (psql gerektiriyor, yani `docker exec`).
+#
+# Beş dakikada bir sormak gerekmiyordu: veritabanı gerçekten ölürse bunu
+# `api-internal` ZATEN bir turda yakalar (backend /health DB'ye dokunuyor).
+# Bu kontrol onun teyidi, ilk savunma hattı değil.
+if nadiren postgres "$SAATLIK"; then
+    if docker exec deploy-db-1 sh -lc 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"' >/dev/null 2>&1; then
+        report "postgres" ok ""
+    else
+        report "postgres" fail "Postgres pg_isready yanıt vermiyor."
+    fi
 fi
 
 # 5) Disk
@@ -222,7 +268,7 @@ done
 # timer'i devre disi birakilir ya da maskelenirse servis sonsuza dek
 # "inactive" kalir -- dongu bunu OK sayar. Yani "is hic calismiyor" durumu
 # nobetcinin tamamen kor oldugu bir yerdeydi.
-for timer in cheep-fetcher-pl cheep-price-drops cheep-site-build              cheep-taxonomy cheep-backup cheep-watchdog; do
+for timer in cheep-fetcher-pl cheep-price-drops cheep-site-build              cheep-taxonomy cheep-backup cheep-watchdog cheep-docker-recycle; do
     if ! systemctl is-enabled "$timer.timer" >/dev/null 2>&1; then
         report "timer-$timer" fail "Zamanlayici '$timer.timer' ETKIN DEGIL -- bu is hic calismiyor."
     else
@@ -243,6 +289,9 @@ done
 # TR daemon'i tamamen olse bile PL'nin gecelik rotasyonu satir guncelledigi
 # icin toplam > 0 kaliyor ve nobetci "veri taze" diyordu. Turk fiyatlari
 # donmusken uyari HIC CIKMIYORDU. Her ulke ayri sinaniyor.
+# SAATTE BİR: eşik 3 GÜN, beş dakikada bir sormanın hiçbir karşılığı yoktu ve
+# tur başına İKİ `docker exec` demekti (günde 576 çağrı, ~77 MB dockerd heap'i).
+if nadiren veri-tazeligi "$SAATLIK"; then
 for ulke in TR PL; do
     taze=$(docker exec deploy-db-1 psql -U cheep -d cheep_db -tAc \
         "SELECT count(*) FROM store_prices sp
@@ -258,5 +307,34 @@ for ulke in TR PL; do
         report "veri-tazeligi-$ulke" fail "$ulke: son 3 GUNDE hicbir fiyat guncellenmedi. Ingest hatti (fetch daemon / PL zamanlayici) durmus olabilir — uygulama saglikli gorunurken bayat fiyat gosteriyor."
     fi
 done
+fi
+
+# 10) BELLEK — bu kontrol, kaçırdığı bir arıza yüzünden eklendi.
+#
+# 30 Eylül'de sunucu haftalardır bellek baskısı altındaydı (dockerd 969 MB,
+# swap 873 MB, boşta 99 MB) ve nöbetçinin bundan HABERİ YOKTU: container'lara,
+# HTTPS'e, diske ve yedeğe bakıyordu ama RAM'e bakmıyordu. Haberi veren
+# DigitalOcean'ın kendi izlemesi oldu — yani bizim izleme katmanımızın kör
+# noktasını dışarıdaki bir servis kapatıyordu. Üstelik baskının KAYNAĞI
+# nöbetçinin kendi docker çağrılarıydı (bkz. `nadiren`).
+#
+# Eşik "kullanılan" değil KULLANILABİLİR bellek üzerinden: Linux boştaki RAM'i
+# önbellek olarak kullanır, o yüzden "used" yüksek görünmesi tek başına arıza
+# değildir. MemAvailable çekirdeğin "baskı olursa gerçekten verebileceğim"
+# tahminidir ve doğru sinyal odur.
+MEM_MIN_PCT=15
+read -r mem_avail_pct mem_avail_mb <<EOF_MEM
+$(awk '/^MemAvailable:/{a=$2} /^MemTotal:/{t=$2} END{printf "%d %d", a*100/t, a/1024}' /proc/meminfo)
+EOF_MEM
+swap_used_mb=$(awk '/^SwapTotal:/{t=$2} /^SwapFree:/{f=$2} END{printf "%d", (t-f)/1024}' /proc/meminfo)
+
+if [ "${mem_avail_pct:-100}" -ge "$MEM_MIN_PCT" ]; then
+    report "bellek" ok ""
+else
+    report "bellek" fail "Kullanılabilir bellek %$mem_avail_pct (${mem_avail_mb} MB), eşik %$MEM_MIN_PCT. Swap kullanımı: ${swap_used_mb} MB.
+
+En çok bellek kullanan 5 süreç:
+$(ps -eo rss,comm --sort=-rss 2>/dev/null | head -6 | awk 'NR>1{printf \"  %6.0f MB  %s\n\", $1/1024, $2}')"
+fi
 
 echo "[$(date -Is)] nöbetçi turu tamam"

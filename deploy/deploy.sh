@@ -33,7 +33,11 @@ echo "==> Kullanılmayan imajlar ve build önbelleği temizleniyor"
 docker image prune -f >/dev/null 2>&1 || true
 # `image prune` BuildKit önbelleğine DOKUNMAZ; bkz. build-site.sh'teki
 # gerekçe (birikip diski %80'e çıkarmıştı).
-docker builder prune -f --filter 'until=48h' >/dev/null 2>&1 || true
+# `--all` ŞART: bayraksız `builder prune` yalnızca DANGLING katmanları siler.
+# Bu satır aylardır her gece koşuyordu ve önbellek yine 64,8 GB'a çıktı
+# (disk %85) — çünkü gecelik derlemenin bıraktığı katmanlar dangling
+# DEĞİL, sadece kullanılmıyor. `--all` ile aynı filtre 49,6 GB boşalttı.
+docker builder prune -f --all --filter 'until=48h' >/dev/null 2>&1 || true
 
 # FETCH DAEMON'INI YENİDEN BAŞLAT.
 #

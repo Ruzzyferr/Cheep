@@ -1,0 +1,13 @@
+[Unit]
+Description=Cheep — dockerd'yi geri donusture (bellek sizintisini sifirla)
+Documentation=https://github.com/moby/moby/issues
+After=docker.service
+
+[Service]
+Type=oneshot
+# `live-restore: true` sayesinde bu KESINTISIZ: container'lar calismaya devam
+# eder, StartedAt degismez. 30 Eylul'de canlida dogrulandi (iki uc nokta
+# boyunca 200). live-restore KAPALIYSA bu birim container'lari durdurur --
+# /etc/docker/daemon.json'dan kaldirilirsa bu timer da kaldirilmali.
+ExecStartPre=/usr/bin/test -f /etc/docker/daemon.json
+ExecStart=/bin/systemctl restart docker

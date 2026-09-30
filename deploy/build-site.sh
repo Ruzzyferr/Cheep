@@ -88,7 +88,11 @@ docker image prune -f >/dev/null 2>&1 || true
 # %85 eşiğinin hemen altında. Dolduğunda Postgres yazamaz hale gelirdi.
 # 48 saatten eski katmanlar atılıyor: ardışık iki gecelik derleme hâlâ
 # önbellekten faydalanır, ötesi zaten çöp.
-docker builder prune -f --filter 'until=48h' >/dev/null 2>&1 || true
+# `--all` ŞART: bayraksız `builder prune` yalnızca DANGLING katmanları siler.
+# Bu satır aylardır her gece koşuyordu ve önbellek yine 64,8 GB'a çıktı
+# (disk %85) — çünkü gecelik derlemenin bıraktığı katmanlar dangling
+# DEĞİL, sadece kullanılmıyor. `--all` ile aynı filtre 49,6 GB boşalttı.
+docker builder prune -f --all --filter 'until=48h' >/dev/null 2>&1 || true
 
 # --- 3b) IndexNow: Bing/Yandex'e değişenleri bildir --------------------
 # Google'ın karşılığı yok (sitemap + Search Console ile ilerliyoruz) ama

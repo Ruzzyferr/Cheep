@@ -1,0 +1,11 @@
+[Unit]
+Description=Cheep dockerd geri donusum zamanlayicisi (haftalik)
+
+[Timer]
+# Pazar 05:30 -- gecelik site derlemesinden (04:00) ve yedekten sonra.
+OnCalendar=Sun *-*-* 05:30:00
+Persistent=true
+AccuracySec=5min
+
+[Install]
+WantedBy=timers.target
