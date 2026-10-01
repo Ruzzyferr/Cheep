@@ -16,7 +16,7 @@ numpy>=2.5.2  # Cosine similarity hesaplamaları için (py3.12 wheel)
 python-dotenv==1.2.3  # .env dosyası desteği için
 
 # Kafka producer (INGEST_MODE=kafka) — raw.products.v1'e Avro üretimi
-confluent-kafka==2.15.0
+confluent-kafka==2.15.1
 fastavro==1.12.2
 
 # Test
