@@ -33,7 +33,7 @@ export const hr: Dict = {
     badge: 'Uživo u 5 zemalja · 120.000+ proizvoda',
     titleLine1: 'Isti proizvod.',
     titleLine2: 'Najniža cijena.',
-    sub: 'Cheep uspoređuje cijene trgovačkih lanaca jednu po jednu i tvoj popis za kupnju prebacuje u najpovoljniju košaricu. Stvarne cijene, osvježene svaki dan — štediš bez razmišljanja.',
+    sub: 'Cheep uspoređuje cijene trgovačkih lanaca jednu po jednu i tvoj popis za kupnju prebacuje u najpovoljniju košaricu. Stvarne cijene, redovito osvježene — štediš bez razmišljanja.',
     ctaPrimary: 'Preuzmi aplikaciju',
     ctaSecondary: 'Kako radi?',
     // Cijene su primjer. Poredane su tako da je posljednja najjeftinija.
@@ -112,7 +112,7 @@ export const hr: Dict = {
     eyebrow: 'Pokrivenost',
     titleLead: 'Uživo u pet zemalja,',
     titleAccent: 'Europa slijedi',
-    sub: 'Turska, Poljska, Hrvatska, Mađarska i Rumunjska. Cijene se povezuju preko barkoda i osvježavaju svaki dan stvarnim podacima trgovina.',
+    sub: 'Turska, Poljska, Hrvatska, Mađarska i Rumunjska. Cijene se povezuju preko barkoda i redovito osvježavaju stvarnim podacima trgovina.',
     countries: [
       { code: 'TR', name: 'Turska' },
       { code: 'PL', name: 'Poljska' },
@@ -169,7 +169,7 @@ export const hr: Dict = {
       },
       {
         q: 'Odakle dolaze cijene i koliko se često osvježavaju?',
-        a: 'U Hrvatskoj i Poljskoj cijene preuzimamo iz javno objavljenih cjenika trgovačkih lanaca, u Turskoj iz službenog, javno dostupnog izvora koji vodi TÜBİTAK BİLGEM uz potporu turskog Ministarstva trgovine (marketfiyati.org.tr), u Mađarskoj iz službenog sustava za praćenje cijena Agencije za zaštitu tržišnog natjecanja (GVH), a u Rumunjskoj iz državnog sustava Monitorul Prețurilor. Cijene osvježavamo svaki dan. Informativne su naravi i mogu se razlikovati od cijene na blagajni.',
+        a: 'U Hrvatskoj i Poljskoj cijene preuzimamo iz javno objavljenih cjenika trgovačkih lanaca, u Turskoj iz službenog, javno dostupnog izvora koji vodi TÜBİTAK BİLGEM uz potporu turskog Ministarstva trgovine (marketfiyati.org.tr), u Mađarskoj iz službenog sustava za praćenje cijena Agencije za zaštitu tržišnog natjecanja (GVH), a u Rumunjskoj iz državnog sustava Monitorul Prețurilor. Cijene osvježavamo redovito; većina proizvoda osvježi se svakih nekoliko dana. Informativne su naravi i mogu se razlikovati od cijene na blagajni.',
       },
       {
         q: 'Cijene kojih trgovina uspoređujete?',
@@ -312,7 +312,7 @@ export const hr: Dict = {
         { p: 'Korištenjem Cheepa prihvaćaš ove uvjete. Cheep je informativni alat za usporedbu cijena u trgovinama.' },
         { h2: 'Narav usluge' },
         { ul: [
-          'Cijene se redovito prikupljaju iz javno dostupnih izvora trgovačkih lanaca i osvježavaju svaki dan.',
+          'Cijene se redovito prikupljaju iz javno dostupnih izvora trgovačkih lanaca; većina proizvoda osvježi se svakih nekoliko dana.',
           'Cijene su informativne naravi i mogu se razlikovati od cijene koja vrijedi u trgovini. Obvezujuća je cijena na blagajni.',
           'Cheep nije prodajno mjesto — ne prodaje proizvode niti naplaćuje.',
         ] },

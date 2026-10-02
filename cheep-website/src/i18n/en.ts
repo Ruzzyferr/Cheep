@@ -63,7 +63,7 @@ export const en: Dict = {
   },
 
   compare: {
-    eyebrow: 'Official data · updated daily',
+    eyebrow: 'Official data · updated regularly',
     titleLead: 'Same product,',
     titleAccent: 'a different price in every store.',
     body: 'On a single carton of milk you can pay 10–15% more from one chain to the next. Cheep puts the price of that exact product side by side across chains and hands you the cheapest one in a second — no guessing, no driving around.',
@@ -182,7 +182,7 @@ export const en: Dict = {
       },
       {
         q: 'Where do the prices come from and how often are they updated?',
-        a: 'In Turkey prices come from the public, official source operated by TÜBİTAK BİLGEM with the support of the Ministry of Trade (marketfiyati.org.tr); in Hungary from the official price monitor of the Competition Authority (GVH); in Romania from the state Monitorul Prețurilor system; and in Poland and Croatia from the price lists the chains publish publicly. Prices are updated daily. They are for information only and may differ from the price at the checkout.',
+        a: 'In Turkey prices come from the public, official source operated by TÜBİTAK BİLGEM with the support of the Ministry of Trade (marketfiyati.org.tr); in Hungary from the official price monitor of the Competition Authority (GVH); in Romania from the state Monitorul Prețurilor system; and in Poland and Croatia from the price lists the chains publish publicly. Prices are updated regularly; most products refresh every few days. They are for information only and may differ from the price at the checkout.',
       },
       {
         q: 'Which stores does it compare?',

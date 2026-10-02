@@ -34,7 +34,7 @@ export const tr: Dict = {
     badge: '5 ülkede canlı · 120.000+ ürün',
     titleLine1: 'Aynı ürün.',
     titleLine2: 'En ucuz fiyat.',
-    sub: 'Cheep, marketlerin fiyatlarını tek tek karşılaştırır; alışveriş listeni en uygun sepete taşır. Her gün güncellenen gerçek fiyatlarla, hiç düşünmeden tasarruf et.',
+    sub: 'Cheep, marketlerin fiyatlarını tek tek karşılaştırır; alışveriş listeni en uygun sepete taşır. Düzenli güncellenen gerçek fiyatlarla, hiç düşünmeden tasarruf et.',
     ctaPrimary: 'Uygulamayı indir',
     ctaSecondary: 'Nasıl çalışır?',
     // Fiyatlar örnektir. Son fiyat en ucuz olacak şekilde sıralanır.
@@ -170,7 +170,7 @@ export const tr: Dict = {
       },
       {
         q: 'Fiyatlar nereden geliyor ve ne sıklıkla güncelleniyor?',
-        a: 'Türkiye’de fiyatlar T.C. Ticaret Bakanlığı desteğiyle TÜBİTAK BİLGEM tarafından yürütülen herkese açık resmi kaynaktan (marketfiyati.org.tr), Macaristan’da Rekabet Kurumu’nun (GVH) resmi fiyat izleme sisteminden, Romanya’da devletin Monitorul Prețurilor sisteminden, Polonya ve Hırvatistan’da ise market zincirlerinin herkese açık fiyat listelerinden derlenir. Fiyatlar her gün güncellenir. Bilgilendirme amaçlıdır; kasadaki güncel fiyattan farklı olabilir.',
+        a: 'Türkiye’de fiyatlar T.C. Ticaret Bakanlığı desteğiyle TÜBİTAK BİLGEM tarafından yürütülen herkese açık resmi kaynaktan (marketfiyati.org.tr), Macaristan’da Rekabet Kurumu’nun (GVH) resmi fiyat izleme sisteminden, Romanya’da devletin Monitorul Prețurilor sisteminden, Polonya ve Hırvatistan’da ise market zincirlerinin herkese açık fiyat listelerinden derlenir. Fiyatlar düzenli güncellenir; çoğu ürün birkaç günde bir tazelenir. Bilgilendirme amaçlıdır; kasadaki güncel fiyattan farklı olabilir.',
       },
       {
         q: 'Hangi marketlerin fiyatlarını karşılaştırıyor?',

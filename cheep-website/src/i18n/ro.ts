@@ -169,7 +169,7 @@ export const ro: Dict = {
       },
       {
         q: 'De unde vin prețurile și cât de des se actualizează?',
-        a: 'În România, prețurile provin din sistemul de stat Monitorul Prețurilor, în Ungaria din sistemul oficial de monitorizare a prețurilor al autorității de concurență (GVH), în Turcia din sursa oficială publică operată de TÜBİTAK BİLGEM cu sprijinul Ministerului Comerțului (marketfiyati.org.tr), iar în Polonia și Croația din listele de prețuri publicate de lanțurile de magazine. Prețurile se actualizează zilnic. Au caracter informativ și pot diferi de prețul de la casă.',
+        a: 'În România, prețurile provin din sistemul de stat Monitorul Prețurilor, în Ungaria din sistemul oficial de monitorizare a prețurilor al autorității de concurență (GVH), în Turcia din sursa oficială publică operată de TÜBİTAK BİLGEM cu sprijinul Ministerului Comerțului (marketfiyati.org.tr), iar în Polonia și Croația din listele de prețuri publicate de lanțurile de magazine. Prețurile se actualizează periodic; majoritatea produselor se reîmprospătează la câteva zile. Au caracter informativ și pot diferi de prețul de la casă.',
       },
       {
         q: 'Prețurile căror magazine le comparați?',

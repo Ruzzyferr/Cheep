@@ -169,7 +169,7 @@ export const pl: Dict = {
       },
       {
         q: 'Skąd pochodzą ceny i jak często są aktualizowane?',
-        a: 'W Polsce i Chorwacji ceny zbieramy z publicznie dostępnych cenników sieci handlowych, w Turcji z oficjalnego, publicznego źródła tureckiego Ministerstwa Handlu, na Węgrzech z oficjalnego monitora cen urzędu antymonopolowego (GVH), a w Rumunii z państwowego systemu Monitorul Prețurilor. Ceny aktualizujemy codziennie. Mają charakter informacyjny i mogą różnić się od ceny przy kasie.',
+        a: 'W Polsce i Chorwacji ceny zbieramy z publicznie dostępnych cenników sieci handlowych, w Turcji z oficjalnego, publicznego źródła tureckiego Ministerstwa Handlu, na Węgrzech z oficjalnego monitora cen urzędu antymonopolowego (GVH), a w Rumunii z państwowego systemu Monitorul Prețurilor. Ceny aktualizujemy regularnie; większość produktów odświeża się co kilka dni. Mają charakter informacyjny i mogą różnić się od ceny przy kasie.',
       },
       {
         q: 'Ceny których sklepów porównujecie?',

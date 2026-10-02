@@ -169,7 +169,7 @@ export const hu: Dict = {
       },
       {
         q: 'Honnan származnak az árak, és milyen gyakran frissülnek?',
-        a: 'Magyarországon a Gazdasági Versenyhivatal (GVH) hivatalos Árfigyelő rendszeréből, Romániában az állami Monitorul Prețurilor rendszerből, Törökországban a TÜBİTAK BİLGEM által, a Kereskedelmi Minisztérium támogatásával működtetett nyilvános, hivatalos forrásból (marketfiyati.org.tr), Lengyelországban és Horvátországban pedig az áruházláncok nyilvánosan közzétett árlistáiból gyűjtjük az árakat. Az árakat naponta frissítjük. Tájékoztató jellegűek, és eltérhetnek a pénztárnál fizetendő ártól.',
+        a: 'Magyarországon a Gazdasági Versenyhivatal (GVH) hivatalos Árfigyelő rendszeréből, Romániában az állami Monitorul Prețurilor rendszerből, Törökországban a TÜBİTAK BİLGEM által, a Kereskedelmi Minisztérium támogatásával működtetett nyilvános, hivatalos forrásból (marketfiyati.org.tr), Lengyelországban és Horvátországban pedig az áruházláncok nyilvánosan közzétett árlistáiból gyűjtjük az árakat. Az árakat rendszeresen frissítjük; a legtöbb termék néhány naponta frissül. Tájékoztató jellegűek, és eltérhetnek a pénztárnál fizetendő ártól.',
       },
       {
         q: 'Melyik boltok árait hasonlítjátok össze?',
@@ -312,7 +312,7 @@ export const hu: Dict = {
         { p: 'A Cheep használatával elfogadod ezeket a feltételeket. A Cheep egy tájékoztató jellegű eszköz a bolti árak összehasonlításához.' },
         { h2: 'A szolgáltatás jellege' },
         { ul: [
-          'Az árakat rendszeresen gyűjtjük az áruházláncok nyilvánosan elérhető forrásaiból, és naponta frissítjük őket.',
+          'Az árakat rendszeresen gyűjtjük az áruházláncok nyilvánosan elérhető forrásaiból; a legtöbb termék néhány naponta frissül.',
           'Az árak tájékoztató jellegűek, és eltérhetnek a boltban érvényes ártól. A kötelező érvényű ár a pénztárnál fizetendő ár.',
           'A Cheep nem értékesítési pont: nem árul terméket, és nem fogad el fizetést.',
         ] },
