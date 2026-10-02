@@ -115,3 +115,17 @@ değil. Veri katalogda ise dördüncü sırada. Yani TR erişimi kesilirse uygul
 
 **Karar kuralı:** TÜBİTAK'tan 30 gün içinde yanıt gelmezse 2. seçeneğin
 koşul okumasına başla. Erişim fiilen kesilirse (WAF/IP bloğu) aynı gün başla.
+
+---
+
+## ⏳ Bekleyen: atıf düzeltmesi henüz YAYINDA DEĞİL
+
+TÜBİTAK BİLGEM atfı (2 Eki 2026) main'de ama **mağazadaki sürümde yok**.
+Yayındaki 1.6.4 yalnızca Ticaret Bakanlığı'nı anıyor — eksik, ama yanlış
+değil, dolayısıyla acil bir ihlal yok.
+
+Tek satırlık metin için ayrı sürüm döngüsü açılmadı. **Bir sonraki sürümde
+kendiliğinden gidecek.** `app.json` 1.6.4'te bırakıldı; 1.6.4 App Store'da
+READY_FOR_SALE olduğu için aynı sürüm numarasıyla yeni iOS derlemesi
+90186 ("closed pre-release train") ile reddedilir — sonraki sürümde önce
+sürüm numarası yükseltilmeli.
