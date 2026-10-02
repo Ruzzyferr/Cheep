@@ -13,6 +13,25 @@ git -C "$APP_DIR" reset --hard origin/main
 
 echo "==> Servisler yeniden build + restart"
 cd "$APP_DIR/deploy"
+# ---- DERLEME ONCESI ALAN GARANTISI ----------------------------------
+# 2 Eki 2026: bu derleme diski %100'e dayadi (86/87 GB) ve nobetci alarm
+# verdi. Postgres o pencerede yazamazdi; sansliydik.
+#
+# `--filter until=48h` BU ISI GORMUYOR: ayni gun ikinci bir derleme
+# yapildiginda onceki derlemenin ~21 GB'lik onbellegi 48 saatten GENC
+# oldugu icin dokunulmadan kaliyor ve ust uste biniyor. Canlida olculdu:
+# zaman filtresiyle budama 0 BAYT bosaltti, filtresiz ayni komut 20,93 GB.
+# ("Reclaimable" sutunu da yaniltici — 4,43 GB diyordu, hepsi gitti.)
+#
+# Bu yuzden alan darsa TUM kullanilmayan onbellek siliniyor. Bedeli bir
+# derlemenin onbelleksiz, yani yavas kosmasi; karsiligi diskin dolmamasi.
+bos_gb=$(df --output=avail -BG / 2>/dev/null | tail -1 | tr -dc '0-9')
+if [ "${bos_gb:-0}" -lt 60 ]; then
+    docker builder prune -f --all >/dev/null 2>&1 || true
+else
+    docker builder prune -f --all --filter 'until=48h' >/dev/null 2>&1 || true
+fi
+
 docker compose -f docker-compose.prod.yml up -d --build
 
 # CADDY'Yİ ZORLA YENİDEN OLUŞTUR.

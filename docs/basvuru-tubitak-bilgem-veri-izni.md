@@ -4,9 +4,6 @@
 **Bilgi:** `mavp@sanayi.gov.tr`
 **Konu:** Market Fiyatı verisinin mobil uygulamada kullanımı hakkında yazılı izin talebi
 
-> Gönderilmeden önce köşeli parantezli alanlar doldurulmalı.
-> Gönderildiği tarih `docs/VERI-IZINLERI.md` dosyasına işlenmeli.
-
 ---
 
 Sayın Yetkili,
@@ -39,9 +36,10 @@ yazılı izni talep etmek üzere başvuruyorum.
   kaynağı olarak marketfiyati.org.tr açıkça belirtiliyor.
 - **Yeniden yayın:** veri bir API olarak üçüncü taraflara sunulmuyor, toplu
   olarak satılmıyor veya devredilmiyor.
-- **Ticari nitelik:** uygulama ücretsizdir; gelir reklam ve isteğe bağlı bir
-  abonelikten gelmektedir. Bu nedenle kullanımı **ticari** kabul ediyor ve
-  izninizi bu çerçevede talep ediyoruz.
+- **Ticari nitelik:** uygulama kullanıcılar için ücretsizdir; gelir reklam ve
+  isteğe bağlı bir abonelikten gelmektedir. Arkasında bir şirket bulunmayıp
+  tarafımdan şahsen geliştirilmiş olsa da, gelir elde edildiği için kullanımı
+  **ticari** kabul ediyor ve izninizi bu çerçevede talep ediyorum.
 
 ## 2. Taleplerimiz
 
@@ -62,11 +60,12 @@ durdurmayı şimdiden kabul ediyoruz.
 - **App Store:** `6803882626`
 - **Web:** https://cheep.live
 - **İletişim:** info@swiip.app
-- **Geliştirici / firma:** [AD SOYAD veya ŞİRKET UNVANI]
-- **Vergi/TC kimlik no:** [GEREKİYORSA]
-- **Adres:** [ADRES]
+- **Başvuru sahibi:** Rüzgar Emir Bulut (gerçek kişi — tüzel kişilik yoktur,
+  uygulama şahsım tarafından geliştirilmiştir)
+- **T.C. kimlik no:** 49000792720
+- **Adres:** Hasırcı Sokak No: 3 Daire: 9, Kadıköy / İstanbul
 
 Değerlendirmeniz için teşekkür eder, iyi çalışmalar dilerim.
 
-[AD SOYAD]
-[TARİH]
+Rüzgar Emir Bulut
+2 Ekim 2026

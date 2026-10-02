@@ -15,7 +15,7 @@ Son güncelleme: 2 Ekim 2026
 | İşletici | **TÜBİTAK BİLGEM** (T.C. Ticaret Bakanlığı desteğiyle) |
 | Telif sahibi | TÜBİTAK (kullanım koşullarında açıkça yazılı) |
 | Erişim yolu | Açık API (`api.marketfiyati.org.tr/api/v2`) + açık sitemap |
-| **İzin durumu** | **YOK — 2 Eki 2026'da başvuruldu, yanıt bekleniyor** |
+| **İzin durumu** | **YOK — başvuru 2 Eki 2026'da GÖNDERİLDİ** (Resend id `01a0fcf5-4f02-7b3a-b5f3-1c4b1057fcd4`; alıcı marketfiyati.iletisim@tubitak.gov.tr, bilgi mavp@sanayi.gov.tr). Yanıt bekleniyor. **30 günlük karar kuralı 1 Kas 2026'da dolar.** |
 | Yetkili mahkeme | Gebze |
 | Koşulların yürürlüğü | 1 Temmuz 2024 |
 | İletişim | `marketfiyati.iletisim@tubitak.gov.tr` · `mavp@sanayi.gov.tr` |
