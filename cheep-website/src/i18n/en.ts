@@ -45,7 +45,7 @@ export const en: Dict = {
     badge: 'Live in 5 countries · 120,000+ products',
     titleLine1: 'Same product.',
     titleLine2: 'Cheapest price.',
-    sub: 'Cheep compares supermarket prices item by item and moves your shopping list to the cheapest basket. Real prices, updated every day — save without thinking about it.',
+    sub: 'Cheep compares supermarket prices item by item and moves your shopping list to the cheapest basket. Real prices, updated regularly — save without thinking about it.',
     ctaPrimary: 'Download the app',
     ctaSecondary: 'How it works',
     // Fiyatlar örnektir ve TR kataloğundan; İngilizce anasayfa da TR verisini
@@ -67,7 +67,7 @@ export const en: Dict = {
     titleLead: 'Same product,',
     titleAccent: 'a different price in every store.',
     body: 'On a single carton of milk you can pay 10–15% more from one chain to the next. Cheep puts the price of that exact product side by side across chains and hands you the cheapest one in a second — no guessing, no driving around.',
-    sourceNote: 'Official and public sources · updated daily',
+    sourceNote: 'Official and public sources · updated regularly',
     card: {
       name: 'Whole Milk',
       unit: '1 L · same brand, same product',
@@ -111,14 +111,14 @@ export const en: Dict = {
     eyebrow: 'What is it worth?',
     titleLead: 'On an average basket,',
     titleAccentSuffix: ' less to pay',
-    sub: 'The average difference people leave behind when they move their list to the best-value store. It looks small; over a month, over a year, it adds up.',
+    sub: 'The average price gap between the cheapest and most expensive store for the same product, measured across our catalogue. It looks small; over a month, over a year, it adds up.',
     stats: [
       { key: 'products', label: 'matched products' },
       { key: 'branches', label: 'store branches' },
       { key: 'countries', label: 'countries, one app' },
       { key: 'updates', label: 'price updates' },
     ],
-    updatesValue: 'Every day',
+    updatesValue: 'Every few days',
   },
 
   coverage: {
@@ -264,6 +264,8 @@ export const en: Dict = {
       updated: '2 July 2026',
       blocks: [
         { p: 'At Cheep (“we”, “the app”) we care about your privacy. This policy explains what data we collect when you use the Cheep mobile app and the **cheep.live** website, why we collect it, and what your rights are. Cheep is a savings app that compares supermarket prices; we do **not sell** your data.' },
+        { h2: 'Data controller' },
+        { p: 'The data controller is **Rüzgar Emir Bulut** (a natural person; Cheep is operated personally, not by a company). Contact: [gizlilik@cheep.live](mailto:gizlilik@cheep.live). The full postal address is provided to competent authorities on request.' },
         { h2: 'Data we collect' },
         { h3: 'Because you provide it' },
         { ul: [
@@ -323,7 +325,7 @@ export const en: Dict = {
         { p: 'By using Cheep you accept these terms. Cheep is an informational tool that helps you compare supermarket prices.' },
         { h2: 'Nature of the service' },
         { ul: [
-          'Prices are collected regularly from publicly available store sources and updated daily.',
+          'Prices are collected regularly from publicly available store sources; most products refresh every few days.',
           'Prices are for information only and may differ from the price actually in force in the store. What binds is the price at the store’s checkout.',
           'Cheep is not a point of sale; it does not sell products and does not take payments.',
         ] },

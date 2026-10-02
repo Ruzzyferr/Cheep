@@ -33,7 +33,7 @@ export const pl: Dict = {
     badge: 'Na żywo w 5 krajach · 120 000+ produktów',
     titleLine1: 'Ten sam produkt.',
     titleLine2: 'Najniższa cena.',
-    sub: 'Cheep porównuje ceny w sklepach spożywczych i przenosi Twoją listę zakupów do najtańszego koszyka. Prawdziwe ceny aktualizowane codziennie — oszczędzasz bez zastanawiania się.',
+    sub: 'Cheep porównuje ceny w sklepach spożywczych i przenosi Twoją listę zakupów do najtańszego koszyka. Prawdziwe ceny aktualizowane regularnie — oszczędzasz bez zastanawiania się.',
     ctaPrimary: 'Pobierz aplikację',
     ctaSecondary: 'Jak to działa?',
     // Ceny przykładowe. Ostatnia pozycja to najtańsza.
@@ -50,11 +50,11 @@ export const pl: Dict = {
   },
 
   compare: {
-    eyebrow: 'Dane publiczne · aktualizacja codziennie',
+    eyebrow: 'Dane publiczne · aktualizowane regularnie',
     titleLead: 'Ten sam produkt,',
     titleAccent: 'inna cena w każdym sklepie.',
     body: 'Za jeden karton mleka możesz zapłacić 10–15% więcej, zależnie od sklepu. Cheep zestawia ceny tego samego produktu w sieciach i w sekundę pokazuje najtańszą — bez zgadywania i bez objeżdżania sklepów.',
-    sourceNote: 'W Polsce dane z publicznych źródeł sieci handlowych · aktualizacja codziennie',
+    sourceNote: 'W Polsce dane z publicznych źródeł sieci handlowych · aktualizowane regularnie',
     card: {
       name: 'Mleko UHT 3,2%',
       unit: '1 L · ta sama marka, ten sam produkt',
@@ -98,21 +98,21 @@ export const pl: Dict = {
     eyebrow: 'Ile to daje?',
     titleLead: 'W przeciętnym koszyku zapłacisz o',
     titleAccentSuffix: ' mniej',
-    sub: 'Średnia różnica, jaką zostawiają użytkownicy, przenosząc listę do najtańszego sklepu. Wygląda niepozornie, ale w skali miesiąca i roku robi się z tego konkretna kwota.',
+    sub: 'Średnia różnica ceny tego samego produktu między najtańszym a najdroższym sklepem, zmierzona w naszym katalogu. Wygląda niepozornie, ale w skali miesiąca i roku robi się z tego konkretna kwota.',
     stats: [
       { key: 'products', label: 'dopasowanych produktów' },
       { key: 'branches', label: 'sklepów w bazie' },
       { key: 'countries', label: 'kraje, jedna aplikacja' },
       { key: 'updates', label: 'aktualizacja cen' },
     ],
-    updatesValue: 'Codziennie',
+    updatesValue: 'Co kilka dni',
   },
 
   coverage: {
     eyebrow: 'Zasięg',
     titleLead: 'Na żywo w pięciu krajach,',
     titleAccent: 'Europa w drodze',
-    sub: 'Turcja, Polska, Chorwacja, Węgry i Rumunia. Ceny dopasowywane po kodzie kreskowym, aktualizowane codziennie z prawdziwych danych sklepowych.',
+    sub: 'Turcja, Polska, Chorwacja, Węgry i Rumunia. Ceny dopasowywane po kodzie kreskowym, aktualizowane regularnie z prawdziwych danych sklepowych.',
     countries: [
       { code: 'TR', name: 'Turcja' },
       { code: 'PL', name: 'Polska' },
@@ -251,6 +251,8 @@ export const pl: Dict = {
       updated: '2 lipca 2026',
       blocks: [
         { p: 'W Cheep („my”, „aplikacja”) szanujemy Twoją prywatność. Ta polityka wyjaśnia, jakie dane zbieramy, gdy korzystasz z aplikacji mobilnej Cheep i serwisu **cheep.live**, po co je zbieramy i jakie masz prawa. Cheep to aplikacja oszczędnościowa porównująca ceny w sklepach; Twoich danych **nie sprzedajemy**.' },
+        { h2: 'Administrator danych' },
+        { p: 'Administratorem danych jest **Rüzgar Emir Bulut** (osoba fizyczna; Cheep jest prowadzony osobiście, nie przez spółkę). Kontakt: [gizlilik@cheep.live](mailto:gizlilik@cheep.live). Pełny adres pocztowy jest udostępniany właściwym organom na żądanie.' },
         { h2: 'Jakie dane zbieramy' },
         { h3: 'Bo je podajesz' },
         { ul: [
@@ -310,7 +312,7 @@ export const pl: Dict = {
         { p: 'Korzystając z Cheep, akceptujesz niniejszy regulamin. Cheep jest narzędziem informacyjnym służącym do porównywania cen w sklepach.' },
         { h2: 'Charakter usługi' },
         { ul: [
-          'Ceny są regularnie zbierane z publicznie dostępnych źródeł sieci handlowych i aktualizowane codziennie.',
+          'Ceny są regularnie zbierane z publicznie dostępnych źródeł sieci handlowych; większość produktów odświeża się co kilka dni.',
           'Ceny mają charakter informacyjny i mogą różnić się od ceny obowiązującej w sklepie. Wiążąca jest cena przy kasie.',
           'Cheep nie jest punktem sprzedaży — nie sprzedaje produktów ani nie przyjmuje płatności.',
         ] },

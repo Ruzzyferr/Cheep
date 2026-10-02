@@ -50,11 +50,11 @@ export const hr: Dict = {
   },
 
   compare: {
-    eyebrow: 'Javni podaci · osvježeno svaki dan',
+    eyebrow: 'Javni podaci · redovito osvježeno',
     titleLead: 'Isti proizvod,',
     titleAccent: 'druga cijena u svakoj trgovini.',
     body: 'Za jednu litru mlijeka možeš platiti 10–15 % više, ovisno o trgovini. Cheep stavlja cijene istog proizvoda iz svih lanaca jednu uz drugu i u sekundi ti pokaže najjeftiniju — bez nagađanja i bez obilaženja trgovina.',
-    sourceNote: 'Cijene iz javno dostupnih izvora trgovačkih lanaca · osvježeno svaki dan',
+    sourceNote: 'Cijene iz javno dostupnih izvora trgovačkih lanaca · redovito osvježeno',
     card: {
       name: 'Trajno mlijeko 3,2 % m.m.',
       unit: '1 L · ista marka, isti proizvod',
@@ -98,14 +98,14 @@ export const hr: Dict = {
     eyebrow: 'Koliko to donosi?',
     titleLead: 'U prosječnoj košarici plati',
     titleAccentSuffix: ' manje',
-    sub: 'Prosječna razlika koju korisnici ostvare kad popis prebace u najpovoljniju trgovinu. Djeluje sitno, ali na razini mjeseca i godine naraste u ozbiljan iznos.',
+    sub: 'Prosječna razlika u cijeni istog proizvoda između najjeftinije i najskuplje trgovine, izmjerena u našem katalogu. Djeluje sitno, ali na razini mjeseca i godine naraste u ozbiljan iznos.',
     stats: [
       { key: 'products', label: 'uparenih proizvoda' },
       { key: 'branches', label: 'poslovnica u bazi' },
       { key: 'countries', label: 'države, jedna aplikacija' },
       { key: 'updates', label: 'osvježavanje cijena' },
     ],
-    updatesValue: 'Svaki dan',
+    updatesValue: 'Svakih nekoliko dana',
   },
 
   coverage: {
@@ -251,6 +251,8 @@ export const hr: Dict = {
       updated: '2. srpnja 2026.',
       blocks: [
         { p: 'U Cheepu („mi”, „aplikacija”) poštujemo tvoju privatnost. Ova politika objašnjava koje podatke prikupljamo kad koristiš mobilnu aplikaciju Cheep i stranicu **cheep.live**, zašto ih prikupljamo i koja su tvoja prava. Cheep je aplikacija za uštedu koja uspoređuje cijene u trgovinama; tvoje podatke **ne prodajemo**.' },
+        { h2: 'Voditelj obrade' },
+        { p: 'Voditelj obrade podataka je **Rüzgar Emir Bulut** (fizička osoba; Cheep se vodi osobno, ne putem tvrtke). Kontakt: [gizlilik@cheep.live](mailto:gizlilik@cheep.live). Puna poštanska adresa dostavlja se nadležnim tijelima na zahtjev.' },
         { h2: 'Podaci koje prikupljamo' },
         { h3: 'Jer nam ih daš' },
         { ul: [

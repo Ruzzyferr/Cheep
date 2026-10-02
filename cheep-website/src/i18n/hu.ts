@@ -33,7 +33,7 @@ export const hu: Dict = {
     badge: 'Élesben 5 országban · 120 000+ termék',
     titleLine1: 'Ugyanaz a termék.',
     titleLine2: 'A legolcsóbb ár.',
-    sub: 'A Cheep sorra összeveti a boltok árait, és a bevásárlólistádat a legolcsóbb kosárba teszi át. Valódi, naponta frissülő árak — gondolkodás nélkül spórolsz.',
+    sub: 'A Cheep sorra összeveti a boltok árait, és a bevásárlólistádat a legolcsóbb kosárba teszi át. Valódi, rendszeresen frissülő árak — gondolkodás nélkül spórolsz.',
     ctaPrimary: 'Töltsd le az appot',
     ctaSecondary: 'Hogyan működik?',
     // Az árak példaértékűek. Az első a legdrágább, az utolsó a legolcsóbb.
@@ -50,7 +50,7 @@ export const hu: Dict = {
   },
 
   compare: {
-    eyebrow: 'Nyilvános adatok · naponta frissül',
+    eyebrow: 'Nyilvános adatok · rendszeresen frissül',
     titleLead: 'Ugyanaz a termék,',
     titleAccent: 'minden boltban más ár.',
     body: 'Egyetlen doboz tejért boltról boltra 10–15%-kal is többet fizethetsz. A Cheep egymás mellé teszi ugyanannak a terméknek az árát a láncoknál, és másodpercek alatt megmutatja a legolcsóbbat — találgatás és felesleges kör nélkül.',
@@ -98,21 +98,21 @@ export const hu: Dict = {
     eyebrow: 'Mennyit ér ez?',
     titleLead: 'Egy átlagos kosárban',
     titleAccentSuffix: '-kal kevesebbet fizetsz',
-    sub: 'Ennyi az az átlagos különbség, amit a felhasználók megtakarítanak, amikor a listájukat a legolcsóbb boltba viszik át. Apróságnak tűnik, de egy hónap, egy év alatt komoly összeg lesz belőle.',
+    sub: 'Ennyi az átlagos árkülönbség ugyanarra a termékre a legolcsóbb és a legdrágább bolt között, a katalógusunkban mérve. Apróságnak tűnik, de egy hónap, egy év alatt komoly összeg lesz belőle.',
     stats: [
       { key: 'products', label: 'párosított termék' },
       { key: 'branches', label: 'üzlet az adatbázisban' },
       { key: 'countries', label: 'ország, egyetlen alkalmazás' },
       { key: 'updates', label: 'árfrissítés' },
     ],
-    updatesValue: 'Naponta',
+    updatesValue: 'Néhány naponta',
   },
 
   coverage: {
     eyebrow: 'Lefedettség',
     titleLead: 'Élesben öt országban,',
     titleAccent: 'Európa következik',
-    sub: 'Törökország, Lengyelország, Horvátország, Magyarország és Románia. Az árak vonalkód alapján párosulnak, és minden nap valós bolti adatokból frissülnek.',
+    sub: 'Törökország, Lengyelország, Horvátország, Magyarország és Románia. Az árak vonalkód alapján párosulnak, és rendszeresen, valós bolti adatokból frissülnek.',
     countries: [
       { code: 'TR', name: 'Törökország' },
       { code: 'PL', name: 'Lengyelország' },
@@ -251,6 +251,8 @@ export const hu: Dict = {
       updated: '2026. július 2.',
       blocks: [
         { p: 'A Cheepnél („mi”, „az alkalmazás”) fontos számunkra a magánszférád. Ez a tájékoztató elmondja, milyen adatokat gyűjtünk, amikor a Cheep mobilalkalmazást és a **cheep.live** oldalt használod, miért gyűjtjük őket, és milyen jogaid vannak. A Cheep egy megtakarítási alkalmazás, amely a boltok árait hasonlítja össze; az adataidat **nem adjuk el**.' },
+        { h2: 'Adatkezelő' },
+        { p: 'Az adatkezelő **Rüzgar Emir Bulut** (természetes személy; a Cheepet nem cég, hanem személyesen ő üzemelteti). Kapcsolat: [gizlilik@cheep.live](mailto:gizlilik@cheep.live). A teljes postacímet kérésre az illetékes hatóságok rendelkezésére bocsátjuk.' },
         { h2: 'Milyen adatokat gyűjtünk' },
         { h3: 'Mert te adod meg' },
         { ul: [

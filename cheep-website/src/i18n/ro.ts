@@ -33,7 +33,7 @@ export const ro: Dict = {
     badge: 'Live în 5 țări · 120.000+ produse',
     titleLine1: 'Același produs.',
     titleLine2: 'Cel mai mic preț.',
-    sub: 'Cheep compară prețurile din magazine, unul câte unul, și îți mută lista de cumpărături în cel mai ieftin coș. Prețuri reale, actualizate zilnic — economisești fără să stai pe gânduri.',
+    sub: 'Cheep compară prețurile din magazine, unul câte unul, și îți mută lista de cumpărături în cel mai ieftin coș. Prețuri reale, actualizate periodic — economisești fără să stai pe gânduri.',
     ctaPrimary: 'Descarcă aplicația',
     ctaSecondary: 'Cum funcționează?',
     // Prețuri exemplificative. Ultima poziție este cea mai ieftină.
@@ -50,11 +50,11 @@ export const ro: Dict = {
   },
 
   compare: {
-    eyebrow: 'Date publice · actualizate zilnic',
+    eyebrow: 'Date publice · actualizate periodic',
     titleLead: 'Același produs,',
     titleAccent: 'alt preț în fiecare magazin.',
     body: 'Pentru un singur litru de lapte poți plăti cu 10–15% mai mult, de la un magazin la altul. Cheep pune prețurile aceluiași produs din toate lanțurile unul lângă altul și îți arată în câteva secunde cel mai ieftin — fără presupuneri și fără drumuri în plus.',
-    sourceNote: 'Date din sistemul de stat Monitorul Prețurilor · actualizate zilnic',
+    sourceNote: 'Date din sistemul de stat Monitorul Prețurilor · actualizate periodic',
     card: {
       name: 'Lapte integral 3,5%',
       unit: '1 l · aceeași marcă, același produs',
@@ -98,21 +98,21 @@ export const ro: Dict = {
     eyebrow: 'Cât înseamnă asta?',
     titleLead: 'La un coș obișnuit plătești cu',
     titleAccentSuffix: ' mai puțin',
-    sub: 'Diferența medie pe care o lasă în buzunar utilizatorii care își mută lista în cel mai ieftin magazin. Pare puțin, dar într-o lună și într-un an se adună serios.',
+    sub: 'Diferența medie de preț pentru același produs între cel mai ieftin și cel mai scump magazin, măsurată în catalogul nostru. Pare puțin, dar într-o lună și într-un an se adună serios.',
     stats: [
       { key: 'products', label: 'produse potrivite' },
       { key: 'branches', label: 'magazine în baza de date' },
       { key: 'countries', label: 'țări, o singură aplicație' },
       { key: 'updates', label: 'actualizare a prețurilor' },
     ],
-    updatesValue: 'Zilnic',
+    updatesValue: 'La câteva zile',
   },
 
   coverage: {
     eyebrow: 'Acoperire',
     titleLead: 'Live în cinci țări,',
     titleAccent: 'Europa urmează',
-    sub: 'Turcia, Polonia, Croația, Ungaria și România. Prețurile se potrivesc după codul de bare și se actualizează zilnic din date reale din magazine.',
+    sub: 'Turcia, Polonia, Croația, Ungaria și România. Prețurile se potrivesc după codul de bare și se actualizează periodic din date reale din magazine.',
     countries: [
       { code: 'TR', name: 'Turcia' },
       { code: 'PL', name: 'Polonia' },
@@ -251,6 +251,8 @@ export const ro: Dict = {
       updated: '2 iulie 2026',
       blocks: [
         { p: 'La Cheep („noi”, „aplicația”) îți respectăm confidențialitatea. Această politică îți explică ce date colectăm atunci când folosești aplicația mobilă Cheep și site-ul **cheep.live**, de ce le colectăm și ce drepturi ai. Cheep este o aplicație de economisire care compară prețurile din magazine; datele tale **nu le vindem**.' },
+        { h2: 'Operator de date' },
+        { p: 'Operatorul de date este **Rüzgar Emir Bulut** (persoană fizică; Cheep este administrat personal, nu de o societate). Contact: [gizlilik@cheep.live](mailto:gizlilik@cheep.live). Adresa poștală completă este furnizată autorităților competente la cerere.' },
         { h2: 'Datele pe care le colectăm' },
         { h3: 'Pentru că ni le dai tu' },
         { ul: [
@@ -310,7 +312,7 @@ export const ro: Dict = {
         { p: 'Folosind Cheep, accepți acești termeni. Cheep este un instrument informativ care te ajută să compari prețurile din magazine.' },
         { h2: 'Natura serviciului' },
         { ul: [
-          'Prețurile sunt colectate periodic din sursele publice ale magazinelor și sunt actualizate zilnic.',
+          'Prețurile sunt colectate periodic din sursele publice ale magazinelor; majoritatea produselor se reîmprospătează la câteva zile.',
           'Prețurile au caracter informativ și pot diferi de prețul valabil în magazin. Obligatoriu este prețul de la casa magazinului.',
           'Cheep nu este un punct de vânzare; nu vinde produse și nu încasează plăți.',
         ] },

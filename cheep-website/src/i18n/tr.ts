@@ -51,11 +51,11 @@ export const tr: Dict = {
   },
 
   compare: {
-    eyebrow: 'Resmi veri · her gün güncel',
+    eyebrow: 'Resmi veri · düzenli güncellenir',
     titleLead: 'Aynı ürün,',
     titleAccent: 'her markette farklı fiyat.',
     body: 'Bir kutu süt için marketten markete %10–15 fark ödeyebilirsin. Cheep, aynı ürünün zincirlerdeki fiyatını yan yana koyar ve en ucuzunu saniyede önüne getirir — tahmin yok, gezmek yok.',
-    sourceNote: 'Türkiye’de T.C. Ticaret Bakanlığı resmi verisi · her gün güncel',
+    sourceNote: 'Türkiye’de T.C. Ticaret Bakanlığı desteğiyle TÜBİTAK BİLGEM tarafından yürütülen resmi veri · düzenli güncellenir',
     card: {
       name: 'Tam Yağlı Süt',
       unit: '1 L · aynı marka, aynı ürün',
@@ -85,7 +85,7 @@ export const tr: Dict = {
       {
         n: '02',
         title: 'Cheep karşılaştırır',
-        body: 'Her ürünü barkodundan eşleştirip tüm marketlerin güncel fiyatlarını tarar. Saniyeler içinde.',
+        body: 'Her ürünü barkodundan eşleştirip kapsadığımız marketlerin güncel fiyatlarını tarar. Saniyeler içinde.',
       },
       {
         n: '03',
@@ -99,14 +99,14 @@ export const tr: Dict = {
     eyebrow: 'Ne kadar ediyor?',
     titleLead: 'Ortalama bir sepette',
     titleAccentSuffix: ' daha az öde',
-    sub: 'Kullanıcıların listelerini en uygun markete taşıdığında bıraktığı ortalama fark. Küçük gibi görünür; ayda, yılda toplamı büyür.',
+    sub: 'Aynı ürünün en pahalı ve en ucuz market arasındaki ortalama fiyat farkı (katalogdan ölçüldü). Küçük gibi görünür; ayda, yılda toplamı büyür.',
     stats: [
       { key: 'products', label: 'eşleştirilmiş ürün' },
       { key: 'branches', label: 'market şubesi' },
       { key: 'countries', label: 'ülke, tek uygulama' },
       { key: 'updates', label: 'fiyat güncellemesi' },
     ],
-    updatesValue: 'Her gün',
+    updatesValue: 'Birkaç günde bir',
   },
 
   coverage: {
@@ -253,6 +253,8 @@ export const tr: Dict = {
       updated: '2 Temmuz 2026',
       blocks: [
         { p: 'Cheep (“biz”, “uygulama”) olarak gizliliğine önem veriyoruz. Bu politika, Cheep mobil uygulamasını ve **cheep.live** sitesini kullandığında hangi verileri topladığımızı, neden topladığımızı ve haklarını açıklar. Cheep, marketlerin fiyatlarını karşılaştıran bir tasarruf uygulamasıdır; verini **satmayız**.' },
+        { h2: 'Veri sorumlusu' },
+        { p: 'KVKK kapsamında veri sorumlusu **Rüzgar Emir Bulut**’tur (gerçek kişi; Cheep bir şirket tarafından değil, şahsen işletilmektedir). İletişim: [gizlilik@cheep.live](mailto:gizlilik@cheep.live). Açık adres bilgisi, yetkili mercilerin talebi hâlinde iletilir.' },
         { h2: 'Topladığımız veriler' },
         { h3: 'Sen sağladığın için' },
         { ul: [
@@ -312,7 +314,7 @@ export const tr: Dict = {
         { p: 'Cheep’i kullanarak bu şartları kabul etmiş olursun. Cheep, market fiyatlarını karşılaştırman için bilgi amaçlı bir araçtır.' },
         { h2: 'Hizmetin niteliği' },
         { ul: [
-          'Fiyatlar marketlerin herkese açık kaynaklarından düzenli olarak toplanır ve her gün güncellenir.',
+          'Fiyatlar marketlerin herkese açık kaynaklarından düzenli olarak toplanır; çoğu ürünün fiyatı birkaç günde bir tazelenir.',
           'Fiyatlar bilgilendirme amaçlıdır; markette geçerli olan güncel fiyattan farklı olabilir. Bağlayıcı olan marketin kasadaki fiyatıdır.',
           'Cheep bir satış noktası değildir; ürün satmaz, ödeme almaz.',
         ] },

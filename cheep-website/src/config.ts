@@ -72,5 +72,11 @@ export const HEADLINE_STATS = {
   products: 120000,
   branches: 27500, // TR 10.247 + PL 13.422 + HR 1.135 + HU 878 + RO 1.920 = 27.602
   countries: 5,
-  avgSavingPct: 23,
+  // ÖLÇÜLDÜ 2026-10-02 (üretim veritabanı): aynı ürünün en pahalı ve en ucuz
+  // market arasındaki fark, en az 2 markette bulunan 30.207 ürün üzerinden.
+  //   HR %15,8 · HU %16,1 · TR %14,5 · RO %12,7 · PL %11,5 → ağırlıklı ort. %14,7
+  // ESKİDEN 23 YAZIYORDU ve hiçbir ölçüm notu yoktu. Yalnızca abartılı değil,
+  // sitenin KENDİ gövde metniyle de çelişiyordu ("%10–15 fark"). Rakam
+  // ölçüme çekildi ve aşağı yuvarlandı; abartmak yerine eksik söylüyoruz.
+  avgSavingPct: 15,
 }
