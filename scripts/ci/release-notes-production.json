@@ -1,9 +1,9 @@
 {
-  "_not": "Play ÜRETİMİ 1.6.3'te. Bu notlar 1.6.3 -> 1.6.4 farkını anlatır: parola sıfırlama (yeni özellik) + genişletilmiş reklam yerleşimi. Reklam yerleşimi KULLANICIYA DUYURULMUYOR: sürüm notunda 'daha fazla reklam ekledik' demek indirmeyi düşürür ve mağaza notu bir pazarlama alanı, değişiklik günlüğü değil. iOS'un notları AYRI (App Store üretimi 1.6.1'de, yani oradaki fark daha büyük).",
-  "tr-TR": "• Şifreni unuttuysan artık e-postana gelen kodla yeni şifre belirleyebilirsin.\n• Çeşitli iyileştirmeler ve hata düzeltmeleri.",
-  "en-US": "• Forgot your password? You can now set a new one with a code sent to your email.\n• Various improvements and bug fixes.",
-  "pl-PL": "• Nie pamiętasz hasła? Możesz teraz ustawić nowe za pomocą kodu wysłanego na e-mail.\n• Różne ulepszenia i poprawki błędów.",
-  "hr": "• Zaboravili ste lozinku? Sada možete postaviti novu pomoću koda poslanog na e-mail.\n• Razna poboljšanja i ispravci grešaka.",
-  "hu-HU": "• Elfelejtetted a jelszavad? Mostantól beállíthatsz újat az e-mailben kapott kóddal.\n• Különféle fejlesztések és hibajavítások.",
-  "ro": "• Ți-ai uitat parola? Acum poți seta una nouă cu un cod trimis pe e-mail.\n• Diverse îmbunătățiri și corecții de erori."
+  "_not": "Play ve App Store URETIMI 1.6.4'te. Bu notlar 1.6.4 -> 1.6.5 farkini anlatir. Gorunur tek degisiklik asistan ekranindaki klavye hatasi; atif duzeltmesi ve bagimlilik yamalari kullaniciya anlatilmiyor (surum notu degisiklik gunlugu degil).",
+  "tr-TR": "• Yapay zekâ asistanında klavye açılınca yazı alanının klavyenin arkasında kalması giderildi.\n• Çeşitli iyileştirmeler ve hata düzeltmeleri.",
+  "en-US": "• Fixed the AI assistant input field being hidden behind the keyboard.\n• Various improvements and bug fixes.",
+  "pl-PL": "• Naprawiono chowanie się pola tekstowego asystenta AI za klawiaturą.\n• Różne ulepszenia i poprawki błędów.",
+  "hr": "• Ispravljeno skrivanje polja za unos AI asistenta iza tipkovnice.\n• Razna poboljšanja i ispravci grešaka.",
+  "hu-HU": "• Javítottuk, hogy az AI asszisztens beviteli mezője a billentyűzet mögé került.\n• Különféle fejlesztések és hibajavítások.",
+  "ro": "• Am reparat ascunderea câmpului de text al asistentului AI în spatele tastaturii.\n• Diverse îmbunătățiri și corecții de erori."
 }

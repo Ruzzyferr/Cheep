@@ -388,9 +388,24 @@ export function AssistantChatScreen({
 
   // ─── Render ──────────────────────────────────────────────────
   return (
+    // ANDROID'DE `behavior` BOS BIRAKILAMAZ.
+    //
+    // Burada `undefined` yaziyordu, yani KeyboardAvoidingView Android'de
+    // HICBIR SEY yapmiyordu ve klavye acilinca yazi alani klavyenin ARKASINDA
+    // kaliyordu — kullanici ne yazdigini goremiyordu.
+    //
+    // Eskiden bunu manifest'teki `windowSoftInputMode="adjustResize"`
+    // hallediyordu: pencere kuculuyor, giris yukari itiliyordu. Android 15
+    // (RN 0.81'in hedefledigi API 35) edge-to-edge'i zorunlu kiliyor ve o
+    // kipte pencere ARTIK KUCULMUYOR; inset'leri uygulamanin kendisi
+    // yonetmek zorunda. Manifest ayari yerinde duruyor ama etkisiz.
+    //
+    // `'height'` secildi cunku uygulamadaki DIGER ALTI ekran (giris, kayit,
+    // dogrulama, sifre sifirlama, onboarding, destek) tam olarak bunu
+    // kullaniyor ve calisiyor. Aykiri olan tek ekran burasiydi.
     <KeyboardAvoidingView
       style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
     >
       <FlatList
