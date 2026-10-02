@@ -14,8 +14,13 @@ git -C "$APP_DIR" reset --hard origin/main
 echo "==> Servisler yeniden build + restart"
 cd "$APP_DIR/deploy"
 # ---- DERLEME ONCESI ALAN GARANTISI ----------------------------------
-# 2 Eki 2026: bu derleme diski %100'e dayadi (86/87 GB) ve nobetci alarm
-# verdi. Postgres o pencerede yazamazdi; sansliydik.
+# 2 Eki 2026: disk %100'e dayadi (86/87 GB) ve nobetci alarm verdi.
+#
+# SUCLU TEK BIR DERLEME DEGIL, BIRIKIM. Duzeltmeden sonra olculdu: temiz
+# onbellekle kosan bir deploy tepe noktada diskin yalnizca %20'sini
+# kullaniyor ve geride 4,35 GB onbellek birakiyor. 86 GB, tekrarlanan
+# deploy'larin onbelleginin zaman filtresi yuzunden HIC temizlenmeden
+# ust uste binmesiyle olusmus.
 #
 # `--filter until=48h` BU ISI GORMUYOR: ayni gun ikinci bir derleme
 # yapildiginda onceki derlemenin ~21 GB'lik onbellegi 48 saatten GENC
