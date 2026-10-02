@@ -1,17 +1,33 @@
 """
-Türkiye veri hattı — RESMİ KAYNAK: marketfiyati.org.tr (TÜBİTAK BİLGEM / Ticaret Bakanlığı).
+Türkiye veri hattı — KAYNAK: marketfiyati.org.tr (TÜBİTAK BİLGEM, Ticaret Bakanlığı desteğiyle).
 
-7 Aralık 2022 Yönetmelik değişikliği ile 200+ şubeli zincirler fiyat verisini Bakanlığa
-verir; bu veri "tüketicinin fiyat karşılaştırması yapabilmesi için" kamuoyuyla paylaşılır
-(açık API). Scraping'in FSEK/TTK/ToS riskini ortadan kaldırır. Görsel İNGEST EDİLMEZ.
+⚠️ HUKUKİ DURUM — `docs/VERI-IZINLERI.md` OKUNMADAN BU DOSYA DEĞİŞTİRİLMEMELİ.
+
+Bu başlıkta uzun süre şu cümle yazılıydı: "Scraping'in FSEK/TTK/ToS riskini
+ortadan kaldırır." BU YANLIŞTI ve 2 Ekim 2026'da kaldırıldı. Portalın Kullanım
+Koşulları (yürürlük 1 Tem 2024) tam olarak bu akıl yürütmeyi reddediyor:
+
+  • yasak özellikle "tüm kullanıcılar için erişilebilir olan bilgiler" için konmuş,
+  • "ticari amaçlarla ... TÜBİTAK BİLGEM'in yazılı izni olmaksızın" kullanım yasak,
+  • "erişime olanak sağlanması ... izin verildiği şeklinde yorumlanamaz" deniyor.
+
+Yani verinin KAMUYA AÇIK olması tek başına bize hak vermiyor. 2 Eki 2026'da
+yazılı izin başvurusu yapıldı; yanıt gelene kadar dayanağımız bir başvurudur,
+bir izin değildir. Durum değişince `docs/VERI-IZINLERI.md` güncellenmeli.
 
 TAM KAPSAM: portalın açık sitemap'inden (sitemaps/sitemap-*.xml) TÜM ürün ID'leri alınır
-(~33k), her ID `/searchByIdentity` (identityType=id) ile çekilir. Bu, WAF'ın bloklamadığı
-tek toplu-erişim yoludur (facet `filters` istekleri 418/bağlantı-düşürme ile bloklu).
-Kategori, her ürünün `main_category` alanından → Cheep ALT-kategori id'sine map'lenir.
+(~33k), her ID `/searchByIdentity` (identityType=id) ile çekilir. Facet (`filters`) ucu
+WAF ile bloklu (418/bağlantı düşürme), bu uç değil. Bu teknik ayrım bir hak doğurmuyor —
+izin başvurusunda açıkça beyan edildi. Kategori, her ürünün `main_category` alanından →
+Cheep ALT-kategori id'sine map'lenir.
 
-Portalın kendi başlıklarıyla (tarayıcı UA + Origin/Referer) erişilir — kamu API'sine
-portalın istemcisi gibi meşru erişim.
+Portalın kendi başlıklarıyla (tarayıcı UA + Origin/Referer) erişilir. İstek hızı bilinçli
+olarak düşük (3 eşzamanlı, istek başına 0,15 sn bekleme): portala yük bindirmemek hem
+nezaket hem de başvuruda verdiğimiz taahhüt.
+
+GÖRSEL: dosya indirilmiyor ama `cdn.marketfiyati.org.tr` adresi saklanıp uygulamada
+GÖSTERİLİYOR. "İndirmiyoruz" ToS açısından koruma değildir — görsel ticari bir
+uygulamada yayınlanıyor. İzin başvurusunda ayrıca soruldu.
 """
 import argparse
 import logging

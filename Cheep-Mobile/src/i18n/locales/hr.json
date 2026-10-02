@@ -108,7 +108,7 @@
     "country": "Država / Trgovine",
     "about": "O aplikaciji",
     "about_title": "O Cheepu",
-    "about_body": "Cheep · Verzija {{version}}\nPronađi najbolju cijenu.\n\nIzvori podataka\n• Turska: marketfiyati.org.tr — službena javna platforma cijena Ministarstva trgovine Republike Turske.\n• Poljska: cijene koje trgovački lanci javno objavljuju na vlastitim internetskim stranicama.\n• Podaci o proizvodima: Open Food Facts, licencija ODbL.\n\nCheep nije povezan ni s jednim trgovačkim lancem niti ga ijedan podržava. Cijene su informativne naravi i mogu se razlikovati od cijena u trgovini.",
+    "about_body": "Cheep · Verzija {{version}}\nPronađi najbolju cijenu.\n\nIzvori podataka\n• Turska: marketfiyati.org.tr — službena javna platforma cijena koju vodi TÜBİTAK BİLGEM uz potporu Ministarstva trgovine Republike Turske.\n• Poljska: cijene koje trgovački lanci javno objavljuju na vlastitim internetskim stranicama.\n• Podaci o proizvodima: Open Food Facts, licencija ODbL.\n\nCheep nije povezan ni s jednim trgovačkim lancem niti ga ijedan podržava. Cijene su informativne naravi i mogu se razlikovati od cijena u trgovini.",
     "app_section_title": "Aplikacija",
     "notifications": "Obavijesti",
     "notifications_subtitle": "Upozorenja o padu cijene",

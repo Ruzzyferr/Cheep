@@ -169,7 +169,7 @@ export const hu: Dict = {
       },
       {
         q: 'Honnan származnak az árak, és milyen gyakran frissülnek?',
-        a: 'Magyarországon a Gazdasági Versenyhivatal (GVH) hivatalos Árfigyelő rendszeréből, Romániában az állami Monitorul Prețurilor rendszerből, Törökországban a Kereskedelmi Minisztérium nyilvános, hivatalos forrásából (marketfiyati.org.tr), Lengyelországban és Horvátországban pedig az áruházláncok nyilvánosan közzétett árlistáiból gyűjtjük az árakat. Az árakat naponta frissítjük. Tájékoztató jellegűek, és eltérhetnek a pénztárnál fizetendő ártól.',
+        a: 'Magyarországon a Gazdasági Versenyhivatal (GVH) hivatalos Árfigyelő rendszeréből, Romániában az állami Monitorul Prețurilor rendszerből, Törökországban a TÜBİTAK BİLGEM által, a Kereskedelmi Minisztérium támogatásával működtetett nyilvános, hivatalos forrásból (marketfiyati.org.tr), Lengyelországban és Horvátországban pedig az áruházláncok nyilvánosan közzétett árlistáiból gyűjtjük az árakat. Az árakat naponta frissítjük. Tájékoztató jellegűek, és eltérhetnek a pénztárnál fizetendő ártól.',
       },
       {
         q: 'Melyik boltok árait hasonlítjátok össze?',
@@ -236,7 +236,7 @@ export const hu: Dict = {
       },
     ],
     disclaimer:
-      'Minden márkanév és logó a jogosultja bejegyzett védjegye. A Cheep nem áll hivatalos partneri kapcsolatban vagy együttműködésben ezekkel az áruházláncokkal; a márkaneveket kizárólag annak jelölésére használjuk, melyik bolt árát mutatjuk. Magyarországon az árakat a GVH hivatalos Árfigyelő rendszeréből, Romániában a Monitorul Prețurilor rendszerből, Törökországban a Kereskedelmi Minisztérium nyilvános, hivatalos forrásából (marketfiyati.org.tr), Lengyelországban és Horvátországban pedig a boltok nyilvánosan közzétett árlistáiból gyűjtjük; tájékoztató jellegűek, és eltérhetnek a pénztárnál fizetendő ártól.',
+      'Minden márkanév és logó a jogosultja bejegyzett védjegye. A Cheep nem áll hivatalos partneri kapcsolatban vagy együttműködésben ezekkel az áruházláncokkal; a márkaneveket kizárólag annak jelölésére használjuk, melyik bolt árát mutatjuk. Magyarországon az árakat a GVH hivatalos Árfigyelő rendszeréből, Romániában a Monitorul Prețurilor rendszerből, Törökországban a TÜBİTAK BİLGEM által, a Kereskedelmi Minisztérium támogatásával működtetett nyilvános, hivatalos forrásból (marketfiyati.org.tr), Lengyelországban és Horvátországban pedig a boltok nyilvánosan közzétett árlistáiból gyűjtjük; tájékoztató jellegűek, és eltérhetnek a pénztárnál fizetendő ártól.',
     copyright: '© 2026 Cheep. Minden jog fenntartva.',
     madeIn: 'Magyarországnak, Törökországnak, Lengyelországnak, Horvátországnak és Romániának, szeretettel',
   },

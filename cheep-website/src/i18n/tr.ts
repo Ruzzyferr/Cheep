@@ -170,7 +170,7 @@ export const tr: Dict = {
       },
       {
         q: 'Fiyatlar nereden geliyor ve ne sıklıkla güncelleniyor?',
-        a: 'Türkiye’de fiyatlar T.C. Ticaret Bakanlığı’nın herkese açık resmi kaynağından (marketfiyati.org.tr), Macaristan’da Rekabet Kurumu’nun (GVH) resmi fiyat izleme sisteminden, Romanya’da devletin Monitorul Prețurilor sisteminden, Polonya ve Hırvatistan’da ise market zincirlerinin herkese açık fiyat listelerinden derlenir. Fiyatlar her gün güncellenir. Bilgilendirme amaçlıdır; kasadaki güncel fiyattan farklı olabilir.',
+        a: 'Türkiye’de fiyatlar T.C. Ticaret Bakanlığı desteğiyle TÜBİTAK BİLGEM tarafından yürütülen herkese açık resmi kaynaktan (marketfiyati.org.tr), Macaristan’da Rekabet Kurumu’nun (GVH) resmi fiyat izleme sisteminden, Romanya’da devletin Monitorul Prețurilor sisteminden, Polonya ve Hırvatistan’da ise market zincirlerinin herkese açık fiyat listelerinden derlenir. Fiyatlar her gün güncellenir. Bilgilendirme amaçlıdır; kasadaki güncel fiyattan farklı olabilir.',
       },
       {
         q: 'Hangi marketlerin fiyatlarını karşılaştırıyor?',
@@ -237,7 +237,7 @@ export const tr: Dict = {
       },
     ],
     disclaimer:
-      'Tüm marka adları ve logoları ilgili sahiplerinin tescilli markalarıdır. Cheep bu marketlerle resmi bir ortaklık veya iş birliği içinde değildir; marka adları yalnızca hangi markete ait fiyatın gösterildiğini belirtmek için kullanılır. Türkiye’de fiyatlar T.C. Ticaret Bakanlığı’nın herkese açık resmi kaynağından (marketfiyati.org.tr), Macaristan’da Rekabet Kurumu’nun (GVH) resmi fiyat izleme sisteminden, Romanya’da Monitorul Prețurilor sisteminden, Polonya ve Hırvatistan’da ise marketlerin herkese açık fiyat listelerinden derlenir; bilgilendirme amaçlıdır ve kasadaki güncel fiyattan farklı olabilir.',
+      'Tüm marka adları ve logoları ilgili sahiplerinin tescilli markalarıdır. Cheep bu marketlerle resmi bir ortaklık veya iş birliği içinde değildir; marka adları yalnızca hangi markete ait fiyatın gösterildiğini belirtmek için kullanılır. Türkiye’de fiyatlar T.C. Ticaret Bakanlığı desteğiyle TÜBİTAK BİLGEM tarafından yürütülen herkese açık resmi kaynaktan (marketfiyati.org.tr), Macaristan’da Rekabet Kurumu’nun (GVH) resmi fiyat izleme sisteminden, Romanya’da Monitorul Prețurilor sisteminden, Polonya ve Hırvatistan’da ise marketlerin herkese açık fiyat listelerinden derlenir; bilgilendirme amaçlıdır ve kasadaki güncel fiyattan farklı olabilir.',
     copyright: '© 2026 Cheep. Tüm hakları saklıdır.',
     // Bayrak emojileri Windows'ta harf çiftine düşüyor ("TR PL") — metin kullan.
     madeIn: 'Türkiye, Polonya, Hırvatistan, Macaristan ve Romanya için sevgiyle yapıldı',
