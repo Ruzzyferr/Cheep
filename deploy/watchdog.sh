@@ -337,4 +337,28 @@ En çok bellek kullanan 5 süreç:
 $(ps -eo rss,comm --sort=-rss 2>/dev/null | head -6 | awk 'NR>1{printf \"  %6.0f MB  %s\n\", $1/1024, $2}')"
 fi
 
+# 11) SERTLESTIRME YERINDE Mİ
+#
+# Bu kontrol, 3 Eki 2026 denetiminde bulunan boslugu bir daha sessiz
+# birakmamak icin eklendi: fail2ban kurulu DEGILDI ve DOCKER-USER zinciri
+# BOSTU, ama hicbir sey bunu haber vermiyordu. Sertlestirme "bir kez yapilip
+# unutulan" bir is degil — paket guncellemesi sshd drop-in'ini ezebilir,
+# biri fail2ban'i durdurabilir.
+sertlestirme_sorun=""
+[ "$(systemctl is-active fail2ban 2>/dev/null)" = "active" ] || sertlestirme_sorun="$sertlestirme_sorun fail2ban-kapali"
+[ -f /etc/ssh/sshd_config.d/99-cheep-hardening.conf ] || sertlestirme_sorun="$sertlestirme_sorun ssh-ayari-yok"
+iptables -S DOCKER-USER 2>/dev/null | grep -q "ctstate NEW -j DROP" || sertlestirme_sorun="$sertlestirme_sorun docker-firewall-yok"
+# OpenSSH `prohibit-password` degerini ciktida ES ANLAMLISI
+# `without-password` olarak yaziyor. Yalnizca birini aramak YANLIS ALARM
+# uretiyordu (3 Eki 2026'da uretti). Gevsek olan tek deger `yes`.
+sshd -T 2>/dev/null | grep -qiE "^permitrootlogin (prohibit-password|without-password|no)" || sertlestirme_sorun="$sertlestirme_sorun root-login-gevsek"
+
+if [ -z "$sertlestirme_sorun" ]; then
+    report "sertlestirme" ok ""
+else
+    report "sertlestirme" fail "Sunucu sertlestirmesi BOZULMUS:$sertlestirme_sorun
+
+Duzeltmek icin: bash /opt/cheep/deploy/harden.sh"
+fi
+
 echo "[$(date -Is)] nöbetçi turu tamam"

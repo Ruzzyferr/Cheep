@@ -53,6 +53,14 @@ docker compose -f docker-compose.prod.yml up -d --build
 # yaşandı: apex güvenlik başlıkları eklendi, deploy geçti, başlıklar gelmedi.
 docker compose -f docker-compose.prod.yml up -d --force-recreate caddy
 
+# SERTLESTIRMEYI HER DAGITIMDA YENIDEN UYGULA.
+#
+# Sunucuda elle yapilan ayarlar sessizce kayboluyor: bir yeniden kurulum, bir
+# paket guncellemesi (sshd_config.d'yi ezebilir) ya da birinin temizligi
+# yetiyor. 3 Eki 2026 denetiminde fail2ban HIC KURULU DEGILDI ve DOCKER-USER
+# zinciri BOSTU. Betik idempotent; tekrar calismasi zararsiz.
+bash /opt/cheep/deploy/harden.sh 2>&1 | sed 's/^/  /' || echo "  UYARI: sertlestirme basarisiz"
+
 echo "==> Kullanılmayan imajlar ve build önbelleği temizleniyor"
 docker image prune -f >/dev/null 2>&1 || true
 # `image prune` BuildKit önbelleğine DOKUNMAZ; bkz. build-site.sh'teki
