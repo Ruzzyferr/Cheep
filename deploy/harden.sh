@@ -22,9 +22,16 @@ set -uo pipefail   # -e YOK: bir adımın patlaması diğerlerini engellememeli
 LOG() { echo "[$(date -Is)] $*"; }
 HATA=0
 
+# `--sadece-firewall`: yalnizca acilista kaybolan seyleri uygular (iptables +
+# sysctl). SSH ve fail2ban ZATEN DISKTE KALICI; acilista onlara dokunmanin
+# hicbir faydasi yok, zarari ise 3 Eki 2026'da goruldu (asagiya bak).
+SADECE_FIREWALL=0
+[ "${1:-}" = "--sadece-firewall" ] && SADECE_FIREWALL=1
+
 # ---------------------------------------------------------------- 1) fail2ban
 # 17.414 başarısız denemenin tek bir engeli yoktu. Parola girişi kapalı olduğu
 # için giremezler, ama her deneme sshd'yi meşgul eder ve logu şişirir.
+if [ "$SADECE_FIREWALL" = "0" ]; then
 LOG "1/4 fail2ban"
 if ! dpkg -l fail2ban 2>/dev/null | grep -q '^ii'; then
     DEBIAN_FRONTEND=noninteractive apt-get install -y -qq fail2ban >/dev/null 2>&1 \
@@ -107,15 +114,31 @@ ClientAliveInterval 300
 ClientAliveCountMax 2
 CONF
 
-# ⚠️ ASLA DOĞRULAMADAN RELOAD ETME.
+# ⚠️ ASLA DOĞRULAMADAN RELOAD ETME — ama BASARISIZLIKTA DA SILME.
+#
+# Ilk surumde `sshd -t` basarisiz olunca dosya SILINIYORDU. 3 Eki 2026
+# reboot'unda tam bu oldu: acilista `sshd -t` GECICI olarak dustu, betik
+# sertlestirmeyi sildi ve sunucu `PermitRootLogin yes` ile acildi. Ayni komut
+# 30 saniye sonra sorunsuz geciyordu. Yani "guvenli" sanilan davranis,
+# guvenlik ayarini sessizce KALDIRIYORDU.
+#
+# Artik: bir kez bekleyip TEKRAR dene; yine olmazsa dosyayi silme, KENARA AL
+# (.devredisi) ki ne oldugu gorulebilsin ve elle geri konabilsin.
+SSH_DROPIN=/etc/ssh/sshd_config.d/99-cheep-hardening.conf
+if ! sshd -t 2>/dev/null; then
+    sleep 3
+fi
 if sshd -t 2>/dev/null; then
     systemctl reload ssh 2>/dev/null || systemctl reload sshd 2>/dev/null
     LOG "   uygulandı (reload — açık oturumlar korundu)"
 else
-    LOG "   SÖZDİZİMİ HATALI — GERİ ALINIYOR, hiçbir değişiklik uygulanmadı"
-    rm -f /etc/ssh/sshd_config.d/99-cheep-hardening.conf
+    mv -f "$SSH_DROPIN" "$SSH_DROPIN.devredisi" 2>/dev/null
+    LOG "   SÖZDİZİMİ DOĞRULANAMADI — ayar KENARA ALINDI ($SSH_DROPIN.devredisi), silinmedi"
+    LOG "   sebep: $(sshd -t 2>&1 | head -1)"
     HATA=1
 fi
+
+fi   # SADECE_FIREWALL
 
 # ------------------------------------------------- 3) DOCKER-USER (derinlik)
 # Docker, ufw'yi ATLAYARAK iptables'a kendi zincirini ekler. Bugün yalnızca
@@ -148,7 +171,7 @@ Requires=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/bash /opt/cheep/deploy/harden.sh
+ExecStart=/bin/bash /opt/cheep/deploy/harden.sh --sadece-firewall
 
 [Install]
 WantedBy=multi-user.target
