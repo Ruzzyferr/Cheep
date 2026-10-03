@@ -268,7 +268,7 @@ done
 # timer'i devre disi birakilir ya da maskelenirse servis sonsuza dek
 # "inactive" kalir -- dongu bunu OK sayar. Yani "is hic calismiyor" durumu
 # nobetcinin tamamen kor oldugu bir yerdeydi.
-for timer in cheep-fetcher-pl cheep-price-drops cheep-site-build              cheep-taxonomy cheep-backup cheep-watchdog cheep-docker-recycle; do
+for timer in cheep-fetcher-pl cheep-price-drops cheep-site-build              cheep-taxonomy cheep-backup cheep-watchdog cheep-docker-recycle cheep-restore-drill; do
     if ! systemctl is-enabled "$timer.timer" >/dev/null 2>&1; then
         report "timer-$timer" fail "Zamanlayici '$timer.timer' ETKIN DEGIL -- bu is hic calismiyor."
     else

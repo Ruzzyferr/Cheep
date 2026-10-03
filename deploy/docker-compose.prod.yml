@@ -41,6 +41,14 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      # `pg_hba.conf`taki `trust` satirlari KALDIRILDI (artik scram-sha-256).
+      # Konteyner ICINDEN calisan her psql/pg_dump artik parola istiyor:
+      # backup-db.sh, restore-drill.sh ve nobetcinin veri-tazeligi sorgusu
+      # toplam DOKUZ yerde `docker exec ... psql` cagiriyor. Dokuzunu tek tek
+      # duzenlemek yerine parolayi ortam degiskeni olarak veriyoruz; libpq
+      # otomatik okuyor. Yeni bir sir ifsa edilmiyor: POSTGRES_PASSWORD zaten
+      # ayni konteynerin ortaminda.
+      PGPASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - cheep_pgdata:/var/lib/postgresql/data
     # Sadece backend container'ı erişsin — host'a/dışarı PORT AÇILMAZ.

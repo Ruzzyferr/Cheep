@@ -18,6 +18,29 @@ set -uo pipefail   # -e YOK: tek bir tablo hatası tatbikatı bitirmemeli
 
 BACKUP_DIR=/opt/cheep/backups
 DB_CONTAINER=deploy-db-1
+
+# GERI YUKLEME YONETICI ROLUYLE YAPILIR, uygulama roluyle DEGIL.
+#
+# 3 Eki 2026'da `cheep` rolunden SUPERUSER dusuruldu (uygulama rolunun
+# superuser olmasi gereksiz bir risk). Ama dump `CREATE EXTENSION pg_trgm`
+# ve `unaccent` iceriyor ve bunlar superuser istiyor:
+#   ERROR: permission denied for language c
+# "trusted eklenti db sahibi tarafindan kurulabilir" kuralinin bu kurulumda
+# GECERLI OLMADIGI tatbikatla olculdu — varsayimla degil.
+#
+# Dogru cozum superuser'i geri vermek degil, geri yuklemeyi (zaten bir
+# YONETIM islemi) yonetici roluyle yapmak. Gercek bir felaket kurtarmasi da
+# ayni rolu kullanir.
+ENV_FILE=/opt/cheep/deploy/.env
+ADMIN_USER=$(grep -m1 '^PG_ADMIN_USER=' "$ENV_FILE" 2>/dev/null | cut -d= -f2-)
+ADMIN_PW=$(grep -m1 '^PG_ADMIN_PASSWORD=' "$ENV_FILE" 2>/dev/null | cut -d= -f2-)
+if [ -z "${ADMIN_USER:-}" ] || [ -z "${ADMIN_PW:-}" ]; then
+    echo "HATA: PG_ADMIN_USER/PG_ADMIN_PASSWORD $ENV_FILE icinde yok." >&2
+    echo "      Geri yukleme superuser ister; bkz. docs/GUVENLIK-UYARILARI.md" >&2
+    exit 1
+fi
+# Yonetici roluyle konteyner icinde komut calistirir.
+yonetici() { docker exec -e PGPASSWORD="$ADMIN_PW" "$DB_CONTAINER" "$@"; }
 DB_USER=cheep
 DB_LIVE=cheep_db
 
@@ -49,8 +72,14 @@ docker exec "$DB_CONTAINER" psql -U "$DB_USER" -d postgres \
     -c "CREATE DATABASE $TEST_DB;" >/dev/null || { log "HATA: test veritabanı yaratılamadı"; exit 1; }
 
 log "geri yükleniyor…"
-docker exec "$DB_CONTAINER" pg_restore -U "$DB_USER" -d "$TEST_DB" \
-    --no-owner --no-privileges /tmp/drill.dump 2>&1 | tail -5
+# `--no-owner --no-privileges` KALDIRILDI, bilerek.
+#
+# Onlarla geri yukleme calisiyordu ama tablolar YONETICI rolune ait oluyordu
+# ve uygulama rolu (`cheep`) okuyamiyordu: "permission denied for table
+# products". Yani tatbikat pg_restore asamasini gecse bile gercek bir
+# kurtarmada uygulama ayaga KALKMAZDI — tam da tatbikatin yakalamasi
+# gereken sey. Bayraksiz geri yukleme dump'taki SAHIPLIGI de kuruyor.
+yonetici pg_restore -U "$ADMIN_USER" -d "$TEST_DB" /tmp/drill.dump 2>&1 | tail -5
 RC=${PIPESTATUS[0]}
 log "pg_restore çıkış kodu: $RC"
 [ "$RC" -eq 0 ] || { log "BAŞARISIZ: geri yükleme hata verdi"; exit 1; }

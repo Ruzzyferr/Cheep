@@ -1,0 +1,11 @@
+[Unit]
+Description=Cheep geri yukleme tatbikati zamanlayicisi (haftalik)
+
+[Timer]
+# Pazar 03:30 — gecelik yedekten (02:05) SONRA, site derlemesinden (04:00) ONCE.
+OnCalendar=Sun *-*-* 03:30:00
+Persistent=true
+AccuracySec=10min
+
+[Install]
+WantedBy=timers.target
