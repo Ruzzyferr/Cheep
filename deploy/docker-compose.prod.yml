@@ -7,6 +7,16 @@
 # Docker json-file loglari da SINIRSIZDI: dort container'in stdout'u
 # /var/lib/docker/containers altinda sinirsiz buyuyordu. Backend her istegi
 # logluyor; 48 GB'lik diskte bu tek basina bir zaman bombasi.
+# KONTEYNER SERTLESTIRME — patlama yaricapini daraltir.
+#
+# `no-new-privileges`: konteyner icindeki bir surec setuid ikilisi ile yetki
+# YUKSELTEMEZ. Uygulama acigi bulan biri icin root'a tirmanma yolunu kapatir.
+# `cap_drop: ALL`: Linux yeteneklerinin tamami dusuruluyor, her servise
+# yalnizca GERCEKTEN gerekeni geri veriliyor (asagida tek tek gerekcesiyle).
+x-sertlestirme: &sertlestirme
+  security_opt:
+    - no-new-privileges:true
+
 x-logging: &varsayilan-log
   driver: json-file
   options:
@@ -15,9 +25,18 @@ x-logging: &varsayilan-log
 
 services:
   db:
-    image: postgres:15.8-alpine
+    # `15-alpine` (sabit 15.8 DEGIL): minor surumler Postgres'te geriye donuk
+    # uyumlu ve yalnizca hata/guvenlik duzeltmesi icerir. Sabit pin yuzunden
+    # 15.8'de kalmistik — 3 Eki 2026'da 15.19 vardi, yani 11 yama surumu
+    # geride. Major atlamak (16/17) pg_upgrade ister, o AYRI bir is.
+    image: postgres:15-alpine
     restart: always
     logging: *varsayilan-log
+    <<: *sertlestirme
+    cap_drop: [ALL]
+    # Postgres acilista dosya sahipligini duzeltip `postgres` kullanicisina
+    # dusuyor; bu bes yetenek olmadan BASLAYAMAZ.
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -38,6 +57,10 @@ services:
       context: ../cheep-backend-express
     restart: always
     logging: *varsayilan-log
+    # Node 3000'de dinliyor (>1024), ayrica dosya sahipligi degistirmiyor —
+    # hicbir yetenege ihtiyaci yok.
+    <<: *sertlestirme
+    cap_drop: [ALL]
     env_file: .env
     depends_on:
       db:
@@ -75,6 +98,10 @@ services:
       context: ../cheep-website
     restart: always
     logging: *varsayilan-log
+    <<: *sertlestirme
+    cap_drop: [ALL]
+    # Ic agda :80 dinliyor; 1024 altindaki porta baglanmak bu yetenegi ister.
+    cap_add: [NET_BIND_SERVICE]
     expose:
       - "80"
 
@@ -85,6 +112,11 @@ services:
     image: caddy:2-alpine
     restart: always
     logging: *varsayilan-log
+    <<: *sertlestirme
+    cap_drop: [ALL]
+    # 80 ve 443'e baglanmak icin; TLS sertifikasi yazmak icin yetenek gerekmez
+    # (volume'lar zaten yazilabilir).
+    cap_add: [NET_BIND_SERVICE]
     depends_on:
       - backend
       - website

@@ -33,9 +33,11 @@ export interface VersionPolicy {
 const PLAY_PACKAGE = 'com.cheep.mobile';
 const STORE_URL: Record<Platform, string> = {
     android: `https://play.google.com/store/apps/details?id=${PLAY_PACKAGE}`,
-    // iOS henüz yayında değil; kullanıcı boş bir düğmeye basmasın diye
-    // arama sayfasına götürüyoruz.
-    ios: 'https://apps.apple.com/search?term=cheep',
+    // iOS 1.4.0'dan beri YAYINDA (App Store id 6803882626). Burası uzun süre
+    // arama sayfasına gidiyordu: yorum "henüz yayında değil" diyordu ve
+    // uygulama çıkınca güncellenmedi. Sonuç, "Güncelle" düğmesine basan iOS
+    // kullanıcısının mağaza aramasına düşmesiydi.
+    ios: 'https://apps.apple.com/app/id6803882626',
 };
 
 /**

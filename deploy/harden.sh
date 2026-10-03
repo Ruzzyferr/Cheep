@@ -54,7 +54,28 @@ bantime.maxtime   = 1w
 enabled = true
 port    = ssh
 maxretry = 4
+
+# WEB SONDALARI. 48 saatte 170 istek: /.env x30, /.git/config x7, wp-admin,
+# phpmyadmin... Hepsi 404 aliyor ama deneyen taramaya devam ediyor. Caddy
+# GERCEK istemci IP'sini logluyor (dogrulandi: Googlebot ve kullanici IP'leri
+# goruluyor, Docker ag adresi degil), dolayisiyla engelleme ise yarar.
+[cheep-web-sonda]
+enabled  = true
+backend  = polling
+port     = http,https
+logpath  = /var/lib/docker/volumes/deploy_caddy_logs/_data/*.log
+filter   = cheep-web-sonda
+maxretry = 3
+findtime = 10m
+bantime  = 24h
 CONF
+
+# Caddy JSON log bicimi: "client_ip" alani "uri"den ONCE geliyor.
+cat > /etc/fail2ban/filter.d/cheep-web-sonda.conf <<'FILTRE'
+[Definition]
+failregex = ^.*"client_ip":"<HOST>".*"uri":"/(\.env|\.git|\.aws|\.ssh|wp-admin|wp-login|phpmyadmin|xmlrpc|vendor/|cgi-bin|boaform|\.well-known/.*\.php)
+ignoreregex =
+FILTRE
 systemctl enable --now fail2ban >/dev/null 2>&1
 systemctl reload fail2ban >/dev/null 2>&1 || systemctl restart fail2ban >/dev/null 2>&1
 LOG "   durum: $(systemctl is-active fail2ban)"
