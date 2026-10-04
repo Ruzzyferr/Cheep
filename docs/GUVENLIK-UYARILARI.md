@@ -44,6 +44,18 @@ bir dahaki sefere aynı araştırma baştan yapılmasın.
   varlıklarımız. Market görselleri paketlenmiyor, çalışma anında URL olarak
   yükleniyor (bkz. `docs/VERI-IZINLERI.md`).
 
+### 3. `braces` — yayınlanmış yama YOK (4 Eki 2026'da eklendi)
+
+- Kurulu **3.0.3**, ve bu **en son sürüm** (3.x dalı 3.0.3'te bitiyor).
+- Zincir: `expo → @expo/metro → metro-file-map → micromatch → braces`.
+- Açık: derin iç içe glob kalıplarıyla yığın tüketimi (DoS).
+- **Neden tolere ediliyor:** yalnızca **derleme zamanı** (Metro paketleyici),
+  kullanıcıya giden pakette yok; eşleştirilen glob kalıpları kendi depomuzdan
+  geliyor, dışarıdan gelmiyor.
+
+⚠️ Bu uyarı `react-native-keyboard-controller` eklendikten SONRA cikti ama
+onunla ILGISI YOK — zincir yukarida, Expo'nun kendi paketleyicisi.
+
 ### 3. Türev uyarılar (kendi açıkları değil)
 
 `@expo/cli`, `@expo/code-signing-certificates`, `expo`,
