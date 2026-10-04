@@ -526,10 +526,15 @@ function ListItemCard({
 
   // Alt satır: marka bağımsızsa marka gösterilmez, sadece adet; aksi halde "Marka · adet".
   // Adet artik stepper'da gorunuyor; burada TEKRAR ETMIYOR, yalnizca birim.
-  const subtitle =
-    product.brand && !item.brand_independent
-      ? `${product.brand} · ${item.unit}`
-      : item.unit;
+  // SAYIM BIRIMI alt satirda TEKRAR EDILMIYOR: adedi zaten stepper gosteriyor,
+  // "Ulker · adet" yazmak bilgi katmiyor ama yer kapliyor ve dar ekranda
+  // kesiliyordu ("Ulker · a..."). Agirlik/hacim birimi ise ANLAMLI, o duruyor.
+  const SAYIM_BIRIMLERI = ['adet', 'ad', 'tane', 'piece', 'pcs', 'szt', 'szt.', 'kom', 'kom.', 'db', 'buc', 'buc.', 'st', 'stk'];
+  const birimAnlamli = !SAYIM_BIRIMLERI.includes((item.unit ?? '').trim().toLowerCase());
+  const markaGoster = product.brand && !item.brand_independent;
+  const subtitle = [markaGoster ? product.brand : null, birimAnlamli ? item.unit : null]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <TouchableOpacity
