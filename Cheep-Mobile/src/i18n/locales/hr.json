@@ -304,7 +304,10 @@
     "view": "Prikaži",
     "view_list": "Prikaži popis {{title}}",
     "brand_toggle_hint": "Dugo pritisni za promjenu preferencije marke",
-    "no_active_list": "Trenutačno nemaš aktivan popis za kupnju"
+    "no_active_list": "Trenutačno nemaš aktivan popis za kupnju",
+    "quantity_increase": "Povećaj količinu",
+    "quantity_decrease": "Smanji količinu",
+    "quantity_label": "{{count}} kom."
   },
   "deals": {
     "title": "Akcije",
@@ -476,7 +479,14 @@
     "store_detail": "Detalji trgovine",
     "list_detail": "Detalji popisa",
     "compare_results": "Rezultati usporedbe",
-    "route_detail": "Detalji rute"
+    "route_detail": "Detalji rute",
+    "home": "Početna",
+    "lists": "Moji popisi",
+    "deals": "Akcije",
+    "profile": "Profil",
+    "products": "Proizvodi",
+    "search": "Pretraga",
+    "price_difference": "Razlika u cijeni"
   },
   "auth": {
     "email_invalid": "Unesi važeću e-mail adresu",

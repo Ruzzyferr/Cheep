@@ -10,7 +10,7 @@
  *   ⋮ menu (bottom-sheet): Aktif liste yap · Klonla · Başka listeden aktar · Sil
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -24,7 +24,7 @@ import { useBottomSpacing, useStickyBottomOffset } from '../../hooks/useScreenSp
 import { useTranslation } from 'react-i18next';
 import { listService } from '../../services';
 import { useListDetail, useListMutations } from '../../queries';
-import { RefreshBar , Button, ListSkeleton } from '../../components/ui';
+import { RefreshBar, Button, ListSkeleton, QuantityStepper } from '../../components/ui';
 import { ProductThumb } from '../../components/product/ProductThumb';
 import { ListActionsSheet } from '../../components/list/ListActionsSheet';
 import { SelectSourceListModal } from '../../components/list/SelectSourceListModal';
@@ -82,9 +82,9 @@ export function ListDetailScreen({
    * liste listesi, sepet rozeti ve karşılaştırma — birlikte tazeleniyor.
    * Ekrana dönüşteki tazeleme de React Query'nin odak yönetimiyle geliyor.
    */
-  const loadList = async () => {
+  const loadList = useCallback(async () => {
     await invalidateLists();
-  };
+  }, [invalidateLists]);
 
   // Liste yüklenemiyorsa geri dön — AMA yalnızca kalıcı hatada.
       // AĞ HATASINDA EKRANDAN ATMA.
@@ -117,6 +117,17 @@ export function ListDetailScreen({
       appAlert(t('common.error'), t('common.something_went_wrong'));
     }
   };
+
+  // Stepper zaten gecikmeli cagiriyor; burada listeyi tazelemek yeterli.
+  const handleQuantityChange = useCallback(async (itemId: number, quantity: number) => {
+    try {
+      await listService.updateItem(itemId, { quantity });
+      await loadList();
+    } catch {
+      appAlert(t('common.error'), t('common.something_went_wrong'));
+      await loadList(); // Yerel deger sunucudan sapmasin.
+    }
+  }, [loadList, t]);
 
   const handleCompare = () => {
     if (!list) return;
@@ -340,6 +351,7 @@ export function ListDetailScreen({
             item={item}
             onDelete={handleDeleteItem}
             onToggleBrandIndependent={handleToggleBrandIndependent}
+            onQuantityChange={handleQuantityChange}
           />
         )}
         ItemSeparatorComponent={Separator}
@@ -435,20 +447,67 @@ function ListItemCard({
   item,
   onDelete,
   onToggleBrandIndependent,
+  onQuantityChange,
 }: {
   item: ListItem;
   onDelete: (id: number) => void;
   onToggleBrandIndependent: (item: ListItem) => void;
+  onQuantityChange: (itemId: number, quantity: number) => void;
 }) {
   const { t } = useTranslation();
   const product = item.product;
+
+  // ADET YEREL TUTULUYOR, SUNUCUYA GECIKTIRILMIS YAZILIYOR.
+  // Her dokunusta `updateItem` + listeyi bastan yukleme yapilsaydi, uc kez
+  // artirmak uc tur gidis-donus eder ve sayi parmagin gerisinde kalirdi —
+  // kullanicinin "artiramadim" dedigi hissin ta kendisi.
+  const [adet, setAdet] = useState(item.quantity);
+  const zamanlayici = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sunucudan taze deger gelirse (baska cihaz, yeniden yukleme) yereli hizala —
+  // ama kullanicinin bekleyen degisikligi varken ustune YAZMA.
+  useEffect(() => {
+    if (zamanlayici.current == null) setAdet(item.quantity);
+  }, [item.quantity]);
+
+  // Ekran kapanirken bekleyen yazmayi KAYBETME. Yalnizca clearTimeout
+  // yapilsaydi, kullanici +'ya basip 500 ms dolmadan geri gittiginde
+  // degisiklik sessizce yok olurdu. Iptal degil, DERHAL gonder.
+  const bekleyenAdet = useRef<number | null>(null);
+  const gonderRef = useRef(onQuantityChange);
+  gonderRef.current = onQuantityChange;
+  const itemIdRef = useRef(item.id);
+  itemIdRef.current = item.id;
+
+  useEffect(() => () => {
+    if (!zamanlayici.current) return;
+    clearTimeout(zamanlayici.current);
+    zamanlayici.current = null;
+    if (bekleyenAdet.current != null) {
+      gonderRef.current(itemIdRef.current, bekleyenAdet.current);
+      bekleyenAdet.current = null;
+    }
+  }, []);
+
+  const adetDegistir = useCallback((yeni: number) => {
+    setAdet(yeni);
+    bekleyenAdet.current = yeni;
+    if (zamanlayici.current) clearTimeout(zamanlayici.current);
+    zamanlayici.current = setTimeout(() => {
+      zamanlayici.current = null;
+      bekleyenAdet.current = null;
+      onQuantityChange(item.id, yeni);
+    }, 500);
+  }, [item.id, onQuantityChange]);
+
   if (!product) return null;
 
   // Alt satır: marka bağımsızsa marka gösterilmez, sadece adet; aksi halde "Marka · adet".
+  // Adet artik stepper'da gorunuyor; burada TEKRAR ETMIYOR, yalnizca birim.
   const subtitle =
     product.brand && !item.brand_independent
-      ? `${product.brand} · ${item.quantity} ${item.unit}`
-      : `${item.quantity} ${item.unit}`;
+      ? `${product.brand} · ${item.unit}`
+      : item.unit;
 
   return (
     <TouchableOpacity
@@ -476,6 +535,12 @@ function ListItemCard({
           {subtitle}
         </Text>
       </View>
+      <QuantityStepper
+        value={adet}
+        onChange={adetDegistir}
+        size="row"
+        style={styles.stepper}
+      />
       <TouchableOpacity
         onPress={() => onDelete(item.id)}
         hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -667,6 +732,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
+  stepper: { marginRight: spacing.xs },
   deleteBtn: {
     width: 36,
     height: 36,

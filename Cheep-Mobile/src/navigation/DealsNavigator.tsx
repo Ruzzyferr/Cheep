@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useTranslation } from 'react-i18next';
 import { DealsScreen } from '../screens/deals/DealsScreen';
 import { colors, typography } from '../theme';
 import type { DealsStackParamList } from './types';
@@ -12,6 +13,8 @@ import type { DealsStackParamList } from './types';
 const Stack = createStackNavigator<DealsStackParamList>();
 
 export function DealsNavigator() {
+  const { t } = useTranslation();
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -29,7 +32,7 @@ export function DealsNavigator() {
       <Stack.Screen
         name="DealsMain"
         component={DealsScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('screens.deals') }}
       />
     </Stack.Navigator>
   );

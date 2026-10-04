@@ -38,7 +38,7 @@ export function ListsNavigator() {
       <Stack.Screen
         name="ListsMain"
         component={ListsScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('screens.lists') }}
       />
       <Stack.Screen
         name="ListDetail"
@@ -53,12 +53,12 @@ export function ListsNavigator() {
       <Stack.Screen
         name="CategoryProducts"
         component={CategoryProductsScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('screens.products') }}
       />
       <Stack.Screen
         name="Search"
         component={SearchScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('screens.search') }}
       />
       <Stack.Screen
         name="CompareResults"

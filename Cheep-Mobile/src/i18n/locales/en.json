@@ -304,7 +304,10 @@
     "view": "View",
     "view_list": "View the {{title}} list",
     "brand_toggle_hint": "Press and hold to change the brand preference",
-    "no_active_list": "You have no active shopping list right now"
+    "no_active_list": "You have no active shopping list right now",
+    "quantity_increase": "Increase quantity",
+    "quantity_decrease": "Decrease quantity",
+    "quantity_label": "{{count}} pcs"
   },
   "deals": {
     "title": "Deals",
@@ -476,7 +479,14 @@
     "store_detail": "Store Details",
     "list_detail": "List Details",
     "compare_results": "Comparison Results",
-    "route_detail": "Route Details"
+    "route_detail": "Route Details",
+    "home": "Home",
+    "lists": "My Lists",
+    "deals": "Deals",
+    "profile": "Profile",
+    "products": "Products",
+    "search": "Search",
+    "price_difference": "Price Difference"
   },
   "auth": {
     "email_invalid": "Enter a valid email address",

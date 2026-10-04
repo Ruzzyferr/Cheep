@@ -41,6 +41,7 @@ import type { Product } from '../../types';
 import type { HomeStackScreenProps, ListsStackScreenProps } from '../../navigation/types';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 import { appAlert } from '../../utils/dialog';
+import { useListQuantities } from '../../hooks/useListQuantities';
 
 // Aynı bileşen hem Home hem Lists stack'inde kayıtlı (liste detayından "Ürün Ekle"
 // akışı kullanıcıyı Listeler sekmesinde tutar). İki stack'in param'ı özdeş.
@@ -81,6 +82,11 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
   const subcategories = subcategoriesQ.data ?? [];
   const activeList = activeListQ.data ?? null;
   const cartCount = activeList?.list_items?.length ?? 0;
+
+  // Izgaradaki adetler HEDEF listeden okunuyor: "Urun Ekle" akisinda hedef
+  // liste aktif listeden farkli olabilir; aktif listeye bakmak yanlis adet
+  // gosterirdi.
+  const { adetAl, adetDegistir, adetSil } = useListQuantities(targetListId ?? activeList?.id);
 
   // Etkin kategori: alt kategori seçiliyse o, değilse üst kategori.
   const effectiveCategoryId = selectedSubcategory ?? selectedCategory;
@@ -321,6 +327,9 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
                       constraint={item.constraint}
                       onPress={() => (navigation as any).navigate('ProductDetail', { productId: item.id })}
                       onAddToCart={() => handleAddToCart(item)}
+                      quantity={adetAl(item.id)}
+                      onQuantityChange={(n) => adetDegistir(item.id, n)}
+                      onRemove={() => adetSil(item.id)}
                     />
                   </View>
                 ))}

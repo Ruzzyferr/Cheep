@@ -8,6 +8,7 @@ export { Card } from './Card';
 export { Input } from './Input';
 export { CodeInput } from './CodeInput';
 export { FAB } from './FAB';
+export { QuantityStepper } from './QuantityStepper';
 export { Skeleton, DealCardsSkeleton, ListSkeleton, GridSkeleton } from './Skeleton';
 export {
   ScreenLoader,

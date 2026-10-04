@@ -304,7 +304,10 @@
     "view": "Visa",
     "view_list": "Visa listan {{title}}",
     "brand_toggle_hint": "Tryck och håll för att ändra märkesval",
-    "no_active_list": "Du har ingen aktiv inköpslista just nu"
+    "no_active_list": "Du har ingen aktiv inköpslista just nu",
+    "quantity_increase": "Öka antal",
+    "quantity_decrease": "Minska antal",
+    "quantity_label": "{{count}} st"
   },
   "deals": {
     "title": "Erbjudanden",
@@ -476,7 +479,14 @@
     "store_detail": "Butiksdetaljer",
     "list_detail": "Listdetaljer",
     "compare_results": "Jämförelseresultat",
-    "route_detail": "Ruttdetaljer"
+    "route_detail": "Ruttdetaljer",
+    "home": "Hem",
+    "lists": "Mina listor",
+    "deals": "Erbjudanden",
+    "profile": "Profil",
+    "products": "Produkter",
+    "search": "Sök",
+    "price_difference": "Prisskillnad"
   },
   "auth": {
     "email_invalid": "Ange en giltig e-postadress",

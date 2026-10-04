@@ -304,7 +304,10 @@
     "view": "Görüntüle",
     "view_list": "{{title}} listesini görüntüle",
     "brand_toggle_hint": "Marka tercihini değiştirmek için uzun basın",
-    "no_active_list": "Şu anda aktif alışveriş listeniz yok"
+    "no_active_list": "Şu anda aktif alışveriş listeniz yok",
+    "quantity_increase": "Adedi artır",
+    "quantity_decrease": "Adedi azalt",
+    "quantity_label": "{{count}} adet"
   },
   "deals": {
     "title": "Fırsatlar",
@@ -476,7 +479,14 @@
     "store_detail": "Market Detayı",
     "list_detail": "Liste Detayı",
     "compare_results": "Karşılaştırma Sonuçları",
-    "route_detail": "Rota Detayı"
+    "route_detail": "Rota Detayı",
+    "home": "Ana Sayfa",
+    "lists": "Listelerim",
+    "deals": "Fırsatlar",
+    "profile": "Profil",
+    "products": "Ürünler",
+    "search": "Arama",
+    "price_difference": "Fiyat Farkı"
   },
   "auth": {
     "email_invalid": "Geçerli bir email adresi giriniz",

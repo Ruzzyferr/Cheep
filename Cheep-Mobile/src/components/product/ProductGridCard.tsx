@@ -9,6 +9,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useTranslation } from 'react-i18next';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { ProductThumb } from './ProductThumb';
+import { QuantityStepper } from '../ui/QuantityStepper';
 import type { ProductConstraint } from '../../types';
 
 interface PriceInfo {
@@ -26,6 +27,12 @@ interface ProductGridCardProps {
   topThreePrices: PriceInfo[];
   onPress: () => void;
   onAddToCart: () => void;
+  /** Hedef listedeki mevcut adet. 0/undefined ise "sepete ekle" dugmesi cikar. */
+  quantity?: number;
+  /** Adet degisimi — yalnizca `quantity > 0` iken cagrilir. */
+  onQuantityChange?: (next: number) => void;
+  /** Adet 1'ken eksiye basilirsa — stepper cop kutusuna doner. */
+  onRemove?: () => void;
   constraint?: ProductConstraint;
 }
 
@@ -45,6 +52,9 @@ function ProductGridCardBase({
   topThreePrices,
   onPress,
   onAddToCart,
+  quantity,
+  onQuantityChange,
+  onRemove,
   constraint,
 }: ProductGridCardProps) {
   const { t } = useTranslation();
@@ -121,15 +131,26 @@ function ProductGridCardBase({
 
         {/* Add to Cart Button */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={(e) => {
-              e.stopPropagation();
-              onAddToCart();
-            }}
-          >
-            <MaterialIcons name="add-shopping-cart" size={20} color={colors.background.paper} />
-          </TouchableOpacity>
+          {/* Urun zaten listedeyse dugme yerine adet denetimi cikar —
+              kullanici "3 tane sut" icin urunu 3 kez eklemeye calismasin. */}
+          {quantity != null && quantity > 0 && onQuantityChange ? (
+            <QuantityStepper
+              value={quantity}
+              onChange={onQuantityChange}
+              onRemove={onRemove}
+              size="compact"
+            />
+          ) : (
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={(e) => {
+                e.stopPropagation();
+                onAddToCart();
+              }}
+            >
+              <MaterialIcons name="add-shopping-cart" size={20} color={colors.background.paper} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </TouchableOpacity>

@@ -38,7 +38,7 @@ export function HomeNavigator() {
       <Stack.Screen
         name="HomeMain"
         component={NewHomeScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('screens.home') }}
       />
       <Stack.Screen
         name="ProductDetail"
@@ -53,12 +53,12 @@ export function HomeNavigator() {
       <Stack.Screen
         name="CategoryProducts"
         component={CategoryProductsScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('screens.products') }}
       />
       <Stack.Screen
         name="Search"
         component={SearchScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('screens.search') }}
       />
       <Stack.Screen
         name="Notifications"
@@ -68,7 +68,7 @@ export function HomeNavigator() {
       <Stack.Screen
         name="PriceDifferenceList"
         component={PriceDifferenceScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('screens.price_difference') }}
       />
     </Stack.Navigator>
   );

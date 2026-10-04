@@ -20,6 +20,7 @@ import { colors, typography, spacing, layout } from '../../theme';
 import type { Product } from '../../types';
 import type { HomeStackScreenProps, ListsStackScreenProps } from '../../navigation/types';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
+import { useListQuantities } from '../../hooks/useListQuantities';
 
 // Aynı bileşen hem Home hem Lists stack'inde kayıtlı (Ürün Ekle akışı kullanıcıyı
 // Listeler sekmesinde tutar). İki stack'in Search route param'ı özdeş.
@@ -33,6 +34,11 @@ export function SearchScreen({ navigation, route }: SearchScreenProps) {
   const { activeList } = useCart();
   const { addItem } = useListMutations();
   const targetListId = route.params?.targetListId;
+  // Izgaradaki adetler HEDEF listeden okunuyor: "Urun Ekle" akisinda hedef
+  // liste aktif listeden farkli olabilir; aktif listeye bakmak yanlis adet
+  // gosterirdi.
+  const { adetAl, adetDegistir, adetSil } = useListQuantities(targetListId ?? activeList?.id);
+
   const targetListName = route.params?.targetListName;
   const toast = useToast();
   const { formatMoney } = useLocale();
@@ -233,6 +239,9 @@ export function SearchScreen({ navigation, route }: SearchScreenProps) {
                       constraint={item.constraint}
                       onPress={() => (navigation as any).navigate('ProductDetail', { productId: item.id })}
                       onAddToCart={() => handleAdd(item)}
+                      quantity={adetAl(item.id)}
+                      onQuantityChange={(n) => adetDegistir(item.id, n)}
+                      onRemove={() => adetSil(item.id)}
                     />
                   </View>
                 ))}

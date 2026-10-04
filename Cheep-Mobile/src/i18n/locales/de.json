@@ -304,7 +304,10 @@
     "view": "Ansehen",
     "view_list": "Liste {{title}} ansehen",
     "brand_toggle_hint": "Zum Ändern der Markenpräferenz gedrückt halten",
-    "no_active_list": "Du hast gerade keine aktive Einkaufsliste"
+    "no_active_list": "Du hast gerade keine aktive Einkaufsliste",
+    "quantity_increase": "Menge erhöhen",
+    "quantity_decrease": "Menge verringern",
+    "quantity_label": "{{count}} Stk."
   },
   "deals": {
     "title": "Angebote",
@@ -476,7 +479,14 @@
     "store_detail": "Marktdetails",
     "list_detail": "Listendetails",
     "compare_results": "Vergleichsergebnisse",
-    "route_detail": "Routendetails"
+    "route_detail": "Routendetails",
+    "home": "Start",
+    "lists": "Meine Listen",
+    "deals": "Angebote",
+    "profile": "Profil",
+    "products": "Produkte",
+    "search": "Suche",
+    "price_difference": "Preisunterschied"
   },
   "auth": {
     "email_invalid": "Gib eine gültige E-Mail-Adresse ein",

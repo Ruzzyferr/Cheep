@@ -304,7 +304,10 @@
     "view": "Vezi",
     "view_list": "Vezi lista {{title}}",
     "brand_toggle_hint": "Ține apăsat ca să schimbi preferința de marcă",
-    "no_active_list": "Momentan nu ai nicio listă de cumpărături activă"
+    "no_active_list": "Momentan nu ai nicio listă de cumpărături activă",
+    "quantity_increase": "Crește cantitatea",
+    "quantity_decrease": "Scade cantitatea",
+    "quantity_label": "{{count}} buc."
   },
   "deals": {
     "title": "Oferte",
@@ -476,7 +479,14 @@
     "store_detail": "Detalii magazin",
     "list_detail": "Detalii listă",
     "compare_results": "Rezultatele comparației",
-    "route_detail": "Detalii rută"
+    "route_detail": "Detalii rută",
+    "home": "Acasă",
+    "lists": "Listele mele",
+    "deals": "Oferte",
+    "profile": "Profil",
+    "products": "Produse",
+    "search": "Căutare",
+    "price_difference": "Diferența de preț"
   },
   "auth": {
     "email_invalid": "Introdu o adresă de e-mail validă",

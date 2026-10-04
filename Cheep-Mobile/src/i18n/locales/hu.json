@@ -304,7 +304,10 @@
     "view": "Megtekintés",
     "view_list": "A(z) {{title}} lista megtekintése",
     "brand_toggle_hint": "Tartsd nyomva a márkapreferencia módosításához",
-    "no_active_list": "Jelenleg nincs aktív bevásárlólistád"
+    "no_active_list": "Jelenleg nincs aktív bevásárlólistád",
+    "quantity_increase": "Mennyiség növelése",
+    "quantity_decrease": "Mennyiség csökkentése",
+    "quantity_label": "{{count}} db"
   },
   "deals": {
     "title": "Akciók",
@@ -476,7 +479,14 @@
     "store_detail": "Üzlet részletei",
     "list_detail": "Lista részletei",
     "compare_results": "Összehasonlítás eredménye",
-    "route_detail": "Útvonal részletei"
+    "route_detail": "Útvonal részletei",
+    "home": "Főoldal",
+    "lists": "Listáim",
+    "deals": "Akciók",
+    "profile": "Profil",
+    "products": "Termékek",
+    "search": "Keresés",
+    "price_difference": "Árkülönbség"
   },
   "auth": {
     "email_invalid": "Adj meg egy érvényes e-mail-címet",
