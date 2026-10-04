@@ -56,7 +56,7 @@ bir dahaki sefere aynı araştırma baştan yapılmasın.
 ⚠️ Bu uyarı `react-native-keyboard-controller` eklendikten SONRA cikti ama
 onunla ILGISI YOK — zincir yukarida, Expo'nun kendi paketleyicisi.
 
-### 3. Türev uyarılar (kendi açıkları değil)
+### 4. Türev uyarılar (kendi açıkları değil)
 
 `@expo/cli`, `@expo/code-signing-certificates`, `expo`,
 `react-native-google-mobile-ads` — dördü de yukarıdaki ikisinin zinciri.
