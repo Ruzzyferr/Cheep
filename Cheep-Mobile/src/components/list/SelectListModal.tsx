@@ -21,6 +21,7 @@ import { useLocale } from '../../context/LocaleContext';
 import { colors, typography, spacing, layout, borderRadius } from '../../theme';
 import type { ShoppingList } from '../../types';
 import { appAlert } from '../../utils/dialog';
+import { useListMutations } from '../../queries';
 
 interface SelectListModalProps {
   visible: boolean;
@@ -39,6 +40,7 @@ export function SelectListModal({
   quantity = 1,
   unit,
 }: SelectListModalProps) {
+  const { invalidateLists } = useListMutations();
   const { t } = useTranslation();
   const { formatMoney } = useLocale();
   const insets = useSafeAreaInsets();
@@ -92,6 +94,8 @@ export function SelectListModal({
         quantity,
         unit: effectiveUnit,
       });
+      // ONBELLEK: yoksa sepet rozeti ve aktif liste bayat kalir.
+      await invalidateLists();
       appAlert(t('list.select_modal.add_success_title'), t('list.select_modal.add_success_body'), [
         {
           text: t('common.ok'),
@@ -114,6 +118,7 @@ export function SelectListModal({
       setAdding(-1);
       const newList = await listService.createList({ name: t('list.select_modal.default_new_list_name') });
       await listService.addItem(newList.id, { product_id: productId, quantity, unit: effectiveUnit });
+      await invalidateLists();
       onSelect(newList.id);
       onClose();
     } catch (error) {

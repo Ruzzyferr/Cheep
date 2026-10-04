@@ -124,3 +124,15 @@ describe('boy/ambalaj gurultusu', () => {
     expect(a).not.toBe(b);
   });
 });
+
+describe('marka normallestirmesi', () => {
+  it("'I' ile baslayan marka cekirdekte KALMAZ", () => {
+    // Gercek hata: 'I' duzeltmesi yalnizca urun adina uygulanmisti, marka
+    // alanina degil; "Icim" temizlenemeyip cekirdege sizmisti.
+    expect(jenerikParmakIzi({ name: 'İçim Süt 1 Lt', brand: 'İçim' })).toBe('sut@1000ml');
+  });
+  it("'I'li marka ile baska marka ayni gruba duser", () => {
+    expect(jenerikParmakIzi({ name: 'İçim Süt 1 Lt', brand: 'İçim' }))
+      .toBe(jenerikParmakIzi({ name: 'Pınar Süt 1 Lt', brand: 'Pınar' }));
+  });
+});

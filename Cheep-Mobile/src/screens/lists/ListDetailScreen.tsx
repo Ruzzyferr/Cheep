@@ -261,6 +261,13 @@ export function ListDetailScreen({
           onPress: async () => {
             try {
               await listService.deleteList(list.id);
+              // ONBELLEGI GECERSIZLESTIR — yoksa liste SUNUCUDAN silinir ama
+              // `['lists']` onbellekte kalir: Listelerim'e donunce silinmis
+              // liste hala gorunur, tekrar silmeye basilinca sunucu 404 doner
+              // ve "bir hata olustu" cikar. Ana sayfadaki tasarruf sayaci da
+              // ayni onbellege bagli oldugu icin elle cekilmeden yenilenmez.
+              // (Kullanici bildirimi, 5 Eki 2026 — 2. ve 3. maddeler.)
+              await invalidateLists();
               navigation.goBack();
             } catch {
               appAlert(t('common.error'), t('common.something_went_wrong'));
@@ -530,39 +537,42 @@ function ListItemCard({
             {product.name}
           </Text>
         </View>
-        <View style={styles.itemSubRow}>
+        {/* IKINCI SATIR. Cip ile adet denetimi tek sirada tutuldugunda
+            (kucuk resim + bilgi + adet + sil) yatayda yer kalmiyordu ve cip
+            +/- dugmesinin ARKASINA kaciyordu — kullanici bildirimi, 5 Eki.
+            Alt satira alininca ikisine de tam genislik dusuyor. */}
+        <View style={styles.itemAltSatir}>
           <Text style={styles.itemSub} numberOfLines={1}>
             {subtitle}
           </Text>
-          {/* GORUNUR DUGME. Eskiden bu ayar YALNIZCA uzun basmayla aciliyordu
-              ve tek ipucu ekran okuyucunun gordugu bir etiketti; goren
-              kullanici ozelligin varligini bilemiyordu (kullanici geri
-              bildirimi, 4 Eki 2026: "markasiz secenek de olsa"). */}
           <TouchableOpacity
             onPress={() => onToggleBrandIndependent(item)}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            hitSlop={{ top: 10, bottom: 10, left: 6, right: 6 }}
             accessibilityRole="switch"
             accessibilityState={{ checked: item.brand_independent }}
             accessibilityLabel={t('list.brand_free_label')}
             style={[styles.markaCip, item.brand_independent && styles.markaCipAcik]}
           >
             <MaterialIcons
-              name={item.brand_independent ? 'check' : 'sell'}
-              size={12}
-              color={item.brand_independent ? colors.background.paper : colors.text.hint}
+              name={item.brand_independent ? 'check-circle' : 'sell'}
+              size={13}
+              color={item.brand_independent ? colors.background.paper : colors.text.secondary}
             />
-            <Text style={[styles.markaCipYazi, item.brand_independent && styles.markaCipYaziAcik]}>
+            <Text
+              style={[styles.markaCipYazi, item.brand_independent && styles.markaCipYaziAcik]}
+              numberOfLines={1}
+            >
               {t('list.brand_free_label')}
             </Text>
           </TouchableOpacity>
+          <View style={styles.esnekBosluk} />
+          <QuantityStepper
+            value={adet}
+            onChange={adetDegistir}
+            size="row"
+          />
         </View>
       </View>
-      <QuantityStepper
-        value={adet}
-        onChange={adetDegistir}
-        size="row"
-        style={styles.stepper}
-      />
       <TouchableOpacity
         onPress={() => onDelete(item.id)}
         hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
@@ -754,20 +764,25 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  stepper: { marginRight: spacing.xs },
-  itemSubRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: 2 },
+  itemAltSatir: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: 4,
+  },
+  esnekBosluk: { flex: 1, minWidth: spacing.xs },
   markaCip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: borderRadius.sm,
     borderWidth: 1,
     borderColor: colors.border.light,
   },
   markaCipAcik: { backgroundColor: colors.primary.main, borderColor: colors.primary.main },
-  markaCipYazi: { ...typography.styles.caption, fontSize: 10, color: colors.text.hint },
+  markaCipYazi: { ...typography.styles.caption, fontSize: 11, color: colors.text.secondary },
   markaCipYaziAcik: { color: colors.background.paper },
   deleteBtn: {
     width: 36,

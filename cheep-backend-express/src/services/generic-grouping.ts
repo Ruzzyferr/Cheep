@@ -172,7 +172,12 @@ export function jenerikParmakIzi(data: { name: string; brand?: string | null }):
 
   // Marka adını çıkar — isim marka ile başlamasa da geçtiği her yerden.
   if (data.brand) {
-    for (const bk of baseNormalize(data.brand).split(' ').filter(Boolean)) {
+    // MARKA da ayni 'I' duzeltmesinden gecmeli. Yalnizca urun adina
+    // uygulandiginda marka kelimesi eslesmiyor ve CEKIRDEKTE KALIYORDU:
+    // "Icim Sut 6x200 Ml" -> "icim-sut@1200ml" gibi. Markasi 'I' ile
+    // baslayan her urun bu yuzden tekil grupta kaliyordu.
+    const markaDuz = data.brand.replace(/İ/g, 'I').replace(/ı/g, 'i');
+    for (const bk of baseNormalize(markaDuz).split(' ').filter(Boolean)) {
       if (bk.length < 2) continue;
       metin = metin.replace(new RegExp(String.raw`\b` + bk + String.raw`\b`, 'g'), ' ');
     }

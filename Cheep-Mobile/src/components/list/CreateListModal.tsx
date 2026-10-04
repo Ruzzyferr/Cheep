@@ -22,6 +22,7 @@ import { colors, typography, spacing, borderRadius } from '../../theme';
 import { shadows } from '../../theme/shadows';
 import { useTranslation } from 'react-i18next';
 import { appAlert } from '../../utils/dialog';
+import { useListMutations } from '../../queries';
 
 interface CreateListModalProps {
   visible: boolean;
@@ -34,6 +35,7 @@ export function CreateListModal({
   onClose,
   onSuccess,
 }: CreateListModalProps) {
+  const { invalidateLists } = useListMutations();
   const { t } = useTranslation();
   const [name, setName] = useState('');
   const [budget, setBudget] = useState('');
@@ -52,6 +54,10 @@ export function CreateListModal({
         budget: budget ? parseFloat(budget) : undefined,
       });
       
+      // ONBELLEK: `onSuccess` yalnizca Listelerim ekranini tazeliyordu;
+      // sepet rozeti ve ana sayfadaki sayac ayni onbellege bagli.
+      await invalidateLists();
+
       // Reset form
       setName('');
       setBudget('');
