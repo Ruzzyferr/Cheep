@@ -38,6 +38,11 @@ const NITELIKLER = new Set<string>([
  * jenerik gruplamaya özel ek gürültü.
  */
 const GURULTU = new Set<string>([
+  // BOY/AMBALAJ sozcukleri. ProductMatcher'in EXTRA_NOISE_WORDS listesinde
+  // bunlar vardi ama o liste burada kullanilmiyor; eksikligi "M Boy Yumurta"yi
+  // duz "Yumurta"dan AYIRIYORDU (yanlis ikame degil, kapsama kaybi).
+  'boy', 'orta', 'buyuk', 'kucuk', 'mini', 'jumbo', 'paket', 'koli',
+  'adet', 'tane', 'gramaj', 'ebat',
   'urun', 'urunu', 'cesit', 'cesitleri', 'karisik', 'ozel', 'klasik',
   'premium', 'secme', 'taze', 'gunluk', 'enfes', 'lezzetli', 'yeni',
   'avantaj', 'firsat', 'ekonomik', 'aile', 'boyu',

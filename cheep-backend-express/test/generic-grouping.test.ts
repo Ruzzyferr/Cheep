@@ -110,3 +110,17 @@ describe('gramaj araligi', () => {
     expect(a).not.toBe(b);
   });
 });
+
+describe('boy/ambalaj gurultusu', () => {
+  it('"M Boy" ikameyi engellemez', () => {
+    const a = jenerikParmakIzi({ name: 'Akyaka Yumurta M Boy 15 Adet', brand: 'Akyaka' });
+    const b = jenerikParmakIzi({ name: 'Carrefour Yumurta 15 Adet', brand: 'Carrefour' });
+    expect(a).toBe('yumurta@15adet');
+    expect(a).toBe(b);
+  });
+  it('nitelik HALA ayirir (boy temizlense de)', () => {
+    const a = jenerikParmakIzi({ name: 'X Gezen Yumurta M Boy 10 Adet', brand: 'X' });
+    const b = jenerikParmakIzi({ name: 'Y Yumurta 10 Adet', brand: 'Y' });
+    expect(a).not.toBe(b);
+  });
+});
