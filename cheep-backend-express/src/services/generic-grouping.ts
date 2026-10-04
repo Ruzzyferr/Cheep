@@ -108,8 +108,17 @@ export function jenerikYuzde(name: string): string | null {
  * çökmüştü. Bu kelimelerden biri geçiyorsa ürün jenerik gruba HİÇ alınmaz.
  */
 const IKAME_YASAK = [
+  // TR
   'bebek', 'mama', 'devam sutu', 'baslangic sutu', 'formul',
   'ilac', 'takviye', 'vitamin', 'biberon', 'emzik',
+  // PL / HU / RO / HR / EN — asil koruma kademe rakaminin cekirdekte
+  // korunmasi, bu liste ikinci katman. Turkce kelimelerle sinirli kalsaydi
+  // diger pazarlarda hic calismazdi.
+  'poczatkowe', 'modyfikowane', 'nastepne', 'kaszka', 'niemowl',
+  'tapszer', 'anyatej', 'csecsemo',
+  'lapte praf', 'formula de start', 'sugari',
+  'pocetna', 'dojenack',
+  'infant', 'follow on', 'baby food',
 ];
 
 /** Uzunluğu 2'yi geçmeyen ama GERÇEK ürün olan kelimeler. */
