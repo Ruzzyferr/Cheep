@@ -30,7 +30,8 @@ import i18n from '../../i18n';
 import { usePremium } from '../../context/PremiumContext';
 import { showDialog , appAlert } from '../../utils/dialog';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { KeyboardAvoidingView, useKeyboardHandler } from 'react-native-keyboard-controller';
+import { runOnJS } from 'react-native-reanimated';
 import { useHeaderHeight } from '@react-navigation/elements';
 
 // ============================================================
@@ -116,6 +117,28 @@ export function AssistantChatScreen({
   // olceklerinde bu sayi tutmuyor. `useHeaderHeight` navigasyonun kendi
   // olcumunu veriyor.
   const headerHeight = useHeaderHeight();
+
+  // KLAVYE ACILIRKEN LISTE DIBE YAPISIK KALSIN.
+  //
+  // `KeyboardAvoidingView` giris cubugunu dogru yere tasiyor ama listenin
+  // kaydirma konumuna dokunmuyor: klavye acilinca gorunur alan kisaliyor ve
+  // son mesaj yukari kayip gozden kayboluyordu. WhatsApp'ta son mesaj
+  // klavyenin hemen ustunde KALIR.
+  //
+  // `onStart` klavye animasyonu BASLARKEN tetikleniyor (bitince degil), yani
+  // kaydirma ile klavye ayni karede ilerliyor. `Keyboard.addListener` ile
+  // yapilsaydi animasyon bittikten sonra zipladigi gorulurdu.
+  const dibeKaydir = useCallback(() => {
+    flatListRef.current?.scrollToEnd({ animated: false });
+  }, []);
+  useKeyboardHandler({
+    onStart: (e) => {
+      'worklet';
+      // Yalnizca ACILIRKEN; kapanirken kaydirmak kullaniciyi gecmise
+      // bakarken zorla asagi ceker.
+      if (e.height > 0) runOnJS(dibeKaydir)();
+    },
+  }, [dibeKaydir]);
 
   const [threadId, setThreadId] = useState<number | null>(null);
   /** Sohbet başlatılamadı — giriş alanı kapalı olmalı, yoksa ölü bir input kalır. */
