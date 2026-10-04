@@ -100,6 +100,7 @@ export function ListDetailScreen({
       // ve yalnızca ekran odaktayken.
   React.useEffect(() => {
     if (!listQ.isError) return;
+    if (siliniyorRef.current) return;   // silme akisi — hata degil
     const e = listQ.error as { code?: string; status?: number } | null;
     const isNetwork = e?.code === 'NETWORK_ERROR' || e?.status == null;
     if (isNetwork) return;
@@ -108,6 +109,12 @@ export function ListDetailScreen({
     navigation.goBack();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listQ.isError]);
+
+  // Liste SILINIRKEN hata kutusu cikmasin: silme sonrasi onbellek
+  // gecersizlestirilince bu ekranin sorgusu silinmis listeyi yeniden
+  // cekiyor ve 404 doneyor. Kullanici acisindan islem BASARILI, hata
+  // gostermek yanlis olur. (Emulator testinde yakalandi, 5 Eki 2026.)
+  const siliniyorRef = useRef(false);
 
   const handleToggleBrandIndependent = async (item: ListItem) => {
     try {
@@ -260,6 +267,7 @@ export function ListDetailScreen({
           style: 'destructive',
           onPress: async () => {
             try {
+              siliniyorRef.current = true;
               await listService.deleteList(list.id);
               // ONBELLEGI GECERSIZLESTIR — yoksa liste SUNUCUDAN silinir ama
               // `['lists']` onbellekte kalir: Listelerim'e donunce silinmis
@@ -267,9 +275,16 @@ export function ListDetailScreen({
               // ve "bir hata olustu" cikar. Ana sayfadaki tasarruf sayaci da
               // ayni onbellege bagli oldugu icin elle cekilmeden yenilenmez.
               // (Kullanici bildirimi, 5 Eki 2026 — 2. ve 3. maddeler.)
-              await invalidateLists();
+              // SIRA ONEMLI: once ekrandan cik, SONRA gecersizlestir.
+              // Tersi yapildiginda bu ekran hala monte oldugu icin silinmis
+              // listenin sorgusu yeniden cekiliyor, 404 donuyor ve kullaniciya
+              // "Listeler yuklenirken bir hata olustu" gosteriliyordu —
+              // islem aslinda BASARILIYKEN. React Query pasif sorgulari
+              // kendiliginden yeniden cekmez, bu yuzden sira yeterli.
               navigation.goBack();
+              await invalidateLists();
             } catch {
+              siliniyorRef.current = false;
               appAlert(t('common.error'), t('common.something_went_wrong'));
             }
           },
@@ -756,6 +771,10 @@ const styles = StyleSheet.create({
     ...typography.styles.caption,
     color: colors.text.secondary,
     marginTop: 2,
+    // ONCE BU DARALSIN. Daralmazsa uzun birim/marka metni esnek boslugu
+    // sikistirip adet kutusunu saga itiyor ve satirlar arasinda 20px kayma
+    // olusuyordu (emulatorde olculdu).
+    flexShrink: 1,
   },
 
   brandFreeBadge: {
@@ -780,6 +799,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.sm,
     borderWidth: 1,
     borderColor: colors.border.light,
+    flexShrink: 0,
   },
   markaCipAcik: { backgroundColor: colors.primary.main, borderColor: colors.primary.main },
   markaCipYazi: { ...typography.styles.caption, fontSize: 11, color: colors.text.secondary },
