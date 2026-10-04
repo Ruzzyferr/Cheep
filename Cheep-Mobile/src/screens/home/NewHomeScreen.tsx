@@ -215,7 +215,15 @@ export function NewHomeScreen({ navigation }: HomeStackScreenProps<'HomeMain'>) 
       })
     );
   };
-  const goLists = () => navigation.dispatch(CommonActions.navigate({ name: 'Lists' }));
+  // `screen: 'ListsMain'` SART. Parametresiz `navigate({name:'Lists'})`
+  // zaten yuklu sekmenin SON DURUMUNU geri yukluyor: kullanici daha once
+  // aktif listeye girdiyse yiginda ListDetail duruyor ve "Listelerim"
+  // dugmesi tum listeler yerine O LISTEYI aciyordu.
+  // (Kullanici bildirimi, 5 Eki 2026 — 1. madde.)
+  const goLists = () =>
+    navigation.dispatch(
+      CommonActions.navigate({ name: 'Lists', params: { screen: 'ListsMain' } })
+    );
   const goSearch = () => navigation.navigate('Search');
   const goAllProducts = () => navigation.navigate('CategoryProducts', { categoryId: 0, categoryName: t('product.all_categories') });
 

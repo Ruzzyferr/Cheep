@@ -186,7 +186,11 @@ export function CategoryProductsScreen({ navigation, route }: CategoryProductsPr
         }),
       );
     } else {
-      navigation.dispatch(CommonActions.navigate({ name: 'Lists' }));
+      // Parametresiz gecis sekmenin SON DURUMUNU geri yukler ve eski bir
+      // ListDetail acilir; hedef acikca verilmeli (bkz. NewHomeScreen).
+      navigation.dispatch(
+        CommonActions.navigate({ name: 'Lists', params: { screen: 'ListsMain' } }),
+      );
     }
   };
 

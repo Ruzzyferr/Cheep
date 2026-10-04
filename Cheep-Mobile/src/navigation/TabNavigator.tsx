@@ -148,26 +148,15 @@ function TabNavigatorInner() {
             },
           }}
           listeners={({ navigation }) => ({
-            tabPress: (e) => {
-              // Reset Lists stack to ListsMain when tab is pressed
-              // This ensures user always sees the list screen with tabs, not a detail screen
-              const state = navigation.getState();
-              const listsTabState = state.routes.find(r => r.name === 'Lists')?.state;
-              if (listsTabState && listsTabState.routes && listsTabState.routes.length > 1) {
-                // Reset to ListsMain if we're on a nested screen
-                navigation.reset({
-                  index: 0,
-                  routes: [
-                    {
-                      name: 'Lists',
-                      state: {
-                        routes: [{ name: 'ListsMain' }],
-                        index: 0,
-                      },
-                    },
-                  ],
-                });
-              }
+            tabPress: () => {
+              // Sekmeye basinca HER ZAMAN tum listeler ekrani acilsin.
+              //
+              // Eskiden burada `navigation.reset` vardi ve KOK sekme
+              // gezginini TEK rotaya indiriyordu (`routes: [{name:'Lists'}]`)
+              // — yani Ana Sayfa, Firsatlar ve Profil sekmelerini durumdan
+              // siliyordu. Hedefli `navigate` hem yikici degil hem de ayni
+              // isi yapiyor.
+              navigation.navigate('Lists', { screen: 'ListsMain' });
             },
           })}
         />
