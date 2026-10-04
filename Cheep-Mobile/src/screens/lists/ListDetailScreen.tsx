@@ -529,11 +529,33 @@ function ListItemCard({
           <Text style={styles.productName} numberOfLines={1}>
             {product.name}
           </Text>
-          {item.brand_independent && <Text style={styles.brandFreeBadge}> 🏷️</Text>}
         </View>
-        <Text style={styles.itemSub} numberOfLines={1}>
-          {subtitle}
-        </Text>
+        <View style={styles.itemSubRow}>
+          <Text style={styles.itemSub} numberOfLines={1}>
+            {subtitle}
+          </Text>
+          {/* GORUNUR DUGME. Eskiden bu ayar YALNIZCA uzun basmayla aciliyordu
+              ve tek ipucu ekran okuyucunun gordugu bir etiketti; goren
+              kullanici ozelligin varligini bilemiyordu (kullanici geri
+              bildirimi, 4 Eki 2026: "markasiz secenek de olsa"). */}
+          <TouchableOpacity
+            onPress={() => onToggleBrandIndependent(item)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: item.brand_independent }}
+            accessibilityLabel={t('list.brand_free_label')}
+            style={[styles.markaCip, item.brand_independent && styles.markaCipAcik]}
+          >
+            <MaterialIcons
+              name={item.brand_independent ? 'check' : 'sell'}
+              size={12}
+              color={item.brand_independent ? colors.background.paper : colors.text.hint}
+            />
+            <Text style={[styles.markaCipYazi, item.brand_independent && styles.markaCipYaziAcik]}>
+              {t('list.brand_free_label')}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <QuantityStepper
         value={adet}
@@ -733,6 +755,20 @@ const styles = StyleSheet.create({
   },
 
   stepper: { marginRight: spacing.xs },
+  itemSubRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: 2 },
+  markaCip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: borderRadius.sm,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  markaCipAcik: { backgroundColor: colors.primary.main, borderColor: colors.primary.main },
+  markaCipYazi: { ...typography.styles.caption, fontSize: 10, color: colors.text.hint },
+  markaCipYaziAcik: { color: colors.background.paper },
   deleteBtn: {
     width: 36,
     height: 36,

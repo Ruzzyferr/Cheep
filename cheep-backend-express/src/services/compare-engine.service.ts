@@ -33,6 +33,7 @@ interface ProductInList {
         image_url: string | null;
         category_id: number | null;
         muadil_grup_id: string | null;
+        jenerik_grup_id: string | null;
         store_prices: Array<{
             id: number;
             store_id: number;
@@ -197,23 +198,25 @@ export async function compareShoppingList(
         options.countryId
     );
 
-    // Marka-bağımsız öğeler için muadil grup ürünlerini çek (tek sorgu)
+    // Marka-bağımsız öğeler için İKAME (jenerik) grup ürünlerini çek (tek sorgu).
+    // `muadil_grup_id` DEĞİL: o alan ürün birleştirme anahtarı ve grupları
+    // tekil — 32.710 grubun 32.709'u tek ürünlüydü, yani ikame hiç olmuyordu.
     const muadilIds = Array.from(new Set(
         listItems
-            .filter(i => i.brand_independent && i.product.muadil_grup_id)
-            .map(i => i.product.muadil_grup_id as string)
+            .filter(i => i.brand_independent && i.product.jenerik_grup_id)
+            .map(i => i.product.jenerik_grup_id as string)
     ));
     const siblingsByGroup = new Map<string, PricedProduct[]>();
     if (muadilIds.length > 0) {
         const siblings = await prisma.product.findMany({
             where: {
-                muadil_grup_id: { in: muadilIds },
+                jenerik_grup_id: { in: muadilIds },
                 ...(options.countryId ? { country_id: options.countryId } : {}),
             },
             include: { store_prices: { include: { store: true } } },
         });
         for (const s of siblings) {
-            const gid = s.muadil_grup_id as string;
+            const gid = s.jenerik_grup_id as string;
             const arr = siblingsByGroup.get(gid) || [];
             arr.push({
                 id: s.id, name: s.name, brand: s.brand, image_url: s.image_url,
@@ -235,8 +238,8 @@ export async function compareShoppingList(
                 store_id: sp.store_id, price: Number(sp.price), store: sp.store,
             })),
         };
-        const siblings = item.brand_independent && item.product.muadil_grup_id
-            ? (siblingsByGroup.get(item.product.muadil_grup_id) || []).filter(s => s.id !== item.product.id)
+        const siblings = item.brand_independent && item.product.jenerik_grup_id
+            ? (siblingsByGroup.get(item.product.jenerik_grup_id) || []).filter(s => s.id !== item.product.id)
             : [];
         itemOptions.set(item.id, resolveItemStoreOptions(representative, item.brand_independent, siblings));
     }
@@ -702,13 +705,13 @@ async function findAlternativeProducts(
     // bir hız limiti (`compareLimiter`) koyduğu bir uç. Üstelik aynı grupların
     // kardeşleri yukarıda (satır ~208) ZATEN toplu çekiliyordu.
     const groupIds = Array.from(new Set(
-        listItems.map(i => i.product.muadil_grup_id).filter((g): g is string => !!g)
+        listItems.map(i => i.product.jenerik_grup_id).filter((g): g is string => !!g)
     ));
     if (groupIds.length === 0) return alternatives;
 
     const siblingRows = await prisma.product.findMany({
         where: {
-            muadil_grup_id: { in: groupIds },
+            jenerik_grup_id: { in: groupIds },
             ...(countryId ? { country_id: countryId } : {}),
         },
         include: {
@@ -722,17 +725,17 @@ async function findAlternativeProducts(
 
     const byGroup = new Map<string, typeof siblingRows>();
     for (const row of siblingRows) {
-        const gid = row.muadil_grup_id as string;
+        const gid = row.jenerik_grup_id as string;
         const arr = byGroup.get(gid) ?? [];
         arr.push(row);
         byGroup.set(gid, arr);
     }
 
     for (const item of listItems) {
-        // Muadil grup ID'si varsa, aynı gruptaki diğer ürünleri bul
-        if (!item.product.muadil_grup_id) continue;
+        // İkame (jenerik) grubu varsa, aynı gruptaki diğer markaları bul
+        if (!item.product.jenerik_grup_id) continue;
 
-        const alternativeProducts = (byGroup.get(item.product.muadil_grup_id) ?? [])
+        const alternativeProducts = (byGroup.get(item.product.jenerik_grup_id) ?? [])
             .filter(alt => alt.id !== item.product.id); // Kendisi hariç
 
         // Orijinal ürünün en ucuz fiyatı

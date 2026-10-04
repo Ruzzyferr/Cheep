@@ -290,6 +290,11 @@ model Product {
   image_url      String?
   category_id    Int?
   muadil_grup_id String? // Muadil ürünleri gruplamak için
+  // IKAME grubu. `muadil_grup_id`den AYRI tutulmak ZORUNDA: o alan ayni
+  // zamanda urun BIRLESTIRME anahtari (ProductMatcher.findExactMatch), oraya
+  // markalar arasi ortak bir deger yazilsaydi farkli markalar tek urune
+  // cokerdi. Bu alan YALNIZCA 'marka onemsemiyorum' ikamesinde okunur.
+  jenerik_grup_id String?
   country_id     Int
 
   created_at DateTime @default(now())
@@ -307,6 +312,7 @@ model Product {
   @@unique([country_id, slug])
   @@index([country_id])
   @@index([muadil_grup_id])
+  @@index([jenerik_grup_id])
   @@index([category_id])
   @@index([slug])
   @@map("products")

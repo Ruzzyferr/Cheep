@@ -307,7 +307,8 @@
     "no_active_list": "Jelenleg nincs aktív bevásárlólistád",
     "quantity_increase": "Mennyiség növelése",
     "quantity_decrease": "Mennyiség csökkentése",
-    "quantity_label": "{{count}} db"
+    "quantity_label": "{{count}} db",
+    "brand_free_label": "Bármelyik márka"
   },
   "deals": {
     "title": "Akciók",

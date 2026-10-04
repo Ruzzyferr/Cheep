@@ -5,6 +5,7 @@ import {
 } from '../../utils/similarity.js';
 import { getCountryIdByCode } from '../../utils/country.js';
 import { extractGramaj } from '../../services/brand-independent-pricing.js';
+import { jenerikParmakIzi } from '../../services/generic-grouping.js';
 
 /**
  * Product Matching Service
@@ -466,6 +467,10 @@ export class ProductMatcher {
                 image_url: data.image_url,
                 ean_barcode: ean,
                 muadil_grup_id: muadilToPersist && muadilToPersist.length > 0 ? muadilToPersist : undefined,
+                // IKAME grubu — `muadil_grup_id`den AYRI. Bos olabilir
+                // (miktarsiz urun, ikameye kapali kategori): o zaman urun
+                // "marka onemsemiyorum" ikamesine girmez.
+                jenerik_grup_id: jenerikParmakIzi({ name: data.name, brand: data.brand }) ?? undefined,
             },
         });
 

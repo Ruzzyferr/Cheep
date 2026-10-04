@@ -307,7 +307,8 @@
     "no_active_list": "You have no active shopping list right now",
     "quantity_increase": "Increase quantity",
     "quantity_decrease": "Decrease quantity",
-    "quantity_label": "{{count}} pcs"
+    "quantity_label": "{{count}} pcs",
+    "brand_free_label": "Any brand"
   },
   "deals": {
     "title": "Deals",

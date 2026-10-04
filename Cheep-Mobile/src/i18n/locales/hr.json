@@ -307,7 +307,8 @@
     "no_active_list": "Trenutačno nemaš aktivan popis za kupnju",
     "quantity_increase": "Povećaj količinu",
     "quantity_decrease": "Smanji količinu",
-    "quantity_label": "{{count}} kom."
+    "quantity_label": "{{count}} kom.",
+    "brand_free_label": "Bilo koja marka"
   },
   "deals": {
     "title": "Akcije",

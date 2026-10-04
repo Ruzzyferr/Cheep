@@ -307,7 +307,8 @@
     "no_active_list": "Du har ingen aktiv inköpslista just nu",
     "quantity_increase": "Öka antal",
     "quantity_decrease": "Minska antal",
-    "quantity_label": "{{count}} st"
+    "quantity_label": "{{count}} st",
+    "brand_free_label": "Valfritt märke"
   },
   "deals": {
     "title": "Erbjudanden",

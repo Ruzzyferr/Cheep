@@ -307,7 +307,8 @@
     "no_active_list": "Şu anda aktif alışveriş listeniz yok",
     "quantity_increase": "Adedi artır",
     "quantity_decrease": "Adedi azalt",
-    "quantity_label": "{{count}} adet"
+    "quantity_label": "{{count}} adet",
+    "brand_free_label": "Marka farketmez"
   },
   "deals": {
     "title": "Fırsatlar",

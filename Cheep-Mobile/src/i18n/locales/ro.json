@@ -307,7 +307,8 @@
     "no_active_list": "Momentan nu ai nicio listă de cumpărături activă",
     "quantity_increase": "Crește cantitatea",
     "quantity_decrease": "Scade cantitatea",
-    "quantity_label": "{{count}} buc."
+    "quantity_label": "{{count}} buc.",
+    "brand_free_label": "Orice marcă"
   },
   "deals": {
     "title": "Oferte",

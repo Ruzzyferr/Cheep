@@ -307,7 +307,8 @@
     "no_active_list": "Du hast gerade keine aktive Einkaufsliste",
     "quantity_increase": "Menge erhöhen",
     "quantity_decrease": "Menge verringern",
-    "quantity_label": "{{count}} Stk."
+    "quantity_label": "{{count}} Stk.",
+    "brand_free_label": "Beliebige Marke"
   },
   "deals": {
     "title": "Angebote",
