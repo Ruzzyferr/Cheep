@@ -96,3 +96,17 @@ describe('Turkce normallestirme', () => {
     expect(fp('A Tavuk Yumurtası 10 Adet', 'A')).toBe(fp('B Tavuk Yumurta 10 Adet', 'B'));
   });
 });
+
+describe('gramaj araligi', () => {
+  it('"53-62 Gr" olcudur, varyant numarasi degil', () => {
+    const a = jenerikParmakIzi({ name: 'Bili Bili Yumurta 53-62 Gr 30 Adet', brand: 'Bili Bili' });
+    const b = jenerikParmakIzi({ name: 'Keskinoğlu Yumurta 30 Adet', brand: 'Keskinoğlu' });
+    expect(a).toBe('yumurta@30adet');
+    expect(a).toBe(b);
+  });
+  it('kademe numarasi HALA ayirt edici', () => {
+    const a = jenerikParmakIzi({ name: 'Marka Kahve 2 Numara 100 Gr', brand: 'Marka' });
+    const b = jenerikParmakIzi({ name: 'Marka Kahve 5 Numara 100 Gr', brand: 'Marka' });
+    expect(a).not.toBe(b);
+  });
+});

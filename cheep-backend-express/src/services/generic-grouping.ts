@@ -149,6 +149,11 @@ export function jenerikParmakIzi(data: { name: string; brand?: string | null }):
   // yazilmis hali AYRI gruba duserdi. baseNormalize'a DOKUNMUYORUZ (mevcut
   // muadil parmak izlerini tasiyor), duzeltme yalnizca burada.
   let ham = data.name.replace(/İ/g, 'I').replace(/ı/g, 'i').replace(/,/g, '.');
+  // GRAMAJ ARALIGI once temizlenir: "53-62 Gr" icin birim temizligi yalnizca
+  // "62 Gr"yi alir, geriye "53" kalir ve kademe numarasi sanilip cekirdekte
+  // tutulur. Sonuc yanlis ikame DEGIL ama kapsama kaybi: aralik yazmayan ayni
+  // urun ("Yumurta 30 Adet") ayri gruba duser. Aralik bir OLCU, varyant degil.
+  ham = ham.replace(/\d+\s*[-–]\s*(\d+(?:\.\d+)?\s*(?:ml|lt|l|cl|kg|gr|g)\b)/gi, ' $1 ');
   ham = ham.replace(/(?:\d+\s*[x×]\s*)?\d+(?:\.\d+)?\s*(ml|lt|l|cl|kg|gr|g|adet|ad|tane)\b/gi, ' ');
   ham = ham.replace(/\b\d+\s*['’]?\s*(li|lu|lı|lü)\b/gi, ' ');
 
