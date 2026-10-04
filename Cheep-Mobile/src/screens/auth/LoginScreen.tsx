@@ -8,8 +8,6 @@ import {
   View,
   Text,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   TouchableOpacity,
   } from 'react-native';
@@ -21,6 +19,12 @@ import { useAuth } from '../../context/AuthContext';
 import { colors, typography, spacing, layout } from '../../theme';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 import { appAlert } from '../../utils/dialog';
+// RN'in KeyboardAvoidingView'i DEGIL — `react-native-keyboard-controller`inki.
+// Gerekce AssistantChatScreen'de uzun uzun yazili: RN'inki yalnizca ac/kapa
+// olaylarini gorup arayi tahmin ediyor. Ayrica `KeyboardProvider` pencerenin
+// kendiliginden kuculmesini kapatiyor; bu ekranlar RN'in bilesenini
+// kullanmaya devam etseydi hicbir telafi kalmaz ve KLAVYE ALTINDA kalirlardi.
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 export function LoginScreen({ navigation }: any) {
   // Sekme disi ekran: tab bar payi yok ama sistem cubugu payi gerekli.
@@ -72,7 +76,7 @@ export function LoginScreen({ navigation }: any) {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior="padding"
     >
       <ScrollView
         contentContainerStyle={[styles.scrollContent, { paddingTop: topSpacing, paddingBottom: bottomSpacing }]}

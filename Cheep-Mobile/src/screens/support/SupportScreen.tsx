@@ -18,8 +18,6 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +27,12 @@ import { useLocale } from '../../context/LocaleContext';
 import { useToast } from '../../context/ToastContext';
 import { colors, typography, spacing, borderRadius } from '../../theme';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
+// RN'in KeyboardAvoidingView'i DEGIL — `react-native-keyboard-controller`inki.
+// Gerekce AssistantChatScreen'de uzun uzun yazili: RN'inki yalnizca ac/kapa
+// olaylarini gorup arayi tahmin ediyor. Ayrica `KeyboardProvider` pencerenin
+// kendiliginden kuculmesini kapatiyor; bu ekranlar RN'in bilesenini
+// kullanmaya devam etseydi hicbir telafi kalmaz ve KLAVYE ALTINDA kalirlardi.
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 const TOPICS: SupportTopic[] = ['bug', 'price', 'account', 'suggestion', 'other'];
 
@@ -89,7 +93,7 @@ export function SupportScreen({ navigation }: any) {
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior="padding"
     >
       <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingBottom: bottomSpacing }]} keyboardShouldPersistTaps="handled">
         <Text style={styles.intro}>{t('support.intro')}</Text>

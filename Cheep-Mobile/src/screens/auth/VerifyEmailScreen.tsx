@@ -8,14 +8,18 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
 } from 'react-native';
 import { Button, CodeInput } from '../../components/ui';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { colors, typography, spacing, layout } from '../../theme';
 import { appAlert } from '../../utils/dialog';
+// RN'in KeyboardAvoidingView'i DEGIL — `react-native-keyboard-controller`inki.
+// Gerekce AssistantChatScreen'de uzun uzun yazili: RN'inki yalnizca ac/kapa
+// olaylarini gorup arayi tahmin ediyor. Ayrica `KeyboardProvider` pencerenin
+// kendiliginden kuculmesini kapatiyor; bu ekranlar RN'in bilesenini
+// kullanmaya devam etseydi hicbir telafi kalmaz ve KLAVYE ALTINDA kalirlardi.
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 export function VerifyEmailScreen() {
   const { t } = useTranslation();
@@ -66,7 +70,7 @@ export function VerifyEmailScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior="padding"
     >
       <View style={styles.content}>
         <View style={styles.iconCircle}>

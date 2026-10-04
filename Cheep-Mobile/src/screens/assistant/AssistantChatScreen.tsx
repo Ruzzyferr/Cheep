@@ -9,8 +9,6 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  KeyboardAvoidingView,
-  Platform,
   TouchableOpacity,
   Pressable,
 } from 'react-native';
@@ -32,6 +30,8 @@ import i18n from '../../i18n';
 import { usePremium } from '../../context/PremiumContext';
 import { showDialog , appAlert } from '../../utils/dialog';
 import { useBottomSpacing } from '../../hooks/useScreenSpacing';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { useHeaderHeight } from '@react-navigation/elements';
 
 // ============================================================
 // Types
@@ -111,6 +111,11 @@ export function AssistantChatScreen({
 }: AssistantStackScreenProps<'AssistantChat'>) {
   const qc = useQueryClient();
   const flatListRef = useRef<FlatList<LocalMessage>>(null);
+  // Basligin GERCEK yuksekligi. Eskiden iOS icin 88 SABIT yaziliydi —
+  // centikli/centiksiz cihazda, dinamik adada ve farkli yazi tipi
+  // olceklerinde bu sayi tutmuyor. `useHeaderHeight` navigasyonun kendi
+  // olcumunu veriyor.
+  const headerHeight = useHeaderHeight();
 
   const [threadId, setThreadId] = useState<number | null>(null);
   /** Sohbet başlatılamadı — giriş alanı kapalı olmalı, yoksa ölü bir input kalır. */
@@ -388,25 +393,25 @@ export function AssistantChatScreen({
 
   // ─── Render ──────────────────────────────────────────────────
   return (
-    // ANDROID'DE `behavior` BOS BIRAKILAMAZ.
+    // KLAVYE: `react-native-keyboard-controller`in bileseni — RN'inki DEGIL.
     //
-    // Burada `undefined` yaziyordu, yani KeyboardAvoidingView Android'de
-    // HICBIR SEY yapmiyordu ve klavye acilinca yazi alani klavyenin ARKASINDA
-    // kaliyordu — kullanici ne yazdigini goremiyordu.
+    // RN'in KeyboardAvoidingView'i yalnizca "klavye acildi/kapandi"
+    // OLAYLARINI goruyor ve arasini kendi tahmin ettigi bir egriyle
+    // animasyonluyor. Her OEM klavyesinin (Gboard, Samsung, SwiftKey) suresi
+    // ve egrisi farkli oldugu icin yazi alani klavyenin ARKASINDA kaliyordu;
+    // kullanici ne yazdigini gormek icin klavyeyi kapatip acmak zorundaydi.
+    // Android 15 edge-to-edge ile durum daha da kotulesti: `adjustResize`
+    // artik pencereyi kucultmuyor, yani RN'in dayandigi mekanizma yok.
     //
-    // Eskiden bunu manifest'teki `windowSoftInputMode="adjustResize"`
-    // hallediyordu: pencere kuculuyor, giris yukari itiliyordu. Android 15
-    // (RN 0.81'in hedefledigi API 35) edge-to-edge'i zorunlu kiliyor ve o
-    // kipte pencere ARTIK KUCULMUYOR; inset'leri uygulamanin kendisi
-    // yonetmek zorunda. Manifest ayari yerinde duruyor ama etkisiz.
-    //
-    // `'height'` secildi cunku uygulamadaki DIGER ALTI ekran (giris, kayit,
-    // dogrulama, sifre sifirlama, onboarding, destek) tam olarak bunu
-    // kullaniyor ve calisiyor. Aykiri olan tek ekran burasiydi.
+    // Bu bilesen native geri cagrilara baglaniyor — iOS'ta
+    // `keyboardWillChangeFrame` (sure + egri dahil), Android'de
+    // `WindowInsetsAnimationCompat` (HER KAREDE inset) — ve yuksekligi UI
+    // thread'inde yayinliyor. Giris cubugu klavyeyle AYNI karede hareket
+    // ediyor; WhatsApp'in yerel olarak yaptigi sey tam olarak budur.
     <KeyboardAvoidingView
       style={styles.root}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
+      behavior="padding"
+      keyboardVerticalOffset={headerHeight}
     >
       <FlatList
         ref={flatListRef}

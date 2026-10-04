@@ -19,8 +19,6 @@ import {
   View,
   Text,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
@@ -35,6 +33,12 @@ import { colors, typography, spacing, layout } from '../../theme';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 import { appAlert } from '../../utils/dialog';
 import type { AuthStackScreenProps } from '../../navigation/types';
+// RN'in KeyboardAvoidingView'i DEGIL — `react-native-keyboard-controller`inki.
+// Gerekce AssistantChatScreen'de uzun uzun yazili: RN'inki yalnizca ac/kapa
+// olaylarini gorup arayi tahmin ediyor. Ayrica `KeyboardProvider` pencerenin
+// kendiliginden kuculmesini kapatiyor; bu ekranlar RN'in bilesenini
+// kullanmaya devam etseydi hicbir telafi kalmaz ve KLAVYE ALTINDA kalirlardi.
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 /** Parola alt sınırı — sunucudaki `resetPasswordSchema` ile AYNI olmak zorunda. */
 const MIN_PASSWORD = 6;
@@ -104,7 +108,7 @@ export function ForgotPasswordScreen({ navigation, route }: AuthStackScreenProps
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior="padding"
     >
       <ScrollView
         contentContainerStyle={[

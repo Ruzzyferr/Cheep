@@ -1,9 +1,9 @@
 {
-  "_not": "Play ve App Store URETIMI 1.6.4'te. Bu notlar 1.6.4 -> 1.6.5 farkini anlatir. Gorunur tek degisiklik asistan ekranindaki klavye hatasi; atif duzeltmesi ve bagimlilik yamalari kullaniciya anlatilmiyor (surum notu degisiklik gunlugu degil).",
-  "tr-TR": "• Yapay zekâ asistanında klavye açılınca yazı alanının klavyenin arkasında kalması giderildi.\n• Çeşitli iyileştirmeler ve hata düzeltmeleri.",
-  "en-US": "• Fixed the AI assistant input field being hidden behind the keyboard.\n• Various improvements and bug fixes.",
-  "pl-PL": "• Naprawiono chowanie się pola tekstowego asystenta AI za klawiaturą.\n• Różne ulepszenia i poprawki błędów.",
-  "hr": "• Ispravljeno skrivanje polja za unos AI asistenta iza tipkovnice.\n• Razna poboljšanja i ispravci grešaka.",
-  "hu-HU": "• Javítottuk, hogy az AI asszisztens beviteli mezője a billentyűzet mögé került.\n• Különféle fejlesztések és hibajavítások.",
-  "ro": "• Am reparat ascunderea câmpului de text al asistentului AI în spatele tastaturii.\n• Diverse îmbunătățiri și corecții de erori."
+  "_not": "Play ve App Store URETIMI 1.6.5'te. 1.6.5'teki klavye duzeltmesi ISE YARAMADI (kullanici Samsung cihazda dogruladi: giris cubugu hic gorunmuyordu). 1.6.6 gercek duzeltme: react-native-keyboard-controller. Kullaniciya ayni sey ikinci kez duyurulmuyor, cunku onceki notta zaten 'giderildi' yazmistik.",
+  "tr-TR": "• Yapay zekâ asistanında klavye açılırken yazı alanının kaybolması tamamen giderildi.\n• Çeşitli iyileştirmeler ve hata düzeltmeleri.",
+  "en-US": "• Fixed the AI assistant input field disappearing when the keyboard opens.\n• Various improvements and bug fixes.",
+  "pl-PL": "• Naprawiono znikanie pola tekstowego asystenta AI przy otwieraniu klawiatury.\n• Różne ulepszenia i poprawki błędów.",
+  "hr": "• Ispravljeno nestajanje polja za unos AI asistenta pri otvaranju tipkovnice.\n• Razna poboljšanja i ispravci grešaka.",
+  "hu-HU": "• Javítottuk, hogy az AI asszisztens beviteli mezője eltűnt a billentyűzet megnyitásakor.\n• Különféle fejlesztések és hibajavítások.",
+  "ro": "• Am reparat dispariția câmpului de text al asistentului AI la deschiderea tastaturii.\n• Diverse îmbunătățiri și corecții de erori."
 }

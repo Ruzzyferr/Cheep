@@ -13,8 +13,6 @@ import {
   TextInput,
   ScrollView,
   Animated,
-  KeyboardAvoidingView,
-  Platform,
   ActivityIndicator,
   } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +32,12 @@ import type { UserProfile } from '../../types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBottomSpacing, useTopSpacing } from '../../hooks/useScreenSpacing';
 import { appAlert } from '../../utils/dialog';
+// RN'in KeyboardAvoidingView'i DEGIL — `react-native-keyboard-controller`inki.
+// Gerekce AssistantChatScreen'de uzun uzun yazili: RN'inki yalnizca ac/kapa
+// olaylarini gorup arayi tahmin ediyor. Ayrica `KeyboardProvider` pencerenin
+// kendiliginden kuculmesini kapatiyor; bu ekranlar RN'in bilesenini
+// kullanmaya devam etseydi hicbir telafi kalmaz ve KLAVYE ALTINDA kalirlardi.
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 
 // Prepended locale steps (language + country) that precede ONBOARDING_QUESTIONS.
 const LOCALE_STEPS = 2;
@@ -456,7 +460,7 @@ export function OnboardingScreen() {
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior="padding"
     >
       <ScrollView
         style={styles.flex}

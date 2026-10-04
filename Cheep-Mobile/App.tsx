@@ -7,6 +7,7 @@ import React, { useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -106,6 +107,13 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* KLAVYE: `KeyboardProvider` native geri cagrilara abone oluyor
+          (iOS keyboardWillChangeFrame, Android WindowInsetsAnimationCompat)
+          ve klavye yuksekligini UI thread'inde KARE KARE yayinliyor.
+          RN'in kendi KeyboardAvoidingView'i yalnizca ac/kapa OLAYLARINI
+          goruyor ve arayi kendi tahmin ettigi egriyle animasyonluyor; her
+          OEM klavyesinin egrisi farkli oldugu icin tutmuyordu. */}
+      <KeyboardProvider>
       <SafeAreaProvider>
         <StatusBar barStyle="dark-content" backgroundColor={colors.background.default} />
         {/* Hata sınırı SAĞLAYICILARIN DIŞINDA: bir context sağlayıcısının
@@ -146,6 +154,7 @@ export default function App() {
         </QueryClientProvider>
         </ErrorBoundary>
       </SafeAreaProvider>
+      </KeyboardProvider>
     </GestureHandlerRootView>
   );
 }
