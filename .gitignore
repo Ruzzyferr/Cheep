@@ -155,3 +155,8 @@ CheepKeys-yedek-*/
 # Gunluk toplu artefakt onbellegi (countries/_common/daily_artifact.py).
 # HR arsivi TEK BASINA gunde ~81 MB; bunlar tureilebilir veri, repoya girmemeli.
 Cheep-Scraper/countries/**/cache/
+
+# Sunucu tam yedegi — URETIM SIRLARI icerir, asla islenmez.
+# Icerigi: postgres dump, deploy/.env (37 anahtar), systemd uniteleri,
+# Caddyfile, magaza varliklari. Ayrinti: _sunucu-yedek/GERI-YUKLEME.md
+/_sunucu-yedek/
