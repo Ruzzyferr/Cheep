@@ -129,7 +129,10 @@ export function ReportPriceModal({
                 return (
                   <TouchableOpacity
                     key={s.id}
-                    onPress={() => setStoreId(s.id)}
+                    onPress={() => {
+                      setStoreId(s.id);
+                      setHata(null); // kullanici duzeltti — eski hata durmasin
+                    }}
                     accessibilityRole="radio"
                     accessibilityState={{ selected: secili }}
                     style={[styles.storeChip, secili && styles.storeChipOn]}
@@ -146,7 +149,10 @@ export function ReportPriceModal({
               label={t('user_price.price_label')}
               placeholder="0,00"
               value={fiyat}
-              onChangeText={setFiyat}
+              onChangeText={(v) => {
+                setFiyat(v);
+                if (hata) setHata(null);
+              }}
               keyboardType="decimal-pad"
               leftIcon={<MaterialIcons name="payments" size={20} color={colors.text.hint} />}
             />

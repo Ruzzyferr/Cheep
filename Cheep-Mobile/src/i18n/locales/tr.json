@@ -201,7 +201,7 @@
     "buy_cheapest": "En ucuz markette al ({{store}})",
     "smart_deals": "Akıllı Fırsatlar",
     "store_details": "Mağaza Detayları",
-    "price_disclaimer": "Fiyatlar herkese açık resmi kaynaklardan derlenir ve bilgilendirme amaçlıdır; anlık olarak değişebilir. Bağlayıcı olan, marketin kendi kanalındaki güncel fiyattır. Karşılaştırma yalnızca listelenen marketler arasındadır.",
+    "price_disclaimer": "Fiyatlar herkese açık resmi kaynaklardan ve kullanıcı bildirimlerinden derlenir; bilgilendirme amaçlıdır ve anlık olarak değişebilir. Kullanıcı bildirimleri ayrıca işaretlenir. Bağlayıcı olan, marketin kendi kanalındaki güncel fiyattır. Karşılaştırma yalnızca listelenen marketler arasındadır.",
     "store_details_soon": "Bu özellik yakında kullanıma açılacak.",
     "no_price_info_desc": "Bu ürün için henüz fiyat bilgisi eklenmemiş.",
     "cheapest_label": "En Ucuz",

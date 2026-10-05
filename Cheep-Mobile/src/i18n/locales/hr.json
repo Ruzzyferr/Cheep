@@ -201,7 +201,7 @@
     "buy_cheapest": "Kupi u najjeftinijoj trgovini ({{store}})",
     "smart_deals": "Pametne akcije",
     "store_details": "Detalji trgovine",
-    "price_disclaimer": "Cijene se prikupljaju iz javno dostupnih službenih izvora i informativne su naravi; mogu se promijeniti u svakom trenutku. Obvezujuća je važeća cijena u kanalu same trgovine. Usporedba obuhvaća isključivo navedene trgovine.",
+    "price_disclaimer": "Cijene se prikupljaju iz javno dostupnih službenih izvora i iz prijava korisnika; informativne su i mogu se promijeniti. Prijave korisnika posebno su označene. Obvezujuća je cijena u kanalu same trgovine. Usporedba obuhvaća samo navedene trgovine.",
     "store_details_soon": "Ova će značajka uskoro biti dostupna.",
     "no_price_info_desc": "Za ovaj proizvod još nije dodana cijena.",
     "cheapest_label": "Najjeftinije",

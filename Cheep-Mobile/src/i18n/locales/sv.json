@@ -201,7 +201,7 @@
     "buy_cheapest": "Köp i billigaste butiken ({{store}})",
     "smart_deals": "Smarta erbjudanden",
     "store_details": "Butiksdetaljer",
-    "price_disclaimer": "Priserna sammanställs från offentligt tillgängliga officiella källor och är endast informativa; de kan ändras när som helst. Bindande är det aktuella priset i butikens egen kanal. Jämförelsen omfattar endast de listade butikerna.",
+    "price_disclaimer": "Priserna sammanställs från offentligt tillgängliga officiella källor och från användarrapporter; de är endast informativa och kan ändras. Användarrapporter märks separat. Bindande är priset i butikens egen kanal. Jämförelsen omfattar endast de listade butikerna.",
     "store_details_soon": "Den här funktionen kommer snart.",
     "no_price_info_desc": "Inget pris har lagts till för den här produkten än.",
     "cheapest_label": "Billigast",

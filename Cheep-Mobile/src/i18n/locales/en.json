@@ -201,7 +201,7 @@
     "buy_cheapest": "Buy at the cheapest store ({{store}})",
     "smart_deals": "Smart Deals",
     "store_details": "Store Details",
-    "price_disclaimer": "Prices are compiled from publicly available official sources and are for information only; they may change at any time. The binding price is the current one in the store’s own channel. The comparison covers only the listed stores.",
+    "price_disclaimer": "Prices are compiled from publicly available official sources and from user reports; they are for information only and may change at any time. User reports are labelled separately. The binding price is the one in the retailer's own channel. Comparison covers only the listed retailers.",
     "store_details_soon": "This feature is coming soon.",
     "no_price_info_desc": "No price has been added for this product yet.",
     "cheapest_label": "Cheapest",

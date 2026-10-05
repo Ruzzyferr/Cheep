@@ -201,7 +201,7 @@
     "buy_cheapest": "Vedd meg a legolcsóbb üzletben ({{store}})",
     "smart_deals": "Okos ajánlatok",
     "store_details": "Üzlet részletei",
-    "price_disclaimer": "Az árakat nyilvános hivatalos forrásokból gyűjtjük, tájékoztató jellegűek, és bármikor változhatnak. A kötelező érvényű ár mindig az áruház saját csatornáján szereplő aktuális ár. Az összehasonlítás csak a felsorolt üzletekre terjed ki.",
+    "price_disclaimer": "Az árak nyilvánosan elérhető hivatalos forrásokból és felhasználói bejelentésekből származnak; tájékoztató jellegűek és bármikor változhatnak. A felhasználói bejelentéseket külön jelöljük. A kötelező ár a kereskedő saját csatornájában szereplő ár. Az összehasonlítás csak a felsorolt üzletekre vonatkozik.",
     "store_details_soon": "Ez a funkció hamarosan elérhető lesz.",
     "no_price_info_desc": "Ehhez a termékhez még nem rögzítettünk árat.",
     "cheapest_label": "Legolcsóbb",

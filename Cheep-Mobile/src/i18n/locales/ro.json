@@ -201,7 +201,7 @@
     "buy_cheapest": "Cumpără din cel mai ieftin magazin ({{store}})",
     "smart_deals": "Oferte inteligente",
     "store_details": "Detalii magazin",
-    "price_disclaimer": "Prețurile sunt colectate din surse oficiale publice și au caracter informativ; se pot modifica oricând. Prețul obligatoriu este cel actual din canalul propriu al magazinului. Comparația se face numai între magazinele listate.",
+    "price_disclaimer": "Prețurile sunt compilate din surse oficiale publice și din raportări ale utilizatorilor; au caracter informativ și se pot modifica. Raportările utilizatorilor sunt marcate separat. Prețul obligatoriu este cel din canalul propriu al magazinului. Comparația acoperă doar magazinele listate.",
     "store_details_soon": "Această funcție va fi disponibilă în curând.",
     "no_price_info_desc": "Pentru acest produs nu a fost adăugat încă niciun preț.",
     "cheapest_label": "Cel mai ieftin",

@@ -232,7 +232,15 @@ jobs:
           cache: npm
           cache-dependency-path: Cheep-Mobile/package-lock.json
       - uses: actions/setup-java@v6
-        with: { distribution: temurin, java-version: '17' }
+        with:
+          distribution: temurin
+          java-version: '17'
+          # Gradle bagimliliklari ve derleme onbellegi. Onbelleksizken her
+          # kosu sifirdan indirip sifirdan derliyordu; olculen Android suresi
+          # 17-21 dk. `android/` depoda tutulmadigi icin kaynak dosyalari
+          # zaten her sefer yeniden uretiliyor, ama BAGIMLILIKLARIN yeniden
+          # indirilmesi icin bir sebep yok.
+          cache: gradle
 
       - name: İmzalama kasasını secret'lardan kur
         env:
@@ -400,6 +408,18 @@ jobs:
         env:
           EXPO_NO_TELEMETRY: '1'
         run: npx expo prebuild --platform ios --no-install --clean
+
+      # Pod kaynaklari surumlere gore sabit; her kosuda yeniden indirmek
+      # iOS isinin en uzun tek adimlarindan biriydi.
+      - name: CocoaPods onbellegi
+        uses: actions/cache@v4
+        with:
+          path: |
+            Cheep-Mobile/ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: pods-${{ runner.os }}-${{ hashFiles('Cheep-Mobile/package-lock.json') }}
+          restore-keys: |
+            pods-${{ runner.os }}-
 
       - name: CocoaPods
         working-directory: Cheep-Mobile/ios

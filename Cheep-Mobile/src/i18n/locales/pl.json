@@ -201,7 +201,7 @@
     "buy_cheapest": "Kup w najtańszym sklepie ({{store}})",
     "smart_deals": "Inteligentne okazje",
     "store_details": "Szczegóły sklepu",
-    "price_disclaimer": "Ceny pochodzą z publicznie dostępnych źródeł urzędowych i mają charakter informacyjny; mogą się zmienić w każdej chwili. Wiążąca jest aktualna cena w kanale danego sklepu. Porównanie obejmuje wyłącznie wymienione sklepy.",
+    "price_disclaimer": "Ceny pochodzą z publicznie dostępnych źródeł urzędowych oraz ze zgłoszeń użytkowników; mają charakter informacyjny i mogą się zmienić. Zgłoszenia użytkowników są oznaczone osobno. Wiążąca jest cena w kanale danego sklepu. Porównanie obejmuje tylko wymienione sklepy.",
     "store_details_soon": "Ta funkcja będzie dostępna wkrótce.",
     "no_price_info_desc": "Do tego produktu nie dodano jeszcze ceny.",
     "cheapest_label": "Najtaniej",
