@@ -615,5 +615,20 @@
   },
   "ads": {
     "label": "Reklam"
+  },
+  "user_price": {
+    "title": "Fiyat bildir",
+    "which_store": "Hangi markette gördün?",
+    "price_label": "Gördüğün fiyat",
+    "pick_store": "Önce market seç",
+    "invalid_price": "Geçerli bir fiyat gir",
+    "submit": "Gönder",
+    "thanks_title": "Teşekkürler!",
+    "published": "Bildirimin yayına alındı.",
+    "pending": "Kaydedildi. Bir kullanıcı daha aynı fiyatı bildirince yayına alınacak.",
+    "error": "Bildirim gönderilemedi",
+    "consensus_note": "Fiyatlar en az iki kullanıcı aynı değeri bildirince yayına alınır. Böylece yanlış fiyat gösterme riski azalır.",
+    "user_sourced": "Kullanıcı bildirimi",
+    "report_cta": "Fiyat bildir"
   }
 }

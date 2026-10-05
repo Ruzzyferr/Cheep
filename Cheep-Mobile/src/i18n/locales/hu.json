@@ -615,5 +615,20 @@
   },
   "ads": {
     "label": "Hirdetés"
+  },
+  "user_price": {
+    "title": "Ár bejelentése",
+    "which_store": "Melyik boltban láttad?",
+    "price_label": "Látott ár",
+    "pick_store": "Előbb válassz boltot",
+    "invalid_price": "Adj meg érvényes árat",
+    "submit": "Küldés",
+    "thanks_title": "Köszönjük!",
+    "published": "A bejelentésed megjelent.",
+    "pending": "Mentve. Akkor jelenik meg, ha egy másik felhasználó is ugyanezt jelenti.",
+    "error": "A bejelentés nem sikerült",
+    "consensus_note": "Az árak akkor jelennek meg, ha legalább két felhasználó ugyanazt az értéket jelenti.",
+    "user_sourced": "Felhasználói bejelentés",
+    "report_cta": "Ár bejelentése"
   }
 }

@@ -249,6 +249,35 @@ export const changePasswordLimiter = rateLimit({
 });
 
 /** Fiyat geri bildirimi — kullanıcı başına (rota `authenticate` ardından geliyor). */
+/**
+ * Kullanıcı fiyat bildirimi. Feedback'ten DAHA SIKI: bu uç katalogu
+ * değiştirebiliyor (uzlaşı tutarsa `store_prices`a yazılıyor), oysa feedback
+ * yalnızca yorum ekliyor. Otomatik bir istemcinin kısa sürede yüzlerce
+ * bildirim basıp fiyatları eğmesini engeller.
+ */
+export const userPriceLimiter = rateLimit({
+    ...base,
+    windowMs: 60_000,
+    max: perEnv(10),
+    keyGenerator: userOrIpKey,
+    message: {
+        success: false,
+        message: 'Çok fazla fiyat bildirdiniz. Lütfen biraz bekleyin.',
+    },
+});
+
+/** Günlük üst sınır: tek hesabın uzun vadede katalogu eğmesini sınırlar. */
+export const userPriceDailyLimiter = rateLimit({
+    ...base,
+    windowMs: 24 * 60 * 60_000,
+    max: perEnv(100),
+    keyGenerator: userOrIpKey,
+    message: {
+        success: false,
+        message: 'Günlük fiyat bildirim sınırına ulaştınız.',
+    },
+});
+
 export const feedbackLimiter = rateLimit({
     ...base,
     windowMs: 60_000,

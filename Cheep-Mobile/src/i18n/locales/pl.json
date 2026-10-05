@@ -615,5 +615,20 @@
   },
   "ads": {
     "label": "Reklama"
+  },
+  "user_price": {
+    "title": "Zgłoś cenę",
+    "which_store": "W którym sklepie?",
+    "price_label": "Zobaczona cena",
+    "pick_store": "Najpierw wybierz sklep",
+    "invalid_price": "Podaj poprawną cenę",
+    "submit": "Wyślij",
+    "thanks_title": "Dziękujemy!",
+    "published": "Twoje zgłoszenie jest już widoczne.",
+    "pending": "Zapisano. Pojawi się, gdy inny użytkownik zgłosi tę samą cenę.",
+    "error": "Nie udało się wysłać zgłoszenia",
+    "consensus_note": "Ceny pojawiają się, gdy co najmniej dwóch użytkowników poda tę samą wartość.",
+    "user_sourced": "Zgłoszone przez użytkownika",
+    "report_cta": "Zgłoś cenę"
   }
 }

@@ -14,12 +14,13 @@ import {
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { productService, categoryService, affiliateService } from '../../services';
 import { useQuery } from '@tanstack/react-query';
-import { useProduct, useScope, qk, STALE } from '../../queries';
+import { useProduct, useScope, qk, STALE, useStores } from '../../queries';
 import { DetailSkeleton, ErrorState , Card, Button } from '../../components/ui';
 import { CheepBanner } from '../../components/ads/CheepBanner';
 import { PriceTrendCard } from '../../components/product/PriceTrendCard';
 import { ProductThumb } from '../../components/product/ProductThumb';
 import { SelectListModal } from '../../components/list/SelectListModal';
+import { ReportPriceModal } from '../../components/product/ReportPriceModal';
 import { getStoreTint, getStoreInitial } from '../../utils/storeLogo';
 import { openExternalUrl } from '../../utils/linking';
 import { useLocale } from '../../context/LocaleContext';
@@ -68,6 +69,15 @@ export function ProductDetailScreen({
   const historyError = historyQ.isError;
 
   /** Ürünün fiyatları, ucuzdan pahalıya. */
+  const [fiyatModali, setFiyatModali] = useState(false);
+  const storesQ = useStores();
+  // Yalnizca urunun ulkesindeki marketler secilebilsin; aksi halde kullanici
+  // TR urunune PL marketi secip sunucudan hata alirdi.
+  const secilebilirMarketler = useMemo(
+    () => (storesQ.data ?? []).filter((m: any) => m.country_id === (product as any)?.country_id),
+    [storesQ.data, product],
+  );
+
   const prices: StorePrice[] = useMemo(() => {
     const list = product?.store_prices ?? [];
     return [...list].sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
@@ -180,9 +190,23 @@ export function ProductDetailScreen({
         {/* Price Comparison */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>{t('product.store_prices')}</Text>
-          {prices.length > 0 && (
-            <Text style={styles.priceCount}>{prices.length} market</Text>
-          )}
+          <View style={styles.sectionHeaderRight}>
+            {prices.length > 0 && (
+              <Text style={styles.priceCount}>{prices.length} market</Text>
+            )}
+            {/* FIYAT BILDIR — hukuken bize ait tek fiyat kaynagi.
+                Her urunde gorunur: fiyat olmayan urunlerde de bildirilebilsin,
+                asil deger orada (bkz. docs/VERI-IZINLERI.md). */}
+            <TouchableOpacity
+              onPress={() => setFiyatModali(true)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              style={styles.bildirBtn}
+            >
+              <MaterialIcons name="add-circle-outline" size={15} color={colors.primary.main} />
+              <Text style={styles.bildirBtnText}>{t('user_price.report_cta')}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         {prices.length > 0 ? (
           prices.map((storePrice, index) => {
@@ -220,6 +244,14 @@ export function ProductDetailScreen({
                           {storePrice.store?.name || 'Market'}
                         </Text>
                         <Text style={styles.unit}>{storePrice.unit}</Text>
+                        {/* SEFFAFLIK: kaynagi gizlemiyoruz. Kullanici
+                            bildirimi, zincir verisiyle ayni guvende degil. */}
+                        {storePrice.source === 'user' && (
+                          <View style={styles.kullaniciRozet}>
+                            <MaterialIcons name="people-outline" size={11} color={colors.primary.main} />
+                            <Text style={styles.kullaniciRozetYazi}>{t('user_price.user_sourced')}</Text>
+                          </View>
+                        )}
                         {storePrice.last_updated_at && (
                           <Text style={styles.updateDate}>
                             {new Date(storePrice.last_updated_at).toLocaleDateString('tr-TR', {
@@ -362,6 +394,15 @@ export function ProductDetailScreen({
         </View>
       </ScrollView>
 
+      <ReportPriceModal
+        visible={fiyatModali}
+        onClose={() => setFiyatModali(false)}
+        productId={Number(productId)}
+        productName={product?.name ?? ''}
+        stores={secilebilirMarketler as any}
+        onReported={() => void productQ.refetch()}
+      />
+
       <SelectListModal
         visible={showListModal}
         onClose={() => setShowListModal(false)}
@@ -467,6 +508,11 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
 
+  sectionHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  bildirBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  bildirBtnText: { ...typography.styles.caption, color: colors.primary.main, fontWeight: '700' },
+  kullaniciRozet: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 2 },
+  kullaniciRozetYazi: { ...typography.styles.caption, fontSize: 10, color: colors.primary.main },
   priceCount: {
     ...typography.styles.body2,
     fontSize: 14,

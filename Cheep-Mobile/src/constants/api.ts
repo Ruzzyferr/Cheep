@@ -111,6 +111,13 @@ export const API_ENDPOINTS = {
     IMPORT: (id: number) => `/lists/${id}/import`,
   },
 
+  // Kullanıcı fiyat bildirimi — hukuken bize ait tek fiyat kaynağı
+  // (bkz. docs/VERI-IZINLERI.md: TÜBİTAK reddi + zincir koşulları).
+  USER_PRICES: {
+    CREATE: '/user-prices',
+    MINE: '/user-prices/mine',
+  },
+
   // Feedback
   FEEDBACK: {
     CREATE: '/feedback',

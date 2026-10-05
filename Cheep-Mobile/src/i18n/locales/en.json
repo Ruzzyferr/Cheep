@@ -615,5 +615,20 @@
   },
   "ads": {
     "label": "Ad"
+  },
+  "user_price": {
+    "title": "Report a price",
+    "which_store": "Which store did you see it in?",
+    "price_label": "Price you saw",
+    "pick_store": "Pick a store first",
+    "invalid_price": "Enter a valid price",
+    "submit": "Send",
+    "thanks_title": "Thank you!",
+    "published": "Your report is now live.",
+    "pending": "Saved. It goes live once another user reports the same price.",
+    "error": "Could not send the report",
+    "consensus_note": "Prices go live once at least two users report the same value. This reduces the risk of showing a wrong price.",
+    "user_sourced": "User reported",
+    "report_cta": "Report price"
   }
 }

@@ -15,3 +15,4 @@ export { affiliateService } from './affiliate.service';
 export { notificationService } from './notification.service';
 export { supportService } from './support.service';
 export { billingService } from './billing.service';
+export { userPriceService } from './user-price.service';

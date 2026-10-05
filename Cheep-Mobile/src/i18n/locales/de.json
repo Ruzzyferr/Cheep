@@ -615,5 +615,20 @@
   },
   "ads": {
     "label": "Anzeige"
+  },
+  "user_price": {
+    "title": "Preis melden",
+    "which_store": "In welchem Markt gesehen?",
+    "price_label": "Gesehener Preis",
+    "pick_store": "Zuerst einen Markt wählen",
+    "invalid_price": "Gültigen Preis eingeben",
+    "submit": "Senden",
+    "thanks_title": "Danke!",
+    "published": "Deine Meldung ist jetzt sichtbar.",
+    "pending": "Gespeichert. Sie wird sichtbar, sobald ein weiterer Nutzer denselben Preis meldet.",
+    "error": "Meldung konnte nicht gesendet werden",
+    "consensus_note": "Preise werden sichtbar, sobald mindestens zwei Nutzer denselben Wert melden.",
+    "user_sourced": "Von Nutzern gemeldet",
+    "report_cta": "Preis melden"
   }
 }

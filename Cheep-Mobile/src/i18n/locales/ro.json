@@ -615,5 +615,20 @@
   },
   "ads": {
     "label": "Publicitate"
+  },
+  "user_price": {
+    "title": "Raportează un preț",
+    "which_store": "În ce magazin l-ai văzut?",
+    "price_label": "Prețul văzut",
+    "pick_store": "Alege întâi magazinul",
+    "invalid_price": "Introdu un preț valid",
+    "submit": "Trimite",
+    "thanks_title": "Mulțumim!",
+    "published": "Raportul tău este public.",
+    "pending": "Salvat. Devine public când încă un utilizator raportează același preț.",
+    "error": "Raportul nu a putut fi trimis",
+    "consensus_note": "Prețurile devin publice când cel puțin doi utilizatori raportează aceeași valoare.",
+    "user_sourced": "Raportat de utilizatori",
+    "report_cta": "Raportează preț"
   }
 }

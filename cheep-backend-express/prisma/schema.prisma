@@ -15,6 +15,7 @@ datasource db {
 // ============================================
 
 model User {
+  user_price_reports UserPriceReport[]
   id            Int      @id @default(autoincrement())
   email         String   @unique
   password_hash String
@@ -138,6 +139,7 @@ model Country {
 // ============================================
 
 model Store {
+  user_price_reports UserPriceReport[]
   id          Int     @id @default(autoincrement())
   name        String
   slug        String? // SEO sayfası URL'i — bir kez üretilir, ASLA değişmez
@@ -282,6 +284,7 @@ model CategoryRedirect {
 // ============================================
 
 model Product {
+  user_price_reports UserPriceReport[]
   id             Int     @id @default(autoincrement())
   name           String
   slug           String? // SEO sayfası URL'i — bir kez üretilir, ASLA değişmez
@@ -421,6 +424,41 @@ model PriceHistory {
   @@index([product_id, recorded_at])
   @@index([store_id, product_id])
   @@map("price_history")
+}
+
+/// KULLANICI FIYAT BILDIRIMI — ham gozlem, append-only.
+///
+/// `PriceFeedback`ten FARKI: o, zaten cektigimiz bir `store_price` uzerine
+/// yorum yapiyor; bu ise YOKTAN fiyat olusturabiliyor. TUBITAK izni
+/// reddedildigi ve zincir kosullari kopyalamayi yasakladigi icin (bkz.
+/// docs/VERI-IZINLERI.md) hukuken tartismasiz bize ait TEK fiyat kaynagi bu.
+///
+/// Uzlasi `services/user-price-consensus.ts` ile hesaplanip `store_prices`a
+/// `source='user'` olarak yazilir — boylece karsilastirma/arama/rota
+/// degismeden calisir.
+model UserPriceReport {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  product_id Int
+  store_id   Int
+  price      Decimal  @db.Decimal(10, 2)
+  unit       String   @default("adet")
+
+  /// Gun bazli: ayni kullanici ayni urun-market icin GUNDE BIR bildirim.
+  observed_on DateTime @db.Date
+  created_at  DateTime @default(now())
+
+  /// active | outlier | removed  (moderasyon icin; uzlasi yalnizca active okur)
+  status String @default("active")
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  store   Store   @relation(fields: [store_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, product_id, store_id, observed_on])
+  @@index([product_id, store_id])
+  @@index([created_at])
+  @@map("user_price_reports")
 }
 
 model PriceFeedback {

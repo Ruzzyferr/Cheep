@@ -615,5 +615,20 @@
   },
   "ads": {
     "label": "Oglas"
+  },
+  "user_price": {
+    "title": "Prijavi cijenu",
+    "which_store": "U kojoj trgovini?",
+    "price_label": "Viđena cijena",
+    "pick_store": "Prvo odaberi trgovinu",
+    "invalid_price": "Unesi valjanu cijenu",
+    "submit": "Pošalji",
+    "thanks_title": "Hvala!",
+    "published": "Tvoja prijava je objavljena.",
+    "pending": "Spremljeno. Objavit će se kad još jedan korisnik prijavi istu cijenu.",
+    "error": "Prijava nije poslana",
+    "consensus_note": "Cijene se objavljuju kad barem dva korisnika prijave istu vrijednost.",
+    "user_sourced": "Prijavio korisnik",
+    "report_cta": "Prijavi cijenu"
   }
 }

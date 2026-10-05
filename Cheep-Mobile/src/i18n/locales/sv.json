@@ -615,5 +615,20 @@
   },
   "ads": {
     "label": "Annons"
+  },
+  "user_price": {
+    "title": "Rapportera pris",
+    "which_store": "I vilken butik såg du det?",
+    "price_label": "Priset du såg",
+    "pick_store": "Välj butik först",
+    "invalid_price": "Ange ett giltigt pris",
+    "submit": "Skicka",
+    "thanks_title": "Tack!",
+    "published": "Din rapport är publicerad.",
+    "pending": "Sparat. Det publiceras när ytterligare en användare rapporterar samma pris.",
+    "error": "Rapporten kunde inte skickas",
+    "consensus_note": "Priser publiceras när minst två användare rapporterar samma värde.",
+    "user_sourced": "Rapporterat av användare",
+    "report_cta": "Rapportera pris"
   }
 }
