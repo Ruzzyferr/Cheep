@@ -74,15 +74,11 @@ docker builder prune -f --all --filter 'until=48h' >/dev/null 2>&1 || true
 # FETCH DAEMON'INI YENİDEN BAŞLAT.
 #
 # `git reset --hard` Cheep-Scraper/ dizinini de güncelliyor ama
-# `cheep-fetcher.service` `Type=simple` ve haftalardır ayakta — Python kodu
-# süreç başlarken belleğe alındığı için daemon ESKİ kodu çalıştırmaya devam
-# ediyor. Yani scraper'a yapılan bir düzeltme deploy edilmiş görünüp fiilen
-# hiç devreye girmiyordu (yalnızca elle restart ya da sunucu yeniden
-# başlatmasıyla). Birim yoksa deploy'u düşürme.
-if systemctl list-unit-files cheep-fetcher.service >/dev/null 2>&1; then
-    echo "==> Fetch daemon yeniden başlatılıyor (yeni scraper kodu için)"
-    systemctl restart cheep-fetcher.service || echo "   (fetcher yeniden başlatılamadı — elle bak)"
-fi
+# MARKETFIYATI BAGIMLILIGI KALDIRILDI — 5 Eki 2026.
+# TUBITAK BILGEM veri iznini yazili olarak REDDETTI ve platformun kosullari
+# yazili izin olmadan kullanimi acikca yasakliyor (bkz. docs/VERI-IZINLERI.md).
+# `cheep-fetcher.service` durduruldu, devre disi birakildi ve kaldirildi;
+# Turkiye fiyatlari artik yalnizca KULLANICI BILDIRIMLERINDEN geliyor.
 
 # DEPLOY'U DOĞRULA.
 #

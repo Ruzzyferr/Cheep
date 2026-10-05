@@ -210,3 +210,62 @@ geçiş, tek taraf yerine **beş tarafa karşı** aynı ihlali üretir.
 2. **Kullanıcı katkısı** (`price_feedbacks`) — veri BİZİM, hukuken temiz;
    kapsama düşük başlar.
 3. **Türkiye'yi kapatmak** — %42 kullanıcı kaybı.
+
+---
+
+## ✅ UYGULANDI — 5 Ekim 2026: marketfiyati bağımlılığı KALDIRILDI
+
+Kullanıcı kararı: *"marketfiyatı ile ilgili hiçbir ilgimiz kalmamalı, her şey
+hukuki süreçler içinde olmalı."*
+
+### Yapılanlar
+
+| Adım | Sonuç |
+|---|---|
+| `cheep-fetcher.service` (mf_daemon) | durduruldu, devre dışı, kaldırıldı |
+| `Cheep-Scraper/countries/turkey/` | depodan silindi |
+| `deploy/cheep-fetcher.service`, `install-fetcher.sh` | silindi |
+| `deploy.sh` fetcher yeniden başlatma bloğu | kaldırıldı |
+| TR `store_prices` | **17.084 → 0** |
+| TR `price_history` | **56.302 → 0** |
+| `mf-` önekli barkodlar | **13.326 → 0** (NULL) |
+| `cdn.marketfiyati.org.tr` görselleri | **11.399 → 0** (NULL) |
+| Mobil atıf (8 dil) | kullanıcı bildirimi olarak güncellendi |
+| Website atıf (6 dil, 11 yer) | kullanıcı bildirimi olarak güncellendi |
+
+Silme öncesi yedek alındı: `cheep-20261005-174013.dump` (22 MB).
+
+### Neden ÜRÜN KAYITLARI korundu (13.326 adet)
+
+Silinen: **onların içeriği** — fiyatlar, fiyat geçmişi, kendi tanımlayıcıları
+(`mf-` barkodları), kendi CDN görselleri.
+
+Korunan: ürün **adı, markası, gramajı, kategorisi**. Gerekçe:
+
+1. Bunlar **olgusal** bilgiler. "Çaykur Tiryaki Çay 1 Kg" diye bir ürün olduğu
+   TÜBİTAK'ın yarattığı bir şey değil; üreticinin ve her zincirin kendi
+   sitesinde de var.
+2. Kullanıcıların **44 listesi** bu ürünlere bağlı. Ürünleri silmek, kendi
+   verisini kaybeden kullanıcıya zarar verirdi — kaçındığımız şeyin başka bir
+   biçimi.
+3. Kullanıcı fiyat bildiriminin **bağlanacağı bir iskelet** gerekiyor. Ürün
+   yoksa bildirilecek bir şey de yok.
+
+⚠️ Bu bir yorum; dava konusu olursa tartışılabilir. Kayda geçiriliyor ki
+karar gerekçesiyle birlikte savunulabilsin.
+
+### Türkiye'nin bugünkü durumu
+
+**Fiyat sayısı: 0.** Uygulama Türkiye'de fiyat göstermiyor. Tek kaynak artık
+kullanıcı bildirimleri (`user_price_reports` → uzlaşı → `store_prices`
+`source='user'`). İki farklı kullanıcı aynı fiyatı bildirene kadar hiçbir
+fiyat yayına girmiyor.
+
+129 TR kullanıcısı etkileniyor. Bu bilinçli bir karar: izinsiz veri
+kullanmaktansa veri göstermemek.
+
+### Diğer ülkeler ETKİLENMEDİ
+
+PL, HR, HU, RO: 188.909 fiyat dokunulmadan duruyor. Kaynakları farklı
+(cijene.dev, GVH, Monitorul Prețurilor, zincirlerin kendi listeleri) ve
+koşulları ayrıca okunmalı — bu iş **henüz yapılmadı**.

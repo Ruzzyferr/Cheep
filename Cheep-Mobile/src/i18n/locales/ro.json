@@ -108,7 +108,7 @@
     "country": "Țară / Magazine",
     "about": "Despre",
     "about_title": "Despre Cheep",
-    "about_body": "Cheep · Versiunea {{version}}\nGăsește cel mai bun preț.\n\nSurse de date\n• Turcia: marketfiyati.org.tr — platforma oficială publică de prețuri operată de TÜBİTAK BİLGEM cu sprijinul Ministerului Comerțului din Turcia.\n• Polonia: prețurile publicate public de magazine pe propriile site-uri.\n• Informații despre produse: Open Food Facts, licență ODbL.\n\nCheep nu este afiliat cu niciun magazin și nu este susținut de niciunul dintre ele. Prețurile au caracter informativ și pot diferi de prețul din magazin.",
+    "about_body": "Cheep · Versiunea {{version}}\nGăsește cel mai bun preț.\n\nSurse de date\n• Turcia: prețuri raportate de utilizatori. Un preț devine public când cel puțin doi utilizatori raportează aceeași valoare.\n• Polonia: prețurile publicate public de magazine pe propriile site-uri.\n• Informații despre produse: Open Food Facts, licență ODbL.\n\nCheep nu este afiliat cu niciun magazin și nu este susținut de niciunul dintre ele. Prețurile au caracter informativ și pot diferi de prețul din magazin.",
     "app_section_title": "Aplicație",
     "notifications": "Notificări",
     "notifications_subtitle": "Alerte de scădere a prețului",

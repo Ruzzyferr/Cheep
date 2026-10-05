@@ -169,7 +169,7 @@ export const hr: Dict = {
       },
       {
         q: 'Odakle dolaze cijene i koliko se često osvježavaju?',
-        a: 'U Hrvatskoj i Poljskoj cijene preuzimamo iz javno objavljenih cjenika trgovačkih lanaca, u Turskoj iz službenog, javno dostupnog izvora koji vodi TÜBİTAK BİLGEM uz potporu turskog Ministarstva trgovine (marketfiyati.org.tr), u Mađarskoj iz službenog sustava za praćenje cijena Agencije za zaštitu tržišnog natjecanja (GVH), a u Rumunjskoj iz državnog sustava Monitorul Prețurilor. Cijene osvježavamo redovito; većina proizvoda osvježi se svakih nekoliko dana. Informativne su naravi i mogu se razlikovati od cijene na blagajni.',
+        a: 'U Hrvatskoj i Poljskoj cijene preuzimamo iz javno objavljenih cjenika trgovačkih lanaca, u Turskoj iz prijava korisnika (cijena se objavljuje kad barem dva korisnika prijave istu vrijednost), u Mađarskoj iz službenog sustava za praćenje cijena Agencije za zaštitu tržišnog natjecanja (GVH), a u Rumunjskoj iz državnog sustava Monitorul Prețurilor. Cijene osvježavamo redovito; većina proizvoda osvježi se svakih nekoliko dana. Informativne su naravi i mogu se razlikovati od cijene na blagajni.',
       },
       {
         q: 'Cijene kojih trgovina uspoređujete?',
@@ -236,7 +236,7 @@ export const hr: Dict = {
       },
     ],
     disclaimer:
-      'Svi nazivi marki i logotipi registrirani su žigovi svojih vlasnika. Cheep nije službeni partner tih trgovačkih lanaca niti s njima surađuje; nazivi marki koriste se isključivo kako bi se naznačilo čija je cijena prikazana. U Hrvatskoj i Poljskoj cijene preuzimamo iz javno objavljenih cjenika trgovačkih lanaca, u Turskoj iz službenog izvora koji vodi TÜBİTAK BİLGEM uz potporu turskog Ministarstva trgovine (marketfiyati.org.tr), u Mađarskoj iz službenog sustava GVH-a, a u Rumunjskoj iz sustava Monitorul Prețurilor; informativne su naravi i mogu se razlikovati od cijene na blagajni.',
+      'Svi nazivi marki i logotipi registrirani su žigovi svojih vlasnika. Cheep nije službeni partner tih trgovačkih lanaca niti s njima surađuje; nazivi marki koriste se isključivo kako bi se naznačilo čija je cijena prikazana. U Hrvatskoj i Poljskoj cijene preuzimamo iz javno objavljenih cjenika trgovačkih lanaca, u Turskoj iz prijava korisnika (cijena se objavljuje kad barem dva korisnika prijave istu vrijednost), u Mađarskoj iz službenog sustava GVH-a, a u Rumunjskoj iz sustava Monitorul Prețurilor; informativne su naravi i mogu se razlikovati od cijene na blagajni.',
     copyright: '© 2026 Cheep. Sva prava pridržana.',
     madeIn: 'Stvoreno s ljubavlju za Hrvatsku, Tursku, Poljsku, Mađarsku i Rumunjsku',
   },

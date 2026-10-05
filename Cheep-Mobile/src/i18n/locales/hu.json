@@ -108,7 +108,7 @@
     "country": "Ország / Üzletek",
     "about": "Névjegy",
     "about_title": "A Cheepről",
-    "about_body": "Cheep · {{version}} verzió\nTaláld meg a legjobb árat.\n\nAdatforrások\n• Törökország: marketfiyati.org.tr — a TÜBİTAK BİLGEM által, a Török Köztársaság Kereskedelmi Minisztériumának támogatásával működtetett hivatalos, nyilvános árplatform.\n• Lengyelország: az áruházláncok saját weboldalán nyilvánosan közzétett árak.\n• Termékinformációk: Open Food Facts, ODbL licenc.\n\nA Cheep egyetlen áruházlánccal sem áll kapcsolatban, és egyik sem támogatja. Az árak tájékoztató jellegűek, eltérhetnek az üzletben érvényes ártól.",
+    "about_body": "Cheep · {{version}} verzió\nTaláld meg a legjobb árat.\n\nAdatforrások\n• Törökország: a felhasználók által bejelentett árak. Az ár akkor jelenik meg, ha legalább két felhasználó ugyanazt jelenti.\n• Lengyelország: az áruházláncok saját weboldalán nyilvánosan közzétett árak.\n• Termékinformációk: Open Food Facts, ODbL licenc.\n\nA Cheep egyetlen áruházlánccal sem áll kapcsolatban, és egyik sem támogatja. Az árak tájékoztató jellegűek, eltérhetnek az üzletben érvényes ártól.",
     "app_section_title": "Alkalmazás",
     "notifications": "Értesítések",
     "notifications_subtitle": "Árcsökkenési riasztások",

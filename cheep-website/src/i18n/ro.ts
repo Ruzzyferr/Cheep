@@ -169,7 +169,7 @@ export const ro: Dict = {
       },
       {
         q: 'De unde vin prețurile și cât de des se actualizează?',
-        a: 'În România, prețurile provin din sistemul de stat Monitorul Prețurilor, în Ungaria din sistemul oficial de monitorizare a prețurilor al autorității de concurență (GVH), în Turcia din sursa oficială publică operată de TÜBİTAK BİLGEM cu sprijinul Ministerului Comerțului (marketfiyati.org.tr), iar în Polonia și Croația din listele de prețuri publicate de lanțurile de magazine. Prețurile se actualizează periodic; majoritatea produselor se reîmprospătează la câteva zile. Au caracter informativ și pot diferi de prețul de la casă.',
+        a: 'În România, prețurile provin din sistemul de stat Monitorul Prețurilor, în Ungaria din sistemul oficial de monitorizare a prețurilor al autorității de concurență (GVH), în Turcia din raportări ale utilizatorilor (un preț devine public când cel puțin doi utilizatori raportează aceeași valoare), iar în Polonia și Croația din listele de prețuri publicate de lanțurile de magazine. Prețurile se actualizează periodic; majoritatea produselor se reîmprospătează la câteva zile. Au caracter informativ și pot diferi de prețul de la casă.',
       },
       {
         q: 'Prețurile căror magazine le comparați?',
@@ -236,7 +236,7 @@ export const ro: Dict = {
       },
     ],
     disclaimer:
-      'Toate denumirile și siglele de marcă sunt mărci înregistrate ale deținătorilor lor. Cheep nu are un parteneriat oficial și nu colaborează cu aceste lanțuri de magazine; denumirile mărcilor sunt folosite exclusiv pentru a indica al cărui magazin este prețul afișat. În România, prețurile provin din sistemul Monitorul Prețurilor, în Ungaria din sistemul oficial al GVH, în Turcia din sursa oficială publică operată de TÜBİTAK BİLGEM cu sprijinul Ministerului Comerțului (marketfiyati.org.tr), iar în Polonia și Croația din listele de prețuri publicate de magazine; au caracter informativ și pot diferi de prețul de la casă.',
+      'Toate denumirile și siglele de marcă sunt mărci înregistrate ale deținătorilor lor. Cheep nu are un parteneriat oficial și nu colaborează cu aceste lanțuri de magazine; denumirile mărcilor sunt folosite exclusiv pentru a indica al cărui magazin este prețul afișat. În România, prețurile provin din sistemul Monitorul Prețurilor, în Ungaria din sistemul oficial al GVH, în Turcia din raportări ale utilizatorilor (un preț devine public când cel puțin doi utilizatori raportează aceeași valoare), iar în Polonia și Croația din listele de prețuri publicate de magazine; au caracter informativ și pot diferi de prețul de la casă.',
     copyright: '© 2026 Cheep. Toate drepturile rezervate.',
     madeIn: 'Făcut cu drag pentru România, Turcia, Polonia, Croația și Ungaria',
   },

@@ -236,7 +236,7 @@ export const pl: Dict = {
       },
     ],
     disclaimer:
-      'Wszystkie nazwy i logotypy marek są zastrzeżonymi znakami towarowymi ich właścicieli. Cheep nie jest oficjalnym partnerem tych sieci handlowych ani z nimi nie współpracuje; nazwy marek służą wyłącznie wskazaniu, czyja cena jest prezentowana. W Polsce i Chorwacji ceny zbieramy z publicznie dostępnych cenników sieci handlowych, w Turcji z oficjalnego, publicznego źródła prowadzonego przez TÜBİTAK BİLGEM przy wsparciu tureckiego Ministerstwa Handlu (marketfiyati.org.tr), na Węgrzech z oficjalnego monitora cen urzędu antymonopolowego (GVH), a w Rumunii z systemu Monitorul Prețurilor; mają charakter informacyjny i mogą różnić się od ceny przy kasie.',
+      'Wszystkie nazwy i logotypy marek są zastrzeżonymi znakami towarowymi ich właścicieli. Cheep nie jest oficjalnym partnerem tych sieci handlowych ani z nimi nie współpracuje; nazwy marek służą wyłącznie wskazaniu, czyja cena jest prezentowana. W Polsce i Chorwacji ceny zbieramy z publicznie dostępnych cenników sieci handlowych, w Turcji ze zgłoszeń użytkowników (cena pojawia się, gdy co najmniej dwóch użytkowników poda tę samą wartość), na Węgrzech z oficjalnego monitora cen urzędu antymonopolowego (GVH), a w Rumunii z systemu Monitorul Prețurilor; mają charakter informacyjny i mogą różnić się od ceny przy kasie.',
     copyright: '© 2026 Cheep. Wszelkie prawa zastrzeżone.',
     madeIn: 'Zrobione z myślą o Polsce, Turcji, Chorwacji, Węgrzech i Rumunii',
   },
