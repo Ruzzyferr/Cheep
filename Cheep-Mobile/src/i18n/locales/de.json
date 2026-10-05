@@ -108,7 +108,7 @@
     "country": "Land / Märkte",
     "about": "Über",
     "about_title": "Über Cheep",
-    "about_body": "Cheep · Version {{version}}\nFinde den besten Preis.\n\nDatenquellen\n• Türkei: von Nutzern gemeldete Preise. Ein Preis wird sichtbar, sobald mindestens zwei Nutzer denselben Wert melden.\n• Polen: Preise, die die Händler selbst öffentlich auf ihren Websites veröffentlichen.\n• Produktinformationen: Open Food Facts, ODbL-Lizenz.\n\nCheep steht in keiner Verbindung zu einem Händler und wird von keinem unterstützt. Die Preise dienen der Information und können von den Preisen im Geschäft abweichen.",
+    "about_body": "Cheep · Version {{version}}\nFinde den besten Preis.\n\nDatenquellen\n• Kroatien: tägliche Preislisten, die Händler gesetzlich veröffentlichen müssen (NN 75/2025), über cijene.dev.\n• Andere Länder: von Nutzern gemeldete Preise. Ein Preis wird sichtbar, sobald mindestens zwei Nutzer denselben Wert melden.\n• Produktinformationen: Open Food Facts, ODbL-Lizenz.\n• Standorte: OpenStreetMap, ODbL-Lizenz.\n\nCheep steht in keiner Verbindung zu einem Händler und wird von keinem unterstützt. Die Preise dienen der Information und können von den Preisen im Geschäft abweichen.",
     "app_section_title": "App",
     "notifications": "Benachrichtigungen",
     "notifications_subtitle": "Preissenkungs-Hinweise",

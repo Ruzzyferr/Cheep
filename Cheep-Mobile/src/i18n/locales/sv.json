@@ -108,7 +108,7 @@
     "country": "Land / Butiker",
     "about": "Om",
     "about_title": "Om Cheep",
-    "about_body": "Cheep · Version {{version}}\nHitta det bästa priset.\n\nDatakällor\n• Turkiet: priser rapporterade av användare. Ett pris publiceras när minst två användare rapporterar samma värde.\n• Polen: priser som butikskedjorna själva publicerar offentligt på sina webbplatser.\n• Produktinformation: Open Food Facts, ODbL-licens.\n\nCheep är inte kopplat till eller rekommenderat av någon butikskedja. Priserna är informativa och kan skilja sig från priserna i butik.",
+    "about_body": "Cheep · Version {{version}}\nHitta det bästa priset.\n\nDatakällor\n• Kroatien: dagliga prislistor som handlare enligt lag måste publicera (NN 75/2025), via cijene.dev.\n• Övriga länder: priser rapporterade av användare. Ett pris publiceras när minst två användare rapporterar samma värde.\n• Produktinformation: Open Food Facts, ODbL-licens.\n• Butikslägen: OpenStreetMap, ODbL-licens.\n\nCheep är inte kopplat till eller rekommenderat av någon butikskedja. Priserna är informativa och kan skilja sig från priserna i butik.",
     "app_section_title": "App",
     "notifications": "Aviseringar",
     "notifications_subtitle": "Prissänkningsvarningar",

@@ -108,7 +108,7 @@
     "country": "Country / Stores",
     "about": "About",
     "about_title": "About Cheep",
-    "about_body": "Cheep · Version {{version}}\nFind the best price.\n\nData sources\n• Turkey: prices reported by users. A price goes live once at least two users report the same value.\n• Poland: prices published publicly by the retailers on their own websites.\n• Product information: Open Food Facts, licensed under ODbL.\n\nCheep is not affiliated with, and not endorsed by, any retailer. Prices are informational and may differ from in-store prices.",
+    "about_body": "Cheep · Version {{version}}\nFind the best price.\n\nData sources\n• Croatia: daily price lists retailers must publish by law (NN 75/2025), via cijene.dev.\n• Other countries: prices reported by users. A price goes live once at least two users report the same value.\n• Product information: Open Food Facts, ODbL licence.\n• Store locations: OpenStreetMap, ODbL licence.\n\nCheep is not affiliated with, and not endorsed by, any retailer. Prices are informational and may differ from in-store prices.",
     "app_section_title": "App",
     "notifications": "Notifications",
     "notifications_subtitle": "Price drop alerts",

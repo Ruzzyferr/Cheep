@@ -108,7 +108,7 @@
     "country": "Kraj / Sklepy",
     "about": "O aplikacji",
     "about_title": "O Cheep",
-    "about_body": "Cheep · Wersja {{version}}\nZnajdź najlepszą cenę.\n\nŹródła danych\n• Turcja: ceny zgłaszane przez użytkowników. Cena pojawia się, gdy co najmniej dwóch użytkowników poda tę samą wartość.\n• Polska: ceny publikowane publicznie przez sieci handlowe na ich własnych stronach.\n• Informacje o produktach: Open Food Facts, licencja ODbL.\n\nCheep nie jest powiązany z żadną siecią handlową ani przez nią wspierany. Ceny mają charakter informacyjny i mogą różnić się od cen w sklepie.",
+    "about_body": "Cheep · Wersja {{version}}\nZnajdź najlepszą cenę.\n\nŹródła danych\n• Chorwacja: dzienne cenniki, które sieci muszą publikować z mocy prawa (NN 75/2025), przez cijene.dev.\n• Pozostałe kraje: ceny zgłaszane przez użytkowników. Cena pojawia się, gdy co najmniej dwóch użytkowników poda tę samą wartość.\n• Informacje o produktach: Open Food Facts, licencja ODbL.\n• Lokalizacje sklepów: OpenStreetMap, licencja ODbL.\n\nCheep nie jest powiązany z żadną siecią handlową ani przez nią wspierany. Ceny mają charakter informacyjny i mogą różnić się od cen w sklepie.",
     "app_section_title": "Aplikacja",
     "notifications": "Powiadomienia",
     "notifications_subtitle": "Alerty o spadku ceny",

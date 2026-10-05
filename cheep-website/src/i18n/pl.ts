@@ -54,7 +54,7 @@ export const pl: Dict = {
     titleLead: 'Ten sam produkt,',
     titleAccent: 'inna cena w każdym sklepie.',
     body: 'Za jeden karton mleka możesz zapłacić 10–15% więcej, zależnie od sklepu. Cheep zestawia ceny tego samego produktu w sieciach i w sekundę pokazuje najtańszą — bez zgadywania i bez objeżdżania sklepów.',
-    sourceNote: 'W Polsce dane z publicznych źródeł sieci handlowych · aktualizowane regularnie',
+    sourceNote: 'W Chorwacji ceny pochodzą z dziennych cenników, które sieci muszą publikować z mocy prawa (NN 75/2025). W pozostałych krajach ceny pochodzą ze zgłoszeń użytkowników i pojawiają się, gdy co najmniej dwóch użytkowników poda tę samą wartość. Mają charakter informacyjny i mogą różnić się od ceny przy kasie.',
     card: {
       name: 'Mleko UHT 3,2%',
       unit: '1 L · ta sama marka, ten sam produkt',
@@ -236,7 +236,7 @@ export const pl: Dict = {
       },
     ],
     disclaimer:
-      'Wszystkie nazwy i logotypy marek są zastrzeżonymi znakami towarowymi ich właścicieli. Cheep nie jest oficjalnym partnerem tych sieci handlowych ani z nimi nie współpracuje; nazwy marek służą wyłącznie wskazaniu, czyja cena jest prezentowana. W Polsce i Chorwacji ceny zbieramy z publicznie dostępnych cenników sieci handlowych, w Turcji ze zgłoszeń użytkowników (cena pojawia się, gdy co najmniej dwóch użytkowników poda tę samą wartość), na Węgrzech z oficjalnego monitora cen urzędu antymonopolowego (GVH), a w Rumunii z systemu Monitorul Prețurilor; mają charakter informacyjny i mogą różnić się od ceny przy kasie.',
+      'Wszystkie nazwy i logotypy marek są zastrzeżonymi znakami towarowymi ich właścicieli. Cheep nie jest oficjalnym partnerem tych sieci handlowych ani z nimi nie współpracuje; nazwy marek służą wyłącznie wskazaniu, czyja cena jest prezentowana. W Polsce i Chorwacji ceny zbieramy z publicznie dostępnych cenników sieci handlowych, W Chorwacji ceny pochodzą z dziennych cenników, które sieci muszą publikować z mocy prawa (NN 75/2025). W pozostałych krajach ceny pochodzą ze zgłoszeń użytkowników i pojawiają się, gdy co najmniej dwóch użytkowników poda tę samą wartość. Mają charakter informacyjny i mogą różnić się od ceny przy kasie.',
     copyright: '© 2026 Cheep. Wszelkie prawa zastrzeżone.',
     madeIn: 'Zrobione z myślą o Polsce, Turcji, Chorwacji, Węgrzech i Rumunii',
   },

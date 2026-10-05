@@ -182,7 +182,7 @@ export const en: Dict = {
       },
       {
         q: 'Where do the prices come from and how often are they updated?',
-        a: 'In Turkey prices come from user reports (a price goes live once at least two users report the same value); in Hungary from the official price monitor of the Competition Authority (GVH); in Romania from the state Monitorul Prețurilor system; and in Poland and Croatia from the price lists the chains publish publicly. Prices are updated regularly; most products refresh every few days. They are for information only and may differ from the price at the checkout.',
+        a: 'In Croatia prices come from the daily lists retailers must publish by law (NN 75/2025). In other countries prices come from user reports and go live once at least two users report the same value. They are for information only and may differ from the price at the checkout.',
       },
       {
         q: 'Which stores does it compare?',
@@ -249,7 +249,7 @@ export const en: Dict = {
       },
     ],
     disclaimer:
-      'All brand names and logos are registered trademarks of their respective owners. Cheep has no official partnership or affiliation with these retailers; brand names are used solely to indicate whose price is being shown. In Turkey prices come from user reports (a price goes live once at least two users report the same value); in Hungary from the official price monitor of the Competition Authority (GVH); in Romania from the Monitorul Prețurilor system; and in Poland and Croatia from the price lists the stores publish publicly. They are for information only and may differ from the price at the checkout.',
+      'All brand names and logos are registered trademarks of their respective owners. Cheep has no official partnership or affiliation with these retailers; brand names are used solely to indicate whose price is being shown. In Croatia prices come from the daily lists retailers must publish by law (NN 75/2025). In other countries prices come from user reports and go live once at least two users report the same value. They are for information only and may differ from the price at the checkout.',
     copyright: '© 2026 Cheep. All rights reserved.',
     madeIn: 'Made with love for Turkey, Poland, Croatia, Hungary and Romania',
   },
