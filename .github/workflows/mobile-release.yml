@@ -235,12 +235,22 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          # Gradle bagimliliklari ve derleme onbellegi. Onbelleksizken her
-          # kosu sifirdan indirip sifirdan derliyordu; olculen Android suresi
-          # 17-21 dk. `android/` depoda tutulmadigi icin kaynak dosyalari
-          # zaten her sefer yeniden uretiliyor, ama BAGIMLILIKLARIN yeniden
-          # indirilmesi icin bir sebep yok.
-          cache: gradle
+
+      # GRADLE ONBELLEGI — `setup-java`nin `cache: gradle` secenegi BURADA
+      # CALISMAZ ve derlemeyi KIRAR: o secenek checkout aninda `*.gradle`
+      # dosyasi arar, ama `android/` depoda tutulmuyor (Expo prebuild uretiyor),
+      # dolayisiyla hicbir dosya eslesmiyor ve adim hata veriyor.
+      # Cozum: proje degil, GRADLE ANA DIZINI onbellege aliniyor. Anahtar
+      # package-lock'a bagli cunku native bagimliliklar oradan tureluyor.
+      - name: Gradle onbellegi
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('Cheep-Mobile/package-lock.json') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
 
       - name: İmzalama kasasını secret'lardan kur
         env:
