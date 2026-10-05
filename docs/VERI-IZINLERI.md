@@ -269,3 +269,84 @@ kullanmaktansa veri göstermemek.
 PL, HR, HU, RO: 188.909 fiyat dokunulmadan duruyor. Kaynakları farklı
 (cijene.dev, GVH, Monitorul Prețurilor, zincirlerin kendi listeleri) ve
 koşulları ayrıca okunmalı — bu iş **henüz yapılmadı**.
+
+---
+
+## 🔍 DİĞER ÜLKELERİN KAYNAKLARI OKUNDU — 5 Ekim 2026
+
+Türkiye'de yapılan hatayı tekrarlamamak için dört ülkenin kaynağı da
+koşullarıyla birlikte incelendi.
+
+| Ülke | Kaynak | Durum |
+|---|---|---|
+| 🇭🇷 HR | `api.cijene.dev` | ✅ **TEMİZ** |
+| 🇷🇴 RO | `monitorulpreturilor.info` | ⚠️ belirsiz |
+| 🇵🇱 PL | zincirlerin kendi siteleri | 🔴 **YASAK** — alım durduruldu |
+| 🇭🇺 HU | `arfigyelo.gvh.hu` (GVH) | 🔴 **İZİN YOK** — alım durduruldu |
+
+### 🇭🇷 Hırvatistan — temiz, devam ediyor
+
+NN 75/2025 (2 Mayıs 2025) kararıyla her perakendeci her mağazası için günlük
+fiyat listesini makine-okunur yayınlamak **zorunda**. `cijene.dev` bunları
+topluyor. Koşulları birebir:
+
+> "Korisnik može slobodno koristiti podatke u svojim aplikacijama"
+> (Kullanıcı veriyi kendi uygulamalarında serbestçe kullanabilir.)
+
+Ücretsiz planda **günlük 1000 istek** sınırı var; günde tek ZIP indirdiğimiz
+için sınırın çok altındayız. Kazıma yapmıyoruz, zorunlu yayınlanan veriyi
+okuyoruz.
+
+### 🇵🇱 Polonya — yasak, durduruldu
+
+Zincirlerin kendi siteleri kazınıyordu (lidl.pl, carrefour.pl, biedronka.pl,
+zabka, auchan). `robots.txt` ve resmi sitemap kullanılıyordu — yöntem nazik,
+ama **robots izni ToS izni değil** (Türkiye dersi).
+
+Lidl Polska şartnamesi lidl.pl'in kopyalanmasını **yazılı izin olmadan
+yasaklıyor** ve dayanak olarak **27 Temmuz 2001 tarihli Veri Tabanı Koruma
+Kanunu**'nu gösteriyor — bu AB Veritabanı Direktifi'nin Polonya uygulaması.
+Yani Türkiye'den **daha güçlü** bir koruma: sözleşmesel değil, yasal.
+
+Ayrıca `consumer-api.wolt.com` kullanılıyordu — Wolt'un kendi iç API'si.
+
+### 🇭🇺 Macaristan — izin yok, durduruldu
+
+GVH (Rekabet Kurumu) 2023'te Árfigyelő'yü kopyalayan bir uygulamaya karşı
+kamuya açık uyarı yayınladı. Birebir:
+
+> "A GVH nem adott engedélyt az illegális alkalmazás létrehozójának az
+> Árfigyelő rendszer adatainak felhasználására"
+> (GVH, Árfigyelő sistem verilerinin kullanımına izin vermedi.)
+
+GVH **hukuk ve ceza davası** açtı ve uygulamanın **Google Play ile App
+Store'dan kaldırılmasını** talep etti.
+
+⚠️ O vakada marka taklidi de vardı, bizde yok. Ama "veri kullanımına izin
+vermedik" gerekçesi bize de aynen uyuyor ve sonucu mağazadan kaldırılma oldu.
+
+### 🇷🇴 Romanya — belirsiz, ŞİMDİLİK AÇIK
+
+Rekabet Konseyi'nin sistemi, XML API'si kimlik doğrulama istemiyor, üçüncü
+taraf arayüzleri var (`gov2-ro/monitorulpreturilor`). Sitede bulunan tek
+ilgili ifade bir **sorumluluk reddi**, lisans değil:
+
+> "nu sunt responsabili pentru **utilizarea ilicită de către terți** a
+> informațiilor afișate pe site"
+
+"Üçüncü tarafların hukuka aykırı kullanımı" deniyor ama neyin hukuka aykırı
+olduğu tanımlanmıyor ve açık bir izin de verilmiyor.
+
+### Yapılanlar ve yapılmayanlar
+
+**Yapıldı:** PL ve HU veri alımı durduruldu ve devre dışı bırakıldı
+(`cheep-fetcher-pl.timer`, `cheep-fetcher-hu.timer`). Devam eden alım kesildi.
+
+**YAPILMADI — bilerek:** PL (39.340) ve HU (11.091) mevcut fiyatları
+SİLİNMEDİ. Türkiye'den farkı: orada bize **yazılı, adımıza gelmiş bir ret**
+vardı ve kullandığımızı kendimiz beyan etmiştik. Burada kimse bize yazmadı;
+değerlendirme benim okumama dayanıyor. 107 kullanıcıyı etkileyen geri
+dönüşsüz bir silmeyi tek başına bir yorumla yapmak doğru olmaz.
+
+**Önerilen sıra:** (1) RO koşullarını yazılı kaynaktan doğrula,
+(2) PL/HU verisini sil, (3) bu ülkelerde de kullanıcı bildirimine geç.
