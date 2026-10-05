@@ -71,7 +71,10 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
   const c = CONTENT[locale]
   const { country, payload } = data
   const now = new Date(country.generatedAt)
-  const homePath = locale === 'tr' ? '/' : '/pl'
+  // Her dil KENDI kokune. Once `: '/pl'` idi — yani Hirvat, Macar, Romen ve
+  // Ingilizce sayfalarin HEPSINDE 'ana sayfa' kirinti baglantisi LEHCE
+  // ana sayfaya gidiyordu.
+  const homePath = locale === 'tr' ? '/' : `/${locale}`
   const money = (v: number) => formatMoney(locale, country.currency, v)
 
   switch (payload.kind) {
@@ -88,10 +91,10 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
         return base(locale, path, p.name, c.product.noOffers, NOINDEX)
       }
 
-      const title =
-        locale === 'tr'
-          ? `${p.name} fiyatları — ${s.storeCount} markette karşılaştır | Cheep`
-          : `${p.name} — ceny w ${s.storeCount} sklepach | Cheep`
+      const title = fillLocalized(locale, c.seo.productTitle, {
+        name: p.name,
+        stores: s.storeCount,
+      })
 
       // Tasarruf cümlesi yalnızca GERÇEK bir tasarruf varsa yazılır.
       // Koşulsuz eklendiğinde indekslenen ürün sayfalarının ~%18'i arama
@@ -100,14 +103,17 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
       // Sayfa gövdesinde bu kapı (`savingPct >= 1`) zaten vardı; açıklamaya
       // konmamıştı.
       const hasSaving = s.savingPct >= 1
-      const description =
-        locale === 'tr'
-          ? hasSaving
-            ? `${p.name} en ucuz ${s.cheapest.storeName}: ${money(s.min)}. ${s.storeCount} marketin güncel fiyatlarını karşılaştır, ${formatPct(locale, s.savingPct)} tasarruf et.`
-            : `${p.name} en ucuz ${s.cheapest.storeName}: ${money(s.min)}. ${s.storeCount} marketin güncel fiyatlarını karşılaştır.`
-          : hasSaving
-            ? `${p.name} najtaniej w ${s.cheapest.storeName}: ${money(s.min)}. Porównaj ceny w ${s.storeCount} sklepach i oszczędź ${formatPct(locale, s.savingPct)}.`
-            : `${p.name} najtaniej w ${s.cheapest.storeName}: ${money(s.min)}. Porównaj aktualne ceny w ${s.storeCount} sklepach.`
+      const description = fillLocalized(
+        locale,
+        hasSaving ? c.seo.productDescSaving : c.seo.productDesc,
+        {
+          name: p.name,
+          store: s.cheapest.storeName,
+          price: money(s.min),
+          stores: s.storeCount,
+          pct: formatPct(locale, s.savingPct),
+        },
+      )
 
       // Bayat fiyatlı sayfa indekslenmez (spec §9) — yanlış fiyat göstermek
       // güveni ve sıralamayı birlikte yakar.
@@ -193,10 +199,7 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
     case 'category': {
       const cat = payload.category
       const pageSuffix = payload.page > 1 ? ` — ${c.pagination.page} ${payload.page}` : ''
-      const title =
-        locale === 'tr'
-          ? `${cat.name} fiyatları${pageSuffix} | Cheep`
-          : `${cat.name} — ceny${pageSuffix} | Cheep`
+      const title = fill(c.seo.categoryTitle, { name: cat.name, suffix: pageSuffix })
       const description = fillLocalized(locale, c.category.intro, {
         name: cat.name,
         count: formatNumber(locale, cat.productCount),
@@ -212,8 +215,7 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
 
     case 'store': {
       const s = payload.store
-      const title =
-        locale === 'tr' ? `${s.name} fiyatları ve şubeleri | Cheep` : `${s.name} — ceny i sklepy | Cheep`
+      const title = fill(c.seo.storeTitle, { name: s.name })
       // SAYILAR BICIMLENDIRILIR. Aciklama ham tam sayi basiyordu ("3067 sube")
       // ama sayfanin govdesi ayni sayiyi `formatNumber` ile ("3.067") ciziyordu:
       // arama snippet'i hem okunmasi zor bir sayi gosteriyor hem de tikladigi
@@ -231,10 +233,7 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
 
     case 'storeCategory': {
       const { store, category } = payload
-      const title =
-        locale === 'tr'
-          ? `${store.name} ${category.name} fiyatları | Cheep`
-          : `${store.name} — ${category.name} ceny | Cheep`
+      const title = fill(c.seo.storeCategoryTitle, { store: store.name, name: category.name })
       // AÇIKLAMA MARKET ADINI DA TAŞIR. Eskiden yalnızca kategori adı ve
       // sayı vardı, yani A101/BİM/ŞOK'un aynı kategori sayfaları BAYT BAYT
       // AYNI açıklamayı paylaşıyordu — Google'ın "Duplicate, Google chose
@@ -270,10 +269,7 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
 
     case 'city': {
       const city = payload.city
-      const title =
-        locale === 'tr'
-          ? `${city.name} marketleri — en ucuz market ve şubeler | Cheep`
-          : `${city.name} — sklepy i najtańsze ceny | Cheep`
+      const title = fill(c.seo.cityTitle, { name: city.name })
       const description = fillLocalized(locale, c.city.intro, { name: city.name, branches: formatNumber(locale, city.branchCount) })
       // NOINDEX — bu sayfalar sablondan uretiliyor ve birbirine %84-91 benziyor.
       // Ozgun icerik sayfa basina ~300 karakter: sehir adi, sube sayisi, zincir
@@ -295,17 +291,14 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
     }
 
     case 'report': {
-      const title = locale === 'tr' ? 'Market zam raporu — güncel fiyat değişimleri | Cheep' : 'Raport cen — zmiany cen | Cheep'
+      const title = c.seo.reportTitle
       const head = base(locale, path, title, c.report.lead, INDEXABLE)
       head.jsonLd.push(breadcrumbLd([{ name: c.breadcrumbHome, path: homePath }, { name: c.report.title }]))
       return head
     }
 
     case 'products': {
-      const title =
-        locale === 'tr'
-          ? 'Ürünler — market fiyatlarını karşılaştır | Cheep'
-          : 'Produkty — porównaj ceny w sklepach | Cheep'
+      const title = c.seo.productsTitle
       // Yer tutucular SİLİNMİYOR, DOLDURULUYOR. `.replace(/\{\w+\}/g, '')`
       // sayıları atıyordu ve `priority 0.9` olan bu hub sayfasının açıklaması
       // canlıda " ürünü  markette karşılaştır." diye çıkıyordu — baştaki
@@ -328,8 +321,7 @@ export function buildContentHead(locale: Locale, path: string, data: PageData): 
     }
 
     case 'compare': {
-      const title =
-        locale === 'tr' ? 'En ucuz market hangisi? Karşılaştırma | Cheep' : 'Który sklep jest najtańszy? | Cheep'
+      const title = c.seo.compareTitle
       const head = base(locale, path, title, c.compare.lead, INDEXABLE)
       head.jsonLd.push(breadcrumbLd([{ name: c.breadcrumbHome, path: homePath }, { name: c.compare.title }]))
       return head

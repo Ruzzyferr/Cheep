@@ -13,6 +13,31 @@ import type { Locale } from './index'
 export interface ContentDict {
   breadcrumbHome: string
 
+  /**
+   * Arama sonucu basliklari ve aciklamalari.
+   *
+   * NEDEN BURADA: `seo/content.ts` bunlari `locale === 'tr' ? turkce : LEHCE`
+   * diye uretiyordu — site yalnizca TR+PL iken dogruydu. HR/HU/RO/EN
+   * eklendiginde hepsi Lehce dalina dustu ve 12.908 Hirvat urun sayfasi
+   * "ceny w 6 sklepach" basligiyla indekslendi. Sablonlar artik dilin kendi
+   * sozlugunde; yeni dil eklenince TypeScript eksik anahtari derlemede yakalar.
+   *
+   * `{stores}` sayidir; `fillLocalized` ondan {sklepy}/{trgovine}/{magazine}
+   * cogul bicimini turetir.
+   */
+  seo: {
+    productTitle: string
+    productDescSaving: string
+    productDesc: string
+    categoryTitle: string
+    storeTitle: string
+    storeCategoryTitle: string
+    cityTitle: string
+    reportTitle: string
+    productsTitle: string
+    compareTitle: string
+  }
+
   product: {
     priceTableCaption: string
     store: string
@@ -275,6 +300,20 @@ export function fillLocalized(
 }
 
 const tr: ContentDict = {
+  seo: {
+    productTitle: '{name} fiyatları — {stores} markette karşılaştır | Cheep',
+    productDescSaving:
+      '{name} en ucuz {store}: {price}. {stores} marketin güncel fiyatlarını karşılaştır, {pct} tasarruf et.',
+    productDesc: '{name} en ucuz {store}: {price}. {stores} marketin güncel fiyatlarını karşılaştır.',
+    categoryTitle: '{name} fiyatları{suffix} | Cheep',
+    storeTitle: '{name} fiyatları ve şubeleri | Cheep',
+    storeCategoryTitle: '{store} {name} fiyatları | Cheep',
+    cityTitle: '{name} marketleri — en ucuz market ve şubeler | Cheep',
+    reportTitle: 'Market zam raporu — güncel fiyat değişimleri | Cheep',
+    productsTitle: 'Ürünler — market fiyatlarını karşılaştır | Cheep',
+    compareTitle: 'En ucuz market hangisi? Karşılaştırma | Cheep',
+  },
+
   breadcrumbHome: 'Ana sayfa',
 
   product: {
@@ -397,6 +436,20 @@ const tr: ContentDict = {
 }
 
 const pl: ContentDict = {
+  seo: {
+    productTitle: '{name} — ceny w {stores} sklepach | Cheep',
+    productDescSaving:
+      '{name} najtaniej w {store}: {price}. Porównaj ceny w {stores} sklepach i oszczędź {pct}.',
+    productDesc: '{name} najtaniej w {store}: {price}. Porównaj aktualne ceny w {stores} sklepach.',
+    categoryTitle: '{name} — ceny{suffix} | Cheep',
+    storeTitle: '{name} — ceny i sklepy | Cheep',
+    storeCategoryTitle: '{store} — {name} ceny | Cheep',
+    cityTitle: '{name} — sklepy i najtańsze ceny | Cheep',
+    reportTitle: 'Raport cen — zmiany cen | Cheep',
+    productsTitle: 'Produkty — porównaj ceny w sklepach | Cheep',
+    compareTitle: 'Który sklep jest najtańszy? | Cheep',
+  },
+
   breadcrumbHome: 'Strona główna',
 
   product: {
@@ -526,6 +579,20 @@ const pl: ContentDict = {
  * degiskenlerinden doldurulur -- Lehce'deki {produkty}/{sklepy} ile ayni yer.
  */
 const hr: ContentDict = {
+  seo: {
+    productTitle: '{name} — cijene u {stores} {trgovine} | Cheep',
+    productDescSaving:
+      '{name} najjeftinije u {store}: {price}. Usporedi cijene u {stores} {trgovine} i uštedi {pct}.',
+    productDesc: '{name} najjeftinije u {store}: {price}. Usporedi aktualne cijene u {stores} {trgovine}.',
+    categoryTitle: '{name} — cijene{suffix} | Cheep',
+    storeTitle: '{name} — cijene i poslovnice | Cheep',
+    storeCategoryTitle: '{store} — {name} cijene | Cheep',
+    cityTitle: '{name} — trgovine i najniže cijene | Cheep',
+    reportTitle: 'Izvještaj o cijenama — promjene cijena | Cheep',
+    productsTitle: 'Proizvodi — usporedi cijene u trgovinama | Cheep',
+    compareTitle: 'Koja je trgovina najjeftinija? | Cheep',
+  },
+
   breadcrumbHome: 'Početna',
 
   product: {
@@ -654,6 +721,20 @@ const hr: ContentDict = {
  * bu yuzden burada hicbir cekim degiskeni kullanilmaz, isim tekil yazilir.
  */
 const hu: ContentDict = {
+  seo: {
+    productTitle: '{name} — árak {stores} boltban | Cheep',
+    productDescSaving:
+      '{name} legolcsóbban itt: {store} {price}. Hasonlítsd össze {stores} bolt árait és spórolj {pct}.',
+    productDesc: '{name} legolcsóbban itt: {store} {price}. Hasonlítsd össze {stores} bolt aktuális árait.',
+    categoryTitle: '{name} — árak{suffix} | Cheep',
+    storeTitle: '{name} — árak és üzletek | Cheep',
+    storeCategoryTitle: '{store} — {name} árak | Cheep',
+    cityTitle: '{name} — boltok és legolcsóbb árak | Cheep',
+    reportTitle: 'Árjelentés — árváltozások | Cheep',
+    productsTitle: 'Termékek — hasonlítsd össze a boltok árait | Cheep',
+    compareTitle: 'Melyik bolt a legolcsóbb? | Cheep',
+  },
+
   breadcrumbHome: 'Főoldal',
 
   product: {
@@ -783,6 +864,20 @@ const hu: ContentDict = {
  * kendisi ekler ("20 de produse").
  */
 const ro: ContentDict = {
+  seo: {
+    productTitle: '{name} — prețuri în {stores} {magazine} | Cheep',
+    productDescSaving:
+      '{name} cel mai ieftin la {store}: {price}. Compară prețurile din {stores} {magazine} și economisește {pct}.',
+    productDesc: '{name} cel mai ieftin la {store}: {price}. Compară prețurile actuale din {stores} {magazine}.',
+    categoryTitle: '{name} — prețuri{suffix} | Cheep',
+    storeTitle: '{name} — prețuri și magazine | Cheep',
+    storeCategoryTitle: '{store} — prețuri {name} | Cheep',
+    cityTitle: '{name} — magazine și cele mai mici prețuri | Cheep',
+    reportTitle: 'Raport de prețuri — modificări de preț | Cheep',
+    productsTitle: 'Produse — compară prețurile din magazine | Cheep',
+    compareTitle: 'Care magazin este cel mai ieftin? | Cheep',
+  },
+
   breadcrumbHome: 'Pagina principală',
 
   product: {
@@ -905,6 +1000,20 @@ const ro: ContentDict = {
 }
 
 const en: ContentDict = {
+  seo: {
+    productTitle: '{name} — prices at {stores} stores | Cheep',
+    productDescSaving:
+      '{name} cheapest at {store}: {price}. Compare prices across {stores} stores and save {pct}.',
+    productDesc: '{name} cheapest at {store}: {price}. Compare current prices across {stores} stores.',
+    categoryTitle: '{name} — prices{suffix} | Cheep',
+    storeTitle: '{name} — prices and stores | Cheep',
+    storeCategoryTitle: '{store} — {name} prices | Cheep',
+    cityTitle: '{name} — stores and lowest prices | Cheep',
+    reportTitle: 'Price report — price changes | Cheep',
+    productsTitle: 'Products — compare grocery prices | Cheep',
+    compareTitle: 'Which store is cheapest? | Cheep',
+  },
+
   breadcrumbHome: 'Home',
 
   product: {
