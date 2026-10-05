@@ -94,7 +94,7 @@ E-posta: info@swiip.app
 | Kanal | Durum | Tarih | Referans |
 |---|---|---|---|
 | CİMER → Sanayi ve Teknoloji Bak. | ✅ GÖNDERİLDİ | 5 Eki 2026 | **2605447214** |
-| CİMER → Ticaret Bakanlığı | ⏳ BEKLİYOR | — | CİMER günlük başvuru limiti (1/gün) — yarın gönderilecek |
+| CİMER → Ticaret Bakanlığı | ✅ GÖNDERİLDİ | 6 Eki 2026 | **2605449144** |
 | Bakanlık e-postası | ❌ UYGULANMADI | — | Her iki bakanlığın kendi sitesi bilgi edinmeyi CİMER'e yönlendiriyor; 4982 başvurusu kimlik doğrulaması istiyor |
 
 **Yasal süre:** Bilgi Edinme Kanunu m.11 uyarınca **15 iş günü** içinde cevap
@@ -139,3 +139,113 @@ yazılacak. Sanayi ve Teknoloji Bakanlığı yanıt verdiğinde de aynı düzelt
 iletilecek. Bir kamu kurumuna verilen yazılı beyanın birebir doğru olması
 gerekir; "fiyatları sildim, olgusal ürün adlarını tuttum" demek, "her şeyi
 sildim" demekten hem daha doğru hem savunması daha kolay.
+
+---
+
+## Ticaret Bakanlığı başvuru metni (6 Eki 2026)
+
+> Sanayi ve Teknoloji Bakanlığı'na gönderilen metinden **tek farkı**, veri
+> kaldırma beyanının kesinleştirilmiş olması. İlk metinde "tüm veriyi
+> kaldırdım" yazıyordu; aşağıda ne kaldırıldığı ve neyin bilinçli olarak
+> korunduğu ayrı ayrı yazılı.
+
+Cheep adlı ücretsiz mobil uygulamanın geliştiricisiyim. Uygulama,
+tüketicilerin market alışverişinde fiyat karşılaştırması yapmasına yardımcı
+olmak üzere geliştirildi ve Google Play ile App Store'da yayımlanmıştı.
+
+Türkiye verisi için marketfiyati.org.tr portalını kullanıyordum. Portalın
+Kullanım Koşulları yazılı izin şartı getirdiğinden 02.10.2026'da TÜBİTAK
+BİLGEM'e şeffaf bir izin başvurusu yaptım ve mevcut kullanımımı kendim
+bildirdim.
+
+05.10.2026 tarihli yanıtta özetle; TÜBİTAK BİLGEM'in projenin teknik
+yürütücüsü konumunda olduğu, üçüncü taraflara veri aktarılması veya API
+erişimi tanımlanması hususunda YETKİLİ OLMADIĞI, veri paylaşım süreçlerinin
+yalnızca projenin sahibi olan T.C. Sanayi ve Teknoloji Bakanlığı ile T.C.
+Ticaret Bakanlığı nezdinde yürütüldüğü bildirilmiştir.
+
+Bu yanıttan sonra yaptıklarımı, olduğundan fazla ya da eksik göstermeden
+arz ediyorum.
+
+KALDIRILANLAR: Market Fiyatı kaynaklı tüm fiyatlar ve fiyat geçmişi
+silinmiştir (Türkiye'de kayıtlı fiyat sayısı sıfırdır). Portala ait ürün
+tanımlayıcıları, portalın sunucularındaki görsellere yapılan tüm bağlantılar,
+veri çekme yazılımı ve onu çalıştıran servis kaldırılmış, sunucudaki 83 MB
+ham veri silinmiştir. Uygulama 05.10.2026 itibarıyla her iki mağazadan da
+geri çekilmiş, sunucularım kapatılmıştır.
+
+KORUNAN: 13.326 ürünün adı, markası, gramajı ve kategorisi. Bunları olgusal
+bilgi saydığım için tuttum; "Çaykur Tiryaki Çay 1 Kg" diye bir ürün
+bulunduğu, üreticinin ve her zincirin kendi sitesinde de yer alan bir
+olgudur. Bu benim yorumum olup Bakanlığınız aksi görüşteyse kayıtları da
+silerim; bu nedenle ayrıca belirtme gereği duydum.
+
+Veri sahibinin Bakanlığınız olduğu belirtildiğinden, 4982 sayılı Bilgi
+Edinme Hakkı Kanunu kapsamında şu hususlarda bilgi talep ediyorum:
+
+1) Bir tüketici uygulaması Market Fiyatı verisini hangi şartlar altında
+gösterebilir? Kaynak gösterimi, erişim hızı sınırı, güncelleme sıklığı veya
+benzeri koşullara bağlı bir kullanım imkânı var mıdır?
+
+2) Yukarıda "korunan" olarak belirttiğim ürün adı/marka/gramaj kayıtlarının
+tutulması bir sakınca doğurur mu?
+
+3) Bu veri setinin açık veri olarak yayımlanması gündemde midir?
+
+4) Araştırma amaçlı, ticari olmayan veya sınırlı hacimli kullanım için
+tanımlanmış bir çerçeve mevcut mudur?
+
+Şeffaflık adına: uygulama kullanıcılar için ücretsizdi, arkasında şirket
+bulunmayıp tarafımca bireysel olarak geliştirilmektedir.
+
+Gereğini bilgilerinize arz ederim.
+
+---
+
+## ✅ Ticaret Bakanlığı başvurusu GÖNDERİLDİ — 6 Eki 2026
+
+**Takip no: `2605449144`** · Bilgi Edinme Hakkı · Gerçek Kişi
+
+Sanayi ve Teknoloji Bakanlığı metninden farkı, "tüm veriyi kaldırdım"
+cümlesinin ikiye ayrılmış olması: **KALDIRILANLAR** (fiyatlar, tanımlayıcılar,
+görsel bağlantıları, yazılım, 83 MB ham veri, mağaza ve sunucu kapanışı) ve
+**KORUNAN** (13.326 ürünün adı/markası/gramajı/kategorisi, olgusal bilgi
+gerekçesiyle). Ayrıca 2. soru doğrudan şunu soruyor: bu kayıtları tutmak
+sakınca doğurur mu? Bakanlık hayır derse kayıtlar da silinecek.
+
+Böylece iki bakanlık da kapsandı:
+
+| Bakanlık | Takip no | Tarih |
+|---|---|---|
+| Sanayi ve Teknoloji | `2605447214` | 5 Eki 2026 |
+| Ticaret | `2605449144` | 6 Eki 2026 |
+
+### ⚠️ CİMER formunda tuzak
+
+`document.querySelector('textarea')` sayfadaki **İLK** textarea'yı veriyor ve
+o, 1. adımdan kalan gizli **Mernis adres alanı** (`#mernisAcikAdres`). Başvuru
+metnini oraya yazmak sessizce başarısız oluyor: form "Metin giriniz" deyip
+geri dönüyor, üstelik adres alanı kirleniyor. Doğru alan **`#Basvuru_Metin`**
+(`placeholder="Başvuru metnini giriniz."`). Ayrıca JS ile `value` atamak
+doğrulamayı tetiklemiyor — gerçek yazma gerekiyor.
+
+---
+
+## 📅 Yasal cevap takvimi (hesaplandı)
+
+4982 sayılı Kanun m.11: **15 iş günü**. Hafta sonları ve **29 Ekim Cumhuriyet
+Bayramı** düşülerek:
+
+| Bakanlık | Takip no | Başvuru | **Son gün** |
+|---|---|---|---|
+| Sanayi ve Teknoloji | `2605447214` | 5 Eki 2026 | **26 Ekim 2026** |
+| Ticaret | `2605449144` | 6 Eki 2026 | **27 Ekim 2026** |
+
+**Süre dolar da cevap gelmezse ne yapılır:** 4982 m.13 uyarınca, sürenin
+bitiminden itibaren **60 gün içinde** Bilgi Edinme Değerlendirme Kurulu'na
+itiraz edilebilir. İtiraz, idareye başvuru tarihinden itibaren işlemeye devam
+eden süreyi durdurur. Kurul'a başvuru CİMER üzerinden ya da doğrudan yapılır.
+
+**Cevap gelirse:** gelen yanıt bu dosyaya birebir eklenecek ve
+`docs/VERI-IZINLERI.md` buna göre güncellenecek. Türkiye'nin açılıp
+açılmayacağı bu yanıta bağlı.
