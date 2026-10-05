@@ -58,7 +58,7 @@ const METIN: Record<Locale, Metin> = {
     verinBaslik: 'Senin verin',
     verin: [
       'Uygulamayı indirdiysen listelerin cihazında duruyor.',
-      'Ücretli aboneliği olan kimse yok; kimseden tahsilat yapılmadı.',
+      'Ücretli abonelik satın aldıysan yeni bir tahsilat yapılmayacak. Uygulama geri çekildiği için App Store üzerinden iade talep edebilirsin; destek@cheep.live adresine yazarsan biz de yardımcı oluruz.',
       'Hesabının silinmesini istersen aşağıdaki sayfadan talep edebilirsin; sunucu kapalıyken de talebini alıyoruz.',
     ],
     neBekliyorBaslik: 'Ne bekliyoruz',
@@ -86,7 +86,7 @@ const METIN: Record<Locale, Metin> = {
     verinBaslik: 'Your data',
     verin: [
       'If you installed the app, your lists are still on your device.',
-      'Nobody holds a paid subscription; no one has been charged.',
+      'If you bought a paid subscription, you will not be charged again. Because the app has been withdrawn, you can request a refund through the App Store; write to destek@cheep.live and we will help.',
       'If you want your account deleted, you can request it on the page below — we receive requests even while the server is off.',
     ],
     neBekliyorBaslik: 'What we are waiting for',
@@ -114,7 +114,7 @@ const METIN: Record<Locale, Metin> = {
     verinBaslik: 'Twoje dane',
     verin: [
       'Jeśli masz zainstalowaną aplikację, Twoje listy pozostają na urządzeniu.',
-      'Nikt nie ma płatnej subskrypcji; nikomu nie pobrano opłaty.',
+      'Jeśli wykupiłeś płatną subskrypcję, nie pobierzemy kolejnej opłaty. Ponieważ aplikacja została wycofana, możesz poprosić o zwrot przez App Store; napisz na destek@cheep.live, a pomożemy.',
       'Jeśli chcesz usunąć konto, możesz złożyć wniosek na stronie poniżej — odbieramy zgłoszenia także przy wyłączonym serwerze.',
     ],
     neBekliyorBaslik: 'Na co czekamy',
@@ -142,7 +142,7 @@ const METIN: Record<Locale, Metin> = {
     verinBaslik: 'Vaši podaci',
     verin: [
       'Ako ste instalirali aplikaciju, vaši popisi ostaju na uređaju.',
-      'Nitko nema plaćenu pretplatu; nikome ništa nije naplaćeno.',
+      'Ako ste kupili plaćenu pretplatu, nova naplata neće uslijediti. Budući da je aplikacija povučena, povrat možete zatražiti putem App Storea; javite se na destek@cheep.live i pomoći ćemo.',
       'Želite li brisanje računa, možete ga zatražiti na stranici ispod — zahtjeve primamo i dok je poslužitelj ugašen.',
     ],
     neBekliyorBaslik: 'Što čekamo',
@@ -170,7 +170,7 @@ const METIN: Record<Locale, Metin> = {
     verinBaslik: 'A te adataid',
     verin: [
       'Ha telepítetted az alkalmazást, a listáid továbbra is az eszközödön vannak.',
-      'Senkinek nincs fizetős előfizetése; senkitől nem vontunk le díjat.',
+      'Ha fizetős előfizetést vásároltál, újabb díjat nem vonunk le. Mivel az alkalmazást visszavontuk, visszatérítést kérhetsz az App Store-on keresztül; írj a destek@cheep.live címre, és segítünk.',
       'Ha szeretnéd törölni a fiókodat, az alábbi oldalon kérheted — a kéréseket leállított szerver mellett is megkapjuk.',
     ],
     neBekliyorBaslik: 'Mire várunk',
@@ -198,7 +198,7 @@ const METIN: Record<Locale, Metin> = {
     verinBaslik: 'Datele tale',
     verin: [
       'Dacă ai instalat aplicația, listele tale rămân pe dispozitiv.',
-      'Nimeni nu are abonament plătit; nimănui nu i s-a perceput vreo sumă.',
+      'Dacă ai cumpărat un abonament plătit, nu îți va mai fi perceput niciun cost. Întrucât aplicația a fost retrasă, poți cere rambursarea prin App Store; scrie-ne la destek@cheep.live și te ajutăm.',
       'Dacă vrei ștergerea contului, o poți cere pe pagina de mai jos — primim solicitările și cu serverul oprit.',
     ],
     neBekliyorBaslik: 'Ce așteptăm',
