@@ -54,7 +54,11 @@ function Pointer() {
 
 function SceneCompare() {
   const { t } = useTranslation();
-  const { formatMoney } = useLocale();
+  // Market adlari ULKEYE GORE. Sabit kodlanmisken Hirvat kullanici EURO
+  // fiyatlarla TURK marketleri goruyordu; ustelik Turkiye'de artik resmi
+  // fiyat akisi olmadigi icin o ekran tutulamayan bir soz veriyordu.
+  const { formatMoney, demoStores } = useLocale();
+  const [m1, m2, m3] = demoStores;
   return (
     <View style={scene.card}>
       <View style={scene.productRow}>
@@ -65,18 +69,18 @@ function SceneCompare() {
       </View>
       <View style={scene.priceRow}>
         <View style={scene.priceChip}>
-          <Text style={scene.priceStore}>Migros</Text>
+          <Text style={scene.priceStore}>{m1}</Text>
           <Text style={scene.priceVal}>{formatMoney(25)}</Text>
         </View>
         <View style={[scene.priceChip, scene.priceBest]}>
-          <Text style={[scene.priceStore, scene.priceStoreBest]}>A101</Text>
+          <Text style={[scene.priceStore, scene.priceStoreBest]}>{m2}</Text>
           <Text style={[scene.priceVal, scene.priceValBest]}>{formatMoney(22)}</Text>
           <View style={scene.bestTag}>
             <Text style={scene.bestTagText}>{t('intro.scene.cheapest_tag')}</Text>
           </View>
         </View>
         <View style={scene.priceChip}>
-          <Text style={scene.priceStore}>ŞOK</Text>
+          <Text style={scene.priceStore}>{m3}</Text>
           <Text style={scene.priceVal}>{formatMoney(24)}</Text>
         </View>
       </View>
@@ -117,12 +121,13 @@ function SceneTab() {
 
 function SceneRoute() {
   const { t } = useTranslation();
-  const { formatMoney } = useLocale();
+  const { formatMoney, demoStores } = useLocale();
+  const [rm1, rm2] = demoStores;
   return (
     <View style={scene.card}>
       <Text style={scene.routeOverline}>{t('intro.scene.best_route_overline')}</Text>
       <View style={scene.routeRow}>
-        <Text style={scene.routeStores}>Migros + A101</Text>
+        <Text style={scene.routeStores}>{`${rm1} + ${rm2}`}</Text>
         <Text style={scene.routePrice}>{formatMoney(229)}</Text>
       </View>
       <View style={scene.routeCta}>

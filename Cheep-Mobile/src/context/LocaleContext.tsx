@@ -1,23 +1,35 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from 'react';
 import { countryStorage } from '../utils/storage';
 
-export const COUNTRY_CONFIG: Record<string, { currency: string; symbol: string; locale: string }> = {
-  TR: { currency: 'TRY', symbol: '₺', locale: 'tr-TR' },
-  CH: { currency: 'CHF', symbol: 'CHF', locale: 'de-CH' },
-  SE: { currency: 'SEK', symbol: 'kr', locale: 'sv-SE' },
-  DE: { currency: 'EUR', symbol: '€', locale: 'de-DE' },
-  PL: { currency: 'PLN', symbol: 'zł', locale: 'pl-PL' },
+/**
+ * `demoStores`: tanitim turundaki ORNEK market adlari.
+ *
+ * NEDEN BURADA: tur ekraninda Migros/A101/SOK SABIT KODLANMISTI ama para
+ * birimi ulkeye gore degisiyordu — Hirvat kullanici EURO fiyatlarla TURK
+ * marketleri goruyordu. Daha kotusu: Turkiye'de artik resmi fiyat akisi yok,
+ * yani o ekran tutulamayan bir soz veriyordu.
+ *
+ * Bunlar GERCEK fiyat degil, yalnizca "nasil gorunur" ornegi.
+ */
+export const COUNTRY_CONFIG: Record<string, { currency: string; symbol: string; locale: string; demoStores: [string, string, string] }> = {
+  TR: { currency: 'TRY', symbol: '₺', locale: 'tr-TR', demoStores: ['Migros', 'A101', 'ŞOK'] },
+  CH: { currency: 'CHF', symbol: 'CHF', locale: 'de-CH', demoStores: ['Migros', 'Coop', 'Denner'] },
+  SE: { currency: 'SEK', symbol: 'kr', locale: 'sv-SE', demoStores: ['ICA', 'Coop', 'Willys'] },
+  DE: { currency: 'EUR', symbol: '€', locale: 'de-DE', demoStores: ['REWE', 'Lidl', 'Aldi'] },
+  PL: { currency: 'PLN', symbol: 'zł', locale: 'pl-PL', demoStores: ['Biedronka', 'Lidl', 'Auchan'] },
   // Hırvatistan 2023'te euro'ya geçti — kuna (HRK) ARTIK KULLANILMIYOR.
-  HR: { currency: 'EUR', symbol: '€', locale: 'hr-HR' },
+  HR: { currency: 'EUR', symbol: '€', locale: 'hr-HR', demoStores: ['Konzum', 'Plodine', 'Spar'] },
   // Forint'in pratikte kuruşu yok; Intl `HUF` için zaten 0 ondalık kullanır.
-  HU: { currency: 'HUF', symbol: 'Ft', locale: 'hu-HU' },
-  RO: { currency: 'RON', symbol: 'lei', locale: 'ro-RO' },
+  HU: { currency: 'HUF', symbol: 'Ft', locale: 'hu-HU', demoStores: ['Tesco', 'Lidl', 'Spar'] },
+  RO: { currency: 'RON', symbol: 'lei', locale: 'ro-RO', demoStores: ['Kaufland', 'Lidl', 'Auchan'] },
 };
 const DEFAULT_CODE = 'TR';
 const cfg = (code: string) => COUNTRY_CONFIG[code] ?? COUNTRY_CONFIG[DEFAULT_CODE];
 
 interface LocaleValue {
   country: string;
+  /** Tanitim turundaki ORNEK market adlari — gercek fiyat degil. */
+  demoStores: [string, string, string];
   setCountry: (code: string) => Promise<void>;
   formatMoney: (n: number) => string;
   formatNumber: (n: number) => string;
@@ -61,7 +73,14 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   // tüketiciler (referans eşitliğine bakan React.memo/useEffect dahil) her
   // country değişiminde gereksiz yeniden render/efekt tetiklenmesi yaşar.
   const value = useMemo(
-    () => ({ country, setCountry, formatMoney, formatNumber, formatDate }),
+    () => ({
+      country,
+      demoStores: cfg(country).demoStores,
+      setCountry,
+      formatMoney,
+      formatNumber,
+      formatDate,
+    }),
     [country, setCountry, formatMoney, formatNumber, formatDate],
   );
 
