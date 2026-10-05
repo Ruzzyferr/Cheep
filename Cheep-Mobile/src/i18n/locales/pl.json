@@ -174,7 +174,7 @@
     "ro": "Română"
   },
   "product": {
-    "no_price_info": "Brak informacji o cenie",
+    "no_price_info": "Dodaj pierwszą cenę",
     "all_categories": "Wszystkie kategorie",
     "all_shown": "Wyświetlono wszystkie produkty",
     "category_empty": "Nie znaleziono produktów w tej kategorii",
@@ -203,7 +203,7 @@
     "store_details": "Szczegóły sklepu",
     "price_disclaimer": "Ceny pochodzą z publicznie dostępnych źródeł urzędowych oraz ze zgłoszeń użytkowników; mają charakter informacyjny i mogą się zmienić. Zgłoszenia użytkowników są oznaczone osobno. Wiążąca jest cena w kanale danego sklepu. Porównanie obejmuje tylko wymienione sklepy.",
     "store_details_soon": "Ta funkcja będzie dostępna wkrótce.",
-    "no_price_info_desc": "Do tego produktu nie dodano jeszcze ceny.",
+    "no_price_info_desc": "Ceny pochodzą od użytkowników. Zgłoś cenę z półki; pojawi się, gdy dwie osoby podadzą tę samą wartość.",
     "cheapest_label": "Najtaniej",
     "difference": "Różnica",
     "average_price": "Cena średnia:",

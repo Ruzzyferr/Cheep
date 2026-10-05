@@ -174,7 +174,7 @@
     "ro": "Română"
   },
   "product": {
-    "no_price_info": "Nincs árinformáció",
+    "no_price_info": "Add meg te az első árat",
     "all_categories": "Összes kategória",
     "all_shown": "Minden terméket megjelenítettünk",
     "category_empty": "Ebben a kategóriában nincs termék",
@@ -203,7 +203,7 @@
     "store_details": "Üzlet részletei",
     "price_disclaimer": "Az árak nyilvánosan elérhető hivatalos forrásokból és felhasználói bejelentésekből származnak; tájékoztató jellegűek és bármikor változhatnak. A felhasználói bejelentéseket külön jelöljük. A kötelező ár a kereskedő saját csatornájában szereplő ár. Az összehasonlítás csak a felsorolt üzletekre vonatkozik.",
     "store_details_soon": "Ez a funkció hamarosan elérhető lesz.",
-    "no_price_info_desc": "Ehhez a termékhez még nem rögzítettünk árat.",
+    "no_price_info_desc": "Az árak a felhasználóktól származnak. Jelentsd a polcon látott árat; akkor jelenik meg, ha ketten ugyanazt jelentik.",
     "cheapest_label": "Legolcsóbb",
     "difference": "Különbség",
     "average_price": "Átlagár:",

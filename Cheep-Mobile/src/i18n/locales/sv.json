@@ -174,7 +174,7 @@
     "ro": "Română"
   },
   "product": {
-    "no_price_info": "Ingen prisinformation",
+    "no_price_info": "Lägg till det första priset",
     "all_categories": "Alla kategorier",
     "all_shown": "Alla produkter visas",
     "category_empty": "Inga produkter hittades i den här kategorin",
@@ -203,7 +203,7 @@
     "store_details": "Butiksdetaljer",
     "price_disclaimer": "Priserna sammanställs från offentligt tillgängliga officiella källor och från användarrapporter; de är endast informativa och kan ändras. Användarrapporter märks separat. Bindande är priset i butikens egen kanal. Jämförelsen omfattar endast de listade butikerna.",
     "store_details_soon": "Den här funktionen kommer snart.",
-    "no_price_info_desc": "Inget pris har lagts till för den här produkten än.",
+    "no_price_info_desc": "Priser kommer från användare. Rapportera priset du såg i hyllan; det publiceras när två personer rapporterar samma värde.",
     "cheapest_label": "Billigast",
     "difference": "Skillnad",
     "average_price": "Snittpris:",

@@ -174,7 +174,7 @@
     "ro": "Română"
   },
   "product": {
-    "no_price_info": "Fără informații despre preț",
+    "no_price_info": "Adaugă tu primul preț",
     "all_categories": "Toate categoriile",
     "all_shown": "Toate produsele au fost afișate",
     "category_empty": "Nu am găsit produse în această categorie",
@@ -203,7 +203,7 @@
     "store_details": "Detalii magazin",
     "price_disclaimer": "Prețurile sunt compilate din surse oficiale publice și din raportări ale utilizatorilor; au caracter informativ și se pot modifica. Raportările utilizatorilor sunt marcate separat. Prețul obligatoriu este cel din canalul propriu al magazinului. Comparația acoperă doar magazinele listate.",
     "store_details_soon": "Această funcție va fi disponibilă în curând.",
-    "no_price_info_desc": "Pentru acest produs nu a fost adăugat încă niciun preț.",
+    "no_price_info_desc": "Prețurile vin de la utilizatori. Raportează prețul de pe raft; devine public când două persoane raportează aceeași valoare.",
     "cheapest_label": "Cel mai ieftin",
     "difference": "Diferență",
     "average_price": "Preț mediu:",

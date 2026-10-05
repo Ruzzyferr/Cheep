@@ -174,7 +174,7 @@
     "ro": "Română"
   },
   "product": {
-    "no_price_info": "Nema podatka o cijeni",
+    "no_price_info": "Dodaj prvu cijenu",
     "all_categories": "Sve kategorije",
     "all_shown": "Prikazani su svi proizvodi",
     "category_empty": "U ovoj kategoriji nema proizvoda",
@@ -203,7 +203,7 @@
     "store_details": "Detalji trgovine",
     "price_disclaimer": "Cijene se prikupljaju iz javno dostupnih službenih izvora i iz prijava korisnika; informativne su i mogu se promijeniti. Prijave korisnika posebno su označene. Obvezujuća je cijena u kanalu same trgovine. Usporedba obuhvaća samo navedene trgovine.",
     "store_details_soon": "Ova će značajka uskoro biti dostupna.",
-    "no_price_info_desc": "Za ovaj proizvod još nije dodana cijena.",
+    "no_price_info_desc": "Cijene dolaze od korisnika. Prijavi cijenu s police; objavit će se kad dvije osobe prijave istu vrijednost.",
     "cheapest_label": "Najjeftinije",
     "difference": "Razlika",
     "average_price": "Prosječna cijena:",

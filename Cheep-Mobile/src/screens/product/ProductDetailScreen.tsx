@@ -289,6 +289,13 @@ export function ProductDetailScreen({
               <MaterialIcons name="info-outline" size={48} color={colors.text.hint} />
               <Text style={styles.noPrice}>{t('product.no_price_info')}</Text>
               <Text style={styles.noPriceSubtext}>{t('product.no_price_info_desc')}</Text>
+              {/* Bos ekranda kullaniciyi ciplak birakmiyoruz: duzeltmenin yolu
+                  BURADA. Turkiye'de 5 Eki 2026'dan beri tek fiyat kaynagi bu. */}
+              <Button
+                title={t('user_price.report_cta')}
+                onPress={() => setFiyatModali(true)}
+                style={styles.noPriceBtn}
+              />
             </View>
           </Card>
         )}
@@ -508,6 +515,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
 
+  noPriceBtn: { marginTop: spacing.md, minWidth: 200 },
   sectionHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   bildirBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   bildirBtnText: { ...typography.styles.caption, color: colors.primary.main, fontWeight: '700' },

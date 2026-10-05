@@ -174,7 +174,7 @@
     "ro": "Română"
   },
   "product": {
-    "no_price_info": "Fiyat bilgisi yok",
+    "no_price_info": "Bu ürüne ilk fiyatı sen ekle",
     "all_categories": "Tüm Kategoriler",
     "all_shown": "Tüm ürünler gösterildi",
     "category_empty": "Bu kategoride ürün bulunamadı",
@@ -203,7 +203,7 @@
     "store_details": "Mağaza Detayları",
     "price_disclaimer": "Fiyatlar herkese açık resmi kaynaklardan ve kullanıcı bildirimlerinden derlenir; bilgilendirme amaçlıdır ve anlık olarak değişebilir. Kullanıcı bildirimleri ayrıca işaretlenir. Bağlayıcı olan, marketin kendi kanalındaki güncel fiyattır. Karşılaştırma yalnızca listelenen marketler arasındadır.",
     "store_details_soon": "Bu özellik yakında kullanıma açılacak.",
-    "no_price_info_desc": "Bu ürün için henüz fiyat bilgisi eklenmemiş.",
+    "no_price_info_desc": "Fiyatlar kullanıcılardan geliyor. Rafta gördüğün fiyatı bildir; iki kişi aynı fiyatı söyleyince yayına girer.",
     "cheapest_label": "En Ucuz",
     "difference": "Fark",
     "average_price": "Ortalama Fiyat:",
