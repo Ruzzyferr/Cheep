@@ -17,6 +17,7 @@ import { ComparePage } from './pages/content/ComparePage'
 import { ProductsPage } from './pages/content/ProductsPage'
 import { PageDataContext, readClientData, type PageData } from './data/context'
 import { ContentRoute } from './components/content/ContentRoute'
+import { PauseBanner } from './components/PauseBanner'
 import { segment, type ContentKind } from './data/routes'
 
 /** Rota değişiminde başa sar; ana sayfadaki #çapaları onurlandır. */
@@ -55,6 +56,8 @@ function Page({
   return (
     <LocaleContext.Provider value={locale}>
       <Seo pageKey={pageKey} path={path} />
+      {/* Duraklatma bildirimi TUM sayfalarda — bkz. components/PauseBanner.tsx */}
+      <PauseBanner />
       {children}
     </LocaleContext.Provider>
   )
