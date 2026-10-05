@@ -112,3 +112,30 @@ hakkı doğar.
   kapsanmış durumda. Yine de ayrı başvuru yapılacak.
 - Başvuru e-Devlet kimlik doğrulamasıyla verildiği için **4982 m.11'in 15 iş
   günü** süresi işliyor. Son tarih: **27 Ekim 2026** civarı (resmî tatiller hariç).
+
+---
+
+## ⚠️ Gönderilen metindeki bir FAZLA KESİNLİK (5 Eki 2026, gönderimden sonra fark edildi)
+
+CİMER metninde şöyle yazdım:
+
+> "Market Fiyatı kaynaklı TÜM VERİYİ uygulamadan ve sunucularımdan KALDIRDIM."
+
+Bu cümle **olduğundan kesin**. Gerçekte kaldırılanlar:
+
+- tüm fiyatlar ve fiyat geçmişi (TR'de **0 fiyat** kaldı),
+- Market Fiyatı'na ait tanımlayıcılar (`mf-` barkodları),
+- `cdn.marketfiyati.org.tr` görsel adresleri (üretimde **0** ürünün görseli var),
+- veri çekme yazılımı ve onu çalıştıran systemd servisi,
+- sunucudaki 83 MB ham veri (`mf_raw/`, `mf_state.db`).
+
+**Korunan:** 13.326 TR ürününün **adı, markası, gramajı ve kategorisi.**
+Gerekçe `VERI-IZINLERI.md` → *"Neden ÜRÜN KAYITLARI korundu"* bölümünde
+yazılı: bunlar olgusal bilgiler ve kullanıcı fiyat bildiriminin bağlanacağı
+iskelet. Bu bilinçli bir karardı, kazara kalmış veri değil.
+
+**Yapılacak:** Ticaret Bakanlığı başvurusunda (yarın) bu ayrım AÇIKÇA
+yazılacak. Sanayi ve Teknoloji Bakanlığı yanıt verdiğinde de aynı düzeltme
+iletilecek. Bir kamu kurumuna verilen yazılı beyanın birebir doğru olması
+gerekir; "fiyatları sildim, olgusal ürün adlarını tuttum" demek, "her şeyi
+sildim" demekten hem daha doğru hem savunması daha kolay.
