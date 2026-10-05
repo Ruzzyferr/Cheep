@@ -314,7 +314,7 @@ export const tr: Dict = {
         { p: 'Cheep’i kullanarak bu şartları kabul etmiş olursun. Cheep, market fiyatlarını karşılaştırman için bilgi amaçlı bir araçtır.' },
         { h2: 'Hizmetin niteliği' },
         { ul: [
-          'Fiyatlar marketlerin herkese açık kaynaklarından düzenli olarak toplanır; çoğu ürünün fiyatı birkaç günde bir tazelenir.',
+          'Hizmet şu anda duraklatılmıştır: fiyat toplama durdurulmuş, uygulama mağazalardan geri çekilmiştir. Yeniden başladığında fiyatlar yalnızca kaynağın açıkça izin verdiği ya da yetkili mercinin şartlarını bildirdiği yollardan alınacaktır.',
           'Fiyatlar bilgilendirme amaçlıdır; markette geçerli olan güncel fiyattan farklı olabilir. Bağlayıcı olan marketin kasadaki fiyatıdır.',
           'Cheep bir satış noktası değildir; ürün satmaz, ödeme almaz.',
         ] },
@@ -327,7 +327,7 @@ export const tr: Dict = {
         { ul: [
           'Uygulamada geçen tüm market ve ürün marka adları ile logoları, ilgili sahiplerinin tescilli markalarıdır. Bu adlar yalnızca **hangi markete ait fiyatın gösterildiğini belirtmek** için, atıf amacıyla kullanılır (dürüst kullanım).',
           'Cheep, adı geçen marketlerle **resmi bir ortaklık, bağlantı veya iş birliği içinde değildir** ve onlar tarafından desteklenmez.',
-          'Fiyat bilgileri herkese açık kaynaklardan derlenir. Herhangi bir marka sahibi içeriğiyle ilgili talepte bulunmak isterse [destek@cheep.live](mailto:destek@cheep.live) üzerinden bize ulaşabilir; haklı taleplere hızla yanıt veririz.',
+          'Bir marka sahibi içeriğiyle ilgili talepte bulunmak isterse [destek@cheep.live](mailto:destek@cheep.live) üzerinden bize ulaşabilir; haklı taleplere hızla yanıt veririz.',
         ] },
         { h2: 'Cheep Premium aboneliği' },
         { p: 'Cheep’in fiyat karşılaştırma, alışveriş listesi, en ucuz rota ve fiyat düşüşü bildirimi özellikleri ücretsizdir ve ücretsiz kalacaktır. Ücretsiz sürüm reklam gösterir. Cheep Premium, reklamları kaldıran ve yapay zekâ asistanının mesaj kotasını artıran, isteğe bağlı bir aboneliktir.' },
@@ -377,9 +377,11 @@ export const tr: Dict = {
 
   seo: {
     home: {
-      title: 'Cheep — Market Fiyatları Karşılaştırma Uygulaması',
+      // DURAKLATMA — 5 Eki 2026. Eskisi zincir adlari sayip "Ucretsiz indir"
+      // diyordu; uygulama artik indirilemiyor, o yuzden yanlis bir vaatti.
+      title: 'Cheep — duraklatıldı',
       description:
-        'A101, BİM, ŞOK, Migros ve CarrefourSA fiyatlarını aynı üründe karşılaştır. Alışveriş listeni en ucuz markete taşı, her sepette tasarruf et. Ücretsiz indir.',
+        'Cheep şu anda çalışmıyor: uygulama mağazalardan geri çekildi ve sunucularımız kapalı. Veri kullanımına ilişkin resmî başvurumuzun sonucunu bekliyoruz.',
     },
     privacy: {
       title: 'Gizlilik Politikası — Cheep',

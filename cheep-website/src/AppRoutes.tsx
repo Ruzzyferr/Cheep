@@ -56,8 +56,10 @@ function Page({
   return (
     <LocaleContext.Provider value={locale}>
       <Seo pageKey={pageKey} path={path} />
-      {/* Duraklatma bildirimi TUM sayfalarda — bkz. components/PauseBanner.tsx */}
-      <PauseBanner />
+      {/* Duraklatma bildirimi — ana sayfa HARIC. Ana sayfa duraklatma
+          doneminde zaten bastan asagi durum sayfasi (bkz. pages/PausedHome.tsx),
+          orada banner ayni seyi iki kez soylerdi. */}
+      {pageKey !== 'home' ? <PauseBanner /> : null}
       {children}
     </LocaleContext.Provider>
   )

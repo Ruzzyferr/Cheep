@@ -312,7 +312,7 @@ export const pl: Dict = {
         { p: 'Korzystając z Cheep, akceptujesz niniejszy regulamin. Cheep jest narzędziem informacyjnym służącym do porównywania cen w sklepach.' },
         { h2: 'Charakter usługi' },
         { ul: [
-          'Ceny są regularnie zbierane z publicznie dostępnych źródeł sieci handlowych; większość produktów odświeża się co kilka dni.',
+          'Usługa jest obecnie wstrzymana: zbieranie cen zostało zatrzymane, a aplikacja wycofana z obu sklepów. Po wznowieniu ceny będą pozyskiwane wyłącznie kanałami, na które źródło wyraźnie zezwala, lub na warunkach wskazanych przez właściwy organ.',
           'Ceny mają charakter informacyjny i mogą różnić się od ceny obowiązującej w sklepie. Wiążąca jest cena przy kasie.',
           'Cheep nie jest punktem sprzedaży — nie sprzedaje produktów ani nie przyjmuje płatności.',
         ] },
@@ -375,9 +375,11 @@ export const pl: Dict = {
 
   seo: {
     home: {
-      title: 'Cheep — Porównywarka cen w sklepach spożywczych',
+      // DURAKLATMA — 5 Eki 2026. Eskisi zincir adlari sayip "Ucretsiz indir"
+      // diyordu; uygulama artik indirilemiyor, o yuzden yanlis bir vaatti.
+      title: 'Cheep — wstrzymany',
       description:
-        'Porównaj ceny tego samego produktu w Biedronce, Lidlu, Żabce, Auchan i Carrefour. Przenieś listę zakupów do najtańszego sklepu i oszczędzaj. Pobierz za darmo.',
+        'Cheep obecnie nie działa: aplikacja została wycofana ze sklepów, a nasze serwery są wyłączone. Czekamy na wynik oficjalnego wniosku o wykorzystanie danych.',
     },
     privacy: {
       title: 'Polityka prywatności — Cheep',

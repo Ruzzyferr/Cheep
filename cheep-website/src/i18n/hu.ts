@@ -312,7 +312,7 @@ export const hu: Dict = {
         { p: 'A Cheep használatával elfogadod ezeket a feltételeket. A Cheep egy tájékoztató jellegű eszköz a bolti árak összehasonlításához.' },
         { h2: 'A szolgáltatás jellege' },
         { ul: [
-          'Az árakat rendszeresen gyűjtjük az áruházláncok nyilvánosan elérhető forrásaiból; a legtöbb termék néhány naponta frissül.',
+          'A szolgáltatás jelenleg szünetel: az árgyűjtés leállt, az alkalmazást mindkét áruházból visszavontuk. Újraindításkor az árakat kizárólag olyan csatornákon szerezzük be, amelyeket a forrás kifejezetten engedélyez, vagy amelyek feltételeit az illetékes hatóság meghatározza.',
           'Az árak tájékoztató jellegűek, és eltérhetnek a boltban érvényes ártól. A kötelező érvényű ár a pénztárnál fizetendő ár.',
           'A Cheep nem értékesítési pont: nem árul terméket, és nem fogad el fizetést.',
         ] },
@@ -375,9 +375,11 @@ export const hu: Dict = {
 
   seo: {
     home: {
-      title: 'Cheep — Bolti árösszehasonlító alkalmazás',
+      // DURAKLATMA — 5 Eki 2026. Eskisi zincir adlari sayip "Ucretsiz indir"
+      // diyordu; uygulama artik indirilemiyor, o yuzden yanlis bir vaatti.
+      title: 'Cheep — szünetel',
       description:
-        'Hasonlítsd össze ugyanannak a terméknek az árát a boltokban. Vidd át a bevásárlólistád a legolcsóbb boltba, és spórolj minden kosáron. Töltsd le ingyen.',
+        'A Cheep jelenleg nem működik: az alkalmazást visszavontuk az áruházakból, a szervereink le vannak állítva. Hivatalos adatfelhasználási kérelmünk eredményére várunk.',
     },
     privacy: {
       title: 'Adatvédelmi tájékoztató — Cheep',

@@ -102,7 +102,15 @@ function jsonLd(locale: Locale, key: PageKey, url: string): unknown[] {
 
   out.push({ '@context': 'https://schema.org', '@graph': [organization, website] })
 
-  if (key === 'home') {
+  // DURAKLATMA — 5 Eki 2026: ana sayfanin SoftwareApplication ve FAQPage
+  // isaretlemesi ÇIKARILDI. Birincisi Google'a `installUrl`/`downloadUrl` ile
+  // indirilebilir bir uygulama bildiriyordu; uygulama iki magazadan da
+  // cekildigi icin o baglantilar olu. Ikincisi artik cizilmeyen SSS
+  // bolumunun sorularini bildiriyordu — sayfada olmayan icerigi isaretlemek
+  // hem yanlis hem de yapisal veri ihlali.
+  const DURAKLATILDI = true
+
+  if (key === 'home' && !DURAKLATILDI) {
     out.push({
       '@context': 'https://schema.org',
       '@type': 'SoftwareApplication',

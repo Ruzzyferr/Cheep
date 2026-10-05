@@ -312,7 +312,7 @@ export const hr: Dict = {
         { p: 'Korištenjem Cheepa prihvaćaš ove uvjete. Cheep je informativni alat za usporedbu cijena u trgovinama.' },
         { h2: 'Narav usluge' },
         { ul: [
-          'Cijene se redovito prikupljaju iz javno dostupnih izvora trgovačkih lanaca; većina proizvoda osvježi se svakih nekoliko dana.',
+          'Usluga je trenutno pauzirana: prikupljanje cijena je zaustavljeno, a aplikacija povučena iz obje trgovine. Po nastavku, cijene će se pribavljati isključivo kanalima koje izvor izričito dopušta ili pod uvjetima koje odredi nadležno tijelo.',
           'Cijene su informativne naravi i mogu se razlikovati od cijene koja vrijedi u trgovini. Obvezujuća je cijena na blagajni.',
           'Cheep nije prodajno mjesto — ne prodaje proizvode niti naplaćuje.',
         ] },
@@ -375,9 +375,11 @@ export const hr: Dict = {
 
   seo: {
     home: {
-      title: 'Cheep — Usporedba cijena u trgovinama',
+      // DURAKLATMA — 5 Eki 2026. Eskisi zincir adlari sayip "Ucretsiz indir"
+      // diyordu; uygulama artik indirilemiyor, o yuzden yanlis bir vaatti.
+      title: 'Cheep — pauzirano',
       description:
-        'Usporedi cijenu istog proizvoda među trgovačkim lancima. Prebaci popis za kupnju u najjeftiniju trgovinu i uštedi na svakoj košarici. Preuzmi besplatno.',
+        'Cheep trenutno ne radi: aplikacija je povučena iz trgovina, a poslužitelji su ugašeni. Čekamo ishod službenog zahtjeva za korištenje podataka.',
     },
     privacy: {
       title: 'Politika privatnosti — Cheep',

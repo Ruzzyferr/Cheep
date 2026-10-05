@@ -325,7 +325,7 @@ export const en: Dict = {
         { p: 'By using Cheep you accept these terms. Cheep is an informational tool that helps you compare supermarket prices.' },
         { h2: 'Nature of the service' },
         { ul: [
-          'Prices are collected regularly from publicly available store sources; most products refresh every few days.',
+          'The service is currently paused: price collection has stopped and the app has been withdrawn from both stores. When it resumes, prices will only be obtained through channels the source explicitly permits, or on terms stated by the competent authority.',
           'Prices are for information only and may differ from the price actually in force in the store. What binds is the price at the store’s checkout.',
           'Cheep is not a point of sale; it does not sell products and does not take payments.',
         ] },
@@ -388,9 +388,11 @@ export const en: Dict = {
 
   seo: {
     home: {
-      title: 'Cheep — Compare Supermarket Prices',
+      // DURAKLATMA — 5 Eki 2026. Eskisi zincir adlari sayip "Ucretsiz indir"
+      // diyordu; uygulama artik indirilemiyor, o yuzden yanlis bir vaatti.
+      title: 'Cheep — paused',
       description:
-        'Compare the price of the same product across supermarkets in five countries. Move your shopping list to the cheapest store and save on every basket. Free to download.',
+        'Cheep is not running right now: the app has been withdrawn from the stores and our servers are off. We are waiting for the outcome of our official data-use application.',
     },
     privacy: {
       title: 'Privacy Policy — Cheep',

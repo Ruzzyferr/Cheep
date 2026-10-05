@@ -312,7 +312,7 @@ export const ro: Dict = {
         { p: 'Folosind Cheep, accepți acești termeni. Cheep este un instrument informativ care te ajută să compari prețurile din magazine.' },
         { h2: 'Natura serviciului' },
         { ul: [
-          'Prețurile sunt colectate periodic din sursele publice ale magazinelor; majoritatea produselor se reîmprospătează la câteva zile.',
+          'Serviciul este momentan în pauză: colectarea prețurilor a fost oprită, iar aplicația a fost retrasă din ambele magazine. La reluare, prețurile vor fi obținute exclusiv prin canale permise explicit de sursă sau în condițiile stabilite de autoritatea competentă.',
           'Prețurile au caracter informativ și pot diferi de prețul valabil în magazin. Obligatoriu este prețul de la casa magazinului.',
           'Cheep nu este un punct de vânzare; nu vinde produse și nu încasează plăți.',
         ] },
@@ -375,9 +375,11 @@ export const ro: Dict = {
 
   seo: {
     home: {
-      title: 'Cheep — Aplicația de comparat prețurile din magazine',
+      // DURAKLATMA — 5 Eki 2026. Eskisi zincir adlari sayip "Ucretsiz indir"
+      // diyordu; uygulama artik indirilemiyor, o yuzden yanlis bir vaatti.
+      title: 'Cheep — în pauză',
       description:
-        'Compară prețul aceluiași produs în Kaufland, Carrefour, Auchan, Lidl și Mega Image. Mută-ți lista de cumpărături în cel mai ieftin magazin și economisește la fiecare coș. Descarcă gratuit.',
+        'Cheep nu funcționează momentan: aplicația a fost retrasă din magazine, iar serverele sunt oprite. Așteptăm rezultatul cererii oficiale privind utilizarea datelor.',
     },
     privacy: {
       title: 'Politica de confidențialitate — Cheep',
