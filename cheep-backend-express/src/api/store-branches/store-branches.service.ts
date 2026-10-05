@@ -51,7 +51,7 @@ export async function bulkUpsertStoreBranches(
                     lat: b.lat,
                     lon: b.lon,
                     city: b.city?.slice(0, 120) || null,
-                    source: (b.source || 'marketfiyati').slice(0, 40),
+                    source: (b.source || 'unknown').slice(0, 40),
                 };
                 return prisma.storeBranch.upsert({
                     where: { external_ref: b.external_ref },

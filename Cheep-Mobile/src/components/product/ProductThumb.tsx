@@ -20,12 +20,13 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { getCategoryIcon } from '../../utils/categoryIcon';
 import { colors } from '../../theme';
 
-// Devletin CDN'i (cdn.marketfiyati.org.tr) hotlink korumalı: tarayıcı User-Agent'ı
-// olmayan istekleri 403'ler. RN Image'e bu header'ı geçince görsel yüklenir.
-const IMG_HEADERS = {
-  'User-Agent':
-    'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
-};
+// 5 Eki 2026 — KALDIRILDI: burada devletin CDN'ine (cdn.marketfiyati.org.tr)
+// gonderilen SAHTE bir tarayici User-Agent'i vardi. O CDN hotlink korumali ve
+// User-Agent'siz istekleri 403'luyor; yani bu baslik bilerek konulmus bir
+// ERISIM KONTROLU ATLATMASIYDI. Market FiyatI verisiyle baglantimiz kesildi
+// (bkz. docs/VERI-IZINLERI.md), uretimde tek bir urunun bile image_url'i yok,
+// dolayisiyla bu kod hem islevsiz hem de hukuki olarak savunulamazdi.
+// Gorsel adresi artik OLDUGU GIBI kullanilir; baslik eklenmez.
 
 interface ProductThumbProps {
   imageUrl?: string | null;
@@ -39,7 +40,7 @@ export function ProductThumb({ imageUrl, categoryName, iconKey, iconSize = 34 }:
   if (imageUrl) {
     return (
       <Image
-        source={{ uri: imageUrl, headers: IMG_HEADERS }}
+        source={{ uri: imageUrl }}
         style={styles.image}
         // Bellek + disk: aynı görsel ikinci kez indirilmez.
         cachePolicy="memory-disk"

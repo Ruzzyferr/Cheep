@@ -9,11 +9,14 @@ from countries._common.pipeline import run_country_pipeline
 
 logger = logging.getLogger(__name__)
 
+# 5 Eki 2026 — HUKUKI TEMIZLIK: yalnizca ACIK IZINLI kaynak kaldi.
+# Once burada switzerland/sweden/germany/poland vardi; o ulkelerin scraper'lari
+# ve config'leri silindi ama bu liste GERIDE KALDI. Haftalik orkestratoru
+# calistiran biri, var olmayan 4 config'e gidip sessizce 4 hata toplardi.
+# Tek gecerli kaynak: Hirvatistan (NN 75/2025 geregi zincirler gunluk fiyat
+# listesi yayinlamak ZORUNDA, cijene.dev acikca izin veriyor).
 DEFAULT_CONFIGS = [
-    "countries/switzerland/config.json",
-    "countries/sweden/config.json",
-    "countries/germany/config.json",
-    "countries/poland/config.json",
+    "countries/croatia/config.json",
 ]
 
 

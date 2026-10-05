@@ -10,7 +10,11 @@ export const upsertStoreBranchSchema = Joi.object({
     lat: Joi.number().min(-90).max(90).required(),
     lon: Joi.number().min(-180).max(180).required(),
     city: Joi.string().max(120).optional().allow(null, '').empty(''),
-    source: Joi.string().max(40).default('marketfiyati'),
+    // Varsayilan 'marketfiyati' IDI: kaynak belirtmeyen her sube, verisi oradan
+    // gelmese bile Market Fiyati'ndan gelmis gibi etiketleniyordu — artik o
+    // kaynakla baglantimiz yok (bkz. docs/VERI-IZINLERI.md), yani bu YANLIS bir
+    // kayitti. Tek canli ice aktarici (osm_branches.py) zaten 'osm' gonderiyor.
+    source: Joi.string().max(40).default('unknown'),
 });
 
 export const bulkUpsertStoreBranchesSchema = Joi.object({

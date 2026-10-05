@@ -32,3 +32,7 @@ shots
 # Üretilen SEO verisi — git'te tutulmaz (3,5 MB, her gece yenilenir).
 # Docker build bağlamına GİRMESİ gerekiyor, o yüzden .dockerignore'da YOK.
 .seo-data.json
+# .prev.json da: ".seo-data.json" deseni onu YAKALAMIYORDU ve 3,7 MB'lik dosya
+# (2.681 cdn.marketfiyati.org.tr gorseli + gercek Migros/A101/CarrefourSA
+# fiyatlari) repoya islenmisti. Yildizli desen tum turevlerini kapsar.
+.seo-data*.json
