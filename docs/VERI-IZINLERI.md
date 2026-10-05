@@ -129,3 +129,84 @@ kendiliğinden gidecek.** `app.json` 1.6.4'te bırakıldı; 1.6.4 App Store'da
 READY_FOR_SALE olduğu için aynı sürüm numarasıyla yeni iOS derlemesi
 90186 ("closed pre-release train") ile reddedilir — sonraki sürümde önce
 sürüm numarası yükseltilmeli.
+
+---
+
+## 🔴 TÜBİTAK YANITI GELDİ — 5 Ekim 2026: **RET**
+
+Başvuru (2 Eki) yanıtlandı. Özet: **izin verilmedi ve verilemez.**
+
+> "TÜBİTAK BİLGEM söz konusu projenin teknik yürütücüsü konumunda olup;
+> üçüncü taraflara, bağımsız geliştiricilere veya akademik çalışmalara
+> doğrudan ham veri aktarılması, CSV dosyası sunulması ya da API erişimi
+> tanımlanması hususunda **yetkili değildir**."
+
+> "Bu yasal kapsam dışında, herhangi bir üçüncü taraf uygulamaya veya ticari
+> girişime düzenli veri akışı sağlanması veya geliştiricilere yönelik bir
+> lisanslama/API servisinin açılması **mevcut mevzuat ve yetki sınırları
+> gereği mümkün değildir**."
+
+**Önemli ayrımlar:**
+- Durmamız İSTENMEDİ. İhtar yok, mevcut kullanımımıza değinilmedi.
+- Ama izin de YOK. Üstelik başvuruda mevcut kullanımı **kendimiz beyan ettik**
+  (bkz. `basvuru-tubitak-bilgem-veri-izni.md` §1).
+- Pozisyon değişimi: "sorduk, bekliyoruz" → **"sorduk, yazılı ret aldık"**.
+  "Bilmiyorduk" savunması artık yok.
+
+**1 Kasım karar kuralı GEÇERSİZ** — cevap geldi, beklemek anlamsız.
+
+---
+
+## 🔴 ZİNCİR-DOĞRUDAN PLANI DE TEMİZ DEĞİL — 5 Eki 2026 araştırması
+
+Yedek planın 2. maddesi "zincirlerin kendi sayfalarından çek" diyordu.
+**Koşullar okundu; aynı yasak orada da var.** Plan bu haliyle hedefi
+(= hiçbir market ile hukuki sorun yaşamamak) KARŞILAMIYOR.
+
+### robots.txt (tarama sinyali — izin DEĞİL)
+
+| Zincir | Ürün sayfaları | Not |
+|---|---|---|
+| Migros | ✅ serbest | yalnız `/arama`, `/*espv` kapalı; sitemap var |
+| A101 | ✅ serbest | yalnız arama uçları kapalı; sitemap var |
+| ŞOK | ✅ serbest | yalnız `/arama` kapalı; sitemap var |
+| CarrefourSA | ✅ serbest | `/tr/`,`/en/` kapalı ama ürünler KÖKTE (`/urun-adi-p-123`) |
+| BİM | — | `robots.txt` YOK (404) |
+
+### Kullanım koşulları (BAĞLAYICI olan bu)
+
+**ŞOK** — `kurumsal.sokmarket.com.tr/kullanim-sartlari` (birebir):
+> "Sitemizde yer alan içeriğin tamamı veya herhangi bir kısmı yalnızca
+> sahipleri tarafından veya **sahiplerinin yazılı izni ile** kullanılabilir."
+> "İçerik üzerinde İzinsiz değişiklik yapmak, **kopyalamak**, kiralamak,
+> ödünç vermek, iletmek ve yayınlamak **yasaktır**."
+> "Bu siteden alınan İçerik **herhangi bir ticari amaçla kullanılamaz**."
+
+**CarrefourSA** — `yatirimciiliskileri.carrefoursa.com/tr/kullanim-kosullari` (birebir):
+> "sadece **kişisel kullanımınız** için olup, hiçbir şekilde **ticari ve sair
+> amaçlarla kullanılamaz**"
+> "CarrefourSA'nın **önceden yazılı izni alınmaksızın**, kısmen veya tamamen
+> **kopyalanamaz, dağıtılamaz, çoğaltılamaz**"
+
+**Migros** — DPG (Dijital Platform Gıda) koşulları: içerik üzerinde şirket hak
+sahibi; "önceden izin ve kaynak gösterilmeden değiştirilemez, kopyalanamaz,
+çoğaltılamaz, yeniden yayınlanamaz". ⚠️ Sayfa SPA olduğu için birebir alıntı
+tarayıcıyla teyit edilmeli.
+
+**A101** — koşul sayfası otomatik isteklere **403** dönüyor (bot engeli).
+⚠️ Tarayıcıyla okunmalı. 403'ün kendisi de bir sinyal.
+
+**BİM** — tam katalog YAYINLAMIYOR; yalnızca haftalık aktüel ürün broşürü.
+Zincir-doğrudan modeli BİM için zaten veri sağlamaz.
+
+### Sonuç
+
+Beş zincirin en az ikisinde **marketfiyati ile birebir aynı** yasak var:
+yazılı izin olmadan kopyalama yok, ticari kullanım yok. Zincir-doğrudan
+geçiş, tek taraf yerine **beş tarafa karşı** aynı ihlali üretir.
+
+**Yasal olarak temiz olan yollar yalnızca şunlar:**
+1. **Her zincirden yazılı izin / iş ortaklığı** — tek gerçekten temiz yol.
+2. **Kullanıcı katkısı** (`price_feedbacks`) — veri BİZİM, hukuken temiz;
+   kapsama düşük başlar.
+3. **Türkiye'yi kapatmak** — %42 kullanıcı kaybı.
