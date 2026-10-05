@@ -57,16 +57,27 @@ describe('verisi olan ülkeler', () => {
     expect(rows.map((r) => r.code)).toEqual(['TR', 'PL', 'HR']);
   });
 
-  it('yalnızca FİYATI olan ürünleri sayar', async () => {
-    // Fiyatsız ürün satırı kullanıcıya hiçbir şey göstermez: katalog dolu
-    // görünür, her ekran boş çıkar.
+  it('KATALOGU sayar — fiyat sartı ARANMAZ', async () => {
+    // KURAL DEĞİŞTİ (5 Eki 2026). Eskiden yalnızca fiyatı olan ürünler
+    // sayılıyordu; o kural fiyatın tek kaynağının resmi akış olduğu dönemde
+    // doğruydu.
+    //
+    // Artık kullanıcı fiyat bildirebiliyor. Eski kural KISIR DÖNGÜ üretiyor:
+    // fiyat yok → ülke seçilemez → kullanıcı bildiremez → hiç fiyat oluşmaz.
+    // TR/PL/HU/RO verisi kaldırıldıktan sonra tam bu tuzağa düştü.
     count.mockResolvedValue(20_000);
     await getAvailableCountries();
-    expect(count).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({ store_prices: { some: {} } }),
-      }),
-    );
+    const cagri = count.mock.calls[0]![0] as any;
+    expect(cagri.where).not.toHaveProperty('store_prices');
+    expect(cagri.where).toHaveProperty('country_id');
+  });
+
+  it('fiyatsiz ama katalogu olan ulke LISTELENIR', async () => {
+    // Kullanici oraya fiyat bildirebilsin diye. Ekranlar "ilk fiyati sen
+    // ekle" diyor ve dogrudan bildirim dugmesi sunuyor.
+    count.mockResolvedValue(MIN_PRODUCTS);
+    const rows = await getAvailableCountries();
+    expect(rows.length).toBeGreaterThan(0);
   });
 
   it('para birimi ve adı taşır (istemci biçimlendirme için kullanıyor)', async () => {

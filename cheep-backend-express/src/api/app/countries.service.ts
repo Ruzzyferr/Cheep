@@ -49,10 +49,21 @@ export async function getAvailableCountries(): Promise<AvailableCountry[]> {
 
     const rows: AvailableCountry[] = [];
     for (const c of countries) {
-        // Ürünün FİYATI olmalı: fiyatsız ürün satırı kullanıcıya hiçbir şey
-        // göstermez (katalog dolu görünür, her ekran boş çıkar).
+        // KURAL DEĞİŞTİ — 5 Eki 2026. Eskiden ülke ancak FİYATLI ürünü varsa
+        // listeleniyordu. O kural, fiyatın yalnızca resmi akıştan geldiği
+        // dönemde doğruydu: fiyat yoksa kullanıcının yapabileceği bir şey de
+        // yoktu.
+        //
+        // Artık kullanıcı FİYAT BİLDİREBİLİYOR (bkz. api/user-prices). Eski
+        // kural bir KISIR DÖNGÜ üretiyor: fiyat yok → ülke seçilemez →
+        // kullanıcı bildiremez → hiç fiyat oluşmaz. Türkiye, Polonya,
+        // Macaristan ve Romanya veri kaldırıldıktan sonra tam bu tuzağa
+        // düştü.
+        //
+        // Yeni ölçüt: KATALOG var mı. Fiyat yoksa ekranlar "ilk fiyatı sen
+        // ekle" diyor ve doğrudan bildirim düğmesi sunuyor.
         const productCount = await prisma.product.count({
-            where: { country_id: c.id, store_prices: { some: {} } },
+            where: { country_id: c.id },
         });
         if (productCount >= MIN_PRODUCTS) {
             rows.push({ code: c.code, name: c.name, currency: c.currency, productCount });
