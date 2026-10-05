@@ -11,14 +11,25 @@ name: Prod deploy (backend + site)
 # deploy gerektirmiyor. Filtresiz her commit gereksiz bir yeniden derleme ve
 # kısa bir 502 penceresi üretirdi.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'cheep-backend-express/**'
-      - 'cheep-website/**'
-      - 'Cheep-Scraper/**'
-      - 'deploy/**'
-      - '.github/workflows/deploy.yml'
+  # DURAKLATILDI — 5 Eki 2026: deploy edilecek sunucu YOK.
+  #
+  # DigitalOcean droplet'i (cheep-prod-2) ve Reserved IP'si silindi; site
+  # Vercel'de statik duruyor. Push tetikleyicisi acik kalsaydi her commit
+  # olmeyen bir sunucuya ssh atmayi deneyip BASARISIZ olacak ve her
+  # seferinde bildirim e-postasi gonderecekti.
+  #
+  # `workflow_dispatch` BILEREK duruyor: yeni sunucu kurulunca DEPLOY_HOST
+  # secret'i guncellenip elle bir kez calistirilabilir. Geri acmak icin
+  # asagidaki `push:` blogunu yorumdan cikar.
+  #
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'cheep-backend-express/**'
+  #     - 'cheep-website/**'
+  #     - 'Cheep-Scraper/**'
+  #     - 'deploy/**'
+  #     - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 # Aynı anda iki deploy koşmasın: ikisi de `git reset --hard` + `docker compose

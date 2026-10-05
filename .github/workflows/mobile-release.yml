@@ -13,12 +13,23 @@ name: Mobil sürüm (test kanalları)
 # Filtre olmasaydı sunucu tarafındaki her düzeltme boşuna iki derleme tetikler,
 # testçilere anlamsız bir TestFlight bildirimi giderdi.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'Cheep-Mobile/**'
-      - 'scripts/ci/**'
-      - '.github/workflows/mobile-release.yml'
+  # DURAKLATILDI — 5 Eki 2026: uygulama iki magazadan da cekildi.
+  #
+  # Play'de "unpublished", App Store'da "removed from sale". Yeni bir
+  # derlemeyi TestFlight'a / Play alpha'ya yuklemenin bir karsiligi yok;
+  # ustelik macOS kosucusu dakikayi 10 katiyla yazdigi icin Free plan
+  # butcesini (surum basina ~167 dk) bos yere yakiyordu.
+  #
+  # `workflow_dispatch` BILEREK duruyor: magazalar geri acilinca elle bir
+  # kez calistirilabilir. Geri acmak icin asagidaki `push:` blogunu
+  # yorumdan cikar.
+  #
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'Cheep-Mobile/**'
+  #     - 'scripts/ci/**'
+  #     - '.github/workflows/mobile-release.yml'
       # ÜRETİM SÜRÜM NOTU DERLEMEYİ TETİKLEMEZ.
       #
       # Bu dosyayı yalnızca `play-promote.mjs` okuyor ve o betik ELLE
@@ -26,7 +37,7 @@ on:
       # kalıbı içinde kaldığı için notu güncellemek koca bir mobil derleme
       # başlatıyordu; macOS koşucusu dakikayı 10 katıyla yazdığından bu,
       # hiçbir çıktısı olmayan en pahalı koşu oluyordu.
-      - '!scripts/ci/release-notes-production.json'
+  #   - '!scripts/ci/release-notes-production.json'
       # Magaza vitrini ve onu ureten betikler DERLEMEYI TETIKLEMEZ.
       #
       # `Cheep-Mobile/**` cok genis: bir PNG eklemek ya da .gitignore'a
@@ -34,10 +45,10 @@ on:
       # Bugun bu iki kez oldu ve iki kosu da elle iptal edildi; macOS
       # kosucusu dakikayi 10 katiyla yaziyor, yani bu hatanin faturasi
       # dogrudan aylik CI butcesinden cikiyor.
-      - '!Cheep-Mobile/appstore-screenshots*/**'
-      - '!Cheep-Mobile/play-screenshots*/**'
-      - '!Cheep-Mobile/*_shots.py'
-      - '!Cheep-Mobile/.gitignore'
+  #   - '!Cheep-Mobile/appstore-screenshots*/**'
+  #   - '!Cheep-Mobile/play-screenshots*/**'
+  #   - '!Cheep-Mobile/*_shots.py'
+  #   - '!Cheep-Mobile/.gitignore'
   workflow_dispatch:
     inputs:
       android_track:
